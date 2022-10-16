@@ -6,6 +6,12 @@
 
     <!-- コーディング規約指定 -->
     <rule ref="PSR12" />
+    <rule ref="Generic.WhiteSpace.ScopeIndent">
+        <properties>
+            <property name="indent" value="4"/>
+            <property name="tabIndent" value="true"/>
+        </properties>
+    </rule>
 
     <arg name="colors" />
 
@@ -13,6 +19,7 @@
 
     <!-- 除外ディレクトリ設定 -->
     <exclude-pattern>/bootstrap/</exclude-pattern>
+    <exclude-pattern>/database/</exclude-pattern>
     <exclude-pattern>/node_modules/</exclude-pattern>
     <exclude-pattern>/public/</exclude-pattern>
     <exclude-pattern>/resources/</exclude-pattern>

@@ -19,8 +19,8 @@ class CreateInstructorsTable extends Migration
             $table->string('email', 255)->comment('メールアドレス');
             $table->string('password', 255)->comment('パスワード');
             $table->dateTime('created_at');
-            $table->dateTime('update_at');
-            $table->dateTime('deleted_at');
+            $table->dateTime('updated_at');
+            $table->softDeletes();
         });
     }
 

@@ -19,8 +19,8 @@ class CreateCoursesTable extends Migration
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
             $table->dateTime('created_at');
-            $table->dateTime('update_at');
-            $table->dateTime('deleted_at');
+            $table->dateTime('updated_at');
+            $table->softDeletes();
         });
     }
 

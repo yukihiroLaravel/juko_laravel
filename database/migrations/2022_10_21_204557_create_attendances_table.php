@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInstructorsTable extends Migration
+class CreateAttendancesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,17 @@ class CreateInstructorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('instructors', function (Blueprint $table) {
+        Schema::create('attendances', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nick_name', 50)->comment('ニックネーム');
-            $table->string('last_name', 50)->comment('苗字');
-            $table->string('first_name', 50)->comment('名前');
-            $table->string('email', 255)->comment('メールアドレス');
-            $table->string('password', 255)->comment('パスワード');
+            $table->bigInteger('course_id')->unsigned()->comment('講座ID');
+            $table->bigInteger('student_id')->unsigned()->comment('生徒ID');
+            $table->tinyInteger('progress')->comment('進捗');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+
+            $table->foreign('course_id')->references('id')->on('courses');
+            $table->foreign('student_id')->references('id')->on('students');
         });
     }
 
@@ -33,6 +34,6 @@ class CreateInstructorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('instructors');
+        Schema::dropIfExists('attendaces');
     }
 }

@@ -22,4 +22,14 @@ class Course extends Model
     {
         return $this->belongsTo(Instructor::class);
     }
+
+    /**
+     * 受講状態を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

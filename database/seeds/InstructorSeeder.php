@@ -15,8 +15,10 @@ class InstructorSeeder extends Seeder
     {
         Instructor::create(
             [
-            'name' => 'Test',
-            'email' => 'test@example.com',
+            'nick_name' => 'ニックネーム',
+            'last_name' => '山田',
+            'first_name' => '太郎',
+            'email' => 'test_instructor@example.com',
             'password' => Hash::make('password')
             ]
         );

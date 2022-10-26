@@ -1,5 +1,7 @@
 <?php
 
+namespace  App\Database\Factories;
+
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
 
 use App\User;

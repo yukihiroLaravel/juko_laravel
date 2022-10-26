@@ -27,7 +27,7 @@ class CoursesGetResponse extends JsonResource
                     'email' => $value->course->instructor->email,
                 ],
                 'attendance' => [
-                    'attendance_id' => $value->attendance_id,
+                    'attendance_id' => $value->id,
                     'progress' => $value->progress,
                 ],
             ];

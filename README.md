@@ -12,5 +12,5 @@ composer sniffer
 コード上書き (可能な限りで上書き)
 - APIコンテナ内で下記コマンドを実行する。
 ````
-sniffer-rewrite
+composer sniffer-rewrite
 ````

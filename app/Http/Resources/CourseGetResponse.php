@@ -19,29 +19,22 @@ class CourseGetResponse extends JsonResource
                 'course_id' => $value->course->id,
                 'title' => $value->course->title,
                 'image' => $value->course->image,
-                'instructor' => [
-                    'instructor' => $value->course->instructor->id,
-                    'nick_name' => $value->course->instructor->nick_name,
-                    'last_name' => $value->course->instructor->last_name,
-                    'first_name' => $value->course->instructor->first_name,
-                    'email' => $value->course->instructor->email,
+                'chapter' => [
+                    'chapter_id' => $value->course->chapter->id,
+                    'lesson' => [
+                        'lesson_id' => $value->course->chapter->lesson->id,
+                        'title' => $value->course->chapter->lesson->title,
+                        'status' => $value->course->chapter->lesson->status,
+                        'lesson_attendance' => [
+                            'lesson_attendance_id' =>  $value->course->chapter->lesson->lesson_attendance->id,
+                            'status' => $value->course->chapter->lesson->lesson_attendance->status,
+                        ],
+                    ],
                 ],
                 'attendance' => [
                     'attendance_id' => $value->id,
                     'progress' => $value->progress,
                 ],
-                'chapters' => [
-                    'chapter_id' => $value->chapter->id,
-                    'title' => $value->chapter->title,
-                    'lessons' => [
-                        'lesson_id' => $value->lesson->id,
-                        'title' => $value->lesson->title,
-                        'lesson_attendance' => [
-                            'lesson_attendance_id' => $value->lesson_attendance->id,
-                            'status' => $value->lesson_attendance->status,
-                        ]
-                    ]
-                ]
             ];
         });
     }

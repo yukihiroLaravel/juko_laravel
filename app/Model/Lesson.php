@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
-    public function chaputer()
+    public function  chapter()
     {
-        return $this->$belongsTo(chapter::class);
+        return $this->$belongsTo(Chapter::class);
     }
     
-    public function lessonattendance()
+    public function lessonAttendance()
     {
         return $this->hasMany(LessonAttendance::class);
     }

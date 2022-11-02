@@ -17,9 +17,9 @@ class CreateLessonsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('chapter_id')->unsigned()->comment('チャプタID');
             $table->text('url')->comment('教材動画url');
-            $table->string('title')->comment('lessonタイトル');
+            $table->string('title', 50)->comment('lessonタイトル');
             $table->text('remarks')->comment('備考欄');
-            $table->tinyInteger('status')->comment('公開、非公開');
+            $table->tinyInteger('status')->comment('公開、非公開ステータス');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

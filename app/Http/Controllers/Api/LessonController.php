@@ -9,5 +9,4 @@ use App\Model\LessonAttendance;
 
 class LessonController extends Controller
 {
-    
 }

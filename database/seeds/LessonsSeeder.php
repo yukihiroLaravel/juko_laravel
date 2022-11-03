@@ -13,7 +13,7 @@ class LessonsSeeder extends Seeder
      */
     public function run()
     {
-       Lesson::insert([
+        Lesson::insert([
            [
                'chapter_id' => 1,
                'url' => 'http://www.youtube.com',

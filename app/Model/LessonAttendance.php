@@ -10,9 +10,9 @@ class LessonAttendance extends Model
     {
         return $this->hasMany(Lesson::class);
     }
-    
+
     public function attendance()
     {
-        return $this->hasMany(attendance::class);
+        return $this->belongsTo(Attendance::class);
     }
 }

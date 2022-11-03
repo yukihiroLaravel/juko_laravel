@@ -4,7 +4,6 @@ use App\Model\LessonAttendance;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
-
 class LessonAttendancesSeeder extends Seeder
 {
     /**
@@ -30,5 +29,5 @@ class LessonAttendancesSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
         ]);
-    }  
+    }
 }

@@ -24,7 +24,7 @@ class LessonAttendance extends Model
     }
     
     /**
-     * レッスン取得
+     * 受講状態を取得
      * 
      * @return  \Illuminate\Database\Eloquent\Relations\HasOne
      */

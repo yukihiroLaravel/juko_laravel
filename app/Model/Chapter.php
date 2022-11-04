@@ -20,11 +20,11 @@ class Chapter extends Model
      */
     public function course()
     {
-        return $this->belongTo(Course::class);
+        return $this->belongsTo(Course::class);
     }
     
     /**
-     * 受講状態を取得
+     * レッスンを取得
      * 
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

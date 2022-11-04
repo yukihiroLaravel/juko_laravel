@@ -24,7 +24,7 @@ class Lesson extends Model
     }
 
     /**
-     * レッスン受講を取得
+     * レッスン受講状態を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

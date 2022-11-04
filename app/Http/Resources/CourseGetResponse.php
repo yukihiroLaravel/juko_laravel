@@ -21,6 +21,7 @@ class CourseGetResponse extends JsonResource
                 'image' => $value->course->image,
                 'chapter' => [
                     'chapter_id' => $value->course->chapter->id,
+                    'title' => $value->course->chapter->title,
                     'lesson' => [
                         'lesson_id' => $value->course->chapter->lesson->id,
                         'title' => $value->course->chapter->lesson->title,

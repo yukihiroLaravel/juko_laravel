@@ -24,7 +24,7 @@ class CourseGetRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_id' => ['required', 'integer']
+            'course_id' => ['required', 'integer'],
         ];
     }
 }

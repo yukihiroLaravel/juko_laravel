@@ -27,6 +27,41 @@ class CoursesSeeder extends Seeder
                 'image' => 'course/2/thumbnail.png',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+            ],
+            [
+                'instructor_id' => 1,
+                'title' => 'React入門講座',
+                'image' => 'course/3/thumbnail.png',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'instructor_id' => 1,
+                'title' => 'TypeScript入門講座',
+                'image' => 'course/4/thumbnail.png',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'instructor_id' => 1,
+                'title' => 'Python入門講座',
+                'image' => 'course/5/thumbnail.png',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'instructor_id' => 1,
+                'title' => 'Vue入門講座',
+                'image' => 'course/6/thumbnail.png',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'instructor_id' => 1,
+                'title' => 'JavaScript入門講座',
+                'image' => 'course/7/thumbnail.png',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]
         ]);
     }

@@ -39,6 +39,6 @@ class Course extends Model
      */
     public function chapter()
     {
-        return $this->hasMany( Chapter::class);
+        return $this->hasMany(Chapter::class);
     }
 }

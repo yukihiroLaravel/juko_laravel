@@ -12,7 +12,7 @@ class ChapterController extends Controller
 {
     public function index(CourseGetRequest $request)
     {
-        $courses = Course::with(['chapter.lesson.lesson_attendance','attendances'])->where('id', $request->course_id)->get();
+        $courses = Course::with(['chapter.lesson.lesson_attendance'])->where('id', $request->course_id)->get();
         // $attendances = Attendance::where('id', $request->course_id)->get();
         
         foreach ($courses as $key => $course) {

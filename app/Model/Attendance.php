@@ -32,4 +32,9 @@ class Attendance extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function lesson()
+    {
+        return $this->hasMany(LessonaAttendance);
+    }
 }

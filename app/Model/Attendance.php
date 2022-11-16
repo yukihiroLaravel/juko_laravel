@@ -31,10 +31,11 @@ class Attendance extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+        
     }
 
-    public function lesson()
+    public function lessonAttendaces()
     {
-        return $this->hasMany(LessonaAttendance);
+        return $this->hasOne(LessonaAttendance::class);
     }
 }

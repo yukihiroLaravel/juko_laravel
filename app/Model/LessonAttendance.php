@@ -6,13 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class LessonAttendance extends Model
 {
+    protected $table = 'lesson_attendances';
+
     public function lesson()
     {
-        return $this->hasMany(Lesson::class);
+        return $this->belongsTo(Lesson::class);
     }
 
     public function attendance()
     {
-        return $this->belongsTo(Attendance::class);
+        return $this->hasOne(Attendance::class);
     }
 }

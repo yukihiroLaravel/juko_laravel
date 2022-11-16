@@ -19,4 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::get('courses', 'Api\CourseController@index');
+    Route::get('course/chapter', 'Api\ChapterController@index');
 });

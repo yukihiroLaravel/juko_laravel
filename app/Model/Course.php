@@ -30,6 +30,13 @@ class Course extends Model
      */
     public function attendances()
     {
+        return $this->belongsTo(Student::class);
         return $this->hasMany(Attendance::class);
+
+    }
+
+    public function chapter()
+    {
+        return $this->hasMany(Chapter::class);
     }
 }

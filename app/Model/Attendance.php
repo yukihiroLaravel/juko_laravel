@@ -32,4 +32,13 @@ class Attendance extends Model
     {
         return $this->belongsTo(Course::class);
     }
+    /**
+     * 講座を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function lessonAttendances()
+    {
+        return $this->hasMany(LessonAttendance::class);
+    }
 }

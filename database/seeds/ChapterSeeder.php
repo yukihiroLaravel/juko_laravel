@@ -22,7 +22,13 @@ class ChapterSeeder extends Seeder
             ],
             [
                 'course_id' => 1,
-                'title' => 'Laravel入門2',
+                'title' => '基本コードを覚えよう',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'course_id' => 2,
+                'title' => 'コードを書こう2',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

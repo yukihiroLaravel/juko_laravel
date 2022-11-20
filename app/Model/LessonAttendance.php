@@ -15,6 +15,6 @@ class LessonAttendance extends Model
 
     public function attendance()
     {
-        return $this->hasOne(Attendance::class);
+        return $this->belongTo(Attendance::class);
     }
 }

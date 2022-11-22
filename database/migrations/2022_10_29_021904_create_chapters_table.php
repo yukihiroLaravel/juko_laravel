@@ -16,7 +16,7 @@ class CreateChaptersTable extends Migration
         Schema::create('chapters', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('course_id')->unsigned()->comment('講座ID');
-            $table->string('title',50)->comment('タイトル');
+            $table->string('title', 50)->comment('タイトル');
             $table->datetime('created_at');
             $table->datetime('updated_at');
             $table->softDeletes();

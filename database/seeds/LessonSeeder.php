@@ -25,7 +25,7 @@ class LessonSeeder extends Seeder
             ],
             [
                 'chapter_id' => 1,
-                'url' =>'chapter/1/lesson/2',
+                'url' => 'chapter/1/lesson/2',
                 'title' => 'swaggerとは2',
                 'remarks' => 'swaggerUIの見方',
                 'status' => 2,

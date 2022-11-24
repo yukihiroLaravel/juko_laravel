@@ -26,10 +26,10 @@ class LessonAttendance extends Model
     /**
      * 受講状態を取得
      *
-     * @return  \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return  \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function attendance()
     {
-        return $this->hasOne(Attendance::class);
+        return $this->belongTo(Attendance::class);
     }
 }

@@ -12,7 +12,7 @@ class ChapterController extends Controller
 {
     public function index(CourseGetRequest $request)
     {
-        $attendances = Attendance::with(['course.chapter.lesson.lesson_attendance','course.instructor'])
+        $attendances = Attendance::with(['course.chapter.lesson','course.instructor','lessonAttendances.attendance'])
         ->where('id', $request->attendance_id)
         ->first();
 
@@ -29,7 +29,7 @@ class ChapterController extends Controller
             ],
             'attendance' => [
                 'attendance_id' => $attendances->id,
-                'progress' => $attendances->id,
+                'progress' => $attendances->progress,
             ],
             'chapters' => [],
         ];
@@ -41,6 +41,7 @@ class ChapterController extends Controller
                 foreach ($lesson->lesson_attendance as $lessonAttendance) {
                     $lessonAttendances[] = [
                         'lesson_attendance_id' => $lessonAttendance->id,
+                        'attendance_id' => $lessonAttendance->attendance->id,
                         'status' => $lessonAttendance->status,
                     ];
                 }

@@ -12,7 +12,7 @@ class ChapterController extends Controller
 {
     public function index(CourseGetRequest $request)
     {
-        $attendances = Attendance::with(['course.chapter.lesson','course.instructor','lessonAttendances.attendance'])
+        $attendances = Attendance::with(['course.chapter.lesson','course.instructor','lessonAttendances'])
         ->where('id', $request->attendance_id)
         ->first();
 

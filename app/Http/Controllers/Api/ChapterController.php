@@ -41,7 +41,7 @@ class ChapterController extends Controller
                 foreach ($lesson->lesson_attendance as $lessonAttendance) {
                     $lessonAttendances[] = [
                         'lesson_attendance_id' => $lessonAttendance->id,
-                        'attendance_id' => $lessonAttendance->attendance->id,
+                        'attendance_id' => $attendances->id,
                         'status' => $lessonAttendance->status,
                     ];
                 }

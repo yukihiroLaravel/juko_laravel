@@ -20,16 +20,10 @@ class LessonAttendance extends Model
      */
     public function lesson()
     {
-        return $this->belongTo(Lesson::class);
+        return $this->belongsTo(Lesson::class);
     }
-
-    /**
-     * 受講状態を取得
-     *
-     * @return  \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
     public function attendance()
     {
-        return $this->belongTo(Attendance::class);
+        return $this->belongsTo(Attendance::class);
     }
 }

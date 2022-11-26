@@ -32,6 +32,15 @@ class LessonSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'chapter_id' => 2,
+                'url' => 'chapter/2/lesson/3',
+                'title' => 'swaggerとは3',
+                'remarks' => 'swaggerUIの考え方',
+                'status' => 2,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }

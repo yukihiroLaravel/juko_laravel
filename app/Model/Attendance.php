@@ -36,6 +36,6 @@ class Attendance extends Model
 
     public function lessonAttendance()
     {
-        return $this->hasOne(LessonAttendance::class);
+        return $this->hasMany(LessonAttendance::class);
     }
 }

@@ -34,6 +34,7 @@ class LessonController extends Controller
             'title' => $lesson->title,
             'url' => $lesson->url,
             'remarks' => $lesson->remarks,
+            'lessonattendance' => $lesson->lesson_attendance
           ];
           foreach ((array)$lesson->lesson_attendance as $lessonAttendances) {
             $results['lessons_attendances'][] = [

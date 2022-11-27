@@ -68,7 +68,7 @@ class LessonsSeeder extends Seeder
              'created_at' => Carbon::now(),
              'updated_at' => Carbon::now(),
             ],
-             [
+            [
                  'chapter_id' => 2,
                  'url' => 'http://www.youtube.com',
                  'title' => '出力してみよう！',
@@ -85,7 +85,25 @@ class LessonsSeeder extends Seeder
               'status' => 10,
               'created_at' => Carbon::now(),
               'updated_at' => Carbon::now(),
-             ]
+             ],
+             [
+                'chapter_id' => 2,
+                'url' => 'http://www.youtube.com',
+                'title' => 'プログラミを書いてみよう！',
+                'remarks' => '動画index',
+                'status' => 10,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+               ],
+               [
+                    'chapter_id' => 2,
+                    'url' => 'http://www.youtube.com',
+                    'title' => '出力してみよう！',
+                    'remarks' => '動画index',
+                    'status' => 10,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]
            ]);
     }
 }

@@ -16,12 +16,17 @@ class CoursesSeeder extends Seeder
         Course::insert([
             [
                 'instructor_id' => 1,
+                'title' => 'PHP',
+                'image' => 'course/1/thumbnail.png',
                 'title' => 'PHP入門講座',
                 'image' => '/course/1/thumbnail.png',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
+                'instructor_id' => 2,
+                'title' => 'Laravel',
+                'image' => 'course/2/thumbnail.png',
                 'instructor_id' => 1,
                 'title' => 'Laravel入門講座',
                 'image' => '/course/2/thumbnail.png',

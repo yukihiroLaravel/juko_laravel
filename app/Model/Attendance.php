@@ -31,5 +31,11 @@ class Attendance extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+        
+    }
+
+    public function lessonAttendance()
+    {
+        return $this->hasMany(LessonAttendance::class);
     }
 }

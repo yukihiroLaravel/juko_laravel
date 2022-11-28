@@ -30,6 +30,17 @@ class Course extends Model
      */
     public function attendances()
     {
+<<<<<<< HEAD
         return $this->hasMany(Attendance::class);
+=======
+        return $this->belongsTo(Student::class);
+        return $this->hasMany(Attendance::class);
+
+    }
+
+    public function chapter()
+    {
+        return $this->hasMany(Chapter::class);
+>>>>>>> feature/yuta/jka-65/lesson_api
     }
 }

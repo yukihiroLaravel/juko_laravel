@@ -21,7 +21,10 @@ class CreateAttendancesTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+<<<<<<< HEAD
 
+=======
+>>>>>>> feature/yuta/jka-65/lesson_api
             $table->foreign('course_id')->references('id')->on('courses');
             $table->foreign('student_id')->references('id')->on('students');
         });

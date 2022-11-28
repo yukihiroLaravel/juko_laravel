@@ -1,10 +1,10 @@
 <?php
 
-use App\Model\Attendance;
+use App\Model\LessonAttendance;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
-class AttendanceSeeder extends Seeder
+class LessonAttendancesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,78 +13,77 @@ class AttendanceSeeder extends Seeder
      */
     public function run()
     {
-        Attendance::insert([
+        LessonAttendance::insert([
             [
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
+                'lesson_id' => 1,
+                'attendance_id' => 1,
+                'status' => 10,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
+                'lesson_id' => 2,
+                'attendance_id' => 2,
+                'status' => 20,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-<<<<<<< HEAD
+            ],
+            [
+                'lesson_id' => 1,
+                'attendance_id' => 3,
+                'status' => 10,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 2,
+                'attendance_id' => 4,
+                'status' => 30,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 1,
+                'attendance_id' => 5,
+                'status' => 40,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 4,
+                'attendance_id' => 6,
+                'status' => 20,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 6,
+                'attendance_id' => 7,
+                'status' => 10,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 7,
+                'attendance_id' => 8,
+                'status' => 20,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 8,
+                'attendance_id' => 9,
+                'status' => 10,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'lesson_id' => 8,
+                'attendance_id' => 10,
+                'status' => 30,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]
-=======
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
->>>>>>> feature/yuta/jka-65/lesson_api
         ]);
     }
 }

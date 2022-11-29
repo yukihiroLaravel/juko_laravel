@@ -27,9 +27,6 @@ class AttendanceSeeder extends Seeder
                 'progress' => 100,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-<<<<<<< HEAD
-            ]
-=======
             ],
             [
                 'course_id' => 1,
@@ -84,7 +81,6 @@ class AttendanceSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
->>>>>>> feature/yuta/jka-65/lesson_api
         ]);
     }
 }

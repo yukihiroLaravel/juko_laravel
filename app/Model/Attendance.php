@@ -31,14 +31,11 @@ class Attendance extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
-<<<<<<< HEAD
-=======
         
     }
 
     public function lessonAttendance()
     {
         return $this->hasMany(LessonAttendance::class);
->>>>>>> feature/yuta/jka-65/lesson_api
     }
 }

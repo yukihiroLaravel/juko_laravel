@@ -25,7 +25,7 @@ class LessonController extends Controller
               'chapter_id' => $chapter->id,
               'title' => $chapter->title,
           ];
-      }
+        }
         foreach ($chapter->lesson as $key =>  $lesson) {
            /*  return response()->json($lesson); */
             $results['lessons'][] = [
@@ -47,9 +47,7 @@ class LessonController extends Controller
         /* return response()->json($results);   */
         /* return response()->json($chapter); */
       }
-    }
-      
-    }
-    
+    }  
+  } 
 }
   

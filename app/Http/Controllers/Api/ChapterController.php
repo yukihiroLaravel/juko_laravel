@@ -37,20 +37,21 @@ class ChapterController extends Controller
         foreach ($attendances->course->chapter as $chapter) {
             $lessons = [];
             foreach ($chapter->lesson as $lesson) {
-                $lessonAttendances = [];
-                foreach ($lesson->lesson_attendance as $lessonAttendance) {
-                    $lessonAttendances[] = [
-                        'lesson_attendance_id' => $lessonAttendance->id,
-                        'attendance_id' => $attendances->id,
-                        'status' => $lessonAttendance->status,
-                    ];
+                $newLessonAttendance = null;
+                foreach ($attendances->lessonAttendances as $lessonAttendance) {
+                    if ($lesson->id == $lessonAttendance->lesson_id) {
+                        $newLessonAttendance = [
+                            'lesson_attendance_id' => $lessonAttendance->id,
+                            'status' => $lessonAttendance->status,
+                        ];
+                    }
                 }
                 $lessons[] = [
                     'lesson_id' => $lesson->id,
                     'title' => $lesson->title,
                     'url' => $lesson->url,
                     'remarks' => $lesson->remarks,
-                    'lesson_attendances' => $lessonAttendances,
+                    'lesson_attendance' => $newLessonAttendance,
                 ];
             }
             $result['chapters'][] = [
@@ -58,8 +59,7 @@ class ChapterController extends Controller
                 'title' => $chapter->title,
                 'lessons' => $lessons,
             ];
-        }
-
+        }        
         return response()->json($result);
     }
 }

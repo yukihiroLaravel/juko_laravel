@@ -23,25 +23,25 @@ class LessonAttendanceSeeder extends Seeder
             ],
             [
                 'lesson_id' => 2,
-                'attendance_id' => 2,
+                'attendance_id' => 1,
                 'status' => 2,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'lesson_id' => 3,
-                'attendance_id' => 2,
+                'attendance_id' => 1,
                 'status' => 2,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'lesson_id' => 4,
-                'attendance_id' => 2,
-                'status' => 2,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
+            // [
+            //     'lesson_id' => 4,
+            //     'attendance_id' => 2,
+            //     'status' => 2,
+            //     'created_at' => Carbon::now(),
+            //     'updated_at' => Carbon::now(),
+            // ],
         ]);
     }
 }

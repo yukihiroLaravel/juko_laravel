@@ -21,66 +21,6 @@ class AttendanceSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],[
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 70,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 100,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
         ]);
     }
 }

@@ -26,12 +26,6 @@ class ChapterSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'course_id' => 2,
-                'title' => 'コードを書こう2',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
         ]);
     }
 }

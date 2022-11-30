@@ -32,7 +32,6 @@ class Course extends Model
     {
         return $this->belongsTo(Student::class);
         return $this->hasMany(Attendance::class);
-
     }
 
     public function chapter()

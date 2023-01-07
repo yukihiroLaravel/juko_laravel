@@ -4,17 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
-use App\Http\Resources\CourseGetResponse;
-use App\Model\Course;
 use App\Model\Attendance;
 
 class ChapterController extends Controller
 {
     public function index(CourseGetRequest $request)
     {
-        $attendances = Attendance::with(['course.chapter.lesson','course.instructor','lessonAttendances'])
-        ->where('id', $request->attendance_id)
-        ->first();
+        $attendances = Attendance::with([
+            'course.chapter.lesson',
+            'course.instructor',
+            'lessonAttendances'
+            ])
+            ->where('id', $request->attendance_id)
+            ->first();
 
         $result = [
             'course_id' => $attendances->course_id,
@@ -59,7 +61,8 @@ class ChapterController extends Controller
                 'title' => $chapter->title,
                 'lessons' => $lessons,
             ];
-        }        
+        }
+
         return response()->json($result);
     }
 }

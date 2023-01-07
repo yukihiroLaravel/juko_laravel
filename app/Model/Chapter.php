@@ -4,24 +4,14 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class Chapter extends Model
 {
     /**
      * モデルと関連しているテーブル
      *
      * @var string
      */
-    protected $table = 'attendances';
-
-    /**
-     * 受講生を取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function student()
-    {
-        return $this->belongsTo(Student::class);
-    }
+    protected $table = 'chapters';
 
     /**
      * 講座を取得
@@ -32,13 +22,14 @@ class Attendance extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
     /**
-     * 講座を取得
+     * レッスンを取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function lessonAttendances()
+    public function lesson()
     {
-        return $this->hasMany(LessonAttendance::class);
+        return $this->hasMany(Lesson::class);
     }
 }

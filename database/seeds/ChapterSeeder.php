@@ -1,10 +1,10 @@
 <?php
 
-use App\Model\Attendance;
+use App\Model\Chapter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
-class AttendanceSeeder extends Seeder
+class ChapterSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,12 +13,16 @@ class AttendanceSeeder extends Seeder
      */
     public function run()
     {
-        Attendance::insert([
-            // 受講生1
+        Chapter::insert([
             [
                 'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 10,
+                'title' => 'Laravel入門1',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'course_id' => 1,
+                'title' => 'Laravel入門2',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

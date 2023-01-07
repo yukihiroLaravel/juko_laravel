@@ -32,4 +32,13 @@ class Course extends Model
     {
         return $this->hasMany(Attendance::class);
     }
+    /**
+     * 受講状態を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function chapter()
+    {
+        return $this->hasMany(Chapter::class);
+    }
 }

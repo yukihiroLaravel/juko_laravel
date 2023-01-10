@@ -28,7 +28,7 @@ class Chapter extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function lesson()
+    public function lessons()
     {
         return $this->hasMany(Lesson::class);
     }

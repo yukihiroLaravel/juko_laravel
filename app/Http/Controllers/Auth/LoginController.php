@@ -3,27 +3,28 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+final class LoginController extends Controller
 {
-    use AuthenticatesUsers;
-
     /**
-     * Where to redirect users after login.
-     *
-     * @var string
+     * @param LoginRequest $request
+     * @return JsonResponse
+     * @throws AuthenticationException
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function __invoke(LoginRequest $request)
     {
-        $this->middleware('guest')->except('logout');
+        if (Auth::attempt($request->only(['email', 'password']))) {
+            $request->session()->regenerate();
+            return new JsonResponse([
+                'result' => true,
+                'message' => 'Authenticated.',
+            ]);
+        }
+
+        throw new AuthenticationException();
     }
 }

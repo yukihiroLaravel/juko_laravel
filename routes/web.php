@@ -14,3 +14,6 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('login', 'Auth\LoginController');
+Route::post('logout', 'Auth\LogoutController');

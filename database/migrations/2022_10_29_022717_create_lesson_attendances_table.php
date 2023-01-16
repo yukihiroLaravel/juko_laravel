@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAttendancesTable extends Migration
+class CreateLessonAttendancesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,14 @@ class CreateAttendancesTable extends Migration
      */
     public function up()
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('lesson_attendances', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('course_id')->unsigned()->comment('講座ID');
-            $table->bigInteger('student_id')->unsigned()->comment('生徒ID');
-            $table->tinyInteger('progress')->comment('進捗');
+            $table->bigInteger('lesson_id')->unsigned()->comment('レッスンID');
+            $table->bigInteger('attendance_id')->unsigned()->comment('受講ID');
+            $table->tinyInteger('status')->comment('レッスン受講状態');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
-            $table->foreign('course_id')->references('id')->on('courses');
-            $table->foreign('student_id')->references('id')->on('students');
         });
     }
 
@@ -33,6 +31,6 @@ class CreateAttendancesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('lesson_attendances');
     }
 }

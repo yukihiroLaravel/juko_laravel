@@ -33,8 +33,12 @@ class Course extends Model
         return $this->belongsTo(Student::class);
         return $this->hasMany(Attendance::class);
     }
-
-    public function chapter()
+    /**
+     * チャプターリストを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function chapters()
     {
         return $this->hasMany(Chapter::class);
     }

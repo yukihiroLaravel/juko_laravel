@@ -13,12 +13,11 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 Route::prefix('v1')->group(function () {
     Route::get('courses', 'Api\CourseController@index');
-    Route::get('course/chapter', 'Api\ChapterController@index');
-    Route::get('course/chapter/lesson', 'Api\LessonController@index');
+    Route::get('course', 'Api\CourseController@show');
 });

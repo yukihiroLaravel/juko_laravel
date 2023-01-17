@@ -24,7 +24,8 @@ class ChapterGetRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer']
+            'attendance_id' => ['required', 'integer'],
+            'chapter_id' => ['required', 'integer'],
         ];
     }
 }

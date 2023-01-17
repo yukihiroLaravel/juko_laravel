@@ -33,6 +33,7 @@ class Course extends Model
         return $this->belongsTo(Student::class);
         return $this->hasMany(Attendance::class);
     }
+
     /**
      * チャプターリストを取得
      *

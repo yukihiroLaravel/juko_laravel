@@ -30,8 +30,10 @@ class Course extends Model
      */
     public function attendances()
     {
+        return $this->belongsTo(Student::class);
         return $this->hasMany(Attendance::class);
     }
+
     /**
      * チャプターリストを取得
      *

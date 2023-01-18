@@ -19,5 +19,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::get('courses', 'Api\CourseController@index');
-    Route::get('course', 'Api\CourseController@show');
+    Route::prefix('course')->group(function () {
+        Route::get('/', 'Api\CourseController@show');
+        Route::prefix('chapter')->group(function () {
+            Route::get('/', 'Api\ChapterController@show');
+        });
+    });
 });

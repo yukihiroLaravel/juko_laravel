@@ -16,12 +16,18 @@ class LessonAttendance extends Model
     /**
      * レッスン取得
      *
-     * @return  \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
+
+    /**
+     * 受講
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);

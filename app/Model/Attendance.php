@@ -32,6 +32,7 @@ class Attendance extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
     /**
      * 講座を取得
      *

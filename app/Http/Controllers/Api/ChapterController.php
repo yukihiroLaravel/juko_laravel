@@ -20,8 +20,8 @@ class ChapterController extends Controller
     public function show(ChapterGetRequest $request)
     {
         $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances'
+                'course.chapters.lessons',
+                'lessonAttendances'
             ])
             ->where('id', $request->attendance_id)
             ->first();

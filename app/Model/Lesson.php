@@ -28,7 +28,7 @@ class Lesson extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function lesson_attendance()
+    public function lessonAttendance()
     {
         return $this->hasMany(LessonAttendance::class);
     }

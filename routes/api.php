@@ -25,4 +25,6 @@ Route::prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
+    Route::patch('courses/attendance', 'Api\LessonAttendanceController@index');
 });
+

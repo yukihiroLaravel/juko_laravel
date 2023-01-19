@@ -8,8 +8,11 @@ use App\Model\LessonAttendance;
 
 class LessonAttendanceController extends Controller
 {
-    public function index()
+    public function update(Request $request)
     {
-    return response()->json();
+    return response()->json([
+        "lesson_attendance_id" => $request->lesson_attendance_id,
+        "lesson_attendance_id" => LessonAttendance::find($request)
+    ]);
     }
 }

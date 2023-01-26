@@ -8,8 +8,18 @@ use App\Model\LessonAttendance;
 
 class LessonAttendanceController extends Controller
 {
-    public function index()
+    public function update(Request $request)
     {
-    return response()->json();
+        //　ToDo　ログインユーザーとレッスン受講状態の受講者が一致するか検証が必要
+        LessonAttendance::where('id','=',$request->lesson_attendance_id)
+        ->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            "result" => true,
+        ]);
     }
+
+
 }

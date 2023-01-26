@@ -14,9 +14,9 @@ class LessonAttendance extends Model
     protected $table = 'lesson_attendances';
 
     // ToDo ステータス定数
-    const STATUS_NOT_ATTENDANCE = 'not_attendance';
+    const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
     const STATUS_IN_ATTENDANCE = 'in_attendance';
-    const STATUS_COMPLETED_COURSE = 'completed_courde';
+    const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
 
     /**
      * レッスン取得

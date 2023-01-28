@@ -43,6 +43,6 @@ class LessonAttendanceStatusRule implements Rule
      */
     public function message()
     {
-        return '失敗です';
+        return 'Invalid Request Body.';
     }
 }

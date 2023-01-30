@@ -25,7 +25,7 @@ class LessonAttendanceRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_attendance_id' => ['required', 'numeric'],
+            'lesson_attendance_id' => ['required', 'integer'],
             'status' => ['required', new LessonAttendanceStatusRule]
         ];
     }

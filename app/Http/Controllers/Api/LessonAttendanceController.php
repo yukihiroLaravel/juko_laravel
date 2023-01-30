@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LessonAttendanceRequest;
-use Illuminate\Http\Request;
 use App\Model\LessonAttendance;
-use App\Rules\LessonAttendanceIdRule;
-use App\Rules\LessonAttendanceStatusRule;
 
 class LessonAttendanceController extends Controller
 {

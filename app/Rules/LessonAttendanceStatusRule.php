@@ -4,6 +4,8 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
+use App\Model\LessonAttendance;
+
 class LessonAttendanceStatusRule implements Rule
 {
     /**
@@ -25,16 +27,19 @@ class LessonAttendanceStatusRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if($value === 'in_attendance'){
+        if ($value === LessonAttendance::STATUS_IN_ATTENDANCE) {
             return true;
-        }else if($value === 'before_attendance'){
-            return true;
-        }else if($value === 'completed_attendance'){
-            return true;
-        }else{
-            return false;
         }
+        if ($value === LessonAttendance::STATUS_BEFORE_ATTENDANCE) {
+            return true;
+        }
+        if ($value === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+            return true;
+        }
+
+        return false;
     }
+
 
     /**
      * Get the validation error message.

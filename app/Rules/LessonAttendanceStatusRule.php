@@ -27,16 +27,16 @@ class LessonAttendanceStatusRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($value === LessonAttendance::STATUS_IN_ATTENDANCE) {
+        $values = array($value);
+        if (in_array(LessonAttendance::STATUS_IN_ATTENDANCE, $values, true)) {
             return true;
         }
-        if ($value === LessonAttendance::STATUS_BEFORE_ATTENDANCE) {
+        if (in_array(LessonAttendance::STATUS_COMPLETED_ATTENDANCE, $values, true)) {
             return true;
         }
-        if ($value === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+        if (in_array(LessonAttendance::STATUS_BEFORE_ATTENDANCE, $values, true)) {
             return true;
         }
-
         return false;
     }
 

@@ -27,14 +27,12 @@ class LessonAttendanceStatusRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $values = array($value);
-        if (in_array(LessonAttendance::STATUS_IN_ATTENDANCE, $values, true)) {
-            return true;
-        }
-        if (in_array(LessonAttendance::STATUS_COMPLETED_ATTENDANCE, $values, true)) {
-            return true;
-        }
-        if (in_array(LessonAttendance::STATUS_BEFORE_ATTENDANCE, $values, true)) {
+        if (in_array($value, 
+            [
+                LessonAttendance::STATUS_IN_ATTENDANCE, 
+                LessonAttendance::STATUS_COMPLETED_ATTENDANCE, 
+                LessonAttendance::STATUS_BEFORE_ATTENDANCE
+            ], true)) {
             return true;
         }
         return false;
@@ -48,6 +46,6 @@ class LessonAttendanceStatusRule implements Rule
      */
     public function message()
     {
-        return 'Invalid Request Body.';
+        return 'Invalid Status.';
     }
 }

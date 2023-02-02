@@ -13,6 +13,10 @@ class Lesson extends Model
      */
     protected $table = 'lessons';
 
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
+
     /**
      * チャプターを取得
      *

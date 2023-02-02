@@ -65,7 +65,7 @@ class CourseGetResponse extends JsonResource
                 'title' => $lesson->title,
                 'url' => $lesson->url,
                 'remarks' => $lesson->remarks,
-                'lesson_attendance' => [
+                'lessonAttendance' => [
                     'lesson_attendance_id' => $lessonAttendance->id,
                     'status' => $lessonAttendance->status,
                 ]

@@ -38,7 +38,6 @@ class LessonAttendanceController extends Controller
 
             return response()->json([
                 "result" => true,
-                //"lessonAttendance" => $lessonAttendance,
                 "student_id" => $lessonAttendance->attendance->student_id
             ]);
         } catch (\Exception $e) {

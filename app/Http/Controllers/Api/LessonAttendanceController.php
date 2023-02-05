@@ -13,9 +13,8 @@ class LessonAttendanceController extends Controller
     {
         // ToDo 認証ユーザーを一時的にid=1とする。
         $authId = 1;
-        try { throw new \Exception("aa");
-
-            //　ToDo　ログインユーザーとレッスン受講者idが一致するか検証
+        try {
+            //ログインユーザーとレッスン受講者idが一致するか検証
             $lessonAttendance = LessonAttendance::where('id', '=', $request->lesson_attendance_id)->first();
             if ($authId !== $lessonAttendance->attendance->student_id) {
                 return response()->json([

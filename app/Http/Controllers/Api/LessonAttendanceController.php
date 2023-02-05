@@ -13,7 +13,7 @@ class LessonAttendanceController extends Controller
     {
         // ToDo 認証ユーザーを一時的にid=1とする。
         $authId = 1;
-        try { //throw new \Exception("aa");
+        try { throw new \Exception("aa");
 
             //　ToDo　ログインユーザーとレッスン受講者idが一致するか検証
             $lessonAttendance = LessonAttendance::where('id', '=', $request->lesson_attendance_id)->first();
@@ -32,10 +32,6 @@ class LessonAttendanceController extends Controller
                 "result" => true
             ]);
 
-
-            //error code 403
-            //null は404　
-
             $lessonAttendance->update([
                 'status' => $request->status,
             ]);
@@ -46,9 +42,11 @@ class LessonAttendanceController extends Controller
                 "student_id" => $lessonAttendance->attendance->student_id
             ]);
         } catch (\Exception $e) {
+            $errorMessage = 'update_error.';
+            Log::error($errorMessage);
             return response()->json([
                 "result" => false,
-                Log::debug('An informational message.') //←エラーログに残す※例外のメッセージは要らない。理由対処しきれない。メッセージを出したところでフロントでは処理しようがない。
+                "error_log" => $errorMessage //←エラーログに残す※例外のメッセージは要らない。理由対処しきれない。メッセージを出したところでフロントでは処理しようがない。
             ]);
         }
     }

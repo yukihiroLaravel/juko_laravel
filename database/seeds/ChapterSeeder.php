@@ -16,13 +16,13 @@ class ChapterSeeder extends Seeder
         Chapter::insert([
             [
                 'course_id' => 1,
-                'title' => 'Laravel入門1',
+                'title' => 'PHPとは？',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 1,
-                'title' => 'Laravel入門2',
+                'title' => 'PHPの基礎を学ぼう',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

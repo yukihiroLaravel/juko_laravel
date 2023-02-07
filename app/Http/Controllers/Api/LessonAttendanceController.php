@@ -15,21 +15,23 @@ class LessonAttendanceController extends Controller
         $authId = 1;
         try {
             //ログインユーザーとレッスン受講者idが一致するか検証
-            $lessonAttendance = LessonAttendance::where('id', '=', $request->lesson_attendance_id)->first();
+            $lessonAttendance =  LessonAttendance::with('attendance')
+                ->where('id', '=', $request->lesson_attendance_id)
+                ->first();
+            if ($lessonAttendance === null) {
+                return response()->json([
+                    "result" => false,
+                    "error_code" => 404,
+                    "error_message" => "Not found lesson attendance status."
+                ]);
+            }
             if ($authId !== $lessonAttendance->attendance->student_id) {
                 return response()->json([
                     "result" => false,
-                    "error_code" => 403
-                ]);
-            } else if ($authId === null) {
-                return response()->json([
-                    "result" => false,
-                    "error_code" => 404
+                    "error_code" => 403,
+                    "error_message" => "Forbidden."
                 ]);
             }
-            return response()->json([
-                "result" => true
-            ]);
 
             $lessonAttendance->update([
                 'status' => $request->status,
@@ -37,14 +39,11 @@ class LessonAttendanceController extends Controller
 
             return response()->json([
                 "result" => true,
-                "student_id" => $lessonAttendance->attendance->student_id
             ]);
-        } catch (\Exception $e) {
-            $errorMessage = 'update_error.';
-            Log::error($errorMessage);
+        } catch (\RuntimeException $e) {
+            Log::error($e->getMessage());
             return response()->json([
                 "result" => false,
-                "error_log" => $errorMessage //←エラーログに残す※例外のメッセージは要らない。理由対処しきれない。メッセージを出したところでフロントでは処理しようがない。
             ]);
         }
     }

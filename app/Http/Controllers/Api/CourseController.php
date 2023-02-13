@@ -23,6 +23,21 @@ class CourseController extends Controller
         return new CoursesGetResponse($attendance);
     }
 
+     /**
+     * 講座検索取得API
+     *
+     * @param CoursesGetRequest $request
+     * @return CoursesGetResponse
+     */
+    public function serch(CoursesGetRequest $request)//(CoursesGetRequest $request)   //入力文字がそのままリターンされるように実装する。
+    {
+        // return response()->json([
+        //     "title" => $request
+        // ]);
+        $attendance = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+        return new CoursesGetResponse($attendance);
+    }
+
     /**
      * 講座詳細取得API
      *

@@ -18,13 +18,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::get('courses', 'Api\CourseController@index');
+    Route::prefix('courses')->group(function () {
+        Route::get('/', 'Api\CourseController@index');
+        Route::get('/serch', 'Api\CourseController@serch');
+    });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
+        Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
     });
-    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });
 

@@ -29,13 +29,12 @@ class CourseController extends Controller
      * @param CoursesGetRequest $request
      * @return CoursesGetResponse
      */
-    public function serch(CoursesGetRequest $request)//(CoursesGetRequest $request)   //入力文字がそのままリターンされるように実装する。
+    public function search(CoursesGetRequest $request)   //入力文字がそのままリターンされるように実装する。
     {
-        // return response()->json([
-        //     "title" => $request
-        // ]);
-        $attendance = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-        return new CoursesGetResponse($attendance);
+        
+        return response()->json([
+            "text" => $request->text
+        ]);
     }
 
     /**

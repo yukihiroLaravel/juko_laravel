@@ -19,8 +19,26 @@ class CourseController extends Controller
      */
     public function index(CoursesGetRequest $request)
     {
-        $attendance = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-        return new CoursesGetResponse($attendance);
+        if($request->text === null){
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            return new CoursesGetResponse($attendances);
+        }
+
+        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
+                $q->where('title', 'like', "%$request->text%");
+            })
+            ->with(['course.instructor'])
+            ->where('student_id', '=', $request->student_id)
+            ->get();
+        return new CoursesGetResponse($attendances);
+
+        //テキストがなかったら全件取得
+        //ToDo 最終的にurlを一緒にするので上のindexメソッドと一緒に実行できるようにする
+
+        // return response()->json([
+        //     "searchedCourseAttendance" => $searchedCourseAttendance //変数名。キー名が何を示しているかを分かるようにする。
+        // ]);
+
     }
 
     /**

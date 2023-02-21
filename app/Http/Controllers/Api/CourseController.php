@@ -33,7 +33,7 @@ class CourseController extends Controller
     public function search(CoursesGetRequest $request)
     {
 
-        $searchLessonAttendance = Attendance::whereHas('course', function ($q) use ($request) {
+        $searchedCourseAttendance = Attendance::whereHas('course', function ($q) use ($request) {
             $q->where('title', 'like', "%$request->text%");
         })
             ->where('student_id', '=', $request->student_id)
@@ -43,7 +43,7 @@ class CourseController extends Controller
         //ToDo 最終的にurlを一緒にするので上のindexメソッドと一緒に実行できるようにする
 
         return response()->json([
-            "searchLessonAttendance" => $searchLessonAttendance //変数名。キー名が何を示しているかを分かるようにする。
+            "searchedCourseAttendance" => $searchedCourseAttendance //変数名。キー名が何を示しているかを分かるようにする。
         ]);
     }
 

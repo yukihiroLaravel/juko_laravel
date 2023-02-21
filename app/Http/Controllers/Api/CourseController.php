@@ -8,7 +8,6 @@ use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
-use App\Model\Course;
 
 class CourseController extends Controller
 {

@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
+use App\Http\Requests\CourseMakeRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
+use App\Model\Course;
+use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
@@ -51,4 +54,32 @@ class CourseController extends Controller
 
         return new CourseGetResponse($attendance);
     }
+    /**
+     * 講座登録API
+     *
+     * @param CourseGetRequest $request
+     * @return CourseGetResponse
+     */
+    public function store(CourseMakeRequest $request)
+    {
+        // $courses = new Course;
+        // $courses->instructor_id = $request->instructor_id;
+        // $courses->title = $request->title;
+        // $courses->image = $request->file('image')->get();
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        
+        if (!in_array($extension, ['jpg', 'png'])) {
+            return response()->json(['error' => 'Only jpg and png files are allowed.']);
+        }
+        $filename = date('YmdHis') . '.' . $extension;
+        Storage::putFileAs('courese', $file, $filename);
+        //$courses->save();
+        return response()->json([
+            "result" => true,
+        ]);
+    }//バイナリデータ　受け取りデータ　リクエストでファイルを受けとるメソッド　ファイルパスを保存する　フォームリクエストを作る　りくえすとのいめーじファイルを受け取って保存
 }
+//いったんDBではなく、ローカルに保存されるところまでを目指す
+//storage\app\public\courseに保存YmdHisを使ってファイルを区別する
+//jpgとpngのみ受け入れる。

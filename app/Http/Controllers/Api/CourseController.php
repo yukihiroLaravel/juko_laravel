@@ -62,10 +62,9 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        // $courses = new Course;
-        // $courses->instructor_id = $request->instructor_id;
-        // $courses->title = $request->title;
-        // $courses->image = $request->file('image')->get();
+        $courses = new Course;
+        $courses->instructor_id = $request->instructor_id;
+        $courses->title = $request->title;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         if (!in_array($extension, ['jpg', 'png'])) {
@@ -73,7 +72,8 @@ class CourseController extends Controller
         }
         $filename = date('YmdHis') . '.' . $extension;
         Storage::putFileAs('courese', $file, $filename);
-        //$courses->save();
+        $courses->image = $request->image;
+        $courses->save();
         return response()->json([
             "result" => true,
         ]);

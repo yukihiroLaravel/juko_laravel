@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
-use App\Http\Requests\CourseMakeRequest;
+use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
@@ -60,7 +60,7 @@ class CourseController extends Controller
      * @param CourseGetRequest $request
      * @return CourseGetResponse
      */
-    public function store(CourseMakeRequest $request)
+    public function store(CourseStoreRequest $request)
     {
         // $courses = new Course;
         // $courses->instructor_id = $request->instructor_id;
@@ -68,7 +68,6 @@ class CourseController extends Controller
         // $courses->image = $request->file('image')->get();
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        
         if (!in_array($extension, ['jpg', 'png'])) {
             return response()->json(['error' => 'Only jpg and png files are allowed.']);
         }

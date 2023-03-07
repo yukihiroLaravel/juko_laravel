@@ -62,7 +62,7 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        
+
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         //Todo バリデーションをフォームリクエストに移す
@@ -71,7 +71,7 @@ class CourseController extends Controller
         }
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('courese', $file, $filename);
-        
+
         $course = new Course;
         $course->instructor_id = $request->instructor_id;
         $course->title = $request->title;
@@ -81,4 +81,4 @@ class CourseController extends Controller
             "result" => true,
         ]);
     }
-
+}

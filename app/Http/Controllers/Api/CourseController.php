@@ -62,23 +62,23 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        $courses = new Course;
-        $courses->instructor_id = $request->instructor_id;
-        $courses->title = $request->title;
+        
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
+        //Todo バリデーションをフォームリクエストに移す
         if (!in_array($extension, ['jpg', 'png'])) {
             return response()->json(['error' => 'Only jpg and png files are allowed.']);
         }
         $filename = date('YmdHis') . '.' . $extension;
-        Storage::putFileAs('courese', $file, $filename);
-        $courses->image = $request->image;
-        $courses->save();
+        $filePath = Storage::putFileAs('courese', $file, $filename);
+        
+        $course = new Course;
+        $course->instructor_id = $request->instructor_id;
+        $course->title = $request->title;
+        $course->image = $filePath;
+        $course->save();
         return response()->json([
             "result" => true,
         ]);
-    }//バイナリデータ　受け取りデータ　リクエストでファイルを受けとるメソッド　ファイルパスを保存する　フォームリクエストを作る　りくえすとのいめーじファイルを受け取って保存
-}
-//いったんDBではなく、ローカルに保存されるところまでを目指す
-//storage\app\public\courseに保存YmdHisを使ってファイルを区別する
-//jpgとpngのみ受け入れる。
+    }
+

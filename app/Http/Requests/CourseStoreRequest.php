@@ -25,7 +25,8 @@ class CourseStoreRequest extends FormRequest
     {
         return [
             'instructor_id' => 'required',
-            'title' => 'required'
+            'title' => 'required',
+            'image' => 'required|mimes:jpg,png',
         ];
     }
 }

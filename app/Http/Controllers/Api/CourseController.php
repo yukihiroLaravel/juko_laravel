@@ -62,7 +62,6 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         //Todo バリデーションをフォームリクエストに移す

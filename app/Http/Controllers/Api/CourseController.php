@@ -11,6 +11,7 @@ use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CourseController extends Controller
 {
@@ -64,18 +65,21 @@ class CourseController extends Controller
     {
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        //Todo バリデーションをフォームリクエストに移す
-        if (!in_array($extension, ['jpg', 'png'])) {
-            return response()->json(['error' => 'Only jpg and png files are allowed.']);
-        }
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('courese', $file, $filename);
+        $param = [
+            'instructor_id' => $request->instructor_id,
+            'title' => $request->title,
+            'image' => $request->image = $filePath,
+        ];
 
-        $course = new Course;
-        $course->instructor_id = $request->instructor_id;
-        $course->title = $request->title;
-        $course->image = $filePath;
-        $course->save();
+        DB::insert('insert into courses (instructor_id, title, image, created_at, updated_at) values(:instructor_id, :title, :image, now(), now())', $param);
+
+       // $course = new Course;
+       // $course->instructor_id = $request->instructor_id;
+       // $course->title = $request->title;
+       // $course->image = $filePath;
+       // $course->save();
         return response()->json([
             "result" => true,
         ]);

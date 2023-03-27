@@ -11,7 +11,6 @@ use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 
 class CourseController extends Controller
 {
@@ -67,19 +66,13 @@ class CourseController extends Controller
         $extension = $file->getClientOriginalExtension();
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('courese', $file, $filename);
-        $param = [
+        Course::insert([
             'instructor_id' => $request->instructor_id,
             'title' => $request->title,
             'image' => $request->image = $filePath,
-        ];
-
-        DB::insert('insert into courses (instructor_id, title, image, created_at, updated_at) values(:instructor_id, :title, :image, now(), now())', $param);
-
-       // $course = new Course;
-       // $course->instructor_id = $request->instructor_id;
-       // $course->title = $request->title;
-       // $course->image = $filePath;
-       // $course->save();
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
         return response()->json([
             "result" => true,
         ]);

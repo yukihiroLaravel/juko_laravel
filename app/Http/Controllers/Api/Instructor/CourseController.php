@@ -11,7 +11,6 @@ use App\Http\Resources\Instructor\CoursesGetResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
-
 class CourseController extends Controller
 {
     /**

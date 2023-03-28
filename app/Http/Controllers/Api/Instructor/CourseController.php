@@ -9,6 +9,7 @@ use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Resources\Instructor\CoursesGetResponse;
 
 class CourseController extends Controller
 {
@@ -17,7 +18,7 @@ class CourseController extends Controller
      *
      * @param CourseUpdateRequest $request
      * @return CourseUpdateResponse
-     */   
+     */
     public function update(CourseUpdateRequest $request)
     {
         $file = $request->file('image');
@@ -46,7 +47,7 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResponse($course)    
+                "data" => new CourseUpdateResponse($course)
             ]);
 
         } catch (RuntimeException $e) {
@@ -55,5 +56,16 @@ class CourseController extends Controller
                 "result" => false,
             ], 500);
         }
+    }
+
+    /**
+     * 講師側講座一覧取得API
+     *
+     * @param $instructor_id
+     * @return CoursesGetResponse
+     */
+    public function index($instructor_id)
+    {
+        return new CoursesGetResponse([]);
     }
 }

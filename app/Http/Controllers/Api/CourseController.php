@@ -55,6 +55,7 @@ class CourseController extends Controller
 
         return new CourseGetResponse($attendance);
     }
+
     /**
      * 講座登録API
      *
@@ -76,6 +77,13 @@ class CourseController extends Controller
         ]);
         return response()->json([
             "result" => true,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $course = Course::find($id);
+        return response()->json([
         ]);
     }
 }

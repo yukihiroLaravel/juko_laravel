@@ -8,6 +8,7 @@ use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -50,5 +51,12 @@ class CourseController extends Controller
             ->first();
 
         return new CourseGetResponse($attendance);
+    }
+
+    public function edit($id)
+    {
+        $course = Course::find($id);
+        return response()->json([
+        ]);
     }
 }

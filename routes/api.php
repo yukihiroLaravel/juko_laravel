@@ -23,6 +23,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('instructor')->group(function () {
         Route::prefix('course')->group(function() {
+            //chapter_idを渡す
             Route::get('{id}', 'Api\Instructor\CourseController@show');
         });
     });
@@ -36,7 +37,6 @@ Route::prefix('v1')->group(function () {
         Route::post('register', 'Api\CourseController@store');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
-            Route::get('{id}','Api\ChapterController@index');
         });
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');

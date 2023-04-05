@@ -93,4 +93,9 @@ class CourseController extends Controller
             "result" => true,
         ]);
     }
+    public function dex($id)
+    {
+        $chapter = Chapter::findOrFail($id);
+        return new CourseIndexResponse();
+    }
 }

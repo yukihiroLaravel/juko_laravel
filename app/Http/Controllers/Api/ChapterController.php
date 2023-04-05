@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChapterGetRequest;
 use App\Http\Resources\ChapterGetResponse;
-use App\Http\Resources\ChapterStoreResponse;
 use App\Model\Attendance;
-use App\Model\Chapter;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ChapterController extends Controller
@@ -33,10 +31,5 @@ class ChapterController extends Controller
         }
 
         return new ChapterGetResponse($attendance, $request->chapter_id);
-    }
-    public function index($id)
-    {
-        $chapter = Chapter::findOrFail($id);
-        return new ChapterStoreResponse();
     }
 }

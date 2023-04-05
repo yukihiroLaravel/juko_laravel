@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ChapterStoreResponse extends JsonResource
+class CourseIndexResponse extends JsonResource
 {
     public function __construct()
     {

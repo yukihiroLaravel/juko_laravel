@@ -15,7 +15,9 @@ class CourseController extends Controller
      */
     public function index($instructor_id)
     {
-        return [];
+        return response()->json([
+            "result" => true,
+        ]);
     }
 
 }

@@ -8,8 +8,6 @@ use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
-use App\Http\Resources\CourseIndexResponse;
-use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
@@ -79,10 +77,5 @@ class CourseController extends Controller
         return response()->json([
             "result" => true,
         ]);
-    }
-    public function dex($id)
-    {
-        $chapter = Chapter::findOrFail($id);
-        return new CourseIndexResponse();
     }
 }

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseIndexResponse extends JsonResource
+class CourseGetResponse extends JsonResource
 {
     public function __construct()
     {
-        
+
     }
     /**
      * Transform the resource into an array.
@@ -20,6 +20,4 @@ class CourseIndexResponse extends JsonResource
     {
         return [] ;
     }
-
-    
 }

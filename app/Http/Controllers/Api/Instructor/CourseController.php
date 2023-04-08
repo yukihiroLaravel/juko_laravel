@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 use App\Http\Resources\Instructor\CoursesGetResponse;
+use App\Http\Requests\Instructor\CoursesGetRequest;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -61,11 +63,13 @@ class CourseController extends Controller
     /**
      * 講師側講座一覧取得API
      *
-     * @param $instructor_id
+     * @param CoursesGetRequest $request
      * @return CoursesGetResponse
      */
-    public function index($instructor_id)
-    {
-        return new CoursesGetResponse([]);
-    }
+    public function index(CoursesGetRequest $request)
+{
+    $courses = Course::where('instructor_id', $request->instructor_id)->get();
+
+    return new CoursesGetResponse($courses);
+}
 }

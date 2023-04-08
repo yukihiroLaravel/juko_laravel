@@ -12,10 +12,15 @@ class CoursesGetResponse extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($instructor_id)
+    public function toArray($request)
     {
+        return $this->resource->map(function($value, $key) {
             return [
-
+                'course_id' => $value->id,
+                'image' => $value->image,
+                'title' => $value->title,
             ];
+        });
+
     }
 }

@@ -86,4 +86,12 @@ class CourseController extends Controller
         return response()->json([
         ]);
     }
+
+    public function update($id)
+    {
+        $course = Course::find($id);
+        return response()->json([
+        ]);
+    }
+   
 }

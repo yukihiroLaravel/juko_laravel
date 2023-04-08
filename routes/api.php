@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
         Route::get('{id}/edit','Api\CourseController@edit');
+        Route::put('{id}','Api\CourseController@update');
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

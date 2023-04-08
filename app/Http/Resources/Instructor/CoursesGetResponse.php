@@ -14,13 +14,12 @@ class CoursesGetResponse extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function($value, $key) {
+        return $this->resource->map(function($course) {
             return [
-                'course_id' => $value->id,
-                'image' => $value->image,
-                'title' => $value->title,
+                'course_id' => $course->id,
+                'image' => $course->image,
+                'title' => $course->title,
             ];
         });
-
     }
 }

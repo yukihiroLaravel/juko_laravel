@@ -7,7 +7,9 @@ use App\Http\Requests\CourseGetRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
+use App\Http\Resources\Instructor\CourseIndexResponse;
 use App\Model\Attendance;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -19,31 +21,18 @@ class CourseController extends Controller
      */
     public function index(CoursesGetRequest $request)
     {
-        $attendance = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-        return new CoursesGetResponse($attendance);
-    }
+        if ($request->text === null) {
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            return new CoursesGetResponse($attendances);
+        }
 
-    /**
-     * 講座検索取得API
-     *
-     * @param CoursesGetRequest $request
-     * @return CoursesGetResponse
-     */
-    public function search(CoursesGetRequest $request)
-    {
-
-        $searchedCourseAttendance = Attendance::whereHas('course', function ($q) use ($request) {
+        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
             $q->where('title', 'like', "%$request->text%");
         })
+            ->with(['course.instructor'])
             ->where('student_id', '=', $request->student_id)
             ->get();
-
-        //テキストがなかったら全件取得
-        //ToDo 最終的にurlを一緒にするので上のindexメソッドと一緒に実行できるようにする
-
-        return response()->json([
-            "searchedCourseAttendance" => $searchedCourseAttendance //変数名。キー名が何を示しているかを分かるようにする。
-        ]);
+        return new CoursesGetResponse($attendances);
     }
 
     /**
@@ -63,5 +52,13 @@ class CourseController extends Controller
             ->first();
 
         return new CourseGetResponse($attendance);
+    }
+
+    public function edit($id)
+    {
+        $course = Course::find($id);
+
+        return new CourseIndexResponse($course);
+
     }
 }

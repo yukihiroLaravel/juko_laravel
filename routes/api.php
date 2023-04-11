@@ -23,6 +23,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
+        Route::post('register', 'Api\CourseController@store');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });

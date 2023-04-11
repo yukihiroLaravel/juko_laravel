@@ -15,7 +15,7 @@ class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
-     *
+
      * @param CoursesGetRequest $request
      * @return CoursesGetResponse
      */

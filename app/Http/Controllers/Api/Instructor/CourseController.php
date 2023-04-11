@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\CoursesGetRequest;
 use App\Http\Resources\Instructor\CoursesGetResponse;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
     /**
      * 講師側講座一覧取得API
      *
-     * @param $instructor_id
+     * @param CoursesGetRequest $request
      * @return CoursesGetResponse
      */
-    public function index($instructor_id)
+    public function index(CoursesGetRequest $request)
     {
-        return new CoursesGetResponse([]);
+        $couses = Course::where('instructor_id', $request->instructor_id)->get();
     }
 }

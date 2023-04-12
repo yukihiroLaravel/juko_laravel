@@ -25,7 +25,6 @@ class CoursesGetRequest extends FormRequest
     {
         return [
             'instructor_id' => ['required', 'integer'],
-            'text' => ['string']
         ];
     }
 

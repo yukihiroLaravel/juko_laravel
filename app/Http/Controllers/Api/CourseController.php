@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
 use App\Http\Requests\CoursesGetRequest;
+use App\Http\Requests\CoursePatchRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Model\Attendance;
@@ -53,17 +54,13 @@ class CourseController extends Controller
         return new CourseGetResponse($attendance);
     }
 
-    public function edit($id)
+    public function update(CoursePatchRequest $request,$id)
     {
-        $course = Course::find($id);
+        $course = Course::findOrFail($id);
         return response()->json([
-        ]);
-    }
-
-    public function update($id)
-    {
-        $course = Course::find($id);
-        return response()->json([
+            'course_id' => $course->id,
+            'title' => $course->title,
+            'image' => $course->image,
         ]);
     }
    

@@ -82,16 +82,12 @@ class CourseController extends Controller
 
     public function edit($id)
     {
-        $course = Course::find($id);
+        $course = Course::findOrFail($id);
         return response()->json([
+            'course_id' => $course->id,
+            'title' => $course->title,
+            'image' => $course->image,
         ]);
     }
 
-    public function update($id)
-    {
-        $course = Course::find($id);
-        return response()->json([
-        ]);
-    }
-   
 }

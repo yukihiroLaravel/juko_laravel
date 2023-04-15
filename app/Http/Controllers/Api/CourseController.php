@@ -61,10 +61,12 @@ class CourseController extends Controller
 
     public function edit(CoursesIndexRequest $request)
     {
-        $course = Course::find($id);
+       // $course = Course::find($id);  
 
-        return new CourseIndexResponse($course);
-
+       // return new CourseIndexResponse($course);
+       return response()->json([
+        "result" => true,
+    ]);
     }
 
     /**

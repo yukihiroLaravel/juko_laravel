@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
 use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
+use App\Http\Requests\Instructor\CoursesIndexRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Http\Resources\Instructor\CourseIndexResponse;
@@ -13,6 +14,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+
 
 class CourseController extends Controller
 {

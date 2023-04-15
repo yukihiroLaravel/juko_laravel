@@ -27,4 +27,11 @@ class CoursesIndexRequest extends FormRequest
             'course_id' => ['required', 'integer'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
 }

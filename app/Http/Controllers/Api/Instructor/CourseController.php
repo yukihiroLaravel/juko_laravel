@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\CourseGetRequest;
 use App\Http\Resources\Instructor\CoursesGetResponse;
 use App\Http\Resources\Instructor\CourseGetResponse;
 use App\Model\Chapter;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -19,10 +21,11 @@ class CourseController extends Controller
     {
         return new CoursesGetResponse([]);
     }
-    public function show($id)
+    public function show(CourseGetRequest $request)
     {
-        $chapter = Chapter::findOrFail($id);
-        return new CourseGetResponse();
+        $course = Course::findOrFail($request->id);
+        $chapters = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
+        return new CourseGetResponse($course);
     }
 }
 

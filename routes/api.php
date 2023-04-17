@@ -21,10 +21,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('courses')->group(function () {
         Route::get('/', 'Api\CourseController@index');
     });
-
     Route::prefix('instructor')->group(function(){
         Route::get('{instructor_id}/courses', 'Api\Instructor\CourseController@index');
         Route::prefix('course')->group(function () {
+            Route::get('{course_id}', 'Api\Instructor\CourseController@show');
             Route::post('{course_id}','Api\Instructor\CourseController@update');
         });
     });

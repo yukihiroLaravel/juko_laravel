@@ -24,7 +24,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::prefix('course')->group(function() {
             //course_idを渡す
-            Route::get('{id}', 'Api\Instructor\CourseController@show');
+            Route::get('{course_id}', 'Api\Instructor\CourseController@show');
         });
     });
 

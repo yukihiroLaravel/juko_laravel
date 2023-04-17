@@ -16,6 +16,13 @@ class CoursePatchRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

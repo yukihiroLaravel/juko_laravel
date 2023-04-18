@@ -9,7 +9,7 @@ use App\Http\Requests\CoursesGetRequest;
 use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
-use App\Http\Resources\Instructor\CourseIndexResponse;
+use App\Http\Resources\Instructor\CourseEditResponse;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
@@ -58,14 +58,10 @@ class CourseController extends Controller
         return new CourseGetResponse($attendance);
     }
 
-    public function edit(CourseEditRequest $request)
+    public function edit(CourseEditRequest $course_id)
     {
-       // $course = Course::find($id);  
-
-       // return new CourseIndexResponse($course);
-       return response()->json([
-        "result" => true,
-    ]);
+       $course = Course::find($course_id);  
+       return new CourseEditResponse($course);
     }
 
     /**

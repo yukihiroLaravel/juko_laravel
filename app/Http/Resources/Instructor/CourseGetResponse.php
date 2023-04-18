@@ -6,10 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseGetResponse extends JsonResource
 {
-    public function __construct($course)
-    {
-        $this->courseId = $course;
-    }
     /**
      * Transform the resource into an array.
      *
@@ -18,7 +14,7 @@ class CourseGetResponse extends JsonResource
      */
     public function toArray($request)
     {
-        $course = $this->courseId; 
+      return $this->resource->map(function($course) { 
         return [
             'course_id' => $course->id,
             'title' => $course->title,
@@ -36,8 +32,8 @@ class CourseGetResponse extends JsonResource
                 ];    
             })
                         ];
-                    })
-            
+                    })      
         ];
+      });
     }
 }

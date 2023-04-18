@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseGetRequest;
 use App\Http\Resources\Instructor\CoursesGetResponse;
 use App\Http\Resources\Instructor\CourseGetResponse;
-use App\Model\Chapter;
 use App\Model\Course;
 
 class CourseController extends Controller
@@ -21,10 +20,16 @@ class CourseController extends Controller
     {
         return new CoursesGetResponse([]);
     }
-    public function show(CourseGetRequest $request)
+
+     /**
+     * 講師側講座登録取得API
+     *
+     * @param $course_id
+     * @return CourseGetResponse
+     */
+    public function show(CourseGetRequest $course_id)
     {
-        $course = Course::findOrFail($request->course_id);
-        $chapters = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
+        $course = Course::findOrFail($course_id);
         return new CourseGetResponse($course);
     }
 }

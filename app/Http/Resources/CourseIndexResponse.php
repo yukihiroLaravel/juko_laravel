@@ -14,7 +14,7 @@ class CourseIndexResponse extends JsonResource
      */
     public function toArray($request)
     {
-        $course = $this->courseId;
+      return $this->resource->map(function($course) {
         return [
             'course_id' => $course->id,
             'title' => $course->title,
@@ -33,8 +33,8 @@ class CourseIndexResponse extends JsonResource
             })
                         ];
                     })
-
         ];
+      });
     }
 
 

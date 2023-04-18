@@ -73,10 +73,15 @@ class CourseController extends Controller
         return new CoursesGetResponse($courses);
     }
 
-    public function show(CourseGetRequest $request)
+    /**
+     * 講師側講座登録取得API
+     *
+     * @param $course_id
+     * @return CourseGetResponse
+     */
+    public function show(CourseGetRequest $course_id)
     {
-        $course = Course::findOrFail($request->course_id);
-        $chapters = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
+        $course = Course::findOrFail($course_id);
         return new CourseGetResponse($course);
     }
 }

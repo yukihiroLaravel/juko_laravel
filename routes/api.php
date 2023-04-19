@@ -22,7 +22,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', 'Api\CourseController@index');
     });
     Route::prefix('instructor')->group(function () {
-        Route::prefix('course')->group(function() {
+        Route::prefix('course')->group(function () {
             //course_idを渡す
             Route::get('{course_id}', 'Api\Instructor\CourseController@show');
         });

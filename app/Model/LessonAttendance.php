@@ -16,7 +16,7 @@ class LessonAttendance extends Model
     protected $fillable = [
         'status',
     ];
-    
+
     // ToDo ステータス定数
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
     const STATUS_IN_ATTENDANCE = 'in_attendance';

@@ -22,15 +22,14 @@ class CourseController extends Controller
     }
 
      /**
-     * 講師側講座登録取得API
+     * 講師側講座取得API
      *
-     * @param $course_id
+     * @param CourseGetRequest $request
      * @return CourseGetResponse
      */
-    public function show(CourseGetRequest $course_id)
+    public function show(CourseGetRequest $request)
     {
-        $course = Course::findOrFail($course_id);
+        $course = Course::findOrFail($request->validated('$course_id'));
         return new CourseGetResponse($course);
     }
 }
-

@@ -66,7 +66,7 @@ class CourseController extends Controller
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = date('YmdHis') . '.' . $extension;
-        $filePath = Storage::putFileAs('course', $file, $filename);
+        $filePath = Storage::putFileAs('courese', $file, $filename);
         Course::insert([
             'instructor_id' => $request->instructor_id,
             'title' => $request->title,

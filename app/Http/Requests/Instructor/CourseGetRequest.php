@@ -5,7 +5,7 @@ namespace App\Http\Requests\Instructor;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CourseGetRequest extends FormRequest
-{  
+{
     protected function prepareForValidation()
     {
         $this->merge([
@@ -32,5 +32,5 @@ class CourseGetRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer'],
         ];
-    }   
+    }
 }

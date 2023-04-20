@@ -29,7 +29,7 @@ class CourseController extends Controller
      */
     public function show(CourseGetRequest $request)
     {
-        $course = Course::findOrFail($request->validated('$course_id'));
+        $course = Course::findOrFail($request->course_id);
         return new CourseGetResponse($course);
     }
 }

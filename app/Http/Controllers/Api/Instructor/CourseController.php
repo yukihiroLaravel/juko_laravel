@@ -18,6 +18,7 @@ class CourseController extends Controller
     public function index(CoursesGetRequest $request)
     {
         $courses = Course::where('instructor_id', $request->instructor_id)->get();
-        return response()->json($courses);
+
+        return new CoursesGetResponse($courses);
     }
 }

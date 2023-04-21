@@ -6,6 +6,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseIndexResponse extends JsonResource
 {
+    public function __construct($course)
+    {
+        $this->courseId = $course;
+    }
     /**
      * Transform the resource into an array.
      *
@@ -14,27 +18,26 @@ class CourseIndexResponse extends JsonResource
      */
     public function toArray($request)
     {
-      return $this->resource->map(function($course) {
-        return [
-            'course_id' => $course->id,
-            'title' => $course->title,
-            'image' => $course->image,
-            'chapters'=>$course->chapters->map(function($chapter) {
-                return [
-                    'chapter_id' => $chapter->id,
-                    'title' => $chapter->title,
-                    'lessons' => $chapter->lessons->map(function($lesson){
-                        return[
-                          'lesson_id'=>$lesson->id,
-                          'url'=>$lesson->url,
-                          'title'=>$lesson->title,
-                          'remarks'=>$lesson->remarks,
-                ];
-            })
-                        ];
-                    })
-        ];
-      });
+          $course = $this->courseId;
+          return [
+              'course_id' => $course->id,
+              'title' => $course->title,
+              'image' => $course->image,
+              'chapters'=> $course->chapters->map(function ($chapter) {
+                  return [
+                      'chapter_id' => $chapter->id,
+                      'title' => $chapter->title,
+                      'lessons' => $chapter->lessons->map(function ($lesson) {
+                          return [
+                            'lesson_id'=>$lesson->id,
+                            'url'=>$lesson->url,
+                            'title'=>$lesson->title,
+                            'remarks'=>$lesson->remarks,
+                          ];
+                      })
+                  ];
+              })
+          ];
     }
 
 

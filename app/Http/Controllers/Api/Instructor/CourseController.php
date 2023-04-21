@@ -20,8 +20,8 @@ class CourseController extends Controller
     {
         return new CoursesGetResponse([]);
     }
-
-     /**
+    
+    /**
      * 講師側講座取得API
      *
      * @param CourseGetRequest $request

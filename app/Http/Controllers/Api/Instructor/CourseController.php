@@ -29,7 +29,7 @@ class CourseController extends Controller
      */
     public function show(CourseGetRequest $request)
     {
-        $course = Course::findOrFail($request->course_id);
+        $course = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
         return new CourseGetResponse($course);
     }
 }

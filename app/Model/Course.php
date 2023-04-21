@@ -13,6 +13,11 @@ class Course extends Model
      */
     protected $table = 'courses';
 
+    protected $fillable = [
+        'title',
+        'image'
+    ];
+
     /**
      * 講師を取得
      *

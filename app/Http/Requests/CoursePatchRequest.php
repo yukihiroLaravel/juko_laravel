@@ -33,7 +33,7 @@ class CoursePatchRequest extends FormRequest
         return [
             'course_id' => ['required','integer'],
             'title' => ['required','string'],
-            'image' => ['required','mimes:jpg,png'],
+            'image' => ['mimes:jpg,png'],
         ];
     }
 }

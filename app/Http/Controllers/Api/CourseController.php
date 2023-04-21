@@ -89,12 +89,19 @@ class CourseController extends Controller
         $filePath = Storage::putFileAs('course',$file,$filename);
         $course = Course::FindOrFail($request->course_id);
         $course->title = $request->title;
-        $course->image = $request->image;
-        $course->save();
+        // if (isset($file)){
+        //     strage::disk('public')->delete($file);
+        //     $file = $request->image;
+        // }
+        $course->update([
+            "title" => $request->title,
+            "image" => $filePath
+        ]);
+      
         return response()->json([
             "result" => 200,
             "title" => $request->title,
-            "image" => $request->image,
+            "image" => $filePath
         ]);
 
         //return new CoursePatchResponse($course);

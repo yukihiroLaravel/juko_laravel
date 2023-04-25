@@ -64,10 +64,13 @@ class CourseController extends Controller
         $filePath = Storage::putFileAs('course',$file,$filename);
         $course = Course::FindOrFail($request->course_id);
         $course->title = $request->title;
-        // if (isset($file)){
-        //     strage::disk('public')->delete($file);
-        //     $file = $request->image;
-        // }
+        if (isset($file))
+        {
+            if($course->image !== '' && $course->image !== null){
+                Storage::disk('public')->delete($file);
+            }
+        }
+
         $course->update([
             "title" => $request->title,
             "image" => $filePath

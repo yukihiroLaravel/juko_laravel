@@ -13,12 +13,20 @@ class ChapterController extends Controller
         return response()->json([]);
     }
 
+    /**
+     * チャプター新規作成
+     *
+     * @param ChapterGetRequest $request
+     * @param int $course_id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(ChapterGetRequest $request, $course_id)
     {
-        $chapter = new Chapter();
-        $chapter->course_id = $course_id;
-        $chapter->title = $request->input('title');
-        $chapter->save();
+        $chapter = Chapter::create([
+            'course_id' => $course_id,
+            'title' => $request->input('title'),
+        ]);
+
         return response()->json($chapter);
     }
 }

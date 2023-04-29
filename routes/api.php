@@ -21,11 +21,17 @@ Route::prefix('v1')->group(function () {
     Route::prefix('courses')->group(function () {
         Route::get('/', 'Api\CourseController@index');
     });
+    Route::prefix('instructor')->group(function () {
+        Route::prefix('chapter')->group(function () {
+            Route::delete('{chapter_id}', 'Api\Instructor\ChapterController@destory');
+        });
+    });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::post('register', 'Api\CourseController@store');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
+
         });
         Route::get('{course_id}/edit','Api\CourseController@edit');
     });

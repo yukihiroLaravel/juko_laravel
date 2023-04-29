@@ -37,6 +37,11 @@ Route::prefix('v1')->group(function () {
     Route::prefix('courses')->group(function () {
         Route::get('/', 'Api\CourseController@index');
     });
+    Route::prefix('instructor')->group(function () {
+        Route::prefix('chapter')->group(function () {
+            Route::delete('{chapter_id}', 'Api\Instructor\ChapterController@destory');
+        });
+    });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::prefix('chapter')->group(function () {

@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('{course_id}', 'Api\Instructor\CourseController@delete');
             Route::prefix('chapter')->group(function () {
                 Route::post('sort','Api\Instructor\ChapterController@sort');
+                Route::delete('{chapter_id}', 'Api\Instructor\ChapterController@destory');
             });
         });
     });
@@ -40,6 +41,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
+
         });
         Route::get('{course_id}/edit','Api\CourseController@edit');
     });

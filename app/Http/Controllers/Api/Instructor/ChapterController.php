@@ -43,4 +43,9 @@ class ChapterController extends Controller
             ], 500);
         }
     }
+
+    public function destory($chapter_id)
+    {
+        return response()->json([]);
+    }
 }

@@ -33,3 +33,9 @@ class ChapterController extends Controller
         return new ChapterGetResponse($attendance, $request->chapter_id);
     }
 }
+
+    
+    
+
+
+

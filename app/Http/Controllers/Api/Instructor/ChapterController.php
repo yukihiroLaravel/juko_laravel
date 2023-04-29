@@ -46,6 +46,20 @@ class ChapterController extends Controller
     }
 
     /**
+     * チャプター名前変更API
+     *
+     * @param $chapter_id
+     * @return array
+     */
+    public function update($chapter_id)
+    {
+        return response()->json([
+            "result" => true,
+        ]);
+
+    }
+
+    /**
      * チャプター削除API
      *
      * @param ChapterDeleteRequest $request

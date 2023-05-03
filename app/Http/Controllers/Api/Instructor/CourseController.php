@@ -84,4 +84,15 @@ class CourseController extends Controller
         $course = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
         return new CourseGetResponse($course);
     }
+
+    public function destroy (CourseDeleteRequest $request)
+    {
+        $course = Course::find($request->course_id);
+
+        return response()->json([
+            // "result" => $course,
+        ]);
+
+        // return new CoursesGetResponse($course);
+    }
 }

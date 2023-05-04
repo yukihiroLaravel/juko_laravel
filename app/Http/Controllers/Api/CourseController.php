@@ -63,9 +63,7 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
-            //course_idをBDから検索
             $course = Course::FindOrFail($request->course_id);
-            //検索した$courseと紐づいているimageをimagePathに格納
             $imagePath = $course->image;
 
             if (isset($file)){

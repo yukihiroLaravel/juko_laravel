@@ -60,46 +60,43 @@ class CourseController extends Controller
 
     public function update(CoursePatchRequest $request)
     {
-        try{
-            //リクエストを通ったimageを格納する
-            $file = $request->file('image');
-            //拡張子の指定
-            $extension = $file->getClientOriginalExtension();
-            //ファイルに名前をつけて、最後に拡張子を接続している
-            $filename = date('YmdHis').'.'.$extension;
-            //ファイルパスに保存する
-            $filePath = Storage::putFileAs('course',$file,$filename);
+        $file = $request->file('image');
+
+        try {
+            //course_idをBDから検索
             $course = Course::FindOrFail($request->course_id);
-            $course->title = $request->title;
+            //検索した$courseと紐づいているimageをimagePathに格納
+            $imagePath = $course->image;
 
             if (isset($file)){
-                if (Storage::exists($course->image))
-                {
+
+                // 更新前の画像ファイルを削除
+                if (Storage::exists($course->image)) {
                     Storage::delete($course->image);
-                    $course->update([
-                        "title" => $request->title,
-                        "image" => $filePath
-                    ]);
-                } else {
-                    $course->update([
-                        "title" => $request->title,
-                    ]);
-                    
                 }
+
+                // 画像ファイル保存処理
+                $extension = $file->getClientOriginalExtension();
+                $filename = date('YmdHis').'.'.$extension;
+                $imagePath = Storage::putFileAs('course',$file,$filename);
             }
-            return response()->json([
-                "result" => 200,
-                "title" => $request->title,
-                "image" => $filePath
+
+            $course->update([
+                'title' => $request->title,
+                'image' => $imagePath
             ]);
 
-        } catch (\RuntimeException $e) {
+            return response()->json([
+                "result" => true,
+                "title" => $request->title,
+                "image" => $imagePath
+            ]);
+
+        } catch (RuntimeException $e) {
             Log::error($e->getMessage());
             return response()->json([
                 "result" => false,
-                "error_message" => "Invalid Request Body.",
-                "error_code" => "400"
-            ]);
+            ], 500);
         }
     }
 }

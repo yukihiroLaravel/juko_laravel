@@ -79,6 +79,4 @@ class CourseController extends Controller
             "result" => true,
         ]);
     }
-
-
 }

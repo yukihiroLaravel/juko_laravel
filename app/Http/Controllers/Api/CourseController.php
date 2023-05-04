@@ -8,7 +8,6 @@ use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
-use App\Http\Resources\CoursePatchResponse;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
@@ -81,32 +80,5 @@ class CourseController extends Controller
         ]);
     }
 
-    public function edit($id)
-    {
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = date('YmdHis').'.'.$extension;
-        $filePath = Storage::putFileAs('course',$file,$filename);
-        $course = Course::FindOrFail($request->course_id);
-        $course->title = $request->title;
-        if (isset($file))
-        {
-            if($course->image !== '' && $course->image !== null){
-                Storage::disk('public')->delete($file);
-            }
-        }
 
-        $course->update([
-            "title" => $request->title,
-            "image" => $filePath
-        ]);
-      
-        return response()->json([
-            "result" => 200,
-            "title" => $request->title,
-            "image" => $filePath
-        ]);
-
-        //return new CoursePatchResponse($course);
-    }
 }

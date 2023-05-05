@@ -24,8 +24,8 @@ class CourseStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required',
-            'image' => 'required|mimes:jpg,png',
+            'title' => ['required'],
+            'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ];
     }
 }

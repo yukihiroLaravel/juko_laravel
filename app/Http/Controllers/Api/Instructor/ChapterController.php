@@ -14,12 +14,12 @@ class ChapterController extends Controller
      * @param $chapter_id
      * @return CoursesGetResponse
      */ 
-    
-     public function delete(ChapterDeleteRequest $request)
-     {
+    public function delete(ChapterDeleteRequest $request)
+    {
         $chapter = Chapter::findOrFail($request->chapter_id);
         $chapter->delete();
         return response()->json([
-            "result" => true]);
-     }
+            "result" => true
+        ]);
+    }
 }

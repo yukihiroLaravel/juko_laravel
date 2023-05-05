@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Resources\Instructor\ChapterStoreResponse;
 use Illuminate\Support\Facades\Log;
@@ -44,8 +45,12 @@ class ChapterController extends Controller
         }
     }
 
-    public function destory($chapter_id)
+    public function delete(ChapterDeleteRequest $request)
     {
-        return response()->json([]);
+       $chapter = Chapter::findOrFail($request->chapter_id);
+       $chapter->delete();
+       return response()->json([
+            "result" => true
+        ]);
     }
 }

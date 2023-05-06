@@ -57,44 +57,4 @@ class CourseController extends Controller
 
         return new CourseGetResponse($attendance);
     }
-
-    public function update(CoursePatchRequest $request)
-    {
-        $file = $request->file('image');
-
-        try {
-            $course = Course::FindOrFail($request->course_id);
-            $imagePath = $course->image;
-
-            if (isset($file)){
-
-                // 更新前の画像ファイルを削除
-                if (Storage::exists($course->image)) {
-                    Storage::delete($course->image);
-                }
-
-                // 画像ファイル保存処理
-                $extension = $file->getClientOriginalExtension();
-                $filename = date('YmdHis').'.'.$extension;
-                $imagePath = Storage::putFileAs('course',$file,$filename);
-            }
-
-            $course->update([
-                'title' => $request->title,
-                'image' => $imagePath
-            ]);
-
-            return response()->json([
-                "result" => true,
-                "title" => $request->title,
-                "image" => $imagePath
-            ]);
-
-        } catch (RuntimeException $e) {
-            Log::error($e->getMessage());
-            return response()->json([
-                "result" => false,
-            ], 500);
-        }
-    }
 }

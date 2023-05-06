@@ -9,10 +9,10 @@ use App\Model\Chapter;
 class ChapterController extends Controller
 {
     /**
-     * 講師側講座一覧取得API
+     * チャプター削除API
      *
-     * @param $chapter_id
-     * @return CoursesGetResponse
+     * @param ChapterDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */ 
     public function delete(ChapterDeleteRequest $request)
     {

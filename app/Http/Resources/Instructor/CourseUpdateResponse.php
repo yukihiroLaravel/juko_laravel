@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CoursePatchResponse extends JsonResource
+class CourseUpdateResponse extends JsonResource
 {
     /**
      * Transform the resource into an array.

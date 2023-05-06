@@ -45,11 +45,17 @@ class ChapterController extends Controller
         }
     }
 
+    /**
+     * チャプター削除API
+     *
+     * @param ChapterDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function delete(ChapterDeleteRequest $request)
     {
-       $chapter = Chapter::findOrFail($request->chapter_id);
-       $chapter->delete();
-       return response()->json([
+        $chapter = Chapter::findOrFail($request->chapter_id);
+        $chapter->delete();
+        return response()->json([
             "result" => true
         ]);
     }

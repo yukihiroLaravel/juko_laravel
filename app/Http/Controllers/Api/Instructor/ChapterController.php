@@ -6,6 +6,7 @@ use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
+use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Resources\Instructor\ChapterStoreResponse;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -51,11 +52,15 @@ class ChapterController extends Controller
      * @param $chapter_id
      * @return array
      */
-    public function update($chapter_id)
+    public function update(ChapterPatchRequest $request, $chapter_id)
     {
-        return response()->json([
-            "result" => true,
-        ]);
+
+            $chapter = Chapter::findOrFail($chapter_id);
+            // $chapter->chapter_id = $request->chapter_id;
+            $chapter->title = $request->title;
+            $chapter->save();
+
+        return response()->json($chapter);
 
     }
 

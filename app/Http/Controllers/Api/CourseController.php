@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
+use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
 use App\Http\Requests\CoursePatchRequest;
 use App\Http\Resources\CoursesGetResponse;
@@ -14,6 +15,11 @@ use App\Model\Course;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
+use App\Http\Requests\Instructor\CourseEditRequest;
+use App\Http\Resources\CoursesGetResponse;
+use App\Http\Resources\CourseGetResponse;
+use App\Http\Resources\Instructor\CourseEditResponse;
+use App\Model\Attendance;
 
 class CourseController extends Controller
 {

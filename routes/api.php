@@ -28,9 +28,13 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
+        Route::post('register', 'Api\CourseController@store');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
+        Route::get('{id}/edit','Api\CourseController@edit');
+        Route::patch('{id}','Api\CourseController@update');
+        Route::get('{course_id}/edit','Api\CourseController@edit');
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

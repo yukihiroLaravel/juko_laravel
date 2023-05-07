@@ -23,7 +23,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('instructor')->group(function () {
         Route::prefix('course')->group(function () {
-            Route::patch('{course_id}/chapter', 'Api\Instructor\ChapterController@update');
+            Route::patch('{course_id}/chapter/{chapter_id}', 'Api\Instructor\ChapterController@update');
         });
     });
     Route::prefix('course')->group(function () {

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Model\Chapter;
 
 class ChapterController extends Controller
 {
@@ -12,11 +14,15 @@ class ChapterController extends Controller
      * @param $chapter_id
      * @return array
      */
-    public function update($chapter_id)
+    public function update(ChapterPatchRequest $request, $chapter_id)
     {
-        return response()->json([
-            "result" => true,
-        ]);
+        
+            $chapter = Chapter::findOrFail($chapter_id);
+            // $chapter->chapter_id = $request->chapter_id;
+            $chapter->title = $request->title;
+            $chapter->save();
+        
+        return response()->json($chapter);
 
     }
 }

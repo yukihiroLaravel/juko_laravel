@@ -19,7 +19,7 @@ class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
-
+     *
      * @param CoursesGetRequest $request
      * @return CoursesGetResponse
      */
@@ -59,6 +59,18 @@ class CourseController extends Controller
     }
 
     /**
+     * 講座編集API
+     *
+     * @param CourseEditRequest $request
+     * @return CourseEditResponse
+     */
+    public function edit(CourseEditRequest $request)
+    {
+       $course = Course::findOrFail($request->course_id);
+       return new CourseEditResponse($course);
+    }
+
+    /**
      * 講座登録API
      *
      * @param CourseGetRequest $request
@@ -80,12 +92,5 @@ class CourseController extends Controller
         return response()->json([
             "result" => true,
         ]);
-    }
-
-    public function edit($id)
-    {
-        $course = Course::find($id);
-
-        return new CourseIndexResponse($course);
     }
 }

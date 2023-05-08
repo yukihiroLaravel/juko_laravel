@@ -9,7 +9,7 @@ class ChapterController extends Controller
 {
 
 
-    public function sort($chapter_id)
+    public function sort()
     {
         return response()->json([]);
     }

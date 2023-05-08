@@ -6,20 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseGetRequest;
 use App\Http\Requests\CourseStoreRequest;
 use App\Http\Requests\CoursesGetRequest;
-use App\Http\Requests\CoursePatchRequest;
-use App\Http\Resources\CoursesGetResponse;
-use App\Http\Resources\CourseGetResponse;
-use App\Http\Resources\CoursePatchResponse;
-use App\Model\Attendance;
-use App\Model\Course;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-
 use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Resources\CoursesGetResponse;
 use App\Http\Resources\CourseGetResponse;
 use App\Http\Resources\Instructor\CourseEditResponse;
 use App\Model\Attendance;
+use App\Model\Course;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 
 class CourseController extends Controller
 {
@@ -62,5 +56,41 @@ class CourseController extends Controller
             ->first();
 
         return new CourseGetResponse($attendance);
+    }
+
+    /**
+     * 講座編集API
+     *
+     * @param CourseEditRequest $request
+     * @return CourseEditResponse
+     */
+    public function edit(CourseEditRequest $request)
+    {
+       $course = Course::findOrFail($request->course_id);  
+       return new CourseEditResponse($course);
+    }
+
+    /**
+     * 講座登録API
+     *
+     * @param CourseGetRequest $request
+     * @return CourseGetResponse
+     */
+    public function store(CourseStoreRequest $request)
+    {
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        $filename = date('YmdHis') . '.' . $extension;
+        $filePath = Storage::putFileAs('courese', $file, $filename);
+        Course::insert([
+            'instructor_id' => $request->instructor_id,
+            'title' => $request->title,
+            'image' => $request->image = $filePath,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+        return response()->json([
+            "result" => true,
+        ]);
     }
 }

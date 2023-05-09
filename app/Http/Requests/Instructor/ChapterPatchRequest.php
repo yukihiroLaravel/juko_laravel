@@ -32,6 +32,7 @@ class ChapterPatchRequest extends FormRequest
     public function rules()
     {
         return [
+            'course_id' => ['required', 'integer'],
             'chapter_id' => ['required', 'integer'],
             'title' => ['required', 'string'],
         ];

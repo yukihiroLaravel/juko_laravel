@@ -23,15 +23,24 @@ class CourseController extends Controller
         return new CoursesGetResponse($courses);
     }
 
+    /**
+     * 講師側講座削除
+     *
+     * @param CourseDeleteRequest $request
+     * @return CourseDeleteResponse
+     */
     public function destroy (CourseDeleteRequest $request)
     {        
-        $course = Course::find($request->course_id); 
+        $course = Course::find($request->course_id);
+
+        if ($course) {
+            $table->bigIncrements('id')->delete(); 
+        }
 
         return response()->json([
-            // "result" => $course,
+
         ]);
 
-        // return new CoursesGetResponse($course);
     }
 
 }

@@ -35,7 +35,6 @@ Route::prefix('v1')->group(function () {
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
     Route::prefix('course')->group(function () {
-        // Route::get('/', 'Api\Instructor\CourseController@index');
         Route::post('{course_id}', 'Api\Instructor\CourseController@destroy');
     });
 });

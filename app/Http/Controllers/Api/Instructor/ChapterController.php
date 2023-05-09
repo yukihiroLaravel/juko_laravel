@@ -11,16 +11,16 @@ class ChapterController extends Controller
     /**
      * チャプター名前変更API
      *
-     * @param $chapter_id
+     * @param ChapterPatchRequest $request
      * @return array
      */
     public function update(ChapterPatchRequest $request, $chapter_id)
     {
         
-            $chapter = Chapter::findOrFail($chapter_id);
+           $chapter = Chapter::findOrFail($chapter_id);
             // $chapter->chapter_id = $request->chapter_id;
             $chapter->title = $request->title;
-            $chapter->save();
+            $chapter->update();
         
         return response()->json($chapter);
 

@@ -18,7 +18,7 @@ class Chapter extends Model
      *
      * @var array
      */
-    protected $fillable = ['course_id','title'];
+    protected $fillable = ['chapter_id','title'];
 
     /**
      * 講座を取得

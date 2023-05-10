@@ -52,13 +52,12 @@ class ChapterController extends Controller
      * @param ChapterPatchRequest $request
      * @return array
      */
-    public function update(ChapterPatchRequest $request, $chapter_id)
+    public function update(ChapterPatchRequest $request)
     {
-
-           $chapter = Chapter::findOrFail($chapter_id);
-            // $chapter->chapter_id = $request->chapter_id;
-            $chapter->title = $request->title;
-            $chapter->update();
+           $chapter = Chapter::findOrFail($request->chapter_id);
+            $chapter->update([
+                'title' => $request->title
+            ]);
 
         return response()->json($chapter);
 

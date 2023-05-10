@@ -9,7 +9,7 @@ use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Model\Course;
 
 class CourseController extends Controller
-{
+{    
     /**
      * 講師側講座一覧取得API
      *
@@ -27,20 +27,15 @@ class CourseController extends Controller
      * 講師側講座削除
      *
      * @param CourseDeleteRequest $request
-     * @return CourseDeleteResponse
      */
     public function destroy (CourseDeleteRequest $request)
-    {        
-        $course = Course::find($request->course_id);
+    {   
+        $course = Course::findOrfail($request->course_id);
 
-        if ($course) {
-            $table->bigIncrements('id')->delete(); 
-        }
+        $course->delete();
 
         return response()->json([
 
         ]);
-
-    }
-
+    }    
 }

@@ -14,7 +14,7 @@ class Chapter extends Model
     protected $table = 'chapters';
 
     /**
-     * 複数代入可能な属性
+     * 
      *
      * @var array
      */

@@ -52,5 +52,12 @@ Route::prefix('v1')->group(function () {
         });
         Route::get('{course_id}/edit','Api\CourseController@edit');
     });
+    Route::prefix('instructor')->group(function(){
+        Route::prefix('course')->group(function(){
+            Route::prefix('chapter')->group(function(){
+                Route::post('{chapter_id}/lesson','Api\Instructor\LessonController@store');
+            });
+        });
+    });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

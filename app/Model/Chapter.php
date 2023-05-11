@@ -14,6 +14,13 @@ class Chapter extends Model
     protected $table = 'chapters';
 
     /**
+     * 
+     *
+     * @var array
+     */
+    protected $fillable = ['chapter_id','title'];
+
+    /**
      * 講座を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

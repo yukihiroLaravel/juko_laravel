@@ -35,6 +35,6 @@ Route::prefix('v1')->group(function () {
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
     Route::prefix('course')->group(function () {
-        Route::post('{course_id}', 'Api\Instructor\CourseController@destroy');
+        Route::delete('{course_id}', 'Api\Instructor\CourseController@delete');
     });
 });

@@ -28,9 +28,9 @@ class CourseController extends Controller
      *
      * @param CourseDeleteRequest $request
      */
-    public function destroy (CourseDeleteRequest $request)
+    public function delete (CourseDeleteRequest $request)
     {   
-        $course = Course::findOrfail($request->course_id);
+        $course = Course::findOrFail($request->course_id);
 
         $course->delete();
 

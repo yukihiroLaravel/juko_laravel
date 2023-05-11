@@ -20,7 +20,7 @@ class CreateCoursesTable extends Migration
             $table->text('image')->comment('サムネイルファイルパス');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
-            $table->SoftDeletes();
+            $table->softDeletes();
         });
     }
 

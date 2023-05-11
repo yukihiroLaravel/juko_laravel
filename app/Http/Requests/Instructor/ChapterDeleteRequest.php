@@ -28,10 +28,10 @@ class ChapterDeleteRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'chapter_id' => $this->route('chapter_id'),
-        ]);
-    }
+    //protected function prepareForValidation()
+    //{
+      //  $this->merge([
+        //    'chapter_id' => $this->route('chapter_id'),
+        //]);
+   // }
 }

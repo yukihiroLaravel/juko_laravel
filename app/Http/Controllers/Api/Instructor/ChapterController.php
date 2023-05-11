@@ -8,6 +8,7 @@ use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Resources\Instructor\ChapterStoreResponse;
+use App\Http\Resources\Instructor\ChapterPatchResponse;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -50,7 +51,8 @@ class ChapterController extends Controller
      * チャプター名前変更API
      *
      * @param ChapterPatchRequest $request
-     * @return array
+     * @return @return \Illuminate\Http\JsonResponse
+
      */
     public function update(ChapterPatchRequest $request)
     {
@@ -59,8 +61,10 @@ class ChapterController extends Controller
                 'title' => $request->title
             ]);
 
-        return response()->json($chapter);
-
+        return response()->json([
+            'result' => true,
+            'data' => new ChapterPatchResponse($chapter),
+        ]);
     }
 
     /**

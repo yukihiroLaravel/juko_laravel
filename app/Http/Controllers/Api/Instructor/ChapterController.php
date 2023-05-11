@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Resources\Instructor\ChapterPatchResponse;
 use App\Model\Chapter;
 
 class ChapterController extends Controller
@@ -12,7 +13,8 @@ class ChapterController extends Controller
      * チャプター名前変更API
      *
      * @param ChapterPatchRequest $request
-     * @return array
+     * @return @return \Illuminate\Http\JsonResponse
+
      */
     public function update(ChapterPatchRequest $request)
     {
@@ -21,7 +23,10 @@ class ChapterController extends Controller
                 'title' => $request->title
             ]);
         
-        return response()->json($chapter);
+        return response()->json([
+            'result' => true,
+            'data' => new ChapterPatchResponse($chapter),
+        ]);
 
     }
 }

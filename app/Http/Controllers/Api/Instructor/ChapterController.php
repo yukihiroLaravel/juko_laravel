@@ -51,15 +51,14 @@ class ChapterController extends Controller
      * チャプター名前変更API
      *
      * @param ChapterPatchRequest $request
-     * @return @return \Illuminate\Http\JsonResponse
-
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(ChapterPatchRequest $request)
     {
-           $chapter = Chapter::findOrFail($request->chapter_id);
-            $chapter->update([
-                'title' => $request->title
-            ]);
+        $chapter = Chapter::findOrFail($request->chapter_id);
+        $chapter->update([
+            'title' => $request->title
+        ]);
 
         return response()->json([
             'result' => true,

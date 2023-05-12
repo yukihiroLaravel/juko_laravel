@@ -15,8 +15,8 @@ class ChapterPatchResponse extends JsonResource
     public function toArray($request)
     {
         return [
-                'chapter_id' => $this->id,
-                'title' => $this->title,
+            'chapter_id' => $this->id,
+            'title' => $this->title,
         ];
     }
 }

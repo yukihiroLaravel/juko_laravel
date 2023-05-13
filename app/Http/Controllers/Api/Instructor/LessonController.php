@@ -8,7 +8,7 @@ use App\Model\Lesson;
 class LessonController extends Controller
 {
 
-    public function sort($lesson_id)
+    public function sort()
     {
         return response()->json([]);
     }

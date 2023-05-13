@@ -42,7 +42,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('{chapter_id}', 'Api\Instructor\ChapterController@delete');
         });
         Route::prefix('lesson')->group(function (){
-            Route::post('{lesson_id}','Api\Instructor\LessonController@sort');
+            Route::post('sort','Api\Instructor\LessonController@sort');
         });
     });
     Route::prefix('course')->group(function () {

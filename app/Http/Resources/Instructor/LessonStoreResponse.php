@@ -19,6 +19,7 @@ class LessonStoreResponse extends JsonResource
             'lesson' => [
                 'lesson_id' => $this->resource->id,
                 'title' => $this->resource->title,
+                'url' => $this->resource->url,
             ],
         ];
     }

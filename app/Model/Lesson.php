@@ -19,7 +19,9 @@ class Lesson extends Model
 
     protected $fillable = [
         'chapter_id',
-        'title'
+        'title',
+        'url',
+        'remarks'
     ];
 
     /**

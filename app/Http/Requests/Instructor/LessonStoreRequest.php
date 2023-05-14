@@ -31,8 +31,8 @@ class LessonStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => 'required',
-            'title' => 'required',
+            'chapter_id' => ['required','integer'],
+            'title' => ['required','string'],
         ];
     }
 }

@@ -14,24 +14,23 @@ class LessonController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\LessonStoreRequest  $request
+     * @return \Illuminate\Http\LessonStoreResponse
      */
     public function store(LessonStoreRequest $request)
     {
-        try{
+        try {
             $lesson = Lesson::create([
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
+                'url' => $request->nullable(),
             ]);
 
             return response()->json([
                 "result" => true,
-                "date" => new LessonStoreResponse($lesson),
+                "data" => new LessonStoreResponse($lesson),
             ]);
-        }
-
-        catch (RuntimeException $e){
+        }catch (Exception $e){
             Log::error($e->getMessage());
             return response()->json([
                 "result" => false,

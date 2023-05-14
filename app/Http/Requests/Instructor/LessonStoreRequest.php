@@ -16,6 +16,13 @@ class LessonStoreRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,7 +32,6 @@ class LessonStoreRequest extends FormRequest
     {
         return [
             'chapter_id' => 'required',
-            'lesson_id' => 'required', 
             'title' => 'required',
         ];
     }

@@ -4,7 +4,7 @@ namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LessonStoreRequest extends JsonResource
+class LessonStoreResponse extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,6 +14,12 @@ class LessonStoreRequest extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'chapter_id' => $this->resource->chapter_id,
+            'lesson' => [
+                'lesson_id' => $this->resource->id,
+                'title' => $this->resource->title,
+            ],
+        ];
     }
 }

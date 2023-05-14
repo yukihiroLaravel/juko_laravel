@@ -30,7 +30,7 @@ class LessonController extends Controller
                 "result" => true,
                 "data" => new LessonStoreResponse($lesson),
             ]);
-        }catch (Exception $e){
+        } catch (Exception $e){
             Log::error($e->getMessage());
             return response()->json([
                 "result" => false,

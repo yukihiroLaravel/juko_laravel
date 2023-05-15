@@ -33,6 +33,7 @@ class LessonStoreRequest extends FormRequest
         return [
             'chapter_id' => ['required','integer'],
             'title' => ['required','string'],
+            'status' => 'private',
         ];
     }
 }

@@ -24,13 +24,14 @@ class LessonController extends Controller
             $lesson = Lesson::create([
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
+                'status' => 'private',
             ]);
 
             return response()->json([
                 "result" => true,
                 "data" => new LessonStoreResponse($lesson),
             ]);
-            
+
         } catch (Exception $e){
             Log::error($e->getMessage());
             return response()->json([

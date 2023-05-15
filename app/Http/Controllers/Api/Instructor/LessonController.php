@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResponse;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -23,8 +24,17 @@ class LessonController extends Controller
             $lesson = Lesson::create([
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
-                'url' => $request->nullable(),
             ]);
+
+            // $url = Chapter::FindOrFail($request->chapter_id);
+            // if (isset($url)){
+            //     $url->save();
+            // }
+
+            // $data = [
+            //     'lesson' => $lesson,
+            //     'url' => $url
+            // ];
 
             return response()->json([
                 "result" => true,

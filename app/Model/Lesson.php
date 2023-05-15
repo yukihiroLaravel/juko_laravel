@@ -21,7 +21,8 @@ class Lesson extends Model
         'chapter_id',
         'title',
         'url',
-        'remarks'
+        'remarks',
+        'status',
     ];
 
     /**

@@ -26,20 +26,11 @@ class LessonController extends Controller
                 'title' => $request->input('title'),
             ]);
 
-            // $url = Chapter::FindOrFail($request->chapter_id);
-            // if (isset($url)){
-            //     $url->save();
-            // }
-
-            // $data = [
-            //     'lesson' => $lesson,
-            //     'url' => $url
-            // ];
-
             return response()->json([
                 "result" => true,
                 "data" => new LessonStoreResponse($lesson),
             ]);
+            
         } catch (Exception $e){
             Log::error($e->getMessage());
             return response()->json([

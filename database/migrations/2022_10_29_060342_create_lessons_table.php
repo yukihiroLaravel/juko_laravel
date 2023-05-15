@@ -17,9 +17,9 @@ class CreateLessonsTable extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('chapter_id')->unsigned()->comment('チャプターID');
-            $table->text('url')->comment('URL')->nullable(true);
+            $table->text('url')->comment('URL')->nullable();
             $table->string('title', 50)->comment('タイトル');
-            $table->text('remarks')->comment('備考')->nullable(true);
+            $table->text('remarks')->comment('備考')->nullable();
             $table->string('status', 30)->comment('レッスン受講状態')->default('private');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');

@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Resources\Instructor\ChapterStoreResponse;
-use App\Model\Chapter;
-use App\Http\Requests\Instructor\ChapterGetRequest;
-use App\Model\Course;
-use Exception;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ChapterController extends Controller
 {

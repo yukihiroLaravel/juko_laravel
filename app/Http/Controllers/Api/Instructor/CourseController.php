@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
+use App\Http\Requests\Instructor\CoursesGetRequest;
 use App\Http\Resources\Instructor\CourseUpdateResponse;
-use App\Model\Course;
+use App\Http\Resources\Instructor\CoursesGetResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
-use App\Http\Resources\Instructor\CoursesGetResponse;
-use App\Http\Requests\Instructor\CoursesGetRequest;
-use App\Model\Course;
 
 class CourseController extends Controller
 {

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Course;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Requests\Instructor\CoursesGetRequest;
 use App\Http\Requests\Instructor\CourseGetRequest;
 use App\Http\Resources\Instructor\CourseUpdateResponse;
 use App\Http\Resources\Instructor\CoursesGetResponse;
 use App\Http\Resources\Instructor\CourseGetResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -85,12 +87,16 @@ class CourseController extends Controller
         return new CourseGetResponse($course);
     }
 
-    public function delete (CourseDeleteRequest $request)
+    /**
+     * 講座削除API
+     *
+     * @param CourseDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function delete(CourseDeleteRequest $request)
     {
         $course = Course::findOrFail($request->course_id);
-
         $course->delete();
-
         return response()->json([
 
         ]);

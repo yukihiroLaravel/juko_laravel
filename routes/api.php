@@ -18,22 +18,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::prefix('courses')->group(function () {
-        Route::get('/', 'Api\CourseController@index');
-    });
+    // 講師側API
     Route::prefix('instructor')->group(function(){
         Route::get('{instructor_id}/courses', 'Api\Instructor\CourseController@index');
         Route::prefix('course')->group(function () {
             Route::get('{course_id}', 'Api\Instructor\CourseController@show');
             Route::post('{course_id}','Api\Instructor\CourseController@update');
-        });
-    });
-    Route::prefix('instructor')->group(function () {
-        Route::prefix('course')->group(function () {
             Route::prefix('chapter')->group(function () {
                 Route::post('sort','Api\Instructor\ChapterController@sort');
             });
         });
+    });
+
+    // 受講生側API
+    Route::prefix('courses')->group(function () {
+        Route::get('/', 'Api\CourseController@index');
     });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');

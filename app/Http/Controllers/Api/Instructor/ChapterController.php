@@ -7,12 +7,8 @@ use App\Model\Chapter;
 
 class ChapterController extends Controller
 {
-
-
     public function sort()
     {
         return response()->json([]);
     }
-
-
 }

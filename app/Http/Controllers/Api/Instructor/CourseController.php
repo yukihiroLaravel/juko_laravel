@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
+use App\Http\Requests\Instructor\CoursesGetRequest;
 use App\Http\Resources\Instructor\CourseUpdateResponse;
-use App\Model\Course;
+use App\Http\Resources\Instructor\CoursesGetResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +19,7 @@ class CourseController extends Controller
      *
      * @param CourseUpdateRequest $request
      * @return CourseUpdateResponse
-     */   
+     */
     public function update(CourseUpdateRequest $request)
     {
         $file = $request->file('image');
@@ -46,7 +48,7 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResponse($course)    
+                "data" => new CourseUpdateResponse($course)
             ]);
 
         } catch (RuntimeException $e) {
@@ -55,5 +57,18 @@ class CourseController extends Controller
                 "result" => false,
             ], 500);
         }
+    }
+
+    /**
+     * 講師側講座一覧取得API
+     *
+     * @param CoursesGetRequest $request
+     * @return CoursesGetResponse
+     */
+    public function index(CoursesGetRequest $request)
+    {
+        $courses = Course::where('instructor_id', $request->instructor_id)->get();
+
+        return new CoursesGetResponse($courses);
     }
 }

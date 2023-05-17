@@ -35,6 +35,11 @@ Route::prefix('v1')->group(function () {
     Route::prefix('courses')->group(function () {
         Route::get('/', 'Api\CourseController@index');
     });
+    Route::prefix('instructor')->group(function () {
+        Route::prefix('course')->group(function() {
+            Route::post('{course_id}/chapter', 'Api\Instructor\ChapterController@store');
+        });
+    });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::prefix('chapter')->group(function () {

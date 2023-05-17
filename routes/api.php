@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
         Route::post('register', 'Api\CourseController@store');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
+            Route::get('{id}','Api\ChapterController@index');
         });
         Route::get('{course_id}/edit','Api\CourseController@edit');
     });

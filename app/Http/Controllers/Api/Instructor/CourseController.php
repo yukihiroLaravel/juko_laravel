@@ -6,11 +6,12 @@ use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Requests\Instructor\CoursesGetRequest;
+use App\Http\Requests\Instructor\CourseGetRequest;
 use App\Http\Resources\Instructor\CourseUpdateResponse;
 use App\Http\Resources\Instructor\CoursesGetResponse;
+use App\Http\Resources\Instructor\CourseGetResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-
 
 class CourseController extends Controller
 {
@@ -70,5 +71,17 @@ class CourseController extends Controller
         $courses = Course::where('instructor_id', $request->instructor_id)->get();
 
         return new CoursesGetResponse($courses);
+    }
+
+    /**
+     * 講師側講座取得API
+     *
+     * @param CourseGetRequest $request
+     * @return CourseGetResponse
+     */
+    public function show(CourseGetRequest $request)
+    {
+        $course = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
+        return new CourseGetResponse($course);
     }
 }

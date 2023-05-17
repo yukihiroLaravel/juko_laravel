@@ -85,14 +85,14 @@ class CourseController extends Controller
         return new CourseGetResponse($course);
     }
 
-    public function destroy (CourseDeleteRequest $request)
+    public function delete (CourseDeleteRequest $request)
     {
-        $course = Course::find($request->course_id);
+        $course = Course::findOrFail($request->course_id);
+
+        $course->delete();
 
         return response()->json([
-            // "result" => $course,
-        ]);
 
-        // return new CoursesGetResponse($course);
+        ]);
     }
 }

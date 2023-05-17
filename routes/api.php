@@ -24,6 +24,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('course')->group(function () {
             Route::get('{course_id}', 'Api\Instructor\CourseController@show');
             Route::post('{course_id}','Api\Instructor\CourseController@update');
+            Route::post('{course_id}', 'Api\Instructor\CourseController@destroy');
             Route::prefix('chapter')->group(function () {
                 Route::post('sort','Api\Instructor\ChapterController@sort');
             });
@@ -47,8 +48,4 @@ Route::prefix('v1')->group(function () {
         Route::get('{course_id}/edit','Api\CourseController@edit');
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
-    Route::prefix('course')->group(function () {
-        // Route::get('/', 'Api\Instructor\CourseController@index');
-        Route::post('{course_id}', 'Api\Instructor\CourseController@destroy');
-    });
 });

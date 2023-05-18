@@ -4,14 +4,8 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseGetRequest extends FormRequest
+class CourseStoreRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -30,7 +24,8 @@ class CourseGetRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer'],
+            'title' => 'required',
+            'image' => 'required|mimes:jpg,png',
         ];
     }
 }

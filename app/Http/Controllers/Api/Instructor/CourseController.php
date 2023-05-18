@@ -6,12 +6,14 @@ use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
-use App\Http\Requests\Instructor\CourseGetRequest;
+use App\Http\Requests\Instructor\CourseShowRequest;
+use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseEditRequest;
-use App\Http\Resources\Instructor\CourseUpdateResponse;
-use App\Http\Resources\Instructor\CourseIndexResponse;
-use App\Http\Resources\Instructor\CourseGetResponse;
-use App\Http\Resources\Instructor\CourseEditResponse;
+use App\Http\Resources\Instructor\CourseUpdateResource;
+use App\Http\Resources\Instructor\CourseIndexResource;
+use App\Http\Resources\Instructor\CourseShowResource;
+use App\Http\Resources\Instructor\CourseEditResource;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +24,7 @@ class CourseController extends Controller
     /**
      * 講師側講座一覧取得API
      *
-     * @return CourseIndexResponse
+     * @return CourseIndexResource
      */
     public function index(Request $request)
     {
@@ -30,40 +32,65 @@ class CourseController extends Controller
         $instructorId = 1;
         $courses = Course::where('instructor_id', $instructorId)->get();
 
-        return new CourseIndexResponse($courses);
+        return new CourseIndexResource($courses);
     }
 
     /**
      * 講師側講座取得API
      *
-     * @param CourseGetRequest $request
-     * @return CourseGetResponse
+     * @param CourseShowRequest $request
+     * @return CourseShowResource
      */
-    public function show(CourseGetRequest $request)
+    public function show(CourseShowRequest $request)
     {
         $course = Course::with(['chapters.lessons'])
             ->findOrFail($request->course_id);
-        return new JsonResponse($course);
-        return new CourseGetResponse($course);
+        return new CourseShowResource($course);
+    }
+
+    /**
+     * 講座登録API
+     *
+     * @param CourseStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(CourseStoreRequest $request)
+    {
+        // TODO 認証機能ができるまで、講師IDを固定値で設定
+        $instructorId = 1;
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        $filename = date('YmdHis') . '.' . $extension;
+        $filePath = Storage::putFileAs('course', $file, $filename);
+        Course::create([
+            'instructor_id' => $instructorId,
+            'title' => $request->title,
+            'image' => $request->image = $filePath,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+        return response()->json([
+            "result" => true,
+        ]);
     }
 
     /**
      * 講座編集API
      *
      * @param CourseEditRequest $request
-     * @return CourseEditResponse
+     * @return CourseEditResource
      */
     public function edit(CourseEditRequest $request)
     {
         $course = Course::findOrFail($request->course_id);
-        return new CourseEditResponse($course);
+        return new CourseEditResource($course);
     }
 
     /**
      * 講師側の更新処理API
      *
      * @param CourseUpdateRequest $request
-     * @return CourseUpdateResponse
+     * @return CourseUpdateResource
      */
     public function update(CourseUpdateRequest $request)
     {
@@ -92,7 +119,7 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResponse($course)
+                "data" => new CourseUpdateResource($course)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());

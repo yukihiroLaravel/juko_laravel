@@ -4,7 +4,7 @@ namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseIndexResponse extends JsonResource
+class CourseIndexResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

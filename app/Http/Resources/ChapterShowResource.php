@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class ChapterGetResponse  extends JsonResource
+class ChapterShowResource extends JsonResource
 {
     private int $chapterId;
     public function __construct($attendances, $chapterId)

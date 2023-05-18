@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
-use App\Http\Resources\Instructor\ChapterStoreResponse;
-use App\Http\Resources\Instructor\ChapterPatchResponse;
+use App\Http\Resources\Instructor\ChapterStoreResource;
+use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -30,7 +30,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new ChapterStoreResponse($chapter),
+                'data' => new ChapterStoreResource($chapter),
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -55,7 +55,7 @@ class ChapterController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new ChapterPatchResponse($chapter),
+            'data' => new ChapterPatchResource($chapter),
         ]);
     }
 

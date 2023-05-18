@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
-use App\Http\Resources\Instructor\LessonStoreResponse;
+use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\Log;
 class LessonController extends Controller
 {
     /**
-     * Store a newly created resource in storage.
+     * レッスン新規作成API
      *
-     * @param  \Illuminate\Http\LessonStoreRequest  $request
-     * @return \Illuminate\Http\LessonStoreResponse
+     * @param  LessonStoreRequest  $request
+     * @return LessonStoreResource
      */
     public function store(LessonStoreRequest $request)
     {
@@ -28,7 +28,7 @@ class LessonController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new LessonStoreResponse($lesson),
+                "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -38,6 +38,11 @@ class LessonController extends Controller
         }
     }
 
+    /**
+     * レッスン並び替えAPI
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sort()
     {
         return response()->json([]);

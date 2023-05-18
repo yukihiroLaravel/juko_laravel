@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResponse;
 use App\Model\Lesson;
-use App\Model\Chapter;
 use Exception;
 use Illuminate\Support\Facades\Log;
 

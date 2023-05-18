@@ -6,28 +6,23 @@ use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
-use App\Http\Resources\Instructor\ChapterStoreResponse;
+use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Resources\Instructor\ChapterStoreResource;
+use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
 class ChapterController extends Controller
 {
-    public function sort()
-    {
-        return response()->json([]);
-    }
-
     /**
-     * チャプター新規作成
+     * チャプター新規作成API
      *
      * @param ChapterStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(ChapterStoreRequest $request)
     {
-        try{
-            // TODO 認証ユーザーが作成した講座かどうかを検証する必要がある
-
+        try {
             $chapter = Chapter::create([
                 'course_id' => $request->input('course_id'),
                 'title' => $request->input('title'),
@@ -35,7 +30,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new ChapterStoreResponse($chapter),
+                'data' => new ChapterStoreResource($chapter),
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -43,6 +38,25 @@ class ChapterController extends Controller
                 'result' => false
             ], 500);
         }
+    }
+
+    /**
+     * チャプター更新API
+     *
+     * @param ChapterPatchRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(ChapterPatchRequest $request)
+    {
+        $chapter = Chapter::findOrFail($request->chapter_id);
+        $chapter->update([
+            'title' => $request->title
+        ]);
+
+        return response()->json([
+            'result' => true,
+            'data' => new ChapterPatchResource($chapter),
+        ]);
     }
 
     /**
@@ -58,5 +72,13 @@ class ChapterController extends Controller
         return response()->json([
             "result" => true
         ]);
+    }
+
+    /**
+     * チャプター並び替えAPI
+     */
+    public function sort()
+    {
+        return response()->json([]);
     }
 }

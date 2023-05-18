@@ -17,6 +17,14 @@ class Lesson extends Model
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';
 
+    protected $fillable = [
+        'chapter_id',
+        'title',
+        'url',
+        'remarks',
+        'status',
+    ];
+
     /**
      * チャプターを取得
      *

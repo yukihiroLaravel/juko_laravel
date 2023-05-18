@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterDeleteRequest extends FormRequest
+class CourseShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +24,7 @@ class ChapterDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required', 'integer'],
+            'attendance_id' => ['required', 'integer'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'chapter_id' => $this->route('chapter_id'),
-        ]);
     }
 }

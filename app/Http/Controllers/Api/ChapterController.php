@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChapterGetRequest;
-use App\Http\Resources\ChapterGetResponse;
+use App\Http\Resources\ChapterShowResource;
 use App\Model\Attendance;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -14,7 +14,7 @@ class ChapterController extends Controller
      * チャプター詳細情報を取得
      *
      * @param ChapterGetRequest $request
-     * @return ChapterGetResponse
+     * @return ChapterShowResource
      * @throws HttpException
      */
     public function show(ChapterGetRequest $request)
@@ -30,6 +30,6 @@ class ChapterController extends Controller
             throw new HttpException(404, "Not found attendance.");
         }
 
-        return new ChapterGetResponse($attendance, $request->chapter_id);
+        return new ChapterShowResource($attendance, $request->chapter_id);
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CoursesGetRequest extends FormRequest
+class CourseStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +24,8 @@ class CoursesGetRequest extends FormRequest
     public function rules()
     {
         return [
-            'student_id' => ['required', 'integer'],
-            'text' => ['string']
+            'title' => 'required',
+            'image' => 'required|mimes:jpg,png',
         ];
     }
 }

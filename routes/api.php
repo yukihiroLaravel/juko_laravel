@@ -19,33 +19,38 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     // 講師側API
-    Route::prefix('instructor')->group(function(){
-        Route::get('{instructor_id}/courses', 'Api\Instructor\CourseController@index');
+    Route::prefix('instructor')->group(function () {
         Route::prefix('course')->group(function () {
-            Route::get('{course_id}', 'Api\Instructor\CourseController@show');
-            Route::post('{course_id}','Api\Instructor\CourseController@update');
-            Route::post('{course_id}/chapter', 'Api\Instructor\ChapterController@store');
-            Route::delete('{course_id}', 'Api\Instructor\CourseController@delete');
-            Route::prefix('chapter')->group(function () {
-                Route::post('sort','Api\Instructor\ChapterController@sort');
-                Route::delete('{chapter_id}', 'Api\Instructor\ChapterController@delete');
-            });
-            Route::prefix('lesson')->group(function (){
-                Route::post('sort','Api\Instructor\LessonController@sort');
+            Route::get('index', 'Api\Instructor\CourseController@index');
+            Route::post('/', 'Api\Instructor\CourseController@store');
+            Route::prefix('{course_id}')->group(function () {
+                Route::get('/', 'Api\Instructor\CourseController@show');
+                Route::get('edit', 'Api\Instructor\CourseController@edit');
+                Route::post('/', 'Api\Instructor\CourseController@update');
+                Route::delete('/', 'Api\Instructor\CourseController@delete');
+                Route::prefix('chapter')->group(function () {
+                    Route::post('/', 'Api\Instructor\ChapterController@store');
+                    Route::post('sort', 'Api\Instructor\ChapterController@sort');
+                    Route::prefix('{chapter_id}')->group(function () {
+                        Route::patch('/', 'Api\Instructor\ChapterController@update');
+                        Route::delete('/', 'Api\Instructor\ChapterController@delete');
+                        Route::prefix('lesson')->group(function () {
+                            Route::post('/', 'Api\Instructor\LessonController@store');
+                            Route::post('sort', 'Api\Instructor\LessonController@sort');
+                        });
+                    });
+                });
             });
         });
     });
 
     // 受講生側API
-    Route::prefix('courses')->group(function () {
-        Route::get('/', 'Api\CourseController@index');
-    });
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
+        Route::get('index', 'Api\CourseController@index');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
-        Route::get('{course_id}/edit','Api\CourseController@edit');
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

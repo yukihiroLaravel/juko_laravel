@@ -14,11 +14,13 @@ class Chapter extends Model
     protected $table = 'chapters';
 
     /**
-     *
-     *
-     * @var array
+     * @var array<string>
      */
-    protected $fillable = ['chapter_id','title'];
+    protected $fillable = [
+        'chapter_id',
+        'course_id',
+        'title'
+    ];
 
     /**
      * 講座を取得

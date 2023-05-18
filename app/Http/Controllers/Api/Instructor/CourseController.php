@@ -6,17 +6,59 @@ use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
-use App\Http\Requests\Instructor\CoursesGetRequest;
 use App\Http\Requests\Instructor\CourseGetRequest;
+use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Resources\Instructor\CourseUpdateResponse;
-use App\Http\Resources\Instructor\CoursesGetResponse;
+use App\Http\Resources\Instructor\CourseIndexResponse;
 use App\Http\Resources\Instructor\CourseGetResponse;
+use App\Http\Resources\Instructor\CourseEditResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class CourseController extends Controller
 {
+    /**
+     * 講師側講座一覧取得API
+     *
+     * @return CourseIndexResponse
+     */
+    public function index(Request $request)
+    {
+        // TODO 認証機能ができるまで、講師IDを固定値で設定
+        $instructorId = 1;
+        $courses = Course::where('instructor_id', $instructorId)->get();
+
+        return new CourseIndexResponse($courses);
+    }
+
+    /**
+     * 講師側講座取得API
+     *
+     * @param CourseGetRequest $request
+     * @return CourseGetResponse
+     */
+    public function show(CourseGetRequest $request)
+    {
+        $course = Course::with(['chapters.lessons'])
+            ->findOrFail($request->course_id);
+        return new JsonResponse($course);
+        return new CourseGetResponse($course);
+    }
+
+    /**
+     * 講座編集API
+     *
+     * @param CourseEditRequest $request
+     * @return CourseEditResponse
+     */
+    public function edit(CourseEditRequest $request)
+    {
+        $course = Course::findOrFail($request->course_id);
+        return new CourseEditResponse($course);
+    }
+
     /**
      * 講師側の更新処理API
      *
@@ -58,31 +100,6 @@ class CourseController extends Controller
                 "result" => false,
             ], 500);
         }
-    }
-
-    /**
-     * 講師側講座一覧取得API
-     *
-     * @param CoursesGetRequest $request
-     * @return CoursesGetResponse
-     */
-    public function index(CoursesGetRequest $request)
-    {
-        $courses = Course::where('instructor_id', $request->instructor_id)->get();
-
-        return new CoursesGetResponse($courses);
-    }
-
-    /**
-     * 講師側講座取得API
-     *
-     * @param CourseGetRequest $request
-     * @return CourseGetResponse
-     */
-    public function show(CourseGetRequest $request)
-    {
-        $course = Course::with(['chapters.lessons'])->where('id', $request->course_id)->first();
-        return new CourseGetResponse($course);
     }
 
     /**

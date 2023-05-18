@@ -24,7 +24,8 @@ class ChapterStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required',
+            'title' => ['required'],
+            'course_id' => ['required', 'integer'],
         ];
     }
 

@@ -14,13 +14,8 @@ use Exception;
 
 class ChapterController extends Controller
 {
-    public function sort()
-    {
-        return response()->json([]);
-    }
-
     /**
-     * チャプター新規作成
+     * チャプター新規作成API
      *
      * @param ChapterStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -28,8 +23,6 @@ class ChapterController extends Controller
     public function store(ChapterStoreRequest $request)
     {
         try {
-            // TODO 認証ユーザーが作成した講座かどうかを検証する必要がある
-
             $chapter = Chapter::create([
                 'course_id' => $request->input('course_id'),
                 'title' => $request->input('title'),
@@ -48,7 +41,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * チャプター名前変更API
+     * チャプター更新API
      *
      * @param ChapterPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -79,5 +72,13 @@ class ChapterController extends Controller
         return response()->json([
             "result" => true
         ]);
+    }
+
+    /**
+     * チャプター並び替えAPI
+     */
+    public function sort()
+    {
+        return response()->json([]);
     }
 }

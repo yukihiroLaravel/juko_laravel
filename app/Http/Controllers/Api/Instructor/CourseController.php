@@ -31,8 +31,7 @@ class CourseController extends Controller
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if (isset($file)){
-
+            if (isset($file)) {
                 // 更新前の画像ファイルを削除
                 if (Storage::exists($course->image)) {
                     Storage::delete($course->image);
@@ -40,8 +39,8 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = date('YmdHis').'.'.$extension;
-                $imagePath = Storage::putFileAs('course',$file,$filename);
+                $filename = date('YmdHis') . '.' . $extension;
+                $imagePath = Storage::putFileAs('course', $file, $filename);
             }
 
             $course->update([
@@ -53,7 +52,6 @@ class CourseController extends Controller
                 "result" => true,
                 "data" => new CourseUpdateResponse($course)
             ]);
-
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
             return response()->json([
@@ -83,7 +81,7 @@ class CourseController extends Controller
      */
     public function show(CourseGetRequest $request)
     {
-        $course = Course::with(['chapters.lessons'])->where('id',$request->course_id)->first();
+        $course = Course::with(['chapters.lessons'])->where('id', $request->course_id)->first();
         return new CourseGetResponse($course);
     }
 

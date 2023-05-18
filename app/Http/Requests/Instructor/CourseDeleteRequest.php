@@ -34,5 +34,4 @@ class CourseDeleteRequest extends FormRequest
             'course_id' => $this->route('course_id'),
         ]);
     }
-
 }

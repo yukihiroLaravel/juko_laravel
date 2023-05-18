@@ -37,5 +37,4 @@ class ChapterPatchRequest extends FormRequest
             'title' => ['required', 'string'],
         ];
     }
-
 }

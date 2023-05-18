@@ -27,7 +27,7 @@ class ChapterController extends Controller
      */
     public function store(ChapterStoreRequest $request)
     {
-        try{
+        try {
             // TODO 認証ユーザーが作成した講座かどうかを検証する必要がある
 
             $chapter = Chapter::create([

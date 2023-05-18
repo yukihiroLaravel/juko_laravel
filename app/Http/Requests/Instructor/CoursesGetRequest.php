@@ -34,5 +34,4 @@ class CoursesGetRequest extends FormRequest
             'instructor_id' => $this->route('instructor_id'),
         ]);
     }
-
 }

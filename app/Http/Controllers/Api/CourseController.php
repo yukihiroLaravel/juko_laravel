@@ -66,8 +66,8 @@ class CourseController extends Controller
      */
     public function edit(CourseEditRequest $request)
     {
-       $course = Course::findOrFail($request->course_id);
-       return new CourseEditResponse($course);
+        $course = Course::findOrFail($request->course_id);
+        return new CourseEditResponse($course);
     }
 
     /**

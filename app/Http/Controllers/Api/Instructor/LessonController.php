@@ -36,6 +36,13 @@ class LessonController extends Controller
                 "result" => false,
             ], 500);
         }
+        
+    }
+    public function update($id)
+    {
+        $lesson = lesson::find($id);
+        return response()->json([
+        ]);
     }
 
     /**

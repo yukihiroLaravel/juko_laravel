@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
+use App\Http\Requests\Instructor\LessonEditRequest;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -46,5 +47,17 @@ class LessonController extends Controller
     public function sort()
     {
         return response()->json([]);
+    }
+
+    /**
+     * レッスン編集
+     *
+     * @param LessonEditRequest $request
+     * @return LessonEditResource
+     */
+    public function edit(Lesson $lesson)
+    {   
+        $lesson = Lesson::find($lesson);    
+        return response()->json([]);      
     }
 }

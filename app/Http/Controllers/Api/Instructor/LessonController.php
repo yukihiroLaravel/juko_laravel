@@ -52,7 +52,7 @@ class LessonController extends Controller
     /**
      * レッスン編集
      *
-     * @param LessonEditRequest 
+     * @param LessonEditRequest //テスト
      * @return LessonEditResource
      */
     public function edit(Lesson $lesson)

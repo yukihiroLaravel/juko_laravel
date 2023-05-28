@@ -38,10 +38,10 @@ class LessonController extends Controller
         }
         
     }
-    
-    public function update($Lesson_id)
+
+    public function update($lesson_id)
     {
-        $lesson = lesson::find($Lesson_id);
+        $lesson = lesson::find($lesson_id);
         return response()->json([
         ]);
     }

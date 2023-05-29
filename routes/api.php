@@ -38,14 +38,14 @@ Route::prefix('v1')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
                             Route::post('sort', 'Api\Instructor\LessonController@sort');
                             Route::prefix('{lesson_id}')->group(function () {
-                                Route::patch('/','Api\Instructor\LessonController@update');
+                                Route::patch('/', 'Api\Instructor\LessonController@update');
+                            });
                         });
                     });
                 });
             });
         });
-    });
-}); 
+    }); 
  
     // 受講生側API
     Route::prefix('course')->group(function () {

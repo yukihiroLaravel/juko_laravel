@@ -23,7 +23,7 @@ class LessonController extends Controller
             $lesson = Lesson::create([
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
-                'status' => 'private',
+                'status' =>  Lesson::STATUS_PRIVATE,
             ]);
 
             return response()->json([
@@ -31,11 +31,19 @@ class LessonController extends Controller
                 "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
         }
+        
+    }
+
+    public function update($lesson_id)
+    {
+        $lesson = lesson::find($lesson_id);
+        return response()->json([
+        ]);
     }
 
     /**

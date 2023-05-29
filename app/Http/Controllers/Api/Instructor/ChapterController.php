@@ -10,6 +10,7 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Exception;
 
 class ChapterController extends Controller
@@ -77,8 +78,21 @@ class ChapterController extends Controller
     /**
      * チャプター並び替えAPI
      */
-    public function sort()
+    public function sort(Request $request)
     {
-        return response()->json([]);
+        $chapterData = $request->input('chapters');
+
+        foreach ($chapterData as $chapterItem) {
+        $chapterId = $chapterItem['chapter_id'];
+        $order = $chapterItem['order'];
+
+        $chapter = Chapter::findOrFail($chapterId);
+        $chapter->order = $order;
+        $chapter->save();
+        }
+
+        return response()->json([
+        "result" => true 
+        ]);
     }
 }

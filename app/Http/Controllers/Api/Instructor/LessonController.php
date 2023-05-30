@@ -54,9 +54,8 @@ class LessonController extends Controller
      * @param LessonEditRequest 
      * @return LessonEditResource
      */
-    public function edit(Lesson $lesson)
-    {   
-        $lesson = Lesson::find($lesson);    
+    public function edit()
+    {       
         return response()->json([]);      
     }
 }

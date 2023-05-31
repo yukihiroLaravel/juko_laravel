@@ -47,4 +47,15 @@ class LessonController extends Controller
     {
         return response()->json([]);
     }
+
+    /**
+     * レッスン編集
+     *
+     * @param LessonEditRequest 
+     * @return LessonEditResource
+     */
+    public function edit()
+    {       
+        return response()->json([]);      
+    }
 }

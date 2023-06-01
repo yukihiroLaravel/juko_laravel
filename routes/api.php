@@ -37,7 +37,7 @@ Route::prefix('v1')->group(function () {
                         Route::prefix('lesson')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
                             Route::post('sort', 'Api\Instructor\LessonController@sort');
-                            Route::delete('/lessons/{lesson_id}', 'LessonController@deleteLesson');
+                            Route::delete('/lessons/{lesson_id}', 'LessonController@delete');
                         });
                     });
                 });

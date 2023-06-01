@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
-    public function deleteLesson($lesson_id)
+    public function delete($lesson_id)
     {
         // レッスンの削除処理を行う
 
@@ -22,6 +22,6 @@ class LessonController extends Controller
             "error_code" => "400"
         ];
 
-        return $response;
+        return response()->json([]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
+use Illuminate\Http\Request;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,20 @@ class LessonController extends Controller
         }
     }
 
+    public function update(Request $request)
+    {
+        $lesson = Lesson::findOrFail($request->lesson_id);
+        $lesson->update([
+            'title' => $request->title,
+            'url' => $request->url,
+            'remark' => $request->remark,
+        ]);
+
+        return response()->json([
+            'result' => true,
+            // 'data' => new LessonUpdateResource($lesson)
+        ]);
+    }
     /**
      * レッスン並び替えAPI
      *

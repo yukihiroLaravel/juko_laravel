@@ -24,7 +24,12 @@ class LessonEditRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_id' => ['required','integer']
+                'lessons' => 'array',
+                'lessons.*.lesson_id' => 'required|integer',
+                'lessons.*.title' => 'required|string',
+                'lessons.*.url' => 'required|string',
+                'lessons.*.remark' => 'string',
+                'lessons.*.order' => 'integer',
         ];
     }
 }

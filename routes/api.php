@@ -45,7 +45,7 @@ Route::prefix('v1')->group(function () {
                 });
             });
         });
-    }); 
+    });  
  
     // 受講生側API
     Route::prefix('course')->group(function () {

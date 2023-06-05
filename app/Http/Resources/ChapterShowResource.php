@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ChapterShowResource extends JsonResource
 {
-    private int $chapterId;
+    private $chapterId;
     public function __construct($attendances, $chapterId)
     {
         $this->chapterId = $chapterId;

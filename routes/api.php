@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('chapter')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
+                    Route::get('/', 'Api\Instructor\ChapterController@show');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
                     Route::prefix('{chapter_id}')->group(function () {
                         Route::patch('/', 'Api\Instructor\ChapterController@update');
@@ -37,7 +38,6 @@ Route::prefix('v1')->group(function () {
                         Route::prefix('lesson')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
                             Route::post('sort', 'Api\Instructor\LessonController@sort');
-                            Route::get('edit', 'Api\Instructor\LessonController@edit');
                         });
                     });
                 });

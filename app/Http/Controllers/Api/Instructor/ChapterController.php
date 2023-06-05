@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
@@ -40,6 +41,37 @@ class ChapterController extends Controller
         }
     }
 
+    /**
+     * チャプター詳細情報を取得
+     *
+     * @param ChapterGetRequest $request
+     * @return ChapterShowResource
+     */
+
+     public function show(ChapterShowRequest $request, $chapter_id)
+     {
+         $chapter = Chapter::with('lessons')
+             ->findOrFail($chapter_id);
+ 
+         $data = [
+             'chapter_id' => $chapter->id, 
+             'title' => $chapter->title,
+             'lessons' => [
+                 [
+                     'lesson_id' => $chapter->lessons[0]->id, 
+                     'title' => $chapter->lessons[0]->title,
+                     'url' => $chapter->lessons[0]->url,
+                     'remarks' => $chapter->lessons[0]->remarks,
+                     'order' => $chapter->lessons[0]->order, 
+                 ]
+             ],
+         ];
+ 
+         return response()->json([
+             'data' => $data,
+         ]); 
+     }
+ 
     /**
      * チャプター更新API
      *

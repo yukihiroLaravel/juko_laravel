@@ -88,12 +88,12 @@ class ChapterController extends Controller
         $chapters = $request->input('chapters');
 
         foreach ($chapters as $chapter) {
-            $chapterId = $chapter['chapter_id'];
-            $order = $chapter['order'];
-
-            $chapterModel = Chapter::findOrFail($chapterId);
-            $chapterModel->order = $order;
-            $chapterModel->update();
+            $chapterModel = Chapter::findOrFail($chapter['chapter_id']);
+            $chapterModel->update(
+                [
+                    'order' => $chapter['order']
+                ]
+            );
         }
 
         return response()->json([

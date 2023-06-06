@@ -91,8 +91,11 @@ class ChapterController extends Controller
             $chapterId = $chapter['chapter_id'];
             $order = $chapter['order'];
 
-            Chapter::where('id', $chapterId)->update(['order' => $order]);
+            $chapterModel = Chapter::findOrFail($chapterId);
+            $chapterModel->order = $order;
+            $chapterModel->update();
         }
+
         return response()->json([
             "result" => true 
         ]);

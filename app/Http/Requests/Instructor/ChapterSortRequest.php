@@ -11,32 +11,32 @@ class ChapterSortRequest extends FormRequest
      *
      * @return bool
      */
-    // public function authorize()
-    // {
-    //     return true;
-    // }
+    public function authorize()
+    {
+        return true;
+    }
 
-    // protected function prepareForValidation()
-    // {
-    //     $this->merge([
-    //         'title' => ('title'),
-    //         'course_id' => ('course_id')
-    //     ]);
-    // }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'title' => ('title'),
+            'course_id' => ('course_id')
+        ]);
+    }
 
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array
      */    
-    // public function rules()
-    // {
-    //     return [            
-    //         'chapters' => ['required', 'array'],
-    //         'chapters.*.chapter_id' => ['required', 'integer'],
-    //         'chapters.*.order' => ['required', 'integer'],
-    //     ];
-    // }
+    public function rules()
+    {
+        return [            
+            'chapters' => ['required', 'array'],
+            'chapters.*.chapter_id' => ['required', 'integer'],
+            'chapters.*.order' => ['required', 'integer'],
+        ];
+    }
 
     
 }

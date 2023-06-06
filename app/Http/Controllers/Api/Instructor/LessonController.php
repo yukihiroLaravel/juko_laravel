@@ -32,7 +32,7 @@ class LessonController extends Controller
                 "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
-            Log::error($e->getMessage());
+            Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
@@ -41,8 +41,7 @@ class LessonController extends Controller
 
     public function update(Request $request)
     {
-        $lesson = Lesson::findOrFail($request->lesson_id);
-        $lesson->update([
+        Lesson::findOrFail($request->lesson_id)->update([
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,

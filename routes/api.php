@@ -30,7 +30,6 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('chapter')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
-                    
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
                     Route::prefix('{chapter_id}')->group(function () {
                         Route::patch('/', 'Api\Instructor\ChapterController@update');

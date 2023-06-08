@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Course;
+use App\Model\Attendance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
@@ -138,9 +139,18 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         $course = Course::findOrFail($request->course_id);
-        $course->delete();
-        return response()->json([
-
-        ]);
+        $attendance = Attendance::where('course_id', $request->course_id)
+        ->whereNull('deleted_at')
+        ->exists();
+        if(!$attendance){
+            $course->delete();
+            return response()->json([
+                "result" => true
+            ]);
+        }else{
+            return response()->json([
+                "result" => false
+            ]);
+        }
     }
 }

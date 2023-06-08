@@ -11,6 +11,7 @@ use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Exception;
 
@@ -85,19 +86,30 @@ class ChapterController extends Controller
      */
     public function sort(Request $request)
     {
-        $chapters = $request->input('chapters');
+        try {
+            DB::beginTransaction();
 
-        foreach ($chapters as $chapter) {
-            $chapterModel = Chapter::findOrFail($chapter['chapter_id']);
-            $chapterModel->update(
-                [
+            $chapters = $request->input('chapters');
+
+            foreach ($chapters as $chapter) {
+                Chapter::findOrFail($chapter['chapter_id'])->update([
                     'order' => $chapter['order']
-                ]
-            );
-        }
+                ]);
+            }
 
-        return response()->json([
-            "result" => true 
-        ]);
+            DB::commit();
+
+            return response()->json([
+                "result" => true 
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                "result" => false,
+                "error_message" => "Invalid Request Body.",
+                "error_code" => "400"
+            ]);
+        }
     }
 }

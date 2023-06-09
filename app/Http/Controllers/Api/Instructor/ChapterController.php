@@ -66,7 +66,7 @@ class ChapterController extends Controller
         $data = [
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
-            'lesson' => $lessons,
+            'lessons' => $lessons,
         ];
 
         return response()->json([

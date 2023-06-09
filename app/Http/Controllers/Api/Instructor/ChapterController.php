@@ -48,30 +48,32 @@ class ChapterController extends Controller
      * @return ChapterShowResource
      */
 
-     public function show(ChapterShowRequest $request, $chapter_id)
-     {
-         $chapter = Chapter::with('lessons')
-             ->findOrFail($chapter_id);
- 
-         $data = [
-             'chapter_id' => $chapter->id, 
-             'title' => $chapter->title,
-             'lessons' => [
-                 [
-                     'lesson_id' => $chapter->lessons[0]->id, 
-                     'title' => $chapter->lessons[0]->title,
-                     'url' => $chapter->lessons[0]->url,
-                     'remarks' => $chapter->lessons[0]->remarks,
-                     'order' => $chapter->lessons[0]->order, 
-                 ]
-             ],
-         ];
- 
-         return response()->json([
-             'data' => $data,
-         ]); 
+    public function show(ChapterShowRequest $request, $chapter_id)
+    {
+        $chapter = Chapter::with('lessons')
+            ->findOrFail($chapter_id);
+        
+        $lessons = [];
+        foreach ($chapter->lessons as $lesson){
+            $lessons[] = [
+                'lesson_id' => $lesson->id,
+                'title' => $lesson->title,
+                'url' => $lesson->url,
+                'remark' => $lesson-> remarks,
+                'order' => $lesson->order,
+            ];
+        }
+        $data = [
+            'chapter_id' => $chapter->id,
+            'title' => $chapter->title,
+            'lesson' => $lessons,
+        ];
+
+        return response()->json([
+            'data' => $data,
+        ]); 
     }
- 
+
     /**
      * チャプター更新API
      *

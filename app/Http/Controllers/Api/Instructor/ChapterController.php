@@ -59,7 +59,7 @@ class ChapterController extends Controller
                 'lesson_id' => $lesson->id,
                 'title' => $lesson->title,
                 'url' => $lesson->url,
-                'remark' => $lesson-> remarks,
+                'remark' => $lesson->remarks,
                 'order' => $lesson->order,
             ];
         }

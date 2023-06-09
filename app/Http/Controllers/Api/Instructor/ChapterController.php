@@ -73,7 +73,6 @@ class ChapterController extends Controller
             'data' => $data,
         ]); 
     }
-
     /**
      * チャプター更新API
      *

@@ -104,11 +104,10 @@ class ChapterController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-
+            Log::error($e->getMessage());
+            
             return response()->json([
                 "result" => false,
-                "error_message" => "Invalid Request Body.",
-                "error_code" => "400"
             ]);
         }
     }

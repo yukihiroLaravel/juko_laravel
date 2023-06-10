@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -34,8 +34,8 @@ class LessonUpdateRequest extends FormRequest
         return [
             'lesson_id' => ['required','integer'],
             'title' => ['required','string'],
-            'url' => ['nullable','url'],
-            'remark' => ['nullable','string'],
+            'url' => ['required','url'],
+            'remarks' => ['nullable','string'],
         ];
     }
 }

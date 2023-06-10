@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,11 +14,12 @@ class LessonUpdateResource extends JsonResource
      */
     public function toArray($request)
     {
+        // return response()->json($this->resource);
         return [
             'lesson_id' => $this->resource->id,
             'title' => $this->resource->title,
             'url' => $this->resource->url,
-            'remark' => $this->resource->remark,
+            'remarks' => $this->resource->remarks,
         ];
     }
 }

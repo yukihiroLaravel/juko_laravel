@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
+use App\Http\Requests\Instructor\LessonUpdateRequest;
+use App\Http\Resources\Instructor\LessonUpdateResource;
 use Illuminate\Http\Request;
 use App\Model\Lesson;
 use Exception;
@@ -39,17 +41,17 @@ class LessonController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(LessonUpdateRequest $request)
     {
         Lesson::findOrFail($request->lesson_id)->update([
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
         ]);
-
+        $lesson = Lesson::findOrFail($request->lesson_id);
         return response()->json([
             'result' => true,
-            // 'data' => new LessonUpdateResource($lesson)
+            'data' => new LessonUpdateResource($lesson)
         ]);
     }
     /**

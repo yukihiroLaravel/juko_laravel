@@ -7,9 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Exception;
 
 class ChapterController extends Controller
@@ -76,9 +79,36 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
+     * 
+     * @param ChapterSortRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     * 
      */
-    public function sort()
+    public function sort(Request $request)
     {
-        return response()->json([]);
+        try {
+            DB::beginTransaction();
+
+            $chapters = $request->input('chapters');
+
+            foreach ($chapters as $chapter) {
+                Chapter::findOrFail($chapter['chapter_id'])->update([
+                    'order' => $chapter['order']
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true 
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            
+            return response()->json([
+                "result" => false,
+            ]);
+        }
     }
 }

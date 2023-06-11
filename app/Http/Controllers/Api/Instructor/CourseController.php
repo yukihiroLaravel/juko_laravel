@@ -140,7 +140,6 @@ class CourseController extends Controller
     {
         $course = Course::findOrFail($request->course_id);
         $attendance = Attendance::where('course_id', $request->course_id)
-            ->whereNull('deleted_at')
             ->exists();
         $result = false;
         if(!$attendance){

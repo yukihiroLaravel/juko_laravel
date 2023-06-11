@@ -10,6 +10,7 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
+use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -49,10 +50,10 @@ class ChapterController extends Controller
      */
 
     public function show(ChapterShowRequest $request, $chapter_id)
-    {
-        $chapter = Chapter::with('lessons')
-            ->findOrFail($chapter_id);
-        
+{
+    $chapter = Chapter::with(['lessons'])
+        ->findOrFail($chapter_id);
+
         $lessons = [];
         foreach ($chapter->lessons as $lesson){
             $lessons[] = [
@@ -68,11 +69,13 @@ class ChapterController extends Controller
             'title' => $chapter->title,
             'lessons' => $lessons,
         ];
-
+        
         return response()->json([
-            'data' => $data,
+            'data' => $data,   
         ]); 
-    }
+        $data =  new ChapterShowResource($chapter);
+}
+
     /**
      * チャプター更新API
      *

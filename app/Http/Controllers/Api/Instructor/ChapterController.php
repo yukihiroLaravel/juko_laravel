@@ -84,7 +84,7 @@ class ChapterController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * 
      */
-    public function sort(Request $request)
+    public function sort(ChapterSortRequest $request)
     {
         try {
             DB::beginTransaction();

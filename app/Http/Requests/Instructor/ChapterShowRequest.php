@@ -10,7 +10,7 @@ class ChapterShowRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
+            // 'chapter_id' => $this->route('chapter_id'),
         ]);
     }
     /**
@@ -31,8 +31,8 @@ class ChapterShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => 'required|integer',
-            'course_id' => 'required|integer',
+            'chapter_id' => ['required','integer'],
+            'course_id' => ['required','integer'],
         ];
     }
 }

@@ -12,7 +12,6 @@ use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Exception;
 
 class ChapterController extends Controller

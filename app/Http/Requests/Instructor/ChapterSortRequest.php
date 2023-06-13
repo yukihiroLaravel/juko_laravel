@@ -28,5 +28,13 @@ class ChapterSortRequest extends FormRequest
             'chapters.*.chapter_id' => ['required', 'integer'],
             'chapters.*.order' => ['required', 'integer'],
         ];
-    }    
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
+    }
 }

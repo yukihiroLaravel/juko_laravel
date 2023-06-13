@@ -20,15 +20,16 @@ class ChapterShowResource extends JsonResource
                 'title' => $this->title,
                 'lessons' => $this->lessons->map(function ($lesson) {
                     return [
-                        'lesson_id' => $this->id,
-                        'title' => $this->title,
-                        'url' => $this->url,
-                        'remark' => $this->remarks,
-                        'order' => $this->order,
+                        'lesson_id' => $lesson->id,
+                        'title' => $lesson->title,
+                        'url' => $lesson->url,
+                        'remarks' => $lesson->remarks,
+                        'order' => $lesson->order,
                     ];
                 }),
-            
             ],
         ];
     }
+    
+
 }

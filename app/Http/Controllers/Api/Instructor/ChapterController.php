@@ -14,6 +14,7 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
+
 class ChapterController extends Controller
 {
     /**
@@ -49,32 +50,12 @@ class ChapterController extends Controller
      * @return ChapterShowResource
      */
 
-    public function show(ChapterShowRequest $request, $chapter_id)
-{
-    $chapter = Chapter::with(['lessons'])
-        ->findOrFail($chapter_id);
-
-        $lessons = [];
-        foreach ($chapter->lessons as $lesson){
-            $lessons[] = [
-                'lesson_id' => $lesson->id,
-                'title' => $lesson->title,
-                'url' => $lesson->url,
-                'remark' => $lesson->remarks,
-                'order' => $lesson->order,
-            ];
-        }
-        $data = [
-            'chapter_id' => $chapter->id,
-            'title' => $chapter->title,
-            'lessons' => $lessons,
-        ];
-        
-        return response()->json([
-            'data' => $data,   
-        ]); 
-        $data =  new ChapterShowResource($chapter);
-}
+    public function show(ChapterShowRequest $request)
+    {
+        $chapter = Chapter::with(['lessons.chapter'])
+            ->findOrFail($request->chapter_id);
+        return new ChapterShowResource($chapter);
+    }
 
     /**
      * チャプター更新API

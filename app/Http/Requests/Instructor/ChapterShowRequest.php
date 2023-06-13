@@ -30,16 +30,9 @@ class ChapterShowRequest extends FormRequest
      */
     public function rules()
     {
-         return [
-            // 'chapters' => 'array',
-            //'title' => ['required'],
+        return [
             'chapter_id' => 'required|integer',
             'course_id' => 'required|integer',
-            // 'chapters.*.lesson_id' => 'required|integer',
-            // 'chapters.*.title' => 'required|string',
-            // 'chapters.*.url' => 'required|string',
-            // 'chapters.*.remarks' => 'string',
-            // 'chapters.*.order' => 'integer',
         ];
     }
 }

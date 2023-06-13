@@ -14,7 +14,6 @@ class LessonUpdateResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return response()->json($this->resource);
         return [
             'lesson_id' => $this->resource->id,
             'title' => $this->resource->title,

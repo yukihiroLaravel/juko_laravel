@@ -20,6 +20,8 @@ class LessonUpdateRequest extends FormRequest
     {
         $this->merge([
             'lesson_id' => $this->route('lesson_id'),
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -33,6 +35,8 @@ class LessonUpdateRequest extends FormRequest
     {
         return [
             'lesson_id' => ['required','integer'],
+            'chapter_id' => ['required', 'integer'],
+            'course_id' => ['required', 'integer'],
             'title' => ['required','string'],
             'url' => ['required','url'],
             'remarks' => ['nullable','string'],

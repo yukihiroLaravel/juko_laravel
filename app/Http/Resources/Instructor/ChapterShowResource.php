@@ -14,19 +14,22 @@ class ChapterShowResource extends JsonResource
      */
     public function toArray($request)
     {
+        $lessons = [];
+        foreach ($this->lessons as $lesson){
+            $lessons[] = [
+                'lesson_id' => $lesson->id,
+                'title' => $lesson->title,
+                'url' => $lesson->url,
+                'remark' => $lesson->remarks,
+                'order' => $lesson->order,
+            ];
+        }
+
         return [
             'data' => [
                 'chapter_id' => $this->id,
                 'title' => $this->title,
-                'lessons' => $this->lessons->map(function ($lesson) {
-                    return [
-                        'lesson_id' => $lesson->id,
-                        'title' => $lesson->title,
-                        'url' => $lesson->url,
-                        'remarks' => $lesson->remarks,
-                        'order' => $lesson->order,
-                    ];
-                }),
+                'lessons' => $lessons,
             ],
         ];
     }

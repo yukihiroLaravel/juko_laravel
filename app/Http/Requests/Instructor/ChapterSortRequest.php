@@ -20,10 +20,12 @@ class ChapterSortRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array
-     */    
+     */ 
+    
     public function rules()
     {
-        return [            
+        return [
+            'course_id' => ['required', 'integer'],
             'chapters' => ['required', 'array'],
             'chapters.*.chapter_id' => ['required', 'integer'],
             'chapters.*.order' => ['required', 'integer'],
@@ -34,7 +36,6 @@ class ChapterSortRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 }

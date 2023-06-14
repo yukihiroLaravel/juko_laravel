@@ -14,7 +14,6 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-
 class ChapterController extends Controller
 {
     /**
@@ -49,7 +48,6 @@ class ChapterController extends Controller
      * @param ChapterGetRequest $request
      * @return ChapterShowResource
      */
-
     public function show(ChapterShowRequest $request)
     {
         $chapter = Chapter::with(['lessons.chapter'])

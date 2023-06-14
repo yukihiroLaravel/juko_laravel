@@ -38,7 +38,7 @@ class LessonUpdateRequest extends FormRequest
             'chapter_id' => ['required', 'integer'],
             'course_id' => ['required', 'integer'],
             'title' => ['required','string'],
-            'url' => ['required','url'],
+            'url' => ['required','string'],
             'remarks' => ['nullable','string'],
         ];
     }

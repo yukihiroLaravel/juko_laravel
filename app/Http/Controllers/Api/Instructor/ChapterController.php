@@ -12,7 +12,6 @@ use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Exception;
 
 class ChapterController extends Controller
@@ -84,7 +83,7 @@ class ChapterController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * 
      */
-    public function sort(Request $request)
+    public function sort(ChapterSortRequest $request)
     {
         try {
             DB::beginTransaction();

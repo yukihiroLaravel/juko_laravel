@@ -16,27 +16,26 @@ class ChapterSortRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'title' => ('title'),
-            'course_id' => ('course_id')
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array
-     */    
+     */ 
+    
     public function rules()
     {
-        return [            
+        return [
+            'course_id' => ['required', 'integer'],
             'chapters' => ['required', 'array'],
             'chapters.*.chapter_id' => ['required', 'integer'],
             'chapters.*.order' => ['required', 'integer'],
         ];
     }
 
-    
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
 }

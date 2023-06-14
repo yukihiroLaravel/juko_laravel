@@ -139,15 +139,15 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         $course = Course::findOrFail($request->course_id);
-        $attendance = Attendance::where('course_id', $request->course_id)
-            ->exists();
-        $result = false;
-        if(!$attendance){
-            $course->delete();
-            $result = true;
+        if (Attendance::where('course_id', $request->course_id)->exists()) {
+            return response()->json([
+                "result" => false,
+                "message" => "This course has already been taken by students."
+            ]);
         }
+        $course->delete();
         return response()->json([
-            "result" => $result
+            "result" => true,
         ]);
     }
 }

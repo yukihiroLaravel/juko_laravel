@@ -8,6 +8,8 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -46,5 +48,39 @@ class LessonController extends Controller
     public function sort()
     {
         return response()->json([]);
+    }
+
+    /**
+     * レッスン削除API
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function delete($request)
+    {
+        return response()->json($request);
+        //try {
+
+        $lesson = Lesson::findOrFail($lesson_id);
+
+        //$lesson->lesson_attendances()->delete();
+
+        //$lesson->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'レッスンが正常に削除されました。',
+        ]);
+        //} catch (ModelNotFoundException $exception) {
+        return response()->json([
+            'success' => false,
+            'message' => '指定されたレッスンが見つかりませんでした。',
+        ], 404);
+        //} catch (Exception $exception) {
+        return response()->json([
+            'success' => false,
+            'message' => '削除中にエラーが発生しました。',
+        ], 500);
+        //}
     }
 }

@@ -65,18 +65,18 @@ class LessonController extends Controller
             $lesson->delete();
 
             return response()->json([
-                'success' => true,
-                'message' => 'レッスンが正常に削除されました。',
+                'result' => true,
+
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
-                'success' => false,
-                'message' => '指定されたレッスンが見つかりませんでした。',
+                'result' => false,
+                'message' => 'Not Found Lesson.'
             ], 404);
         } catch (Exception $exception) {
             return response()->json([
-                'success' => false,
-                'message' => '削除中にエラーが発生しました。',
+                'result' => false,
+
             ], 500);
         }
     }

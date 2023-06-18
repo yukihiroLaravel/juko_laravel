@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
+use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -56,31 +57,27 @@ class LessonController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function delete($request)
+    public function delete(LessonDeleteRequest $request)
     {
-        return response()->json($request);
-        //try {
+        try {
+            $lesson_id = $request->input('lesson_id');
+            $lesson = Lesson::findOrFail($lesson_id);
+            $lesson->delete();
 
-        $lesson = Lesson::findOrFail($lesson_id);
-
-        //$lesson->lesson_attendances()->delete();
-
-        //$lesson->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'レッスンが正常に削除されました。',
-        ]);
-        //} catch (ModelNotFoundException $exception) {
-        return response()->json([
-            'success' => false,
-            'message' => '指定されたレッスンが見つかりませんでした。',
-        ], 404);
-        //} catch (Exception $exception) {
-        return response()->json([
-            'success' => false,
-            'message' => '削除中にエラーが発生しました。',
-        ], 500);
-        //}
+            return response()->json([
+                'success' => true,
+                'message' => 'レッスンが正常に削除されました。',
+            ]);
+        } catch (ModelNotFoundException $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => '指定されたレッスンが見つかりませんでした。',
+            ], 404);
+        } catch (Exception $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => '削除中にエラーが発生しました。',
+            ], 500);
+        }
     }
 }

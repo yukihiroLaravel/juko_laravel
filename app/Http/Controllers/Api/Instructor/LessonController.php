@@ -66,7 +66,6 @@ class LessonController extends Controller
 
             return response()->json([
                 'result' => true,
-
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
@@ -76,7 +75,6 @@ class LessonController extends Controller
         } catch (Exception $exception) {
             return response()->json([
                 'result' => false,
-
             ], 500);
         }
     }

@@ -10,7 +10,6 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
-use App\Http\Resources\Instructor\ChapterSortResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -101,17 +100,14 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new ChapterSortResource($chapter),
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            
+
             return response()->json([
-                'result' => false,
-                'error_code' => 500,
-                'error_message' => $e->getMessage(),
-            ]);
+                'result' => false
+            ], 500);
         }
     }
 }

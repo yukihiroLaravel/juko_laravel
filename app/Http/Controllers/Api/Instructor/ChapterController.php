@@ -99,15 +99,15 @@ class ChapterController extends Controller
             DB::commit();
 
             return response()->json([
-                "result" => true 
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            
+
             return response()->json([
-                "result" => false,
-            ]);
+                'result' => false
+            ], 500);
         }
     }
 }

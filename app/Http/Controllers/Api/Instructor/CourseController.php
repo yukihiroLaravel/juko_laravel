@@ -96,7 +96,7 @@ class CourseController extends Controller
     public function update(CourseUpdateRequest $request)
     {
         $file = $request->file('image');
-
+        
         try {
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
@@ -144,6 +144,9 @@ class CourseController extends Controller
                 "result" => false,
                 "message" => "This course has already been taken by students."
             ]);
+        }
+        if (Storage::exists($course->image)) {
+            Storage::delete($course->image);
         }
         $course->delete();
         return response()->json([

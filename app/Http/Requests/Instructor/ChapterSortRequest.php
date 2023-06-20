@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ChapterSortRequest extends FormRequest
 {
@@ -25,9 +26,13 @@ class ChapterSortRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer'],
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
             'chapters' => ['required', 'array'],
-            'chapters.*.chapter_id' => ['required', 'integer'],
+            'chapters.*.chapter_id' => ['required', 'integer',
+            Rule::exists('chapters', 'id')->where(function ($query) {
+                $query->where('course_id', $this->input('course_id'));
+                }),
+            ],
             'chapters.*.order' => ['required', 'integer'],
         ];
     }

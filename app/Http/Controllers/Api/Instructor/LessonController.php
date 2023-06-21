@@ -63,7 +63,7 @@ class LessonController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e->getMessage());
+            Log::error($e);
             return response()->json([
                 "result" => false,
             ]);

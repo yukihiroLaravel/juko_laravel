@@ -85,10 +85,10 @@ class LessonController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort()
+    public function sort(Request $request)
     {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             $lessons = $request->input('lessons');
             foreach ($lessons as $lesson) {
                 Lesson::findOrFail($lesson['lesson_id'])->update([

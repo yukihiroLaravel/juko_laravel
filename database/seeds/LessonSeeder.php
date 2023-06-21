@@ -32,7 +32,7 @@ class LessonSeeder extends Seeder
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'order'=> 2,
+                'order'=> 1,
             ],
             [
                 'chapter_id' => 2,
@@ -42,7 +42,7 @@ class LessonSeeder extends Seeder
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'order'=> 3,
+                'order'=> 2,
             ],
             [
                 'chapter_id' => 2,
@@ -52,7 +52,7 @@ class LessonSeeder extends Seeder
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'order'=> 4,
+                'order'=> 3,
             ],
             [
                 'chapter_id' => 2,
@@ -62,7 +62,7 @@ class LessonSeeder extends Seeder
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-                'order'=> 5,
+                'order'=> 4,
             ],
         ]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
@@ -88,10 +89,13 @@ class ChapterController extends Controller
         try {
             DB::beginTransaction();
 
+            $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
 
             foreach ($chapters as $chapter) {
-                Chapter::findOrFail($chapter['chapter_id'])->update([
+                Chapter::where('id',$chapter['chapter_id'])
+                ->where('course_id', $courseId)
+                ->firstOrFail()->update([
                     'order' => $chapter['order']
                 ]);
             }
@@ -106,7 +110,8 @@ class ChapterController extends Controller
             Log::error($e);
 
             return response()->json([
-                'result' => false
+                'result' => false,
+                'error_message' => $e->getMessage()
             ], 500);
         }
     }

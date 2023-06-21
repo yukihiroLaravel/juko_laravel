@@ -26,13 +26,9 @@ class ChapterSortRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'course_id' => ['required', 'integer'],
             'chapters' => ['required', 'array'],
-            'chapters.*.chapter_id' => ['required', 'integer',
-            Rule::exists('chapters', 'id')->where(function ($query) {
-                $query->where('course_id', $this->input('course_id'));
-                }),
-            ],
+            'chapters.*.chapter_id' => ['required', 'integer'],
             'chapters.*.order' => ['required', 'integer'],
         ];
     }

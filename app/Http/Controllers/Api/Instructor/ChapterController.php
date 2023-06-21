@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
@@ -111,7 +110,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => false,
-                'error_message' => $e->getMessage()
+                'message' => 'Not found course.'
             ], 500);
         }
     }

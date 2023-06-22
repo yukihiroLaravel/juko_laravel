@@ -8,6 +8,8 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
@@ -43,8 +45,28 @@ class LessonController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort()
+    public function sort(Request $request)
     {
-        return response()->json([]);
+        DB::beginTransaction();
+        try {
+            $lessons = $request->input('lessons');
+            foreach ($lessons as $lesson) {
+                Lesson::findOrFail($lesson['lesson_id'])->update([
+                    'order' => $lesson['order']
+                ]);
+            }
+            
+            DB::commit();
+
+            return response()->json([
+                "result" => true
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ]);
+        }
     }
 }

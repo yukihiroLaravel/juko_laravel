@@ -24,6 +24,8 @@ class CreateLessonsTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+            $table->unsignedTinyInteger('order')->coment('順番');
+
         });
     }
 

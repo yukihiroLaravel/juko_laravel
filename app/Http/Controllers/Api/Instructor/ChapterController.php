@@ -50,9 +50,18 @@ class ChapterController extends Controller
      */
     public function show(ChapterShowRequest $request)
     {
-        $chapter = Chapter::with(['lessons.chapter'])
-            ->findOrFail($request->chapter_id);
-        return new ChapterShowResource($chapter);
+        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'invalid lesson_id or chapter_id.',
+            ], 500);
+        }
+
+        return response()->json([
+            'result' => true,
+            'data' => new ChapterShowResource($chapter)
+        ]);
     }
 
     /**

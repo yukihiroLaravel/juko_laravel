@@ -93,7 +93,9 @@ class ChapterController extends Controller
             $chapters = $request->input('chapters');
 
             foreach ($chapters as $chapter) {
-                Chapter::where('id',$chapter['chapter_id'])->where('course_id', $courseId)->firstOrFail()
+                Chapter::where('id',$chapter['chapter_id'])
+                ->where('course_id', $courseId)
+                ->firstOrFail()
                 ->update([
                     'order' => $chapter['order']
                 ]);

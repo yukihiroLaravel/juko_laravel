@@ -40,6 +40,7 @@ class LessonUpdateRequest extends FormRequest
             'title' => ['required','string'],
             'url' => ['required','string'],
             'remarks' => ['nullable','string'],
+            'status' => ['required', 'string'],
         ];
     }
 }

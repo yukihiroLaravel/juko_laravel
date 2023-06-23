@@ -11,7 +11,6 @@ class ChapterShowRequest extends FormRequest
         $this->merge([
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
-            'lesson_id' => $this->route('lesson_id'),
         ]);
     }
     /**

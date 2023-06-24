@@ -13,6 +13,7 @@ use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ChapterController extends Controller
 {
@@ -88,25 +89,32 @@ class ChapterController extends Controller
         try {
             DB::beginTransaction();
 
+            $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
 
             foreach ($chapters as $chapter) {
-                Chapter::findOrFail($chapter['chapter_id'])->update([
+                Chapter::where('id',$chapter['chapter_id'])
+                ->where('course_id', $courseId)
+                ->firstOrFail()
+                ->update([
                     'order' => $chapter['order']
                 ]);
             }
-
             DB::commit();
-
             return response()->json([
                 'result' => true,
             ]);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => 'Not found course.'
+            ], 500);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
             return response()->json([
-                'result' => false
+                'result' => false,
             ], 500);
         }
     }

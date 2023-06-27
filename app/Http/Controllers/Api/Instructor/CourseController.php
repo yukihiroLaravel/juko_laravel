@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Course;
 use App\Model\Attendance;
-use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
@@ -141,7 +139,6 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         $course = Course::findOrFail($request->course_id);
-        
         if (Attendance::where('course_id', $request->course_id)->exists()) {
             return response()->json([
                 "result" => false,

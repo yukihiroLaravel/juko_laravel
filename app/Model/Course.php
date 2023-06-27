@@ -55,11 +55,11 @@ class Course extends Model
 
     protected static function boot() 
     {
-    parent::boot();
-    static::deleting(function($course) {
-        foreach ($course->chapters()->get() as $child) {
+        parent::boot();
+        static::deleting(function($course) {
+            foreach ($course->chapters()->get() as $child) {
             $child->delete();
-        }
-    });
+            }
+        });
     }
 }

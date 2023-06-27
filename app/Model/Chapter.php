@@ -46,11 +46,11 @@ class Chapter extends Model
 
     protected static function boot() 
     {
-    parent::boot();
-    static::deleting(function($chapter) {
-        foreach ($chapter->lessons()->get() as $child) {
+        parent::boot();
+        static::deleting(function($chapter) {
+            foreach ($chapter->lessons()->get() as $child) {
             $child->delete();
-        }
-    });
+            }
+        });
     }
 }

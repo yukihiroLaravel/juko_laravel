@@ -8,8 +8,10 @@ use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
+use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
+use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -41,6 +43,28 @@ class ChapterController extends Controller
                 'result' => false
             ], 500);
         }
+    }
+
+    /**
+     * チャプター詳細情報を取得
+     *
+     * @param ChapterGetRequest $request
+     * @return ChapterShowResource
+     */
+    public function show(ChapterShowRequest $request)
+    {
+        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'invalid course_id.',
+            ], 500);
+        }
+
+        return response()->json([
+            'result' => true,
+            'data' => new ChapterShowResource($chapter)
+        ]);
     }
 
     /**

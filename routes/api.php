@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
                     Route::prefix('{chapter_id}')->group(function () {
+                        Route::get('/', 'Api\Instructor\ChapterController@show');
                         Route::patch('/', 'Api\Instructor\ChapterController@update');
                         Route::delete('/', 'Api\Instructor\ChapterController@delete');
                         Route::prefix('lesson')->group(function () {

@@ -25,7 +25,7 @@ class LessonController extends Controller
             $lesson = Lesson::create([
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
-                'status' => 'private',
+                'status' => Lesson::STATUS_PRIVATE,
             ]);
 
             return response()->json([

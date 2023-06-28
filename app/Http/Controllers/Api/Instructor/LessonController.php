@@ -66,10 +66,13 @@ class LessonController extends Controller
             $lesson_id = $request->input('lesson_id');
             $lesson = Lesson::findOrFail($lesson_id);
 
+            $course = $lesson->chapter->course;
+            $instructor_id = $course->instructor_id;
+
             //$user = Auth::user();
             $user = Instructor::find(1);
 
-            if ($lesson->user_id !== $user->id) {
+            if ($instructor_id !== $user->id) {
                 return response()->json([
                     'result' => false,
                 ], 401);

@@ -49,7 +49,7 @@ class Chapter extends Model
         parent::boot();
         static::deleting(function($chapter) {
             foreach ($chapter->lessons()->get() as $child) {
-            $child->delete();
+                $child->delete();
             }
         });
     }

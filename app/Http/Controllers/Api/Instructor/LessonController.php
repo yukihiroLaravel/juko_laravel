@@ -57,6 +57,7 @@ class LessonController extends Controller
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
+            'status' => $request->status,
         ]);
 
         return response()->json([

@@ -43,6 +43,7 @@ class LessonController extends Controller
     public function update(LessonUpdateRequest $request)
     {
         $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+        $user = Instructor::find(1);
 
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([

@@ -8,6 +8,7 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
+use App\Model\instructor;
 use Exception;
 use Illuminate\Support\Facades\Log;
 

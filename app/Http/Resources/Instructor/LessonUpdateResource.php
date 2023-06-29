@@ -19,6 +19,7 @@ class LessonUpdateResource extends JsonResource
             'title' => $this->resource->title,
             'url' => $this->resource->url,
             'remarks' => $this->resource->remarks,
+            'status' => $this->resource->status,
         ];
     }
 }

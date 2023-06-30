@@ -64,7 +64,7 @@ class LessonController extends Controller
 
         try {
             $lesson_id = $request->input('lesson_id');
-            $lesson = Lesson::findOrFail($lesson_id);
+            $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
 
             $course = $lesson->chapter->course;
             $instructor_id = $course->instructor_id;

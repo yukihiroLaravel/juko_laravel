@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Course;
 use App\Model\Attendance;
+use App\Model\instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
@@ -138,19 +139,27 @@ class CourseController extends Controller
      */
     public function delete(CourseDeleteRequest $request)
     {
+        $user = Instructor::find(1);
         $course = Course::findOrFail($request->course_id);
-        if (Attendance::where('course_id', $request->course_id)->exists()) {
+        if ($user->id === $course->instructor_id){
+            if (Attendance::where('course_id', $request->course_id)->exists()) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "This course has already been taken by students."
+                ]);
+            }
+            if (Storage::exists($course->image)) {
+                Storage::delete($course->image);
+            }
+            $course->delete();
+            return response()->json([
+                "result" => true,
+            ]);
+        }else{
             return response()->json([
                 "result" => false,
-                "message" => "This course has already been taken by students."
+                "message" => "Lecturer (cannot be deleted because the creator does not match)"
             ]);
         }
-        if (Storage::exists($course->image)) {
-            Storage::delete($course->image);
-        }
-        $course->delete();
-        return response()->json([
-            "result" => true,
-        ]);
     }
 }

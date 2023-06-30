@@ -118,26 +118,25 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);
-            if ($user->id === $course->instructor_id) {
-                foreach ($chapters as $chapter) {
-                    Chapter::where('id',$chapter['chapter_id'])
-                    ->where('course_id', $courseId)
-                    ->firstOrFail()
-                    ->update([
-                        'order' => $chapter['order']
-                    ]);
-                }
-                DB::commit();
-                return response()->json([
-                    'result' => true,
-                ]);
-            } else {
+            if ($user->id !== $course->instructor_id) {
                 DB::rollBack();
                 return response()->json([
                     'result' => false,
                     'message' => 'You are not authorized to perform this action',
                 ], 403);
             }
+            foreach ($chapters as $chapter) {
+                Chapter::where('id',$chapter['chapter_id'])
+                ->where('course_id', $courseId)
+                ->firstOrFail()
+                ->update([
+                    'order' => $chapter['order']
+                ]);
+            }
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             return response()->json([

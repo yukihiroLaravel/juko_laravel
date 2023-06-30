@@ -127,11 +127,17 @@ class ChapterController extends Controller
                         'order' => $chapter['order']
                     ]);
                 }
+                DB::commit();
+                return response()->json([
+                    'result' => true,
+                ]);
+            } else {
+                DB::rollBack();
+                return response()->json([
+                    'result' => false,
+                    'message' => 'You are not authorized to perform this action',
+                ], 403);
             }
-            DB::commit();
-            return response()->json([
-                'result' => true,
-            ]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             return response()->json([

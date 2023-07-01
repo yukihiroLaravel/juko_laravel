@@ -112,8 +112,8 @@ class ChapterController extends Controller
      */
     public function sort(ChapterSortRequest $request)
     {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             $user = Instructor::find(1);
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');

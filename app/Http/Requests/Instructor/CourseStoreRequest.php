@@ -26,7 +26,7 @@ class CourseStoreRequest extends FormRequest
         return [
             'title' => 'required',
             'image' => 'required|mimes:jpg,png',
-            'status' => ['required', 'private'],
+            'status' => 'public', 'private',
         ];
     }
 }

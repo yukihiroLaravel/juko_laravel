@@ -11,6 +11,7 @@ use App\Model\Lesson;
 use App\Model\instructor;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use 
 
 class LessonController extends Controller
 {
@@ -45,9 +46,9 @@ class LessonController extends Controller
     {
         $user = Instructor::find(1);
         $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
-        
+        $course = Course::where('instructor_id',$user->id);
 
-        if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
+        if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id || $course->id !== $lesson->chapter->course_id ) {
             return response()->json([
                 'result' => false,
                 'message' => 'invalid chapter_id or course_id.',
@@ -64,6 +65,7 @@ class LessonController extends Controller
             'result' => true,
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
+        
     }
  
     /**

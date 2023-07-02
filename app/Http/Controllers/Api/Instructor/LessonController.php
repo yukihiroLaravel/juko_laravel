@@ -8,6 +8,8 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Model\Lesson;
 use App\Model\Instructor;
+use App\Model\Attendance;
+use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -77,6 +79,9 @@ class LessonController extends Controller
                     'result' => false,
                 ], 401);
             }
+
+            $attendanceIds = Attendance::where('course_id', $course->id)->pluck('id');
+            LessonAttendance::whereIn('attendance_id', $attendanceIds)->where('lesson_id', $lesson->id)->delete();
 
             $lesson->delete();
 

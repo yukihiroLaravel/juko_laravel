@@ -7,10 +7,12 @@ use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Model\Lesson;
+use App\Model\Instructor;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
 {
@@ -59,9 +61,23 @@ class LessonController extends Controller
      */
     public function delete(LessonDeleteRequest $request)
     {
+
         try {
-            $lesson_id = $request->input('lesson_id');
-            $lesson = Lesson::findOrFail($lesson_id);
+            $lessonId = $request->input('lesson_id');
+            $lesson = Lesson::with('chapter.course')->findOrFail($lessonId);
+
+            $course = $lesson->chapter->course;
+            $instructorId = $course->instructor_id;
+
+            //$user = Auth::user();
+            $user = Instructor::find(1);
+
+            if ($instructorId !== $user->id) {
+                return response()->json([
+                    'result' => false,
+                ], 401);
+            }
+
             $lesson->delete();
 
             return response()->json([

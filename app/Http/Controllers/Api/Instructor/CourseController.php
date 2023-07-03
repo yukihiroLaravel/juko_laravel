@@ -67,7 +67,7 @@ class CourseController extends Controller
         Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
-            'image' => $request->image = $filePath,
+            'image' => $filePath,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

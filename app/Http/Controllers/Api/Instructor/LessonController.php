@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
+use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
@@ -82,10 +83,10 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     *
+     * @param  LessonStoreRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort(Request $request)
+    public function sort(LessonSortRequest $request)
     {
         DB::beginTransaction();
         try {

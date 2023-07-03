@@ -44,27 +44,28 @@ class LessonController extends Controller
     public function update(LessonUpdateRequest $request)
     {
         $user = Instructor::find(1);
-        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-        if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id ) {
-            return response()->json([
-                'result' => false,
-                'message' => 'invalid chapter_id or course_id.',
-            ], 500);
-        }
-
+        if ($lesson->chapter->course->instructor_id === $user->id && (int) $request->chapter_id === $lesson->chapter->id && (int) $request->course_id === $lesson->chapter->course_id) {
         $lesson->update([
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
+            'status' => $request->status,
         ]);
 
         return response()->json([
             'result' => true,
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
-        
+
+        } else {
+            return response()->json([
+                'result' => false,
+                'message' => '一致しません',
+            ], 500);
     }
+}
  
     /**
      * レッスン並び替えAPI

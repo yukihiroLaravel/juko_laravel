@@ -119,7 +119,6 @@ class ChapterController extends Controller
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);
             if ($user->id !== $course->instructor_id) {
-                DB::rollBack();
                 return response()->json([
                     'result' => false,
                     'message' => 'You are not authorized to perform this action',

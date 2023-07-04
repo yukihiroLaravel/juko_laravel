@@ -16,6 +16,10 @@ class Course extends Model
     protected $table = 'courses';
     const PRIVATE_DEFAULT = 1; 
 
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
+
     protected $fillable = [
         'instructor_id',
         'title',

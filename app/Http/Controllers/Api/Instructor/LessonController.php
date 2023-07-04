@@ -48,26 +48,26 @@ class LessonController extends Controller
         $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
         $course = Course::where('id' , $lesson->chapter->course_id)->first();
         if ($course->instructor_id === $user->id) {
-          
+
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
                 'message' => 'invalid chapter_id or course_id.',
             ], 500);
-         }
-            
+        }
+
         $lesson->update([
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
             'status' => $request->status,
         ]);
-            
+
         return response()->json([
             'result' => true,
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
-         
+
         }else{
             return response()->json([
                 'result' => false,
@@ -75,7 +75,7 @@ class LessonController extends Controller
             ], 500);
         }
     }
- 
+
     /**
      * レッスン並び替えAPI
      *

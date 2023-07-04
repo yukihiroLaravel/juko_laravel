@@ -68,6 +68,7 @@ class CourseController extends Controller
             'instructor_id' => $instructorId,
             'title' => $request->title,
             'image' => $filePath,
+            'private' => 1, 
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

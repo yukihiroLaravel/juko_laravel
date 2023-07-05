@@ -45,17 +45,22 @@ class LessonController extends Controller
     public function update(LessonUpdateRequest $request)
     {
         $user = Instructor::find(1);
-        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
-        $course = Course::where('id' , $lesson->chapter->course_id)->first();
-        if ($course->instructor_id === $user->id) {
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if ($lesson->chapter->course->instructor_id !== $user->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 500);
+    }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
-                'message' => 'invalid chapter_id or course_id.',
+                'message' => 'Invalid chapter_id or course_id.',
             ], 500);
         }
-
+ 
         $lesson->update([
             'title' => $request->title,
             'url' => $request->url,
@@ -67,13 +72,6 @@ class LessonController extends Controller
             'result' => true,
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
-
-        }else{
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id',
-            ], 500);
-        }
     }
 
     /**

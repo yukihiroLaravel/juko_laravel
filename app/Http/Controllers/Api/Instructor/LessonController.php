@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
+use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
@@ -42,10 +42,10 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     *
+     * @param  LessonSortRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort(Request $request)
+    public function sort(LessonSortRequest $request)
     {
         DB::beginTransaction();
         try {

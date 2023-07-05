@@ -83,7 +83,7 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     * @param  LessonStoreRequest  $request
+     * @param  LessonSortRequest  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request)

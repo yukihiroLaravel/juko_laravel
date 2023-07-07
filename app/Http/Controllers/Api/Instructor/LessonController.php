@@ -66,30 +66,11 @@ class LessonController extends Controller
     {
 
         try {
-            //$courseId = $request->input('course_id');
-            //$chapterId = $request->input('chapter_id');
-
             $lessonId = $request->input('lesson_id');
             $lesson = Lesson::with('chapter.course')->findOrFail($lessonId);
 
             $course = $lesson->chapter->course;
             $instructorId = $course->instructor_id;
-
-            //$course = Course::find($courseId);
-            //if (!$course) {
-            //return response()->json([
-            //'result' => false,
-            //'message' => 'Invalid course ID.'
-            //], 400);
-
-            //$chapter = $course->chapters()->find($chapterId);
-            //if (!$chapter) {
-            //return response()->json([
-            //'result' => false,
-            //'message' => 'Invalid chapter ID.'
-            //], 400);
-            //}
-            //}
 
             //$user = Auth::user();
             $user = Instructor::find(1);
@@ -103,18 +84,8 @@ class LessonController extends Controller
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Cannot delete lesson with active attendance.'
                 ], 400);
             }
-
-            //$lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)->get();
-
-            //if ($lessonAttendance->isNotEmpty()) {
-            //return response()->json([
-            //'result' => false,
-            //'message' => 'Cannot delete lesson with active attendance.'
-            //], 400);
-            //}
 
             return response()->json([
                 'result' => true,

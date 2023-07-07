@@ -18,7 +18,7 @@ class CourseEditResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
-            'status' => $this->resource->private ? 'private' : 'public',
+            'status' => $this->resource->status,
         ];
     }
 }

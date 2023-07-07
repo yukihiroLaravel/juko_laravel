@@ -13,9 +13,7 @@ class Course extends Model
      *
      * @var string
      */
-    protected $table = 'courses';
-    const PRIVATE_DEFAULT = 1; 
-
+    
     // ステータス定数
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';

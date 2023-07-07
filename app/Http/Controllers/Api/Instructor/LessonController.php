@@ -9,7 +9,6 @@ use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
 use App\Model\Instructor;
-use App\Model\Course;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -51,14 +50,14 @@ class LessonController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid instructor_id',
-            ], 500);
-    }
+            ], 403);
+        }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid chapter_id or course_id.',
-            ], 500);
+            ], 403);
         }
  
         $lesson->update([

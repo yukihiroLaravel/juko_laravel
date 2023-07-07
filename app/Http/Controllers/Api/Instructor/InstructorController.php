@@ -14,8 +14,9 @@ class InstructorController extends Controller
      * @param InstructorPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update($request)
+    public function update(Request $request)
     {
-        return response()->json([]);
+        return response()->json([
+        ]);
     }
 }

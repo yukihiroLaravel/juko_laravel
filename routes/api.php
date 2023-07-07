@@ -20,7 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
-        Route::prefix('{instructor_id}')->group(function () {
             Route::patch('/', 'Api\Instructor\InstructorController@update');
             Route::prefix('course')->group(function () {
                 Route::get('index', 'Api\Instructor\CourseController@index');
@@ -42,7 +41,6 @@ Route::prefix('v1')->group(function () {
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::patch('/', 'Api\Instructor\LessonController@update');
-                                });
                             });
                         });
                     });

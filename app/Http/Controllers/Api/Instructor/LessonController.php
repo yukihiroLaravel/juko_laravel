@@ -80,10 +80,12 @@ class LessonController extends Controller
                 ], 401);
             }
 
-            $attendanceIds = Attendance::where('course_id', $course->id)->pluck('id');
-            LessonAttendance::whereIn('attendance_id', $attendanceIds)->where('lesson_id', $lesson->id)->delete();
-
-            $lesson->delete();
+            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Cannot delete lesson with active attendance.'
+                ], 400);
+            }
 
             return response()->json([
                 'result' => true,

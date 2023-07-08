@@ -64,9 +64,6 @@ class CourseController extends Controller
         $extension = $file->getClientOriginalExtension();
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('course', $file, $filename);
-        // return response()->json([
-        //     "result" => Course::STATUS_PUBLIC,
-        // ]);
         Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,

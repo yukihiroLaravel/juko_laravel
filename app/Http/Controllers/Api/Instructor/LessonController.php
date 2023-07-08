@@ -8,8 +8,6 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Model\Lesson;
 use App\Model\Instructor;
-use App\Model\Attendance;
-use App\Model\Course;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -78,13 +76,15 @@ class LessonController extends Controller
             if ($instructorId !== $user->id) {
                 return response()->json([
                     'result' => false,
-                ], 401);
+                    'message' => 'Invalid instructor_id.'
+                ], 403);
             }
 
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([
                     'result' => false,
-                ], 400);
+                    'message' => 'Information about current lessons'
+                ], 403);
             }
 
             return response()->json([

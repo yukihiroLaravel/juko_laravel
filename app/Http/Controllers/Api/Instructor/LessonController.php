@@ -8,6 +8,7 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Model\Lesson;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -75,10 +76,16 @@ class LessonController extends Controller
             if ($instructorId !== $user->id) {
                 return response()->json([
                     'result' => false,
-                ], 401);
+                    'message' => 'Invalid instructor_id.'
+                ], 403);
             }
 
-            $lesson->delete();
+            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Information about current lessons'
+                ], 403);
+            }
 
             return response()->json([
                 'result' => true,

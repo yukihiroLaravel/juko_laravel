@@ -22,7 +22,7 @@ class Course extends Model
         'instructor_id',
         'title',
         'image',
-        'private',
+        'status',
         'created_at',
         'updated_at',
     ];

@@ -13,7 +13,6 @@ class Course extends Model
      *
      * @var string
      */
-    
     // ステータス定数
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Course;
+use App\Model\Attendance;
+use App\Model\instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
@@ -95,7 +97,7 @@ class CourseController extends Controller
     public function update(CourseUpdateRequest $request)
     {
         $file = $request->file('image');
-
+        
         try {
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
@@ -137,10 +139,27 @@ class CourseController extends Controller
      */
     public function delete(CourseDeleteRequest $request)
     {
+        $user = Instructor::find(1);
         $course = Course::findOrFail($request->course_id);
-        $course->delete();
-        return response()->json([
-
-        ]);
+        if ($user->id === $course->instructor_id){
+            if (Attendance::where('course_id', $request->course_id)->exists()) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "This course has already been taken by students."
+                ]);
+            }
+            if (Storage::exists($course->image)) {
+                Storage::delete($course->image);
+            }
+            $course->delete();
+            return response()->json([
+                "result" => true,
+            ]);
+        }else{
+            return response()->json([
+                "result" => false,
+                "message" => "Lecturer (cannot be deleted because the creator does not match)"
+            ]);
+        }
     }
 }

@@ -32,12 +32,16 @@ Route::prefix('v1')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
                     Route::prefix('{chapter_id}')->group(function () {
+                        Route::get('/', 'Api\Instructor\ChapterController@show');
                         Route::patch('/', 'Api\Instructor\ChapterController@update');
                         Route::delete('/', 'Api\Instructor\ChapterController@delete');
                         Route::prefix('lesson')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
                             Route::post('sort', 'Api\Instructor\LessonController@sort');
                             Route::delete('{lesson_id}', 'Api\Instructor\LessonController@delete');
+                            Route::prefix('{lesson_id}')->group(function () {
+                                Route::patch('/', 'Api\Instructor\LessonController@update');
+                            });
                         });
                     });
                 });

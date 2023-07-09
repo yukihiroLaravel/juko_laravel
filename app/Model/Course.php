@@ -19,7 +19,9 @@ class Course extends Model
     protected $fillable = [
         'instructor_id',
         'title',
-        'image'
+        'image',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -51,5 +53,15 @@ class Course extends Model
     public function chapters()
     {
         return $this->hasMany(Chapter::class);
+    }
+
+    protected static function boot() 
+    {
+        parent::boot();
+        static::deleting(function($course) {
+            foreach ($course->chapters()->get() as $child) {
+                $child->delete();
+            }
+        });
     }
 }

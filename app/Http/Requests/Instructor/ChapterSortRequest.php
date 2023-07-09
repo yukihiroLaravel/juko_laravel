@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseStoreRequest extends FormRequest
+class ChapterSortRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,12 +20,22 @@ class CourseStoreRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array
-     */
+     */ 
+    
     public function rules()
     {
         return [
-            'title' => ['required'],
-            'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'course_id' => ['required', 'integer'],
+            'chapters' => ['required', 'array'],
+            'chapters.*.chapter_id' => ['required', 'integer'],
+            'chapters.*.order' => ['required', 'integer'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
     }
 }

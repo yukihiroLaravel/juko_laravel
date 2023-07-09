@@ -14,8 +14,8 @@ use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class LessonController extends Controller
 {
@@ -83,7 +83,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      *
-     * @param Request $request
+     * @param LessonDeleteRequest $request
      * @return JsonResponse
      */
     public function delete(LessonDeleteRequest $request)

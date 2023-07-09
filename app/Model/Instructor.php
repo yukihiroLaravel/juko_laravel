@@ -14,16 +14,6 @@ class Instructor extends Model
     protected $table = 'instructors';
 
     /**
-     * @var array<string>
-     */
-    protected $fillable = [
-        'nick_name',
-        'last_name',
-        'first_name',
-        'email'
-    ];
-
-    /**
      * 講座を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+
 class CourseUpdateRequest extends FormRequest
 {
     /**
@@ -34,6 +35,7 @@ class CourseUpdateRequest extends FormRequest
             'course_id' => ['required','integer'],
             'title' => ['required','string'],
             'image' => ['mimes:jpg,png'],
+            'status' => ['required', 'string'],
         ];
     }
 }

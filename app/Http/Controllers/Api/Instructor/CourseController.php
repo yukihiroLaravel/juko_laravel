@@ -117,7 +117,8 @@ class CourseController extends Controller
 
             $course->update([
                 'title' => $request->title,
-                'image' => $imagePath
+                'image' => $imagePath,
+                'status' => $request->status,
             ]);
 
             return response()->json([

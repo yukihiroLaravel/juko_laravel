@@ -18,7 +18,7 @@ class CourseUpdateResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
-            'status' => $request->status ?? $this->status,
+            'status' => $this->resource->status,
         ];
     }
 }

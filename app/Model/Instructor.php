@@ -13,6 +13,13 @@ class Instructor extends Model
      */
     protected $table = 'instructors';
 
+    protected $fillable = [
+        'nick_name',
+        'last_name',
+        'first_name',
+        'email',
+    ];
+
     /**
      * 講座を取得
      *

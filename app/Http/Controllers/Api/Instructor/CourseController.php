@@ -57,25 +57,28 @@ class CourseController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(CourseStoreRequest $request)
-    {
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = date('YmdHis') . '.' . $extension;
-        $filePath = Storage::putFileAs('course', $file, $filename);
-        Course::create([
-            'instructor_id' => $instructorId,
-            'title' => $request->title,
-            'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
-        return response()->json([
-            "result" => true,
-        ]);
-    }
+{
+    // TODO 認証機能ができるまで、講師IDを固定値で設定
+    $instructorId = 1;
+    $file = $request->file('image');
+    $extension = $file->getClientOriginalExtension();
+    $filename = date('YmdHis') . '.' . $extension;
+    $filePath = Storage::putFileAs('course', $file, $filename);
+    
+    $course = Course::create([
+        'instructor_id' => $instructorId,
+        'title' => $request->title,
+        'image' => $filePath,
+        'status' => Course::STATUS_PRIVATE,
+        'created_at' => Carbon::now(),
+        'updated_at' => Carbon::now(),
+    ]);
+
+    return response()->json([
+        "result" => true,
+        "data" => new CourseStoreResource($course),
+    ]);
+}
 
     /**
      * 講座編集API

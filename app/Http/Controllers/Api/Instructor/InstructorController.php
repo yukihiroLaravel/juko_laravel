@@ -11,8 +11,7 @@ class InstructorController extends Controller
      /**
      * 講師情報編集API
      *
-     * @param 
-     * @return CourseEditResource
+     * @return InstructorEditResource
      */
     public function edit()
     {   

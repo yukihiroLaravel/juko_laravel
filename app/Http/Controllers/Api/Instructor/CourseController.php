@@ -15,6 +15,7 @@ use App\Http\Resources\Instructor\CourseUpdateResource;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Instructor\CourseEditResource;
+use App\Http\Resources\Instructor\CourseStoreResource;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,15 +65,19 @@ class CourseController extends Controller
         $extension = $file->getClientOriginalExtension();
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('course', $file, $filename);
-        Course::create([
+    
+        $course = Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
-            'image' => $request->image = $filePath,
+            'image' => $filePath,
+            'status' => Course::STATUS_PRIVATE,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
+    
         return response()->json([
             "result" => true,
+            "data" => new CourseStoreResource($course),
         ]);
     }
 
@@ -116,7 +121,8 @@ class CourseController extends Controller
 
             $course->update([
                 'title' => $request->title,
-                'image' => $imagePath
+                'image' => $imagePath,
+                'status' => $request->status,
             ]);
 
             return response()->json([

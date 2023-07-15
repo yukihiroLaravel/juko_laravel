@@ -8,10 +8,8 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
-use App\Model\Instructor;
 use Exception;
 use Illuminate\Support\Facades\Log;
-
 
 class LessonController extends Controller
 {
@@ -44,23 +42,15 @@ class LessonController extends Controller
 
     public function update(LessonUpdateRequest $request)
     {
-        $user = Instructor::find(1);
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        if ($lesson->chapter->course->instructor_id !== $user->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id',
-            ], 403);
-        }
+        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
-                'message' => 'Invalid chapter_id or course_id.',
-            ], 403);
+                'message' => 'invalid chapter_id or course_id.',
+            ], 500);
         }
- 
+
         $lesson->update([
             'title' => $request->title,
             'url' => $request->url,
@@ -73,7 +63,7 @@ class LessonController extends Controller
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
     }
-
+ 
     /**
      * レッスン並び替えAPI
      *

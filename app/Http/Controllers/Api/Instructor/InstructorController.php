@@ -19,7 +19,7 @@ class InstructorController extends Controller
         try{
             $instructorId = 1;
             $instructor = Instructor::findOrFail($instructorId);
-            $instructor->update([
+                ->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
                 'first_name' => $request->first_name,

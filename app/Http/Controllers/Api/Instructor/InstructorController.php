@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Instructor;
 use Illuminate\Http\Request;
 use App\Model\Instructor;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
 
 class InstructorController extends Controller
 {
@@ -18,14 +17,7 @@ class InstructorController extends Controller
     public function update(Request $request)
     {
         try{
-            $user = $user = Instructor::find(1);
-            $instructor = Instructor::findOrFail($request->instructor_id);
-            if ($instructor->id !== $user->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id',
-                ], 403);
-            }
+            $user = Instructor::find(1);
             $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
@@ -34,7 +26,7 @@ class InstructorController extends Controller
             ]);
             return response()->json([
                 'result' => true,
-                // 'data' => new InstructorPatchResource($instructor),
+                // 'data' => new InstructorPatchResource($instructor)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);

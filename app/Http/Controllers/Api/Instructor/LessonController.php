@@ -49,32 +49,35 @@ class LessonController extends Controller
      */
     public function sort(LessonSortRequest $request)
     {
-        $lesson_sort = new Chapter;
         
-        if ((int) $request->chapter->id == $lesson_sort->chapter_id || (int) $request->course->id == $lesson->course_id){
-            
-            DB::beginTransaction();
-            try {
-                $lessons = $request->input('lessons');
-                foreach ($lessons as $lesson) {
-                    Lesson::findOrFail($lesson['lesson_id'])->update([
-                        'order' => $lesson['order']
-                    ]);
-                }
-                
-                DB::commit();
-                
+        DB::beginTransaction();
+        
+        try {
+            $lessons = new Chapter;
+            if ((int) $request->chapter->id == $lessons->chapter_id || (int) $request->course->id == $lessons->course_id){
                 return response()->json([
-                    "result" => true
-                ]);
-            } catch (Exception $e) {
-                DB::rollBack();
-                Log::error($e);
-                return response()->json([
-                    "result" => false,
+                    "result" => false
                 ]);
             }
-           
+
+            $lessons = $request->input('lessons');
+            foreach ($lessons as $lesson) {
+                Lesson::findOrFail($lesson['lesson_id'])->update([
+                    'order' => $lesson['order']
+                ]);
+            }
+            
+            DB::commit();
+
+            return response()->json([
+                "result" => true
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ]);
         }
     }
     

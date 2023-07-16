@@ -105,16 +105,24 @@ class LessonController extends Controller
 
                 DB::commit();
 
+
+        DB::beginTransaction();
+
+        try {
+            $lessons = new Chapter;
+            if ((int) $request->chapter->id == $lessons->chapter_id || (int) $request->course->id == $lessons->course_id){
                 return response()->json([
-                    "result" => true
-                ]);
-            } catch (Exception $e) {
-                DB::rollBack();
-                Log::error($e);
-                return response()->json([
-                    "result" => false,
+                    "result" => false
                 ]);
             }
+
+            $lessons = $request->input('lessons');
+            foreach ($lessons as $lesson) {
+                Lesson::findOrFail($lesson['lesson_id'])->update([
+                    'order' => $lesson['order']
+                ]);
+            }
+
 
             DB::commit();
 

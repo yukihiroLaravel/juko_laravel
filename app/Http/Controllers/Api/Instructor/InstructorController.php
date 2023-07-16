@@ -9,14 +9,30 @@ use App\Http\Controllers\Controller;
 class InstructorController extends Controller
 {
     /**
-     * チャプター更新API
+     * インストラクター情報更新API
      *
      * @param InstructorPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request)
     {
-        return response()->json([
-        ]);
+        try{
+            Instructor::findOrFail(1)
+                ->update([
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
+                'email' => $request->email
+            ]);
+            return response()->json([
+                'result' => true,
+                // 'data' => new InstructorPatchResource($instructor)
+            ]);
+        } catch (RuntimeException $e) {
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
     }
 }

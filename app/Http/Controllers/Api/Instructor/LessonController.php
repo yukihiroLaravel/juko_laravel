@@ -12,6 +12,7 @@ use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
+use App\Model\Chapter;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 
 class LessonController extends Controller
 {
@@ -88,12 +90,29 @@ class LessonController extends Controller
      */
     public function sort(LessonSortRequest $request)
     {
-        DB::beginTransaction();
-        try {
-            $lessons = $request->input('lessons');
-            foreach ($lessons as $lesson) {
-                Lesson::findOrFail($lesson['lesson_id'])->update([
-                    'order' => $lesson['order']
+        $lesson_sort = new Chapter;
+
+        if ((int) $request->chapter->id == $lesson_sort->chapter_id || (int) $request->course->id == $lesson->course_id){
+
+            DB::beginTransaction();
+            try {
+                $lessons = $request->input('lessons');
+                foreach ($lessons as $lesson) {
+                    Lesson::findOrFail($lesson['lesson_id'])->update([
+                        'order' => $lesson['order']
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    "result" => true
+                ]);
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error($e);
+                return response()->json([
+                    "result" => false,
                 ]);
             }
 
@@ -158,4 +177,8 @@ class LessonController extends Controller
             ], 500);
         }
     }
+
+        }
+    }
+
 }

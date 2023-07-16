@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 
 class InstructorController extends Controller
 {
-     /**
+    /**
      * 講師情報編集API
      *
      * @return InstructorEditResource
@@ -16,8 +16,8 @@ class InstructorController extends Controller
     public function edit()
     {   
         // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $InstructorId = 1;
-        $Instructor = Instructor::findOrFail($InstructorId);
-        return new InstructorEditResource($Instructor);
+        $instructorId = 1;
+        $instructor = Instructor::findOrFail($instructorId);
+        return new InstructorEditResource($instructor);
     }
 }

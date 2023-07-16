@@ -7,9 +7,11 @@ use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+
 
 class LessonController extends Controller
 {
@@ -47,26 +49,33 @@ class LessonController extends Controller
      */
     public function sort(LessonSortRequest $request)
     {
-        DB::beginTransaction();
-        try {
-            $lessons = $request->input('lessons');
-            foreach ($lessons as $lesson) {
-                Lesson::findOrFail($lesson['lesson_id'])->update([
-                    'order' => $lesson['order']
+        $lesson_sort = new Chapter;
+        
+        if ((int) $request->chapter->id == $lesson_sort->chapter_id || (int) $request->course->id == $lesson->course_id){
+            
+            DB::beginTransaction();
+            try {
+                $lessons = $request->input('lessons');
+                foreach ($lessons as $lesson) {
+                    Lesson::findOrFail($lesson['lesson_id'])->update([
+                        'order' => $lesson['order']
+                    ]);
+                }
+                
+                DB::commit();
+                
+                return response()->json([
+                    "result" => true
+                ]);
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error($e);
+                return response()->json([
+                    "result" => false,
                 ]);
             }
-            
-            DB::commit();
-
-            return response()->json([
-                "result" => true
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            return response()->json([
-                "result" => false,
-            ]);
+           
         }
     }
+    
 }

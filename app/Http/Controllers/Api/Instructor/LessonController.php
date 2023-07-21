@@ -110,13 +110,13 @@ class LessonController extends Controller
 
         try {
             $lessons = new Lesson;
-            // if ((int) $request->chapter->id == $lessons->chapter_id || (int) $request->course->id == $lessons->course_id)
-            // {
+            if ((int) $request->chapter->id == $lessons->chapter_id || (int) $request->course->id == $lessons->course_id)
+            {
                 return response()->json([
                     "result" => false,
                     "message"=> "Invalid chapter_id or course_id.",
                 ]);
-            // }
+            }
 
             $lessons = $request->input('lessons');
             foreach ($lessons as $lesson) {

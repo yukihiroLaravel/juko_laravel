@@ -26,7 +26,6 @@ class Lesson extends Model
         'remarks',
         'status',
         'order',
-        'role',
     ];
     /**
      * チャプターを取得

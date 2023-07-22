@@ -8,18 +8,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Course extends Model
 {
     use SoftDeletes;
-
     /**
      * モデルと関連しているテーブル
      *
      * @var string
      */
     protected $table = 'courses';
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
 
     protected $fillable = [
         'instructor_id',
         'title',
         'image',
+        'status',
         'created_at',
         'updated_at',
     ];

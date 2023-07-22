@@ -19,6 +19,7 @@ class CourseIndexResource extends JsonResource
                 'course_id' => $course->id,
                 'image' => $course->image,
                 'title' => $course->title,
+                'status' => $course->status,
             ];
         });
     }

@@ -18,6 +18,7 @@ class CourseShowResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
+            'status' => $this->resource->status,
             'chapters'=> $this->resource->chapters->map(function ($chapter) {
                 return [
                     'chapter_id' => $chapter->id,

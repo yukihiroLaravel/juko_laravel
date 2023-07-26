@@ -109,8 +109,11 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $lessons = new Lesson;
-            if ((int) $request->chapter->id == $lessons->chapter_id || (int) $request->course->id == $lessons->course_id)
+            $user = Chapter::find(1);
+            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+
+            if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id)
             {
                 return response()->json([
                     "result" => false,
@@ -131,6 +134,19 @@ class LessonController extends Controller
             return response()->json([
                 "result" => true
             ]);
+
+                $lessons = $request->input('lessons');
+                foreach ($lessons as $lesson) {
+                    Lesson::findOrFail($lesson['lesson_id'])->update([
+                        'order' => $lesson['order']
+                    ]);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    "result" => true
+                ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

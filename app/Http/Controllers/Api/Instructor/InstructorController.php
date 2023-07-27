@@ -19,11 +19,11 @@ class InstructorController extends Controller
         try{
             Instructor::findOrFail(1)
                 ->update([
-                    'nick_name' => $request->nick_name,
-                    'last_name' => $request->last_name,
-                    'first_name' => $request->first_name,
-                    'email' => $request->email
-                ]);
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
+                'email' => $request->email
+            ]);
             return response()->json([
                 'result' => true,
                 // 'data' => new InstructorPatchResource($instructor)

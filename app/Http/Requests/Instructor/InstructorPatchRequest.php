@@ -24,10 +24,10 @@ class InstructorPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name' => 'required|string',
-            'last_name' => 'required|string',
-            'first_name' => 'required|string',
-            'email' => 'required|email',
+            'nick_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'first_name' => ['required', 'string'],
+            'email' => ['required', 'email'],
         ];
     }
 }

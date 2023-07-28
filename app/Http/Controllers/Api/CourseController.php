@@ -18,10 +18,9 @@ class CourseController extends Controller
      * @return CourseIndexResource
      */
     public function index(CourseIndexRequest $request)
-    {
+    {        
         if ($request->text === null) {
             $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-            return new CourseIndexResource($attendances);
         }
 
         $attendances = Attendance::whereHas('course', function ($q) use ($request) {
@@ -30,7 +29,15 @@ class CourseController extends Controller
             ->with(['course.instructor'])
             ->where('student_id', '=', $request->student_id)
             ->get();
-        return new CourseIndexResource($attendances);
+            
+        $publicAttendances = collect();
+        foreach ($attendances as $attendance) {
+            if ($attendance->course->status === 'public') {
+                $publicAttendances->push($attendance);
+            }
+        }
+
+        return new CourseIndexResource($publicAttendances);
     }
 
     /**

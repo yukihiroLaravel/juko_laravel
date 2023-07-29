@@ -43,7 +43,6 @@ class CourseController extends Controller
         });
         return $publicAttendances;
     }
-
     /**
      * 講座詳細取得API
      *

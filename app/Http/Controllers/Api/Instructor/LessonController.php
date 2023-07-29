@@ -55,29 +55,22 @@ class LessonController extends Controller
         try {
             $user = Chapter::find(1);
             $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-    
-            
-            if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) 
-            {
+            if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id){
                 return response()->json([
                     "result" => false,
                     "message"=> "Invalid chapter_id or course_id.",
                 ]);
             }
-
-            
-                $lessons = $request->input('lessons');
-                foreach ($lessons as $lesson) {
-                    Lesson::findOrFail($lesson['lesson_id'])->update([
-                        'order' => $lesson['order']
-                    ]);
-                }
-                
-                DB::commit();
-                
-                return response()->json([
-                    "result" => true
+            $lessons = $request->input('lessons');
+            foreach ($lessons as $lesson) {
+                Lesson::findOrFail($lesson['lesson_id'])->update([
+                    'order' => $lesson['order']
                 ]);
+            }
+            DB::commit();
+            return response()->json([
+                "result" => true
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

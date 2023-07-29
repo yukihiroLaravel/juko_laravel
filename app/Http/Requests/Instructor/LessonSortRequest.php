@@ -26,7 +26,7 @@ class LessonSortRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer'],
             'chapter_id' => ['required', 'integer'],
-            'lessons' => ['required','array'],
+            'lessons' => ['required', 'array'],
             'lessons.*.lesson_id' => ['required', 'integer'],
             'lessons.*.order' => ['required', 'integer'],
         ];

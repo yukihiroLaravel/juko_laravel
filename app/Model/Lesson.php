@@ -11,8 +11,6 @@ class Lesson extends Model
      *
      * @var string
      */
-
-
    protected $table = 'lessons';
 
     // ステータス定数
@@ -27,6 +25,7 @@ class Lesson extends Model
         'status',
         'order',
     ];
+    
     /**
      * チャプターを取得
      *

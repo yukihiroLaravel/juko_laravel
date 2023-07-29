@@ -8,6 +8,7 @@ use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
 use App\Model\Attendance;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -18,9 +19,11 @@ class CourseController extends Controller
      * @return CourseIndexResource
      */
     public function index(CourseIndexRequest $request)
-    {        
+    {
         if ($request->text === null) {
             $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            $publicAttendances = $this->extractPublicCourse($attendances);
+            return new CourseIndexResource($publicAttendances);
         }
 
         $attendances = Attendance::whereHas('course', function ($q) use ($request) {
@@ -29,15 +32,16 @@ class CourseController extends Controller
             ->with(['course.instructor'])
             ->where('student_id', '=', $request->student_id)
             ->get();
-            
-        $publicAttendances = collect();
-        foreach ($attendances as $attendance) {
-            if ($attendance->course->status === 'public') {
-                $publicAttendances->push($attendance);
-            }
-        }
-
+        $publicAttendances = $this->extractPublicCourse($attendances);
         return new CourseIndexResource($publicAttendances);
+    }
+
+    private function extractPublicCourse($attendances)
+    {
+        $publicAttendances = $attendances->filter(function ($attendance) {
+            return $attendance->course->status === Course::STATUS_PUBLIC;
+        });
+        return $publicAttendances;
     }
 
     /**

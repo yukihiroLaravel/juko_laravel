@@ -22,8 +22,8 @@ class CourseController extends Controller
     {
         if ($request->text === null) {
             $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-            $attendances = $this->extractPublicCourse($attendances);
-            return new CourseIndexResource($attendances);
+            $publicAttendances = $this->extractPublicCourse($attendances);
+            return new CourseIndexResource($publicAttendances);
         }
 
         $attendances = Attendance::whereHas('course', function ($q) use ($request) {
@@ -32,16 +32,15 @@ class CourseController extends Controller
             ->with(['course.instructor'])
             ->where('student_id', '=', $request->student_id)
             ->get();
-        $attendances = $this->extractPublicCourse($attendances);
-        return new CourseIndexResource($attendances);
+        $publicAttendances = $this->extractPublicCourse($attendances);
+        return new CourseIndexResource($publicAttendances);
     }
 
     private function extractPublicCourse($attendances)
     {
-        $publicAttendances = $attendances->filter(function ($attendance) {
+        return $attendances->filter(function ($attendance) {
             return $attendance->course->status === Course::STATUS_PUBLIC;
         });
-        return $publicAttendances;
     }
     /**
      * 講座詳細取得API

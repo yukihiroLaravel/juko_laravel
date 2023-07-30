@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Illuminate\Http\Request;
 use App\Model\Instructor;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\InstructorPatchRequest;
 
 class InstructorController extends Controller
 {
@@ -14,7 +14,7 @@ class InstructorController extends Controller
      * @param InstructorPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request)
+    public function update(InstructorPatchRequest $request)
     {
         try{
             Instructor::findOrFail(1)

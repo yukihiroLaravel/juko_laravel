@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Student\StudentController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -58,5 +60,10 @@ Route::prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
+    Route::prefix('student')->group(function () {
+        // チャプター更新API（updateメソッド）
+        Route::patch('{student_id}/update', [StudentController::class, 'update']);
+    });
+
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

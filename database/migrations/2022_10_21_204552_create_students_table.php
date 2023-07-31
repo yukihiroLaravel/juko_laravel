@@ -28,7 +28,7 @@ class CreateStudentsTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
-            $table->dateTime('last_login_at');
+            $table->dateTime('last_login_at');//カラム追加(最終ログイン日時)
         });
     }
 

@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
         Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::get('edit', 'Api\Instructor\InstructorController@edit');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');
@@ -40,6 +41,7 @@ Route::prefix('v1')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
                             Route::post('sort', 'Api\Instructor\LessonController@sort');
                             Route::prefix('{lesson_id}')->group(function () {
+                                Route::delete('/', 'Api\Instructor\LessonController@delete');
                                 Route::patch('/', 'Api\Instructor\LessonController@update');
                             });
                         });

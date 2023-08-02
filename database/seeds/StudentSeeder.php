@@ -28,6 +28,7 @@ class StudentSeeder extends Seeder
                 'address' => '東京都',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'last_login_at' => Carbon::now(),
             ],
             [
                 'nick_name' => '生徒ニックネーム2',
@@ -42,6 +43,7 @@ class StudentSeeder extends Seeder
                 'address' => '大阪府',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'last_login_at' => Carbon::now(),
             ]
         ]);
     }

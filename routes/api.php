@@ -37,6 +37,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });
         Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');

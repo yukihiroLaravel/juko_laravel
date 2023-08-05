@@ -10,6 +10,7 @@ use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
@@ -46,5 +47,15 @@ class StudentController extends Controller
         $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
 
         return new StudentShowResource($student);
+     * 受講生登録API
+     *
+     * @param Request $request
+     * @return Resource
+     */
+    }
+
+    public function store(Request $request)
+    {
+        return response()->json([]);
     }
 }

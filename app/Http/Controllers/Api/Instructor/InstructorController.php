@@ -6,6 +6,7 @@ use App\Model\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorEditResource;
+use App\Http\Resources\Instructor\InstructorPatchResource;
 
 class InstructorController extends Controller
 {
@@ -18,8 +19,8 @@ class InstructorController extends Controller
     public function update(InstructorPatchRequest $request)
     {
         try{
-            Instructor::findOrFail(1)
-                ->update([
+            $instructor = Instructor::findOrFail($request->instructor_id);
+            $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
                 'first_name' => $request->first_name,
@@ -27,7 +28,7 @@ class InstructorController extends Controller
             ]);
             return response()->json([
                 'result' => true,
-                // 'data' => new InstructorPatchResource($instructor)
+                'data' => new InstructorPatchResource($instructor)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);

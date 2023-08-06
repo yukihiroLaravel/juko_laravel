@@ -19,7 +19,7 @@ class InstructorController extends Controller
     public function update(InstructorPatchRequest $request)
     {
         try{
-            $instructor = Instructor::findOrFail($request->instructor_id);
+            $instructor = Instructor::findOrFail(1);
             $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,

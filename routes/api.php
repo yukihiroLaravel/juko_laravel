@@ -62,7 +62,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::prefix('student')->group(function () {
         // チャプター更新API（updateメソッド）
-        Route::patch('{student_id}/update', [StudentController::class, 'update']);
+        Route::patch('/', 'Api\Student\StudentController@update');
     });
 
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');

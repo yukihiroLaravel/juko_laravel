@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function show(Request $request)
+    public function index(Request $request)
     {
         return response()->json([]);
     }

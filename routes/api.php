@@ -29,26 +29,29 @@ Route::prefix('v1')->group(function () {
                 Route::get('edit', 'Api\Instructor\CourseController@edit');
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
-                Route::prefix('chapter')->group(function () {
-                    Route::post('/', 'Api\Instructor\ChapterController@store');
-                    Route::post('sort', 'Api\Instructor\ChapterController@sort');
-                    Route::prefix('{chapter_id}')->group(function () {
-                        Route::get('/', 'Api\Instructor\ChapterController@show');
-                        Route::patch('/', 'Api\Instructor\ChapterController@update');
-                        Route::delete('/', 'Api\Instructor\ChapterController@delete');
-                        Route::prefix('lesson')->group(function () {
-                            Route::post('/', 'Api\Instructor\LessonController@store');
-                            Route::post('sort', 'Api\Instructor\LessonController@sort');
-                            Route::prefix('{lesson_id}')->group(function () {
-                                Route::delete('/', 'Api\Instructor\LessonController@delete');
-                                Route::patch('/', 'Api\Instructor\LessonController@update');
+                Route::prefix('attendance')->group(function () {
+                    Route::get('login_rate', 'Api\Instructor\AttendanceController@show');
+                });
+                    Route::prefix('chapter')->group(function () {
+                        Route::post('/', 'Api\Instructor\ChapterController@store');
+                        Route::post('sort', 'Api\Instructor\ChapterController@sort');
+                        Route::prefix('{chapter_id}')->group(function () {
+                            Route::get('/', 'Api\Instructor\ChapterController@show');
+                            Route::patch('/', 'Api\Instructor\ChapterController@update');
+                            Route::delete('/', 'Api\Instructor\ChapterController@delete');
+                            Route::prefix('lesson')->group(function () {
+                                Route::post('/', 'Api\Instructor\LessonController@store');
+                                Route::post('sort', 'Api\Instructor\LessonController@sort');
+                                Route::prefix('{lesson_id}')->group(function () {
+                                    Route::delete('/', 'Api\Instructor\LessonController@delete');
+                                    Route::patch('/', 'Api\Instructor\LessonController@update');
+                                });
                             });
                         });
                     });
                 });
             });
         });
-    });
 
     // 受講生側API
     Route::prefix('course')->group(function () {

@@ -10,9 +10,9 @@ use App\Http\Controllers\Controller;
 class StudentController extends Controller
 {
     /**
-     * チャプター更新API
+     * 学生情報更新API
      *
-     * @param InstructorPatchRequest $request
+     * @param StudentPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request)

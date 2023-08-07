@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+//受講生登録(講師側)動作確認テスト
+Route::post('student_mail_test','Api\Instructor\StudentController@student_mail_test');
 Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {

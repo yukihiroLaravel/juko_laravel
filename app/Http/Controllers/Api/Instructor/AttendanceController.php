@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 
 class AttendanceController extends Controller
 {
-    public function show() {
+    public function loginRate() {
         return response()->json([]);
     }
 }

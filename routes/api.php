@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
+        Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');

@@ -13,7 +13,7 @@ class Lesson extends Model
      *
      * @var string
      */
-   protected $table = 'lessons';
+    protected $table = 'lessons';
 
     // ステータス定数
     const STATUS_PUBLIC = 'public';
@@ -27,7 +27,7 @@ class Lesson extends Model
         'status',
         'order',
     ];
-    
+
     /**
      * チャプターを取得
      *

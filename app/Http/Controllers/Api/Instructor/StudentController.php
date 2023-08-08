@@ -18,4 +18,9 @@ class StudentController extends Controller
     {
         return response()->json([]);
     }
+    // 動作確認テスト
+    public function student_test(Request $request)
+    {
+        return response()->json([]);
+    }
 }

@@ -20,8 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
-        Route::patch('/', 'Api\Instructor\InstructorController@update');
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
+        Route::patch('/', 'Api\Instructor\InstructorController@update');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');

@@ -59,7 +59,7 @@ Route::prefix('v1')->group(function () {
         });
     });
     Route::prefix('student')->group(function () {
-        // チャプター更新API（updateメソッド）
+        // 生徒情報更新API（updateメソッド）
         Route::patch('/', 'Api\Student\StudentController@update');
     });
 

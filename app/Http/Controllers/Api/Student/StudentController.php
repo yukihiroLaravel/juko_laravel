@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 class StudentController extends Controller
 {
     /**
-     * 学生情報更新API
+     * 生徒情報更新API
      *
      * @param StudentPatchRequest $request
      * @return \Illuminate\Http\JsonResponse

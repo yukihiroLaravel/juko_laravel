@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 
-
 class LessonController extends Controller
 {
     /**
@@ -65,7 +64,7 @@ class LessonController extends Controller
                 'message' => 'Invalid chapter_id or course_id.',
             ], 403);
         }
- 
+
         $lesson->update([
             'title' => $request->title,
             'url' => $request->url,
@@ -78,7 +77,7 @@ class LessonController extends Controller
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
     }
-
+ 
     /**
      * レッスン並び替えAPI
      *

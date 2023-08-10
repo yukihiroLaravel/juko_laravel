@@ -7,6 +7,7 @@ use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
+use App\Model\Instructor;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;

@@ -7,8 +7,6 @@ use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Model\Lesson;
-use App\Model\Instructor;
-use App\Model\Chapter;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -51,20 +49,23 @@ class LessonController extends Controller
     public function sort(LessonSortRequest $request)
     {
         DB::beginTransaction();
-        
+
         try {
             $user = Instructor::find(1);
-            $lessons = $request->input('lessons');
-            foreach ($lessons as $lesson){
-                $lessonsSort = Lesson::with('chapter.course')->find($lesson['lesson_id']);
-                if($lessonsSort === null){
-                    // todo 無い場合は例外に投げる
+            $inputLessons = $request->input('lessons');
+            foreach ($inputLessons as $inputLesson){
+                $lesson = Lesson::with('chapter.course')->find($inputLesson['lesson_id']);
+
+                if($lesson === null){
+                    throw new Exception('Lesson not found');
                 }
-                if ((int) $request->chapter_id !== $lessonsSort->chapter->id || (int) $request->course_id !== $lessonsSort->chapter->course_id){
-                    // todo ここで失敗したら例外に投げる
+
+                if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
+                    throw new Exception('Invalid lesson');
                 }
-                Lesson::findOrFail($lesson['lesson_id'])->update([
-                    'order' => $lesson['order']
+
+                $lesson->update([
+                    'order' => $inputLesson['order']
                 ]);
             }
             DB::commit();

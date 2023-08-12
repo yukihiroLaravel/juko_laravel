@@ -58,23 +58,22 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        $student = null;
-        if ( Student::where('email', $request->email)->first() === null ) {
-            $student = Student::create([
-                // 'given_name_by_instructor' => $request->name, まだ実装されてないのでnick_nameで代用
-                'nick_name' => $request->nick_name,
-                'email' => $request->email,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ]);
-        } else {
+        if ( Student::where('email', $request->email)->first() !== null ) {
             return response()->json([
                 'result' => false,
                 "error_message" => "Invalid email.",
                 "error_code" => "400"
             ]);
         }
-        
+
+        $student = Student::create([
+            // 'given_name_by_instructor' => $request->name, まだ実装されてないのでnick_nameで代用
+            'nick_name' => $request->nick_name,
+            'email' => $request->email,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
         return response()->json([
             'result' => true,
             'data' => [

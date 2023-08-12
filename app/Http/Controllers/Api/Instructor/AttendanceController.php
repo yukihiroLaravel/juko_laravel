@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use Illuminate\Http\Request;
 
-class AttendancesController extends Controller
+class AttendanceController extends Controller
 {
     public function store(Request $request)
     {

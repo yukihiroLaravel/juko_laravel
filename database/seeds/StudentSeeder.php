@@ -16,6 +16,7 @@ class StudentSeeder extends Seeder
     {
         Student::insert([
             [
+                'given_name_by_instructor' => 'ユーザー名(仮)1',
                 'nick_name' => '生徒ニックネーム1',
                 'last_name' => '生徒',
                 'first_name' => 'テスト1',
@@ -30,6 +31,7 @@ class StudentSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
+                'given_name_by_instructor' => 'ユーザー名(仮)2',
                 'nick_name' => '生徒ニックネーム2',
                 'last_name' => '生徒',
                 'first_name' => 'テスト2',

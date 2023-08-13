@@ -15,7 +15,7 @@ class StudentPatchRequest extends FormRequest
     {
         return true;
     }
-
+    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -30,8 +30,8 @@ class StudentPatchRequest extends FormRequest
             'email' => ['required', 'email'],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
-            'birth_date' => ['required', 'date'],
-            'sex' => ['required', 'string'],
+            'birthdate' => ['required', 'date_format:Y-m-d H:i:s'],
+            'sex' => ['required', 'integer', 'in:1,2'], // 1: 男性, 2: 女性
             'address' => ['required', 'string'],
         ];
     }

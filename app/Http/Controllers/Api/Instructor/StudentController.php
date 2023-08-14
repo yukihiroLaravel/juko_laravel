@@ -21,8 +21,7 @@ class StudentController extends Controller
         if ( Student::where('email', $request->email)->first() !== null ) {
             return response()->json([
                 'result' => false,
-                "error_message" => "Invalid email.",
-                "error_code" => "400"
+                "message" => "The email has already been taken.",
             ]);
         }
 

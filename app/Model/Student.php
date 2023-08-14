@@ -20,6 +20,6 @@ class Student extends Authenticatable
      */
     public function courses()
     {
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Course::class, 'instructor_id');
     }
 }

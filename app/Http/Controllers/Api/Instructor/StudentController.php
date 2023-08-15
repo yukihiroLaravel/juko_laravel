@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Attendance;
+use App\Model\Course;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -14,17 +15,13 @@ class StudentController extends Controller
                                     ->where('course_id', $request->course_id)
                                     ->get();
 
-        $course = $attendances->first()->course;
+        $course = Course::find($request->course_id);
 
-        $students = [];
-        
         foreach ($attendances as $attendance) {
-            $student = $attendance->student;
-            
             $students[] = [
-                'id' => $student->id,
-                'nick_name' => $student->nick_name,
-                'email' => $student->email,
+                'id' => $attendance->student->id,
+                'nick_name' => $attendance->student->nick_name,
+                'email' => $attendance->student->email,
                 'course_title' => $attendance->course->title,
                 'attendanced_at' => $attendance->created_at->format('Y/m/d'),
             ];

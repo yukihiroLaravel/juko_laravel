@@ -10,7 +10,11 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $attendances = Attendance::where('course_id', $request->course_id)->get();
+        $attendances = Attendance::with(['student', 'course'])
+                                    ->where('course_id', $request->course_id)
+                                    ->get();
+
+        $course = $attendances->first()->course;
 
         $students = [];
         
@@ -29,9 +33,9 @@ class StudentController extends Controller
         return response()->json([
             'data' => [
                 'course' => [
-                    'id' => $attendances->first()->course->id,
-                    'image' => $attendances->first()->course->image,
-                    'title' => $attendances->first()->course->title,
+                    'id' => $course->id,
+                    'image' => $course->image,
+                    'title' => $course->title,
                 ],
                 'students' => $students,
             ],

@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
         Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');

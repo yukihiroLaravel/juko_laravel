@@ -20,6 +20,16 @@ class Student extends Authenticatable
      */
     public function courses()
     {
-        return $this->hasMany(Course::class, 'instructor_id');
+        return $this->hasMany(Course::class);
+    }
+
+    /**
+     * 受講履歴を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

@@ -14,8 +14,7 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     protected $fillable = [
-        // 'given_name_by_instructor'がまだの為 nick_nameで確認
-        'nick_name',
+        'given_name_by_instructor',
         'email',
         'created_at',
         'updated_at',

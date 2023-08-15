@@ -66,8 +66,7 @@ class StudentController extends Controller
         }
 
         $student = Student::create([
-            // 'given_name_by_instructor' => $request->name, まだ実装されてないのでnick_nameで代用
-            'nick_name' => $request->nick_name,
+            'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
@@ -77,8 +76,7 @@ class StudentController extends Controller
             'result' => true,
             'data' => [
                 'id' => $student->id,
-                // $student->given_name_by_instructor, まだ実装されてないのでnick_nameで代用
-                'nick_name' => $student->nick_name,
+                'given_name_by_instructor' => $student->given_name_by_instructor,
                 'email' => $student->email
             ]
         ]);

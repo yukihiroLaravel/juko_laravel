@@ -32,4 +32,14 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
+
+    /**
+     * 性別をmanかwomanで取得
+     *
+     * @return string
+     */
+    public function getFormattedSexAttribute()
+    {
+        return $this->sex === 1 ? 'man' : 'woman';
+}
 }

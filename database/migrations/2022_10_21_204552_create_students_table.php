@@ -22,7 +22,7 @@ class CreateStudentsTable extends Migration
             $table->string('email', 255)->unique()->comment('メールアドレス');
             $table->string('password', 255)->comment('パスワード');
             $table->string('purpose', 50)->comment('目的');
-            $table->dateTime('birthdate')->comment('誕生日');
+            $table->date('birth_date')->comment('誕生日');
             $table->tinyInteger('sex')->comment('性別');
             $table->string('address', 255)->comment('都道府県');
             $table->dateTime('created_at');

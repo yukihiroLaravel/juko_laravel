@@ -11,9 +11,12 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
+        $perPage = 20;
+        $page = $request->input('page', 1);
+
         $attendances = Attendance::with(['student', 'course'])
                                     ->where('course_id', $request->course_id)
-                                    ->get();
+                                    ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
 
@@ -33,6 +36,10 @@ class StudentController extends Controller
                     'id' => $course->id,
                     'image' => $course->image,
                     'title' => $course->title,
+                ],
+                'pagination' => [
+                    'page' => $attendances->currentPage(),
+                    'total' => $attendances->total(),
                 ],
                 'students' => $students,
             ],

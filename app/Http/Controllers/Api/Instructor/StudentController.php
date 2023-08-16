@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-  public function student_test(Request $request){
+  public function student_test(Request $request)
+  {
     return response()->json([]);
   }
 }

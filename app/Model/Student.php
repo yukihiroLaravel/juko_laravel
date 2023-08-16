@@ -19,7 +19,16 @@ class Student extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'nick_name','last_name','first_name','occupation','email','password','purpose','birthdate','sex','address',
+        'nick_name',
+        'last_name',
+        'first_name',
+        'occupation',
+        'email',
+        'password',
+        'purpose',
+        'birthdate',
+        'sex',
+        'address',
         // 他の属性もここに追加する
     ];
     

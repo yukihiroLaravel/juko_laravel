@@ -23,19 +23,18 @@ class AttendanceController extends Controller
 
         foreach ($chapterData as $chapter) {
             $completedCount = 0;
-            $chapterId = $chapter->id;
-            $title = $chapter->title;
-            $chapterInfo = ['chapter_id' => $chapterId, 'title' => $title];
             foreach ($chapter->lessons as $lesson) {
                 foreach ($lesson->lessonAttendances as $lessonAttendance) {
-                    $status = $lessonAttendance->status;
-                    if($status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE){
+                    if($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE){
                         $completedCount+=1;
                     }
                 }
             }
-            $chapterInfo['completed_count'] = $chapter->lessons->isEmpty() ? 0 : $completedCount;
-            $chapters[] = $chapterInfo;
+            $chapters[] = [
+                'chapter_id' => $chapter->id,
+                'title' => $chapter->title,
+                'completed_count' => $completedCount,
+            ];
         }
         
         return response()->json([

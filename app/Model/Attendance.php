@@ -16,6 +16,12 @@ class Attendance extends Model
      */
     protected $table = 'attendances';
 
+    protected $fillable = [
+        'course_id',
+        'student_id',
+        'progress'
+    ];
+
     /**
      * 受講生を取得
      *

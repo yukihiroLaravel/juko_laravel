@@ -17,7 +17,7 @@ class CreateAttendancesTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('course_id')->unsigned()->comment('講座ID');
             $table->bigInteger('student_id')->unsigned()->comment('生徒ID');
-            $table->tinyInteger('progress')->nullable()->comment('進捗');
+            $table->tinyInteger('progress')->comment('進捗');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

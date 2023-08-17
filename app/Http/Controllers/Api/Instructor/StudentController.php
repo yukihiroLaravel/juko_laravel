@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Model\Student;
-use Carbon\Carbon;
 
 class StudentController extends Controller
 {
@@ -23,7 +22,7 @@ class StudentController extends Controller
                     'occupation' => $student->occupation,
                     'email' => $student->email,
                     'purpose' => $student->purpose,
-                    'birth_date' => Carbon::parse($student->birth_date)->format('Y/m/d'),
+                    'birth_date' => $student->birth_date->format('Y/m/d'),
                     'sex' => $student->formatted_sex,
                     'address' => $student->address,
                     'created_at' => $student->created_at->format('Y/m/d'),

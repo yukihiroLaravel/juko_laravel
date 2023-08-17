@@ -38,8 +38,18 @@ class Student extends Authenticatable
      *
      * @return string
      */
+    const SEX_MAN = 1;
+    const SEX_WOMAN = 2;
+    
     public function getFormattedSexAttribute()
-    {
-        return $this->sex === 1 ? 'man' : 'woman';
-}
+    {    
+        return $this->sex === self::SEX_MAN ? 'man' : ($this->sex === self::SEX_WOMAN ? 'woman' : null);
+    }
+
+    /**
+     * キャスト
+     */
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
 }

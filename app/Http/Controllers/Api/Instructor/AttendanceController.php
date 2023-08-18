@@ -6,17 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\LessonAttendance;
 use App\Model\Chapter;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
 
 class AttendanceController extends Controller
 {
     /**
      * 受講状況取得API
      *
-     * @param 
+     * @param AttendanceShowRequest $request
      * @return 
      */
-    public function show($course_id) {
-        $courseId = $course_id;
+    public function show(AttendanceShowRequest $request) {
+        $courseId = $request->course_id;
         $chapters = [];
         $chapterData = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
         $studentsCount = Attendance::where('course_id', $courseId)->count();

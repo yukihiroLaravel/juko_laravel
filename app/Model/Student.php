@@ -40,10 +40,15 @@ class Student extends Authenticatable
      */
     const SEX_MAN = 1;
     const SEX_WOMAN = 2;
-    
+
     public function getFormattedSexAttribute()
     {    
-        return $this->sex === self::SEX_MAN ? 'man' : ($this->sex === self::SEX_WOMAN ? 'woman' : null);
+        if ($this->sex === self::SEX_MAN) {
+            return 'man';
+        } elseif ($this->sex === self::SEX_WOMAN) {
+            return 'woman';
+        }
+        return null;
     }
 
     /**

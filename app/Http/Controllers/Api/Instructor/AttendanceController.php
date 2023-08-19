@@ -7,6 +7,7 @@ use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
@@ -17,33 +18,39 @@ class AttendanceController extends Controller
             'student_id' => 'required|exists:students,id',
         ]);
 
-        $existingAttendance = Attendance::where('course_id', $validateData['course_id'])
+        $foundAttendance = Attendance::where('course_id', $validateData['course_id'])
             ->where('student_id', $validateData['student_id'])
             ->first();
 
-        if ($existingAttendance) {
+        if ($foundAttendance) {
             return response()->json([
-                'error' => '既に登録されています'], 409);
+                'result' => false,
+                'message' => 'Not Found Lesson.'
+            ], 404);
         }
 
-        $attendance = Attendance::create([
-            'course_id'  => $validateData['course_id'],
-            'student_id' => $validateData['student_id'],
-            'progress'   => 0
-        ]);
-
-        $lessons = Lesson::whereHas('chapter', function($query) use ($validateData) {
-            $query->where('course_id', $validateData['course_id']);
-        })->get();
-
-        foreach ($lessons as $lesson) {
-            LessonAttendance::create([
-                'attendance_id' => $attendance->id,
-                'lesson_id'     => $lesson->id,
-                'status'        => 'before_attendance'
+        DB::transaction(function () use ($validateData) {
+            $attendance = Attendance::create([
+                'course_id'  => $validateData['course_id'],
+                'student_id' => $validateData['student_id'],
+                'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
             ]);
-        }
 
-        return response()->json(['message' => '登録しました'], 201);
+            $lessons = Lesson::whereHas('chapter', function($query) use ($validateData) {
+                $query->where('course_id', $validateData['course_id']);
+            })->get();
+
+            foreach ($lessons as $lesson) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id'     => $lesson->id,
+                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                ]);
+            }
+        });
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

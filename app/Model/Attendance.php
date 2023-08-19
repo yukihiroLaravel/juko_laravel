@@ -22,6 +22,9 @@ class Attendance extends Model
         'progress'
     ];
 
+    // 受講状態初期値
+    const PROGRESS_DEFAULT_VALUE = 0;
+
     /**
      * 受講生を取得
      *

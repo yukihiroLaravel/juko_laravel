@@ -20,6 +20,8 @@ class StudentController extends Controller
 
         $course = Course::find($request->course_id);
 
+        $students = [];
+
         foreach ($attendances as $attendance) {
             $students[] = [
                 'id' => $attendance->student->id,

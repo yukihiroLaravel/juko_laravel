@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Model\Student;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\StudentPatchRequest; // StudentPatchRequest をインポート
+use App\Http\Requests\Student\StudentPatchRequest; 
 use Illuminate\Support\Facades\Hash;
+use App\Rules\SexRule;
 
 
 class StudentController extends Controller
@@ -30,7 +31,7 @@ class StudentController extends Controller
                 'password' => Hash::make($request->password),
                 'purpose' => $request->purpose,
                 'birthdate' => $request->birthdate,
-                'sex' => $request->sex,
+                'sex' => $request->sex === 'man' ? 1 : ($request->sex === 'woman' ? 2 : 0),
                 'address' => $request->address,
                 // 他の更新項目もここに追加
             ]);

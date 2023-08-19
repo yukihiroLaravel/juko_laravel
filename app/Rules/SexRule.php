@@ -7,16 +7,6 @@ use Illuminate\Contracts\Validation\Rule;
 class SexRule implements Rule
 {
     /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -25,7 +15,7 @@ class SexRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value === 1 || $value === 2;
+        return $value === 'man' || $value === 'woman';
     }
 
     /**
@@ -35,6 +25,6 @@ class SexRule implements Rule
      */
     public function message()
     {
-        return 'The :attribute must be 1 (male) or 2 (female).';
+        return 'The :attribute must be either "man" or "woman".';
     }
 }

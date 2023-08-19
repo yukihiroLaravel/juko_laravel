@@ -32,7 +32,7 @@ class StudentPatchRequest extends FormRequest
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birthdate' => ['required', 'date_format:Y-m-d H:i:s'],
-            'sex' => ['required', 'integer', new SexRule()],
+            'sex' => ['required', 'string', new SexRule()],
             'address' => ['required', 'string'],
         ];
     }

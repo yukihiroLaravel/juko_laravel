@@ -14,7 +14,6 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     /**
-     * 一括代入が許可される属性
      *
      * @var array
      */

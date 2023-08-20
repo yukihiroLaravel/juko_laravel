@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -18,28 +20,27 @@ class AttendanceController extends Controller
             'student_id' => 'required|exists:students,id',
         ]);
 
-        $foundAttendance = Attendance::where('course_id', $validateData['course_id'])
+        $attendance = Attendance::where('course_id', $validateData['course_id'])
             ->where('student_id', $validateData['student_id'])
             ->first();
 
-        if ($foundAttendance) {
+        if ($attendance) {
             return response()->json([
                 'result' => false,
-                'message' => 'Not Found Lesson.'
-            ], 404);
+                'message' => 'Attendance record already exists.'
+            ], 409);
         }
 
-        DB::transaction(function () use ($validateData) {
+        DB::beginTransaction();
+        try {
             $attendance = Attendance::create([
                 'course_id'  => $validateData['course_id'],
                 'student_id' => $validateData['student_id'],
                 'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
             ]);
-
             $lessons = Lesson::whereHas('chapter', function($query) use ($validateData) {
                 $query->where('course_id', $validateData['course_id']);
             })->get();
-
             foreach ($lessons as $lesson) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
@@ -47,10 +48,16 @@ class AttendanceController extends Controller
                     'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
                 ]);
             }
-        });
-
-        return response()->json([
-            'result' => true,
-        ]);
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 }

@@ -23,7 +23,7 @@ class CoursesSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
-                'instructor_id' => 1,
+                'instructor_id' => 2,
                 'title' => 'Laravel入門講座',
                 'image' => 'course/dbe1f6ef-66b4-4ce0-bfef-7555b6213bd4.png',
                 'status' => Course::STATUS_PUBLIC,

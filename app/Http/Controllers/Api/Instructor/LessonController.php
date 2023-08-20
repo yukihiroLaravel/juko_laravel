@@ -12,7 +12,6 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
-
 class LessonController extends Controller
 {
     /**

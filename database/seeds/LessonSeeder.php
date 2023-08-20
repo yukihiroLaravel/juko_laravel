@@ -64,6 +64,16 @@ class LessonSeeder extends Seeder
                 'updated_at' => Carbon::now(),
                 'order'=> 4,
             ],
+            [
+                'chapter_id' => 3,
+                'url' => 'KH4MmQsCDuw',
+                'title' => '環境構築',
+                'remarks' => "",
+                'status' => Lesson::STATUS_PUBLIC,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+                'order'=> 1,
+            ],
         ]);
     }
 }

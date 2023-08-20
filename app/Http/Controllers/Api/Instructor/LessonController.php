@@ -85,7 +85,8 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     * @param  LessonSortRequest  $request
+     *
+     * @param  LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request)
@@ -119,26 +120,35 @@ class LessonController extends Controller
                 ]);
             }
             $user = Instructor::find(1);
-            $inputLessons = $request->input('lessons');
-            foreach ($inputLessons as $inputLesson){
-                $lesson = Lesson::with('chapter.course')->find($inputLesson['lesson_id']);
 
-                if($lesson === null){
-                    throw new Exception('Lesson not found');
+            $inputLessons = $request->input('lessons');
+            foreach ($inputLessons as $inputLesson) {
+
+                $lesson = Lesson::with('chapter.course')->findOrFail($inputLesson['lesson_id']);
+
+                // 講師idが一致するか
+                if ($user->id !== $lesson->chapter->course->instructor_id) {
+                    throw new Exception('Invalid instructor.');
                 }
 
-                if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
-                    throw new Exception('Invalid lesson');
+                if (
+                    (int) $request->chapter_id !== $lesson->chapter->id ||
+                    (int) $request->course_id !== $lesson->chapter->course_id
+                ) {
+                    throw new Exception('Invalid lesson.');
                 }
 
                 $lesson->update([
                     'order' => $inputLesson['order']
                 ]);
             }
+
             DB::commit();
+
             return response()->json([
                 "result" => true
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

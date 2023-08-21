@@ -55,7 +55,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::get('index', 'Api\CourseController@index');
-        Route::get('progress', 'Api\CourseController@progress');
+        Route::get('{course_id}/progress', 'Api\CourseController@progress');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });

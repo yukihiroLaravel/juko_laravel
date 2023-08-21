@@ -6,6 +6,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Student extends Authenticatable
 {
+
+    const SEX_MAN = 'man';
+    const SEX_WOMAN = 'woman';
+
     /**
      * モデルと関連しているテーブル
      *
@@ -28,7 +32,6 @@ class Student extends Authenticatable
         'birthdate',
         'sex',
         'address',
-        // 他の属性もここに追加する
     ];
     
     /**
@@ -39,5 +42,16 @@ class Student extends Authenticatable
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+    
+    /**
+     * 文字列の性別を数値に変換
+     *
+     * @param string $sex
+     * @return int
+     */
+    public static function convertSexToInt($sex)
+    {
+        return $sex === self::SEX_MAN ? 1 : ($sex === self::SEX_WOMAN ? 2 : 0);
     }
 }

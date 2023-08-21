@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -13,15 +14,10 @@ use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
-    public function store(Request $request)
+    public function store(AttendanceStoreRequest $request)
     {
-        $validateData = $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'student_id' => 'required|exists:students,id',
-        ]);
-
-        $attendance = Attendance::where('course_id', $validateData['course_id'])
-            ->where('student_id', $validateData['student_id'])
+        $attendance = Attendance::where('course_id', $request->course_id)
+            ->where('student_id', $request->student_id)
             ->first();
 
         if ($attendance) {
@@ -34,12 +30,12 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             $attendance = Attendance::create([
-                'course_id'  => $validateData['course_id'],
-                'student_id' => $validateData['student_id'],
+                'course_id'  => $request->course_id,
+                'student_id' => $request->student_id,
                 'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
             ]);
-            $lessons = Lesson::whereHas('chapter', function($query) use ($validateData) {
-                $query->where('course_id', $validateData['course_id']);
+            $lessons = Lesson::whereHas('chapter', function($query) use ($request) {
+                $query->where('course_id', $request->course_id);
             })->get();
             foreach ($lessons as $lesson) {
                 LessonAttendance::create([

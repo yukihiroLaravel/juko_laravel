@@ -4,12 +4,19 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Model\Student;
+use App\Http\Requests\Instructor\StudentShowRequest;
 
 class StudentController extends Controller
 {
-    public function show($student_id)
+    /**
+     * 講座受講生詳細情報を取得
+     *
+     * @param StudentShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(StudentShowRequest $request)
     {
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendance'])->findOrFail($student_id);
+        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendance'])->findOrFail($request->student_id);
 
         return response()->json([
             'data' => [
@@ -23,7 +30,7 @@ class StudentController extends Controller
                     'email' => $student->email,
                     'purpose' => $student->purpose,
                     'birth_date' => $student->birth_date->format('Y/m/d'),
-                    'sex' => $student->formatted_sex,
+                    'sex' => $student->sex,
                     'address' => $student->address,
                     'created_at' => $student->created_at->format('Y/m/d'),
                     'last_login_at' => $student->last_login_at, //カラム追加後、日付はフォーマットして渡す ->format('Y/m/d')

@@ -24,8 +24,8 @@ class AttendanceStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => 'required|exists:courses,id',
-            'student_id' => 'required|exists:students,id',
+            'course_id' => ['required', 'exists:courses,id', 'integer'],
+            'student_id' => ['required', 'exists:students,id', 'integer'],
         ];
     }
 }

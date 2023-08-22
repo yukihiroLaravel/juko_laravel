@@ -8,7 +8,6 @@ use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

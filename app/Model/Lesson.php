@@ -25,6 +25,7 @@ class Lesson extends Model
         'url',
         'remarks',
         'status',
+        'order',
     ];
 
     /**

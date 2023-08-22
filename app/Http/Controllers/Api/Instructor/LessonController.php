@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
+use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
@@ -77,15 +79,55 @@ class LessonController extends Controller
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
     }
- 
+
     /**
      * レッスン並び替えAPI
      *
+     * @param  LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort()
+    public function sort(LessonSortRequest $request)
     {
-        return response()->json([]);
+        DB::beginTransaction();
+
+        try {
+            $user = Instructor::find(1);
+
+            $inputLessons = $request->input('lessons');
+            foreach ($inputLessons as $inputLesson) {
+
+                $lesson = Lesson::with('chapter.course')->findOrFail($inputLesson['lesson_id']);
+
+                // 講師idが一致するか
+                if ($user->id !== $lesson->chapter->course->instructor_id) {
+                    throw new Exception('Invalid instructor.');
+                }
+
+                if (
+                    (int) $request->chapter_id !== $lesson->chapter->id ||
+                    (int) $request->course_id !== $lesson->chapter->course_id
+                ) {
+                    throw new Exception('Invalid lesson.');
+                }
+
+                $lesson->update([
+                    'order' => $inputLesson['order']
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ]);
+        }
     }
 
     /**
@@ -124,11 +166,13 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+
         } catch (ModelNotFoundException $exception) {
             return response()->json([
                 'result' => false,
                 'message' => 'Not Found Lesson.'
             ], 404);
+
         } catch (Exception $exception) {
             return response()->json([
                 'result' => false,

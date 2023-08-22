@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;    //postman確認のため仮作成
 use App\Http\Requests\CourseShowRequest;
 use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
@@ -58,5 +59,15 @@ class CourseController extends Controller
         ->findOrFail($request->attendance_id);
 
         return new CourseShowResource($attendance);
+    }
+    /**
+     * チャプター進捗状況、続きのレッスンID取得API
+     *
+     * @param Request $request
+     * @return Resource
+     */
+    public function progress(Request $request)
+    {
+        return response()->json([]);
     }
 }

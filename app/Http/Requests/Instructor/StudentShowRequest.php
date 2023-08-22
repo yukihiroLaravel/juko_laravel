@@ -34,5 +34,4 @@ class StudentShowRequest extends FormRequest
             'student_id' => $this->route('student_id'),
         ]);
     }
-
 }

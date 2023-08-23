@@ -11,7 +11,7 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = 20;
+        $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
 
         $attendances = Attendance::with(['student', 'course'])

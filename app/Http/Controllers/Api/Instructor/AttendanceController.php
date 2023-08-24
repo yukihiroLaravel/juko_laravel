@@ -7,6 +7,7 @@ use App\Model\Attendance;
 use App\Model\LessonAttendance;
 use App\Model\Chapter;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
+use App\Http\Resources\Instructor\AttendanceShowResource;
 
 class AttendanceController extends Controller
 {
@@ -14,11 +15,10 @@ class AttendanceController extends Controller
      * 受講状況取得API
      *
      * @param AttendanceShowRequest $request
-     * @return 
+     * @return AttendanceShowResource
      */
     public function show(AttendanceShowRequest $request) {
         $courseId = $request->course_id;
-        $chapters = [];
         $chapterData = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
         $studentsCount = Attendance::where('course_id', $courseId)->count();
 
@@ -31,16 +31,11 @@ class AttendanceController extends Controller
                     }
                 }
             }
-            $chapters[] = [
-                'chapter_id' => $chapter->id,
-                'title' => $chapter->title,
-                'completed_count' => $completedCount,
-            ];
+            $chapter->completedCount = $completedCount;
         }
-        
-        return response()->json([
-            "chapters" => $chapters,
-            "students_count" => $studentsCount,
+        return new AttendanceShowResource([
+            'chapterData' => $chapterData,
+            'studentsCount' => $studentsCount,
         ]);
     }
 }

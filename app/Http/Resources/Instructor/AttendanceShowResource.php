@@ -15,7 +15,7 @@ class AttendanceShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'chapters' => $this->resource['chapterData']->map(function ($chapter) {
+            'chapters' => $this->resource['chapters']->map(function ($chapter) {
                 return [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,

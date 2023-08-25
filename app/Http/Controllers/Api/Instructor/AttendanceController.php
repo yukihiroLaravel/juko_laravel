@@ -19,10 +19,10 @@ class AttendanceController extends Controller
      */
     public function show(AttendanceShowRequest $request) {
         $courseId = $request->course_id;
-        $chapterData = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
+        $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
         $studentsCount = Attendance::where('course_id', $courseId)->count();
 
-        foreach ($chapterData as $chapter) {
+        foreach ($chapters as $chapter) {
             $completedCount = 0;
             foreach ($chapter->lessons as $lesson) {
                 foreach ($lesson->lessonAttendances as $lessonAttendance) {
@@ -34,7 +34,7 @@ class AttendanceController extends Controller
             $chapter->completedCount = $completedCount;
         }
         return new AttendanceShowResource([
-            'chapterData' => $chapterData,
+            'chapters' => $chapters,
             'studentsCount' => $studentsCount,
         ]);
     }

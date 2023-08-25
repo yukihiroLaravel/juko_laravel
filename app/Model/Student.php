@@ -9,6 +9,9 @@ class Student extends Authenticatable
 
     const SEX_MAN = 'man';
     const SEX_WOMAN = 'woman';
+    const SEX_MAN_INT = 1;
+    const SEX_WOMAN_INT = 2;
+    const SEX_UNKNOWN_INT = 0;
 
     /**
      * モデルと関連しているテーブル
@@ -52,6 +55,12 @@ class Student extends Authenticatable
      */
     public static function convertSexToInt($sex)
     {
-        return $sex === self::SEX_MAN ? 1 : ($sex === self::SEX_WOMAN ? 2 : 0);
+        if ($sex === self::SEX_MAN) {
+            return self::SEX_MAN_INT;
+        } elseif ($sex === self::SEX_WOMAN) {
+            return self::SEX_WOMAN_INT;
+        } else {
+            return self::SEX_UNKNOWN_INT;
+        }
     }
 }

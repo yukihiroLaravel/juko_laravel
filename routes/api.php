@@ -17,7 +17,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 //動作確認テスト
-Route::get('student_register_test','Api\Instructor\StudentController@StudentRegisterTest');
+Route::get('send_mail','Api\Instructor\StudentController@sendMail');
 
 Route::prefix('v1')->group(function () {
     // 講師側API

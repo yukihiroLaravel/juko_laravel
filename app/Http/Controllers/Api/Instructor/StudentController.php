@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function StudentRegisterTest(Request $request)
+    public function sendMail(Request $request)
     {
       return response()->json([]);
     }

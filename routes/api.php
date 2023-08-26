@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+//動作確認テスト
+Route::get('send_mail','Api\Instructor\StudentController@sendMail');
 
 Route::prefix('v1')->group(function () {
     // 講師側API

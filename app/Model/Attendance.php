@@ -16,6 +16,15 @@ class Attendance extends Model
      */
     protected $table = 'attendances';
 
+    protected $fillable = [
+        'course_id',
+        'student_id',
+        'progress'
+    ];
+
+    // 受講状態初期値
+    const PROGRESS_DEFAULT_VALUE = 0;
+
     /**
      * 受講生を取得
      *

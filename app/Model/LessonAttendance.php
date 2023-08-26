@@ -14,7 +14,9 @@ class LessonAttendance extends Model
     protected $table = 'lesson_attendances';
 
     protected $fillable = [
-        'status',
+        'lesson_id',
+        'attendance_id',
+        'status'
     ];
 
     // ToDo ステータス定数

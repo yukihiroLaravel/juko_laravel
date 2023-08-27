@@ -15,7 +15,8 @@ class CreateStudentsTable extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('nick_name', 50)->comment('ニックネーム');
+            $table->string('given_name_by_instructor', 50)->comment('ユーザー名(仮)');
+            $table->string('nick_name', 50)->nullable()->comment('ニックネーム');
             $table->string('last_name', 50)->nullable()->comment('苗字');
             $table->string('first_name', 50)->nullable()->comment('名前');
             $table->string('occupation', 50)->nullable()->comment('職業');

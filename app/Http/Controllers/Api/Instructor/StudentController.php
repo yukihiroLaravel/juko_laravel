@@ -19,8 +19,6 @@ class StudentController extends Controller
     {
         $student = Student::with(['attendances.course.chapters.lessons.lessonAttendance'])->findOrFail($request->student_id);
 
-        return response()->json([
-            'data' => new StudentShowResource($student)
-        ]);
+        return new StudentShowResource($student);
     }
 }

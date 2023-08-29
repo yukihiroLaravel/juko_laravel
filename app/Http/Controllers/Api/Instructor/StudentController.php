@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\StudentIndexRequest;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function index(Request $request)
+    public function index(StudentIndexRequest $request)
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);

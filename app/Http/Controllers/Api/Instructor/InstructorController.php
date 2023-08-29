@@ -3,11 +3,40 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Instructor;
-use App\Http\Resources\Instructor\InstructorEditResource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\InstructorPatchRequest;
+use App\Http\Resources\Instructor\InstructorEditResource;
+use App\Http\Resources\Instructor\InstructorPatchResource;
 
 class InstructorController extends Controller
 {
+    /**
+     * インストラクター情報更新API
+     *
+     * @param InstructorPatchRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(InstructorPatchRequest $request)
+    {
+        try{
+            $instructor = Instructor::findOrFail(1);
+            $instructor->update([
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
+                'email' => $request->email
+            ]);
+            return response()->json([
+                'result' => true,
+                'data' => new InstructorPatchResource($instructor)
+            ]);
+        } catch (RuntimeException $e) {
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
+    }
     /**
      * 講師情報編集API
      *

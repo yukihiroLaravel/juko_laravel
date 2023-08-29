@@ -32,7 +32,7 @@ class Student extends Authenticatable
         'email',
         'password',
         'purpose',
-        'birthdate',
+        'birth_date',
         'sex',
         'address',
     ];
@@ -57,10 +57,10 @@ class Student extends Authenticatable
     {
         if ($sex === self::SEX_MAN) {
             return self::SEX_MAN_INT;
-        } elseif ($sex === self::SEX_WOMAN) {
+        } else if ($sex === self::SEX_WOMAN) {
             return self::SEX_WOMAN_INT;
-        } else {
-            return self::SEX_UNKNOWN_INT;
         }
+
+        return self::SEX_UNKNOWN_INT;
     }
 }

@@ -31,7 +31,7 @@ class StudentPatchRequest extends FormRequest
             'email' => ['required', 'email'],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
-            'birthdate' => ['required', 'date_format:Y-m-d H:i:s'],
+            'birth_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'sex' => ['required', 'string', new SexRule()],
             'address' => ['required', 'string'],
         ];

@@ -12,7 +12,7 @@ class StudentController extends Controller
     /**
      * 生徒情報更新API
      *
-     * @param StudentPatchRequest 
+     * @param StudentPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(StudentPatchRequest $request)
@@ -26,9 +26,8 @@ class StudentController extends Controller
                 'first_name' => $request->first_name,
                 'occupation' => $request->occupation,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
                 'purpose' => $request->purpose,
-                'birthdate' => $request->birthdate,
+                'birth_date' => $request->birth_date,
                 'sex' => Student::convertSexToInt($request->sex), 
                 'address' => $request->address,     
             ]);

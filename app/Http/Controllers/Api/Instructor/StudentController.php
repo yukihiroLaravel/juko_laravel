@@ -6,6 +6,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\StudentIndexRequest;
+use App\Http\Resources\Instructor\StudentIndexResource;
 
 class StudentController extends Controller
 {
@@ -32,19 +33,21 @@ class StudentController extends Controller
             ];
         }
 
-        return response()->json([
-            'data' => [
-                'course' => [
-                    'id' => $course->id,
-                    'image' => $course->image,
-                    'title' => $course->title,
-                ],
-                'pagination' => [
-                    'page' => $attendances->currentPage(),
-                    'total' => $attendances->total(),
-                ],
-                'students' => $students,
-            ],
-        ]);
+        return new StudentIndexResource($course, $attendances);
+
+        // return response()->json([
+        //     'data' => [
+        //         'course' => [
+        //             'id' => $course->id,
+        //             'image' => $course->image,
+        //             'title' => $course->title,
+        //         ],
+        //         'pagination' => [
+        //             'page' => $attendances->currentPage(),
+        //             'total' => $attendances->total(),
+        //         ],
+        //         'students' => $students,
+        //     ],
+        // ]);
     }
 }

@@ -30,7 +30,7 @@ class StudentShowResource extends JsonResource
                 'sex' => $student->sex,
                 'address' => $student->address,
                 'created_at' => $student->created_at->format('Y/m/d'),
-                'last_login_at' => $student->last_login_at, //カラム追加後、日付はフォーマットして渡す ->format('Y/m/d')
+                'last_login_at' => $student->last_login_at->format('Y/m/d'),
                 'courses' => $student->attendances->map(function ($attendance) {
                     return [
                         'course_id' => $attendance->course->id,

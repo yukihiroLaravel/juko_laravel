@@ -17,7 +17,7 @@ class StudentController extends Controller
      */
     public function show(StudentShowRequest $request)
     {
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendance'])->findOrFail($request->student_id);
+        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
 
         return new StudentShowResource($student);
     }

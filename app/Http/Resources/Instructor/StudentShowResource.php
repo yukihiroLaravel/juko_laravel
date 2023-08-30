@@ -44,7 +44,7 @@ class StudentShowResource extends JsonResource
                                 'lessons' => $chapter->lessons->map(function ($lesson) {
                                     return [
                                         'lesson_id' => $lesson->id,
-                                        'lesson_attendance' => $lesson->lessonAttendance->map(function ($attendance) {
+                                        'lesson_attendance' => $lesson->lessonAttendances->map(function ($attendance) {
                                             return [
                                                 'lesson_attendance_id' => $attendance->id,
                                                 'status' => $attendance->status,

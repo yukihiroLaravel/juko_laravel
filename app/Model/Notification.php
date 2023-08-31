@@ -27,8 +27,9 @@ class Notification extends Model
     ];
 
     // type定数
-    const TYPE_ALWAYS = 1;
-    const TYPE_ONCE = 2;
-    const ALWAYS = 'always';
-    const ONCE = 'once';
+    const TYPE_ALWAYS_INT = 1;
+    const TYPE_ONCE_INT = 2;
+    const TYPE_ALWAYS = 'always';
+    const TYPE_ONCE = 'once';
+
 }

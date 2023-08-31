@@ -32,22 +32,9 @@ class StudentController extends Controller
                 'attendanced_at' => $attendance->created_at->format('Y/m/d'),
             ];
         }
-
-        return new StudentIndexResource($course, $attendances);
-
-        // return response()->json([
-        //     'data' => [
-        //         'course' => [
-        //             'id' => $course->id,
-        //             'image' => $course->image,
-        //             'title' => $course->title,
-        //         ],
-        //         'pagination' => [
-        //             'page' => $attendances->currentPage(),
-        //             'total' => $attendances->total(),
-        //         ],
-        //         'students' => $students,
-        //     ],
-        // ]);
+        return new StudentIndexResource([
+            'course' => $course,
+            'attendances' => $attendances,
+        ]);
     }
 }

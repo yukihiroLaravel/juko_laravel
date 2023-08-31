@@ -8,8 +8,9 @@ class StudentIndexResource extends JsonResource
 {
     public function toArray($request)
     {
-        $course = $this->resource[0];
-        $attendances = $this->resource[1];
+
+        $course = $this->resource['course'];
+        $attendances = $this->resource['attendances'];
 
         return [
             'data' => [

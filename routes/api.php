@@ -58,6 +58,13 @@ Route::prefix('v1')->group(function () {
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
+        Route::prefix('{course_id}')->group(function () {
+            Route::prefix('notification')->group(function () {
+                Route::prefix('{notification_id}')->group(function () {
+                    Route::get('/', 'Api\NotificationController@show');
+                });
+            });
+        });
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

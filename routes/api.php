@@ -66,5 +66,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
-    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
+    Route::prefix('lesson_attendance')->group(function () {
+        Route::get('edit', 'Api\LessonAttendanceController@edit');
+        Route::patch('/', 'Api\LessonAttendanceController@update');
+    });
 });

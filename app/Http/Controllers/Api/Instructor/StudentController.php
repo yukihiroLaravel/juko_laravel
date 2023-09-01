@@ -17,6 +17,5 @@ class StudentController extends Controller
       Mail::send(new TestMail($name,$email));
       return response()->json(['message'=>'テストメールが送信されました',]);
   
-      // return response()->json([]);
     }
 }

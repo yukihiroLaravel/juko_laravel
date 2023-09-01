@@ -25,6 +25,8 @@ class CreateNotificationsTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+            $table->foreign('course_id')->references('id')->on('courses');
+            $table->foreign('instructor_id')->references('id')->on('instructors');
         });
     }
 

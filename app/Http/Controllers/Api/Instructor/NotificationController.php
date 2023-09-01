@@ -17,20 +17,11 @@ class NotificationController extends Controller
             'instructor_id' => $request->instructor_id, // テスト中はこちらを使用
             'title'         => $request->title,
             'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
             'content'       => $request->content,
         ];
 
-        if ($request->type == 1) {
-            $data['start_date'] = $request->start_date;
-            $data['end_date'] = $request->end_date;
-        }
-
-
-        $notification = Notification::create($data);
-
-        return response()->json([
-            'result'       => true,
-            'notification' => 'Notification created successfully!',
-        ]);
+        Notification::create($data);
     }
 }

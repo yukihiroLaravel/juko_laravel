@@ -21,6 +21,7 @@ Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
+        Route::get('student/{student_id}', 'Api\Instructor\StudentController@show');
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });

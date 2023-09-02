@@ -60,9 +60,7 @@ Route::prefix('v1')->group(function () {
         });
         Route::prefix('{course_id}')->group(function () {
             Route::prefix('notification')->group(function () {
-                Route::prefix('{notification_id}')->group(function () {
-                    Route::get('/', 'Api\NotificationController@show');
-                });
+                Route::get('{notification_id}', 'Api\NotificationController@show');
             });
         });
     });

@@ -17,23 +17,9 @@ class Notification extends Model
     protected $table = 'notifications';
 
     // type定数
-    const TYPE_ALWAYS = 1;
-    const TYPE_ONCE = 2;
-    const ALWAYS = 'always';
-    const ONCE = 'once';    
+    const TYPE_ALWAYS_INT = 1;
+    const TYPE_ONCE_INT = 2;
+    const TYPE_ALWAYS = 'always';
+    const TYPE_ONCE = 'once';    
     
-    /**
-     * typeをalwaysかonceで取得
-     *
-     * @return string
-     */
-    public function getTypeAttribute($value)
-    {    
-        if ($value === self::TYPE_ALWAYS) {
-            return self::ALWAYS;
-        } elseif ($value === self::TYPE_ONCE) {
-            return self::ONCE;
-        }
-        return null;
-    }
 }

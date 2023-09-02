@@ -7,7 +7,7 @@ use Illuminate\Http\Request; //postman確認のため仮作成
 
 class NotificationController extends Controller
 {
-    public function show(Request $request)
+    public function index(Request $request)
     {
         return response()->json([]);
     }

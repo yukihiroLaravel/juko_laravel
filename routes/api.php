@@ -55,10 +55,10 @@ Route::prefix('v1')->group(function () {
     Route::prefix('course')->group(function () {
         Route::get('/', 'Api\CourseController@show');
         Route::get('index', 'Api\CourseController@index');
-        Route::get('notification', 'Api\NotificationController@show');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
+    Route::get('notification', 'Api\NotificationController@index');
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

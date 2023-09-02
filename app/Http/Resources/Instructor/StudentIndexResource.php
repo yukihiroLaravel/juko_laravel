@@ -6,6 +6,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentIndexResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
     public function toArray($request)
     {
 
@@ -13,18 +19,16 @@ class StudentIndexResource extends JsonResource
         $attendances = $this->resource['attendances'];
 
         return [
-            'data' => [
-                'course' => [
-                    'id' => $course->id,
-                    'image' => $course->image,
-                    'title' => $course->title,
-                ],
-                'pagination' => [
-                    'page' => $attendances->currentPage(),
-                    'total' => $attendances->total(),
-                ],
-                'students' => $this->mapStudents($attendances),
+            'course' => [
+                'id' => $course->id,
+                'image' => $course->image,
+                'title' => $course->title,
             ],
+            'pagination' => [
+                'page' => $attendances->currentPage(),
+                'total' => $attendances->total(),
+            ],
+            'students' => $this->mapStudents($attendances),
         ];
     }
 

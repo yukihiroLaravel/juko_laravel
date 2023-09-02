@@ -13,10 +13,9 @@ class NotificationController extends Controller
     {
         $data = [
             'course_id'     => $request->course_id,
-            // 'instructor_id' => Auth::id(),  // テスト終了後はこちらを使用
-            'instructor_id' => $request->instructor_id, // テスト中はこちらを使用
+            'instructor_id' => 1,
             'title'         => $request->title,
-            'type'          => $request->type,
+            'type'          => intval($request->type),
             'start_date'    => $request->start_date,
             'end_date'      => $request->end_date,
             'content'       => $request->content,
@@ -26,7 +25,6 @@ class NotificationController extends Controller
 
         return response()->json([
             'result' => true,
-            'notification' => 'Notification created successfully!',
         ]);
     }
 }

@@ -26,6 +26,6 @@ class SexRule implements Rule
      */
     public function message()
     {
-        return 'The :attribute must be either "' . Student::SEX_MAN . '" or "' . Student::SEX_WOMAN . '".';
+        return 'The :attribute must be either ' . Student::SEX_MAN . ' or ' . Student::SEX_WOMAN . '.';
     }
 }

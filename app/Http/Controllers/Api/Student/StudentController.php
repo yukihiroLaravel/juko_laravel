@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Student;
 use App\Model\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentPatchRequest; 
-use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {

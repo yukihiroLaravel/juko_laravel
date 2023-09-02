@@ -2,12 +2,12 @@
 
 namespace App\Rules;
 
-// app/Rules/UniqueEmail.php
+// app/Rules/UniqueEmailRule.php
 
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Student;
 
-class UniqueEmail implements Rule
+class UniqueEmailRule implements Rule
 {
     protected $email;
 

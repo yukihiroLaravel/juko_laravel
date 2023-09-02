@@ -21,7 +21,7 @@ class CourseController extends Controller
     public function index(CourseIndexRequest $request)
     {
         if ($request->text === null) {
-            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->user()->id)->get();
             $publicAttendances = $this->extractPublicCourse($attendances);
             return new CourseIndexResource($publicAttendances);
         }
@@ -32,6 +32,7 @@ class CourseController extends Controller
             ->with(['course.instructor'])
             ->where('student_id', '=', $request->student_id)
             ->get();
+
         $publicAttendances = $this->extractPublicCourse($attendances);
         return new CourseIndexResource($publicAttendances);
     }

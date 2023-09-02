@@ -11,6 +11,7 @@ use App\Http\Resources\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\LessonAttendance;
 
 class CourseController extends Controller
 {
@@ -72,49 +73,60 @@ class CourseController extends Controller
         // TODO 認証ユーザーを一時的にid=1とする。
         $authId = 1;
         $attendance = Attendance::with([
-            'course.chapters.lessons.lessonAttendance'
+            'course.chapters.lessons',
+            'lessonAttendances'
         ])
         ->where([
             'course_id' => $request->route('course_id'),
             'student_id' => $authId
         ])
-        ->first();
-
-        
-        // 終了済みのレッスン数
-        $completedLessonsCount = 0;
-        foreach ($attendance->course->chapters as $chapter) {
-            foreach ($chapter->lessons as $lesson) {
-                $completedAttendancesCount = $lesson->lessonAttendance->where('status', 'completed_attendance')->count();
-                $completedLessonsCount += $completedAttendancesCount;
-            }
-        }
+        ->firstOrFail();
 
         // 終了済みのチャプター数
-        $completedChaptersCount = 0;
+        $completedLessonAttendanceIds = $attendance->lessonAttendances->filter(function ($lessonAttendance) {
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })
+        ->pluck('id');
+        
+        $groupedLessons = $attendance->course->chapters
+        ->flatMap(function ($chapter) {
+            return $chapter->lessons->groupBy('chapter_id');
+        });
+
+        $completedChaptersCount = $groupedLessons->filter(function ($groupedLesson) use ($completedLessonAttendanceIds) {
+            return $groupedLesson->pluck('id')->intersect($completedLessonAttendanceIds)->count() === $groupedLesson->count();
+        })->count();
+
+        // チャプター合計
+        $totalChaptersCount = $attendance->course->chapters->count();
+
+        // 終了済みのレッスン数
+        $completedLessonsCount = 0;
+        foreach ($attendance->lessonAttendances as $lessonAttendance)
+        if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+            $completedLessonsCount ++;
+        }
+        
+        // レッスン合計
+        $totalLessonsCount = 0;
         foreach ($attendance->course->chapters as $chapter) {
-            if (count($chapter->lessons) === 0 ) {
-                continue;
-            }
-            if ($this->getChapterProgress($chapter->lessons)) {
-                $completedChaptersCount++;
-            }
+            $lessonCount = $chapter->lessons->count();
+            $totalLessonsCount += $lessonCount; 
         }
 
-        // チャプター・チャプター毎のレッスン数
-        $chapterLessons = Chapter::where('course_id', $request->route('course_id'))
-            ->withCount('lessons')
-            ->get();
-
-        // 最もIDが若い未完了のチャプター（続きのレッスンID取得）
-        $youngestUnCompletedChapter = null;
-        foreach ($attendance->course->chapters as $chapter) {
-            if (!$this->getChapterProgress($chapter->lessons)) {
-                if ($youngestUnCompletedChapter === null || $chapter->id < $youngestUnCompletedChapter) {
-                    $youngestUnCompletedChapter = $chapter->id;
-                }
-            }
-        }
+        // 未完了のチャプターでIDが最も若いレッスン（続きのレッスンID取得）
+        $UnCompletedLessonAttendanceIds = $attendance->lessonAttendances->filter(function ($lessonAttendance) {
+            return $lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })
+        ->pluck('id');
+        
+        $youngestUnCompletedLesson = $attendance->course->chapters
+        ->flatMap(function ($chapter) use ($UnCompletedLessonAttendanceIds) {
+            return $chapter->lessons->filter(function ($lesson) use ($UnCompletedLessonAttendanceIds) {
+                return $UnCompletedLessonAttendanceIds->contains($lesson->id);
+            });
+        })
+        ->sortBy('chapter_id')->first()['id'];
 
         return response()->json([
             'course' =>[
@@ -122,21 +134,10 @@ class CourseController extends Controller
                 'progress' => $attendance->progress
             ],
             "number_of_completed_chapters" => $completedChaptersCount,
-            "number_of_total_chapters" => $chapterLessons->count(),
+            "number_of_total_chapters" => $totalChaptersCount,
             "number_of_completed_lessons" => $completedLessonsCount,
-            "number_of_total_lessons" => $chapterLessons->sum('lessons_count'),
-            "continue_lesson_id" => $youngestUnCompletedChapter
+            "number_of_total_lessons" => $totalLessonsCount,
+            "continue_lesson_id" => $youngestUnCompletedLesson
         ]); 
-    }
-
-    private function getChapterProgress($lessons) {
-        foreach ($lessons as $lesson) {
-            foreach ($lesson->lessonAttendance as $lessonAttendance) {
-                if ($lessonAttendance->status !== 'completed_attendance') {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }

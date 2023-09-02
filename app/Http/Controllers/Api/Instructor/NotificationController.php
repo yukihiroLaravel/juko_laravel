@@ -23,5 +23,10 @@ class NotificationController extends Controller
         ];
 
         Notification::create($data);
+
+        return response()->json([
+            'result' => true,
+            'notification' => 'Notification created successfully!',
+        ]);
     }
 }

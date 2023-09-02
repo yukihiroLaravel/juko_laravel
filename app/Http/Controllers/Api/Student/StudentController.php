@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Model\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentPatchRequest; 
+use App\Rules\UniqueEmail;
 
 class StudentController extends Controller
 {
@@ -17,6 +18,10 @@ class StudentController extends Controller
     public function update(StudentPatchRequest $request)
     {
         try {
+            $request->validate([
+                'email' => ['required', 'email', new UniqueEmail($request->email)],
+            ]);
+
             $student = Student::findOrFail(1); 
 
             $student->update([

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Resources\Instructor\StudentStoreResource;
 use App\Model\Student;
 use Carbon\Carbon;
 
@@ -27,11 +28,7 @@ class StudentController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => [
-                'id' => $student->id,
-                'given_name_by_instructor' => $student->given_name_by_instructor,
-                'email' => $student->email
-            ]
+            'data' => new StudentStoreResource($student)
         ]);
     }
 }

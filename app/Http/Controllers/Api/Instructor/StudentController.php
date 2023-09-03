@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Model\Student;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
+use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
@@ -21,4 +22,3 @@ class StudentController extends Controller
 
         return new StudentShowResource($student);
     }
-}

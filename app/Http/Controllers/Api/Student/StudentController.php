@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Model\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentPatchRequest; 
+use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 
 class StudentController extends Controller
@@ -40,7 +41,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => true,
-                // 'data' => new StudentPatchResource($student)
+                'data' => new StudentPatchResource($student)
             ]);
         } catch (Exception $e) {            
             Log::error($e);                    

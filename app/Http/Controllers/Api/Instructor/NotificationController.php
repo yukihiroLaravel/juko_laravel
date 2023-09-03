@@ -15,7 +15,7 @@ class NotificationController extends Controller
             'course_id'     => $request->course_id,
             'instructor_id' => 1,
             'title'         => $request->title,
-            'type'          => intval($request->type),
+            'type'          => $request->type,
             'start_date'    => $request->start_date,
             'end_date'      => $request->end_date,
             'content'       => $request->content,

@@ -21,3 +21,4 @@ class StudentController extends Controller
 
         return new StudentShowResource($student);
     }
+}

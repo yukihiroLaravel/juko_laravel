@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     /**
-     * お知らせ表示更新API
+     * お知らせ更新API
      * @param
      * @return
      */

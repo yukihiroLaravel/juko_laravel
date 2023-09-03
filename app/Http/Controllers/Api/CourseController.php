@@ -26,11 +26,12 @@ class CourseController extends Controller
             return new CourseIndexResource($publicAttendances);
         }
 
-        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
-            $q->where('title', 'like', "%$request->text%");
-        })
-            ->with(['course.instructor'])
-            ->where('student_id', '=', $request->student_id)
+        // 検索ワードで講座を検索
+        $attendances = Attendance::with(['course.instructor'])
+            ->where('student_id', $request->user()->id)
+            ->whereHas('course', function ($query) use ($request) {
+                $query->where('title', 'like', "%{$request->text}%");
+            })
             ->get();
 
         $publicAttendances = $this->extractPublicCourse($attendances);

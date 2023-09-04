@@ -67,5 +67,5 @@ Route::prefix('v1')->group(function () {
         });
     });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
-    Route::get('student/edit/{id}', 'Api\Students\StudentController@edit');
+    Route::get('student/edit', 'Api\Student\StudentController@edit');
 });

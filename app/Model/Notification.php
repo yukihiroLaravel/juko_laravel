@@ -34,12 +34,12 @@ class Notification extends Model
 
     public function setTypeAttribute($value)
     {
+        $this->attributes['type'] = null;
+
         if ($value === self::TYPE_ALWAYS) {
             $this->attributes['type'] = self::TYPE_ALWAYS_INT;
         } elseif ($value === self::TYPE_ONCE) {
             $this->attributes['type'] = self::TYPE_ONCE_INT;
-        } else {
-            $this->attributes['type'] = null;
         }
     }
 }

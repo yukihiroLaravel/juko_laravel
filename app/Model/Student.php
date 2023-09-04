@@ -22,4 +22,11 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
+
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_students')
+            ->withPivot('has_viewed')
+            ->withTimestamps();
+    }
 }

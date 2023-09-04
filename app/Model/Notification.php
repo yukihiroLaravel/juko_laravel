@@ -22,4 +22,30 @@ class Notification extends Model
     const TYPE_ALWAYS = 'always';
     const TYPE_ONCE = 'once';    
     
+    // /**
+    //  * typeをalwaysかonceで取得
+    //  *
+    //  * @return string
+    //  */
+    // public function getTypeAttribute($value)
+    // {    
+    //     if ($value === self::TYPE_ALWAYS_INT) {
+    //         return self::TYPE_ALWAYS;
+    //     } elseif ($value === self::TYPE_ONCE_INT) {
+    //         return self::TYPE_ONCE;
+    //     }
+    //     return null;
+    // }
+
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'notification_students')
+            ->withPivot('has_viewed')
+            ->withTimestamps();
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
 }

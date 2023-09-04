@@ -16,7 +16,7 @@ class StudentStoreResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'student->given_name_by_instructor' => $this->given_name_by_instructor,
+            'given_name_by_instructor' => $this->given_name_by_instructor,
             'email' => $this->email
         ];
     }

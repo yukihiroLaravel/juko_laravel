@@ -44,6 +44,7 @@ class CourseController extends Controller
             return $attendance->course->status === Course::STATUS_PUBLIC;
         });
     }
+
     /**
      * 講座詳細取得API
      *
@@ -61,6 +62,7 @@ class CourseController extends Controller
 
         return new CourseShowResource($attendance);
     }
+
     /**
      * チャプター進捗状況、続きのレッスンID取得API
      *
@@ -90,13 +92,15 @@ class CourseController extends Controller
             "number_of_total_chapters" => $this->getTotalChaptersCount($attendance),
             "number_of_completed_lessons" => $this->getCompletedLessonsCount($attendance),
             "number_of_total_lessons" => $this->getTotalLessonsCount($attendance),
-            "continue_lesson_id" => $this->getYoungestUnCompletedLesson($attendance)
+            "continue_lesson_id" => $this->getYoungestUnCompletedLessonId($attendance)
         ]); 
     }
+
     /**
      * 完了済みのチャプター数を取得する
      *
      * @param Attendance $attendance
+     * @return int
      */
     private function getCompletedChaptersCount($attendance)
     {
@@ -114,19 +118,23 @@ class CourseController extends Controller
             return $isCompleted;
         })->count();        
     }
+
     /**
      * チャプター合計を取得する
      *
      * @param Attendance $attendance
+     * @return int
      */
     private function getTotalChaptersCount($attendance)
     {
         return $attendance->course->chapters->count();
     }
+
     /**
      * 完了済みのレッスン数を取得する
      *
      * @param Attendance $attendance
+     * @return int
      */
     private function getCompletedLessonsCount($attendance)
     {
@@ -134,10 +142,12 @@ class CourseController extends Controller
             return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
         })->count();
     }
+
     /**
      * レッスン合計を取得する
      *
      * @param Attendance $attendance
+     * @return int
      */
     private function getTotalLessonsCount($attendance)
     {
@@ -148,27 +158,32 @@ class CourseController extends Controller
         }
         return $totalLessonsCount;
     }
+
     /**
-     * 続きのレッスンIDを取得する（IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン）
+     * 続きのレッスンIDを取得する
      *
      * @param Attendance $attendance
+     * @return int|null
      */
-    private function getYoungestUnCompletedLesson($attendance)
+    private function getYoungestUnCompletedLessonId($attendance)
     {
-        $UnCompletedLessonAttendanceIds = $attendance->lessonAttendances->filter(function ($lessonAttendance) {
-            return $lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })
-        ->pluck('id');
-        // 全てのレッスンが完了済みの場合
-        if ($UnCompletedLessonAttendanceIds->isEmpty()) {
-            return null;
-        }
+        // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
+        $youngestUnCompletedLessonId = null;
+        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLessonId) {
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLessonId) {
+                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
 
-        return $attendance->course->chapters->flatMap(function ($chapter) use ($UnCompletedLessonAttendanceIds) {
-            return $chapter->lessons->filter(function ($lesson) use ($UnCompletedLessonAttendanceIds) {
-                return $UnCompletedLessonAttendanceIds->contains($lesson->id);
+                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                    if ($youngestUnCompletedLessonId === null) {
+                        $youngestUnCompletedLessonId = $lesson->id;
+                        return;
+                    }
+                    if ($youngestUnCompletedLessonId > $lesson->id) {
+                        $youngestUnCompletedLessonId = $lesson->id;
+                    }
+                }
             });
-        })
-        ->sortBy('chapter_id')->first()['id'];
+        });
+        return $youngestUnCompletedLessonId;
     }
 }

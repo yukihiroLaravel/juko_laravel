@@ -1,53 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Api\Student;
+namespace App\Http\Resources\Student;
 
-use App\Model\Student;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\StudentPatchRequest; 
-use App\Http\Resources\Student\StudentPatchResource;
-use App\Rules\UniqueEmailRule;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class StudentController extends Controller
+class StudentPatchResource extends JsonResource
 {
     /**
-     * 生徒情報更新API
+     * Transform the resource into an array.
      *
-     * @param StudentPatchRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
      */
-    public function update(StudentPatchRequest $request)
+    public function toArray($request)
     {
-        try {
-            
-            $student = Student::findOrFail(1); 
-
-            $request->validate([
-                'email' => [new UniqueEmailRule($student->email)],
-            ]);
-
-
-            $student->update([
-                'nick_name' => $request->nick_name,
-                'last_name' => $request->last_name,
-                'first_name' => $request->first_name,
-                'occupation' => $request->occupation,
-                'email' => $request->email,
-                'purpose' => $request->purpose,
-                'birth_date' => $request->birth_date,
-                'sex' => Student::convertSexToInt($request->sex), 
-                'address' => $request->address,     
-            ]);
-
-            return response()->json([
-                'result' => true,
-                'data' => new StudentPatchResource($student)
-            ]);
-        } catch (Exception $e) {            
-            Log::error($e);                    
-            return response()->json([
-                'result' => false,
-            ], 500);
-        }
+        return [
+            'nick_name' => $this->nick_name,
+            'last_name' => $this->last_name,
+            'first_name' => $this->first_name,
+            'occupation' => $this->occupation,
+            'email' => $this->email,
+            'purpose' => $this->purpose,
+            'birth_date' => $this->birth_date,
+            'sex' => $this->sex,
+            'address' => $this->address,
+        ];
     }
 }

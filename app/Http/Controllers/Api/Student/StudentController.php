@@ -13,9 +13,8 @@ class StudentController extends Controller
         $id = 1;
         $student = Student::findOrFail($id);
 
-            return response()->json([
-                'status' => 200,
-                'student' => $student,
-            ]);
+        return response()->json([
+            'student' => $student,
+        ]);
     }
 }

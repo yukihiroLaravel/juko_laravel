@@ -67,7 +67,7 @@ class CourseController extends Controller
      * チャプター進捗状況、続きのレッスンID取得API
      *
      * @param Request $request
-     * @return Resource
+     * @return \Illuminate\Http\JsonResponse
      */
     public function progress(Request $request)
     {

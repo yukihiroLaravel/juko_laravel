@@ -68,8 +68,4 @@ class Course extends Model
         });
     }
 
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'course_id');
-    }
 }

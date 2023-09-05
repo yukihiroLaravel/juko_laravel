@@ -17,7 +17,6 @@ class CreateNotificationStudentsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('notification_id')->unsigned();
             $table->bigInteger('student_id')->unsigned();
-            $table->boolean('has_viewed')->default(false);
             $table->dateTime('created_at');
             $table->dateTime('updated_at');    
             $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');

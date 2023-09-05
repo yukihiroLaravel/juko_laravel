@@ -22,11 +22,13 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
-
+    /**
+     * お知らせを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     */
     public function notifications()
     {
-        return $this->belongsToMany(Notification::class, 'notification_students')
-            ->withPivot('has_viewed')
-            ->withTimestamps();
+        return $this->belongsToMany(Notification::class, 'notification_students', 'student_id', 'notification_id')->withTimestamps();
     }
 }

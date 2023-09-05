@@ -24,7 +24,6 @@ class NotificationController extends Controller
             })
             ->get();
 
-
         $formattedNotifications = [];
 
         foreach ($notifications as $notification) {

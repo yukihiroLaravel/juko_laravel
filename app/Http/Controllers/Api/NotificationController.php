@@ -27,14 +27,12 @@ class NotificationController extends Controller
         $formattedNotifications = [];
 
         foreach ($notifications as $notification) {
-            if ($notification->type === Notification::TYPE_ONCE) {
-                if (!$notification->students->contains($studentId)) {
-                    $notification->students()->attach($studentId);
-                } else {
-                    continue;
-                }
+            if ($notification->type === Notification::TYPE_ONCE && $notification->students->contains($studentId)) {
+                continue;
             }
-
+            if ($notification->type === Notification::TYPE_ONCE) {
+                $notification->students()->attach($studentId);
+            }        
             $formattedNotifications[] = [
                 'id' => $notification->id,
                 'course_id' => $notification->course_id,
@@ -42,8 +40,8 @@ class NotificationController extends Controller
                 'type' => $notification->type,
                 'title' => $notification->title,
                 'content' => $notification->content,
-            ];
-        }
+            ];        
+        }        
 
         return response()->json(['data' => $formattedNotifications]);
     }

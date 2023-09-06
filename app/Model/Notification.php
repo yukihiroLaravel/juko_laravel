@@ -23,7 +23,7 @@ class Notification extends Model
     const TYPE_ONCE = 'once';    
     
     /**
-     * typeをalwaysかonceで取得
+     * type変換
      *
      * @return string
      */
@@ -44,7 +44,7 @@ class Notification extends Model
      */
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'notification_students', 'notification_id', 'student_id')->withTimestamps();
+        return $this->belongsToMany(Student::class, 'viewed_once_notifications', 'notification_id', 'student_id')->withTimestamps();
     }
 
     /**

@@ -22,6 +22,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
+
     /**
      * お知らせを取得
      *
@@ -29,6 +30,6 @@ class Student extends Authenticatable
      */
     public function notifications()
     {
-        return $this->belongsToMany(Notification::class, 'notification_students', 'student_id', 'notification_id')->withTimestamps();
+        return $this->belongsToMany(Notification::class, 'viewed_once_notifications', 'student_id', 'notification_id')->withTimestamps();
     }
 }

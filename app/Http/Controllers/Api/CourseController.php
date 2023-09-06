@@ -8,6 +8,7 @@ use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
 use App\Model\Attendance;
+use App\Model\Course;
 
 class CourseController extends Controller
 {
@@ -20,19 +21,29 @@ class CourseController extends Controller
     public function index(CourseIndexRequest $request)
     {
         if ($request->text === null) {
-            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
-            return new CourseIndexResource($attendances);
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->user()->id)->get();
+            $publicAttendances = $this->extractPublicCourse($attendances);
+            return new CourseIndexResource($publicAttendances);
         }
 
-        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
-            $q->where('title', 'like', "%$request->text%");
-        })
-            ->with(['course.instructor'])
-            ->where('student_id', '=', $request->student_id)
+        // 検索ワードで講座を検索
+        $attendances = Attendance::with(['course.instructor'])
+            ->where('student_id', $request->user()->id)
+            ->whereHas('course', function ($query) use ($request) {
+                $query->where('title', 'like', "%{$request->text}%");
+            })
             ->get();
-        return new CourseIndexResource($attendances);
+
+        $publicAttendances = $this->extractPublicCourse($attendances);
+        return new CourseIndexResource($publicAttendances);
     }
 
+    private function extractPublicCourse($attendances)
+    {
+        return $attendances->filter(function ($attendance) {
+            return $attendance->course->status === Course::STATUS_PUBLIC;
+        });
+    }
     /**
      * 講座詳細取得API
      *

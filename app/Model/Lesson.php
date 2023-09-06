@@ -25,6 +25,7 @@ class Lesson extends Model
         'url',
         'remarks',
         'status',
+        'order',
     ];
 
     /**
@@ -42,7 +43,7 @@ class Lesson extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function lessonAttendance()
+    public function lessonAttendances()
     {
         return $this->hasMany(LessonAttendance::class);
     }

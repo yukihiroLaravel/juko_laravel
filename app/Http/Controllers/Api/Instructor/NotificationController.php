@@ -15,8 +15,7 @@ class NotificationController extends Controller
      */
     public function update(Request $request) {
 
-        $courseId = $request->course_id;
-        Notification::findOrFail($courseId)->update([
+        Notification::where('course_id', '=', $request->course_id)->update([
             'type'  => $request->type,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,

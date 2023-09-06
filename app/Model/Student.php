@@ -63,4 +63,15 @@ class Student extends Authenticatable
 
         return self::SEX_UNKNOWN_INT;
     }
+
+    public function getSexAttribute($value)
+    {
+        if ($value === self::SEX_MAN_INT) {
+            return self::SEX_MAN;
+        } elseif ($value === self::SEX_WOMAN_INT) {
+            return self::SEX_WOMAN;
+        }
+
+        return null;
+    }
 }

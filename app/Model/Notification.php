@@ -23,7 +23,7 @@ class Notification extends Model
     const TYPE_ONCE = 'once';    
     
     /**
-     * type変換
+     * 表示区分
      *
      * @return string
      */

@@ -24,25 +24,24 @@ class NotificationController extends Controller
             })
             ->get();
 
-        $formattedNotifications = [];
-
-        foreach ($notifications as $notification) {
-            if ($notification->type === Notification::TYPE_ONCE && $notification->students->contains($studentId)) {
-                continue;
-            }
+        $formattedNotifications = $notifications->map(function ($notification) use ($studentId) {
             if ($notification->type === Notification::TYPE_ONCE) {
+                if ($notification->students->contains($studentId)) {
+                    return;
+                }
                 $notification->students()->attach($studentId);
-            }        
-            $formattedNotifications[] = [
+            }
+        
+            return [
                 'id' => $notification->id,
                 'course_id' => $notification->course_id,
                 'course_title' => $notification->course->title,
                 'type' => $notification->type,
                 'title' => $notification->title,
                 'content' => $notification->content,
-            ];        
-        }        
-
+            ];
+        })->filter();
+        
         return response()->json(['data' => $formattedNotifications]);
     }
 }

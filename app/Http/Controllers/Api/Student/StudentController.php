@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Student;
+use App\Http\Resources\StudentEditResource;
 
 class StudentController extends Controller
 {
@@ -14,7 +15,7 @@ class StudentController extends Controller
         $student = Student::findOrFail($id);
 
         return response()->json([
-            'student' => $student,
+            'student' => new StudentEditResource($student),
         ]);
     }
 }

@@ -41,6 +41,7 @@ Route::prefix('v1')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');
             Route::prefix('{course_id}')->group(function () {
+                Route::get('student/index', 'Api\Instructor\StudentController@index');
                 Route::get('/', 'Api\Instructor\CourseController@show');
                 Route::get('edit', 'Api\Instructor\CourseController@edit');
                 Route::post('/', 'Api\Instructor\CourseController@update');

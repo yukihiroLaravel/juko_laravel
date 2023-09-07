@@ -32,4 +32,14 @@ class Student extends Authenticatable
     {
         return $this->belongsToMany(Notification::class, 'viewed_once_notifications', 'student_id', 'notification_id')->withTimestamps();
     }
+
+    /**
+     * 受講状況を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+        public function attendance()
+    {
+        return $this->hasMany(Attendance::class); 
+    }
 }

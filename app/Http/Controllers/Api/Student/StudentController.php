@@ -15,7 +15,7 @@ class StudentController extends Controller
         $student = Student::findOrFail($id);
 
         return response()->json([
-            'student' => new StudentEditResource($student),
+            'data' => new StudentEditResource($student),
         ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor;
 
+use App\Rules\NotificationStoreStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class NotificationStoreRequest extends FormRequest
@@ -16,6 +17,13 @@ class NotificationStoreRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,11 +33,10 @@ class NotificationStoreRequest extends FormRequest
     {
         return [
             'course_id'     => ['required', 'exists:courses,id', 'integer'],
-            'instructor_id' => ['exists:instructors,id', 'integer'],
             'title'         => ['required', 'string', 'max:50'],
-            'type'          => ['required', 'in:always,once'],
-            'start_date'    => ['required', 'date'],
-            'end_date'      => ['required', 'date', 'after:start_date'],
+            'type'          => ['required', new NotificationStoreStatusRule()],
+            'start_date'    => ['required', 'date_format:Y-m-d H:i:s'],
+            'end_date'      => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'content'       => ['required', 'string', 'max:500'],
         ];
     }

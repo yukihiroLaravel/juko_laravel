@@ -14,13 +14,15 @@ class NotificationIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'course_id' => $this->course_id,
-            'course_title' => $this->course->title,
-            'type' => $this->type,
-            'title' => $this->title,
-            'content' => $this->content,
-        ];
+        return $this->map(function ($notification) {    
+            return [
+                'id' => $notification->id,
+                'course_id' => $notification->course_id,
+                'course_title' => $notification->course->title,
+                'type' => $notification->type,
+                'title' => $notification->title,
+                'content' => $notification->content,
+            ];
+        });
     }
 }

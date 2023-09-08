@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('attendance')->group(function () {
-                    Route::get('login_rate', 'Api\Instructor\AttendanceController@loginRate');
+                    Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
                 });
                 Route::prefix('chapter')->group(function () {

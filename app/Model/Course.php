@@ -43,8 +43,7 @@ class Course extends Model
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function attendances()
-    {
-        return $this->belongsTo(Student::class);
+    {        
         return $this->hasMany(Attendance::class);
     }
 
@@ -66,5 +65,5 @@ class Course extends Model
                 $child->delete();
             }
         });
-    }
+    }   
 }

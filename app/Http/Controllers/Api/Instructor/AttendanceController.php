@@ -6,6 +6,7 @@ use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Model\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
@@ -93,22 +94,41 @@ class AttendanceController extends Controller
      * @param 
      * @return 
      */ 
-    public function loginRate() {
-        $courseId = 1;
-        $Attendance = Attendance::with('lessonAttendances.lessons')->where('course_id', $courseId)->get();
-        $studentsCount = Attendance::where('course_id', $courseId)->count();
-  
+    public function loginRate(Course $course,$courseId, $period) {   
+        $endDate = now();   
+    
+        switch ($period) {
+            case 'week':
+                $startDate = now()->subWeek();
+                break;
+            case 'month':
+                $startDate = now()->subMonth();
+                break;
+            case 'year':
+                $startDate = now()->subYear();
+                break;
+            default:
+                return response()->json(['error' => 'Invalid period'], 400);
+            }
         
-        return response()->json([
-          'Attendance' => $Attendance,
-          'studentsCount' => $studentsCount.
-      ]);
-  
+        $courses = Course::with('attendances.student')->get();
+
+        $loginRates = [];
         
-      
-      
-      
-      
-      
-    }  
-}
+        foreach ($courses as $courseItem) {
+        
+            $attendances = $courseItem->attendances;
+            
+            $studentsCount = Attendance::where('course_id', $courseItem->id)->count();        
+        
+            $filteredAttendances = $attendances->whereBetween('last_login_at', [$startDate, $endDate]);
+            
+            $studentLogins = $filteredAttendances->where('student_id', $courseId)->count();
+            
+            $loginRate = $studentsCount > 0 ? ($studentLogins / $studentsCount) * 100 : 0;
+        
+            $loginRates[] = ['course' => $courseItem->name, 'login_rate' => $loginRate];
+            }   
+        return response()->json(['login_rates' => $loginRates]);    
+    }
+}    

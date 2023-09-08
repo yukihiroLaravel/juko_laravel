@@ -123,11 +123,11 @@ class AttendanceController extends Controller
         
             $filteredAttendances = $attendances->whereBetween('last_login_at', [$startDate, $endDate]);
             
-            $studentLogins = $filteredAttendances->where('student_id', $courseId)->count();
+            $studentLogins = $filteredAttendances->where('student_id', $courseId)->count();            
             
             $loginRate = $studentsCount > 0 ? ($studentLogins / $studentsCount) * 100 : 0;
         
-            $loginRates[] = ['course' => $courseItem->name, 'login_rate' => $loginRate];
+            $loginRates[] = ['course' => $courseItem->title, 'login_rate' => $loginRate];
             }   
         return response()->json(['login_rates' => $loginRates]);    
     }

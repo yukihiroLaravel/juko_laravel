@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -24,5 +25,11 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+
+    }
+
+    public function show(Request $request)
+    {
+        return response()->json([]);
     }
 }

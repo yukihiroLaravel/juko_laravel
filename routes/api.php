@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('notification')->group(function () {
+                    Route::get('/', 'Api\Instructor\NotificationController@show');
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
                 Route::prefix('attendance')->group(function () {

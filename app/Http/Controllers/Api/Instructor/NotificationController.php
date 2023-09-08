@@ -15,13 +15,15 @@ class NotificationController extends Controller
      */
     public function update(Request $request) {
 
-        Notification::where('course_id', '=', $request->course_id)->update([
+        $notification = Notification::find($request->id);
+        $notification->fill([
             'type'  => $request->type,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'title' => $request->title,
             'content' => $request->content,
         ]);
+        $notification->save();
         return response()->json([
             'result' => true,
         ]);

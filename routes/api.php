@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });
         Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::patch('notification/{notification_id}', 'Api\Instructor\NotificationController@update');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');
@@ -36,7 +37,6 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
                 });
-                Route::patch('notification', 'Api\Instructor\NotificationController@update');
                 Route::prefix('chapter')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');

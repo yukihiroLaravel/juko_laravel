@@ -15,6 +15,10 @@ class Chapter extends Model
      */
     protected $table = 'chapters';
 
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
+
     /**
      * @var array<string>
      */
@@ -22,7 +26,8 @@ class Chapter extends Model
         'chapter_id',
         'course_id',
         'order',
-        'title'
+        'title',
+        'status'
     ];
 
     /**

@@ -13,17 +13,16 @@ class NotificationController extends Controller
      * @param
      * @return
      */
-    public function update(Request $request) {
-
-        $notification = Notification::find($request->id);
-        $notification->fill([
-            'type'  => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
-        $notification->save();
+    public function update(Request $request, int $notification_id) {
+        Notification::findOrFail($notification_id)
+            ->fill([
+                'type'  => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'title' => $request->title,
+                'content' => $request->content,
+            ])
+            ->save();
         return response()->json([
             'result' => true,
         ]);

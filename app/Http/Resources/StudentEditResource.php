@@ -22,7 +22,7 @@ class StudentEditResource extends JsonResource
             'email' => $this->email,
             'occupation' => $this->occupation,
             'purpose' => $this->purpose,
-            'birth_date' => $this->birthdate,
+            'birth_date' => $this->birth_date->format('Y/m/d'),
             'sex' => $this->sex,
             'address' => $this->address,
         ];

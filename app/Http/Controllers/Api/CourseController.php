@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;    //postman確認のため仮作成
+use App\Http\Requests\CourseProgressRequest;
 use App\Http\Requests\CourseShowRequest;
 use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
@@ -66,10 +66,10 @@ class CourseController extends Controller
     /**
      * チャプター進捗状況、続きのレッスンID取得API
      *
-     * @param Request $request
+     * @param CourseProgressRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function progress(Request $request)
+    public function progress(CourseProgressRequest $request)
     {
         // TODO 認証ユーザーを一時的にid=1とする。
         $authId = 1;

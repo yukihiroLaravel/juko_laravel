@@ -17,25 +17,24 @@ class NotificationController extends Controller
         // $studentId = $request->user()->id; // ログイン中の受講生のIDを取得（developマージ後に実装予定）
         $student = Student::findOrFail(1);
         $notifications = $this->getNotifications($student);
-        $formattedNotifications = $this->formatNotifications($student, $notifications);
+        $filteredNotifications = $this->filterAndMarkAsRead($student, $notifications);
 
-        return new NotificationIndexResource($formattedNotifications);
+        return new NotificationIndexResource($filteredNotifications);
     }
 
     private function getNotifications(Student $student)
     {
-        $attendances = Attendance::where('student_id', $student->id)->get();
+        $attendances = Attendance::where('student_id', $student->id)->with('course')->get();
         $courseIds = $attendances->pluck('course.id')->toArray();
         $currentDateTime = Carbon::now();
 
         return Notification::whereIn('course_id', $courseIds)
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime)
-            ->with('course')
             ->get();
     }
 
-    private function formatNotifications(Student $student, $notifications)
+    private function filterAndMarkAsRead(Student $student, $notifications)
     {
         return $notifications->filter(function ($notification) use ($student) {
             if ($notification->type === Notification::TYPE_ONCE) {

@@ -23,6 +23,7 @@ class CourseShowResource extends JsonResource
                 return [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
+                    'status' => $chapter->status,
                     'lessons' => $chapter->lessons->map(function ($lesson) {
                         return [
                            'lesson_id'=>$lesson->id,

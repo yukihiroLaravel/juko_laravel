@@ -49,6 +49,7 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
                 });
+                Route::delete('notification','Api\Instructor\NotificationController@delete');
                 Route::prefix('chapter')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');

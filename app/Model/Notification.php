@@ -30,8 +30,8 @@ class Notification extends Model
     const TYPE_ALWAYS_INT = 1;
     const TYPE_ONCE_INT = 2;
     const TYPE_ALWAYS = 'always';
-    const TYPE_ONCE = 'once';    
-    
+    const TYPE_ONCE = 'once';
+
     /**
      * 表示区分
      *

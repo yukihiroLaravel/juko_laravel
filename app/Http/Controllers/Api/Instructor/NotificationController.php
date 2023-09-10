@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Model\Notification;
 
 class NotificationController extends Controller
@@ -13,7 +13,7 @@ class NotificationController extends Controller
      * @param
      * @return
      */
-    public function update(Request $request, int $notification_id) {
+    public function update(NotificationUpdateRequest $request, int $notification_id) {
         Notification::findOrFail($notification_id)
             ->fill([
                 'type'  => $request->type,

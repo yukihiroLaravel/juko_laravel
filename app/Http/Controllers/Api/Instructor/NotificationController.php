@@ -34,6 +34,8 @@ class NotificationController extends Controller
 
         // バリデーションに合格した場合、データベースから通知情報を取得
         $notification = Notification::findOrFail($validatedData['notification_id']);
+        // 通知情報をデータベースから取得
+        $notification = Notification::findOrFail($notification_id);
 
         return response()->json($notification);
     }

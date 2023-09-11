@@ -13,6 +13,13 @@ class Student extends Authenticatable
      */
     protected $table = 'students';
 
+    protected $fillable = [
+        'given_name_by_instructor',
+        'email',
+        'created_at',
+        'updated_at',
+    ];
+
     /**
      * 講座を取得
      *

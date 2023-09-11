@@ -47,9 +47,4 @@ class LessonAttendanceController extends Controller
             ]);
         }
     }
-
-    public function edit()
-    {
-        return response()->json([]);
-    }
 }

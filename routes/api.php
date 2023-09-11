@@ -73,8 +73,14 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::prefix('lesson_attendance')->group(function () {
-        Route::get('edit', 'Api\LessonAttendanceController@edit');
-        Route::patch('/', 'Api\LessonAttendanceController@update');
+    // 受講生側API
+    Route::prefix('course')->group(function () {
+        Route::get('/', 'Api\CourseController@show');
+        Route::get('index', 'Api\CourseController@index');
+        Route::prefix('chapter')->group(function () {
+            Route::get('/', 'Api\ChapterController@show');
+        });
     });
+    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
+    Route::get('student/edit', 'Api\Student\StudentController@edit');
 });

@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Model\Notification;
 use Illuminate\Contracts\Validation\Rule;
 
-class NotificationStoreStatusRule implements Rule
+class NotificationUpdateStatusRule implements Rule
 {
     /**
      * Determine if the validation rule passes.

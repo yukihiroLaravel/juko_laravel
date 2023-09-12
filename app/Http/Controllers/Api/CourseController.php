@@ -9,6 +9,7 @@ use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
+use App\Model\Chapter;
 
 class CourseController extends Controller
 {
@@ -59,6 +60,15 @@ class CourseController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
+        $publicChapters = $this->extractPublicChapter($attendance->course->chapters);
+        $attendance->course->chapters = $publicChapters;
         return new CourseShowResource($attendance);
+    }
+
+    private function extractPublicChapter($chapters)
+    {
+        return $chapters->filter(function ($chapter) {
+            return $chapter->status === Chapter::STATUS_PUBLIC;
+        });
     }
 }

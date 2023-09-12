@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request; //postman確認のため仮作成
+use App\Http\Requests\NotificationIndexRequest;
 use App\Http\Resources\NotificationIndexResource;
 use App\Model\Notification;
 use App\Model\Student;
@@ -12,7 +12,13 @@ use Carbon\Carbon;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * お知らせ一覧取得API
+     *
+     * @param NotificationIndexRequest $request
+     * @return NotificationIndexResource
+     */
+    public function index(NotificationIndexRequest $request)
     {
         // $studentId = $request->user()->id; // ログイン中の受講生のIDを取得（developマージ後に実装予定）
         $student = Student::findOrFail(1);

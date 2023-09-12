@@ -26,6 +26,17 @@ class NotificationSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
+                'course_id' => 1,
+                'instructor_id' => 1,
+                'title' => 'お知らせ機能が追加されました',
+                'type' => Notification::TYPE_ONCE_INT,
+                'start_date' => '2023-08-01 00:00:00',
+                'end_date' => '2023-10-10 23:59:59',
+                'content' => '受講生管理画面にお知らせ機能が追加されました。コースごとにお知らせをお送りします。',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
                 'course_id' => 2,
                 'instructor_id' => 2,
                 'title' => 'お知らせ機能が追加されました',

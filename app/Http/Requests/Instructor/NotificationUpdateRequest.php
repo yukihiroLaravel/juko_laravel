@@ -17,6 +17,12 @@ class NotificationUpdateRequest extends FormRequest
         return true;
     }
     
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'notification_id' => $this->route('notification_id'),
+        ]);
+    }
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,11 +31,12 @@ class NotificationUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'type'          => ['required', new NotificationStoreStatusRule()],
-            'start_date'    => ['required', 'date_format:Y-m-d H:i:s'],
-            'end_date'      => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
-            'title'         => ['required', 'string', 'max:50'],
-            'content'       => ['required', 'string', 'max:500'],
+            'notification_id' => ['required', 'integer'],
+            'type'            => ['required', new NotificationStoreStatusRule()],
+            'start_date'      => ['required', 'date_format:Y-m-d H:i:s'],
+            'end_date'        => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
+            'title'           => ['required', 'string', 'max:50'],
+            'content'         => ['required', 'string', 'max:500'],
         ];
     }
 }

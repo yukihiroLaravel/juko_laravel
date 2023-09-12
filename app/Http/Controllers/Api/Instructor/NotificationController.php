@@ -13,8 +13,8 @@ class NotificationController extends Controller
      * @param
      * @return
      */
-    public function update(NotificationUpdateRequest $request, int $notification_id) {
-        Notification::findOrFail($notification_id)
+    public function update(NotificationUpdateRequest $request) {
+        Notification::findOrFail($request->notification_id)
             ->fill([
                 'type'  => $request->type,
                 'start_date' => $request->start_date,

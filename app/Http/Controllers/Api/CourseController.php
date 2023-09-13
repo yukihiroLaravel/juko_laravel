@@ -21,17 +21,19 @@ class CourseController extends Controller
     public function index(CourseIndexRequest $request)
     {
         if ($request->text === null) {
-            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->user()->id)->get();
             $publicAttendances = $this->extractPublicCourse($attendances);
             return new CourseIndexResource($publicAttendances);
         }
 
-        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
-            $q->where('title', 'like', "%$request->text%");
-        })
-            ->with(['course.instructor'])
-            ->where('student_id', '=', $request->student_id)
+        // 検索ワードで講座を検索
+        $attendances = Attendance::with(['course.instructor'])
+            ->where('student_id', $request->user()->id)
+            ->whereHas('course', function ($query) use ($request) {
+                $query->where('title', 'like', "%{$request->text}%");
+            })
             ->get();
+
         $publicAttendances = $this->extractPublicCourse($attendances);
         return new CourseIndexResource($publicAttendances);
     }

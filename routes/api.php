@@ -17,22 +17,39 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
+    // 受講生側API
+    Route::prefix('course')->group(function () {
+        Route::get('index', 'Api\CourseController@index');
+        Route::get('/', 'Api\CourseController@show');
+        Route::prefix('chapter')->group(function () {
+            Route::get('/', 'Api\ChapterController@show');
+        });
+    });
+});
+
 Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
+        Route::get('student/{student_id}', 'Api\Instructor\StudentController@show');
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });
         Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');
             Route::prefix('{course_id}')->group(function () {
+                Route::get('student/index', 'Api\Instructor\StudentController@index');
                 Route::get('/', 'Api\Instructor\CourseController@show');
                 Route::get('edit', 'Api\Instructor\CourseController@edit');
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
+                Route::prefix('notification')->group(function () {
+                    Route::post('/', 'Api\Instructor\NotificationController@store');
+                });
                 Route::prefix('attendance')->group(function () {
                     Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
@@ -66,5 +83,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
-    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
+    Route::prefix('lesson_attendance')->group(function () {
+        Route::get('edit', 'Api\LessonAttendanceController@edit');
+        Route::patch('/', 'Api\LessonAttendanceController@update');
+    });
 });

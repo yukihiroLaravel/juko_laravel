@@ -10,7 +10,7 @@ class NotificationController extends Controller
 {
     /**
      * お知らせ更新API
-     * @param
+     * @param   NotificationUpdateRequest $request
      * @return
      */
     public function update(NotificationUpdateRequest $request) {

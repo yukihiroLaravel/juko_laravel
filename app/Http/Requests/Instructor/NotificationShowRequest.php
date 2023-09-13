@@ -14,7 +14,7 @@ class NotificationShowRequest extends FormRequest
      */
     public function authorize()
     {
-        return true; // 通常はtrueに設定しますが、必要に応じて認可ロジックを追加できます。
+        return true;
     }
 
     /**

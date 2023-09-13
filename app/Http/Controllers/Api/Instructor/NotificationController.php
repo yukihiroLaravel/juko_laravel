@@ -3,23 +3,18 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Model\Notification; // Notificationモデルをインポート
-use Illuminate\Http\Request;
+use App\Http\Requests\Instructor\NotificationShowRequest;
+use App\Model\Notification;
 
 class NotificationController extends Controller
 {
-    public function show(Request $request, $notification_id)
+    public function show(NotificationShowRequest $request)
     {
-        // 通知情報をデータベースから取得
-        $notification = Notification::find($notification_id);
+        // リクエストクラスを使用してバリデーション済みのデータにアクセス
+        $validatedData = $request->validated();
 
-        if (!$notification) {
-            return response()->json([
-                "result" => "false",
-                "error_code" => 400,
-                "error_message" => "Bad request."
-            ], 400);
-        }
+        // バリデーションに合格した場合、データベースから通知情報を取得
+        $notification = Notification::findOrFail($validatedData['notification_id']);
 
         return response()->json($notification);
     }

@@ -47,7 +47,6 @@ Route::prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('notification')->group(function () {
-                    Route::get('index', 'Api\Instructor\NotificationController@index');
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
                 Route::prefix('attendance')->group(function () {
@@ -71,6 +70,9 @@ Route::prefix('v1')->group(function () {
                     });
                 });
             });
+        });
+        Route::prefix('notification')->group(function () {
+            Route::get('index', 'Api\Instructor\NotificationController@index');
         });
     });
 

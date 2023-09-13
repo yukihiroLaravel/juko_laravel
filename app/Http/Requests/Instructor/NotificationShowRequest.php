@@ -4,6 +4,8 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class NotificationShowRequest extends FormRequest
 {
@@ -34,5 +36,15 @@ class NotificationShowRequest extends FormRequest
                 }),
             ],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'result' => 'false',
+                'error_message' => 'Bad request.'
+            ], 400)
+        );
     }
 }

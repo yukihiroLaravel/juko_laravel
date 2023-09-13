@@ -10,7 +10,6 @@ class NotificationController extends Controller
 {
     public function show(NotificationShowRequest $request)
     {
-        // リクエストクラスを使用してバリデーション済みのデータにアクセス
         $validatedData = $request->validated();
 
         // バリデーションに合格した場合、データベースから通知情報を取得

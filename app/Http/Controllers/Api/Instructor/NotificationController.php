@@ -11,7 +11,7 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      * @param   NotificationUpdateRequest $request
-     * @return
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(NotificationUpdateRequest $request) {
         Notification::findOrFail($request->notification_id)

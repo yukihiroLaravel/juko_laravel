@@ -30,6 +30,7 @@ class CreateStudentsTable extends Migration
             $table->dateTime('updated_at');
             $table->softDeletes();
             $table->dateTime('last_login_at')->nullable()->comment('最終ログイン日時');
+            $table->dateTime('email_verified_at');
         });
     }
 

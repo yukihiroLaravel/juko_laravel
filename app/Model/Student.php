@@ -66,5 +66,6 @@ class Student extends Authenticatable
     protected $casts = [
         'birth_date' => 'date',
         'last_login_at' => 'date',
+        //'email_verified_at' => 'date',
     ];
 }

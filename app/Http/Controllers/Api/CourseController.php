@@ -39,12 +39,20 @@ class CourseController extends Controller
         return new CourseIndexResource($publicAttendances);
     }
 
+    /**
+     * 公開中の講座を抽出
+     *
+     * @param \Illuminate\Support\Collection $chapters
+     * @return \Illuminate\Support\Collection
+     */
     private function extractPublicCourse($attendances)
     {
         return $attendances->filter(function ($attendance) {
             return $attendance->course->status === Course::STATUS_PUBLIC;
-        });
+        })
+        ->values();
     }
+
     /**
      * 講座詳細取得API
      *
@@ -65,10 +73,17 @@ class CourseController extends Controller
         return new CourseShowResource($attendance);
     }
 
+    /**
+     * 公開中のチャプターを抽出
+     *
+     * @param \Illuminate\Support\Collection $chapters
+     * @return \Illuminate\Support\Collection
+     */
     private function extractPublicChapter($chapters)
     {
         return $chapters->filter(function ($chapter) {
             return $chapter->status === Chapter::STATUS_PUBLIC;
-        });
+        })
+        ->values();
     }
 }

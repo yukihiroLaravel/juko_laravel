@@ -33,8 +33,10 @@ class StudentController extends Controller
         // 名前もしくはメールアドレスで検索
         if ($searchTerm) {
             $query->where(function ($subQuery) use ($searchTerm) {
-                $subQuery->where('nick_name', 'like', '%' . $searchTerm . '%')
-                    ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                $subQuery->whereHas('student', function ($studentQuery) use ($searchTerm) {
+                    $studentQuery->where('nick_name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                });
             });
         }
 

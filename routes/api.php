@@ -71,6 +71,9 @@ Route::prefix('v1')->group(function () {
                 });
             });
         });
+        Route::prefix('notification')->group(function () {
+            Route::get('index', 'Api\Instructor\NotificationController@index');
+        });
     });
 
     Route::prefix('lesson_attendance')->group(function () {

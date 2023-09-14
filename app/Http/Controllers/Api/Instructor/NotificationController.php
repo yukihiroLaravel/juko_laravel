@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
+use App\Model\Course;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -12,7 +13,18 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json([]);
+        $notifications = Notification::with(['course:id,title'])
+                                        ->select('id', 'course_id', 'title', 'type', 'start_date')
+                                        ->get();
+
+        $notifications->each(function ($notification) {
+            $notification->course_title = $notification->course ? $notification->course->title : null;
+            unset($notification->course);
+        });
+
+        return response()->json([
+            'notifications' => $notifications,
+        ]);
     }
 
     public function store(NotificationStoreRequest $request)

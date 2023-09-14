@@ -32,6 +32,11 @@ class Notification extends Model
     const TYPE_ALWAYS = 'always';
     const TYPE_ONCE = 'once';
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function setTypeAttribute($value)
     {
         $this->attributes['type'] = null;

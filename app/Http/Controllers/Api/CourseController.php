@@ -42,7 +42,7 @@ class CourseController extends Controller
     /**
      * 公開中の講座を抽出
      *
-     * @param \Illuminate\Support\Collection $chapters
+     * @param \Illuminate\Support\Collection $attendances
      * @return \Illuminate\Support\Collection
      */
     private function extractPublicCourse($attendances)

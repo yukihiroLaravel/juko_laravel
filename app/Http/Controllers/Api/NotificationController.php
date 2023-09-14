@@ -20,8 +20,7 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $studentId = $request->user()->id;
-        $student = Student::findOrFail($studentId);
+        $student = Student::findOrFail($request->user()->id);
         $notifications = $this->getNotifications($student);
         $filteredNotifications = $this->filterAndMarkAsRead($student, $notifications);
 

@@ -48,6 +48,16 @@ class Student extends Authenticatable
     }
     
     /**
+     * 受講履歴を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+    
+    /**
      * 文字列の性別を数値に変換
      *
      * @param string $sex
@@ -74,4 +84,12 @@ class Student extends Authenticatable
 
         return null;
     }
+    
+    /**
+     * キャスト
+     */
+    protected $casts = [
+        'birth_date' => 'date',
+        'last_login_at' => 'date',
+    ];
 }

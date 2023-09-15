@@ -77,6 +77,4 @@ Route::prefix('v1')->group(function () {
         // 生徒情報更新API（updateメソッド）
         Route::patch('/', 'Api\Student\StudentController@update');
     });
-
-    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 });

@@ -13,17 +13,21 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $notifications = Notification::with(['course:id,title'])
-                                        ->select('id', 'course_id', 'title', 'type', 'start_date')
-                                        ->get();
+        $notifications = Notification::with(['course'])->get();
 
-        $notifications->each(function ($notification) {
-            $notification->course_title = $notification->course ? $notification->course->title : null;
-            unset($notification->course);
+        $modifiedNotifications = $notifications->map(function ($notification) {
+            return [
+                "id" => $notification->id,
+                "course_id" => $notification->course_id,
+                "course_title" => $notification->course->title,
+                "title" => $notification->title,
+                "type" => $notification->type,
+                "start_date" => $notification->start_date,
+            ];
         });
 
         return response()->json([
-            'notifications' => $notifications,
+            'notifications' => $modifiedNotifications,
         ]);
     }
 

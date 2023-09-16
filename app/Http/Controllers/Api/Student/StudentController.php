@@ -9,10 +9,14 @@ use App\Http\Resources\StudentEditResource;
 
 class StudentController extends Controller
 {
-    public function edit()
+    /**
+     * ユーザー情報編集API
+     *
+     * @return StudentEditResource
+     */
+    public function edit(Request $request)
     {
-        $id = 1;
-        $student = Student::findOrFail($id);
+        $student = Student::findOrFail($request->user()->id);
         return new StudentEditResource($student);
     }
 }

@@ -95,7 +95,7 @@ class CourseController extends Controller
         return new CourseProgressResource($attendance, $progressDate);
     }
 
-        /**
+    /**
      * 完了済みのチャプター数を取得する
      *
      * @param Attendance $attendance

@@ -35,6 +35,8 @@ class NotificationController extends Controller
         $notification = Notification::findOrFail($validatedData['notification_id']);
         // 通知情報をデータベースから取得
         $notification = Notification::findOrFail($notification_id);
+        // データベースから通知情報を取得
+        $notification = Notification::findOrFail($request->notification_id);
 
         return response()->json($notification);
     }

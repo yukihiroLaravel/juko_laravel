@@ -10,10 +10,8 @@ class NotificationController extends Controller
 {
     public function show(NotificationShowRequest $request)
     {
-        $validatedData = $request->validated();
-
-        // バリデーションに合格した場合、データベースから通知情報を取得
-        $notification = Notification::findOrFail($validatedData['notification_id']);
+        // データベースから通知情報を取得
+        $notification = Notification::findOrFail($request->notification_id);
 
         return response()->json($notification);
     }

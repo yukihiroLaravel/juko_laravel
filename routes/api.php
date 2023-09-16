@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
+    Route::get('notification', 'Api\NotificationController@index');
 });
 
 Route::prefix('v1')->group(function () {

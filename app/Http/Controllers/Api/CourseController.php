@@ -9,6 +9,7 @@ use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
+use App\Model\Chapter;
 
 class CourseController extends Controller
 {
@@ -38,12 +39,20 @@ class CourseController extends Controller
         return new CourseIndexResource($publicAttendances);
     }
 
+    /**
+     * 公開中の講座を抽出
+     *
+     * @param \Illuminate\Support\Collection $attendances
+     * @return \Illuminate\Support\Collection
+     */
     private function extractPublicCourse($attendances)
     {
         return $attendances->filter(function ($attendance) {
             return $attendance->course->status === Course::STATUS_PUBLIC;
-        });
+        })
+        ->values();
     }
+
     /**
      * 講座詳細取得API
      *
@@ -59,6 +68,22 @@ class CourseController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
+        $publicChapters = $this->extractPublicChapter($attendance->course->chapters);
+        $attendance->course->chapters = $publicChapters;
         return new CourseShowResource($attendance);
+    }
+
+    /**
+     * 公開中のチャプターを抽出
+     *
+     * @param \Illuminate\Support\Collection $chapters
+     * @return \Illuminate\Support\Collection
+     */
+    private function extractPublicChapter($chapters)
+    {
+        return $chapters->filter(function ($chapter) {
+            return $chapter->status === Chapter::STATUS_PUBLIC;
+        })
+        ->values();
     }
 }

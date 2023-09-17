@@ -32,6 +32,21 @@ class Notification extends Model
     const TYPE_ALWAYS = 'always';
     const TYPE_ONCE = 'once';
 
+    /**
+     * 表示区分
+     *
+     * @return string
+     */
+    public function getTypeAttribute($value)
+    {
+        if ($value === self::TYPE_ALWAYS_INT) {
+            return self::TYPE_ALWAYS;
+        } elseif ($value === self::TYPE_ONCE_INT) {
+            return self::TYPE_ONCE;
+        }
+        return null;
+    }
+
     public function setTypeAttribute($value)
     {
         $this->attributes['type'] = null;

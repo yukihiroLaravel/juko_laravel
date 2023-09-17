@@ -3,12 +3,30 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationUpdateResource;
 use App\Model\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    public function store(NotificationStoreRequest $request)
+    {
+        Notification::create([
+            'course_id'     => $request->course_id,
+            'instructor_id' => 1,
+            'title'         => $request->title,
+            'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'content'       => $request->content,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
     /**
      * お知らせ更新API
      * @param   NotificationUpdateRequest $request

@@ -22,16 +22,6 @@ class Student extends Authenticatable
 
     protected $fillable = [
         'given_name_by_instructor',
-        'email',
-        'created_at',
-        'updated_at',
-    ];
-
-    /**
-     *
-     * @var array
-     */
-    protected $fillable = [
         'nick_name',
         'last_name',
         'first_name',
@@ -42,6 +32,19 @@ class Student extends Authenticatable
         'birth_date',
         'sex',
         'address',
+        'email',
+       
+    ];
+
+    /**
+     *
+     * @var array
+     */
+    protected $guarded = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'last_login_at',
     ];
     
     /**

@@ -23,7 +23,7 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
-        $searchTerm = $request->input('search');
+        $searchTerm = $request->input('search_term');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
@@ -41,8 +41,14 @@ class StudentController extends Controller
         }
 
         // 登録日で検索
-        if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
+        if ($startDate || $endDate) {
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
         }
 
         $attendances = $query->paginate($perPage, ['*'], 'page', $page);

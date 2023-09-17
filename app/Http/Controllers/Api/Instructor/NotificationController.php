@@ -13,7 +13,7 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        $notifications = Notification::with(['course'])->get();
+        $notifications = Notification::with(['course'])->where('instructor_id', 1)->get(); //講師IDは仮で1を指定
 
         $modifiedNotifications = $notifications->map(function ($notification) {
             return [

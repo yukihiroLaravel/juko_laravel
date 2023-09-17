@@ -59,4 +59,17 @@ class Chapter extends Model
             }
         });
     }
+
+    /**
+     * 公開中のチャプターを抽出
+     *
+     * @param \Illuminate\Support\Collection $chapters
+     * @return \Illuminate\Support\Collection
+     */
+    public static function extractPublicChapter($chapters)
+    {
+        return $chapters->filter(function ($chapter) {
+            return $chapter->status === Chapter::STATUS_PUBLIC;
+        });
+    }
 }

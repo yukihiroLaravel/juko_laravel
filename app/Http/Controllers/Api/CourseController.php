@@ -68,22 +68,8 @@ class CourseController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
-        $publicChapters = $this->extractPublicChapter($attendance->course->chapters);
+        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;
         return new CourseShowResource($attendance);
-    }
-
-    /**
-     * 公開中のチャプターを抽出
-     *
-     * @param \Illuminate\Support\Collection $chapters
-     * @return \Illuminate\Support\Collection
-     */
-    private function extractPublicChapter($chapters)
-    {
-        return $chapters->filter(function ($chapter) {
-            return $chapter->status === Chapter::STATUS_PUBLIC;
-        })
-        ->values();
     }
 }

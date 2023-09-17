@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
-use App\Model\Course;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;

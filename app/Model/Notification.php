@@ -42,4 +42,17 @@ class Notification extends Model
             $this->attributes['type'] = self::TYPE_ONCE_INT;
         }
     }
+
+    public function getTypeAttribute($value)
+    {
+        switch ($value) {
+            case self::TYPE_ALWAYS_INT:
+                return self::TYPE_ALWAYS;
+            case self::TYPE_ONCE_INT:
+                return self::TYPE_ONCE;
+            default:
+                return null;
+        }
+    }
+
 }

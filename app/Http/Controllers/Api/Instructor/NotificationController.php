@@ -7,6 +7,7 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\NotificationShowResource;
 
 class NotificationController extends Controller
 {
@@ -38,6 +39,6 @@ class NotificationController extends Controller
         // データベースから通知情報を取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        return response()->json($notification);
+        return new NotificationShowResource($notification);
     }
 }

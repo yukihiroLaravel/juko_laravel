@@ -85,11 +85,11 @@ class CourseController extends Controller
         ->firstOrFail();
 
         $progressDate = [
-            'getCompletedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'getTotalChaptersCount' => $this->getTotalChaptersCount($attendance),
-            'getCompletedLessonsCount' => $this->getCompletedLessonsCount($attendance),
-            'getTotalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'getYoungestUnCompletedLessonId' => $this->getYoungestUnCompletedLessonId($attendance)
+            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
+            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
+            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
+            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
+            'youngestUnCompletedLessonId' => $this->getYoungestUnCompletedLessonId($attendance)
         ];
 
         return new CourseProgressResource($attendance, $progressDate);

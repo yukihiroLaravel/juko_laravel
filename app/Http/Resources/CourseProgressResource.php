@@ -26,11 +26,11 @@ class CourseProgressResource extends JsonResource
                 'course_id' => $this->resource->course_id,
                 'progress' => $this->resource->progress
             ],
-            "number_of_completed_chapters" => $this->progressDate['getCompletedChaptersCount'],
-            "number_of_total_chapters" => $this->progressDate['getTotalChaptersCount'],
-            "number_of_completed_lessons" => $this->progressDate['getCompletedLessonsCount'],
-            "number_of_total_lessons" => $this->progressDate['getTotalLessonsCount'],
-            "continue_lesson_id" => $this->progressDate['getYoungestUnCompletedLessonId']
+            "number_of_completed_chapters" => $this->progressDate['completedChaptersCount'],
+            "number_of_total_chapters" => $this->progressDate['totalChaptersCount'],
+            "number_of_completed_lessons" => $this->progressDate['completedLessonsCount'],
+            "number_of_total_lessons" => $this->progressDate['totalLessonsCount'],
+            "continue_lesson_id" => $this->progressDate['youngestUnCompletedLessonId']
         ];        
     }
 }

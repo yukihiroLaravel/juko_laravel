@@ -15,8 +15,8 @@ class StudentAuthorization extends Model
 
     protected $fillable = [
         'student_id',
-        'number_of_attempts',
-        'authentication_code',
-        'verification_code_validity_period',
+        'trial_count',
+        'code',
+        'expire_at',
     ];
 }

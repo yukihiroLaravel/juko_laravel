@@ -23,6 +23,7 @@ class StudentController extends Controller
         return new StudentEditResource($student);
     }
     
+    /**
      * 生徒情報更新API
      *
      * @param StudentPatchRequest $request

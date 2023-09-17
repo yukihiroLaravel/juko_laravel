@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Model\Notification;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function show(Request $request, $notification_id)
+    public function show(NotificationShowRequest $request)
     {
-        // 通知情報をデータベースから取得
-        $notification = Notification::findOrFail($notification_id);
+        // データベースから通知情報を取得
+        $notification = Notification::findOrFail($request->notification_id);
 
         return response()->json($notification);
     }

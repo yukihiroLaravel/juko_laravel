@@ -16,9 +16,9 @@ class CreateStudentAuthorization extends Migration
         Schema::create('student_authorization', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('student_id')->unsigned();
-            $table->bigInteger('number_of_attempts')->nullable()->comment('試行回数');
-            $table->bigInteger('authentication_code')->unsigned()->comment('認証コード');
-            $table->dateTime('verification_code_validity_period')->comment('認証コード有効時間');
+            $table->bigInteger('trial_count')->comment('試行回数');
+            $table->string('code')->comment('認証コード');
+            $table->dateTime('expire_at')->comment('認証コード有効期間');
             $table->foreign('student_id')->references('id')->on('students');
         });
     }

@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
+use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -27,7 +27,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete(Request $request)
+    public function delete(NotificationDeleteRequest $request)
     {
      try{
         $notification = Notification::findOrFail($request->notification_id);

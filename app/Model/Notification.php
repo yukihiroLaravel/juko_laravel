@@ -32,6 +32,11 @@ class Notification extends Model
     const TYPE_ALWAYS = 'always';
     const TYPE_ONCE = 'once';
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function setTypeAttribute($value)
     {
         $this->attributes['type'] = null;
@@ -41,5 +46,15 @@ class Notification extends Model
         } elseif ($value === self::TYPE_ONCE) {
             $this->attributes['type'] = self::TYPE_ONCE_INT;
         }
+    }
+
+    public function getTypeAttribute($value)
+    {
+        if ($value === self::TYPE_ALWAYS_INT) {
+            return self::TYPE_ALWAYS;
+        } elseif ($value === self::TYPE_ONCE_INT) {
+            return self::TYPE_ONCE;
+        }
+        return null;
     }
 }

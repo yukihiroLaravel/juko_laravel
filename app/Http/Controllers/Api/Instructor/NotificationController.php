@@ -12,7 +12,22 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json([]);
+        $notifications = Notification::with(['course'])->where('instructor_id', 1)->get(); //講師IDは仮で1を指定
+
+        $modifiedNotifications = $notifications->map(function ($notification) {
+            return [
+                "id" => $notification->id,
+                "course_id" => $notification->course_id,
+                "course_title" => $notification->course->title,
+                "title" => $notification->title,
+                "type" => $notification->type,
+                "start_date" => $notification->start_date,
+            ];
+        });
+
+        return response()->json([
+            'notifications' => $modifiedNotifications,
+        ]);
     }
 
     public function store(NotificationStoreRequest $request)

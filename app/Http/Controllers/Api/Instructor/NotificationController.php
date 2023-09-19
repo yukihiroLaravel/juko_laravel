@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    public function index(NotificationIndexRequest $request)
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);

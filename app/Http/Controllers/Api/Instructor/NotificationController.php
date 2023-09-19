@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
@@ -19,22 +20,8 @@ class NotificationController extends Controller
                                         ->where('instructor_id', 1) //講師IDは仮で1を指定
                                         ->paginate($perPage, ['*'], 'page', $page);
 
-        $modifiedNotifications = $notifications->map(function ($notification) {
-            return [
-                'id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'type' => $notification->type,
-                'start_date' => $notification->start_date,
-            ];
-        });
-
-        return response()->json([
-            'notifications' => $modifiedNotifications,
-            'pagination' => [
-                    'page' => $notifications->currentPage(),
-                ],
+        return new NotificationIndexResource([
+            'notifications' => $notifications,
         ]);
     }
 

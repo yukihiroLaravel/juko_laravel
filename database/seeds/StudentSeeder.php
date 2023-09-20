@@ -30,6 +30,7 @@ class StudentSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'last_login_at' => Carbon::now(),
+                'email_verified_at' => Carbon::now(),
             ],
             [
                 'given_name_by_instructor' => 'ユーザー名(仮)2',
@@ -46,6 +47,7 @@ class StudentSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'last_login_at' => Carbon::now(),
+                'email_verified_at' => Carbon::now(),
             ]
         ]);
     }

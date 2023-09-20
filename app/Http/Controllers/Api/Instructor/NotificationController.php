@@ -11,6 +11,12 @@ use App\Http\Resources\NotificationShowResource;
 
 class NotificationController extends Controller
 {
+    /**
+     * お知らせ登録
+     *
+     * @param NotificationStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(NotificationStoreRequest $request)
     {
         Notification::create([
@@ -28,14 +34,14 @@ class NotificationController extends Controller
         ]);
     }
 
+    /**
+     * お知らせ詳細
+     *
+     * @param NotificationShowRequest $request
+     * @return NotificationShowResource
+     */
     public function show(NotificationShowRequest $request)
     {
-        $validatedData = $request->validated();
-
-        // バリデーションに合格した場合、データベースから通知情報を取得
-        $notification = Notification::findOrFail($validatedData['notification_id']);
-        // 通知情報をデータベースから取得
-        $notification = Notification::findOrFail($notification_id);
         // データベースから通知情報を取得
         $notification = Notification::findOrFail($request->notification_id);
 

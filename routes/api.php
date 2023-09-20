@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
+    Route::get('student/edit', 'Api\Student\StudentController@edit');
     Route::get('notification', 'Api\NotificationController@index');
 });
 
@@ -40,6 +41,11 @@ Route::prefix('v1')->group(function () {
         Route::patch('/', 'Api\Instructor\InstructorController@update');
         Route::patch('notification/{notification_id}', 'Api\Instructor\NotificationController@update');
         Route::post('student', 'Api\Instructor\StudentController@store');
+        Route::prefix('notification')->group(function () {
+            Route::prefix('{notification_id}')->group(function () {
+                Route::get('/', 'Api\Instructor\NotificationController@show');
+            });
+        });
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
             Route::post('/', 'Api\Instructor\CourseController@store');
@@ -75,13 +81,9 @@ Route::prefix('v1')->group(function () {
             });
         });
     });
+    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
-    Route::prefix('lesson_attendance')->group(function () {
-        Route::get('edit', 'Api\LessonAttendanceController@edit');
-        Route::patch('/', 'Api\LessonAttendanceController@update');
-    });
     Route::prefix('student')->group(function () {
-        // 生徒情報更新API（updateメソッド）
         Route::patch('/', 'Api\Student\StudentController@update');
     });
 });

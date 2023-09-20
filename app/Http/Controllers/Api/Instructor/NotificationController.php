@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationShowRequest;
+use App\Http\Resources\NotificationShowResource;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationUpdateResource;
@@ -11,6 +13,25 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    /**
+     * お知らせ詳細
+     *
+     * @param NotificationShowRequest $request
+     * @return NotificationShowResource
+     */
+    public function show(NotificationShowRequest $request)
+    {
+        $notification = Notification::findOrFail($request->notification_id);
+
+        return new NotificationShowResource($notification);
+    }
+
+    /**
+     * お知らせ登録
+     *
+     * @param NotificationStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(NotificationStoreRequest $request)
     {
         Notification::create([
@@ -27,8 +48,10 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
+
     /**
      * お知らせ更新API
+     *
      * @param   NotificationUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

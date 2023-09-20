@@ -23,10 +23,32 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
+        $searchTerm = $request->input('search_term');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        $attendances = Attendance::with(['student', 'course'])
-                                    ->where('course_id', $request->course_id)
-                                    ->paginate($perPage, ['*'], 'page', $page);
+        $query = Attendance::with(['student', 'course'])
+            ->where('course_id', $request->course_id);
+
+        // 名前もしくはメールアドレスで検索
+        if ($searchTerm) {
+            $query->where(function ($subQuery) use ($searchTerm) {
+                $subQuery->whereHas('student', function ($studentQuery) use ($searchTerm) {
+                    $studentQuery->where('nick_name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('email', 'like', '%' . $searchTerm . '%');
+                });
+            });
+        }
+
+        // 登録日で検索
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        $attendances = $query->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
 

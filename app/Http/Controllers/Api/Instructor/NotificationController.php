@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    /**
+     * 講師側お知らせ一覧取得API
+     *
+     * @param NotificationIndexRequest $request
+     * @return NotificationIndexResource
+     */
     public function index(NotificationIndexRequest $request)
     {
         $perPage = $request->input('per_page', 20);
@@ -20,9 +26,7 @@ class NotificationController extends Controller
                                         ->where('instructor_id', 1) //講師IDは仮で1を指定
                                         ->paginate($perPage, ['*'], 'page', $page);
 
-        return new NotificationIndexResource([
-            'notifications' => $notifications,
-        ]);
+        return new NotificationIndexResource($notifications);
     }
 
     public function store(NotificationStoreRequest $request)

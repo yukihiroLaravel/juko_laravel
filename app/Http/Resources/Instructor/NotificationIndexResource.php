@@ -14,7 +14,7 @@ class NotificationIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        $notifications = $this->resource['notifications'];
+        $notifications = $this->resource;
 
         return [
             'notifications' => $this->mapNotifications($notifications),

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationShowRequest;
-use App\Http\Resources\NotificationShowResource;
+use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationUpdateResource;

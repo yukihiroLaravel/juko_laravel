@@ -10,6 +10,9 @@ use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
+use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Resources\Instructor\StudentStoreResource;
+use Carbon\Carbon;
 
 class StudentController extends Controller
 {
@@ -35,6 +38,7 @@ class StudentController extends Controller
             'attendances' => $attendances,
         ]);
     }
+
     /**
      * 講座受講生詳細情報を取得
      *
@@ -46,5 +50,26 @@ class StudentController extends Controller
         $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
 
         return new StudentShowResource($student);
+    }
+
+    /**
+     * 受講生登録API
+     *
+     * @param StudentStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StudentStoreRequest $request)
+    {
+        $student = Student::create([
+            'given_name_by_instructor' => $request->given_name_by_instructor,
+            'email' => $request->email,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        return response()->json([
+            'result' => true,
+            'data' => new StudentStoreResource($student)
+        ]);
     }
 }

@@ -25,7 +25,7 @@ class NotificationIndexResource extends JsonResource
         ];
     }
 
-    protected function mapNotifications($notifications)
+    private function mapNotifications($notifications)
     {
         return $notifications->map(function ($notification) {
             return [

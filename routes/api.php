@@ -26,7 +26,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
     });
-    Route::get('student/edit', 'Api\Student\StudentController@edit');
+    Route::prefix('student')->group(function () {
+        Route::get('edit', 'Api\Student\StudentController@edit');
+        Route::post('store', 'Api\Student\StudentController@store');
+    });
     Route::get('notification', 'Api\NotificationController@index');
 });
 

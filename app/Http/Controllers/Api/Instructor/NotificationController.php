@@ -3,14 +3,21 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * 講師側お知らせ一覧取得API
+     *
+     * @param NotificationIndexRequest $request
+     * @return NotificationIndexResource
+     */
+    public function index(NotificationIndexRequest $request)
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -19,23 +26,7 @@ class NotificationController extends Controller
                                         ->where('instructor_id', 1) //講師IDは仮で1を指定
                                         ->paginate($perPage, ['*'], 'page', $page);
 
-        $modifiedNotifications = $notifications->map(function ($notification) {
-            return [
-                'id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'type' => $notification->type,
-                'start_date' => $notification->start_date,
-            ];
-        });
-
-        return response()->json([
-            'notifications' => $modifiedNotifications,
-            'pagination' => [
-                    'page' => $notifications->currentPage(),
-                ],
-        ]);
+        return new NotificationIndexResource($notifications);
     }
 
     public function store(NotificationStoreRequest $request)

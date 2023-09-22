@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
         Route::patch('notification/{notification_id}', 'Api\Instructor\NotificationController@update');
         Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('notification')->group(function () {
+            Route::get('index', 'Api\Instructor\NotificationController@index');
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
             });

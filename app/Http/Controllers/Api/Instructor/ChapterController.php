@@ -88,6 +88,25 @@ class ChapterController extends Controller
         ]);
     }
 
+
+    /**
+     * チャプター更新API(公開・非公開切り替え)
+     *
+     *
+     *
+     */
+    {
+        public function updateStatus(Request $request)
+        {
+            return response()->json([]);
+        }
+    }
+
+
+
+
+
+
     /**
      * チャプター削除API
      *

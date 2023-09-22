@@ -88,7 +88,6 @@ class ChapterController extends Controller
         ]);
     }
 
-
     /**
      * チャプター更新API(公開・非公開切り替え)
      *
@@ -101,11 +100,6 @@ class ChapterController extends Controller
             return response()->json([]);
         }
     }
-
-
-
-
-
 
     /**
      * チャプター削除API

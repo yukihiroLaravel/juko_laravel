@@ -12,6 +12,11 @@ use App\Rules\UniqueEmailRule;
 
 class StudentController extends Controller
 {
+    public function store(Request $request)
+   {
+        return response()->json([]);
+   }
+   
     /**
      * ユーザー情報編集API
      *

@@ -84,7 +84,7 @@ class CourseController extends Controller
         ])
         ->firstOrFail();
 
-        $progressDate = [
+        $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
             'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
             'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
@@ -92,7 +92,10 @@ class CourseController extends Controller
             'youngestUnCompletedLessonId' => $this->getYoungestUnCompletedLessonId($attendance)
         ];
 
-        return new CourseProgressResource($attendance, $progressDate);
+        return new CourseProgressResource([
+            'attendance' => $attendance,
+            'progressData' => $progressData,
+        ]);
     }
 
     /**
@@ -115,7 +118,7 @@ class CourseController extends Controller
                 $isCompleted = true;
             });
             return $isCompleted;
-        })->count();        
+        })->count();
     }
 
     /**
@@ -153,7 +156,7 @@ class CourseController extends Controller
         $totalLessonsCount = 0;
         foreach ($attendance->course->chapters as $chapter) {
             $lessonCount = $chapter->lessons->count();
-            $totalLessonsCount += $lessonCount; 
+            $totalLessonsCount += $lessonCount;
         }
         return $totalLessonsCount;
     }

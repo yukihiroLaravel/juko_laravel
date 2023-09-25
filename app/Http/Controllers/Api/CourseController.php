@@ -8,6 +8,7 @@ use App\Http\Requests\CourseShowRequest;
 use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
+use App\Http\Resources\CourseProgressResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\LessonAttendance;
@@ -83,17 +84,18 @@ class CourseController extends Controller
         ])
         ->firstOrFail();
 
-        return response()->json([
-            'course' =>[
-                'course_id' => $request->course_id,
-                'progress' => $attendance->progress
-            ],
-            "number_of_completed_chapters" => $this->getCompletedChaptersCount($attendance),
-            "number_of_total_chapters" => $this->getTotalChaptersCount($attendance),
-            "number_of_completed_lessons" => $this->getCompletedLessonsCount($attendance),
-            "number_of_total_lessons" => $this->getTotalLessonsCount($attendance),
-            "continue_lesson_id" => $this->getYoungestUnCompletedLessonId($attendance)
-        ]); 
+        $progressData = [
+            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
+            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
+            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
+            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
+            'youngestUnCompletedLessonId' => $this->getYoungestUnCompletedLessonId($attendance)
+        ];
+
+        return new CourseProgressResource([
+            'attendance' => $attendance,
+            'progressData' => $progressData,
+        ]);
     }
 
     /**
@@ -116,7 +118,7 @@ class CourseController extends Controller
                 $isCompleted = true;
             });
             return $isCompleted;
-        })->count();        
+        })->count();
     }
 
     /**
@@ -154,7 +156,7 @@ class CourseController extends Controller
         $totalLessonsCount = 0;
         foreach ($attendance->course->chapters as $chapter) {
             $lessonCount = $chapter->lessons->count();
-            $totalLessonsCount += $lessonCount; 
+            $totalLessonsCount += $lessonCount;
         }
         return $totalLessonsCount;
     }

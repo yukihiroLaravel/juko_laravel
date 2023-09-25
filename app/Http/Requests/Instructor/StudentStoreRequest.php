@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseIndexRequest extends FormRequest
+class StudentStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,8 @@ class CourseIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'text' => ['string']
+            'given_name_by_instructor' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255', 'unique:students'],
         ];
     }
 }

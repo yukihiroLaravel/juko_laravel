@@ -12,6 +12,7 @@ use App\Http\Resources\CourseProgressResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\LessonAttendance;
+use App\Model\Chapter;
 
 class CourseController extends Controller
 {
@@ -24,26 +25,35 @@ class CourseController extends Controller
     public function index(CourseIndexRequest $request)
     {
         if ($request->text === null) {
-            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->student_id)->get();
+            $attendances = Attendance::with(['course.instructor'])->where('student_id', $request->user()->id)->get();
             $publicAttendances = $this->extractPublicCourse($attendances);
             return new CourseIndexResource($publicAttendances);
         }
 
-        $attendances = Attendance::whereHas('course', function ($q) use ($request) {
-            $q->where('title', 'like', "%$request->text%");
-        })
-            ->with(['course.instructor'])
-            ->where('student_id', '=', $request->student_id)
+        // 検索ワードで講座を検索
+        $attendances = Attendance::with(['course.instructor'])
+            ->where('student_id', $request->user()->id)
+            ->whereHas('course', function ($query) use ($request) {
+                $query->where('title', 'like', "%{$request->text}%");
+            })
             ->get();
+
         $publicAttendances = $this->extractPublicCourse($attendances);
         return new CourseIndexResource($publicAttendances);
     }
 
+    /**
+     * 公開中の講座を抽出
+     *
+     * @param \Illuminate\Support\Collection $attendances
+     * @return \Illuminate\Support\Collection
+     */
     private function extractPublicCourse($attendances)
     {
         return $attendances->filter(function ($attendance) {
             return $attendance->course->status === Course::STATUS_PUBLIC;
-        });
+        })
+        ->values();
     }
 
     /**
@@ -61,6 +71,8 @@ class CourseController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
+        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
+        $attendance->course->chapters = $publicChapters;
         return new CourseShowResource($attendance);
     }
 

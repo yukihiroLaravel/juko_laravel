@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseIndexRequest extends FormRequest
+class NotificationShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,6 +16,13 @@ class CourseIndexRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'notification_id' => $this->route('notification_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,7 +31,11 @@ class CourseIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'text' => ['string']
+            'notification_id' => [
+                'required',
+                'integer',
+                'exists:notifications,id',
+            ],
         ];
     }
 }

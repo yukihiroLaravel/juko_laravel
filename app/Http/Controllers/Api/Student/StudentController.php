@@ -21,7 +21,6 @@ class StudentController extends Controller
     public function store(Request $request)
    {
         Student::create([
-            'student_id' => 1,
             'nick_name'  => $request->nick_name,
             'last_name'  => $request->last_name,
             'first_name' => $request->first_name,
@@ -31,6 +30,10 @@ class StudentController extends Controller
             'birth_date' => $request->birth_date,
             'sex'        => Student::convertSexToInt($request->sex),
             'address'    => $request->address,
+        ]);
+
+        return response()->json([
+            'result' => true,
         ]);
    }
 

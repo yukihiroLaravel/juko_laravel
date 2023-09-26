@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::prefix('course')->group(function () {
         Route::get('index', 'Api\CourseController@index');
         Route::get('/', 'Api\CourseController@show');
+        Route::get('{course_id}/progress', 'Api\CourseController@progress');
         Route::prefix('chapter')->group(function () {
             Route::get('/', 'Api\ChapterController@show');
         });
@@ -83,15 +84,6 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    // 受講生側API
-    Route::prefix('course')->group(function () {
-        Route::get('/', 'Api\CourseController@show');
-        Route::get('index', 'Api\CourseController@index');
-        Route::get('{course_id}/progress', 'Api\CourseController@progress');
-        Route::prefix('chapter')->group(function () {
-            Route::get('/', 'Api\ChapterController@show');
-        });
-    });
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
     Route::prefix('student')->group(function () {

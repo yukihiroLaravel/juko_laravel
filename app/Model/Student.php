@@ -113,8 +113,4 @@ class Student extends Authenticatable
         return null;
     }
 
-    //生徒が受講している講座情報を取得。
-    public function manyCourses () {
-        return $this->belongsToMany(Course::class, 'attendances', 'student_id', 'course_id');
-    }
 }

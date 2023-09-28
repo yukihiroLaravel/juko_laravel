@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Student;
+use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
 use App\Http\Requests\Student\StudentPatchRequest; 
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -20,22 +23,48 @@ class StudentController extends Controller
      */
     public function store(Request $request)
    {
-        Student::create([
-            'nick_name'  => $request->nick_name,
-            'last_name'  => $request->last_name,
-            'first_name' => $request->first_name,
-            'email'      => $request->email,
-            'occupation' => $request->occupation,
-            'purpose'    => $request->purpose,
-            'birth_date' => $request->birth_date,
-            'sex'        => Student::convertSexToInt($request->sex),
-            'address'    => $request->address,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'result' => true,
-        ]);
-   }
+            Student::create([
+                'nick_name'  => $request->nick_name,
+                'last_name'  => $request->last_name,
+                'first_name' => $request->first_name,
+                'email'      => $request->email,
+                'occupation' => $request->occupation,
+                'purpose'    => $request->purpose,
+                'birth_date' => $request->birth_date,
+                'sex'        => Student::convertSexToInt($request->sex),
+                'address'    => $request->address,
+            ]);
+
+            // 認証コードの生成
+            $code = "";
+            for ($i = 0; $i < 4; $i++) {
+                $code .= strval(rand(0, 9));
+            }
+
+            StudentAuthorization::create([
+                'student_id'  => 1,
+                'trial_count' => 0,
+                'code'        => $code,
+                'expire_at'   => Carbon::now()->addMinutes(60),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+              "result" => false,
+            ]);
+        }
+    }
 
     /**
      * ユーザー情報編集API

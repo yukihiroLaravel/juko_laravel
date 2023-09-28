@@ -79,7 +79,7 @@ class ChapterController extends Controller
     public function update(ChapterPatchRequest $request)
     {
         $chapter = Chapter::findOrFail($request->chapter_id);
-        $chapter->update ([
+        $chapter->update([
             'title' => $request->title
         ]);
 

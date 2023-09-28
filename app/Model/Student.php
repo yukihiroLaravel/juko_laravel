@@ -4,7 +4,7 @@ namespace App\Model;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Student extends  Authenticatable
+class Student extends Authenticatable
 {
 
     const SEX_MAN = 'man';

@@ -95,44 +95,38 @@ class AttendanceController extends Controller
      * @return json
      */ 
     public function loginRate($courseId, $period) {
-        $weekCount = 0;
-        $monthCount = 0;
-        $yearCount = 0;
+        $periodCount = 0;
         $endDate = now();  
-        $weekAgo = $endDate->subWeek(1);
-        $monthAgo = $endDate->subMonth(1);
-        $yearAgo = $endDate->subYear(1);
-        $students = Attendance::where('course_id', $courseId)->get();
-        $studentsCount = Attendance::where('course_id', $courseId)->get()->count();
 
-        foreach ($students as $student) {
-            $lastLoginDate = Student::findOrFail($student->id)->last_login_at;
-            if ($lastLoginDate >= $weekAgo) {
-                $weekCount++;
-            } 
-            if ($lastLoginDate >= $monthAgo) {
-                $monthCount++;
-            } 
-            if ($lastLoginDate >= $yearAgo) {
-                $yearCount++;
-            }   
-        }
-        
-        if ($period === "7") {
-            $last_week_login_rate = $this->loginRateCalculate($weekCount, $studentsCount);
-            return response()->json(['last_week_login_rate' => $last_week_login_rate,], 200);
-        } elseif ($period === "30") {
-            $last_month_login_rate = $this->loginRateCalculate($monthCount, $studentsCount);
-            return response()->json(['last_month_login_rate' => $last_month_login_rate,], 200);
-        } elseif ($period === "365") {
-            $last_year_login_rate = $this->loginRateCalculate($yearCount, $studentsCount);
-            return response()->json(['last_year_login_rate' => $last_year_login_rate,], 200);
+        if ($period === "week") {
+            $periodAgo = $endDate->subWeek(1);
+            $loginRateKey = 'last_week_login_rate';
+        } elseif ($period === "month") {
+            $periodAgo = $endDate->subMonth(1);
+            $loginRateKey = 'last_month_login_rate';
+        } elseif ($period === "year") {
+            $periodAgo = $endDate->subYear(1);
+            $loginRateKey = 'last_year_login_rate';
         } else {
             return response()->json([
                 'result' => false, 
                 'error_message' => 'Invalid Request Body.',
             ], 400);
+        }   
+
+        $students = Attendance::where('course_id', $courseId)->get();
+        $studentsCount = $students->count();
+
+        foreach ($students as $student) {
+            $lastLoginDate = Student::findOrFail($student->id)->last_login_at;
+            if ($lastLoginDate >= $periodAgo) {
+                $periodCount++;
+            } 
         }
+
+        $loginRate = $this->loginRateCalculate($periodCount, $studentsCount);
+        return response()->json([$loginRateKey => $loginRate,], 200);
+        
     }
 
     /**

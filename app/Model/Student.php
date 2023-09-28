@@ -112,5 +112,4 @@ class Student extends Authenticatable
 
         return null;
     }
-
 }

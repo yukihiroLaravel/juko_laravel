@@ -92,7 +92,7 @@ class ChapterController extends Controller
     /**
      * チャプター更新API(公開・非公開切り替え)
      */
-    public function updateStatus(Request  $request)
+    public function updateStatus(ChapterPatchStatusRequest  $request)
     { 
         {
             return response()->json([]);

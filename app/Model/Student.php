@@ -4,7 +4,7 @@ namespace App\Model;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Student extends Authenticatable
+class Student extends  Authenticatable
 {
 
     const SEX_MAN = 'man';
@@ -19,13 +19,6 @@ class Student extends Authenticatable
      * @var string
      */
     protected $table = 'students';
-
-    protected $fillable = [
-        'given_name_by_instructor',
-        'email',
-        'created_at',
-        'updated_at',
-    ];
 
     /**
      *

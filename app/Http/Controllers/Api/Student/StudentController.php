@@ -44,8 +44,8 @@ class StudentController extends Controller
             $DatabaseCodes = StudentAuthorization::all('code');
 
             for ($i = 0; $i < 5; $i++) {
-                foreach($DatabaseCodes as $DatabaseCode){
-                    if($code === $DatabaseCode){
+                foreach ($DatabaseCodes as $DatabaseCode) {
+                    if ($code === $DatabaseCode) {
                         $code = sprintf('%04d', mt_rand(0, 9999));
                     }
                 }

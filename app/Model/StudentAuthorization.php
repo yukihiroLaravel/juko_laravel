@@ -24,6 +24,6 @@ class StudentAuthorization extends Model
         'expire_at',
     ];
 
-    //created_atとupdated_atの更新を無効
+    //認証テーブルのcreated_atとupdated_atの更新を無効
     public $timestamps = false;
 }

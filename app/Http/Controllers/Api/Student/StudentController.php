@@ -23,8 +23,8 @@ class StudentController extends Controller
      */
     public function store(Request $request)
    {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
 
             Student::create([
                 'nick_name'  => $request->nick_name,
@@ -39,13 +39,18 @@ class StudentController extends Controller
             ]);
 
             // 認証コードの生成
-            $code = "";
-            for ($i = 0; $i < 4; $i++) {
-                $code .= strval(rand(0, 9));
-            }
+            $code = sprintf('%04d', mt_rand(0, 9999));
 
+            $DatabaseCode = StudentAuthorization::all('code');
+
+            for ($i = 0; $i < 5; $i++) {
+                if($code === $DatabaseCode){
+                    $code = sprintf('%04d', mt_rand(0, 9999));
+                }
+            }
+            
             StudentAuthorization::create([
-                'student_id'  => 1,
+                'student_id'  => Student::orderBy('id','desc')->first()->id,
                 'trial_count' => 0,
                 'code'        => $code,
                 'expire_at'   => Carbon::now()->addMinutes(60),
@@ -62,7 +67,7 @@ class StudentController extends Controller
             Log::error($e);
             return response()->json([
               "result" => false,
-            ]);
+            ], 500);
         }
     }
 

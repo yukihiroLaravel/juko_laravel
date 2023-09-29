@@ -41,11 +41,13 @@ class StudentController extends Controller
             // 認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
 
-            $DatabaseCode = StudentAuthorization::all('code');
+            $DatabaseCodes = StudentAuthorization::all('code');
 
             for ($i = 0; $i < 5; $i++) {
-                if($code === $DatabaseCode){
-                    $code = sprintf('%04d', mt_rand(0, 9999));
+                foreach($DatabaseCodes as $DatabaseCode){
+                    if($code === $DatabaseCode){
+                        $code = sprintf('%04d', mt_rand(0, 9999));
+                    }
                 }
             }
             

@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+
 
 class ChapterController extends Controller
 {
@@ -94,8 +96,9 @@ class ChapterController extends Controller
      *
      *
      */
-    {
-        public function updateStatus(Request $request)
+    
+     public function updateStatus(Request  $request)
+    { 
         {
             return response()->json([]);
         }

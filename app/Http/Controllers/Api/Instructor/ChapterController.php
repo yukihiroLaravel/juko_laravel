@@ -79,7 +79,7 @@ class ChapterController extends Controller
     public function update(ChapterPatchRequest $request)
     {
         $chapter = Chapter::findOrFail($request->chapter_id);
-        $chapter->update([
+        $chapter->update ([
             'title' => $request->title
         ]);
 
@@ -92,11 +92,16 @@ class ChapterController extends Controller
     /**
      * チャプター更新API(公開・非公開切り替え)
      */
-    public function updateStatus(Request  $request)
+    public function updateStatus(Request $request,$course_id,$chapter_id)
     { 
-        {
-            return response()->json([]);
-        }
+        $chapter = Chapter::findOrFail($chapter_id);
+        $chapter->update([
+            'status' => $request->status 
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

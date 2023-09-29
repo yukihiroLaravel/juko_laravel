@@ -16,8 +16,8 @@ Route::get('/', function () {
 });
 
 Route::prefix('login')->group(function () {
-    Route::get('/', 'Auth\LoginController')->name('login');
-    Route::get('instructor', 'Auth\InstructorLoginController')->name('instructor.login');
+    Route::post('/', 'Auth\LoginController')->name('login');
+    Route::post('instructor', 'Auth\InstructorLoginController')->name('instructor.login');
 });
 
 Route::prefix('logout')->group(function () {

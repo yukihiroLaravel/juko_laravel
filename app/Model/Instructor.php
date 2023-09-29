@@ -2,9 +2,9 @@
 
 namespace App\Model;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Instructor extends Model
+class Instructor extends Authenticatable
 {
     /**
      * モデルと関連しているテーブル

@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Rules;
+
+use App\Model\Notification;
+use Illuminate\Contracts\Validation\Rule;
+
+class NotificationUpdateStatusRule implements Rule
+{
+    /**
+     * Determine if the validation rule passes.
+     *
+     * @param  string  $attribute
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function passes($attribute, $value)
+    {
+        if (
+            in_array(
+                $value,
+                [
+                Notification::TYPE_ALWAYS,
+                Notification::TYPE_ONCE
+                ],
+                true
+            )
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return 'Invalid Type.';
+    }
+}

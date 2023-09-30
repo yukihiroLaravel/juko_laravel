@@ -15,6 +15,10 @@ class Chapter extends Model
      */
     protected $table = 'chapters';
 
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+    const STATUS_PRIVATE = 'private';
+
     /**
      * @var array<string>
      */
@@ -22,7 +26,8 @@ class Chapter extends Model
         'chapter_id',
         'course_id',
         'order',
-        'title'
+        'title',
+        'status'
     ];
 
     /**
@@ -52,6 +57,19 @@ class Chapter extends Model
             foreach ($chapter->lessons()->get() as $child) {
                 $child->delete();
             }
+        });
+    }
+
+    /**
+     * 公開中のチャプターを抽出
+     *
+     * @param \Illuminate\Support\Collection $chapters
+     * @return \Illuminate\Support\Collection
+     */
+    public static function extractPublicChapter($chapters)
+    {
+        return $chapters->filter(function ($chapter) {
+            return $chapter->status === Chapter::STATUS_PUBLIC;
         });
     }
 }

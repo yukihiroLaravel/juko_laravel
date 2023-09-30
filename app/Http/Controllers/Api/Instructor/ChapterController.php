@@ -94,9 +94,9 @@ class ChapterController extends Controller
      */
     public function updateStatus(Request $request,$course_id,$chapter_id)
     { 
-        $chapter = Chapter::findOrFail($chapter_id);
-        $chapter->update([
-            'status' => $request->status 
+        Chapter::findOrFail($chapter_id)
+            ->update([
+                'status' => $request->status
         ]);
 
         return response()->json([

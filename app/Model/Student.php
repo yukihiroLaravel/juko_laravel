@@ -6,13 +6,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Student extends Authenticatable
 {
-
-    const SEX_MAN = 'man';
-    const SEX_WOMAN = 'woman';
-    const SEX_MAN_INT = 1;
-    const SEX_WOMAN_INT = 2;
-    const SEX_UNKNOWN_INT = 0;
-
     /**
      * モデルと関連しているテーブル
      *
@@ -36,7 +29,22 @@ class Student extends Authenticatable
         'sex',
         'address',
     ];
-    
+
+    /**
+     * キャスト
+     */
+    protected $casts = [
+        'birth_date' => 'date',
+        'last_login_at' => 'date',
+    ];
+
+    // 性別定数
+    const SEX_MAN = 'man';
+    const SEX_WOMAN = 'woman';
+    const SEX_MAN_INT = 1;
+    const SEX_WOMAN_INT = 2;
+    const SEX_UNKNOWN_INT = 0;
+
     /**
      * 講座を取得
      *
@@ -46,7 +54,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
-    
+
     /**
      * お知らせを取得
      *
@@ -64,7 +72,7 @@ class Student extends Authenticatable
      */
         public function attendance()
     {
-        return $this->hasMany(Attendance::class); 
+        return $this->hasMany(Attendance::class);
     }
 
     /**
@@ -76,7 +84,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-    
+
     /**
      * 文字列の性別を数値に変換
      *
@@ -104,12 +112,4 @@ class Student extends Authenticatable
 
         return null;
     }
-    
-    /**
-     * キャスト
-     */
-    protected $casts = [
-        'birth_date' => 'date',
-        'last_login_at' => 'date',
-    ];
 }

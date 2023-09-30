@@ -26,7 +26,7 @@ class StudentController extends Controller
         DB::beginTransaction();
         try {
 
-            Student::create([
+            $student = Student::create([
                 'nick_name'  => $request->nick_name,
                 'last_name'  => $request->last_name,
                 'first_name' => $request->first_name,
@@ -40,19 +40,15 @@ class StudentController extends Controller
 
             // 認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
-
-            $DatabaseCodes = StudentAuthorization::all('code');
-
+            
             for ($i = 0; $i < 5; $i++) {
-                foreach ($DatabaseCodes as $DatabaseCode) {
-                    if ($code === $DatabaseCode) {
-                        $code = sprintf('%04d', mt_rand(0, 9999));
-                    }
-                }
+               if (StudentAuthorization::where('code', $code)->exists()) {
+                   $code = sprintf('%04d', mt_rand(0, 9999));
+               }
             }
             
             StudentAuthorization::create([
-                'student_id'  => Student::orderBy('id','desc')->first()->id,
+                'student_id'  => $student->id,
                 'trial_count' => 0,
                 'code'        => $code,
                 'expire_at'   => Carbon::now()->addMinutes(60),

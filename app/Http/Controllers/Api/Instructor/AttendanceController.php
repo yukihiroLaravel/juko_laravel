@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
+use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
@@ -86,4 +87,54 @@ class AttendanceController extends Controller
             'studentsCount' => $studentsCount,
         ]);
     }
+
+     /**
+     * 受講生ログイン率取得API
+     * 
+     * @param string $courseId
+     * @param string $period
+     * @return \Illuminate\Http\JsonResponse
+     */ 
+    public function loginRate($courseId, $period) {
+        $endDate = new Carbon();
+
+        if ($period === "week") {
+            $periodAgo = $endDate->subWeek(1);
+        } elseif ($period === "month") {
+            $periodAgo = $endDate->subMonth(1);
+        } elseif ($period === "year") {
+            $periodAgo = $endDate->subYear(1);
+        } 
+
+        $attendances = Attendance::with('student')->where('course_id', $courseId)->get();
+        $studentsCount = $attendances->count();
+
+        // 期間内にログインした受講生数
+        $loginCount = 0;
+
+        foreach ($attendances as $attendance) {
+            $lastLoginDate = $attendance->student->last_login_at;
+            if ($lastLoginDate->gte($periodAgo)) {
+                $loginCount++;
+            } 
+        }
+
+        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        return response()->json(['login_rate' => $loginRate], 200);
+    }
+
+    /**
+     * 受講生ログイン率計算
+     * 
+     * @param int $number
+     * @param int $total
+     * @return int
+     */
+    public function calcLoginRate($number, $total) { 
+        if ($total === 0) return 0;
+            
+        $percent = ($number / $total) * 100;
+        return floor($percent);
+    }
+
 }

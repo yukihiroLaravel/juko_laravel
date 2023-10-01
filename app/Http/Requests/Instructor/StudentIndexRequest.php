@@ -35,6 +35,9 @@ class StudentIndexRequest extends FormRequest
             'course_id' => ['required', 'integer'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
+            'search_term' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
         ];
     }
 }

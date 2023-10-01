@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use App\Exceptions\AuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationCodeException;
 
 class StudentController extends Controller
 {
@@ -41,7 +41,7 @@ class StudentController extends Controller
                 'address'    => $request->address,
             ]);
 
-            // 認証コードの生成
+            認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
 
             for ($i = 1; $i <= 5; $i++) {
@@ -51,23 +51,9 @@ class StudentController extends Controller
                 $code = sprintf('%04d', mt_rand(0, 9999));
 
                 if ($i === 5) {
-                    throw new Exception('Failed to generate unique authorization code.');
+                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
                 }
             }
-            
-            // エラー表示確認 カスタム例外クラスの検討
-            // $code = '1234';
-
-            // for ($i = 1; $i <= 5; $i++) {
-            //     if (!StudentAuthorization::where('code', $code)->exists()) {
-            //         break;
-            //     }
-            //     $code = '1234';
-
-            //     if ($i === 5) {
-            //         throw new AuthorizationCodeException($student);
-            //     }
-            // }
             
             StudentAuthorization::create([
                 'student_id'  => $student->id,
@@ -81,6 +67,13 @@ class StudentController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+
+        } catch (DuplicateAuthorizationCodeException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+              "result" => false,
+            ], 500);
 
         } catch (Exception $e) {
             DB::rollBack();

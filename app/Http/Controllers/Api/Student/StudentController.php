@@ -41,7 +41,7 @@ class StudentController extends Controller
                 'address'    => $request->address,
             ]);
 
-            認証コードの生成
+            //認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
 
             for ($i = 1; $i <= 5; $i++) {

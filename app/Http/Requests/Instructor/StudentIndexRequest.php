@@ -36,8 +36,8 @@ class StudentIndexRequest extends FormRequest
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'search_term' => ['nullable', 'string'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date'],
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
         ];
     }
 }

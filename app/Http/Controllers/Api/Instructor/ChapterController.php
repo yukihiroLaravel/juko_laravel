@@ -92,11 +92,16 @@ class ChapterController extends Controller
     /**
      * チャプター更新API(公開・非公開切り替え)
      */
-    public function updateStatus(ChapterPatchStatusRequest  $request)
+    public function updateStatus(Request $request,$course_id,$chapter_id)
     { 
-        {
-            return response()->json([]);
-        }
+        Chapter::findOrFail($chapter_id)
+            ->update([
+                'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,g
+        ]);
     }
 
     /**

@@ -12,6 +12,9 @@ use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use App\Exceptions\AuthorizationCodeException;
 
 class StudentController extends Controller
 {
@@ -40,12 +43,31 @@ class StudentController extends Controller
 
             // 認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
-            
-            for ($i = 0; $i < 5; $i++) {
-               if (StudentAuthorization::where('code', $code)->exists()) {
-                   $code = sprintf('%04d', mt_rand(0, 9999));
-               }
+
+            for ($i = 1; $i <= 5; $i++) {
+                if (!StudentAuthorization::where('code', $code)->exists()) {
+                    break;
+                }
+                $code = sprintf('%04d', mt_rand(0, 9999));
+
+                if ($i === 5) {
+                    throw new Exception('Failed to generate unique authorization code.');
+                }
             }
+            
+            // エラー表示確認 カスタム例外クラスの検討
+            // $code = '1234';
+
+            // for ($i = 1; $i <= 5; $i++) {
+            //     if (!StudentAuthorization::where('code', $code)->exists()) {
+            //         break;
+            //     }
+            //     $code = '1234';
+
+            //     if ($i === 5) {
+            //         throw new AuthorizationCodeException($student);
+            //     }
+            // }
             
             StudentAuthorization::create([
                 'student_id'  => $student->id,

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Http\Requests\Student\StudentPostRequest;
+use App\Http\Resources\Student\StudentPostResource;
 
 class StudentController extends Controller
 {
@@ -23,7 +24,7 @@ class StudentController extends Controller
      * ユーザー新規仮登録API
      *
      * @param StudentStoreRequest $request
-     *
+     *@return \Illuminate\Http\JsonResponse
      */
     public function store(StudentPostRequest $request)
    {
@@ -67,6 +68,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => true,
+                'data' => new StudentPostResource($student),
             ]);
 
         } catch (DuplicateAuthorizationCodeException $e) {

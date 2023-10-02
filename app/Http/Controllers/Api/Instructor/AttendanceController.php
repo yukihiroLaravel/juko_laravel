@@ -99,11 +99,11 @@ class AttendanceController extends Controller
     public function loginRate(LoginRateRequest $request) {
         $endDate = new Carbon();
 
-        if ($request->period === "week") {
+        if ($request->period === Attendance::PERIOD_WEEK) {
             $periodAgo = $endDate->subWeek(1);
-        } elseif ($request->period === "month") {
+        } elseif ($request->period === Attendance::PERIOD_MONTH) {
             $periodAgo = $endDate->subMonth(1);
-        } elseif ($request->period === "year") {
+        } elseif ($request->period === Attendance::PERIOD_YEAR) {
             $periodAgo = $endDate->subYear(1);
         } 
 

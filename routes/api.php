@@ -28,10 +28,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     });
     Route::prefix('student')->group(function () {
         Route::get('edit', 'Api\Student\StudentController@edit');
-        Route::post('/', 'Api\Student\StudentController@store');
         Route::patch('/', 'Api\Student\StudentController@update');
     });
     Route::get('notification', 'Api\NotificationController@index');
+});
+
+Route::prefix('v1')->group(function () {
+    Route::post('student', 'Api\Student\StudentController@store');
 });
 
 Route::prefix('v1')->group(function () {

@@ -5,10 +5,16 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Student;
+use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
 use App\Http\Requests\Student\StudentPatchRequest; 
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use App\Exceptions\DuplicateAuthorizationCodeException;
 
 class StudentController extends Controller
 {
@@ -20,22 +26,63 @@ class StudentController extends Controller
      */
     public function store(Request $request)
    {
-        Student::create([
-            'nick_name'  => $request->nick_name,
-            'last_name'  => $request->last_name,
-            'first_name' => $request->first_name,
-            'email'      => $request->email,
-            'occupation' => $request->occupation,
-            'purpose'    => $request->purpose,
-            'birth_date' => $request->birth_date,
-            'sex'        => Student::convertSexToInt($request->sex),
-            'address'    => $request->address,
-        ]);
+        DB::beginTransaction();
+        try {
 
-        return response()->json([
-            'result' => true,
-        ]);
-   }
+            $student = Student::create([
+                'nick_name'  => $request->nick_name,
+                'last_name'  => $request->last_name,
+                'first_name' => $request->first_name,
+                'email'      => $request->email,
+                'occupation' => $request->occupation,
+                'purpose'    => $request->purpose,
+                'birth_date' => $request->birth_date,
+                'sex'        => Student::convertSexToInt($request->sex),
+                'address'    => $request->address,
+            ]);
+
+            //認証コードの生成
+            $code = sprintf('%04d', mt_rand(0, 9999));
+
+            for ($i = 1; $i <= 5; $i++) {
+                if (!StudentAuthorization::where('code', $code)->exists()) {
+                    break;
+                }
+                $code = sprintf('%04d', mt_rand(0, 9999));
+
+                if ($i === 5) {
+                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
+                }
+            }
+            
+            StudentAuthorization::create([
+                'student_id'  => $student->id,
+                'trial_count' => 0,
+                'code'        => $code,
+                'expire_at'   => Carbon::now()->addMinutes(60),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+
+        } catch (DuplicateAuthorizationCodeException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+              "result" => false,
+            ], 500);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+              "result" => false,
+            ], 500);
+        }
+    }
 
     /**
      * ユーザー情報編集API

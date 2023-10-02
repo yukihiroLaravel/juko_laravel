@@ -8,6 +8,7 @@ use App\Model\Lesson;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
@@ -95,18 +96,18 @@ class AttendanceController extends Controller
      * @param string $period
      * @return \Illuminate\Http\JsonResponse
      */ 
-    public function loginRate($courseId, $period) {
+    public function loginRate(LoginRateRequest $request) {
         $endDate = new Carbon();
 
-        if ($period === "week") {
+        if ($request->period === "week") {
             $periodAgo = $endDate->subWeek(1);
-        } elseif ($period === "month") {
+        } elseif ($request->period === "month") {
             $periodAgo = $endDate->subMonth(1);
-        } elseif ($period === "year") {
+        } elseif ($request->period === "year") {
             $periodAgo = $endDate->subYear(1);
         } 
 
-        $attendances = Attendance::with('student')->where('course_id', $courseId)->get();
+        $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
         $studentsCount = $attendances->count();
 
         // 期間内にログインした受講生数

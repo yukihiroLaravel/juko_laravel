@@ -54,4 +54,9 @@ class Attendance extends Model
     {
         return $this->hasMany(LessonAttendance::class);
     }
+
+    //$periodのバリデーションに利用する定数
+    const PERIOD_WEEK = 'week';
+    const PERIOD_MONTH = 'month';
+    const PERIOD_YEAR = 'year';
 }

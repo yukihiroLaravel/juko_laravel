@@ -66,16 +66,6 @@ class Student extends Authenticatable
     }
 
     /**
-     * 受講状況を取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-        public function attendance()
-    {
-        return $this->hasMany(Attendance::class);
-    }
-
-    /**
      * 受講履歴を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Chapter;
 
-class ChapterPatchStatusRule implements Rule
+class ChapterStatusRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -48,6 +48,6 @@ class ChapterPatchStatusRule implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'Invalid status.';
     }
 }

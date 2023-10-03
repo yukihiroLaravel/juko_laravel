@@ -68,7 +68,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new StudentPostResource($student),
+                'data'   => new StudentPostResource($student),
             ]);
 
         } catch (DuplicateAuthorizationCodeException $e) {

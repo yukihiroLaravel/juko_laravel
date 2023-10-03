@@ -15,16 +15,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Http\Requests\Student\StudentPostRequest;
 
 class StudentController extends Controller
 {
     /**
      * ユーザー新規仮登録API
      *
-     *
+     * @param StudentStoreRequest $request
      *
      */
-    public function store(Request $request)
+    public function store(StudentPostRequest $request)
    {
         DB::beginTransaction();
         try {

@@ -61,7 +61,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
                 Route::prefix('attendance')->group(function () {
-                    Route::get('/', 'Api\Instructor\AttendanceController@loginRate');
+                    Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
                 });
                 Route::prefix('chapter')->group(function () {

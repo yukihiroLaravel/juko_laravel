@@ -57,5 +57,20 @@ class LessonAttendanceSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
         ]);
+
+        for ($j = 2; $j <= 6; $j++) {
+            for ($i = 1; $i <= 6; $i++){
+                LessonAttendance::insert([
+                    [
+                        'lesson_id' => $i,
+                        'attendance_id' => $j,
+                        'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ],
+                ]);
+            }
+        }
+        
     }
 }

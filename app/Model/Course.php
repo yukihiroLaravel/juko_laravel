@@ -68,8 +68,4 @@ class Course extends Model
         });
     }
 
-    //受講生の情報を取得。
-    public function students () {
-        return $this->belongsToMany(Student::class, 'attendances', 'course_id', 'student_id');
-    }
 }

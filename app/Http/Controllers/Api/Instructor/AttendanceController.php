@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
+use App\Model\Student;
 use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
@@ -93,46 +94,45 @@ class AttendanceController extends Controller
      * @param string courseId
      * @return json
      */ 
-    public function loginRate($courseId) {
+    public function loginRate($courseId, $period) {
         $weekCount = 0;
         $monthCount = 0;
         $yearCount = 0;
-        $endDate = now(); 
+        $endDate = now();  
         $weekAgo = $endDate->subWeek(1);
         $monthAgo = $endDate->subMonth(1);
         $yearAgo = $endDate->subYear(1);
+        $students = Attendance::where('course_id', $courseId)->get();
+        $studentsCount = Attendance::where('course_id', $courseId)->get()->count();
 
-        if ($this->idCheck($courseId)) {
-            $course = Course::find($courseId);
-            $studentsCount = $course->students()->get()->count();
-
-            foreach ($course->students()->get() as $student) {
-                if ($student->last_login_at >= $weekAgo) {
-                    $weekCount++; 
-                } 
-                if ($student->last_login_at >= $monthAgo) {
-                    $monthCount++;
-                } 
-                if ($student->last_login_at >= $yearAgo) {
-                    $yearCount++;
-                }   
-            }
-    
-            $last_week_login_rate = $this->num2per($weekCount, $studentsCount);
-            $last_month_login_rate = $this->num2per($monthCount, $studentsCount);
-            $last_year_login_rate = $this->num2per($yearCount, $studentsCount);
-    
-            return response()->json([
-                'last_week_login_rate' => $last_week_login_rate, 
-                'last_month_login_rate' => $last_month_login_rate,
-                'last_year_login_rate' => $last_year_login_rate,
-            ], 200);
+        foreach ($students as $student) {
+            $lastLoginDate = Student::findOrFail($student->id)->last_login_at;
+            if ($lastLoginDate >= $weekAgo) {
+                $weekCount++;
+            } 
+            if ($lastLoginDate >= $monthAgo) {
+                $monthCount++;
+            } 
+            if ($lastLoginDate >= $yearAgo) {
+                $yearCount++;
+            }   
         }
-
+        
+        if ($period === "7") {
+            $last_week_login_rate = $this->loginRateCalculate($weekCount, $studentsCount);
+            return response()->json(['last_week_login_rate' => $last_week_login_rate,], 200);
+        } elseif ($period === "30") {
+            $last_month_login_rate = $this->loginRateCalculate($monthCount, $studentsCount);
+            return response()->json(['last_month_login_rate' => $last_month_login_rate,], 200);
+        } elseif ($period === "365") {
+            $last_year_login_rate = $this->loginRateCalculate($yearCount, $studentsCount);
+            return response()->json(['last_year_login_rate' => $last_year_login_rate,], 200);
+        } else {
             return response()->json([
                 'result' => false, 
                 'error_message' => 'Invalid Request Body.',
             ], 400);
+        }
     }
 
     /**
@@ -140,7 +140,7 @@ class AttendanceController extends Controller
      * @param int $number, $total, $precision 
      * @return int
      */
-    public function num2per($number, $total, $precision = 0) {
+    public function loginRateCalculate($number, $total, $precision = 0) {
         if ($number < 0) {
           return 0;
         }
@@ -153,23 +153,4 @@ class AttendanceController extends Controller
         }
     }
 
-    /**
-     * courseIdが存在するかどうかチェック。
-     * @param int $courseId 
-     * @return boolean
-     */
-    public function idCheck ($courseId) {
-        $count = 0;
-        $courses = Course::all();
-        foreach ($courses as $course){
-            if ($course['id'] === (int)$courseId) {
-                $count++;
-            }
-        }
-        if ($count > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

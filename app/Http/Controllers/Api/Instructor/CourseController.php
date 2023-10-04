@@ -168,9 +168,4 @@ class CourseController extends Controller
             ]);
         }
     }
-
-    public function putStatus(Request $request)
-    {
-        return response()->json([]);
-    }
 }

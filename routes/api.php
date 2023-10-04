@@ -57,7 +57,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('edit', 'Api\Instructor\CourseController@edit');
                 Route::post('/', 'Api\Instructor\CourseController@update');
                 Route::delete('/', 'Api\Instructor\CourseController@delete');
-                Route::put('status', 'Api\Instructor\CourseController@putStatus');
                 Route::prefix('notification')->group(function () {
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
@@ -67,6 +66,7 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('chapter')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
+                    Route::put('status', 'Api\Instructor\ChapterController@putStatus');
                     Route::prefix('{chapter_id}')->group(function () {
                         Route::get('/', 'Api\Instructor\ChapterController@show');
                         Route::patch('/', 'Api\Instructor\ChapterController@update');

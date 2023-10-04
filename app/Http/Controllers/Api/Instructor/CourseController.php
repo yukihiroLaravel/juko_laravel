@@ -169,7 +169,7 @@ class CourseController extends Controller
         }
     }
 
-    public function put(Request $request)
+    public function putStatus(Request $request)
     {
         return response()->json([]);
     }

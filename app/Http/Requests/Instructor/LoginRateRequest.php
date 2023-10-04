@@ -24,16 +24,10 @@ class LoginRateRequest extends FormRequest
      */
     public function rules()
     {
-        $validate = [];
-
-        $validate += [
-            'course_id' => [
-                'exists:attendances,course_id','required','integer'
-            ],
+        return [
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
             'period' => ['required', 'string', new AttendancePeriodRule],
         ];
-
-        return $validate;
     }
 
     protected function prepareForValidation()

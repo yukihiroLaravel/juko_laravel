@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
@@ -55,7 +56,7 @@ class CourseController extends Controller
      * 講座登録API
      *
      * @param CourseStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(CourseStoreRequest $request)
     {
@@ -63,9 +64,10 @@ class CourseController extends Controller
         $instructorId = 1;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = date('YmdHis') . '.' . $extension;
-        $filePath = Storage::putFileAs('course', $file, $filename);
-    
+        $filename = Str::uuid() . '.' . $extension;
+        $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
+        $filePath = Course::convertImagePath($filePath);
+
         $course = Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
@@ -74,7 +76,7 @@ class CourseController extends Controller
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
-    
+
         return response()->json([
             "result" => true,
             "data" => new CourseStoreResource($course),
@@ -97,7 +99,7 @@ class CourseController extends Controller
      * 講師側の更新処理API
      *
      * @param CourseUpdateRequest $request
-     * @return CourseUpdateResource
+     * @return JsonResponse
      */
     public function update(CourseUpdateRequest $request)
     {
@@ -115,8 +117,9 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = date('YmdHis') . '.' . $extension;
-                $imagePath = Storage::putFileAs('course', $file, $filename);
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/course', $file, $filename);
+                $imagePath = Course::convertImagePath($imagePath);
             }
 
             $course->update([

@@ -5,6 +5,8 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\NotificationDeleteRequest;
+use Exception;
+
 
 class NotificationController extends Controller
 {
@@ -24,6 +26,11 @@ class NotificationController extends Controller
         ]);
     }
 
+    /**
+     * お知らせ通知の削除
+     *
+     * @return bool
+     */
     public function delete(NotificationDeleteRequest $request)
     {
      try{
@@ -33,7 +40,7 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
-     } catch (\Exception $e) {
+     } catch (Exception $e) {
         return response()->json([
             'result' => false,
             'message' => 'Notification not found',

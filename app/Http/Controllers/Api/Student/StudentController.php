@@ -26,7 +26,7 @@ class StudentController extends Controller
      * ユーザー新規仮登録API
      *
      * @param StudentStoreRequest $request
-     *@return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StudentPostRequest $request)
    {
@@ -76,8 +76,8 @@ class StudentController extends Controller
             }
 
             return response()->json([
-                'result' => true,
-                'data' => new StudentPostResource($student),
+                'result'  => true,
+                'data'    => new StudentPostResource($student),
                 'message' => 'テストメールが送信されました',
             ]);
 

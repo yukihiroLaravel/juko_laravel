@@ -148,27 +148,41 @@ class CourseController extends Controller
      */
     public function delete(CourseDeleteRequest $request)
     {
-        $user = Instructor::find(1);
-        $course = Course::findOrFail($request->course_id);
-        if ($user->id === $course->instructor_id) {
+        try {
+            $user = Instructor::find(1);
+            $course = Course::findOrFail($request->course_id);
+
+            if ($user->id !== $course->instructor_id) {
+                return new JsonResponse([
+                    "result" => false,
+                    "message" => "Not authorized."
+                ], 403);
+            }
+
             if (Attendance::where('course_id', $request->course_id)->exists()) {
-                return response()->json([
+                return new JsonResponse([
                     "result" => false,
                     "message" => "This course has already been taken by students."
-                ]);
+                ], 404);
             }
-            if (Storage::exists($course->image)) {
-                Storage::delete($course->image);
+
+            // publicディレクトリ配下の画像ファイルを削除
+            if (Storage::exists('public/' . $course->image)) {
+                Storage::delete('public/' . $course->image);
             }
+
             $course->delete();
+
             return response()->json([
                 "result" => true,
             ]);
-        } else {
+
+        } catch (RuntimeException $e) {
+            Log::error($e);
             return response()->json([
                 "result" => false,
-                "message" => "Lecturer (cannot be deleted because the creator does not match)"
-            ]);
+            ], 500);
+
         }
     }
 }

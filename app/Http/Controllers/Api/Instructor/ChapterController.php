@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
@@ -96,7 +95,7 @@ class ChapterController extends Controller
      * @param ChapterPatchStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request,$course_id,$chapter_id)
+    public function updateStatus(ChapterPatchStatusRequest $request)
     { 
         Chapter::findOrFail($chapter_id)
             ->update([

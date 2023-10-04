@@ -110,21 +110,22 @@ class AttendanceController extends Controller
         $studentsCount = $attendances->count();
 
         // 期間内にログインした受講生数
-        $periodCount = 0;
+        $loginCount = 0;
 
         foreach ($attendances as $attendance) {
             $lastLoginDate = $attendance->student->last_login_at;
             if ($lastLoginDate->gte($periodAgo)) {
-                $periodCount++;
+                $loginCount++;
             } 
         }
 
-        $loginRate = $this->calcLoginRate($periodCount, $studentsCount);
+        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
     /**
      * 受講生ログイン率計算
+     * 
      * @param int $number
      * @param int $total
      * @return int

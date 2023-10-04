@@ -95,7 +95,6 @@ class StudentController extends Controller
               "result" => false,
             ], 500);
         }
-        
     }
 
     /**

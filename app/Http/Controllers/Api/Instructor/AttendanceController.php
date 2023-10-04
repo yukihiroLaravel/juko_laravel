@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\Student;
-use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
@@ -100,48 +98,40 @@ class AttendanceController extends Controller
 
         if ($period === "week") {
             $periodAgo = $endDate->subWeek(1);
-            $loginRateKey = 'last_week_login_rate';
         } elseif ($period === "month") {
             $periodAgo = $endDate->subMonth(1);
-            $loginRateKey = 'last_month_login_rate';
         } elseif ($period === "year") {
             $periodAgo = $endDate->subYear(1);
-            $loginRateKey = 'last_year_login_rate';
-        } else {
-            return response()->json([
-                'result' => false, 
-                'error_message' => 'Invalid Request Body.',
-            ], 400);
-        }   
+        } 
 
-        $students = Attendance::where('course_id', $courseId)->get();
+        $students = Attendance::with('student')->where('course_id', $courseId)->get();
         $studentsCount = $students->count();
 
         foreach ($students as $student) {
-            $lastLoginDate = Student::findOrFail($student->id)->last_login_at;
+            $lastLoginDate = $student->student->last_login_at;
             if ($lastLoginDate >= $periodAgo) {
                 $periodCount++;
             } 
         }
 
-        $loginRate = $this->loginRateCalculate($periodCount, $studentsCount);
-        return response()->json([$loginRateKey => $loginRate,], 200);
-        
+        $loginRate = $this->calcLoginRate($periodCount, $studentsCount);
+        return response()->json(['login_rate' => $loginRate], 200);
     }
 
     /**
-     * %計算
-     * @param int $number, $total, $precision 
+     * 受講生ログイン率計算
+     * @param int $number
+     * @param int $total
      * @return int
      */
-    public function loginRateCalculate($number, $total, $precision = 0) {
+    public function calcLoginRate($number, $total) {
         if ($number < 0) {
           return 0;
         }
       
         try {
             $percent = ($number / $total) * 100;
-            return round($percent, $precision);
+            return floor($percent);
         } catch (\Throwable $e) {
             return 0;
         }

@@ -21,7 +21,7 @@ class StudentPostResource extends JsonResource
             'occupation' => $this->occupation,
             'email'      => $this->email,
             'purpose'    => $this->purpose,
-            'birth_date' => $this->birth_date,
+            'birth_date' => $this->birth_date->format('Y/m/d'),
             'sex'        => $this->sex,
             'address'    => $this->address,
         ];

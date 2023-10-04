@@ -15,5 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('login', 'Auth\LoginController');
-Route::post('logout', 'Auth\LogoutController');
+Route::prefix('login')->group(function () {
+    Route::post('/', 'Auth\LoginController')->name('login');
+    Route::post('instructor', 'Auth\InstructorLoginController')->name('instructor.login');
+});
+
+Route::prefix('logout')->group(function () {
+    Route::post('/', 'Auth\LogoutController')->name('logout');
+    Route::post('instructor', 'Auth\InstructorLogoutController')->name('instructor.logout');
+});

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
+use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
@@ -89,12 +90,12 @@ class AttendanceController extends Controller
 
      /**
      * 受講生ログイン率取得API
-     * @param string courseId
-     * @return json
+     * @param string $courseId
+     * @param string $period
+     * @return \Illuminate\Http\JsonResponse
      */ 
     public function loginRate($courseId, $period) {
-        $periodCount = 0;
-        $endDate = now();  
+        $endDate = new Carbon();
 
         if ($period === "week") {
             $periodAgo = $endDate->subWeek(1);
@@ -104,12 +105,15 @@ class AttendanceController extends Controller
             $periodAgo = $endDate->subYear(1);
         } 
 
-        $students = Attendance::with('student')->where('course_id', $courseId)->get();
-        $studentsCount = $students->count();
+        $attendances = Attendance::with('student')->where('course_id', $courseId)->get();
+        $studentsCount = $attendances->count();
 
-        foreach ($students as $student) {
-            $lastLoginDate = $student->student->last_login_at;
-            if ($lastLoginDate >= $periodAgo) {
+        // 期間内にログインした受講生数
+        $periodCount = 0;
+
+        foreach ($attendances as $attendance) {
+            $lastLoginDate = $attendance->student->last_login_at;
+            if ($lastLoginDate->gte($periodAgo)) {
                 $periodCount++;
             } 
         }
@@ -124,11 +128,7 @@ class AttendanceController extends Controller
      * @param int $total
      * @return int
      */
-    public function calcLoginRate($number, $total) {
-        if ($number < 0) {
-          return 0;
-        }
-      
+    public function calcLoginRate($number, $total) { 
         try {
             $percent = ($number / $total) * 100;
             return floor($percent);

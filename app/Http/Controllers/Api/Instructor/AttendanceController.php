@@ -90,6 +90,7 @@ class AttendanceController extends Controller
 
      /**
      * 受講生ログイン率取得API
+     * 
      * @param string $courseId
      * @param string $period
      * @return \Illuminate\Http\JsonResponse
@@ -129,12 +130,10 @@ class AttendanceController extends Controller
      * @return int
      */
     public function calcLoginRate($number, $total) { 
-        try {
-            $percent = ($number / $total) * 100;
-            return floor($percent);
-        } catch (\Throwable $e) {
-            return 0;
-        }
+        if ($total === 0) return 0;
+            
+        $percent = ($number / $total) * 100;
+        return floor($percent);
     }
 
 }

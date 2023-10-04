@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Lesson;
+use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
@@ -85,5 +86,90 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
         ]);
+    }
+
+     /**
+     * 受講生ログイン率取得API
+     * @param string courseId
+     * @return json
+     */ 
+    public function loginRate($courseId) {
+        $weekCount = 0;
+        $monthCount = 0;
+        $yearCount = 0;
+        $endDate = now(); 
+        $weekAgo = $endDate->subWeek(1);
+        $monthAgo = $endDate->subMonth(1);
+        $yearAgo = $endDate->subYear(1);
+
+        if ($this->idCheck($courseId)) {
+            $course = Course::find($courseId);
+            $studentsCount = $course->students()->get()->count();
+
+            foreach ($course->students()->get() as $student) {
+                if ($student->last_login_at >= $weekAgo) {
+                    $weekCount++; 
+                } 
+                if ($student->last_login_at >= $monthAgo) {
+                    $monthCount++;
+                } 
+                if ($student->last_login_at >= $yearAgo) {
+                    $yearCount++;
+                }   
+            }
+    
+            $last_week_login_rate = $this->num2per($weekCount, $studentsCount);
+            $last_month_login_rate = $this->num2per($monthCount, $studentsCount);
+            $last_year_login_rate = $this->num2per($yearCount, $studentsCount);
+    
+            return response()->json([
+                'last_week_login_rate' => $last_week_login_rate, 
+                'last_month_login_rate' => $last_month_login_rate,
+                'last_year_login_rate' => $last_year_login_rate,
+            ], 200);
+        }
+
+            return response()->json([
+                'result' => false, 
+                'error_message' => 'Invalid Request Body.',
+            ], 400);
+    }
+
+    /**
+     * %計算
+     * @param int $number, $total, $precision 
+     * @return int
+     */
+    public function num2per($number, $total, $precision = 0) {
+        if ($number < 0) {
+          return 0;
+        }
+      
+        try {
+            $percent = ($number / $total) * 100;
+            return round($percent, $precision);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * courseIdが存在するかどうかチェック。
+     * @param int $courseId 
+     * @return boolean
+     */
+    public function idCheck ($courseId) {
+        $count = 0;
+        $courses = Course::all();
+        foreach ($courses as $course){
+            if ($course['id'] === (int)$courseId) {
+                $count++;
+            }
+        }
+        if ($count > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

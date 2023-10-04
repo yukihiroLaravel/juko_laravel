@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
@@ -18,7 +19,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
@@ -91,10 +91,13 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API(公開・非公開切り替え)
+     * 
+     * @param ChapterPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function updateStatus(Request $request,$course_id,$chapter_id)
+    public function updateStatus(ChapterPatchStatusRequest $request)
     { 
-        Chapter::findOrFail($chapter_id)
+        Chapter::findOrFail($request->chapter_id)
             ->update([
                 'status' => $request->status
         ]);

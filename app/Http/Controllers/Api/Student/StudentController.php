@@ -41,7 +41,7 @@ class StudentController extends Controller
                 'occupation' => $request->occupation,
                 'purpose'    => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex'        => Student::convertSexToInt($request->sex),
+                'sex'        => $request->sex,
                 'address'    => $request->address,
             ]);
 
@@ -125,7 +125,7 @@ class StudentController extends Controller
             ]);
 
 
-            $student->update([
+            $student->fill([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
                 'first_name' => $request->first_name,
@@ -133,9 +133,10 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex' => Student::convertSexToInt($request->sex), 
+                'sex' => $request->sex, 
                 'address' => $request->address,     
-            ]);
+            ])
+            ->save();
 
             return response()->json([
                 'result' => true,

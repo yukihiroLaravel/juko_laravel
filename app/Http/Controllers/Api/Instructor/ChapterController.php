@@ -154,6 +154,13 @@ class ChapterController extends Controller
 
     public function putStatus(Request $request)
     {
-        return response()->json([]);
+        Chapter::where('course_id', $request->route('course_id'))
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

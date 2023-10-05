@@ -65,7 +65,7 @@ class CourseController extends Controller
         $extension = $file->getClientOriginalExtension();
         $filename = date('YmdHis') . '.' . $extension;
         $filePath = Storage::putFileAs('course', $file, $filename);
-    
+
         $course = Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
@@ -74,7 +74,7 @@ class CourseController extends Controller
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
-    
+
         return response()->json([
             "result" => true,
             "data" => new CourseStoreResource($course),

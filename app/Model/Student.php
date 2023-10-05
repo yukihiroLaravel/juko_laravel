@@ -35,7 +35,7 @@ class Student extends Authenticatable
      */
     protected $casts = [
         'birth_date' => 'date',
-        'last_login_at' => 'date',
+        'last_login_at' => 'datetime',
     ];
 
     // 性別定数

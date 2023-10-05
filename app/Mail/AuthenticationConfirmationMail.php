@@ -19,10 +19,10 @@ class AuthenticationConfirmationMail extends Mailable
      */
     public function __construct(Student $student, $code)
     {
-        $this->email = $student->email;
+        $this->email      = $student->email;
         $this->last_name  = $student->last_name;
         $this->first_name = $student->first_name;
-        $this->code  = $code;
+        $this->code       = $code;
     }
 
     /**

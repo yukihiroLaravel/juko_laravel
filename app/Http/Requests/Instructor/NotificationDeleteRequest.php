@@ -22,14 +22,14 @@ class NotificationDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-          'notification_id' => ['required', 'integer'],
+            'notification_id' => ['required', 'integer'],
         ];
     }
 
     protected function prepareForValidation()
     {
         $this->merge([
-          'notification_id' => $this->route('notification_id'),
+            'notification_id' => $this->route('notification_id'),
         ]);
     }
 }

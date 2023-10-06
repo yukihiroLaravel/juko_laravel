@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
@@ -85,6 +86,24 @@ class ChapterController extends Controller
         return response()->json([
             'result' => true,
             'data' => new ChapterPatchResource($chapter),
+        ]);
+    }
+
+    /**
+     * チャプター更新API(公開・非公開切り替え)
+     * 
+     * @param ChapterPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(ChapterPatchStatusRequest $request)
+    { 
+        Chapter::findOrFail($request->chapter_id)
+            ->update([
+                'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
         ]);
     }
 

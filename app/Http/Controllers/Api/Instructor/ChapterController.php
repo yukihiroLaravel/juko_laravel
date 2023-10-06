@@ -59,12 +59,10 @@ class ChapterController extends Controller
         if ((int) $request->course_id !== $chapter->course->id) {
             return response()->json([
                 'message' => 'invalid course_id.',
-            ], 500);
+            ], 403);
         }
 
-        return response()->json([
-            'data' => new ChapterShowResource($chapter)
-        ]);
+        return new ChapterShowResource($chapter);
     }
 
     /**

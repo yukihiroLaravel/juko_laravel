@@ -64,26 +64,44 @@ class NotificationController extends Controller
         ]);
     }
 
+     /**
+     * お知らせ更新API
+     *
+     * @param   NotificationUpdateRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(NotificationUpdateRequest $request) {
+        $notification->fill([
+            'type'  => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'title' => $request->title,
+            'content' => $request->content,
+        ])
+        ->save();
+
     /**
-     * お知らせ通知の削除
+     * お知らせ通知削除API
      * 
      * @param NotificationDeleteRequest $request
-     * @return bool
+     * @return \Illuminate\Http\JsonResponse
      */
     public function delete(NotificationDeleteRequest $request)
     {
-     try{
-        $notification = Notification::findOrFail($request->notification_id);
-        $notification->delete();
+        try{
+            $notification = Notification::findOrFail($request->notification_id);
+            $notification->delete();
 
-        return response()->json([
-            'result' => true,
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'result' => false,
-            'message' => 'Notification not found',
-        ]);
-     }
+            return response()->json([
+                'result' => true,
+                'data' => new NotificationUpdateResource($notification),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Notification not found',
+            ]);
+        }
+    }
     }
 }

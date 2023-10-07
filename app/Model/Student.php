@@ -113,4 +113,12 @@ class Student extends Authenticatable
             $this->attributes['sex'] = self::SEX_WOMAN_INT;
         }
     }
+
+     /**
+     * フルネームアクセサー
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->last_name . ' ' . $this->first_name;
+    }
 }

@@ -17,6 +17,8 @@ use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AuthenticationConfirmationMail;
 
 class StudentController extends Controller
 {
@@ -66,9 +68,11 @@ class StudentController extends Controller
 
             DB::commit();
 
+            Mail::send(new AuthenticationConfirmationMail($student, $code));
+
             return response()->json([
-                'result' => true,
-                'data'   => new StudentPostResource($student),
+                'result'  => true,
+                'data'    => new StudentPostResource($student),
             ]);
 
         } catch (DuplicateAuthorizationCodeException $e) {

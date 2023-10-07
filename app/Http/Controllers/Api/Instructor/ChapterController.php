@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
@@ -124,10 +125,10 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     * 
+     *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     * 
+     *
      */
     public function sort(ChapterSortRequest $request)
     {
@@ -168,5 +169,17 @@ class ChapterController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    public function putStatus(Request $request)
+    {
+        Chapter::where('course_id', $request->route('course_id'))
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

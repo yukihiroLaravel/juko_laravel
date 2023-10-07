@@ -121,5 +121,3 @@ class Student extends Authenticatable
         return $this->last_name . ' ' . $this->first_name;
     }
 }
-
-   

@@ -22,9 +22,9 @@ class AuthenticationConfirmationMail extends Mailable
      */
     public function __construct(Student $student, string $code)
     {
-        $this->email      = $student->email;
+        $this->email     = $student->email;
         $this->fullName  = $student->fullName;
-        $this->code       = $code;
+        $this->code      = $code;
     }
 
     /**

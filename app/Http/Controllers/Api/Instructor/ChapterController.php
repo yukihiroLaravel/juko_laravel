@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
+use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use App\Http\Resources\Instructor\ChapterShowResource;
@@ -171,7 +172,7 @@ class ChapterController extends Controller
         }
     }
 
-    public function putStatus(Request $request)
+    public function putStatus(ChapterPutStatusRequest $request)
     {
         Chapter::where('course_id', $request->route('course_id'))
             ->update([

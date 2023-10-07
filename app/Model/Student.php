@@ -112,4 +112,14 @@ class Student extends Authenticatable
 
         return null;
     }
+
+     /**
+     * フルネームアクセサー
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->last_name . ' ' . $this->first_name;
+    }
 }
+
+   

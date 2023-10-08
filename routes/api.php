@@ -29,6 +29,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     });
     Route::get('student/edit', 'Api\Student\StudentController@edit');
     Route::get('notification', 'Api\NotificationController@index');
+    Route::prefix('instructor')->group(function () {
+        Route::prefix('course')->group(function () {
+            Route::prefix('{course_id}')->group(function () {
+                Route::prefix('attendance')->group(function () {
+                    Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
+                });
+            });        
+        });
+    });
 });
 
 Route::prefix('v1')->group(function () {
@@ -61,7 +70,6 @@ Route::prefix('v1')->group(function () {
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
                 Route::prefix('attendance')->group(function () {
-                    Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     Route::get('status', 'Api\Instructor\AttendanceController@show');
                 });
                 Route::prefix('chapter')->group(function () {

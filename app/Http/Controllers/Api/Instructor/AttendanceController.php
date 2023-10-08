@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Chapter;
 use App\Model\Attendance;
+use Illuminate\Support\Facades\Auth;
 use App\Model\Lesson;
+use App\Model\Course;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
@@ -97,6 +99,12 @@ class AttendanceController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */ 
     public function loginRate(LoginRateRequest $request) {
+        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
+        $loginId = Auth::guard('instructor')->user()->id;
+        if ($instructorId !== $loginId) {
+            return response()->json(['err_msg' => 'You could not get login rate'], 403);
+        }    
+
         $endDate = new Carbon();
 
         if ($request->period === Attendance::PERIOD_WEEK) {

@@ -84,13 +84,6 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-
-    /**
-     * 文字列の性別を数値に変換
-     *
-     * @param string $sex
-     * @return int
-     */
    
     public function getSexAttribute($value)
     {

@@ -154,7 +154,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * レッスン名更新API
+     * レッスンタイトル更新API
      *
      * @param LessonTitlePatchRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -162,14 +162,10 @@ class ChapterController extends Controller
     public function updateLessonTitle(LessonTitlePatchRequest $request)
     {
         try {
-            // リクエストから lesson_id と title を取得
-            $lessonId = $request->input('lesson_id');
-            $newTitle = $request->input('title');
-            // lesson_id に対応するLessonモデルを取得
-            $lesson = Lesson::findOrFail($lessonId);
             // Lessonのタイトルを更新
+            $lesson = Lesson::findOrFail($request->input('lesson_id'));
             $lesson->update([
-                'title' => $newTitle
+                'title' => $request->input('title')
             ]);
             // 成功時のレスポンス
             return response()->json([
@@ -180,6 +176,7 @@ class ChapterController extends Controller
                 ],
             ]);
         } catch (Exception $e) {
+            Log::error($e); //エラーをログに出力
             // エラー時のレスポンス
             return response()->json([
                 'result' => false,

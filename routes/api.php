@@ -38,7 +38,6 @@ Route::prefix('v1')->group(function () {
         Route::get('student/{student_id}', 'Api\Instructor\StudentController@show');
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
-            Route::delete('notification/{notification_id}','Api\Instructor\NotificationController@delete');
         });
         Route::patch('/', 'Api\Instructor\InstructorController@update');
         Route::patch('notification/{notification_id}', 'Api\Instructor\NotificationController@update');
@@ -47,6 +46,7 @@ Route::prefix('v1')->group(function () {
             Route::get('index', 'Api\Instructor\NotificationController@index');
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
+                Route::delete('/','Api\Instructor\NotificationController@delete');
             });
         });
         Route::prefix('course')->group(function () {

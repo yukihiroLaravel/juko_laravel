@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Model\Instructor;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
+use App\Http\Requests\Instructor\LessonTitlePatchRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use App\Http\Resources\Instructor\ChapterShowResource;
@@ -105,10 +107,10 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     * 
+     *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     * 
+     *
      */
     public function sort(ChapterSortRequest $request)
     {
@@ -148,6 +150,40 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => false,
             ], 500);
+        }
+    }
+
+    /**
+     * レッスン名更新API
+     *
+     * @param LessonTitlePatchRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateLessonTitle(LessonTitlePatchRequest $request)
+    {
+        try {
+            // リクエストから lesson_id と title を取得
+            $lessonId = $request->input('lesson_id');
+            $newTitle = $request->input('title');
+            // lesson_id に対応するLessonモデルを取得
+            $lesson = Lesson::findOrFail($lessonId);
+            // Lessonのタイトルを更新
+            $lesson->update([
+                'title' => $newTitle
+            ]);
+            // 成功時のレスポンス
+            return response()->json([
+                'result' => true,
+                'data' => [
+                    'lesson_id' => $lesson->id,
+                    'title' => $lesson->title,
+                ],
+            ]);
+        } catch (Exception $e) {
+            // エラー時のレスポンス
+            return response()->json([
+                'result' => false,
+            ], 500); // HTTPステータスコード 500: Internal Server Error
         }
     }
 }

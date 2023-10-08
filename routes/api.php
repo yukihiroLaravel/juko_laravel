@@ -68,6 +68,7 @@ Route::prefix('v1')->group(function () {
                             Route::prefix('{lesson_id}')->group(function () {
                                 Route::delete('/', 'Api\Instructor\LessonController@delete');
                                 Route::patch('/', 'Api\Instructor\LessonController@update');
+                                Route::patch('title', 'Api\Instructor\ChapterController@updateLessonTitle');
                             });
                         });
                     });

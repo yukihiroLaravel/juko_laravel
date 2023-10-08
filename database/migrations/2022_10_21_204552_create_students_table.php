@@ -15,7 +15,7 @@ class CreateStudentsTable extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('given_name_by_instructor', 50)->comment('ユーザー名(仮)');
+            $table->string('given_name_by_instructor', 50)->nullable()->comment('ユーザー名(仮)');
             $table->string('nick_name', 50)->nullable()->comment('ニックネーム');
             $table->string('last_name', 50)->nullable()->comment('苗字');
             $table->string('first_name', 50)->nullable()->comment('名前');
@@ -30,6 +30,7 @@ class CreateStudentsTable extends Migration
             $table->dateTime('updated_at');
             $table->softDeletes();
             $table->dateTime('last_login_at')->nullable()->comment('最終ログイン日時');
+            $table->dateTime('email_verified_at')->nullable()->comment('認証日時');
         });
     }
 

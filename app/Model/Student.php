@@ -74,24 +74,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-
-    /**
-     * 文字列の性別を数値に変換
-     *
-     * @param string $sex
-     * @return int
-     */
-    public static function convertSexToInt($sex)
-    {
-        if ($sex === self::SEX_MAN) {
-            return self::SEX_MAN_INT;
-        } else if ($sex === self::SEX_WOMAN) {
-            return self::SEX_WOMAN_INT;
-        }
-
-        return self::SEX_UNKNOWN_INT;
-    }
-
+   
     public function getSexAttribute($value)
     {
         if ($value === self::SEX_MAN_INT) {
@@ -101,5 +84,24 @@ class Student extends Authenticatable
         }
 
         return null;
+    }
+
+    public function setSexAttribute($value)
+    {
+        $this->attributes['sex'] = null;
+
+        if ($value === self::SEX_MAN) {
+            $this->attributes['sex'] = self::SEX_MAN_INT;
+        } elseif ($value === self::SEX_WOMAN) {
+            $this->attributes['sex'] = self::SEX_WOMAN_INT;
+        }
+    }
+
+     /**
+     * フルネームアクセサー
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->last_name . ' ' . $this->first_name;
     }
 }

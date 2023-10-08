@@ -34,7 +34,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
         Route::get('notification', 'Api\NotificationController@index');
     });
-    Route::get('notification', 'Api\NotificationController@index');
 
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述

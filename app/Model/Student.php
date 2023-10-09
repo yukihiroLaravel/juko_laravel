@@ -25,6 +25,7 @@ class Student extends Authenticatable
      * @var array
      */
     protected $fillable = [
+        'given_name_by_instructor',
         'nick_name',
         'last_name',
         'first_name',
@@ -36,7 +37,7 @@ class Student extends Authenticatable
         'sex',
         'address',
     ];
-    
+
     /**
      * 講座を取得
      *
@@ -46,7 +47,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Course::class);
     }
-    
+
     /**
      * お知らせを取得
      *
@@ -64,7 +65,7 @@ class Student extends Authenticatable
      */
         public function attendance()
     {
-        return $this->hasMany(Attendance::class); 
+        return $this->hasMany(Attendance::class);
     }
 
     /**
@@ -76,7 +77,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-    
+
     /**
      * 文字列の性別を数値に変換
      *
@@ -104,7 +105,7 @@ class Student extends Authenticatable
 
         return null;
     }
-    
+
     /**
      * キャスト
      */

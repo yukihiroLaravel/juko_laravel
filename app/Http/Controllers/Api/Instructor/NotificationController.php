@@ -101,8 +101,8 @@ class NotificationController extends Controller
     public function delete(NotificationDeleteRequest $request)
     {
         try {
-            $notification = Notification::findOrFail($request->notification_id);
-            $notification->delete();
+            Notification::findOrFail($request->notification_id)
+            ->delete();
 
             return response()->json([
                 'result' => true,
@@ -111,7 +111,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Notification not found',
-            ], 404); // 404 エラーコードを返す
+            ], 500); // 500 エラーコードを返す
         }
     }
 }

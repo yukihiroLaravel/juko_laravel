@@ -17,6 +17,13 @@ class ChapterPutStatusRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,6 +32,7 @@ class ChapterPutStatusRequest extends FormRequest
     public function rules()
     {
         return [
+            'course_id' => ['required', 'integer', 'exists:chapters,id'],
             'status' => ['required', 'string', new ChapterStatusRule()],
         ];
     }

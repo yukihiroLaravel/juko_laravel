@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\NotificationDeleteRequest;
+use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Resources\Instructor\NotificationIndexResource;
+use App\Http\Requests\Instructor\NotificationShowRequest;
+use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationUpdateResource;
-use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Model\Notification;
-use Exception;
 
 class NotificationController extends Controller
 {
@@ -25,8 +27,8 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course'])
-            ->where('instructor_id', 1) // 講師IDは仮で1を指定
-            ->paginate($perPage, ['*'], 'page', $page);
+                                        ->where('instructor_id', 1) //講師IDは仮で1を指定
+                                        ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }
@@ -39,16 +41,9 @@ class NotificationController extends Controller
      */
     public function show(NotificationShowRequest $request)
     {
-        try {
-            $notification = Notification::findOrFail($request->notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
-            return new NotificationShowResource($notification);
-        } catch (Exception $e) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Notification not found',
-            ], 404); // 404 エラーコードを返す
-        }
+        return new NotificationShowResource($notification);
     }
 
     /**
@@ -60,15 +55,15 @@ class NotificationController extends Controller
     public function store(NotificationStoreRequest $request)
     {
         Notification::create([
-            'course_id' => $request->course_id,
+            'course_id'     => $request->course_id,
             'instructor_id' => 1,
-            'title' => $request->title,
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'content' => $request->content,
+            'title'         => $request->title,
+            'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'content'       => $request->content,
         ]);
-        
+
         return response()->json([
             'result' => true,
         ]);
@@ -80,33 +75,26 @@ class NotificationController extends Controller
      * @param   NotificationUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(NotificationUpdateRequest $request)
-    {
-        try {
-            $notification = Notification::findOrFail($request->notification_id);
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-            ])->save();
+    public function update(NotificationUpdateRequest $request) {
+        $notification = Notification::findOrFail($request->notification_id);
+        $notification->fill([
+            'type'  => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'title' => $request->title,
+            'content' => $request->content,
+        ])
+        ->save();
 
-            return response()->json([
-                'result' => true,
-                'data' => new NotificationUpdateResource($notification),
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Notification not found',
-            ], 404); // 404 エラーコードを返す
-        }
+        return response()->json([
+            'result' => true,
+            'data' => new NotificationUpdateResource($notification),
+        ]);
     }
 
     /**
      * お知らせ通知削除API
-     * 
+     *
      * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

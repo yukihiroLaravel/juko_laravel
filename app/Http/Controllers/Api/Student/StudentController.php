@@ -112,7 +112,7 @@ class StudentController extends Controller
     {
         try {
             
-            $student = Student::findOrFail(1); 
+            $student = Student::findOrFail($request->user()->id); 
 
             $request->validate([
                 'email' => [new UniqueEmailRule($student->email)],

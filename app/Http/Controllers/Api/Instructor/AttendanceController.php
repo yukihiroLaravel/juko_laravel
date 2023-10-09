@@ -94,15 +94,17 @@ class AttendanceController extends Controller
      /**
      * 受講生ログイン率取得API
      * 
-     * @param string $courseId
-     * @param string $period
+     * @param LoginRateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */ 
     public function loginRate(LoginRateRequest $request) {
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
         $loginId = Auth::guard('instructor')->user()->id;
         if ($instructorId !== $loginId) {
-            return response()->json(['err_msg' => 'You could not get login rate'], 403);
+            return response()->json([
+                'result' => 'false',
+                'message' => 'You could not get login rate'
+            ], 403);
         }    
 
         $endDate = new Carbon();
@@ -116,7 +118,7 @@ class AttendanceController extends Controller
         } 
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
-         $studentsCount = $attendances->count();
+        $studentsCount = $attendances->count();
 
         // 期間内にログインした受講生数
         $loginCount = 0;

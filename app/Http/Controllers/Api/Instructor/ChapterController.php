@@ -176,11 +176,11 @@ class ChapterController extends Controller
                 ],
             ]);
         } catch (Exception $e) {
-            Log::error($e); //エラーをログに出力
+            Log::error($e);
             // エラー時のレスポンス
             return response()->json([
                 'result' => false,
-            ], 500); // HTTPステータスコード 500: Internal Server Error
+            ], 500);
         }
     }
 }

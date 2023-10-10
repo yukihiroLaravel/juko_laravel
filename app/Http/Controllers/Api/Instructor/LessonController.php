@@ -34,6 +34,7 @@ class LessonController extends Controller
                 'chapter_id' => $request->input('chapter_id'),
                 'title' => $request->input('title'),
                 'status' => Lesson::STATUS_PRIVATE,
+                'order' => Lesson::where('chapter_id', $request->input('chapter_id'))->get()->count() + 1
             ]);
 
             return response()->json([

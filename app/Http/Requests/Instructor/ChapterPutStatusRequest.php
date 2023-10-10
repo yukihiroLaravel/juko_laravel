@@ -32,7 +32,7 @@ class ChapterPutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:chapters,course_id'],
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
             'status' => ['required', 'string', new ChapterStatusRule()],
         ];
     }

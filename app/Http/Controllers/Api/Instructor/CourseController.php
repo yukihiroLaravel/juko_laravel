@@ -32,8 +32,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
+        $instructorId = $request->user()->id;
         $courses = Course::where('instructor_id', $instructorId)->get();
 
         return new CourseIndexResource($courses);
@@ -60,8 +59,7 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
+        $instructorId = $request->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid() . '.' . $extension;
@@ -149,7 +147,7 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         try {
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
             $course = Course::findOrFail($request->course_id);
 
             if ($user->id !== $course->instructor_id) {

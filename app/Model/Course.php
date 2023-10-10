@@ -58,7 +58,19 @@ class Course extends Model
         return $this->hasMany(Chapter::class)->orderBy('order', 'asc');
     }
 
-    protected static function boot() 
+    /**
+     * 画像保存パスに変換
+     *
+     * @param string $filePath
+     * @return string
+     */
+    public static function convertImagePath(string $filePath)
+    {
+        // public/を削除
+        return str_replace('public/', '', $filePath);
+    }
+
+    protected static function boot()
     {
         parent::boot();
         static::deleting(function($course) {

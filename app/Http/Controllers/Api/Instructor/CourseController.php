@@ -157,7 +157,7 @@ class CourseController extends Controller
                 return response()->json([
                     "result" => false,
                     "message" => "This course has already been taken by students."
-                ]);
+                ], 403);
             }
             if (Storage::exists($course->image)) {
                 Storage::delete($course->image);

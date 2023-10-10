@@ -15,7 +15,6 @@ use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -146,7 +145,6 @@ class LessonController extends Controller
             $course = $lesson->chapter->course;
             $instructorId = $course->instructor_id;
 
-            //$user = Auth::user();
             $user = Instructor::find($request->user()->id);
 
             if ($instructorId !== $user->id) {

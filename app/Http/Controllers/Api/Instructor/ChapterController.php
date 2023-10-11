@@ -181,10 +181,10 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => 'true'
             ]);
-        } else {
-            return response()->json([
-                'result' => 'false'
-            ]);
-        }
+        } 
+        return response()->json([
+            'result' => 'false',
+            "message" => "Not authorized."
+        ], 403);
     }
 }

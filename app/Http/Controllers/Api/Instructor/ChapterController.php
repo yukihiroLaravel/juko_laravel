@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
 {
@@ -169,13 +170,21 @@ class ChapterController extends Controller
 
     public function putStatus(ChapterPutStatusRequest $request)
     {
-        Chapter::where('course_id', $request->route('course_id'))
-            ->update([
-                'status' => $request->status
-            ]);
+        $course = Course::findOrFail($request->route('course_id'));
 
-        return response()->json([
-            'result' => 'true'
-        ]);
+        if (Auth::guard('instructor')->user()->id === $course->instructor_id) {
+            Chapter::where('course_id', $request->route('course_id'))
+                ->update([
+                    'status' => $request->status
+                ]);
+
+            return response()->json([
+                'result' => 'true'
+            ]);
+        } else {
+            return response()->json([
+                'result' => 'false'
+            ]);
+        }
     }
 }

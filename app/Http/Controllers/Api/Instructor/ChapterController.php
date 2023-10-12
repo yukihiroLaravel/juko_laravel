@@ -172,19 +172,19 @@ class ChapterController extends Controller
     {
         $course = Course::findOrFail($request->route('course_id'));
 
-        if (Auth::guard('instructor')->user()->id === $course->instructor_id) {
-            Chapter::where('course_id', $request->route('course_id'))
-                ->update([
-                    'status' => $request->status
-                ]);
-
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
-                'result' => 'true'
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+        Chapter::where('course_id', $request->route('course_id'))
+            ->update([
+                'status' => $request->status
             ]);
-        } 
+
         return response()->json([
-            'result' => 'false',
-            "message" => "Not authorized."
-        ], 403);
+            'result' => 'true'
+        ]);
     }
 }

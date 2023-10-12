@@ -20,7 +20,8 @@ class Instructor extends Authenticatable
         'nick_name',
         'last_name',
         'first_name',
-        'email'
+        'email',
+        'image'
     ];
 
     /**

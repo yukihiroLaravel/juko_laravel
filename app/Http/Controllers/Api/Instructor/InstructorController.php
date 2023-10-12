@@ -20,11 +20,20 @@ class InstructorController extends Controller
     {
         try{
             $instructor = Instructor::findOrFail(1);
+
+            // ディレクトリ名
+            $dir = 'images';
+            // アップロードされたファイル名を取得
+            $file_name = $request->file('image')->getClientOriginalName();
+            // 取得したファイル名で保存
+            $request->file('image')->storeAs('public/' . $dir, $file_name);
+
             $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
                 'first_name' => $request->first_name,
-                'email' => $request->email
+                'email' => $request->email,
+                'profile_image' => $request->image,
             ]);
             return response()->json([
                 'result' => true,

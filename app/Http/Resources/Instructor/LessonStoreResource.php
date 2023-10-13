@@ -17,7 +17,7 @@ class LessonStoreResource extends JsonResource
         return [
             'lesson_id' => $this->resource->id,
             'title' => $this->resource->title,
-            'order' => $this->order,
+            'order' => $this->resource->order,
         ];
     }
 }

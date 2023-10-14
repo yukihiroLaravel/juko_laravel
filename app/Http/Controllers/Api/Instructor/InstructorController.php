@@ -27,11 +27,11 @@ class InstructorController extends Controller
         try{
             $instructor = Instructor::findOrFail(1);
 
-            // 2回目以降の更新処理で必要
+            // 2回目以降の更新処理で必要？
             // if (isset($file)) {
             //     // 更新前の画像ファイルを削除
-            //     if (Storage::exists($instructor->image)) {
-            //         Storage::delete($instructor->image);
+            //     if (Storage::exists($instructor->profile_image)) {
+            //         Storage::delete($instructor->profile_image);
             //     }
 
             // 画像ファイル保存処理

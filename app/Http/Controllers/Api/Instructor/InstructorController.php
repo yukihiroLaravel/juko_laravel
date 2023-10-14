@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorEditResource;
 use App\Http\Resources\Instructor\InstructorPatchResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 
 class InstructorController extends Controller
 {
@@ -18,22 +21,31 @@ class InstructorController extends Controller
      */
     public function update(InstructorPatchRequest $request)
     {
+        
+        $file = $request->file('profile_image');
+
         try{
             $instructor = Instructor::findOrFail(1);
 
-            // ディレクトリ名
-            $dir = 'images';
-            // アップロードされたファイル名を取得
-            $file_name = $request->file('image')->getClientOriginalName();
-            // 取得したファイル名で保存
-            $request->file('image')->storeAs('public/' . $dir, $file_name);
+            // 2回目以降の更新処理で必要
+            // if (isset($file)) {
+            //     // 更新前の画像ファイルを削除
+            //     if (Storage::exists($instructor->image)) {
+            //         Storage::delete($instructor->image);
+            //     }
 
+            // 画像ファイル保存処理
+            $extension = $file->getClientOriginalExtension();
+            $filename = Str::uuid() . '.' . $extension;
+            $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
+            $imagePath = Instructor::convertImagePath($imagePath);
+            
             $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
                 'first_name' => $request->first_name,
                 'email' => $request->email,
-                'profile_image' => $request->image,
+                'profile_image' => $imagePath,
             ]);
             return response()->json([
                 'result' => true,

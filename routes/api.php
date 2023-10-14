@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });
-        Route::patch('/', 'Api\Instructor\InstructorController@update');
+        Route::post('/', 'Api\Instructor\InstructorController@update');
         Route::patch('notification/{notification_id}', 'Api\Instructor\NotificationController@update');
         Route::post('student', 'Api\Instructor\StudentController@store');
         Route::prefix('notification')->group(function () {

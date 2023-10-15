@@ -33,11 +33,11 @@ class InstructorController extends Controller
                     Storage::delete($instructor->profile_image);
                 }
 
-            // 画像ファイル保存処理
-            $extension = $file->getClientOriginalExtension();
-            $filename = Str::uuid() . '.' . $extension;
-            $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
-            $imagePath = Instructor::convertImagePath($imagePath);
+                // 画像ファイル保存処理
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
+                $imagePath = Instructor::convertImagePath($imagePath);
             }
             
             $instructor->update([

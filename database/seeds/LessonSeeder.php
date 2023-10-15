@@ -74,6 +74,26 @@ class LessonSeeder extends Seeder
                 'updated_at' => Carbon::now(),
                 'order'=> 1,
             ],
+            [
+                'chapter_id' => 4,
+                'url' => 'KH4MmQsCDux',
+                'title' => '概要',
+                'remarks' => "",
+                'status' => Lesson::STATUS_PUBLIC,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+                'order'=> 1,
+            ],
+            [
+                'chapter_id' => 5,
+                'url' => 'KH4MmQsCDuy',
+                'title' => 'SVCモデルとは',
+                'remarks' => "",
+                'status' => Lesson::STATUS_PUBLIC,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+                'order'=> 1,
+            ],
         ]);
     }
 }

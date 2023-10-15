@@ -27,18 +27,18 @@ class InstructorController extends Controller
         try{
             $instructor = Instructor::findOrFail(1);
 
-            // 2回目以降の更新処理で必要？
-            // if (isset($file)) {
-            //     // 更新前の画像ファイルを削除
-            //     if (Storage::exists($instructor->profile_image)) {
-            //         Storage::delete($instructor->profile_image);
-            //     }
+            if (isset($file)) {
+                // 更新前の画像ファイルを削除
+                if (Storage::exists($instructor->profile_image)) {
+                    Storage::delete($instructor->profile_image);
+                }
 
             // 画像ファイル保存処理
             $extension = $file->getClientOriginalExtension();
             $filename = Str::uuid() . '.' . $extension;
             $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
             $imagePath = Instructor::convertImagePath($imagePath);
+            }
             
             $instructor->update([
                 'nick_name' => $request->nick_name,

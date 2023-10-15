@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\InstructorController@update');
             });
             Route::prefix('course')->group(function () {
+                Route::post('/', 'Api\Instructor\CourseController@store');
                 Route::prefix('{course_id}')->group(function () {
                     Route::post('/', 'Api\Instructor\CourseController@store');
                     Route::delete('/', 'Api\Instructor\CourseController@delete');

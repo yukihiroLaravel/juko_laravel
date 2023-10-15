@@ -43,8 +43,20 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
             Route::prefix('course')->group(function () {
                 Route::prefix('{course_id}')->group(function () {
+                    Route::post('/', 'Api\Instructor\CourseController@store');
+                    Route::delete('/', 'Api\Instructor\CourseController@delete');
                     Route::prefix('chapter')->group(function () {
+                        Route::post('sort', 'Api\Instructor\ChapterController@sort');
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
+                        Route::prefix('{chapter_id}')->group(function () {
+                            Route::prefix('lesson')->group(function () {
+                                Route::post('sort', 'Api\Instructor\LessonController@sort');
+                                Route::prefix('{lesson_id}')->group(function () {
+                                    Route::delete('/', 'Api\Instructor\LessonController@delete');
+                                    Route::patch('/', 'Api\Instructor\LessonController@update');
+                                });
+                            });
+                        });
                     });
                 });
             });
@@ -61,6 +73,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
         Route::get('student/{student_id}', 'Api\Instructor\StudentController@show');
+
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');
         });
@@ -74,13 +87,11 @@ Route::prefix('v1')->group(function () {
         });
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\Instructor\CourseController@index');
-            Route::post('/', 'Api\Instructor\CourseController@store');
             Route::prefix('{course_id}')->group(function () {
                 Route::get('student/index', 'Api\Instructor\StudentController@index');
                 Route::get('/', 'Api\Instructor\CourseController@show');
                 Route::get('edit', 'Api\Instructor\CourseController@edit');
                 Route::post('/', 'Api\Instructor\CourseController@update');
-                Route::delete('/', 'Api\Instructor\CourseController@delete');
                 Route::prefix('notification')->group(function () {
                     Route::post('/', 'Api\Instructor\NotificationController@store');
                 });
@@ -97,11 +108,8 @@ Route::prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Instructor\ChapterController@delete');
                         Route::prefix('lesson')->group(function () {
                             Route::post('/', 'Api\Instructor\LessonController@store');
-                            Route::post('sort', 'Api\Instructor\LessonController@sort');
-                            Route::prefix('{lesson_id}')->group(function () {
-                                Route::delete('/', 'Api\Instructor\LessonController@delete');
-                                Route::patch('/', 'Api\Instructor\LessonController@update');
-                            });
+                            Route::delete('/', 'Api\Instructor\LessonController@delete');
+                            Route::patch('/', 'Api\Instructor\LessonController@update');
                         });
                     });
                 });

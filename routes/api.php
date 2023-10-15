@@ -19,18 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生側API
-    Route::middleware('student')->group(function () {
-        Route::prefix('course')->group(function () {
-            Route::get('index', 'Api\CourseController@index');
-            Route::get('/', 'Api\CourseController@show');
-            Route::get('{course_id}/progress', 'Api\CourseController@progress');
-            Route::prefix('chapter')->group(function () {
-                Route::get('/', 'Api\ChapterController@show');
-            });
-        });
-        Route::prefix('student')->group(function () {
-            Route::get('edit', 'Api\Student\StudentController@edit');
-            Route::patch('/', 'Api\Student\StudentController@update');
+    Route::prefix('course')->group(function () {
+        Route::get('index', 'Api\CourseController@index');
+        Route::get('/', 'Api\CourseController@show');
+        Route::get('{course_id}/progress', 'Api\CourseController@progress');
+        Route::prefix('chapter')->group(function () {
+            Route::get('/', 'Api\ChapterController@show');
         });
         Route::get('notification', 'Api\NotificationController@index');
     });
@@ -62,10 +56,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
         });
     });
-});
-
-Route::prefix('v1')->group(function () {
-    Route::post('student', 'Api\Student\StudentController@store');
+    Route::get('student/edit', 'Api\Student\StudentController@edit');
 });
 
 Route::prefix('v1')->group(function () {
@@ -118,4 +109,8 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
+
+    Route::prefix('student')->group(function () {
+        Route::patch('/', 'Api\Student\StudentController@update');
+    });
 });

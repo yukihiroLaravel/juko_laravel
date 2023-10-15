@@ -40,7 +40,6 @@ class StudentIndexResource extends JsonResource
                 'nick_name' => $attendance->student->nick_name,
                 'email' => $attendance->student->email,
                 'course_title' => $attendance->course->title,
-                'last_login_at' => $attendance->student->last_login_at->format('Y/m/d  H:i:s'),
                 'attendanced_at' => $attendance->created_at->format('Y/m/d'),
             ];
         });

@@ -24,6 +24,7 @@ class StudentPostResource extends JsonResource
             'birth_date' => $this->birth_date->format('Y/m/d'),
             'sex'        => $this->sex,
             'address'    => $this->address,
+            'profile_image' => $this->profile_image
         ];
     }
 }

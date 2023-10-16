@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 use App\Model\Student;
 use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
-use App\Http\Requests\Student\StudentPatchRequest; 
+use App\Http\Requests\Student\StudentPatchRequest;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Http\Requests\Student\StudentPostRequest;
@@ -29,7 +31,7 @@ class StudentController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StudentPostRequest $request)
-   {
+    {
         DB::beginTransaction();
         try {
 
@@ -58,7 +60,7 @@ class StudentController extends Controller
                     throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
                 }
             }
-            
+
             StudentAuthorization::create([
                 'student_id'  => $student->id,
                 'trial_count' => 0,
@@ -79,14 +81,14 @@ class StudentController extends Controller
             DB::rollBack();
             Log::error($e);
             return response()->json([
-              "result" => false,
+                "result" => false,
             ], 500);
 
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
-              "result" => false,
+                "result" => false,
             ], 500);
         }
     }
@@ -101,7 +103,7 @@ class StudentController extends Controller
         $student = Student::findOrFail($request->user()->id);
         return new StudentEditResource($student);
     }
-    
+
     /**
      * 生徒情報更新API
      *
@@ -110,14 +112,27 @@ class StudentController extends Controller
      */
     public function update(StudentPatchRequest $request)
     {
+        $file = $request->file('profile_image');
         try {
-            
-            $student = Student::findOrFail($request->user()->id); 
+
+            $student = Student::findOrFail($request->user()->id);
 
             $request->validate([
                 'email' => [new UniqueEmailRule($student->email)],
             ]);
 
+            $imagePath = $student->profile_image;
+            if (isset($file)) {
+                // 更新前の画像ファイルを削除
+                if (Storage::disc("public")->exists($student->profile_image)) {
+                    Storage::disc("public")->delete($student->profile_image);
+                }
+                // 画像ファイル保存処理
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/student', $file, $filename);
+                $imagePath = Student::convertImagePath($imagePath);
+            }
 
             $student->fill([
                 'nick_name' => $request->nick_name,
@@ -127,8 +142,9 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex' => $request->sex, 
-                'address' => $request->address,     
+                'sex' => $request->sex,
+                'address' => $request->address,
+                'profile_image' => $imagePath
             ])
             ->save();
 
@@ -136,8 +152,8 @@ class StudentController extends Controller
                 'result' => true,
                 'data' => new StudentPatchResource($student)
             ]);
-        } catch (Exception $e) {            
-            Log::error($e);                    
+        } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 'result' => false,
             ], 500);

@@ -26,6 +26,7 @@ class CreateStudentsTable extends Migration
             $table->date('birth_date')->nullable()->comment('誕生日');
             $table->tinyInteger('sex')->nullable()->comment('性別');
             $table->string('address', 255)->nullable()->comment('都道府県');
+            $table->text('profile_image')->comment('プロフィール画像ファイルパス');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

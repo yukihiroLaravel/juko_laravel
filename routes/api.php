@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
         Route::prefix('student')->group(function () {
             Route::get('edit', 'Api\Student\StudentController@edit');
-            Route::patch('/', 'Api\Student\StudentController@update');
+            Route::post('/', 'Api\Student\StudentController@update');
         });
         Route::get('notification', 'Api\NotificationController@index');
     });

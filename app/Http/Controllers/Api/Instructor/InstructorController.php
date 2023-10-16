@@ -29,8 +29,8 @@ class InstructorController extends Controller
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
-                if (Storage::exists($instructor->profile_image)) {
-                    Storage::delete($instructor->profile_image);
+                if (Storage::disk('public')->exists($instructor->profile_image)) {
+                    Storage::disk('public')->delete($instructor->profile_image);
                 }
 
                 // 画像ファイル保存処理

@@ -34,7 +34,7 @@ class StudentPatchRequest extends FormRequest
             'birth_date' => ['required', 'date_format:Y-m-d'],
             'sex' => ['required', 'string', new SexRule()],
             'address' => ['required', 'string'],
-            'profile_image' => ['required']
+            'profile_image' => ['required', 'mimes:jpeg,png', 'max:2048']
         ];
     }
 }

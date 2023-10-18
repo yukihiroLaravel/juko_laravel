@@ -124,8 +124,8 @@ class StudentController extends Controller
             $imagePath = $student->profile_image;
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
-                if (Storage::disc("public")->exists($student->profile_image)) {
-                    Storage::disc("public")->delete($student->profile_image);
+                if (Storage::disk("public")->exists($student->profile_image)) {
+                    Storage::disk("public")->delete($student->profile_image);
                 }
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();

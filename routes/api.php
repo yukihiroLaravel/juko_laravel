@@ -37,6 +37,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
+        Route::prefix('instructor')->group(function () {
+            Route::prefix('{instructor_id}')->group(function () {
+                Route::post('/', 'Api\Instructor\InstructorController@update');
+            });
+        });
     });
 });
 
@@ -48,7 +53,6 @@ Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
         Route::get('edit', 'Api\Instructor\InstructorController@edit');
-        Route::post('/', 'Api\Instructor\InstructorController@update');
         Route::get('student/{student_id}', 'Api\Instructor\StudentController@show');
         Route::prefix('attendance')->group(function () {
             Route::post('/', 'Api\Instructor\AttendanceController@store');

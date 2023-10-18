@@ -9,6 +9,7 @@ use App\Http\Resources\Instructor\InstructorEditResource;
 use App\Http\Resources\Instructor\InstructorPatchResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 class InstructorController extends Controller
@@ -24,8 +25,15 @@ class InstructorController extends Controller
         
         $file = $request->file('profile_image');
 
+        $instructor = Instructor::findOrFail($request->instructor_id);
+        if (Auth::guard('instructor')->user()->id !== $instructor->id) {
+            return response()->json([
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+
         try{
-            $instructor = Instructor::findOrFail(1);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除

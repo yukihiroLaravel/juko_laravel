@@ -22,6 +22,7 @@ class CreateChaptersTable extends Migration
             $table->datetime('created_at');
             $table->datetime('updated_at');
             $table->softDeletes();
+            $table->foreign('course_id')->references('id')->on('courses');
         });
     }
 

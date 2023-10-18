@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
+use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Resources\Instructor\ChapterStoreResource;
 use App\Http\Resources\Instructor\ChapterPatchResource;
 use App\Http\Resources\Instructor\ChapterShowResource;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
 {
@@ -164,5 +166,31 @@ class ChapterController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * チャプター一括更新API(公開・非公開切り替え)
+     * 
+     * @param ChapterPutStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function putStatus(ChapterPutStatusRequest $request)
+    {
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+        Chapter::where('course_id', $request->course_id)
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

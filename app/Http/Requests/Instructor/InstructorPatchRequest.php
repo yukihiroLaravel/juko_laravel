@@ -36,7 +36,7 @@ class InstructorPatchRequest extends FormRequest
             'first_name' => ['required', 'string'],
             'email' => ['required', 'email'],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
-            'profile_image' => ['mimes:jpg,png', 'max:2000'],
+            'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];
     }
 }

@@ -20,7 +20,8 @@ class Instructor extends Authenticatable
         'nick_name',
         'last_name',
         'first_name',
-        'email'
+        'email',
+        'profile_image',
     ];
 
     /**
@@ -31,5 +32,17 @@ class Instructor extends Authenticatable
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+
+    /**
+     * 画像保存パスに変換
+     *
+     * @param string $filePath
+     * @return string
+     */
+    public static function convertImagePath(string $filePath)
+    {
+        // public/を削除
+        return str_replace('public/', '', $filePath);
     }
 }

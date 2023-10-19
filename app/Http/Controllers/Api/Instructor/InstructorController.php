@@ -25,15 +25,16 @@ class InstructorController extends Controller
         
         $file = $request->file('profile_image');
 
-        $instructor = Instructor::findOrFail($request->instructor_id);
-        if (Auth::guard('instructor')->user()->id !== $instructor->id) {
-            return response()->json([
-                'result' => 'false',
-                "message" => "Not authorized."
-            ], 403);
-        }
-
         try{
+
+            $instructor = Instructor::findOrFail($request->instructor_id);
+            
+            if (Auth::guard('instructor')->user()->id !== $instructor->id) {
+                return response()->json([
+                    'result' => 'false',
+                    "message" => "Not authorized."
+                ], 403);
+            }
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除

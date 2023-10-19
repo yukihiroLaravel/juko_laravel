@@ -31,6 +31,20 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('notification', 'Api\NotificationController@index');
 });
 
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
+    Route::prefix('instructor')->group(function () {
+        Route::prefix('course')->group(function () {
+            Route::prefix('{course_id}')->group(function () {
+                Route::prefix('chapter')->group(function () {
+                    Route::prefix('{chapter_id}')->group(function () {
+                        Route::get('/', 'Api\Instructor\ChapterController@show');
+                    });
+                });
+            });
+        });
+    });
+});
+
 Route::prefix('v1')->group(function () {
     // 講師側API
     Route::prefix('instructor')->group(function () {
@@ -67,7 +81,6 @@ Route::prefix('v1')->group(function () {
                     Route::post('/', 'Api\Instructor\ChapterController@store');
                     Route::post('sort', 'Api\Instructor\ChapterController@sort');
                     Route::prefix('{chapter_id}')->group(function () {
-                        Route::get('/', 'Api\Instructor\ChapterController@show');
                         Route::patch('/', 'Api\Instructor\ChapterController@update');
                         Route::patch('status', 'Api\Instructor\ChapterController@updateStatus');
                         Route::delete('/', 'Api\Instructor\ChapterController@delete');

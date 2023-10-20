@@ -20,7 +20,6 @@ class InstructorEditResource extends JsonResource
             'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,
             'email' => $this->resource->email,
-            'profile_image' => $this->resource->profile_image,
         ];
     }
 }

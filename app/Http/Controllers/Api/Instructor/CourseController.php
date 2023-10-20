@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CourseController extends Controller
 {
@@ -54,15 +55,17 @@ class CourseController extends Controller
      * 講座登録API
      *
      * @param CourseStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(CourseStoreRequest $request)
     {
         $instructorId = $request->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = date('YmdHis') . '.' . $extension;
-        $filePath = Storage::putFileAs('course', $file, $filename);
+        $filename = Str::uuid() . '.' . $extension;
+        $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
+        $filePath = Course::convertImagePath($filePath);
+
         $course = Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
@@ -94,7 +97,7 @@ class CourseController extends Controller
      * 講師側の更新処理API
      *
      * @param CourseUpdateRequest $request
-     * @return CourseUpdateResource
+     * @return JsonResponse
      */
     public function update(CourseUpdateRequest $request)
     {
@@ -112,8 +115,9 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = date('YmdHis') . '.' . $extension;
-                $imagePath = Storage::putFileAs('course', $file, $filename);
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/course', $file, $filename);
+                $imagePath = Course::convertImagePath($imagePath);
             }
 
             $course->update([
@@ -154,23 +158,29 @@ class CourseController extends Controller
             }
 
             if (Attendance::where('course_id', $request->course_id)->exists()) {
-                return response()->json([
+                return new JsonResponse([
                     "result" => false,
                     "message" => "This course has already been taken by students."
                 ], 403);
             }
-            if (Storage::exists($course->image)) {
-                Storage::delete($course->image);
+
+            // publicディレクトリ配下の画像ファイルを削除
+            if (Storage::exists('public/' . $course->image)) {
+                Storage::delete('public/' . $course->image);
             }
+
             $course->delete();
+
             return response()->json([
                 "result" => true,
             ]);
-        } else {
+
+        } catch (RuntimeException $e) {
+            Log::error($e);
             return response()->json([
                 "result" => false,
-                "message" => "Lecturer (cannot be deleted because the creator does not match)"
-            ]);
+            ], 500);
+
         }
     }
 }

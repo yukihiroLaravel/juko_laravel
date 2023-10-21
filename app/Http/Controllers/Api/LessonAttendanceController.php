@@ -11,10 +11,7 @@ class LessonAttendanceController extends Controller
 {
     public function update(LessonAttendancePatchRequest $request)
     {
-        // ToDo 認証ユーザーを一時的にid=1とする。
-        $authId = 1;
         try {
-            //ログインユーザーとレッスン受講者idが一致するか検証
             $lessonAttendance =  LessonAttendance::with('attendance')
                 ->where('id', '=', $request->lesson_attendance_id)
                 ->first();
@@ -25,7 +22,7 @@ class LessonAttendanceController extends Controller
                     "error_message" => "Not found lesson attendance status."
                 ]);
             }
-            if ($authId !== $lessonAttendance->attendance->student_id) {
+            if ($request->user()->id !== $lessonAttendance->attendance->student_id) {
                 return response()->json([
                     "result" => false,
                     "error_code" => 403,

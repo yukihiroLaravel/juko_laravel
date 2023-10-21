@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
 {
@@ -137,7 +136,7 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);

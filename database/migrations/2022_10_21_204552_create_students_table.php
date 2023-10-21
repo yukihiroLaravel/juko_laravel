@@ -31,6 +31,7 @@ class CreateStudentsTable extends Migration
             $table->softDeletes();
             $table->dateTime('last_login_at')->nullable()->comment('最終ログイン日時');
             $table->dateTime('email_verified_at')->nullable()->comment('認証日時');
+            $table->text('profile_image')->nullable()->comment('プロフィール画像');
         });
     }
 

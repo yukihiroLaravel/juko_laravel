@@ -15,7 +15,6 @@ use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -50,7 +49,7 @@ class LessonController extends Controller
 
     public function update(LessonUpdateRequest $request)
     {
-        $user = Instructor::find(1);
+        $user = Instructor::find($request->user()->id);
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if ($lesson->chapter->course->instructor_id !== $user->id) {
@@ -91,7 +90,7 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
 
             $inputLessons = $request->input('lessons');
             foreach ($inputLessons as $inputLesson) {
@@ -146,8 +145,7 @@ class LessonController extends Controller
             $course = $lesson->chapter->course;
             $instructorId = $course->instructor_id;
 
-            //$user = Auth::user();
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
 
             if ($instructorId !== $user->id) {
                 return response()->json([

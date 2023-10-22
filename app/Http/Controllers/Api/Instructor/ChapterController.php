@@ -18,9 +18,9 @@ use App\Http\Resources\Instructor\ChapterPatchResource;
 use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
 {
@@ -58,10 +58,15 @@ class ChapterController extends Controller
      */
     public function show(ChapterShowRequest $request)
     {
-        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
         if ((int) $request->course_id !== $chapter->course->id) {
             return response()->json([
                 'message' => 'invalid course_id.',
+            ], 403);
+        }
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'message' => 'invalid instructor_id.',
             ], 403);
         }
 

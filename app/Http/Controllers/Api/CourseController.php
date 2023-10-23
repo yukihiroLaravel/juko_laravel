@@ -57,26 +57,6 @@ class CourseController extends Controller
     }
 
     /**
-     * 講座詳細取得API
-     *
-     * @param CourseShowRequest $request
-     * @return CourseShowResource
-     */
-    public function show(CourseShowRequest $request)
-    {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'course.instructor',
-            'lessonAttendances'
-        ])
-        ->findOrFail($request->attendance_id);
-
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
-        return new CourseShowResource($attendance);
-    }
-
-    /**
      * チャプター進捗状況、続きのレッスンID取得API
      *
      * @param CourseProgressRequest $request

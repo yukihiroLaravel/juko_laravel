@@ -8,6 +8,7 @@ use App\Model\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
+use App\Http\Requests\Instructor\CoursePutStatusRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseEditRequest;
@@ -22,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -182,5 +184,31 @@ class CourseController extends Controller
             ], 500);
 
         }
+    }
+
+    /**
+     * コースステータス一括更新API(公開・非公開切り替え)
+     * 
+     * @param CoursePutStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function putStatus(coursePutStatusRequest $request)
+    {
+        $course = Course::findOrFail($request->instructor_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+        Course::where('instructor_id', $request->instructor_id)
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

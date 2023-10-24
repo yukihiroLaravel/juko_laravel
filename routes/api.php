@@ -19,7 +19,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生側API
-    Route::middleware('student')->group(function () {
+        Route::middleware('student')->group(function () {
+        Route::prefix('attendance')->group(function () {
+        Route::prefix('{attendance_id}')->group(function () {    
+        Route::prefix('course')->group(function () {
+            Route::get('index', 'Api\CourseController@index');
+            Route::get('/', 'Api\CourseController@show');
+            Route::prefix('{course_id}')->group(function () {
+                Route::get('progress', 'Api\CourseController@progress');
+                Route::prefix('chapter')->group(function () {
+                Route::prefix('{chapter_id}')->group(function () {   
+                    Route::get('/', 'Api\Student\AttendanceController@showChapter');
+                });
+                });
+            });
+        });
+        });
+        });
+    });
         // 受講生
         Route::prefix('student')->group(function () {
             Route::get('edit', 'Api\Student\StudentController@edit');
@@ -113,7 +130,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::post('/', 'Api\Instructor\InstructorController@update');
         });
     });
-});
+
 
 Route::prefix('v1')->group(function () {
     Route::post('student', 'Api\Student\StudentController@store');

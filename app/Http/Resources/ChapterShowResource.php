@@ -15,7 +15,7 @@ class ChapterShowResource extends JsonResource
     }
 
     public function toArray($request)
-    {
+    {   $course = $this->resource->course;
         $chapterId = $this->chapterId;
         $chapter = $this->resource->course->chapters->filter(function($chapter) use ($chapterId) {
                 return $chapter->id === (int)$chapterId;
@@ -46,10 +46,16 @@ class ChapterShowResource extends JsonResource
         });
 
         return [
-            'chapter_id' => $chapter->id,
-            'title' => $chapter->title,
-            'lessons' => $lessons,
+            'data' => [
+                'course_id' => $course->id,
+                'title' => $course->title,
+                'image' => $course->image, 
+                'chapters' => [
+                    'chapter_id' => $chapter->id,
+                    'title' => $chapter->title,
+                    'lessons' => $lessons,
+                ],
+            ],
         ];
     }
 }
-

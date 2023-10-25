@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\ChapterStatusRule;
+use App\Rules\CourseStatusRule;
 
 class CoursePutStatusRequest extends FormRequest
 {
@@ -33,7 +33,7 @@ class CoursePutStatusRequest extends FormRequest
     {
         return [
             'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
-            'status' => ['required', 'string', new ChapterStatusRule()],
+            'status' => ['required', 'string', new CourseStatusRule()],
         ];
     }
 }

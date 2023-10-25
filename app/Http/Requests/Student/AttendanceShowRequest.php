@@ -31,7 +31,7 @@ class AttendanceShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'attendance_id' => ['required', 'integer'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
         ];
     }
 }

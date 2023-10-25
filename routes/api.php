@@ -31,10 +31,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('index', 'Api\CourseController@index');
             Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
-            // 受講生-講座-チャプター
-            Route::prefix('chapter')->group(function () {
-                Route::get('/', 'Api\ChapterController@show');
-            });
+        });    
+        
+        // 受講生-講座-チャプター 
+        Route::prefix('attendance/{attendance_id}/course/{course_id}/chapter/{chapter_id}')->group(function () {
+            Route::get('/', 'Api\Student\AttendanceController@showChapter');
         });
 
         // 受講生-お知らせ

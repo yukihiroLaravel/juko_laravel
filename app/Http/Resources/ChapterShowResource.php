@@ -46,10 +46,18 @@ class ChapterShowResource extends JsonResource
         });
 
         return [
-            'chapter_id' => $chapter->id,
-            'title' => $chapter->title,
-            'lessons' => $lessons,
+            'data' => [
+                'course_id' => $this->resource->course->id,
+                'title' => $this->resource->course->title,
+                'image' => $this->resource->course->image, 
+                'chapters' => [
+                    'chapter_id' => $chapter->id,
+                    'title' => $chapter->title,
+                    'lessons' => $lessons,
+                ],
+            ],
         ];
     }
 }
+
 

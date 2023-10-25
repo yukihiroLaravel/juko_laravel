@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChapterGetRequest;
@@ -9,7 +9,7 @@ use App\Model\Attendance;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Model\Chapter;
 
-class ChapterController extends Controller
+class AttendanceController extends Controller
 {
     /**
      * チャプター詳細情報を取得
@@ -18,7 +18,7 @@ class ChapterController extends Controller
      * @return ChapterShowResource
      * @throws HttpException
      */
-    public function show(ChapterGetRequest $request)
+    public function showChapter(ChapterGetRequest $request)
     {
         $attendance = Attendance::with([
                 'course.chapters.lessons',

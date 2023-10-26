@@ -16,21 +16,7 @@ use App\Model\Chapter;
 
 class CourseController extends Controller
 {
-    /**
-     * 公開中の講座を抽出
-     *
-     * @param \Illuminate\Support\Collection $attendances
-     * @return \Illuminate\Support\Collection
-     */
-    private function extractPublicCourse($attendances)
-    {
-        return $attendances->filter(function ($attendance) {
-            return $attendance->course->status === Course::STATUS_PUBLIC;
-        })
-        ->values();
-    }
-
-    /**
+    /** 
      * 講座詳細取得API
      *
      * @param CourseShowRequest $request

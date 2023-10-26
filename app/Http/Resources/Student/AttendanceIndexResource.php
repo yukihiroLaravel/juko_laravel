@@ -14,25 +14,23 @@ class AttendanceIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        $array = array();
-        foreach ($this->resource as $data) {
-            array_push($array, [
-                'attendance_id' => $data->id,
-                'progress' => $data->progress,
+        return $this->resource->map(function ($value){
+            return [
+                'attendance_id' => $value->id,
+                'progress' => $value->progress,
                 'course' => [
-                    'course_id' => $data->course->id,
-                    'title' => $data->course->title,
-                    'image' => $data->course->image,
+                    'course_id' => $value->course->id,
+                    'title' => $value->course->title,
+                    'image' => $value->course->image,
                     'instructor' => [
-                        'instructor_id' => $data->course->instructor->id,
-                        'nick_name' => $data->course->instructor->nick_name,
-                        'last_name' => $data->course->instructor->last_name,
-                        'first_name' => $data->course->instructor->first_name,
-                        'email' => $data->course->instructor->email,
+                        'instructor_id' => $value->course->instructor->id,
+                        'nick_name' => $value->course->instructor->nick_name,
+                        'last_name' => $value->course->instructor->last_name,
+                        'first_name' => $value->course->instructor->first_name,
+                        'email' => $value->course->instructor->email,
                     ],
-                ]
-            ]);
-        }
-        return $array;
+                ],
+            ];
+        });
     }
 }

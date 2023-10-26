@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('course')->group(function () {
                 Route::get('index', 'Api\Instructor\CourseController@index');
                 Route::post('/', 'Api\Instructor\CourseController@store');
+                Route::put('status', 'Api\Instructor\CourseController@putStatus');
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', 'Api\Instructor\CourseController@show');
                     Route::get('edit', 'Api\Instructor\CourseController@edit');

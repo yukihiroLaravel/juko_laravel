@@ -20,15 +20,19 @@ class AttendanceController extends Controller
      */
     public function index (AttendanceIndexRequest $request) {
         $studentId = Auth::id();
-        $attendances = Attendance::with('course.instructor')->where('student_id', $studentId)->whereHas('course', function (Builder $query) {
-            $query->where('status', Course::STATUS_PUBLIC);
-        })->get();
 
         if (!$request->search_word) {
+            $attendances = Attendance::with('course.instructor')
+            ->where('student_id', $studentId)
+            ->whereHas('course', function (Builder $query) {
+                $query->where('status', Course::STATUS_PUBLIC);
+            })->get();
             return new AttendanceIndexResource($attendances);
         }   
 
-        $attendances = Attendance::with('course.instructor')->where('student_id', $studentId)->whereHas('course', function (Builder $query) use($request) {
+        $attendances = Attendance::with('course.instructor')
+        ->where('student_id', $studentId)
+        ->whereHas('course', function (Builder $query) use($request) {
             $query->where('title', 'like', "%{$request->search_word}%");
             $query->where('status', Course::STATUS_PUBLIC);
         })->get();

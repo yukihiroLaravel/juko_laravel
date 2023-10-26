@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\AttendanceShowRequest;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
-use App\Model\Course;
-use App\Model\LessonAttendance;
 use App\Model\Chapter;
 
 class AttendanceController extends Controller
@@ -20,6 +18,14 @@ class AttendanceController extends Controller
      */
     public function show(AttendanceShowRequest $request)
     {
+        if ($request->attendance_id != $request->user()->id){
+            return response()->json([
+                "result" => false,
+                "error_code" => 403,
+                "error_message" => "Access forbidden."
+            ]);
+        }
+
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'course.instructor',

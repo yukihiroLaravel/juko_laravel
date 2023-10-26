@@ -187,22 +187,15 @@ class CourseController extends Controller
     }
 
     /**
-     * コースステータス一括更新API(公開・非公開切り替え)
+     * 講座ステータス一括更新API(公開・非公開切り替え)
      * 
      * @param CoursePutStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function putStatus(coursePutStatusRequest $request)
     {
-        $course = Course::findOrFail($request->instructor_id);
-
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            return response()->json([
-                'result' => 'false',
-                "message" => "Not authorized."
-            ], 403);
-        }
-        Course::where('instructor_id', $request->instructor_id)
+        $instructorId = Auth::guard('instructor')->user()->id;
+        Course::where('instructor_id', $instructorId)
             ->update([
                 'status' => $request->status
             ]);

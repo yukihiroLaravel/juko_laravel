@@ -17,13 +17,6 @@ class CoursePutStatusRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'instructor_id' => $this->route('instructor_id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,7 +25,6 @@ class CoursePutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
             'status' => ['required', 'string', new CourseStatusRule()],
         ];
     }

@@ -18,12 +18,12 @@ class AttendanceController extends Controller
      */
     public function show(AttendanceShowRequest $request)
     {
-        if ($request->attendance_id != $request->user()->id){
+        $student_id = Attendance::select('student_id')->where('id', $request->attendance_id)->first();
+        if ($student_id->student_id !== $request->user()->id){
             return response()->json([
                 "result" => false,
-                "error_code" => 403,
-                "error_message" => "Access forbidden."
-            ]);
+                "message" => "Access forbidden."
+            ], 403);
         }
 
         $attendance = Attendance::with([

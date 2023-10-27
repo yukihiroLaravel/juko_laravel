@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ChapterGetRequest;
-use App\Http\Resources\ChapterShowResource;
+use App\Http\Requests\Student\AttendanceShowChapterRequest;
+use App\Http\Resources\Student\AttendanceShowChapterResource;
 use App\Model\Attendance;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Model\Chapter;
@@ -14,11 +14,11 @@ class AttendanceController extends Controller
     /**
      * チャプター詳細情報を取得
      *
-     * @param ChapterGetRequest $request
-     * @return ChapterShowResource
+     * @param AttendanceShowChapterRequest $request
+     * @return AttendanceShowChapterResource
      * @throws HttpException
      */
-    public function showChapter(ChapterGetRequest $request)
+    public function showChapter(AttendanceShowChapterRequest $request)
     {
         $attendance = Attendance::with([
                 'course.chapters.lessons',
@@ -33,6 +33,6 @@ class AttendanceController extends Controller
 
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;
-        return new ChapterShowResource($attendance, $request->chapter_id);
+        return new AttendanceShowChapterResource($attendance, $request->chapter_id);
     }
 }

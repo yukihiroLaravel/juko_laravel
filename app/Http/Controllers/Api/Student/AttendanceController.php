@@ -18,20 +18,20 @@ class AttendanceController extends Controller
      */
     public function show(AttendanceShowRequest $request)
     {
-        $student_id = Attendance::select('student_id')->where('id', $request->attendance_id)->first();
-        if ($student_id->student_id !== $request->user()->id){
-            return response()->json([
-                "result" => false,
-                "message" => "Access forbidden."
-            ], 403);
-        }
-
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'course.instructor',
             'lessonAttendances'
         ])
         ->findOrFail($request->attendance_id);
+
+        if ($attendance->student_id !== $request->user()->id){
+            return response()->json([
+                $attendance->student_id,
+                "result" => false,
+                "message" => "Access forbidden."
+            ], 403);
+        }
 
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;

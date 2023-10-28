@@ -33,9 +33,9 @@ class AttendanceShowChapterRequest extends FormRequest
     public function rules()
     {
         return [
-            'attendance_id' => ['required', 'integer'],
-            'chapter_id' => ['required', 'integer'],
-            'course_id' => ['required', 'integer'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id'],
         ];
     }
 }

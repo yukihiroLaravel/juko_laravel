@@ -2,60 +2,46 @@
 
 namespace App\Http\Resources\Student;
 
+use App\Model\Lesson;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AttendanceShowChapterResource extends JsonResource
 {
-    private int $chapterId;
-    public function __construct($attendances, $chapterId)
-    {
-        $this->chapterId = $chapterId;
-        parent::__construct($attendances);
-    }
-
     public function toArray($request)
     {
-        $chapterId = $this->chapterId;
-        $chapter = $this->resource->course->chapters->filter(function($chapter) use ($chapterId) {
-                return $chapter->id === (int)$chapterId;
-            })
-            ->first();
-
-        if ($chapter === null) throw new HttpException(404, "Not found chapter.");
-
-        $lessons = $chapter->lessons->map(function($lesson) {
-            $lessonId = $lesson->id;
-            $lessonAttendance = $this->resource->lessonAttendances->filter(function ($lessonAttendance) use($lessonId) {
-                return $lessonAttendance->lesson_id === $lessonId;
-            })
-            ->map(function($lessonAttendance) {
-                return [
-                    'lesson_attendance_id' => $lessonAttendance->id,
-                    'status' => $lessonAttendance->status,
-                ];
-            })
-            ->first();
-            return [
-                'lesson_id' => $lesson->id,
-                'title' => $lesson->title,
-                'url' => $lesson->url,
-                'remarks' => $lesson->remarks,
-                'lessonAttendance' => $lessonAttendance
-            ];
-        });
-
+        $attendance = $this->resource['attendance'];
+        $chapter = $this->resource['chapter'];
         return [
-            'data' => [
-                'course_id' => $this->resource->course->id,
-                'title' => $this->resource->course->title,
-                'image' => $this->resource->course->image, 
-                'chapters' => [
+            'attendance_id' => $attendance->id,
+            'progress' => $attendance->progress,
+            'course' => [
+                'course_id' => $attendance->course->id,
+                'title' => $attendance->course->title,
+                'image' => $attendance->course->image,
+                'chapter' => [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
-                    'lessons' => $lessons,
+                    'lessons' => $chapter->lessons->map(function(Lesson $lesson) {
+                        $lessonAttendance = $lesson->lessonAttendances->filter(function ($lessonAttendance) use($lesson) {
+                            return $lessonAttendance->lesson_id === $lesson->id;
+                        })
+                        ->map(function($lessonAttendance) {
+                            return [
+                                'lesson_attendance_id' => $lessonAttendance->id,
+                                'status' => $lessonAttendance->status,
+                            ];
+                        })
+                        ->first();
+                        return [
+                            'lesson_id' => $lesson->id,
+                            'title' => $lesson->title,
+                            'url' => $lesson->url,
+                            'remarks' => $lesson->remarks,
+                            'lessonAttendance' => $lessonAttendance
+                        ];
+                    }),
                 ],
-            ],
+            ]
         ];
     }
 }

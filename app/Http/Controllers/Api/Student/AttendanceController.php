@@ -25,14 +25,21 @@ class AttendanceController extends Controller
                 'lessonAttendances'
             ])
             ->where('id', $request->attendance_id)
-            ->first();
+            ->firstOrFail();
 
-        if ($attendance === null) {
-            throw new HttpException(404, "Not found attendance.");
-        }
-
+        // 公開されているチャプターのみ抽出
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;
-        return new AttendanceShowChapterResource($attendance, $request->chapter_id);
+
+        // リクエストのチャプターIDと一致するチャプターのみ抽出
+        $chapter = $attendance->course->chapters->filter(function($chapter) use ($request) {
+                return $chapter->id === (int)$request->chapter_id;
+            })
+            ->first();
+
+        return new AttendanceShowChapterResource([
+            'attendance' => $attendance,
+            'chapter' => $chapter
+        ]);
     }
 }

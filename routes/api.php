@@ -21,7 +21,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生側API
     Route::middleware('student')->group(function () {
         Route::prefix('course')->group(function () {
-            Route::get('index', 'Api\CourseController@index');
             Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
             Route::prefix('chapter')->group(function () {
@@ -33,6 +32,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::patch('/', 'Api\Student\StudentController@update');
         });
         Route::get('notification', 'Api\NotificationController@index');
+        Route::get('attendance/index', 'Api\Student\AttendanceController@index');
     });
 
     Route::middleware('instructor')->group(function () {

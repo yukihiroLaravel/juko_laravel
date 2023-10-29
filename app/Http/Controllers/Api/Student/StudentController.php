@@ -68,7 +68,7 @@ class StudentController extends Controller
                 }
                 $token = Str::random(10);
                 if ($i === 5) {
-                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization token.', $student);
+                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student);
                 }
             }
 

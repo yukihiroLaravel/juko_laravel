@@ -87,9 +87,6 @@ return [
 
     ],
 
-    // Cache configuration
-    'allow_origin' => env('ALLOW_ORIGIN'),
-
     /*
     |--------------------------------------------------------------------------
     | Cache Key Prefix

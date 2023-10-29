@@ -27,7 +27,6 @@ class AttendanceController extends Controller
 
         if ($attendance->student_id !== $request->user()->id){
             return response()->json([
-                $attendance->student_id,
                 "result" => false,
                 "message" => "Access forbidden."
             ], 403);

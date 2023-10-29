@@ -13,6 +13,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Model\Chapter;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -85,7 +86,7 @@ class CourseController extends Controller
     public function progress(CourseProgressRequest $request)
     {
         // TODO 認証ユーザーを一時的にid=1とする。
-        $authId = 1;
+        $authId = Auth::id();
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances'

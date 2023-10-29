@@ -22,7 +22,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('student')->group(function () {
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\CourseController@index');
-            Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
             Route::prefix('chapter')->group(function () {
                 Route::get('/', 'Api\ChapterController@show');
@@ -33,6 +32,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::patch('/', 'Api\Student\StudentController@update');
         });
         Route::get('notification', 'Api\NotificationController@index');
+        Route::prefix('attendance')->group(function () {
+            Route::get('{attendance_id}', 'Api\Student\AttendanceController@show');
+            });
+        });
     });
 
     Route::middleware('instructor')->group(function () {
@@ -50,7 +53,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
         });
     });
-});
 
 Route::prefix('v1')->group(function () {
     Route::post('student', 'Api\Student\StudentController@store');

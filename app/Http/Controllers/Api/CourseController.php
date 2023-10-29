@@ -85,14 +85,13 @@ class CourseController extends Controller
      */
     public function progress(CourseProgressRequest $request)
     {
-        // TODO 認証ユーザーを一時的にid=1とする。
         $authId = Auth::id();
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances'
         ])
         ->where([
-            'course_id' => $request->route('course_id'),
+            'course_id' => $request->course_id,
             'student_id' => $authId
         ])
         ->firstOrFail();

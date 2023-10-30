@@ -136,7 +136,7 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);

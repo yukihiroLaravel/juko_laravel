@@ -8,6 +8,7 @@ use App\Model\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
+use App\Http\Requests\Instructor\CoursePutStatusRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseEditRequest;
@@ -22,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -32,8 +34,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
+        $instructorId = $request->user()->id;
         $courses = Course::where('instructor_id', $instructorId)->get();
 
         return new CourseIndexResource($courses);
@@ -60,8 +61,7 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
+        $instructorId = $request->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid() . '.' . $extension;
@@ -149,7 +149,7 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         try {
-            $user = Instructor::find(1);
+            $user = Instructor::find($request->user()->id);
             $course = Course::findOrFail($request->course_id);
 
             if ($user->id !== $course->instructor_id) {
@@ -163,7 +163,7 @@ class CourseController extends Controller
                 return new JsonResponse([
                     "result" => false,
                     "message" => "This course has already been taken by students."
-                ], 404);
+                ], 403);
             }
 
             // publicディレクトリ配下の画像ファイルを削除
@@ -184,5 +184,24 @@ class CourseController extends Controller
             ], 500);
 
         }
+    }
+
+    /**
+     * 講座ステータス一括更新API(公開・非公開切り替え)
+     * 
+     * @param CoursePutStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function putStatus(coursePutStatusRequest $request)
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        Course::where('instructor_id', $instructorId)
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

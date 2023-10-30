@@ -22,13 +22,12 @@ class InstructorController extends Controller
      */
     public function update(InstructorPatchRequest $request)
     {
-        
         $file = $request->file('profile_image');
 
         try{
 
             $instructor = Instructor::findOrFail($request->instructor_id);
-            
+
             if (Auth::guard('instructor')->user()->id !== $instructor->id) {
                 return response()->json([
                     'result' => 'false',
@@ -48,7 +47,7 @@ class InstructorController extends Controller
                 $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
                 $imagePath = Instructor::convertImagePath($imagePath);
             }
-            
+
             $instructor->update([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,
@@ -73,7 +72,7 @@ class InstructorController extends Controller
      * @return InstructorEditResource
      */
     public function edit()
-    {   
+    {
         // TODO 認証機能ができるまで、講師IDを固定値で設定
         $instructorId = 1;
         $instructor = Instructor::findOrFail($instructorId);

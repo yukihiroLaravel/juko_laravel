@@ -102,6 +102,13 @@ class StudentController extends Controller
             return response()->json([
               "result" => false,
             ], 500);
+
+        } catch (DuplicateAuthorizationTokenException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+            "result" => false,
+            ], 500);
         }
     }
 

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
 use Illuminate\Support\Facades\Mail;
@@ -96,18 +97,18 @@ class StudentController extends Controller
               "result" => false,
             ], 500);
 
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            return response()->json([
-              "result" => false,
-            ], 500);
-
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
             "result" => false,
+            ], 500);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+              "result" => false,
             ], 500);
         }
     }

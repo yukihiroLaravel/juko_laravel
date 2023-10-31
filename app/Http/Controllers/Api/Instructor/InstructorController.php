@@ -10,6 +10,8 @@ use App\Http\Resources\Instructor\InstructorPatchResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
 
 
 class InstructorController extends Controller
@@ -72,11 +74,9 @@ class InstructorController extends Controller
      *
      * @return InstructorEditResource
      */
-    public function edit()
+    public function edit(Request $request)
     {   
-        // TODO 認証機能ができるまで、講師IDを固定値で設定
-        $instructorId = 1;
-        $instructor = Instructor::findOrFail($instructorId);
+        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
         return new InstructorEditResource($instructor);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Course;
 
-class CourseUpdateStatusRule implements Rule
+class CourseStatusRule implements Rule
 {
     /**
      * Determine if the validation rule passes.

@@ -47,8 +47,8 @@ class StudentController extends Controller
      */
     public function show(StudentShowRequest $request)
     {
+        // TODO 講師が作成した講座に紐づく受講生のみ取得
         $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
-
         return new StudentShowResource($student);
     }
 

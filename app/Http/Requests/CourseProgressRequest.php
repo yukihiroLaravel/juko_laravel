@@ -31,7 +31,7 @@ class CourseProgressRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer']
+            'course_id' => ['required', 'integer', 'exists:courses,id']
         ];
     }
 }

@@ -173,6 +173,7 @@ class StudentController extends Controller
 
         $code = $request->code;
         $StudentAuth = StudentAuthorization::where('token', $token)->first();
+        $Student = Student::findOrFail($StudentAuth->student_id);
         $password = $request->password;
         $CurrentTime = date('Y-m-d H:i:s');
 
@@ -181,7 +182,6 @@ class StudentController extends Controller
                 // 認証成功
                 $StudentAuth->delete();
                 // 生徒情報を更新
-                $Student = Student::findOrFail($StudentAuth->student_id);
                 $Student->email_verified_at = $CurrentTime;
                 $Student->password = bcrypt($password);
                 $Student->save();
@@ -191,10 +191,10 @@ class StudentController extends Controller
             } else {
                 // 認証失敗
                 $StudentAuth->trial_count += 1;
-                if (($StudentAuth->expire_at < $CurrentTime) ||
+                if ((strtotime($StudentAuth->expire_at) < strtotime($CurrentTime)) ||
                     ($StudentAuth->trial_count >= 3)) {
                     // 認証不成立
-                    throw new DuplicateAuthorizationCodeAuthException('Failed to confirm authentication code.', $student);
+                    throw new DuplicateAuthorizationCodeAuthException('Failed to confirm authentication code.', $Student);
                 } else {
                     $StudentAuth->save();
                 }
@@ -203,7 +203,7 @@ class StudentController extends Controller
             $StudentAuth->delete();
             return response()->json([
                 'result'  => false,
-                'message' => "",
+                'message' => "User authentication failed due to expire period or retry over 3 times.",
             ], 500);
         }
     }

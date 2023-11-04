@@ -28,6 +28,7 @@ class Student extends Authenticatable
         'birth_date',
         'sex',
         'address',
+        'profile_image',
     ];
 
     /**

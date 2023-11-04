@@ -126,17 +126,17 @@ class StudentController extends Controller
                 ], 403);
             }
 
-                if (isset($file)) {
-                // 更新前の画像ファイルを削除
-                if (Storage::disk('public')->exists($student->profile_image)) {
-                    Storage::disk('public')->delete($student->profile_image);
-                }
+            if (isset($file)) {
+            // 更新前の画像ファイルを削除
+            if (Storage::disk('public')->exists($student->profile_image)) {
+                Storage::disk('public')->delete($student->profile_image);
+            }
 
-                // 画像ファイル保存処理
-                $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid() . '.' . $extension;
-                $imagePath = Storage::putFileAs('public/student', $file, $filename);
-                $imagePath = Student::convertImagePath($imagePath);
+            // 画像ファイル保存処理
+            $extension = $file->getClientOriginalExtension();
+            $filename = Str::uuid() . '.' . $extension;
+            $imagePath = Storage::putFileAs('public/student', $file, $filename);
+            $imagePath = Student::convertImagePath($imagePath);
             }
 
             $request->validate([

@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Model\Student;
 use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
-use App\Http\Requests\Student\StudentPatchRequest; 
+use App\Http\Requests\Student\StudentPatchRequest;
+use App\Http\Requests\Student\UserAuthenticationRequest;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,7 @@ use Illuminate\Support\Str;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
+use App\Exceptions\DuplicateAuthorizationCodeAuthException;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
 use Illuminate\Support\Facades\Mail;
@@ -165,4 +167,45 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    public function verifyCode(UserAuthenticationRequest $request, $token)
+    {
+
+        $code = $request->code;
+        $StudentAuth = StudentAuthorization::where('token', $token)->get();
+        $password = $request->password;
+        $CurrentTime = date('Y-m-d H:i:s');
+
+        try {
+            if ($code == $StudentAuth->code) {
+                // 認証成功
+                $StudentAuth->delete();
+                // 生徒情報を更新
+                $Student = Student::findOrFail($StudentAuth->student_id);
+                $Student->email_verified_at = $CurrentTime;
+                $Student->password = bcrypt($password);
+                $Student->save();
+                return response()->json([
+                    'result'  => true,
+                ]);
+            } else {
+                // 認証失敗
+                $StudentAuth->trial_count += 1;
+                if (($StudentAuth->expire_at < $CurrentTime) ||
+                    ($StudentAuth->trial_count >= 3)) {
+                    // 認証不成立
+                    throw new DuplicateAuthorizationCodeAuthException('Failed to confirm authentication code.', $student);
+                } else {
+                    $StudentAuth->save();
+                }
+            }
+        } catch (DuplicateAuthorizationCodeAuthException $e) {
+            Log::error($e);
+            $StudentAuth->delete();
+            return response()->json([
+                'result'  => false,
+            ], 500);
+        }
+    }
+
 }

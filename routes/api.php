@@ -118,7 +118,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::post('student', 'Api\Student\StudentController@store');
+    Route::prefix('student')->group(function () {
+        Route::post('', 'Api\Student\StudentController@store');
+        Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+    });
 });
 
 // 講師側API

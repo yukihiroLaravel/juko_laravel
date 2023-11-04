@@ -31,9 +31,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('index', 'Api\CourseController@index');
             Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
-        });    
-        
-        // 受講生-講座-チャプター 
+        });
+
+        // 受講生-講座-チャプター
         Route::prefix('attendance/{attendance_id}/course/{course_id}/chapter/{chapter_id}')->group(function () {
             Route::get('/', 'Api\Student\AttendanceController@showChapter');
         });
@@ -109,10 +109,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\StudentController@store');
             });
 
-        });
-        // 講師
-        Route::prefix('{instructor_id}')->group(function () {
-            Route::post('/', 'Api\Instructor\InstructorController@update');
+            // 講師
+            Route::prefix('{instructor_id}')->group(function () {
+                Route::post('/', 'Api\Instructor\InstructorController@update');
+            });
         });
     });
 });

@@ -172,7 +172,7 @@ class StudentController extends Controller
     {
 
         $code = $request->code;
-        $StudentAuth = StudentAuthorization::where('token', $token)->get();
+        $StudentAuth = StudentAuthorization::where('token', $token)->first();
         $password = $request->password;
         $CurrentTime = date('Y-m-d H:i:s');
 
@@ -200,10 +200,10 @@ class StudentController extends Controller
                 }
             }
         } catch (DuplicateAuthorizationCodeAuthException $e) {
-            Log::error($e);
             $StudentAuth->delete();
             return response()->json([
                 'result'  => false,
+                'message' => "",
             ], 500);
         }
     }

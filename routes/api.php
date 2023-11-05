@@ -34,9 +34,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });    
         
         // 受講生-講座-チャプター 
-        Route::prefix('attendance/{attendance_id}/course/{course_id}/chapter/{chapter_id}')->group(function () {
-            Route::get('/', 'Api\Student\AttendanceController@showChapter');
-        });
+        Route::prefix('attendance/{attendance_id}')->group(function () {
+            Route::get('progress', 'Api\Student\AttendanceController@progress');
+            Route::prefix('course/{course_id}/chapter/{chapter_id}')->group(function () {
+                Route::get('/', 'Api\Student\AttendanceController@showChapter');
+            });
+        });  
+        
 
         // 受講生-お知らせ
         Route::get('notification', 'Api\NotificationController@index');

@@ -204,7 +204,7 @@ class StudentController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => "User authentication failed due to expire period or retry over 3 times.",
-            ], 500);
+            ], 406);
         }
     }
 

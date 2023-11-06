@@ -72,9 +72,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::delete('/', 'Api\Instructor\ChapterController@delete');
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
+                                Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::post('/', 'Api\Instructor\LessonController@store');
                                     Route::patch('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
                                 });

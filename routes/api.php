@@ -95,6 +95,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
                         Route::get('status', 'Api\Instructor\AttendanceController@show');
+                        Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     });
                 });
             });

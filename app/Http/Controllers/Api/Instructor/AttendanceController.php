@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Chapter;
 use App\Model\Attendance;
+use Illuminate\Support\Facades\Auth;
 use App\Model\Lesson;
+use App\Model\Course;
+use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
@@ -86,4 +90,62 @@ class AttendanceController extends Controller
             'studentsCount' => $studentsCount,
         ]);
     }
+
+     /**
+     * 受講生ログイン率取得API
+     * 
+     * @param LoginRateRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */ 
+    public function loginRate(LoginRateRequest $request) {
+        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
+        $loginId = Auth::guard('instructor')->user()->id;
+        if ($instructorId !== $loginId) {
+            return response()->json([
+                'result' => 'false',
+                'message' => 'You could not get login rate'
+            ], 403);
+        }    
+
+        $endDate = new Carbon();
+
+        if ($request->period === Attendance::PERIOD_WEEK) {
+            $periodAgo = $endDate->subWeek(1);
+        } elseif ($request->period === Attendance::PERIOD_MONTH) {
+            $periodAgo = $endDate->subMonth(1);
+        } elseif ($request->period === Attendance::PERIOD_YEAR) {
+            $periodAgo = $endDate->subYear(1);
+        } 
+
+        $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
+        $studentsCount = $attendances->count();
+
+        // 期間内にログインした受講生数
+        $loginCount = 0;
+
+        foreach ($attendances as $attendance) {
+            $lastLoginDate = $attendance->student->last_login_at;
+            if ($lastLoginDate->gte($periodAgo)) {
+                $loginCount++;
+            } 
+        }
+
+        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        return response()->json(['login_rate' => $loginRate], 200);
+    }
+
+    /**
+     * 受講生ログイン率計算
+     * 
+     * @param int $number
+     * @param int $total
+     * @return int
+     */
+    public function calcLoginRate($number, $total) { 
+        if ($total === 0) return 0;
+            
+        $percent = ($number / $total) * 100;
+        return floor($percent);
+    }
+
 }

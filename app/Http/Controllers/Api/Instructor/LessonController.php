@@ -28,13 +28,15 @@ class LessonController extends Controller
      */
     public function store(LessonStoreRequest $request)
     {
-        $maxOrder = Lesson::where('chapter_id', $request->input('chapter_id'))->max('order');
+        $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
+
         try {
+
             $lesson = Lesson::create([
-                'chapter_id' => $request->input('chapter_id'),
-                'title' => $request->input('title'),
+                'chapter_id' => $request->chapter_id,
+                'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
-                'order' => (int)$maxOrder + 1,
+                'order' => (int) $maxOrder + 1,
             ]);
 
             return response()->json([
@@ -48,7 +50,7 @@ class LessonController extends Controller
             ], 500);
         }
     }
-    
+
     public function update(LessonUpdateRequest $request)
     {
         $user = Instructor::find($request->user()->id);

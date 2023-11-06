@@ -62,7 +62,7 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * 受講状況取得API
      *
@@ -91,21 +91,22 @@ class AttendanceController extends Controller
         ]);
     }
 
-     /**
+    /**
      * 受講生ログイン率取得API
-     * 
+     *
      * @param LoginRateRequest $request
      * @return \Illuminate\Http\JsonResponse
-     */ 
+     */
     public function loginRate(LoginRateRequest $request) {
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
         $loginId = Auth::guard('instructor')->user()->id;
+
         if ($instructorId !== $loginId) {
             return response()->json([
                 'result' => 'false',
                 'message' => 'You could not get login rate'
             ], 403);
-        }    
+        }
 
         $endDate = new Carbon();
 
@@ -115,7 +116,7 @@ class AttendanceController extends Controller
             $periodAgo = $endDate->subMonth(1);
         } elseif ($request->period === Attendance::PERIOD_YEAR) {
             $periodAgo = $endDate->subYear(1);
-        } 
+        }
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
         $studentsCount = $attendances->count();
@@ -127,7 +128,7 @@ class AttendanceController extends Controller
             $lastLoginDate = $attendance->student->last_login_at;
             if ($lastLoginDate->gte($periodAgo)) {
                 $loginCount++;
-            } 
+            }
         }
 
         $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
@@ -136,14 +137,14 @@ class AttendanceController extends Controller
 
     /**
      * 受講生ログイン率計算
-     * 
+     *
      * @param int $number
      * @param int $total
      * @return int
      */
-    public function calcLoginRate($number, $total) { 
+    public function calcLoginRate($number, $total) {
         if ($total === 0) return 0;
-            
+
         $percent = ($number / $total) * 100;
         return floor($percent);
     }

@@ -4,35 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseProgressRequest;
-use App\Http\Requests\CourseShowRequest;
-use App\Http\Resources\CourseShowResource;
 use App\Http\Resources\CourseProgressResource;
 use App\Model\Attendance;
 use App\Model\LessonAttendance;
-use App\Model\Chapter;
 
 class CourseController extends Controller
 {
-    /**
-     * 講座詳細取得API
-     *
-     * @param CourseShowRequest $request
-     * @return CourseShowResource
-     */
-    public function show(CourseShowRequest $request)
-    {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'course.instructor',
-            'lessonAttendances'
-        ])
-        ->findOrFail($request->attendance_id);
-
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
-        return new CourseShowResource($attendance);
-    }
-
     /**
      * チャプター進捗状況、続きのレッスンID取得API
      *

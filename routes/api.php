@@ -29,7 +29,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // 受講生-講座
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\CourseController@index');
-            Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
         });
 
@@ -40,6 +39,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-お知らせ
         Route::get('notification', 'Api\NotificationController@index');
+        Route::prefix('attendance')->group(function () {
+            Route::get('{attendance_id}', 'Api\Student\AttendanceController@show');
+            });
+        });
 
         // 受講生-レッスン受講
         Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');

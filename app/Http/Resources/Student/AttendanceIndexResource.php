@@ -28,6 +28,7 @@ class AttendanceIndexResource extends JsonResource
                         'last_name' => $value->course->instructor->last_name,
                         'first_name' => $value->course->instructor->first_name,
                         'email' => $value->course->instructor->email,
+                        'profile_image' => $value->course->instructor->profile_image,
                     ],
                 ],
             ];

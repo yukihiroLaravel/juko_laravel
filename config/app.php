@@ -177,6 +177,10 @@ return [
 
     ],
 
+
+    // Cache configuration
+    'allow_origin' => env('ALLOW_ORIGIN'),
+
     /*
     |--------------------------------------------------------------------------
     | Class Aliases

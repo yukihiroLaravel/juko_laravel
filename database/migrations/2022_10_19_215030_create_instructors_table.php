@@ -20,6 +20,7 @@ class CreateInstructorsTable extends Migration
             $table->string('first_name', 50)->comment('名前');
             $table->string('email', 255)->comment('メールアドレス');
             $table->string('password', 255)->comment('パスワード');
+            $table->text('profile_image')->nullable()->comment('プロフィール画像ファイルパス');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

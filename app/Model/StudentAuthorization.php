@@ -21,6 +21,7 @@ class StudentAuthorization extends Model
         'student_id',
         'trial_count',
         'code',
+        'token',
         'expire_at',
     ];
 

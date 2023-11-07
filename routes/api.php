@@ -28,7 +28,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-講座
         Route::prefix('course')->group(function () {
-            Route::get('/', 'Api\CourseController@show');
             Route::get('{course_id}/progress', 'Api\CourseController@progress');
         });
 
@@ -37,6 +36,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('index', 'Api\Student\AttendanceController@index');
             Route::prefix('{attendance_id}')->group(function () {
                 Route::prefix('course')->group(function () {
+                    Route::get('/', 'Api\Student\AttendanceController@show');
                     Route::prefix('{course_id}')->group(function () {
                         Route::prefix('chapter')->group(function () {
                             // 受講生-受講-講座-チャプター
@@ -51,6 +51,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-お知らせ
         Route::get('notification', 'Api\NotificationController@index');
+        Route::prefix('attendance')->group(function () {
+            Route::get('{attendance_id}', 'Api\Student\AttendanceController@show');
+        });
 
         // 受講生-レッスン受講
         Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
@@ -83,9 +86,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::delete('/', 'Api\Instructor\ChapterController@delete');
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
+                                Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::post('/', 'Api\Instructor\LessonController@store');
                                     Route::patch('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
                                 });
@@ -106,6 +109,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
                         Route::get('status', 'Api\Instructor\AttendanceController@show');
+                        Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                     });
                 });
             });

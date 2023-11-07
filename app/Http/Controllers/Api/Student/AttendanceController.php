@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Model\Attendance;
+use App\Model\Course;
+use App\Model\Chapter;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\Student\AttendanceIndexRequest;
 use App\Http\Resources\Student\AttendanceIndexResource;
-use App\Model\Course;
-use Illuminate\Database\Eloquent\Builder;
+use App\Http\Requests\Student\AttendanceShowRequest;
+use App\Http\Resources\Student\AttendanceShowResource;
 use App\Http\Requests\Student\AttendanceShowChapterRequest;
 use App\Http\Resources\Student\AttendanceShowChapterResource;
-use App\Model\Chapter;
 
 class AttendanceController extends Controller
 {
@@ -21,7 +23,8 @@ class AttendanceController extends Controller
      * @param AttendanceIndexRequest $request
      * @return AttendanceIndexResource
      */
-    public function index (AttendanceIndexRequest $request) {
+    public function index (AttendanceIndexRequest $request)
+    {
         $studentId = Auth::id();
 
         if (!$request->search_word) {
@@ -41,6 +44,33 @@ class AttendanceController extends Controller
         })->get();
 
         return new AttendanceIndexResource($attendances);
+    }
+
+    /**
+     * 講座詳細取得API
+     *
+     * @param AttendanceShowRequest $request
+     * @return AttendanceShowResource
+     */
+    public function show(AttendanceShowRequest $request)
+    {
+        $attendance = Attendance::with([
+            'course.chapters.lessons',
+            'course.instructor',
+            'lessonAttendances'
+        ])
+        ->findOrFail($request->attendance_id);
+
+        if ($attendance->student_id !== $request->user()->id){
+            return response()->json([
+                "result" => false,
+                "message" => "Access forbidden."
+            ], 403);
+        }
+
+        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
+        $attendance->course->chapters = $publicChapters;
+        return new AttendanceShowResource($attendance);
     }
 
     /**

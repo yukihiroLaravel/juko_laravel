@@ -126,6 +126,8 @@ class StudentController extends Controller
                 ], 403);
             }
 
+            $imagePath = $student->profile_image;
+            
             if (isset($file)) {
             // 更新前の画像ファイルを削除
             if (Storage::disk('public')->exists($student->profile_image)) {

@@ -35,6 +35,8 @@ class AttendanceShowChapterResource extends JsonResource
                         return [
                             'lesson_id' => $lesson->id,
                             'title' => $lesson->title,
+                            'completed_lessons_count' => $lesson->completed_lessons_count,
+                            'total_lessons_count' => $lesson->total_lessons_count,
                             'url' => $lesson->url,
                             'remarks' => $lesson->remarks,
                             'lessonAttendance' => $lessonAttendance

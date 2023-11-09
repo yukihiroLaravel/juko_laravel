@@ -24,6 +24,7 @@ class StudentPatchResource extends JsonResource
             'birth_date' => $this->birth_date,
             'sex' => $this->sex,
             'address' => $this->address,
+            'profile_image' => $this->profile_image,
         ];
     }
 }

@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // 受講生
         Route::prefix('student')->group(function () {
             Route::get('edit', 'Api\Student\StudentController@edit');
-            Route::patch('/', 'Api\Student\StudentController@update');
+            Route::post('update', 'Api\Student\StudentController@update');
         });
 
         // 受講生-講座

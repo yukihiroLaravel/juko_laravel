@@ -54,4 +54,15 @@ class Attendance extends Model
     {
         return $this->hasMany(LessonAttendance::class);
     }
+
+    //sortStudentsメソッドで受け取るパラメータのカラム名を定義
+    const NICK_NAME_COLUMN = 'nick_name';
+    const EMAIL_COLUMN = 'nick_name';
+    const TITLE_COLUMN = 'nick_name';
+    const CREATED_AT_COLUMN = 'nick_name';
+    const LAST_LOGIN_AT_COLUMN = 'nick_name';
+
+    //sortStudentsメソッドで受け取るパラメータとして昇順と降順を定義
+    const ORDER_ASC = 'asc';
+    const ORDER_DESC = 'desc';
 }

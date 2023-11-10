@@ -3,17 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CourseProgressRequest;
 use App\Http\Requests\CourseShowRequest;
 use App\Http\Requests\CourseIndexRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseShowResource;
-use App\Http\Resources\CourseProgressResource;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\LessonAttendance;
 use App\Model\Chapter;
-use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {

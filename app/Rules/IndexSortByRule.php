@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Attendance;
 
-class SortStudentsColumnRule implements Rule
+class IndexSortByRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -30,11 +30,11 @@ class SortStudentsColumnRule implements Rule
             in_array(
                 $value, 
                 [
-                Attendance::NICK_NAME_COLUMN,
-                Attendance::EMAIL_COLUMN,
-                Attendance::TITLE_COLUMN,
-                Attendance::CREATED_AT_COLUMN,
-                Attendance::LAST_LOGIN_AT_COLUMN,
+                Attendance::COLUMN_NICK_NAME,
+                Attendance::COLUMN_EMAIL,
+                Attendance::COLUMN_TITLE,
+                Attendance::COLUMN_CREATED_AT,
+                Attendance::COLUMN_LAST_LOGIN_AT,
                 ],
                 true
             )

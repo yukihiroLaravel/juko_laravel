@@ -15,6 +15,7 @@ use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use App\Http\Requests\Instructor\SortStudentsRequest;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class StudentController extends Controller
 {
@@ -28,10 +29,28 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
+        $sortBy = $request->input('sortBy', 'nick_name');
+        $ascOrDesc = $request->input('in:asc,desc', 'asc');
+        $loginId = Auth::guard('instructor')->user()->id;
+        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
+
+        if ($loginId !== (int)$instructorId) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized.'
+            ], 403);
+        }
 
         $attendances = Attendance::with(['student', 'course'])
-                                    ->where('course_id', $request->course_id)
-                                    ->paginate($perPage, ['*'], 'page', $page);
+            ->where('course_id', $request->course_id)
+            ->when($this->isStudentColumn($sortBy), function (Builder $query) {
+                $query->join('students', 'attendances.student_id', '=', 'students.id');
+            })
+            ->when($this->isCourseColumn($sortBy), function (Builder $query) {
+                $query->join('courses', 'attendances.course_id', '=', 'courses.id');
+            })
+            ->orderBy($sortBy, $ascOrDesc)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
 
@@ -75,39 +94,38 @@ class StudentController extends Controller
         ]);
     }
 
-    public function sortStudents(SortStudentsRequest $request)
-    {
-        $perPage = $request->input('per_page', 20);
-        $page = $request->input('page', 1);
-        $loginId = Auth::guard('instructor')->user()->id;
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
+    /**
+     * indexメソッドで受け取るカラム名がstudentsテーブル内の4つに該当するかをチェック
+     *
+     * @param string $sortBy
+     * @return boolean
+     */
+    private function isStudentColumn($sortBy) {
+        return in_array(
+            $sortBy, 
+            [
+                Attendance::COLUMN_NICK_NAME, 
+                Attendance::COLUMN_EMAIL, 
+                Attendance::COLUMN_CREATED_AT, 
+                Attendance::COLUMN_LAST_LOGIN_AT
+            ], 
+            true
+        );
+    }
 
-        if ($loginId !== (int)$instructorId) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.'
-            ], 403);
-        }
-
-        if ($request->column !== 'title') {
-            $attendances = Attendance::with(['student', 'course'])
-                                        ->where('course_id', $request->course_id)
-                                        ->join('students', 'attendances.student_id', '=', 'students.id')
-                                        ->orderBy('students.' . $request->column, $request->order)
-                                        ->paginate($perPage, ['*'], 'page', $page);
-        } else {
-            $attendances = Attendance::with(['student', 'course'])
-                    ->where('course_id', $request->course_id)
-                    ->join('courses', 'attendances.course_id', '=', 'courses.id')
-                    ->orderBy('courses.' . $request->column, $request->order)
-                    ->paginate($perPage, ['*'], 'page', $page);
-        }
-
-        $course = Course::find($request->course_id);
-
-        return new StudentIndexResource([
-            'course' => $course,
-            'attendances' => $attendances,
-        ]);
+    /**
+     * indexメソッドで受け取るカラム名が講座テーブル内のtitleに一致するかをチェック
+     *
+     * @param string $sortBy
+     * @return boolean
+     */
+    private function isCourseColumn($sortBy) {
+        return in_array(
+            $sortBy, 
+            [
+                Attendance::COLUMN_TITLE,
+            ], 
+            true
+        );
     }
 }

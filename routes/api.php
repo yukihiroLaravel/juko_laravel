@@ -84,7 +84,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-生徒
                     Route::prefix('student')->group(function () {
                         Route::get('index', 'Api\Instructor\StudentController@index');
-                        Route::get('{column}/{order}/index', 'Api\Instructor\StudentController@sortStudents');
                     });
 
                     // 講師-講座-お知らせ

@@ -56,11 +56,11 @@ class Attendance extends Model
     }
 
     //sortStudentsメソッドで受け取るパラメータのカラム名を定義
-    const NICK_NAME_COLUMN = 'nick_name';
-    const EMAIL_COLUMN = 'nick_name';
-    const TITLE_COLUMN = 'nick_name';
-    const CREATED_AT_COLUMN = 'nick_name';
-    const LAST_LOGIN_AT_COLUMN = 'nick_name';
+    const COLUMN_NICK_NAME = 'nick_name';
+    const COLUMN_EMAIL = 'email';
+    const COLUMN_TITLE = 'title';
+    const COLUMN_CREATED_AT = 'created_at';
+    const COLUMN_LAST_LOGIN_AT = 'last_login_at';
 
     //sortStudentsメソッドで受け取るパラメータとして昇順と降順を定義
     const ORDER_ASC = 'asc';

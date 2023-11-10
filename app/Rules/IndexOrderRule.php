@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Attendance;
 
-class SortStudentsOrderRule implements Rule
+class IndexOrderRule implements Rule
 {
     /**
      * Create a new rule instance.

@@ -5,7 +5,7 @@ namespace App\Exceptions;
 use App\Model\Student;
 use Exception;
 
-class DuplicateAuthorizationCodeAuthException extends Exception
+class ExpiredAuthorizationCodeException extends Exception
 {
     protected $message;
 

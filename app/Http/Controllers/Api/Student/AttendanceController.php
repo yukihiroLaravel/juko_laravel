@@ -10,6 +10,7 @@ use App\Http\Resources\Student\AttendanceShowChapterResource;
 use App\Model\Attendance;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Model\Chapter;
+use App\Model\LessonAttendance;
 
 class AttendanceController extends Controller
 {
@@ -64,9 +65,23 @@ class AttendanceController extends Controller
             })
             ->first();
 
+        //完了したレッスンの数を取得
+        $completedAttendanceCount = LessonAttendance::whereHas('lesson', function ($query) use ($chapter) {
+            $query->where('chapter_id', $chapter->id);
+            })
+            ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+            ->where('attendance_id', $request->attendance_id)
+            ->count();
+    
+
+        // 総レッスン数を取得
+        $totalLessonsCount = $chapter->lessons->count();
+
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
-            'chapter' => $chapter
+            'chapter' => $chapter,
+            'completed_lessons_count' => $completedAttendanceCount,
+            'total_lessons_count' => $totalLessonsCount,
         ]);
     
     }

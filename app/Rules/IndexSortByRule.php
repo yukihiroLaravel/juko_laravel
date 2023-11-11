@@ -30,11 +30,11 @@ class IndexSortByRule implements Rule
             in_array(
                 $value, 
                 [
-                Attendance::COLUMN_NICK_NAME,
-                Attendance::COLUMN_EMAIL,
-                Attendance::COLUMN_TITLE,
-                Attendance::COLUMN_CREATED_AT,
-                Attendance::COLUMN_LAST_LOGIN_AT,
+                Attendance::SORT_BY_NICK_NAME,
+                Attendance::SORT_BY_EMAIL,
+                Attendance::SORT_BY_TITLE,
+                Attendance::SORT_BY_CREATED_AT,
+                Attendance::SORT_BY_LAST_LOGIN_AT,
                 ],
                 true
             )

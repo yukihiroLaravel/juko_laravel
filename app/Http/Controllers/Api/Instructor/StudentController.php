@@ -13,7 +13,6 @@ use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
-use App\Http\Requests\Instructor\SortStudentsRequest;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -30,11 +29,11 @@ class StudentController extends Controller
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sortBy', 'nick_name');
-        $ascOrDesc = $request->input('in:asc,desc', 'asc');
+        $order = $request->input('order', 'asc');
         $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
-        if ($loginId !== (int)$instructorId) {
+        if ($loginId !== $instructorId) {
             return response()->json([
                 'result' => false,
                 'message' => 'Not authorized.'
@@ -49,7 +48,7 @@ class StudentController extends Controller
             ->when($this->isCourseColumn($sortBy), function (Builder $query) {
                 $query->join('courses', 'attendances.course_id', '=', 'courses.id');
             })
-            ->orderBy($sortBy, $ascOrDesc)
+            ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
@@ -104,10 +103,10 @@ class StudentController extends Controller
         return in_array(
             $sortBy, 
             [
-                Attendance::COLUMN_NICK_NAME, 
-                Attendance::COLUMN_EMAIL, 
-                Attendance::COLUMN_CREATED_AT, 
-                Attendance::COLUMN_LAST_LOGIN_AT
+                Attendance::SORT_BY_NICK_NAME, 
+                Attendance::SORT_BY_EMAIL, 
+                Attendance::SORT_BY_CREATED_AT, 
+                Attendance::SORT_BY_LAST_LOGIN_AT
             ], 
             true
         );
@@ -123,7 +122,7 @@ class StudentController extends Controller
         return in_array(
             $sortBy, 
             [
-                Attendance::COLUMN_TITLE,
+                Attendance::SORT_BY_TITLE,
             ], 
             true
         );

@@ -27,6 +27,10 @@ class Course extends Model
         'updated_at',
     ];
 
+    protected $casts = [
+        'instructor_id' => 'int'
+    ];
+
     /**
      * 講師を取得
      *

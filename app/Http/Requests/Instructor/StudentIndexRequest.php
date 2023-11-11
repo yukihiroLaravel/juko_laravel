@@ -4,7 +4,6 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\IndexSortByRule;
-use App\Rules\IndexOrderRule;
 
 class StudentIndexRequest extends FormRequest
 {
@@ -38,7 +37,7 @@ class StudentIndexRequest extends FormRequest
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'sortBy' => ['string', new IndexSortByRule],
-            'in:asc,desc' => ['string', new IndexOrderRule],
+            'order' => ['string', 'in:asc,desc'],
         ];
     }
 }

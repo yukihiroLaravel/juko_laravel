@@ -30,12 +30,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::prefix('course')->group(function () {
             Route::get('index', 'Api\CourseController@index');
             Route::get('/', 'Api\CourseController@show');
-            Route::get('{course_id}/progress', 'Api\CourseController@progress');
             // 受講生-講座-チャプター
             Route::prefix('chapter')->group(function () {
                 Route::get('/', 'Api\ChapterController@show');
             });
         });
+
+        Route::get('attendance/{attendance_id}/progress', 'Api\Student\AttendanceController@progress');
 
         // 受講生-お知らせ
         Route::get('notification', 'Api\NotificationController@index');

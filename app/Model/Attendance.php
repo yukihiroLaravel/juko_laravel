@@ -22,6 +22,10 @@ class Attendance extends Model
         'progress'
     ];
 
+    protected $casts = [
+        'student_id' => 'int'
+    ];
+
     // 受講状態初期値
     const PROGRESS_DEFAULT_VALUE = 0;
 

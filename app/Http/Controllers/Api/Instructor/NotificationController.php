@@ -27,7 +27,7 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course'])
-                                        ->where('instructor_id', 1)
+                                        ->where('instructor_id', Auth::guard('instructor')->user()->id)
                                         ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
@@ -57,7 +57,7 @@ class NotificationController extends Controller
     {
         Notification::create([
             'course_id'     => $request->course_id,
-            'instructor_id' => 1,
+            'instructor_id' => Auth::guard('instructor')->user()->id,
             'title'         => $request->title,
             'type'          => $request->type,
             'start_date'    => $request->start_date,

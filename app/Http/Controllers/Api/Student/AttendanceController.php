@@ -65,24 +65,16 @@ class AttendanceController extends Controller
             })
             ->first();
 
-        //完了したレッスンの数を取得
-        $completedAttendanceCount = LessonAttendance::whereHas('lesson', function ($query) use ($chapter) {
-            $query->where('chapter_id', $chapter->id);
-            })
-            ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
-            ->where('attendance_id', $request->attendance_id)
-            ->count();
-    
-
-        // 総レッスン数を取得
-        $totalLessonsCount = $chapter->lessons->count();
-
+        // 各レッスンに対して完了済みのレッスン数を計算
+        $lessons = $chapter->lessons->map(function($lesson) use ($attendance) {
+            $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
+            $lesson->completed_lessons_count = $completedLessonsCount;
+            return $lesson;
+        });
+            
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
             'chapter' => $chapter,
-            'completed_lessons_count' => $completedAttendanceCount,
-            'total_lessons_count' => $totalLessonsCount,
         ]);
-    
     }
 }

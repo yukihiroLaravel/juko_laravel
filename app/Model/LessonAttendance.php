@@ -46,7 +46,7 @@ class LessonAttendance extends Model
 
     /**
      * レッスンの完了した総数を取得する
-     *@param int $lessonid
+     * @param int $lessonid
      * @param int $attendanceid
      * @return int
      */

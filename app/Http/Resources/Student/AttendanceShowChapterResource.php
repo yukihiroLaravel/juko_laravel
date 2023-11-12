@@ -9,7 +9,7 @@ use App\Model\LessonAttendance;
 class AttendanceShowChapterResource extends JsonResource
 {
     public function toArray($request)
-{
+    {
     $attendance = $this->resource['attendance'];
     $chapter = $this->resource['chapter'];
     return [
@@ -22,8 +22,7 @@ class AttendanceShowChapterResource extends JsonResource
             'chapter' => [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
-                'lessons' => $chapter->lessons->map(function(Lesson $lesson) use ($attendance) {
-                    $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
+                'lessons' => $chapter->lessons->map(function(Lesson $lesson) {
                     $lessonAttendance = $lesson->lessonAttendances->filter(function ($lessonAttendance) use($lesson) {
                         return $lessonAttendance->lesson_id === $lesson->id;
                     })
@@ -37,7 +36,7 @@ class AttendanceShowChapterResource extends JsonResource
                     return [
                         'lesson_id' => $lesson->id,
                         'title' => $lesson->title,
-                        'completed_lessons_count' => $completedLessonsCount, 
+                        'completed_lessons_count' => $lesson->completed_lessons_count,  
                         'total_lessons_count' => $lesson->total_lessons_count,
                         'url' => $lesson->url,
                         'remarks' => $lesson->remarks,
@@ -47,5 +46,5 @@ class AttendanceShowChapterResource extends JsonResource
             ],
         ],
     ];
-}
+    }
 }

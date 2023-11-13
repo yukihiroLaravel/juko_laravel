@@ -28,6 +28,7 @@ class Student extends Authenticatable
         'birth_date',
         'sex',
         'address',
+        'profile_image',
     ];
 
     /**
@@ -103,5 +104,17 @@ class Student extends Authenticatable
     public function getFullNameAttribute()
     {
         return $this->last_name . ' ' . $this->first_name;
+    }
+
+    /**
+     * 画像保存パスに変換
+     *
+     * @param string $filePath
+     * @return string
+     */
+    public static function convertImagePath(string $filePath)
+    {
+        // public/を削除
+        return str_replace('public/', '', $filePath);
     }
 }

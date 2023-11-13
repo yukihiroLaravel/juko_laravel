@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseIndexRequest extends FormRequest
+class AttendanceIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class CourseIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'text' => ['string']
+            'search_word' => 'string',
         ];
     }
 }

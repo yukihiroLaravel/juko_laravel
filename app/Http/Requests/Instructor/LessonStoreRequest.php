@@ -20,6 +20,7 @@ class LessonStoreRequest extends FormRequest
     {
         $this->merge([
             'chapter_id' => $this->route('chapter_id'),
+            'course_id' => $this->route('course_id'),
         ]);
     }
 
@@ -31,8 +32,9 @@ class LessonStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required','integer'],
-            'title' => ['required','string'],
+            'chapter_id' => ['required','integer', 'exists:chapters,id'],
+            'course_id' => ['required','integer', 'exists:courses,id'],
+            'title' => ['required','string', 'max:50'],
         ];
     }
 }

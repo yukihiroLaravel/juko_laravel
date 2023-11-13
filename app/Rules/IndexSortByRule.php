@@ -32,7 +32,6 @@ class IndexSortByRule implements Rule
                 [
                 Attendance::SORT_BY_NICK_NAME,
                 Attendance::SORT_BY_EMAIL,
-                Attendance::SORT_BY_TITLE,
                 Attendance::SORT_BY_CREATED_AT,
                 Attendance::SORT_BY_LAST_LOGIN_AT,
                 ],
@@ -51,6 +50,6 @@ class IndexSortByRule implements Rule
      */
     public function message()
     {
-        return 'Invalid Colunm Name.';
+        return 'Invalid Sort By Name.';
     }
 }

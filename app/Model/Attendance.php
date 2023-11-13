@@ -55,10 +55,9 @@ class Attendance extends Model
         return $this->hasMany(LessonAttendance::class);
     }
 
-    //indexメソッドで受講生の一覧を並び替える際にクエリで受け取る値を定義
+    //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
     const SORT_BY_EMAIL = 'email';
-    const SORT_BY_TITLE = 'title';
     const SORT_BY_CREATED_AT = 'created_at';
     const SORT_BY_LAST_LOGIN_AT = 'last_login_at';
 

@@ -40,14 +40,9 @@ class StudentController extends Controller
             ], 403);
         }
 
-        $attendances = Attendance::with(['student', 'course'])
+        $attendances = Attendance::with(['student'])
             ->where('course_id', $request->course_id)
-            ->when($this->isStudentColumn($sortBy), function (Builder $query) {
-                $query->join('students', 'attendances.student_id', '=', 'students.id');
-            })
-            ->when($this->isCourseColumn($sortBy), function (Builder $query) {
-                $query->join('courses', 'attendances.course_id', '=', 'courses.id');
-            })
+            ->join('students', 'attendances.student_id', '=', 'students.id')
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -91,40 +86,5 @@ class StudentController extends Controller
             'result' => true,
             'data' => new StudentStoreResource($student)
         ]);
-    }
-
-    /**
-     * indexメソッドで受け取るカラム名がstudentsテーブル内の4つに該当するかをチェック
-     *
-     * @param string $sortBy
-     * @return boolean
-     */
-    private function isStudentColumn($sortBy) {
-        return in_array(
-            $sortBy, 
-            [
-                Attendance::SORT_BY_NICK_NAME, 
-                Attendance::SORT_BY_EMAIL, 
-                Attendance::SORT_BY_CREATED_AT, 
-                Attendance::SORT_BY_LAST_LOGIN_AT
-            ], 
-            true
-        );
-    }
-
-    /**
-     * indexメソッドで受け取るカラム名が講座テーブル内のtitleに一致するかをチェック
-     *
-     * @param string $sortBy
-     * @return boolean
-     */
-    private function isCourseColumn($sortBy) {
-        return in_array(
-            $sortBy, 
-            [
-                Attendance::SORT_BY_TITLE,
-            ], 
-            true
-        );
     }
 }

@@ -41,7 +41,8 @@ class AttendanceController extends Controller
         return new AttendanceShowResource($attendance);
     }
 
-    /** チャプター詳細情報を取得
+    /**
+     * チャプター詳細情報を取得
      *
      * @param AttendanceShowChapterRequest $request
      * @return AttendanceShowChapterResource
@@ -62,9 +63,16 @@ class AttendanceController extends Controller
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
         $chapter = $attendance->course->chapters->filter(function($chapter) use ($request) {
-                return $chapter->id === (int)$request->chapter_id;
+                return $chapter->id === (int) $request->chapter_id;
             })
             ->first();
+
+        // 各レッスンに対して完了済みのレッスン数を計算
+        $chapter->lessons->map(function($lesson) use ($attendance) {
+            $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
+            $lesson->completed_lessons_count = $completedLessonsCount;
+            return $lesson;
+        });
 
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,

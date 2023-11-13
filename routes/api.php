@@ -41,12 +41,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::get('notification', 'Api\NotificationController@index');
         Route::prefix('attendance')->group(function () {
             Route::get('{attendance_id}', 'Api\Student\AttendanceController@show');
-            });
         });
-
-        // 受講生-レッスン受講
-        Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
     });
+
+    // 受講生-レッスン受講
+    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
     // 講師側API
     Route::middleware('instructor')->group(function () {
@@ -119,19 +118,21 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
         });
     });
+});
 
 Route::prefix('v1')->group(function () {
     Route::post('student', 'Api\Student\StudentController@store');
-});
 
-// 講師側API
-Route::prefix('instructor')->group(function () {
-    Route::get('edit', 'Api\Instructor\InstructorController@edit');
-    Route::prefix('notification')->group(function () {
-        Route::get('index', 'Api\Instructor\NotificationController@index');
-        Route::prefix('{notification_id}')->group(function () {
-            Route::get('/', 'Api\Instructor\NotificationController@show');
-            Route::patch('/', 'Api\Instructor\NotificationController@update');
+    // 講師側API
+    Route::prefix('instructor')->group(function () {
+        Route::get('edit', 'Api\Instructor\InstructorController@edit');
+        Route::prefix('notification')->group(function () {
+            Route::get('index', 'Api\Instructor\NotificationController@index');
+            Route::prefix('{notification_id}')->group(function () {
+                Route::get('/', 'Api\Instructor\NotificationController@show');
+                Route::patch('/', 'Api\Instructor\NotificationController@update');
+            });
         });
     });
 });
+

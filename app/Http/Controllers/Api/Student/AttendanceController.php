@@ -40,7 +40,7 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
         return new AttendanceShowResource($attendance);
     }
-    
+
     /** チャプター詳細情報を取得
      *
      * @param AttendanceShowChapterRequest $request
@@ -55,6 +55,7 @@ class AttendanceController extends Controller
             ])
             ->where('id', $request->attendance_id)
             ->firstOrFail();
+
         // 公開されているチャプターのみ抽出
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;
@@ -71,7 +72,7 @@ class AttendanceController extends Controller
             $lesson->completed_lessons_count = $completedLessonsCount;
             return $lesson;
         });
-            
+
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
             'chapter' => $chapter,

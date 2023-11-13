@@ -66,13 +66,6 @@ class AttendanceController extends Controller
             })
             ->first();
 
-        // 各レッスンに対して完了済みのレッスン数を計算
-        $lessons = $chapter->lessons->map(function($lesson) use ($attendance) {
-            $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
-            $lesson->completed_lessons_count = $completedLessonsCount;
-            return $lesson;
-        });
-
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
             'chapter' => $chapter,

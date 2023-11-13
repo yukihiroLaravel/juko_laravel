@@ -7,18 +7,22 @@ use Illuminate\Http\Request;
 use App\Model\Student;
 use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
-use App\Http\Requests\Student\StudentPatchRequest; 
+use App\Http\Requests\Student\StudentPatchRequest;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AuthenticationConfirmationMail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
@@ -58,17 +62,30 @@ class StudentController extends Controller
                     throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
                 }
             }
-            
+
+            //トークンの生成
+            $token = Str::random(10);
+            for ($i = 1; $i <= 5; $i++) {
+                if (!StudentAuthorization::where('token', $token)->exists()) {
+                    break;
+                }
+                $token = Str::random(10);
+                if ($i === 5) {
+                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student);
+                }
+            }
+
             StudentAuthorization::create([
                 'student_id'  => $student->id,
                 'trial_count' => 0,
                 'code'        => $code,
+                'token'       => $token,
                 'expire_at'   => Carbon::now()->addMinutes(60),
             ]);
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($student, $code));
+            Mail::send(new AuthenticationConfirmationMail($student, $code, $token));
 
             return response()->json([
                 'result'  => true,
@@ -80,6 +97,13 @@ class StudentController extends Controller
             Log::error($e);
             return response()->json([
               "result" => false,
+            ], 500);
+
+        } catch (DuplicateAuthorizationTokenException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+            "result" => false,
             ], 500);
 
         } catch (Exception $e) {
@@ -101,7 +125,7 @@ class StudentController extends Controller
         $student = Student::findOrFail($request->user()->id);
         return new StudentEditResource($student);
     }
-    
+
     /**
      * 生徒情報更新API
      *
@@ -110,9 +134,34 @@ class StudentController extends Controller
      */
     public function update(StudentPatchRequest $request)
     {
+
+        $file = $request->file('profile_image');
+
         try {
-            
-            $student = Student::findOrFail($request->user()->id); 
+
+            $student = Student::findOrFail($request->user()->id);
+
+            if ($request->user()->id !== $student->id) {
+                return response()->json([
+                    'result' => 'false',
+                    "message" => "Not authorized."
+                ], 403);
+            }
+
+            $imagePath = $student->profile_image;
+
+            if (isset($file)) {
+                // 更新前の画像ファイルを削除
+                if (Storage::disk('public')->exists($student->profile_image)) {
+                    Storage::disk('public')->delete($student->profile_image);
+                }
+
+                // 画像ファイル保存処理
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/student', $file, $filename);
+                $imagePath = Student::convertImagePath($imagePath);
+            }
 
             $request->validate([
                 'email' => [new UniqueEmailRule($student->email)],
@@ -127,8 +176,9 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex' => $request->sex, 
-                'address' => $request->address,     
+                'sex' => $request->sex,
+                'address' => $request->address,
+                'profile_image' => $imagePath,
             ])
             ->save();
 
@@ -136,8 +186,8 @@ class StudentController extends Controller
                 'result' => true,
                 'data' => new StudentPatchResource($student)
             ]);
-        } catch (Exception $e) {            
-            Log::error($e);                    
+        } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 'result' => false,
             ], 500);

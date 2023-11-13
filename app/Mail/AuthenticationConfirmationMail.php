@@ -20,11 +20,15 @@ class AuthenticationConfirmationMail extends Mailable
      *
      * @return void
      */
-    public function __construct(Student $student, string $code)
+    public function __construct(
+        Student $student,
+        string $code,
+        string $token)
     {
         $this->email     = $student->email;
         $this->fullName  = $student->fullName;
         $this->code      = $code;
+        $this->token     = $token;
     }
 
     /**
@@ -37,6 +41,10 @@ class AuthenticationConfirmationMail extends Mailable
         return $this->to($this->email)
         ->subject('認証コードのお知らせです')
         ->view('AuthenticationConfirmationMail')
-        ->with(['fullName' => $this->fullName, 'code' => $this->code,]);
+        ->with([
+            'fullName' => $this->fullName,
+            'code' => $this->code,
+            'token' => $this->token,
+        ]);
     }
 }

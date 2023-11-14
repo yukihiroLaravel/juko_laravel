@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseProgressRequest extends FormRequest
+class AttendanceCourseProgressRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,10 +16,9 @@ class CourseProgressRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
+    protected function prepareForValidation(){
         $this->merge([
-            'course_id' => $this->route('course_id')
+            'attendance_id' => $this->route('attendance_id')
         ]);
     }
 
@@ -31,7 +30,7 @@ class CourseProgressRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer']
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id']
         ];
     }
 }

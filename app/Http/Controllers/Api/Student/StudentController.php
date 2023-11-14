@@ -26,6 +26,8 @@ use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AuthenticationConfirmationMail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
@@ -137,9 +139,34 @@ class StudentController extends Controller
      */
     public function update(StudentPatchRequest $request)
     {
+
+        $file = $request->file('profile_image');
+
         try {
 
-            $student = Student::findOrFail($request->user()->id); 
+            $student = Student::findOrFail($request->user()->id);
+
+            if ($request->user()->id !== $student->id) {
+                return response()->json([
+                    'result' => 'false',
+                    "message" => "Not authorized."
+                ], 403);
+            }
+
+            $imagePath = $student->profile_image;
+
+            if (isset($file)) {
+                // 更新前の画像ファイルを削除
+                if (Storage::disk('public')->exists($student->profile_image)) {
+                    Storage::disk('public')->delete($student->profile_image);
+                }
+
+                // 画像ファイル保存処理
+                $extension = $file->getClientOriginalExtension();
+                $filename = Str::uuid() . '.' . $extension;
+                $imagePath = Storage::putFileAs('public/student', $file, $filename);
+                $imagePath = Student::convertImagePath($imagePath);
+            }
 
             $request->validate([
                 'email' => [new UniqueEmailRule($student->email)],
@@ -156,6 +183,7 @@ class StudentController extends Controller
                 'birth_date' => $request->birth_date,
                 'sex' => $request->sex,
                 'address' => $request->address,
+                'profile_image' => $imagePath,
             ])
             ->save();
 

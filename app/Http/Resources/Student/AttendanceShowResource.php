@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Student;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseShowResource extends JsonResource
+class AttendanceShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,11 +15,19 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'attendance_id' => $this->resource->id,
+            'progress' => $this->resource->progress,
+            'course' => $this->course(),
+        ];
+    }
+
+    private function course()
+    {
+        return [
             'course_id' => $this->resource->course->id,
             'title' => $this->resource->course->title,
             'image' => $this->resource->course->image,
             'instructor' => $this->instructor(),
-            'attendance' => $this->attendance(),
             'chapters' => $this->chapters(),
         ];
     }
@@ -32,14 +40,6 @@ class CourseShowResource extends JsonResource
             'last_name' => $this->resource->course->instructor->last_name,
             'first_name' => $this->resource->course->instructor->first_name,
             'email' => $this->resource->course->instructor->email,
-        ];
-    }
-
-    private function attendance()
-    {
-        return [
-            'attendance_id' => $this->resource->id,
-            'progress' => $this->resource->progress,
         ];
     }
 

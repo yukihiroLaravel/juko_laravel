@@ -22,6 +22,10 @@ class Attendance extends Model
         'progress'
     ];
 
+    protected $casts = [
+        'student_id' => 'int'
+    ];
+
     // 受講状態初期値
     const PROGRESS_DEFAULT_VALUE = 0;
 
@@ -54,4 +58,9 @@ class Attendance extends Model
     {
         return $this->hasMany(LessonAttendance::class);
     }
+
+    //$periodのバリデーションに利用する定数
+    const PERIOD_WEEK = 'week';
+    const PERIOD_MONTH = 'month';
+    const PERIOD_YEAR = 'year';
 }

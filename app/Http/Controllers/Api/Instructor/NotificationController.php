@@ -41,7 +41,15 @@ class NotificationController extends Controller
      */
     public function show(NotificationShowRequest $request)
     {
+        $loginId = Auth::guard('instructor')->user()->id;
         $notification = Notification::findOrFail($request->notification_id);
+
+        if ($loginId !== $notification->instructor_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized',
+            ], 403);
+        }
 
         return new NotificationShowResource($notification);
     }
@@ -76,7 +84,16 @@ class NotificationController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(NotificationUpdateRequest $request) {
+        $loginId = Auth::guard('instructor')->user()->id;
         $notification = Notification::findOrFail($request->notification_id);
+
+        if ($loginId !== $notification->instructor_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized',
+            ], 403);
+        }
+
         $notification->fill([
             'type'  => $request->type,
             'start_date' => $request->start_date,

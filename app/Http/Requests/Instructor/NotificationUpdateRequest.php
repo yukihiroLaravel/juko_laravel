@@ -31,7 +31,7 @@ class NotificationUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => ['required', 'integer'],
+            'notification_id' => ['required', 'integer', 'exists:notifications,id'],
             'type'            => ['required', new NotificationUpdateStatusRule()],
             'start_date'      => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date'        => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],

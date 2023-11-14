@@ -3,26 +3,25 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Student;
 use App\Model\StudentAuthorization;
 use App\Http\Resources\StudentEditResource;
+use App\Http\Requests\Student\StudentPostRequest;
+use App\Http\Resources\Student\StudentPostResource;
 use App\Http\Requests\Student\StudentPatchRequest;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Exception;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Http\Requests\Student\StudentPostRequest;
-use App\Http\Resources\Student\StudentPostResource;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\AuthenticationConfirmationMail;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Exception;
 
 class StudentController extends Controller
 {

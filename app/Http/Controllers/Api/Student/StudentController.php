@@ -27,7 +27,6 @@ use App\Http\Resources\Student\StudentPostResource;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AuthenticationConfirmationMail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {

@@ -40,7 +40,7 @@ class StudentController extends Controller
             ], 403);
         }
 
-        $attendances = Attendance::with(['student'])
+        $attendances = Attendance::with(['student', 'course'])
             ->where('course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->orderBy($sortBy, $order)

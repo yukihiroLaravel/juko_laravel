@@ -112,22 +112,23 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 続きのレッスンIDを取得する
+     * 続きのレッスンIDと、それを含むチャプターのIDを取得する
      *
      * @param Attendance $attendance
-     * @return int|null
+     * @return array $continueLesson
      */
     private function getYoungestUnCompletedLessonId($attendance)
     {
         // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
         $youngestUnCompletedLessonId = null;
-        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLessonId) {
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLessonId) {
+        $youngestUnCompletedChapterId = null;
+        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLessonId, &$youngestUnCompletedChapterId) {
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLessonId, $chapter, &$youngestUnCompletedChapterId) {
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
                     if ($youngestUnCompletedLessonId === null) {
                         $youngestUnCompletedLessonId = $lesson->id;
+                        $youngestUnCompletedChapterId = $chapter->id;
                         return;
                     }
                     if ($youngestUnCompletedLessonId > $lesson->id) {
@@ -136,7 +137,9 @@ class AttendanceController extends Controller
                 }
             });
         });
-        return $youngestUnCompletedLessonId;
+        return $continueLesson = [
+            'chapter_id' => $youngestUnCompletedChapterId,
+            'lesson_id' => $youngestUnCompletedLessonId,
+        ];
     }
 }
-

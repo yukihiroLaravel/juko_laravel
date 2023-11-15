@@ -26,11 +26,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::post('update', 'Api\Student\StudentController@update');
         });
 
-        // 受講生-講座
-        Route::prefix('course')->group(function () {
-            Route::get('{course_id}/progress', 'Api\CourseController@progress');
-        });
-
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
             Route::get('index', 'Api\Student\AttendanceController@index');
@@ -48,6 +43,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
             });
         });
+
+        Route::get('attendance/{attendance_id}/progress', 'Api\Student\AttendanceController@progress');
 
         // 受講生-お知らせ
         Route::get('notification', 'Api\NotificationController@index');
@@ -134,18 +131,22 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::post('student', 'Api\Student\StudentController@store');
+    Route::prefix('student')->group(function () {
+        Route::post('/', 'Api\Student\StudentController@store');
+        Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+    });
+});
 
-    // 講師側API
-    Route::prefix('instructor')->group(function () {
-        Route::get('edit', 'Api\Instructor\InstructorController@edit');
-        Route::prefix('notification')->group(function () {
-            Route::get('index', 'Api\Instructor\NotificationController@index');
-            Route::prefix('{notification_id}')->group(function () {
-                Route::get('/', 'Api\Instructor\NotificationController@show');
-                Route::patch('/', 'Api\Instructor\NotificationController@update');
-            });
+// 講師側API
+Route::prefix('instructor')->group(function () {
+    Route::get('edit', 'Api\Instructor\InstructorController@edit');
+    Route::prefix('notification')->group(function () {
+        Route::get('index', 'Api\Instructor\NotificationController@index');
+        Route::prefix('{notification_id}')->group(function () {
+            Route::get('/', 'Api\Instructor\NotificationController@show');
+            Route::patch('/', 'Api\Instructor\NotificationController@update');
         });
     });
 });
+
 

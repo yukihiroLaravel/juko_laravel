@@ -51,10 +51,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::prefix('attendance')->group(function () {
             Route::get('{attendance_id}', 'Api\Student\AttendanceController@show');
         });
-
-        // 受講生-レッスン受講
-        Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
     });
+
+    // 受講生-レッスン受講
+    Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
     // 講師側API
     Route::middleware('instructor')->group(function () {
@@ -148,3 +148,5 @@ Route::prefix('instructor')->group(function () {
         });
     });
 });
+
+

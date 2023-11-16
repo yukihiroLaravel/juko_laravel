@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Model\Attendance;
-use App\Model\LessonAttendance;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;

@@ -53,8 +53,8 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // 講座に紐づく受講生を取得
-        $student = Student::with(['attendances'])
-                                ->findOrFail($request->student_id);
+        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
+                            ->findOrFail($request->student_id);
 
         return new StudentShowResource($student);
     }

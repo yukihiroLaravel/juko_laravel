@@ -13,6 +13,7 @@ use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -47,8 +48,14 @@ class StudentController extends Controller
      */
     public function show(StudentShowRequest $request)
     {
-        // TODO 講師が作成した講座に紐づく受講生のみ取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
+        // 講師が作成した講座のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
+
+        // 講座に紐づく受講生を取得
+        $student = Student::with(['attendances'])
+                                ->findOrFail($request->student_id);
+
         return new StudentShowResource($student);
     }
 

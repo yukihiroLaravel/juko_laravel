@@ -20,7 +20,8 @@ class InstructorSeeder extends Seeder
                 'first_name' => '太郎',
                 'email' => 'test_instructor@example.com',
                 'password' => Hash::make('password'),
-                'profile_image' => 'instructor/default.png'
+                'profile_image' => 'instructor/default.png',
+                'type' => 'manager'
             ]
         );
 
@@ -30,7 +31,8 @@ class InstructorSeeder extends Seeder
                 'last_name' => '山田2',
                 'first_name' => '太郎2',
                 'email' => 'test_instructor2@example.com',
-                'password' => Hash::make('password')
+                'password' => Hash::make('password'),
+                'type' => 'instructor'
             ]
         );
     }

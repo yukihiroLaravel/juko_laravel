@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Attendance;
 use App\Http\Requests\Student\AttendanceCourseProgressRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
@@ -39,7 +38,7 @@ class AttendanceController extends Controller
             'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
             'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'youngestUnCompletedLessonId' => $this->getYoungestUnCompletedLessonId($attendance)
+            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance)
         ];
 
         return new AttendanceCourseProgressResource([
@@ -112,31 +111,39 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 続きのレッスンIDを取得する
+     * 続きのレッスンIDと、それを含むチャプターのIDを取得する
      *
      * @param Attendance $attendance
-     * @return int|null
+     * @return array | null
      */
-    private function getYoungestUnCompletedLessonId($attendance)
+    private function getYoungestUnCompletedLesson($attendance)
     {
         // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
-        $youngestUnCompletedLessonId = null;
-        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLessonId) {
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLessonId) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
+        $youngestUnCompletedLesson = [
+            'chapter_id' => null,
+            'lesson_id' => null,
+        ];
+        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLesson) {
+            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
+                return;
+            }
 
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
+                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    if ($youngestUnCompletedLessonId === null) {
-                        $youngestUnCompletedLessonId = $lesson->id;
+                    if ($youngestUnCompletedLesson['lesson_id'] === null) {
+                        $youngestUnCompletedLesson = [
+                            'lesson_id' => $lesson->id,
+                            'chapter_id' => $chapter->id,
+                        ];
                         return;
-                    }
-                    if ($youngestUnCompletedLessonId > $lesson->id) {
-                        $youngestUnCompletedLessonId = $lesson->id;
                     }
                 }
             });
         });
-        return $youngestUnCompletedLessonId;
+        if ($youngestUnCompletedLesson['lesson_id'] === null) {
+            return null;
+        }
+        return $youngestUnCompletedLesson;
     }
 }
-

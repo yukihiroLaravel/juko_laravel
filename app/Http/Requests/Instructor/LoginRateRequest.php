@@ -2,19 +2,11 @@
 
 namespace App\Http\Requests\Instructor;
 
+use App\Rules\AttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IndexSortByRule;
 
-class StudentIndexRequest extends FormRequest
+class LoginRateRequest extends FormRequest
 {
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -34,10 +26,15 @@ class StudentIndexRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id'],
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new IndexSortByRule],
-            'order' => ['string', 'in:asc,desc'],
+            'period' => ['required', 'string', new AttendancePeriodRule],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'period' => $this->route('period'),
+        ]);
     }
 }

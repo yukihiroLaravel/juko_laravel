@@ -146,7 +146,6 @@ Route::prefix('v1')->group(function () {
 // 講師側API
 Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
-        Route::get('edit', 'Api\Instructor\InstructorController@edit');
         Route::prefix('notification')->group(function () {
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');

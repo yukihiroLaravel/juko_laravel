@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Student;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseProgressResource extends JsonResource
+class AttendanceCourseProgressResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,9 +18,14 @@ class CourseProgressResource extends JsonResource
         $progressData = $this->resource['progressData'];
 
         return [
-            'course' =>[
-                'course_id' => $attendance->course_id,
+            'attendance' => [
+                'attendance_id' => $attendance->id,
                 'progress' => $attendance->progress,
+                'course' => [
+                    'course_id' => $attendance->course->id,
+                    'title' => $attendance->course->title,
+                    'image' => $attendance->course->image,
+                ]
             ],
             "number_of_completed_chapters" => $progressData['completedChaptersCount'],
             "number_of_total_chapters" => $progressData['totalChaptersCount'],

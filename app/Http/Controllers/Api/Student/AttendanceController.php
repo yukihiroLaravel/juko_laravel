@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Attendance;
 use App\Http\Requests\Student\AttendanceCourseProgressRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
@@ -125,6 +124,10 @@ class AttendanceController extends Controller
             'lesson_id' => null,
         ];
         $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLesson) {
+            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
+                return;
+            }
+
             $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
@@ -137,9 +140,6 @@ class AttendanceController extends Controller
                     }
                 }
             });
-            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
-                return;
-            }
         });
         if ($youngestUnCompletedLesson['lesson_id'] === null) {
             return null;

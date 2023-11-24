@@ -20,6 +20,7 @@ class InstructorPatchResource extends JsonResource
             'first_name' => $this->first_name,
             'email' => $this->email,
             'profile_image' => $this->profile_image,
+            'type' => $this->type,
         ];
     }
 }

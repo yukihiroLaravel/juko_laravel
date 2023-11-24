@@ -124,9 +124,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('student')->group(function () {
                 Route::get('{student_id}', 'Api\Instructor\StudentController@show');
                 Route::post('/', 'Api\Instructor\StudentController@store');
-            // 受講生削除
-                Route::delete('delete/{id}', 'Api\Instructor\StudentController@delete')->name('student.delete');
-            });
 
             // 講師
             Route::prefix('{instructor_id}')->group(function () {

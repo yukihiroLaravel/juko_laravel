@@ -91,6 +91,10 @@ class AttendanceController extends Controller
         ]);
     }
 
+    public function delete() {
+        return response()->json([]);
+    }
+
     /**
      * 受講生ログイン率取得API
      *

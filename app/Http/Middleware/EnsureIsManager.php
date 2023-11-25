@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Instructor;
-use Illuminate\Support\Facades\Log;
 
 class EnsureIsManager
 {
@@ -19,9 +18,8 @@ class EnsureIsManager
      */
     public function handle($request, Closure $next)
     {
-
         $instructor = Instructor::find(Auth::guard('instructor')->id());
-        if ($instructor->type !== 'manager') {
+        if ($instructor->type !== Instructor::TYPE_MANAGER) {
             return new JsonResponse([
                 'message' => 'Forbidden, not allowed to use manager api.'
             ], 403);

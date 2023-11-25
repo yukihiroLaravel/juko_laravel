@@ -134,12 +134,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
         });
 
-        // 講師側マネージャAPI
+        // マネージャーAPI
         Route::middleware('manager')->group(function () {
-            // TODO 講師側マネージャAPIはここに記述
+            // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
 
-                // 講師-講座
+                // マネージャー講師-講座
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
                 });

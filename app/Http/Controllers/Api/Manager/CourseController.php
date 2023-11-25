@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 
 class CourseController extends Controller
@@ -23,14 +22,14 @@ class CourseController extends Controller
         $instructorId = $request->user()->id;
 
         // 配下のinstructor情報を取得
-        $instructor = Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
 
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
 
         // 自分と配下instructorのコース情報を取得
         $courses = Course::with('instructor')
-                    ->whereIn('instructor_id', $managingIds)
+                    ->whereIn('instructor_id', $instructorIds)
                     ->get();
 
         return new CourseIndexResource($courses);

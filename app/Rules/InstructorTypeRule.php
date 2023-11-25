@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Model\Course;
+use App\Model\Instructor;
 
 class InstructorTypeRule implements Rule
 {
@@ -20,8 +20,8 @@ class InstructorTypeRule implements Rule
             in_array(
                 $value,
                 [
-                Course::TYPE_MANAGER,
-                Course::TYPE_INSTRUCTOR
+                Instructor::TYPE_MANAGER,
+                Instructor::TYPE_INSTRUCTOR
                 ],
                 true
             )

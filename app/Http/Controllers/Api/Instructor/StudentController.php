@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Student;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Requests\Instructor\StudentShowRequest;
@@ -14,11 +13,7 @@ use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use Carbon\Carbon;
-<<<<<<< HEAD
-use Illuminate\Database\Eloquent\Builder;
-=======
 use Illuminate\Support\Facades\Auth;
->>>>>>> a74ac012262a9093e4a2c1ae0516e3362e12e828
 
 class StudentController extends Controller
 {
@@ -65,17 +60,29 @@ class StudentController extends Controller
      * @return StudentShowResource
      */
     public function show(StudentShowRequest $request)
-    {
-        // 講師が作成した講座のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
+{
+    // 認証された講師のIDを取得
+    $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 講座に紐づく受講生を取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
-                            ->findOrFail($request->student_id);
+    // 認証された講師が作成した講座のIDを取得
+    $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
-        return new StudentShowResource($student);
+    // リクエストされた受講生を取得
+    $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
+                        ->findOrFail($request->student_id);
+
+    // 受講生が講師の講座に所属しているか確認
+    $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+    if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+        return response()->json([
+            'result' => false,
+            'message' => 'Not authorized to access this student.'
+        ], 403);
     }
+
+    return new StudentShowResource($student);
+}
+
 
     /**
      * 受講生登録API

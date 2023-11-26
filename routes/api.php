@@ -133,8 +133,22 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
             });
         });
+
+        // マネージャーAPI
+        Route::middleware('manager')->group(function () {
+            // マネージャーAPIはここに記述
+            Route::prefix('manager')->group(function () {
+
+                // マネージャー講師-講座
+                Route::prefix('course')->group(function () {
+                    Route::get('index', 'Api\Manager\CourseController@index');
+                });
+            });
+        });
+
     });
 });
+
 
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {

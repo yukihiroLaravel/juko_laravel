@@ -13,6 +13,11 @@ class Instructor extends Authenticatable
      */
     protected $table = 'instructors';
 
+
+    // ステータス定数
+    const TYPE_MANAGER = 'manager';
+    const TYPE_INSTRUCTOR = 'instructor';
+
     /**
      * @var array<string>
      */
@@ -22,6 +27,7 @@ class Instructor extends Authenticatable
         'first_name',
         'email',
         'profile_image',
+        'type',
     ];
 
     /**
@@ -44,5 +50,10 @@ class Instructor extends Authenticatable
     {
         // public/を削除
         return str_replace('public/', '', $filePath);
+    }
+
+    public function managings()
+    {
+        return $this->belongsToMany('App\Model\Instructor', 'manage_instructors', 'manager_id', 'instructor_id');
     }
 }

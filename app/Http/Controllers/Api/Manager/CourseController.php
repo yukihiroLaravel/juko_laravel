@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Requests\Instructor\CoursePutStatusRequest;
+use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Controllers\Controller;
 
 use App\Model\Course;

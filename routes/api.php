@@ -117,6 +117,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
+                Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');
             });
 
             // 講師-生徒
@@ -124,7 +125,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('{student_id}', 'Api\Instructor\StudentController@show');
                 Route::post('/', 'Api\Instructor\StudentController@store');
             });
-
+            
             // 講師
             Route::prefix('{instructor_id}')->group(function () {
                 Route::post('/', 'Api\Instructor\InstructorController@update');

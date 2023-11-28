@@ -17,6 +17,7 @@ use App\Http\Resources\Instructor\AttendanceShowResource;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -91,8 +92,24 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function delete() {
-        return response()->json([]);
+    public function delete(Request $request) 
+    {
+        try {
+            $attendanceId = $request->input('attendance_id');
+            $attendance = Attendance::find($attendanceId);
+          
+            $attendance->delete();
+
+            return response()->json([
+                "result" => true,
+            ]);
+   
+        } catch (RuntimeException $e) {
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
     }
 
     /**

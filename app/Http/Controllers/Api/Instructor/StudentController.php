@@ -27,23 +27,10 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'nick_name');
-        $order = $request->input('order', 'asc');
-        $loginId = Auth::guard('instructor')->user()->id;
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-
-        if ($loginId !== $instructorId) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.'
-            ], 403);
-        }
 
         $attendances = Attendance::with(['student', 'course'])
-            ->where('course_id', $request->course_id)
-            ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->orderBy($sortBy, $order)
-            ->paginate($perPage, ['*'], 'page', $page);
+                                    ->where('course_id', $request->course_id)
+                                    ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
 

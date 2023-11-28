@@ -66,7 +66,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(CourseUpdateRequest $request, $course_id)
+    public function update(CourseUpdateRequest $request)
     {
         $instructorId = $request->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);

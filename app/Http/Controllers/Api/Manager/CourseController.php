@@ -79,7 +79,7 @@ class CourseController extends Controller
             $imagePath = $course->image;
 
             // 自分のコース、または、配下instructorのコースでなければエラー応答
-            if (!in_array($course->instructor_id, $managingIds)) {
+            if (!in_array($course->instructor_id, $managingIds, true)) {
 
                 // エラー応答
                 return response()->json([
@@ -90,8 +90,8 @@ class CourseController extends Controller
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
-                if (Storage::exists($course->image)) {
-                    Storage::delete($course->image);
+                if (Storage::disk('public')->exists($course->image)) {
+                    Storage::disk('public')->delete($course->image);
                 }
 
                 // 画像ファイル保存処理

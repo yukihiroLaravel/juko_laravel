@@ -13,6 +13,7 @@ use App\Model\Instructor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
 class CourseController extends Controller
@@ -111,6 +112,12 @@ class CourseController extends Controller
                 "result" => true,
                 "data" => new CourseUpdateResource($course)
             ]);
+        } catch (ModelNotFoundException $exception) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not Found course.'
+            ], 404);
+
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
             return response()->json([

@@ -14,6 +14,11 @@ class CourseUpdateResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'course_id' => $this->resource->id,
+            'title' => $this->resource->title,
+            'image' => $this->resource->image,
+            'status' => $this->resource->status,
+        ];
     }
 }

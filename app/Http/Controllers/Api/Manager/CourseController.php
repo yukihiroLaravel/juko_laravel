@@ -5,21 +5,24 @@ use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
+use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Controllers\Controller;
 
 use App\Model\Course;
+use App\Model\Attendance;
 use App\Model\Instructor;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
 
 class CourseController extends Controller
 {
     /**
-     * 講師側マネージャ講座一覧取得API
+     * マネージャ講座一覧取得API
      *
      * @return CourseIndexResource
      */
@@ -42,7 +45,7 @@ class CourseController extends Controller
     }
 
     /**
-     * 講師側マネージャ講座ステータス一覧更新API
+     * マネージャ講座ステータス一覧更新API
      *
      * @return JsonResponse
      */
@@ -62,6 +65,7 @@ class CourseController extends Controller
             'result' => 'true'
         ]);
     }
+
     /**
      * マネージャ講座情報更新API
      *
@@ -123,6 +127,66 @@ class CourseController extends Controller
             return response()->json([
                 "result" => false,
             ], 500);
+        }
+    }
+
+    /**
+     * マネージャ講座削除API
+     *
+     * @param CourseDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function delete(CourseDeleteRequest $request)
+    {
+        $instructorId = $request->user()->id;
+        $instructor = Instructor::with('managings')->find($instructorId);
+        $managingIds = $instructor->managings->pluck('id')->toArray();
+        $managingIds[] = $instructorId;
+
+        try {
+            $course = Course::findOrFail($request->course_id);
+
+            // 自分のコース、または、配下instructorのコースでなければエラー応答
+            if (!in_array($course->instructor_id, $managingIds, true)) {
+
+                // エラー応答
+                return response()->json([
+                    'result'  => false,
+                    'message' => "Forbidden, not allowed to delete this course.",
+                ], 403);
+            }
+
+            if (Attendance::where('course_id', $request->course_id)->exists()) {
+                return new JsonResponse([
+                    "result" => false,
+                    "message" => "This course has already been taken by students."
+                ], 403);
+            }
+
+            // publicディレクトリ配下の画像ファイルを削除
+            if (Storage::exists('public/' . $course->image)) {
+                Storage::delete('public/' . $course->image);
+            }
+
+            $course->delete();
+
+            return response()->json([
+                "result" => true,
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+                "message" => "Not Found course."
+            ], 404);
+
+        }catch (RuntimeException $e) {
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+
         }
     }
 }

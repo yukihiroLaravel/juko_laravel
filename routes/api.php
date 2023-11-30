@@ -143,7 +143,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
                     Route::put('status', 'Api\Manager\CourseController@status');
-                    Route::post('{course_id}', 'Api\Manager\CourseController@update');
+                    Route::prefix('{course_id}')->group(function () {
+                        Route::post('/', 'Api\Manager\CourseController@update');
+                        Route::delete('/', 'Api\Manager\CourseController@delete');
+                    });
                 });
             });
         });

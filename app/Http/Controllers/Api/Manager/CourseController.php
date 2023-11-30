@@ -164,8 +164,8 @@ class CourseController extends Controller
             }
 
             // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::exists('public/' . $course->image)) {
-                Storage::delete('public/' . $course->image);
+            if (Storage::disk('public')->exists($course->image)) {
+                Storage::disk('public')->delete($course->image);
             }
 
             $course->delete();
@@ -175,7 +175,6 @@ class CourseController extends Controller
             ]);
 
         } catch (ModelNotFoundException $e) {
-            Log::error($e);
             return response()->json([
                 "result" => false,
                 "message" => "Not Found course."

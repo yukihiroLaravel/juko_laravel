@@ -188,4 +188,13 @@ class CourseController extends Controller
 
         }
     }
+    
+    /**
+     * マネージャ講座情報編集API
+     *
+     */
+    public function edit()
+    {
+        return response()->json([]);
+    }
 }

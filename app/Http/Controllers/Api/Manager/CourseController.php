@@ -45,7 +45,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座 管理下講師の講座情報
+     * マネージャ講座 管理下講師の講座情報を取得
      */
     public function show() {
         return response()->json([]);

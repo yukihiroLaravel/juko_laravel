@@ -13,6 +13,7 @@ use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {

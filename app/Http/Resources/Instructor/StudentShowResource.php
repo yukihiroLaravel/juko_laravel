@@ -55,6 +55,6 @@ class StudentShowResource extends JsonResource
                     }),
                 ];
             }),
-        ],
+        ];
     }
 }

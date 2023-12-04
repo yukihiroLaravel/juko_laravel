@@ -96,9 +96,13 @@ class AttendanceController extends Controller
     {
         try {
             $attendanceId = $request->input('attendance_id');
-            $attendance = Attendance::find($attendanceId);
-          
+            $attendance = Attendance::findOrFail($attendanceId);
+
+            $lessonAttendance = $request->input('lessonattendance');
+            $lessonAttendance = LessonAttendance::findOrFail($lessonAttendance);
+    
             $attendance->delete();
+            $lessonAttendance->delete();
 
             return response()->json([
                 "result" => true,

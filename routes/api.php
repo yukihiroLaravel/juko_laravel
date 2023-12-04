@@ -148,6 +148,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Manager\CourseController@delete');
                     });
                 });
+
+                // マネージャ-講師-チャプター
+                Route::prefix('course')->group(function () {
+                    Route::get('{course_id}', 'Api\Manager\ChapterController@index');
+                });
             });
         });
 

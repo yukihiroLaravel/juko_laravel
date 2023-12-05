@@ -1,0 +1,38 @@
+name: PHP CI
+
+on:
+  push:
+    branches:
+      - 'topic*'
+      - 'feature*'
+  pull_request:
+    branches:
+      - 'topic*'
+      - 'feature*'
+
+jobs:
+  format-code:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
+        tools: composer:v2.5.8
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --ansi
+
+    - name: Check code style
+      run: composer sniffer-rewrite
+
+    - name: Commit and Push changes
+      run: |
+        git add -A
+        git commit -m "Automated code format" || exit 0
+        git push

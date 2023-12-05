@@ -26,7 +26,7 @@ class AttendanceController extends Controller
      * @param AttendanceIndexRequest $request
      * @return AttendanceIndexResource
      */
-    public function index (AttendanceIndexRequest $request)
+    public function index(AttendanceIndexRequest $request)
     {
         $studentId = Auth::id();
 
@@ -41,7 +41,7 @@ class AttendanceController extends Controller
 
         $attendances = Attendance::with('course.instructor')
         ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use($request) {
+        ->whereHas('course', function (Builder $query) use ($request) {
             $query->where('title', 'like', "%{$request->search_word}%");
             $query->where('status', Course::STATUS_PUBLIC);
         })->get();
@@ -64,7 +64,7 @@ class AttendanceController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
-        if ($attendance->student_id !== $request->user()->id){
+        if ($attendance->student_id !== $request->user()->id) {
             return response()->json([
                 "result" => false,
                 "message" => "Access forbidden."
@@ -96,13 +96,13 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(function($chapter) use ($request) {
+        $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
                 return $chapter->id === (int) $request->chapter_id;
-            })
+        })
             ->first();
 
         // 各レッスンに対して完了済みのレッスン数を計算
-        $chapter->lessons->map(function($lesson) use ($attendance) {
+        $chapter->lessons->map(function ($lesson) use ($attendance) {
             $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
             $lesson->completed_lessons_count = $completedLessonsCount;
             return $lesson;

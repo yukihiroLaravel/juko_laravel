@@ -75,7 +75,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Attendance::class);
     }
-   
+
     public function getSexAttribute($value)
     {
         if ($value === self::SEX_MAN_INT) {

@@ -3,12 +3,12 @@ name: PHP CI
 on:
   push:
     branches:
-      - 'topic*'
-      - 'feature*'
+      - 'topic/**'
+      - 'feature/**'
   pull_request:
     branches:
-      - 'topic*'
-      - 'feature*'
+      - 'topic/**'
+      - 'feature/**'
 
 jobs:
   format-code:

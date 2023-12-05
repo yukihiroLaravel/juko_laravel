@@ -47,4 +47,14 @@ class Lesson extends Model
     {
         return $this->hasMany(LessonAttendance::class);
     }
+
+    /**
+     * レッスンの総数を取得する
+     *
+     * @return int
+     */
+    public function getTotalLessonsCountAttribute()
+    {
+        return $this->chapter->lessons()->count();
+    }
 }

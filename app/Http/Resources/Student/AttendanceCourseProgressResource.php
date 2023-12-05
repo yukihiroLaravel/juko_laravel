@@ -16,7 +16,6 @@ class AttendanceCourseProgressResource extends JsonResource
     {
         $attendance = $this->resource['attendance'];
         $progressData = $this->resource['progressData'];
-
         return [
             'attendance' => [
                 'attendance_id' => $attendance->id,
@@ -31,7 +30,7 @@ class AttendanceCourseProgressResource extends JsonResource
             "number_of_total_chapters" => $progressData['totalChaptersCount'],
             "number_of_completed_lessons" => $progressData['completedLessonsCount'],
             "number_of_total_lessons" => $progressData['totalLessonsCount'],
-            "continue_lesson_id" => $progressData['youngestUnCompletedLessonId'],
+            "continue_lesson" => $progressData['youngestUnCompletedLesson'],
         ];
     }
 }

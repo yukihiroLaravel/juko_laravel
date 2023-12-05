@@ -9,10 +9,13 @@ use App\Http\Resources\StudentEditResource;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Resources\Student\StudentPostResource;
 use App\Http\Requests\Student\StudentPatchRequest;
+use App\Http\Requests\Student\UserAuthenticationRequest;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Rules\UniqueEmailRule;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
+use App\Exceptions\ExpiredAuthorizationCodeException;
+use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Mail\AuthenticationConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Exception;
 
 class StudentController extends Controller
@@ -192,4 +196,86 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    public function verifyCode(UserAuthenticationRequest $request, $token)
+    {
+
+        $code = $request->code;
+        $password = $request->password;
+        $currentTime = date('Y-m-d H:i:s');
+
+        try {
+            $studentAuth = StudentAuthorization::where('token', $token)->firstOrFail();
+            $student = student::findOrFail($studentAuth->student_id);
+
+            // 有効期限の判定
+            if (strtotime($studentAuth->expire_at) < strtotime($currentTime)) {
+                // 有効期限切れ
+                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student);
+            }
+
+            // 認証コードチェック
+            if ($code !== $studentAuth->code) {
+                // 認証失敗
+
+                // 試行回数をカウント
+                $studentAuth->trial_count += 1;
+                // 試行回数制限の判定
+                if ($studentAuth->trial_count >= 3) {
+                    // 認証失敗回数が3回以上
+                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student);
+                }
+
+                // 試行回数を更新
+                $studentAuth->update();
+                // エラー応答
+                return response()->json([
+                    'result'  => false,
+                    'message' => "Not match authentication code.",
+                ], 400);
+
+            }
+
+            // 認証成功
+            DB::beginTransaction();
+            // 生徒認証情報を物理削除
+            $studentAuth->delete();
+            // 生徒情報を更新
+            $student->email_verified_at = $currentTime;
+            $student->password = Hash::make($password);
+            $student->update();
+            DB::commit();
+
+            // 成功応答
+            return response()->json([
+                'result'  => true,
+                'message' => "Authorization success.",
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'result'  => false,
+                'message' => "Not Found data to match token.",
+            ], 404);
+        } catch (ExpiredAuthorizationCodeException $e) {
+            $studentAuth->delete();
+            return response()->json([
+                'result'  => false,
+                'message' => "Expired authrization period.",
+            ], 406);
+        } catch (TryCountOverAuthorizationCodeException $e) {
+            $studentAuth->delete();
+            return response()->json([
+                'result'  => false,
+                'message' => "Not match authrization code three times.",
+            ], 400);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
+    }
+
 }

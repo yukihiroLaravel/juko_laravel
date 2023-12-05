@@ -22,6 +22,7 @@ class CreateCoursesTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+            $table->foreign('instructor_id')->references('id')->on('instructors');
         });
     }
 

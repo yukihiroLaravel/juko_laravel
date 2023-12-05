@@ -18,7 +18,7 @@ class CreateViewedOnceNotificationsTable extends Migration
             $table->bigInteger('notification_id')->unsigned();
             $table->bigInteger('student_id')->unsigned();
             $table->dateTime('created_at');
-            $table->dateTime('updated_at');    
+            $table->dateTime('updated_at');
             $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
         });

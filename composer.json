@@ -53,7 +53,7 @@
             "./vendor/bin/phpcs --standard=phpcs.xml ./"
         ],
         "sniffer-rewrite": [
-            "./vendor/bin/phpcbf --standard=phpcs.xml ./"
+            "./vendor/bin/phpcbf --standard=phpcs.xml ./ || true"
         ]
     }
 }

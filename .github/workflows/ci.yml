@@ -1,14 +1,7 @@
 name: PHP CI
 
 on:
-  push:
-    branches:
-      - 'topic/**'
-      - 'feature/**'
   pull_request:
-    branches:
-      - 'topic/**'
-      - 'feature/**'
 
 jobs:
   format-code:

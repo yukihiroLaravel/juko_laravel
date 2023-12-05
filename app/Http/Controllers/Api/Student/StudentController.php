@@ -271,5 +271,3 @@ class StudentController extends Controller
         }
     }
 }
-
-

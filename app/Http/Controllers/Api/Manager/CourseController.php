@@ -188,4 +188,10 @@ class CourseController extends Controller
 
         }
     }
+    //マネージャー講座登録API
+    public function store()
+    {
+       return response()->json([]);
+    }
 }
+

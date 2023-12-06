@@ -208,15 +208,15 @@ class CourseController extends Controller
 
         //自分と配下のnstructorのコースでなければエラー応答
         $course = Course::FindOrFail($request->course_id);
-            if (!in_array($course->instructor_id, $instructorIds, true)) {
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
 
         // エラー応答
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden,not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
             
-            }  
+        }  
             return response()->json($course);
 
         //return new CourseEditResource($courses);

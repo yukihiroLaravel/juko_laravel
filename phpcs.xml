@@ -6,12 +6,22 @@
 
     <!-- コーディング規約指定 -->
     <rule ref="PSR12" />
+
     <rule ref="Generic.WhiteSpace.ScopeIndent">
         <properties>
             <property name="indent" value="4"/>
             <property name="tabIndent" value="true"/>
         </properties>
     </rule>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+    <rule ref="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma"/>
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration"/>
 
     <arg name="colors" />
 

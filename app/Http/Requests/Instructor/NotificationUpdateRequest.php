@@ -16,7 +16,7 @@ class NotificationUpdateRequest extends FormRequest
     {
         return true;
     }
-    
+
     protected function prepareForValidation()
     {
         $this->merge([

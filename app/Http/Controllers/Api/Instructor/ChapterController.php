@@ -94,12 +94,12 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API(公開・非公開切り替え)
-     * 
+     *
      * @param ChapterPatchStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(ChapterPatchStatusRequest $request)
-    { 
+    {
         Chapter::findOrFail($request->chapter_id)
             ->update([
                 'status' => $request->status
@@ -127,10 +127,10 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     * 
+     *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     * 
+     *
      */
     public function sort(ChapterSortRequest $request)
     {
@@ -147,7 +147,7 @@ class ChapterController extends Controller
                 ], 403);
             }
             foreach ($chapters as $chapter) {
-                Chapter::where('id',$chapter['chapter_id'])
+                Chapter::where('id', $chapter['chapter_id'])
                 ->where('course_id', $courseId)
                 ->firstOrFail()
                 ->update([
@@ -175,7 +175,7 @@ class ChapterController extends Controller
 
     /**
      * チャプター一括更新API(公開・非公開切り替え)
-     * 
+     *
      * @param ChapterPutStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

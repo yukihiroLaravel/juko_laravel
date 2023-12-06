@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
+use App\Http\Resources\Manager\CourseEditResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
+use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Controllers\Controller;
 
 use App\Model\Course;
@@ -18,6 +20,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
+
 
 class CourseController extends Controller
 {
@@ -192,9 +196,29 @@ class CourseController extends Controller
     /**
      * マネージャ講座情報編集API
      *
+     * @param CourseEditRequest $request
+     * @return CourseEditResource
      */
-    public function edit()
+    public function edit(Request $request)
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        //自分と配下のnstructorのコースでなければエラー応答
+        $course = Course::FindOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+
+            // エラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to edit this course.",
+            ], 403);
+            
+        }  
+        return response()->json($course);
+
+        //return new CourseEditResource($courses);
     }
 }

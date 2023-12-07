@@ -146,14 +146,19 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
+
+                        // マネージャー講師-講座-チャプター
+                        Route::prefix('chapter')->group(function () {
+                            Route::prefix('{chapter_id}')->group(function () {
+                                Route::patch('/', 'Api\Manager\ChapterController@update');
+                            });
+                        });
                     });
                 });
             });
         });
-
     });
 });
-
 
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {

@@ -45,6 +45,30 @@ class CourseController extends Controller
     }
 
     /**
+     * マネージャ講座 管理下講師の講座情報を取得
+     * @param 
+     * @return 
+     */
+    public function show(Request $request, int $course_id)
+    {
+        // ユーザID取得
+        $userId = $request->user()->id;
+        // $course_id から chapters・lessons含めてデータ取得
+        $course = Course::with(['chapters.lessons'])->findOrFail($course_id);    
+        // 配下のinstructor情報を取得
+        $manager = Instructor::with('managings')->find($userId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $userId;
+
+        // manager配下のinstrctorが
+        if (in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json($course);
+        } else {
+            return 401;
+        }            
+    }
+
+    /**
      * マネージャ講座ステータス一覧更新API
      *
      * @return JsonResponse

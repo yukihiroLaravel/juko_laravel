@@ -65,7 +65,7 @@ class CourseController extends Controller
             'result' => 'true'
         ]);
     }
-    
+
     /**
      * マネージャ講座情報更新API
      *

@@ -24,7 +24,7 @@ class CourseEditRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'exists:courses,id', 'integer'],
+            'course_id' => ['required','integer','exists:courses,id,deleted_at,NULL'],
         ];
     }
 

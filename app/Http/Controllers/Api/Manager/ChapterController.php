@@ -16,7 +16,7 @@ class ChapterController extends Controller
       * マネージャ配下のチャプター更新API
       *
       */
-      public function update(Request $request)
+    public function update(Request $request)
     {
         // 現在のユーザーを取得
         $instructorId = Auth::guard('instructor')->user()->id;

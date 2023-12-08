@@ -119,9 +119,6 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
-    
-    
-    
 
     /**
      * 受講生ログイン率取得API

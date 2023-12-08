@@ -96,25 +96,32 @@ class AttendanceController extends Controller
     {
         try {
             $attendanceId = $request->input('attendance_id');
-            $attendance = Attendance::findOrFail($attendanceId);
-
-            $lessonAttendance = $request->input('lessonattendance');
-            $lessonAttendance = LessonAttendance::findOrFail($lessonAttendance);
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+    
+            foreach ($attendance->lessonAttendances as $lessonAttendance) {
+                if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                    $completedCount += 1;
+                }
+    
+                $lessonAttendance->delete();
+            }
     
             $attendance->delete();
-            $lessonAttendance->delete();
-
+    
             return response()->json([
                 "result" => true,
             ]);
-   
-        } catch (RuntimeException $e) {
-            Log::error($e);
+    
+        } catch (\Exception $e) {
+            \Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
         }
     }
+    
+    
+    
 
     /**
      * 受講生ログイン率取得API

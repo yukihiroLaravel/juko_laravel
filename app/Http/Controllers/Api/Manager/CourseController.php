@@ -199,7 +199,7 @@ class CourseController extends Controller
      * @param CourseEditRequest $request
      * @return CourseEditResource
      */
-    public function edit(Request $request)
+    public function edit(CourseEditRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager= Instructor::with('managings')->find($instructorId);

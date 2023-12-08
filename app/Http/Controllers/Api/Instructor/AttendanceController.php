@@ -99,9 +99,6 @@ class AttendanceController extends Controller
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
     
             foreach ($attendance->lessonAttendances as $lessonAttendance) {
-                if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $completedCount += 1;
-                }
     
                 $lessonAttendance->delete();
             }

@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 use App\Model\Instructor;
 use App\Model\Chapter;
-
 
 class ChapterController extends Controller
 {
@@ -26,16 +26,25 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        //自分と配下のnstructorのチャプターでなければエラー応答
-        $chapter = Chapter::FindOrFail($request->chapter_id);
-        if (!in_array($chapter->instructor_id, $instructorIds, true)) {
-            // エラー応答
+        // チャプターを取得
+        $chapter = Chapter::findOrFail($request->chapter_id);
+
+        // チャプターを作成した講師IDを取得
+        $chapterInstructorId = $chapter->id;
+
+        // マネージャー自身が作成したチャプターか、または配下の講師が作成したチャプターなら更新を許可
+        if ($chapterInstructorId === $instructorId || in_array($chapterInstructorId, $instructorIds, true)) {
+            return response()->json([
+                'result'  => true,
+                'message' => "Chapter updated successfully.",
+                'data'    => $chapter, // 更新されたチャプター情報を返す
+            ]);
+        } else {
+            // エラー応答（権限がない場合）
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to edit this chapter.",
             ], 403);
-        }  
-
-        return response()->json($chapter); // 更新されたコース情報を返す
+        }
     }
 }

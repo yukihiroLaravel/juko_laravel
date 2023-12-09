@@ -217,8 +217,7 @@ class CourseController extends Controller
             ], 403);
             
         }  
-        return response()->json($course);
-
-        //return new CourseEditResource($courses);
+        
+        return new CourseEditResource($course);
     }
 }

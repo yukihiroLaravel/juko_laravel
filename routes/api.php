@@ -146,11 +146,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
-                    
-                    // マネージャ-講師-講座-生徒
+
+                        // マネージャー-講座-生徒
                         Route::prefix('student')->group(function () {
                             Route::get('index', 'Api\Manager\StudentController@index');
-                    });
+                        });
 
                     });
                 });

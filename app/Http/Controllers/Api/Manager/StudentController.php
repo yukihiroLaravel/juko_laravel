@@ -9,10 +9,10 @@ use App\Model\Instructor;
 
 class StudentController extends Controller
 {
-    /**マネージャ講座の受講生取得API
-     * 
+    /**
+     * マネージャ講座の受講生取得API
      */
-    public function index() 
+    public function index()
     {
         return response()->json([]);
     }

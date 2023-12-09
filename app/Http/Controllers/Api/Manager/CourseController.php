@@ -60,14 +60,16 @@ class CourseController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
 
-        // manager配下のinstrctorが
-        if (in_array($course->instructor_id, $instructorIds, true)) {
-            return response()->json($course);
-        } else {
-            return 401;
-        }            
-    }
-
+        // 自身 もしくは 配下のinstrctorでない場合はエラー応答
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => "Forbidden, not allowed to edit this course.",
+            ], 403);
+        }
+        return response()->json($course);
+    } 
+    
     /**
      * マネージャ講座ステータス一覧更新API
      *

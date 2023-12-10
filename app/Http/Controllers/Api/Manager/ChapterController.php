@@ -41,8 +41,6 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        Log::info('Request Data:', $request->all());
-
         // チャプターを更新する
         $chapter->update([
             'title' => $request->title,

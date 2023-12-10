@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\Manager;
+
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Resources\Manager\CourseEditResource;
@@ -9,11 +10,9 @@ use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Controllers\Controller;
-
 use App\Model\Course;
 use App\Model\Attendance;
 use App\Model\Instructor;
-
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -89,7 +88,6 @@ class CourseController extends Controller
 
             // 自分のコース、または、配下instructorのコースでなければエラー応答
             if (!in_array($course->instructor_id, $managingIds, true)) {
-
                 // エラー応答
                 return response()->json([
                     'result'  => false,
@@ -125,7 +123,6 @@ class CourseController extends Controller
                 'result' => false,
                 'message' => 'Not Found course.'
             ], 404);
-
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
             return response()->json([
@@ -152,7 +149,6 @@ class CourseController extends Controller
 
             // 自分のコース、または、配下instructorのコースでなければエラー応答
             if (!in_array($course->instructor_id, $managingIds, true)) {
-
                 // エラー応答
                 return response()->json([
                     'result'  => false,
@@ -177,19 +173,16 @@ class CourseController extends Controller
             return response()->json([
                 "result" => true,
             ]);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 "result" => false,
                 "message" => "Not Found course."
             ], 404);
-
-        }catch (RuntimeException $e) {
+        } catch (RuntimeException $e) {
             Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
-
         }
     }
     

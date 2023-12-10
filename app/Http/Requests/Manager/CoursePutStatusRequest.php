@@ -14,7 +14,7 @@ class CoursePutStatusRequest extends FormRequest
      */
     public function authorize()
     {
-        return True;
+        return true;
     }
 
     /**

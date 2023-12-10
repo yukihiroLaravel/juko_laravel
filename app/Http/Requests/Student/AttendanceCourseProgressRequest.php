@@ -16,7 +16,8 @@ class AttendanceCourseProgressRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(){
+    protected function prepareForValidation()
+    {
         $this->merge([
             'attendance_id' => $this->route('attendance_id')
         ]);

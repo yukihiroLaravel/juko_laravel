@@ -106,8 +106,16 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
+            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
+
+            if ($user->id !== $course->instructor_id) {
+                return new JsonResponse([
+                    "result" => false,
+                    "message" => "Not authorized."
+                ], 403);
+            }
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -176,19 +184,17 @@ class CourseController extends Controller
             return response()->json([
                 "result" => true,
             ]);
-
         } catch (RuntimeException $e) {
             Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
-
         }
     }
 
     /**
      * 講座ステータス一括更新API(公開・非公開切り替え)
-     * 
+     *
      * @param CoursePutStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

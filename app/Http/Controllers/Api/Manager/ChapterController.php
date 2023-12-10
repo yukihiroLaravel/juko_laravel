@@ -33,18 +33,24 @@ class ChapterController extends Controller
         $chapterInstructorId = $chapter->id;
 
         // マネージャー自身が作成したチャプターか、または配下の講師が作成したチャプターなら更新を許可
-        if ($chapterInstructorId === $instructorId || in_array($chapterInstructorId, $instructorIds, true)) {
-            return response()->json([
-                'result'  => true,
-                'message' => "Chapter updated successfully.",
-                'data'    => $chapter, // 更新されたチャプター情報を返す
-            ]);
-        } else {
-            // エラー応答（権限がない場合）
+        if (!in_array($chapterInstructorId, $instructorIds, true)) {
+            // 失敗結果を返す
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this chapter.",
             ], 403);
         }
+
+        Log::info('Request Data:', $request->all());
+
+        // チャプターを更新する
+        $chapter->update([
+            'title' => $request->title,
+        ]);
+
+        // 成功結果を返す
+        return response()->json([
+            'result'  => true,
+        ]);
     }
 }

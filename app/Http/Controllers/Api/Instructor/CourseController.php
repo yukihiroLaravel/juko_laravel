@@ -106,16 +106,8 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
-
-            if ($user->id !== $course->instructor_id) {
-                return new JsonResponse([
-                    "result" => false,
-                    "message" => "Not authorized."
-                ], 403);
-            }
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除

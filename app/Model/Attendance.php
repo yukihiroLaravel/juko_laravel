@@ -55,6 +55,14 @@ class Attendance extends Model
         return $this->hasMany(LessonAttendance::class);
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function($attendance) {
+            $attendance->lessonAttendances()->delete();
+        });
+    }
+
     //$periodのバリデーションに利用する定数
     const PERIOD_WEEK = 'week';
     const PERIOD_MONTH = 'month';

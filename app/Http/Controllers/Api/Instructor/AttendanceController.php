@@ -98,19 +98,14 @@ class AttendanceController extends Controller
             $attendanceId = $request->input('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
     
-            foreach ($attendance->lessonAttendances as $lessonAttendance) {
-    
-                $lessonAttendance->delete();
-            }
-    
             $attendance->delete();
     
             return response()->json([
                 "result" => true,
             ]);
     
-        } catch (\Exception $e) {
-            \Log::error($e);
+        } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);

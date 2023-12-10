@@ -21,7 +21,6 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
-
 class CourseController extends Controller
 {
     /**
@@ -185,7 +184,7 @@ class CourseController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * マネージャ講座情報編集API
      *
@@ -195,22 +194,20 @@ class CourseController extends Controller
     public function edit(CourseEditRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
         //自分と配下のnstructorのコースでなければエラー応答
         $course = Course::FindOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-
             // エラー応答
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
-            
-        }  
-        
+        }
+
         return new CourseEditResource($course);
     }
 }

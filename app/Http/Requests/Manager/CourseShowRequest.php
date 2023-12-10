@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CourseShowRequest extends FormRequest
 {
@@ -31,7 +32,7 @@ class CourseShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

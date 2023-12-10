@@ -14,6 +14,7 @@ use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -62,6 +63,35 @@ class CourseController extends Controller
         Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
         return response()->json([
             'result' => 'true'
+        ]);
+    }
+
+    /**
+     * マネージャー講座登録API
+     *
+     * @return JsonResponse
+     */
+    public function store(Request $request)
+    {
+        $managerId = $request->user()->id;
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
+        $filePath = Course::convertImagePath($filePath);
+
+        $course = Course::create([
+            'instructor_id' => $managerId,
+            'title' => $request->title,
+            'image' => $filePath,
+            'status' => Course::STATUS_PRIVATE,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            "result" => true,
+            "data" => $course,
         ]);
     }
 

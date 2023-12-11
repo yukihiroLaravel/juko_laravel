@@ -11,8 +11,8 @@ class ChapterController extends Controller
       * マネージャ配下のチャプター削除API
       *
       */
-      public function delete()
-      {
-          return response()->json([]);
-      }
+    public function delete()
+    {
+        return response()->json([]);
+    }
 }

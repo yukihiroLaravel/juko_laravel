@@ -7,14 +7,13 @@ use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Controllers\Controller;
-
 use App\Model\Course;
 use App\Model\Attendance;
 use App\Model\Instructor;
-
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -65,8 +64,33 @@ class CourseController extends Controller
             'result' => 'true'
         ]);
     }
-
-    /**
+     /**
+     * マネージャ講座登録API
+     *
+     * @return JsonResponse
+     */
+     public function store(Request $request)
+    {
+    $managerId = $request->user()->id;
+    $file = $request->file('image');
+    $extension = $file->getClientOriginalExtension();
+    $filename = Str::uuid() . '.' . $extension;
+    $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
+    $filePath = Course::convertImagePath($filePath);
+    $course = Course::create([
+        'instructor_id' => $managerId,
+        'title' => $request->title,
+        'image' => $filePath,
+        'status' => Course::STATUS_PRIVATE,
+        'created_at' => Carbon::now(),
+        'updated_at' => Carbon::now(),
+    ]);
+    return response()->json([
+        "result" => true,
+        "data" => $course,
+    ]);
+    }
+     /**
      * マネージャ講座情報更新API
      *
      * @return JsonResponse
@@ -188,10 +212,6 @@ class CourseController extends Controller
 
         }
     }
-    //マネージャー講座登録API
-    public function store()
-    {
-       return response()->json([]);
-    }
+
 }
 

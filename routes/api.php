@@ -147,6 +147,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
+
+                        // マネージャー-講座-チャプター
+                        Route::prefix('chapter')->group(function () {
+                            Route::prefix('{chapter_id}')->group(function () {
+                                Route::delete('/', 'Api\Manager\ChapterController@delete');
+                            });
+                        });
                     });
                 });
             });

@@ -81,7 +81,14 @@ class ChapterController extends Controller
      */
     public function update(ChapterPatchRequest $request)
     {
+        $user_id = Instructor::find($request->user()->id);
         $chapter = Chapter::findOrFail($request->chapter_id);
+        if ($chapter->coourse->instructor_id !== $user_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 403);
+        }
         $chapter->update([
             'title' => $request->title
         ]);

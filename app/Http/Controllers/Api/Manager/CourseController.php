@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 use App\Http\Resources\Manager\CourseIndexResource;
+use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseShowRequest;
@@ -48,6 +49,7 @@ class CourseController extends Controller
     /**
      * マネージャ講座 管理下講師の講座情報を取得
      * @param CourseShowRequest $request
+     * @return CourseShowResource
      */
     public function show(CourseShowRequest $request)
     {
@@ -67,7 +69,7 @@ class CourseController extends Controller
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
         }
-        return response()->json($course);
+        return new CourseShowResource($course);
     } 
 
     /**

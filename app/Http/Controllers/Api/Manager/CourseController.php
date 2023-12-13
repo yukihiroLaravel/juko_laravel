@@ -64,32 +64,35 @@ class CourseController extends Controller
             'result' => 'true'
         ]);
     }
-     /**
+
+    /**
      * マネージャ講座登録API
      *
      * @return JsonResponse
      */
-     public function store(Request $request)
+    public function store(Request $request)
     {
-    $managerId = $request->user()->id;
-    $file = $request->file('image');
-    $extension = $file->getClientOriginalExtension();
-    $filename = Str::uuid() . '.' . $extension;
-    $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
-    $course = Course::create([
-        'instructor_id' => $managerId,
-        'title' => $request->title,
-        'image' => $filePath,
-        'status' => Course::STATUS_PRIVATE,
-        'created_at' => Carbon::now(),
-        'updated_at' => Carbon::now(),
-    ]);
-    return response()->json([
-        "result" => true,
-        "data" => $course,
-    ]);
+        $managerId = $request->user()->id;
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
+        $course = Course::create([
+            'instructor_id' => $managerId,
+            'title' => $request->title,
+            'image' => $filePath,
+            'status' => Course::STATUS_PRIVATE,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            "result" => true,
+            "data" => $course,
+        ]);
     }
-     /**
+
+    /**
      * マネージャ講座情報更新API
      *
      * @return JsonResponse

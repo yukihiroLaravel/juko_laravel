@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Resources\Manager\CourseIndexResource;
+use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Resources\Manager\CourseEditResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
+use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseEditRequest;
@@ -44,6 +46,33 @@ class CourseController extends Controller
                     ->get();
 
         return new CourseIndexResource($courses);
+    }
+
+    /**
+     * マネージャ講座 管理下講師の講座情報を取得
+     *
+     * @param CourseShowRequest $request
+     * @return CourseShowResource
+     */
+    public function show(CourseShowRequest $request)
+    {
+        // ユーザID取得
+        $userId = $request->user()->id;
+        // 配下のinstructor情報を取得
+        $manager = Instructor::with('managings')->find($userId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $userId;
+
+        // $course_id から chapters・lessons含めてデータ取得
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        // 自身 もしくは 配下のinstrctorでない場合はエラー応答
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => "Forbidden, not allowed to edit this course.",
+            ], 403);
+        }
+        return new CourseShowResource($course);
     }
 
     /**

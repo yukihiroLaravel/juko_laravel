@@ -75,8 +75,7 @@ class CourseController extends Controller
     $file = $request->file('image');
     $extension = $file->getClientOriginalExtension();
     $filename = Str::uuid() . '.' . $extension;
-    $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
-    $filePath = Course::convertImagePath($filePath);
+    $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
     $course = Course::create([
         'instructor_id' => $managerId,
         'title' => $request->title,

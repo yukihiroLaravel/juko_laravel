@@ -63,7 +63,7 @@ class CourseController extends Controller
         $instructorIds[] = $userId;
 
         // $course_id から chapters・lessons含めてデータ取得
-        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);    
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
         // 自身 もしくは 配下のinstrctorでない場合はエラー応答
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
@@ -72,7 +72,7 @@ class CourseController extends Controller
             ], 403);
         }
         return new CourseShowResource($course);
-    } 
+    }
 
     /**
      * マネージャ講座ステータス一覧更新API

@@ -13,7 +13,7 @@ class CourseDeleteRequest extends FormRequest
      */
     public function authorize()
     {
-        return True;
+        return true;
     }
 
     protected function prepareForValidation()
@@ -34,5 +34,4 @@ class CourseDeleteRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id'],
         ];
     }
-
 }

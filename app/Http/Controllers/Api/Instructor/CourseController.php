@@ -176,19 +176,17 @@ class CourseController extends Controller
             return response()->json([
                 "result" => true,
             ]);
-
         } catch (RuntimeException $e) {
             Log::error($e);
             return response()->json([
                 "result" => false,
             ], 500);
-
         }
     }
 
     /**
      * 講座ステータス一括更新API(公開・非公開切り替え)
-     * 
+     *
      * @param CoursePutStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

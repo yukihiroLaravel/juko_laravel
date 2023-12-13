@@ -36,10 +36,9 @@ class StudentController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StudentPostRequest $request)
-   {
+    {
         DB::beginTransaction();
         try {
-
             $student = Student::create([
                 'nick_name'  => $request->nick_name,
                 'last_name'  => $request->last_name,
@@ -94,21 +93,18 @@ class StudentController extends Controller
                 'result'  => true,
                 'data'    => new StudentPostResource($student),
             ]);
-
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
               "result" => false,
             ], 500);
-
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
             "result" => false,
             ], 500);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -141,7 +137,6 @@ class StudentController extends Controller
         $file = $request->file('profile_image');
 
         try {
-
             $student = Student::findOrFail($request->user()->id);
 
             if ($request->user()->id !== $student->id) {
@@ -233,7 +228,6 @@ class StudentController extends Controller
                     'result'  => false,
                     'message' => "Not match authentication code.",
                 ], 400);
-
             }
 
             // 認証成功
@@ -251,7 +245,6 @@ class StudentController extends Controller
                 'result'  => true,
                 'message' => "Authorization success.",
             ]);
-
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'result'  => false,
@@ -277,5 +270,4 @@ class StudentController extends Controller
             ], 500);
         }
     }
-
 }

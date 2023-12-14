@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Student;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Requests\Instructor\StudentShowRequest;
@@ -15,7 +14,6 @@ use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 
 class StudentController extends Controller
 {

@@ -27,7 +27,7 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'nick_name');
+        $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
         $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;

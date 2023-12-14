@@ -148,6 +148,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
+                        Route::prefix('chapter')->group(function () {
+                            Route::get('{chapter_id}', 'Api\Manager\ChapterController@index');
+                        });
                     });
                 });
             });

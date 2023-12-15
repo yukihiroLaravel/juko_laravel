@@ -30,7 +30,7 @@ class ChapterController extends Controller
         $chapter = Chapter::findOrFail($request->chapter_id);
 
          // チャプター作成者のIDを取得
-         $chapterInstructorId = $chapter->id;
+        $chapterInstructorId = $chapter->course->instructor_id;
 
         // マネージャー自身が作成したチャプターか、または配下の講師が作成したチャプターなら更新を許可
         if (!in_array($chapterInstructorId, $instructorIds, true)) {

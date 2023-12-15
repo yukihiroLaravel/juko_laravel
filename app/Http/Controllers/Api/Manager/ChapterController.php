@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
-    public function index(Request $request)
+    public function show(Request $request)
     {
         // ユーザーID取得
         $userId = $request->user()->id;
@@ -18,7 +18,7 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
         // chapter_idからlassons含めてデータ取得
-        $chapter = Chapter::with(['lessons'])->findOrFail($request->chapter_id);
+        $chapter = Chapter::with(['course.chapters.lessons'])->findOrFail($request->chapter_id);
         // 自身もしくは配下のinstructorでない場合はエラー応答
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([

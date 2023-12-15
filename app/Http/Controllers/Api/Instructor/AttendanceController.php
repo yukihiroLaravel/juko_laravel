@@ -94,17 +94,24 @@ class AttendanceController extends Controller
 
     public function delete(Request $request) 
     {
+        DB::beginTransaction();
+
         try {
-            $attendanceId = $request->input('attendance_id');
+            
+
+            $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
     
             $attendance->delete();
     
+            DB::commit();
+
             return response()->json([
                 "result" => true,
             ]);
     
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             return response()->json([
                 "result" => false,

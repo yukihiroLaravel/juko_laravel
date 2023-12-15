@@ -27,7 +27,7 @@ class ChapterController extends Controller
         $instructorIds[] = $instructorId;
 
         // チャプターを取得
-        $chapter = Chapter::findOrFail($request->chapter_id);
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
          // チャプター作成者のIDを取得
         $chapterInstructorId = $chapter->course->instructor_id;

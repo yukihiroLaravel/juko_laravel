@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Model\Instructor;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manage\ChapterDeleteRequest;
+use App\Http\Requests\Manager\ChapterDeleteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

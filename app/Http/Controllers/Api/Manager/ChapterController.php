@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\ChapterPatchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Instructor;
@@ -12,8 +13,10 @@ class ChapterController extends Controller
 {
     /**
       * マネージャー配下のチャプター更新API
+      * @param ChapterPatchRequest $request
+      * @return \Illuminate\Http\JsonResponse
       */
-    public function update(Request $request)
+    public function update(ChapterPatchRequest $request)
     {
         // 現在のユーザーを取得
         $instructorId = Auth::guard('instructor')->user()->id;

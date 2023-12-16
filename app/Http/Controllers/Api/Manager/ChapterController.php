@@ -24,10 +24,9 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        $course = Course::FindOrFail($request->course_id);
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
+        if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
             return response()->json([
                 'result'  => false,

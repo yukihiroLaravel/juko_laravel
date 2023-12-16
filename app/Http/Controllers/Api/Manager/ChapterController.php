@@ -17,8 +17,8 @@ class ChapterController extends Controller
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
-        // chapter_idからlassons含めてデータ取得
-        $chapter = Chapter::with(['course.chapters.lessons'])->findOrFail($request->chapter_id);
+        // chapter_idから属するlassons含めてデータ取得
+        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
         // 自身もしくは配下のinstructorでない場合はエラー応答
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([

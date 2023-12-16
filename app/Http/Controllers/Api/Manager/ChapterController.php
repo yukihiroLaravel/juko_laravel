@@ -3,19 +3,17 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
-use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
 {
     /**
-      * マネージャ配下のチャプター削除API
-      *
-      */
+     * マネージャ配下のチャプター削除API
+     *
+     */
     public function delete(Request $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -33,13 +31,15 @@ class ChapterController extends Controller
                 'message' => "Forbidden, not allowed to delete this chapter.",
             ], 403);
         }
+
         if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定したコースに属するチャプターでなければエラー応答
+            // 指定した講座に属するチャプターでなければエラー応答
             return response()->json([
                 'result'  => false,
-                'message' => 'invalid course_id.',
+                'message' => 'Invalid course_id.',
             ], 403);
         }
+
         $chapter->delete();
         return response()->json([
             "result" => true

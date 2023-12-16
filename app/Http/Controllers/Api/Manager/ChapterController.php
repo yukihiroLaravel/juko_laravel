@@ -6,10 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Model\Instructor;
 use App\Model\Chapter;
 use Illuminate\Http\Request;
+use App\Http\Requests\Manager\ChapterShowRequest;
 
 class ChapterController extends Controller
 {
-    public function show(Request $request)
+    /**
+     * チャプター詳細情報を取得
+     *
+     * @param ChapterShowRequest $request
+     * @return ChapterShowResource
+     */
+    public function show(ChapterShowRequest $request)
     {
         // ユーザーID取得
         $userId = $request->user()->id;

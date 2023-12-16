@@ -25,7 +25,7 @@ class CourseStoreRequest extends FormRequest
     {
         return [
             'title' =>['required','string','max:30'],
-            'image' =>['required','mimes:jpg,png'],
+            'image' =>['required','mimes:jpg,png','max:2048'],
         ];
     }
 }

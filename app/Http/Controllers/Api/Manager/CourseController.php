@@ -6,6 +6,7 @@ use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
+use App\Http\Requests\Manager\CourseStoreRequest;
 use App\Http\Controllers\Controller;
 use App\Model\Course;
 use App\Model\Attendance;
@@ -70,7 +71,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(CourseStoreRequest $request)
     {
         $managerId = $request->user()->id;
         $file = $request->file('image');

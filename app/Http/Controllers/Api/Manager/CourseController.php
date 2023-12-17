@@ -265,6 +265,4 @@ class CourseController extends Controller
 
         return new CourseEditResource($course);
     }
-
 }
-

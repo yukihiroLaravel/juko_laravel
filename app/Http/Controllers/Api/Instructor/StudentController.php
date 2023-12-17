@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Student;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Requests\Instructor\StudentShowRequest;
@@ -14,7 +13,7 @@ use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentStoreResource;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -28,7 +27,7 @@ class StudentController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'nick_name');
+        $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
         $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
@@ -62,8 +61,25 @@ class StudentController extends Controller
      */
     public function show(StudentShowRequest $request)
     {
-        // TODO 講師が作成した講座に紐づく受講生のみ取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])->findOrFail($request->student_id);
+        // 認証された講師のIDを取得
+        $instructorCourseIds = Auth::guard('instructor')->user()->id;
+
+        // 認証された講師が作成した講座のIDを取得
+        $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
+
+        // リクエストされた受講生を取得
+        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
+                            ->findOrFail($request->student_id);
+
+        // 受講生が講師の講座に所属しているか確認
+        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized to access this student.'
+            ], 403);
+        }
+
         return new StudentShowResource($student);
     }
 

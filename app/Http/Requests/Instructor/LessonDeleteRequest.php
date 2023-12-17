@@ -11,27 +11,27 @@ class LessonDeleteRequest extends FormRequest
    *
    * @return bool
    */
-  public function authorize()
-  {
-    return true;
-  }
+    public function authorize()
+    {
+        return true;
+    }
 
   /**
    * Get the validation rules that apply to the request.
    *
    * @return array
    */
-  public function rules()
-  {
-    return [
-      'lesson_id' => ['required', 'integer'],
-    ];
-  }
+    public function rules()
+    {
+        return [
+        'lesson_id' => ['required', 'integer'],
+        ];
+    }
 
-  protected function prepareForValidation()
-  {
-    $this->merge([
-      'lesson_id' => $this->route('lesson_id'),
-    ]);
-  }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+        'lesson_id' => $this->route('lesson_id'),
+        ]);
+    }
 }

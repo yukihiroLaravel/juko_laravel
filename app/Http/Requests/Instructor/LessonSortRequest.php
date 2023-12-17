@@ -30,7 +30,6 @@ class LessonSortRequest extends FormRequest
             'lessons.*.lesson_id' => ['required', 'integer'],
             'lessons.*.order' => ['required', 'integer'],
         ];
-        
     }
 
     protected function prepareForValidation()

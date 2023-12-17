@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Model\Instructor;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\ChapterDeleteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,7 +15,7 @@ class ChapterController extends Controller
      * マネージャ配下のチャプター削除API
      *
      */
-    public function delete(Request $request)
+    public function delete(ChapterDeleteRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 配下の講師情報を取得

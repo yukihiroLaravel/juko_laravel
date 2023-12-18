@@ -11,6 +11,7 @@ use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseStoreRequest;
+use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Controllers\Controller;
 use App\Model\Course;
 use App\Model\Attendance;

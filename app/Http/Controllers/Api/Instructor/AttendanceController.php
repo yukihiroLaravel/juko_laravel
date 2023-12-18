@@ -100,11 +100,11 @@ class AttendanceController extends Controller
             
             $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
-
-            if ($attendance->lessonAttendances->lesson->id !== $attendanceId) {
+            
+            if (Auth::guard('instructor')->user()->id !== $attendance->instructor_id) {
                 return response()->json([
                     "result" => false,
-                    "message" => "Unauthorized: This attendance does not belong to the authenticated teacher.",
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
                 ], 403);
             }
             

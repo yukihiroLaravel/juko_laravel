@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
-use App\Http\Resources\Manager\ChapterPatchResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Instructor;
@@ -36,6 +35,14 @@ class ChapterController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this chapter.",
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座に属するチャプターでなければエラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
             ], 403);
         }
 

@@ -54,7 +54,6 @@ class ChapterController extends Controller
         // 成功結果を返す
         return response()->json([
             'result'  => true,
-            'data' => new ChapterPatchResource($chapter),
         ]);
     }
 }

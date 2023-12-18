@@ -98,10 +98,16 @@ class AttendanceController extends Controller
 
         try {
             
-
             $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
-    
+
+            if ($attendance->lessonAttendances->lesson->id !== $attendanceId) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: This attendance does not belong to the authenticated teacher.",
+                ], 403);
+            }
+            
             $attendance->delete();
     
             DB::commit();

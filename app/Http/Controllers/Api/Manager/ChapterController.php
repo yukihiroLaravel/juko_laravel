@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
+use App\Http\Resources\Manager\ChapterPatchResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Instructor;
@@ -46,6 +47,7 @@ class ChapterController extends Controller
         // 成功結果を返す
         return response()->json([
             'result'  => true,
+            'data' => new ChapterPatchResource($chapter),
         ]);
     }
 }

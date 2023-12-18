@@ -77,8 +77,9 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座ステータス一覧更新API
-     *
+     * マネージャ講座ステータス一覧更新API
+     *
+     * @param CoursePutStatusRequest $request
      * @return JsonResponse
      */
     public function status(CoursePutStatusRequest $request)
@@ -93,23 +94,27 @@ class CourseController extends Controller
 
         // 自分、または配下の講師の講座のステータスを一括更新
         Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
+
         return response()->json([
             'result' => 'true'
         ]);
     }
 
     /**
-     * マネージャ講座登録API
-     *
+     * マネージャ講座登録API
+     *
+     * @param CourseStoreRequest $request
      * @return JsonResponse
      */
     public function store(CourseStoreRequest $request)
     {
         $managerId = $request->user()->id;
+
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid() . '.' . $extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
+
         $course = Course::create([
             'instructor_id' => $managerId,
             'title' => $request->title,

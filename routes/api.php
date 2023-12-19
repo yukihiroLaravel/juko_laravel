@@ -142,7 +142,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー講師-講座
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
+                    Route::post('store', 'Api\Manager\CourseController@store');
                     Route::put('status', 'Api\Manager\CourseController@status');
+                    Route::post('/', 'Api\Manager\CourseController@store');
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', 'Api\Manager\CourseController@show');
                         Route::get('edit', 'Api\Manager\CourseController@edit');

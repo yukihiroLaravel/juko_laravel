@@ -17,7 +17,7 @@ class ChapterShowResource extends JsonResource
         return [
             'chapter_id' => $this->resource->id,
             'title' => $this->resource->title,
-            'lessons' => $this->resource->lessons->map(function ($lesson) {
+            'lessons' => $this->resource->lessons()->orderBy('order')->get()->map(function ($lesson) {
                 return [
                     'lesson_id' => $lesson->id,
                     'title' => $lesson->title,

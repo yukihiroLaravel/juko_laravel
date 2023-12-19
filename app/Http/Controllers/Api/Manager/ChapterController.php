@@ -12,6 +12,15 @@ use Illuminate\Support\Facades\Auth;
 class ChapterController extends Controller
 {
     /**
+     * チャプター新規作成API
+     *
+     */
+    public function store()
+    {
+        return response()->json([]);
+        
+    }
+    /**
      * マネージャ配下のチャプター削除API
      *
      */

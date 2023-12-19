@@ -18,7 +18,6 @@ class ChapterController extends Controller
     public function store()
     {
         return response()->json([]);
-        
     }
     /**
      * マネージャ配下のチャプター削除API

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Model\Instructor;
 use App\Model\Chapter;
-use Illuminate\Http\Request;
 use App\Http\Requests\Manager\ChapterShowRequest;
+use App\Http\Resources\Manager\ChapterShowResource;
 
 class ChapterController extends Controller
 {
@@ -34,8 +34,6 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        return response()->json([
-            $chapter,
-        ]);
+        return new ChapterShowResource($chapter);
     }
 }

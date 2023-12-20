@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Instructor;
 use App\Model\Chapter;
@@ -12,10 +11,11 @@ use App\Model\Chapter;
 class ChapterController extends Controller
 {
     /**
-      * マネージャー配下のチャプター更新API
-      * @param ChapterPatchRequest $request
-      * @return \Illuminate\Http\JsonResponse
-      */
+     * マネージャー配下のチャプター更新API
+     *
+     * @param ChapterPatchRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(ChapterPatchRequest $request)
     {
         // 現在のユーザーを取得

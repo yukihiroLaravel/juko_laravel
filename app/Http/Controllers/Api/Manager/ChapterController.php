@@ -39,10 +39,10 @@ class ChapterController extends Controller
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座に属するチャプターでなければエラー応答
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
             return response()->json([
                 'result'  => false,
-                'message' => 'Invalid chapter_id.',
+                'message' => 'Invalid course_id.',
             ], 403);
         }
 

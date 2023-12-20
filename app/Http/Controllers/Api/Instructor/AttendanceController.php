@@ -17,6 +17,7 @@ use App\Http\Resources\Instructor\AttendanceShowResource;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -91,8 +92,37 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function delete() {
-        return response()->json([]);
+    public function delete(Request $request) 
+    {
+        DB::beginTransaction();
+
+        try {
+            
+            $attendanceId = $request->route('attendance_id');
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+            
+            if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+            
+            $attendance->delete();
+    
+            DB::commit();
+
+            return response()->json([
+                "result" => true,
+            ]);
+    
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
     }
 
     /**

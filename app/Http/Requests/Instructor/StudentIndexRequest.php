@@ -35,7 +35,7 @@ class StudentIndexRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new IndexSortByRule()],
+            'sort_by' => ['string', new IndexSortByRule()],
             'order' => ['string', 'in:asc,desc'],
         ];
     }

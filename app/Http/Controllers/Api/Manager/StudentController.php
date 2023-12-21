@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Model\Attendance;
+use App\Model\Course;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Model\Student;
@@ -13,14 +15,14 @@ class StudentController extends Controller
     /**マネージャ講座の受講生取得API
      * 
      */
-    public function index(StudentIndexRequest $request) 
+    public function index(Request $request) 
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sortBy', 'nick_name');
         $order = $request->input('order', 'asc');
         $instructorId = $request->user()->id;
-
+        
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
 
@@ -29,17 +31,17 @@ class StudentController extends Controller
 
         // 自分と配下instructorのコース情報を取得
         $courseIds = Course::with('instructor')
-                    ->whereIn('instructor_id', $instructorIds)
-                    ->pluck('id')
-                    ->toArray();
+            ->whereIn('instructor_id', $instructorIds)
+            ->pluck('id')
+            ->toArray();
 
-
-        $attendances = Attendance::with('course')
+        $attendances = Attendance::with(['course', 'student'])
             ->whereIn('course_id', $courseIds)
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
-
+        
+        
         return response()->json([
             'attendances' => $attendances
         ]);

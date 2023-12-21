@@ -67,15 +67,6 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座の受講生一覧取得API
-     * 
-     * @return JsonResponse
-     */
-    public function student_index() {
-        return response()->json([]);
-    }
-    
-    /**
      * マネージャ講座情報更新API
      *
      * @return JsonResponse

@@ -142,8 +142,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
+                    Route::post('store', 'Api\Manager\CourseController@store');
                     Route::put('status', 'Api\Manager\CourseController@status');
+                    Route::post('/', 'Api\Manager\CourseController@store');
                     Route::prefix('{course_id}')->group(function () {
+                        Route::get('/', 'Api\Manager\CourseController@show');
+                        Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
 
@@ -151,6 +155,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('chapter')->group(function () {
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
+                                Route::delete('/', 'Api\Manager\ChapterController@delete');
                             });
                         });
                     });
@@ -178,5 +183,3 @@ Route::prefix('v1')->group(function () {
         });
     });
 });
-
-

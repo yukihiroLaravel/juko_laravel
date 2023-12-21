@@ -31,7 +31,6 @@ class LessonController extends Controller
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
         try {
-
             $lesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
@@ -98,7 +97,6 @@ class LessonController extends Controller
 
             $inputLessons = $request->input('lessons');
             foreach ($inputLessons as $inputLesson) {
-
                 $lesson = Lesson::with('chapter.course')->findOrFail($inputLesson['lesson_id']);
 
                 // 講師idが一致するか
@@ -123,7 +121,6 @@ class LessonController extends Controller
             return response()->json([
                 "result" => true
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -168,13 +165,11 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (ModelNotFoundException $exception) {
             return response()->json([
                 'result' => false,
                 'message' => 'Not Found Lesson.'
             ], 404);
-
         } catch (Exception $exception) {
             return response()->json([
                 'result' => false,

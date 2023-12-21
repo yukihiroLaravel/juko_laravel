@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Chapter extends Model
 {
     use SoftDeletes;
+
     /**
      * モデルと関連しているテーブル
      *
@@ -50,10 +51,10 @@ class Chapter extends Model
         return $this->hasMany(Lesson::class);
     }
 
-    protected static function boot() 
+    protected static function boot()
     {
         parent::boot();
-        static::deleting(function($chapter) {
+        static::deleting(function ($chapter) {
             foreach ($chapter->lessons()->get() as $child) {
                 $child->delete();
             }

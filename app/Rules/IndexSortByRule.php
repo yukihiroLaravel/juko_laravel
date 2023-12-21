@@ -28,7 +28,7 @@ class IndexSortByRule implements Rule
     {
         if (
             in_array(
-                $value, 
+                $value,
                 [
                 Attendance::SORT_BY_NICK_NAME,
                 Attendance::SORT_BY_EMAIL,

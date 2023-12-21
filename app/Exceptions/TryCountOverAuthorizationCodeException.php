@@ -12,8 +12,7 @@ class TryCountOverAuthorizationCodeException extends Exception
     public function __construct(
         $message,
         Student $student
-    )
-    {
+    ) {
         // メッセージにユーザー情報のemailを追加
         $message = [
             $message,

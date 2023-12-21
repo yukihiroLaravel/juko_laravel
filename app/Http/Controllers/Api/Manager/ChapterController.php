@@ -59,6 +59,11 @@ class ChapterController extends Controller
        ]);
     }
 
+    /**
+      * マネージャ配下のチャプター削除API
+      *
+      */
+
     public function delete(ChapterDeleteRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;

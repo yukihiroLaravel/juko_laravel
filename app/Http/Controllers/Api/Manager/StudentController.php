@@ -36,15 +36,8 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
         
-        // 指定した講座の受講生情報と講座情報を取得
-        $attendances = Attendance::with(['course', 'student'])
-            ->where('course_id', $request->course_id)
-            ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->orderBy($sortBy, $order)
-            ->paginate($perPage, ['*'], 'page', $page);
-            
         $course = Course::find($request->course_id);
-    
+        
         // 自分もしくは配下instructorのコースでない場合はエラーを返す
         if (!in_array($course->id, $courseIds, true)) {
             return response()->json([
@@ -52,7 +45,14 @@ class StudentController extends Controller
                 'message' => 'Not authorized.'
             ], 403);
         }
-        
+
+        // 指定した講座の受講生情報と講座情報を取得
+        $attendances = Attendance::with(['course', 'student'])
+            ->where('course_id', $request->course_id)
+            ->join('students', 'attendances.student_id', '=', 'students.id')
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
+                    
         return response()->json([
             'attendances' => $attendances
         ]);

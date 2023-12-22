@@ -10,6 +10,7 @@ use App\Model\Course;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
@@ -92,7 +93,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function delete(Request $request) 
+    public function delete(AttendanceDeleteRequest $request) 
     {
         DB::beginTransaction();
 

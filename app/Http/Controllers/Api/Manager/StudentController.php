@@ -12,7 +12,7 @@ use App\Model\Instructor;
 
 class StudentController extends Controller
 {
-    /**I
+    /**
      * マネージャ講座の受講生取得API
      * 
      */

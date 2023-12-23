@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use App\Rules\SexRule;
 
 class StudentPatchRequest extends FormRequest
@@ -28,7 +29,7 @@ class StudentPatchRequest extends FormRequest
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
-            'email' => ['required', 'email','unique:students'],
+            'email' => ['required', 'email',Rule::unique('students')->ignore($this->route('student'))],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],

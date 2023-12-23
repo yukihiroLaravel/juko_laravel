@@ -107,6 +107,15 @@ class ChapterController extends Controller
      */
     public function updateStatus(ChapterPatchStatusRequest $request)
     {
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+        
         Chapter::findOrFail($request->chapter_id)
             ->update([
                 'status' => $request->status
@@ -125,6 +134,15 @@ class ChapterController extends Controller
      */
     public function delete(ChapterDeleteRequest $request)
     {
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => 'false',
+                "message" => "Not authorized."
+            ], 403);
+        }
+        
         $chapter = Chapter::findOrFail($request->chapter_id);
         $chapter->delete();
         return response()->json([

@@ -28,7 +28,7 @@ class StudentPatchRequest extends FormRequest
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
-            'email' => ['required', 'email',Rule::unique('users')->ignore(Auth::id())],
+            'email' => ['required', 'email','unique:users'],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],

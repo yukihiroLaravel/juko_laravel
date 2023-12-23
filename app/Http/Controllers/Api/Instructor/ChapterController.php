@@ -115,7 +115,7 @@ class ChapterController extends Controller
                 "message" => "Not authorized."
             ], 403);
         }
-        
+
         Chapter::findOrFail($request->chapter_id)
             ->update([
                 'status' => $request->status
@@ -142,7 +142,7 @@ class ChapterController extends Controller
                 "message" => "Not authorized."
             ], 403);
         }
-        
+
         $chapter = Chapter::findOrFail($request->chapter_id);
         $chapter->delete();
         return response()->json([

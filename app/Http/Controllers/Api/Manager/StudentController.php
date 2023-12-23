@@ -14,16 +14,16 @@ class StudentController extends Controller
 {
     /**
      * マネージャ講座の受講生取得API
-     * 
+     *
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sortBy', 'nick_name');
         $order = $request->input('order', 'asc');
         $instructorId = $request->user()->id;
-        
+
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
 
@@ -35,9 +35,9 @@ class StudentController extends Controller
             ->whereIn('instructor_id', $instructorIds)
             ->pluck('id')
             ->toArray();
-        
+
         $course = Course::find($request->course_id);
-        
+
         // 自分もしくは配下instructorのコースでない場合はエラーを返す
         if (!in_array($course->id, $courseIds, true)) {
             return response()->json([
@@ -52,7 +52,7 @@ class StudentController extends Controller
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
-                    
+
         return response()->json([
             'attendances' => $attendances
         ]);

@@ -125,9 +125,16 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
+<<<<<<< HEAD
         
         $chapter->update([
             'status' => $request->status
+=======
+
+        Chapter::findOrFail($request->chapter_id)
+            ->update([
+                'status' => $request->status
+>>>>>>> 889b49f520a518843e4b8ce5902cfe65523dd46f
         ]);
 
         return response()->json([
@@ -161,7 +168,12 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
+<<<<<<< HEAD
         
+=======
+
+        $chapter = Chapter::findOrFail($request->chapter_id);
+>>>>>>> 889b49f520a518843e4b8ce5902cfe65523dd46f
         $chapter->delete();
 
         return response()->json([

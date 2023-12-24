@@ -112,13 +112,22 @@ class ChapterController extends Controller
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
                 'result' => 'false',
-                "message" => "Not authorized."
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
             ], 403);
         }
         
-        Chapter::findOrFail($request->chapter_id)
-            ->update([
-                'status' => $request->status
+        $chapter->update([
+            'status' => $request->status
         ]);
 
         return response()->json([
@@ -139,12 +148,22 @@ class ChapterController extends Controller
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
                 'result' => 'false',
-                "message" => "Not authorized."
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
             ], 403);
         }
         
-        $chapter = Chapter::findOrFail($request->chapter_id);
         $chapter->delete();
+
         return response()->json([
             "result" => true
         ]);

@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class ChapterController extends Controller
 {
@@ -26,9 +25,6 @@ class ChapterController extends Controller
         $instructorIds[] = $instructorId;
 
         $course = Course::FindOrFail($course_id);
-        // コース内にすでに存在するチャプターを取得
-        $chapters = $course->chapters->all();
-        //最大値にプラス１した数字を代入
         $order = $course->chapters()->count();
         $order++;
         

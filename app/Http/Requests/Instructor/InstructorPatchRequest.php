@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor;
 
+use App\Rules\InstructorTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InstructorPatchRequest extends FormRequest
@@ -37,6 +38,7 @@ class InstructorPatchRequest extends FormRequest
             'email' => ['required', 'email'],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
+            'type' => ['required', 'string', 'max:30', new InstructorTypeRule()]
         ];
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Course extends Model
 {
     use SoftDeletes;
+
     /**
      * モデルと関連しているテーブル
      *
@@ -25,6 +26,10 @@ class Course extends Model
         'status',
         'created_at',
         'updated_at',
+    ];
+
+    protected $casts = [
+        'instructor_id' => 'int'
     ];
 
     /**
@@ -73,7 +78,7 @@ class Course extends Model
     protected static function boot()
     {
         parent::boot();
-        static::deleting(function($course) {
+        static::deleting(function ($course) {
             foreach ($course->chapters()->get() as $child) {
                 $child->delete();
             }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Lesson extends Model
 {
     use SoftDeletes;
+
     /**
      * モデルと関連しているテーブル
      *
@@ -46,5 +47,15 @@ class Lesson extends Model
     public function lessonAttendances()
     {
         return $this->hasMany(LessonAttendance::class);
+    }
+
+    /**
+     * レッスンの総数を取得する
+     *
+     * @return int
+     */
+    public function getTotalLessonsCountAttribute()
+    {
+        return $this->chapter->lessons()->count();
     }
 }

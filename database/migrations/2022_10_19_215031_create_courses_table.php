@@ -18,10 +18,11 @@ class CreateCoursesTable extends Migration
             $table->bigInteger('instructor_id')->unsigned()->comment('講師ID');
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
-            $table->string('status',30)->comment('ステータス');
+            $table->string('status', 30)->comment('ステータス');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+            $table->foreign('instructor_id')->references('id')->on('instructors');
         });
     }
 

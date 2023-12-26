@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use App\Http\Requests\Student\AttendanceCourseProgressRequest;
+use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Requests\Student\AttendanceIndexRequest;
 use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Requests\Student\AttendanceShowRequest;
@@ -23,7 +26,7 @@ class AttendanceController extends Controller
      * @param AttendanceIndexRequest $request
      * @return AttendanceIndexResource
      */
-    public function index (AttendanceIndexRequest $request)
+    public function index(AttendanceIndexRequest $request)
     {
         $studentId = Auth::id();
 
@@ -38,7 +41,7 @@ class AttendanceController extends Controller
 
         $attendances = Attendance::with('course.instructor')
         ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use($request) {
+        ->whereHas('course', function (Builder $query) use ($request) {
             $query->where('title', 'like', "%{$request->search_word}%");
             $query->where('status', Course::STATUS_PUBLIC);
         })->get();
@@ -61,7 +64,7 @@ class AttendanceController extends Controller
         ])
         ->findOrFail($request->attendance_id);
 
-        if ($attendance->student_id !== $request->user()->id){
+        if ($attendance->student_id !== $request->user()->id) {
             return response()->json([
                 "result" => false,
                 "message" => "Access forbidden."
@@ -93,14 +96,157 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(function($chapter) use ($request) {
-                return $chapter->id === (int)$request->chapter_id;
-            })
+        $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
+                return $chapter->id === (int) $request->chapter_id;
+        })
             ->first();
+
+        // 各レッスンに対して完了済みのレッスン数を計算
+        $chapter->lessons->map(function ($lesson) use ($attendance) {
+            $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
+            $lesson->completed_lessons_count = $completedLessonsCount;
+            return $lesson;
+        });
 
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
-            'chapter' => $chapter
+            'chapter' => $chapter,
         ]);
+    }
+
+    /**
+     * チャプター進捗状況、続きのレッスンID取得API
+     *
+     * @param AttendanceCourseProgressRequest $request
+     * @return AttendanceCourseProgressResource
+     */
+    public function progress(AttendanceCourseProgressRequest $request)
+    {
+        $authId = Auth::id();
+        $attendance = Attendance::with([
+            'course.chapters.lessons',
+            'lessonAttendances'
+        ])
+        ->findOrFail($request->attendance_id);
+
+        if ($authId !== $attendance->student_id) {
+            return response()->json([
+                'result' => false,
+                'error_message' => 'Not authorized.'
+            ], 403);
+        }
+
+        $progressData = [
+            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
+            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
+            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
+            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
+            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance)
+        ];
+
+        return new AttendanceCourseProgressResource([
+            'attendance' => $attendance,
+            'progressData' => $progressData,
+        ]);
+    }
+
+    /**
+     * 完了済みのチャプター数を取得する
+     *
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function getCompletedChaptersCount($attendance)
+    {
+        return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
+            $isCompleted = false;
+            // 全てのレッスンが完了済みかどうかをチェック
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
+                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
+                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                    $isCompleted = false;
+                    return false;
+                }
+                $isCompleted = true;
+            });
+            return $isCompleted;
+        })->count();
+    }
+
+    /**
+     * チャプター合計を取得する
+     *
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function getTotalChaptersCount($attendance)
+    {
+        return $attendance->course->chapters->count();
+    }
+
+    /**
+     * 完了済みのレッスン数を取得する
+     *
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function getCompletedLessonsCount($attendance)
+    {
+        return $attendance->lessonAttendances->filter(function ($lessonAttendance) {
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })->count();
+    }
+
+    /**
+     * レッスン合計を取得する
+     *
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function getTotalLessonsCount($attendance)
+    {
+        $totalLessonsCount = 0;
+        foreach ($attendance->course->chapters as $chapter) {
+            $lessonCount = $chapter->lessons->count();
+            $totalLessonsCount += $lessonCount;
+        }
+        return $totalLessonsCount;
+    }
+
+    /**
+     * 続きのレッスンIDと、それを含むチャプターのIDを取得する
+     *
+     * @param Attendance $attendance
+     * @return array | null
+     */
+    private function getYoungestUnCompletedLesson($attendance)
+    {
+        // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
+        $youngestUnCompletedLesson = [
+            'chapter_id' => null,
+            'lesson_id' => null,
+        ];
+        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLesson) {
+            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
+                return;
+            }
+
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
+                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
+                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                    if ($youngestUnCompletedLesson['lesson_id'] === null) {
+                        $youngestUnCompletedLesson = [
+                            'lesson_id' => $lesson->id,
+                            'chapter_id' => $chapter->id,
+                        ];
+                        return;
+                    }
+                }
+            });
+        });
+        if ($youngestUnCompletedLesson['lesson_id'] === null) {
+            return null;
+        }
+        return $youngestUnCompletedLesson;
     }
 }

@@ -42,7 +42,7 @@ class AttendanceController extends Controller
                 'student_id' => $request->student_id,
                 'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
             ]);
-            $lessons = Lesson::whereHas('chapter', function($query) use ($request) {
+            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);
             })->get();
             foreach ($lessons as $lesson) {
@@ -71,7 +71,8 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request) {
+    public function show(AttendanceShowRequest $request)
+    {
         $courseId = $request->course_id;
         $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -80,8 +81,8 @@ class AttendanceController extends Controller
             $completedCount = 0;
             foreach ($chapter->lessons as $lesson) {
                 foreach ($lesson->lessonAttendances as $lessonAttendance) {
-                    if($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE){
-                        $completedCount+=1;
+                    if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                        $completedCount += 1;
                     }
                 }
             }
@@ -132,7 +133,8 @@ class AttendanceController extends Controller
      * @param LoginRateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function loginRate(LoginRateRequest $request) {
+    public function loginRate(LoginRateRequest $request)
+    {
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
         $loginId = Auth::guard('instructor')->user()->id;
 
@@ -177,11 +179,13 @@ class AttendanceController extends Controller
      * @param int $total
      * @return int
      */
-    public function calcLoginRate($number, $total) {
-        if ($total === 0) return 0;
+    public function calcLoginRate($number, $total)
+    {
+        if ($total === 0) {
+            return 0;
+        }
 
         $percent = ($number / $total) * 100;
         return floor($percent);
     }
-
 }

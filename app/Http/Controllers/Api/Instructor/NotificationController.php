@@ -27,7 +27,7 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course'])
-                                        ->where('instructor_id', 1) //講師IDは仮で1を指定
+                                        ->where('instructor_id', Auth::guard('instructor')->user()->id)
                                         ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
@@ -56,7 +56,7 @@ class NotificationController extends Controller
     {
         Notification::create([
             'course_id'     => $request->course_id,
-            'instructor_id' => 1,
+            'instructor_id' => Auth::guard('instructor')->user()->id,
             'title'         => $request->title,
             'type'          => $request->type,
             'start_date'    => $request->start_date,
@@ -75,7 +75,8 @@ class NotificationController extends Controller
      * @param   NotificationUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(NotificationUpdateRequest $request) {
+    public function update(NotificationUpdateRequest $request)
+    {
         $notification = Notification::findOrFail($request->notification_id);
         $notification->fill([
             'type'  => $request->type,

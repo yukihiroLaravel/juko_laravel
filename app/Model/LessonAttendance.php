@@ -21,7 +21,7 @@ class LessonAttendance extends Model
         'status'
     ];
 
-    // ToDo ステータス定数
+    // ステータス定数
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
     const STATUS_IN_ATTENDANCE = 'in_attendance';
     const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
@@ -44,5 +44,20 @@ class LessonAttendance extends Model
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
+    }
+
+    /**
+     * レッスンの完了した総数を取得する
+     *
+     * @param int $lessonid
+     * @param int $attendanceid
+     * @return int
+     */
+    public static function countCompletedAttendance($lessonId, $attendanceId)
+    {
+        return self::where('lesson_id', $lessonId)
+                    ->where('attendance_id', $attendanceId)
+                    ->where('status', self::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
     }
 }

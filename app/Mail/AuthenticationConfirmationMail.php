@@ -9,7 +9,8 @@ use App\Model\Student;
 
 class AuthenticationConfirmationMail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     private string $email;
     private string $fullName;
@@ -23,8 +24,8 @@ class AuthenticationConfirmationMail extends Mailable
     public function __construct(
         Student $student,
         string $code,
-        string $token)
-    {
+        string $token
+    ) {
         $this->email     = $student->email;
         $this->fullName  = $student->fullName;
         $this->code      = $code;

@@ -62,11 +62,11 @@ class Attendance extends Model
     protected static function boot()
     {
         parent::boot();
-        static::deleting(function($attendance) {
+        static::deleting(function ($attendance) {
             $attendance->lessonAttendances()->delete();
         });
     }
-    
+
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
     const SORT_BY_EMAIL = 'email';

@@ -94,30 +94,28 @@ class AttendanceController extends Controller
         ]);
     }
 
-    public function delete(AttendanceDeleteRequest $request) 
+    public function delete(AttendanceDeleteRequest $request)
     {
         DB::beginTransaction();
 
         try {
-            
             $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
-            
+
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
                 return response()->json([
                     "result" => false,
                     "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
                 ], 403);
             }
-            
+
             $attendance->delete();
-    
+
             DB::commit();
 
             return response()->json([
                 "result" => true,
             ]);
-    
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

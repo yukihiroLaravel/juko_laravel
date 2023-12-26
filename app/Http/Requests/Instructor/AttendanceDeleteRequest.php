@@ -22,7 +22,7 @@ class AttendanceDeleteRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {        
+    {
         return [
             'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];

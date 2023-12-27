@@ -95,4 +95,8 @@ class ChapterController extends Controller
             "result" => true
         ]);
     }
+    public function sort(Request $request)
+    {
+        return response()->json([]);
+    }
 }

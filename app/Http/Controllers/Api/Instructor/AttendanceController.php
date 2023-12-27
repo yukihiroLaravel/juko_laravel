@@ -10,6 +10,7 @@ use App\Model\Course;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
@@ -90,6 +91,43 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
         ]);
+    }
+
+    /**
+     * 受講状況削除API
+     *
+     * @param AttendanceDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete(AttendanceDeleteRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $attendanceId = $request->route('attendance_id');
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+
+            if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+
+            $attendance->delete();
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
     }
 
     /**

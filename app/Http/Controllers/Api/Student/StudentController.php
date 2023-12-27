@@ -161,11 +161,6 @@ class StudentController extends Controller
                 $imagePath = Student::convertImagePath($imagePath);
             }
 
-            $request->validate([
-                'email' => [new UniqueEmailRule($student->email)],
-            ]);
-
-
             $student->fill([
                 'nick_name' => $request->nick_name,
                 'last_name' => $request->last_name,

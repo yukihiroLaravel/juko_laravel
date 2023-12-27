@@ -5,18 +5,21 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Model\Student;
 use App\Model\Instructor;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\StudentIndexRequest;
+use App\Http\Resources\Manager\StudentIndexResource;
 
 class StudentController extends Controller
 {
     /**
      * マネージャ講座の受講生取得API
      *
+     * @param StudentIndexRequest $request
+     * @return StudentIndexResource
      */
-    public function index(Request $request)
+    public function index(StudentIndexRequest $request)
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -53,8 +56,9 @@ class StudentController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return response()->json([
-            'attendances' => $attendances
+        return new StudentIndexResource([
+            'course' => $course,
+            'attendances' => $attendances,
         ]);
     }
 }

@@ -7,7 +7,6 @@ use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
-use App\Http\Requests\Manager\ChapterSortRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -96,7 +95,7 @@ class ChapterController extends Controller
             "result" => true
         ]);
     }
-    public function sort(ChapterSortRequest $request)
+    public function sort(Request $request)
     {
         return response()->json([]);
     }

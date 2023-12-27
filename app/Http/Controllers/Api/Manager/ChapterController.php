@@ -25,8 +25,6 @@ class ChapterController extends Controller
         $instructorIds[] = $instructorId;
 
         $course = Course::FindOrFail($course_id);
-        $order = $course->chapters()->count();
-        $order++;
         
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
@@ -35,11 +33,14 @@ class ChapterController extends Controller
                 'message' => "Forbidden, not allowed to create new chapter.",
             ], 403);
         }
-        $chapter = Chapter::create([
+        
+        $order =  $course->chapters->count();
+        $newOrder = $order + 1;
+        Chapter::create([
             'course_id' => $course_id,
             'title' => $request->input('title'),
             'order' => $order,
-            'status' => Chapter::STATUS_PRIVATE,
+            'status' => Chapter::STATUS_PUBLIC,
          ]);
 
         return response()->json([

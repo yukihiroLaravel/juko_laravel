@@ -9,7 +9,6 @@ use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
@@ -38,11 +37,10 @@ class ChapterController extends Controller
             ], 403);
         }
 
-            return new ChapterShowResource($chapter);
+        return new ChapterShowResource($chapter);
     }
 
-    /*
-     * マネージャ配下のチャプター削除API
+    /**
      * マネージャー配下のチャプター更新API
      *
      * @param ChapterPatchRequest $request
@@ -90,10 +88,11 @@ class ChapterController extends Controller
     }
 
     /**
-      * マネージャ配下のチャプター削除API
-      *
-      */
-
+     * マネージャ配下のチャプター削除API
+     *
+     * @param ChapterDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function delete(ChapterDeleteRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;

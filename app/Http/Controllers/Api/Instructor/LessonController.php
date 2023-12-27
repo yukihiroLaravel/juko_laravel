@@ -162,6 +162,8 @@ class LessonController extends Controller
                 ], 403);
             }
 
+            $lesson->delete();
+
             return response()->json([
                 'result' => true,
             ]);

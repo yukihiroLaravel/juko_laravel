@@ -25,11 +25,12 @@ class StudentPatchRequest extends FormRequest
      */
     public function rules()
     {
+        $user = $this->user();
         return [
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
-            'email' => ['required', 'email', new UniqueEmailRule($this->email)],
+            'email' => ['required', 'email', new UniqueEmailRule($user->email)],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],

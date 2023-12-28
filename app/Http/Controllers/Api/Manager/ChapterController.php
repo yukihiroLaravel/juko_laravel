@@ -39,7 +39,7 @@ class ChapterController extends Controller
         Chapter::create([
             'course_id' => $course_id,
             'title' => $request->input('title'),
-            'order' => $order,
+            'order' => $newOrder,
             'status' => Chapter::STATUS_PUBLIC,
          ]);
 

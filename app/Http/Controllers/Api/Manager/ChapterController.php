@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
+use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
@@ -15,9 +16,36 @@ class ChapterController extends Controller
      * チャプター新規作成API
      *
      */
-    public function store()
+    public function store(Request $request, int $course_id)
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // 配下の講師情報を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::FindOrFail($course_id);
+
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分、または配下の講師の講座でなければエラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to create new chapter.",
+            ], 403);
+        }
+
+        $order =  $course->chapters->count();
+        $newOrder = $order + 1;
+        Chapter::create([
+            'course_id' => $course_id,
+            'title' => $request->input('title'),
+            'order' => $newOrder,
+            'status' => Chapter::STATUS_PUBLIC,
+         ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
     /**
      * マネージャ配下のチャプター削除API

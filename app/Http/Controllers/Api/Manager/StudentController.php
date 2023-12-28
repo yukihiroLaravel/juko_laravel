@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\Student;
 use App\Model\Instructor;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
 

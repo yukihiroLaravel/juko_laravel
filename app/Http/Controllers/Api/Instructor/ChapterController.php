@@ -123,7 +123,7 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
-        
+
         $chapter->update([
             'status' => $request->status
         ]);

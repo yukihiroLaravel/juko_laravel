@@ -6,6 +6,7 @@ use App\Model\Instructor;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +16,9 @@ class ChapterController extends Controller
     /**
      * チャプター新規作成API
      *
+     * @param ChapterStoreRequest $request
      */
-    public function store(Request $request, int $course_id)
+    public function store(ChapterStoreRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 配下の講師情報を取得
@@ -24,7 +26,7 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        $course = Course::FindOrFail($course_id);
+        $course = Course::FindOrFail($request->course_id);
 
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
@@ -37,7 +39,7 @@ class ChapterController extends Controller
         $order =  $course->chapters->count();
         $newOrder = $order + 1;
         Chapter::create([
-            'course_id' => $course_id,
+            'course_id' => $request->input('course_id'),
             'title' => $request->input('title'),
             'order' => $newOrder,
             'status' => Chapter::STATUS_PUBLIC,

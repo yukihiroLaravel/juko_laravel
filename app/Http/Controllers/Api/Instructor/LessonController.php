@@ -14,7 +14,6 @@ use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -140,15 +139,12 @@ class LessonController extends Controller
     {
 
         try {
-            $lessonId = $request->input('lesson_id');
-            $lesson = Lesson::with('chapter.course')->findOrFail($lessonId);
+            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
             $course = $lesson->chapter->course;
-            $instructorId = $course->instructor_id;
-
             $user = Instructor::find($request->user()->id);
 
-            if ($instructorId !== $user->id) {
+            if ($course->instructor_id !== $user->id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid instructor_id.'
@@ -158,7 +154,7 @@ class LessonController extends Controller
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Information about current lessons'
+                    'message' => 'This lesson has attendance.'
                 ], 403);
             }
 
@@ -167,12 +163,9 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $exception) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not Found Lesson.'
-            ], 404);
-        } catch (Exception $exception) {
+
+        } catch (Exception $e) {
+            Log::error($e);
             return response()->json([
                 'result' => false,
             ], 500);

@@ -8,7 +8,6 @@ use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChapterController extends Controller
@@ -39,7 +38,7 @@ class ChapterController extends Controller
         $order =  $course->chapters->count();
         $newOrder = $order + 1;
         Chapter::create([
-            'course_id' => $request->input('course_id'),
+            'course_id' => $request->course_id,
             'title' => $request->input('title'),
             'order' => $newOrder,
             'status' => Chapter::STATUS_PUBLIC,

@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\CourseStatusRule;
 
-class CoursePutStatusRequest extends FormRequest
+class ChapterDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +24,16 @@ class CoursePutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => ['required', 'string', new CourseStatusRule()],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
     }
 }

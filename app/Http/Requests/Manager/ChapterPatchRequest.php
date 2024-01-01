@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class NotificationShowRequest extends FormRequest
+class ChapterPatchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,7 +20,8 @@ class NotificationShowRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'notification_id' => $this->route('notification_id'),
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -31,11 +33,9 @@ class NotificationShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => [
-                'required',
-                'integer',
-                'exists:notifications,id',
-            ],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'title' => ['required', 'string'],
         ];
     }
 }

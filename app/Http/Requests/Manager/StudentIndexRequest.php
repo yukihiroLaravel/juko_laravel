@@ -7,7 +7,6 @@ use App\Rules\IndexSortByRule;
 
 class StudentIndexRequest extends FormRequest
 {
-
     protected function prepareForValidation()
     {
         $this->merge([
@@ -30,14 +29,14 @@ class StudentIndexRequest extends FormRequest
      *
      * @return array
      */
-     public function rules()
+    public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id'],
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new IndexSortByRule],
-            'order' => ['string', 'in:asc,desc'],
+           'course_id' => ['required', 'integer', 'exists:courses,id'],
+           'per_page' => ['integer', 'min:1'],
+           'page' => ['integer', 'min:1'],
+           'sortBy' => ['string', new IndexSortByRule()],
+           'order' => ['string', 'in:asc,desc'],
         ];
     }
 }

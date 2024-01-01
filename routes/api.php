@@ -156,7 +156,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('student')->group(function () {
                             Route::get('index', 'Api\Manager\StudentController@index');
                         });
-                      
+
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::prefix('{chapter_id}')->group(function () {

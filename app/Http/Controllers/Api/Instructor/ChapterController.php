@@ -142,14 +142,14 @@ class ChapterController extends Controller
     public function delete(ChapterDeleteRequest $request)
     {
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
-    
+
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             return response()->json([
                 'result' => false,
                 'message' => 'invalid instructor_id.'
             ], 403);
         }
-    
+
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
             return response()->json([
@@ -157,9 +157,9 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
-    
+
         $chapter->update(['order' => 0]);
-    
+
         Chapter::where('course_id', $chapter->course_id)
             ->where('id', '!=', $chapter->id)
             ->orderBy('order')
@@ -167,14 +167,13 @@ class ChapterController extends Controller
             ->each(function ($chapterToUpdate, $index) {
                 $chapterToUpdate->update(['order' => $index + 1]);
             });
-    
+
         $chapter->delete();
-    
+
         return response()->json([
             "result" => true
         ]);
     }
-    
 
     /**
      * チャプター並び替えAPI

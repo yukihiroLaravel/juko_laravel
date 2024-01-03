@@ -33,7 +33,7 @@ class StudentIndexRequest extends FormRequest
      public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'sortBy' => ['string', new IndexSortByRule],

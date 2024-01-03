@@ -40,4 +40,4 @@ class CourseStatusRule implements Rule
     {
         return 'Invalid Status.';
     }
-} 
+}

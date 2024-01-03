@@ -40,4 +40,4 @@ class InstructorTypeRule implements Rule
     {
         return 'Invalid Type.';
     }
-} 
+}

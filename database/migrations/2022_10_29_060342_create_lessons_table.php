@@ -26,7 +26,6 @@ class CreateLessonsTable extends Migration
             $table->softDeletes();
             $table->unsignedTinyInteger('order')->comment('順番');
             $table->foreign('chapter_id')->references('id')->on('chapters');
-
         });
     }
 

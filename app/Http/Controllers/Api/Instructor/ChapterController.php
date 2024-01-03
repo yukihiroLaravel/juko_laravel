@@ -81,7 +81,14 @@ class ChapterController extends Controller
      */
     public function update(ChapterPatchRequest $request)
     {
+        $user = Instructor::find($request->user()->id);
         $chapter = Chapter::findOrFail($request->chapter_id);
+        if ($chapter->course->instructor_id !== $user->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 403);
+        }
         $chapter->update([
             'title' => $request->title
         ]);
@@ -94,15 +101,31 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API(公開・非公開切り替え)
-     * 
+     *
      * @param ChapterPatchStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(ChapterPatchStatusRequest $request)
-    { 
-        Chapter::findOrFail($request->chapter_id)
-            ->update([
-                'status' => $request->status
+    {
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        $chapter->update([
+            'status' => $request->status
         ]);
 
         return response()->json([
@@ -118,8 +141,25 @@ class ChapterController extends Controller
      */
     public function delete(ChapterDeleteRequest $request)
     {
-        $chapter = Chapter::findOrFail($request->chapter_id);
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
         $chapter->delete();
+
         return response()->json([
             "result" => true
         ]);
@@ -127,10 +167,10 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     * 
+     *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     * 
+     *
      */
     public function sort(ChapterSortRequest $request)
     {
@@ -147,7 +187,7 @@ class ChapterController extends Controller
                 ], 403);
             }
             foreach ($chapters as $chapter) {
-                Chapter::where('id',$chapter['chapter_id'])
+                Chapter::where('id', $chapter['chapter_id'])
                 ->where('course_id', $courseId)
                 ->firstOrFail()
                 ->update([
@@ -175,7 +215,7 @@ class ChapterController extends Controller
 
     /**
      * チャプター一括更新API(公開・非公開切り替え)
-     * 
+     *
      * @param ChapterPutStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

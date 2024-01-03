@@ -3,17 +3,9 @@
 namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\IndexSortByRule;
 
-class StudentIndexRequest extends FormRequest
+class ChapterDeleteRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -33,10 +25,15 @@ class StudentIndexRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new IndexSortByRule],
-            'order' => ['string', 'in:asc,desc'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
     }
 }

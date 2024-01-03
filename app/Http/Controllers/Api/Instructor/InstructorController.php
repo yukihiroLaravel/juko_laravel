@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
-
 class InstructorController extends Controller
 {
     /**
@@ -24,8 +23,7 @@ class InstructorController extends Controller
     {
         $file = $request->file('profile_image');
 
-        try{
-
+        try {
             $instructor = Instructor::findOrFail($request->instructor_id);
 
             if (Auth::guard('instructor')->user()->id !== $instructor->id) {
@@ -72,7 +70,7 @@ class InstructorController extends Controller
      * @return InstructorEditResource
      */
     public function edit()
-    {   
+    {
         $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
         return new InstructorEditResource($instructor);
     }

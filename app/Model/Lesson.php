@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Lesson extends Model
 {
     use SoftDeletes;
+
     /**
      * モデルと関連しているテーブル
      *

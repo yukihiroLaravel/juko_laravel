@@ -10,6 +10,7 @@ use App\Model\Course;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
@@ -40,7 +41,7 @@ class AttendanceController extends Controller
                 'student_id' => $request->student_id,
                 'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
             ]);
-            $lessons = Lesson::whereHas('chapter', function($query) use ($request) {
+            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);
             })->get();
             foreach ($lessons as $lesson) {
@@ -69,7 +70,8 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request) {
+    public function show(AttendanceShowRequest $request)
+    {
         $courseId = $request->course_id;
         $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -78,8 +80,8 @@ class AttendanceController extends Controller
             $completedCount = 0;
             foreach ($chapter->lessons as $lesson) {
                 foreach ($lesson->lessonAttendances as $lessonAttendance) {
-                    if($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE){
-                        $completedCount+=1;
+                    if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                        $completedCount += 1;
                     }
                 }
             }
@@ -92,12 +94,50 @@ class AttendanceController extends Controller
     }
 
     /**
+     * 受講状況削除API
+     *
+     * @param AttendanceDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete(AttendanceDeleteRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $attendanceId = $request->route('attendance_id');
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+
+            if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+
+            $attendance->delete();
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
+    }
+
+    /**
      * 受講生ログイン率取得API
      *
      * @param LoginRateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function loginRate(LoginRateRequest $request) {
+    public function loginRate(LoginRateRequest $request)
+    {
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
         $loginId = Auth::guard('instructor')->user()->id;
 
@@ -142,11 +182,13 @@ class AttendanceController extends Controller
      * @param int $total
      * @return int
      */
-    public function calcLoginRate($number, $total) {
-        if ($total === 0) return 0;
+    public function calcLoginRate($number, $total)
+    {
+        if ($total === 0) {
+            return 0;
+        }
 
         $percent = ($number / $total) * 100;
         return floor($percent);
     }
-
 }

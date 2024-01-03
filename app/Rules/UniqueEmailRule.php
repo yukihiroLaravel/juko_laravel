@@ -32,5 +32,3 @@ class UniqueEmailRule implements Rule
         return 'The :attribute has already been taken.';
     }
 }
-
-

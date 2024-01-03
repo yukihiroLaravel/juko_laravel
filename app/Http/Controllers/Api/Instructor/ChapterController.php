@@ -33,8 +33,24 @@ class ChapterController extends Controller
     public function store(ChapterStoreRequest $request)
     {
         try {
+            // 講師の情報を取得
+            $user = Instructor::find($request->user()->id);
+            
+            // リクエストに含まれる講座IDを使用して対応する講座を取得
+            $course = Course::findOrFail($request->input('course_id'));
+    
+            // 講座の作成者が現在の講師であるかどうかを確認
+            if ($course->instructor_id !== $user->id) {
+                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id for this course.',
+                ], 403);
+            }
+    
+            // チャプターを作成
             $chapter = Chapter::create([
-                'course_id' => $request->input('course_id'),
+                'course_id' => $course->id,
                 'title' => $request->input('title'),
             ]);
 
@@ -132,7 +148,7 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
-
+        
         $chapter->update([
             'status' => $request->status
         ]);

@@ -181,9 +181,6 @@ class ChapterController extends Controller
                 ->each(function ($chapter, $index) {
                     $chapter->update(['order' => $index + 1]);
                 });
-    
-
-            $chapter->delete();
 
             DB::commit();
 

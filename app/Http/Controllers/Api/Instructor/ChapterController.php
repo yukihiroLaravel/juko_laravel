@@ -48,12 +48,15 @@ class ChapterController extends Controller
                 ], 403);
             }
     
-            // チャプターを作成
+            $order = $course->chapters->count();
+            $newOrder = $order + 1;
             $chapter = Chapter::create([
                 'course_id' => $course->id,
                 'title' => $request->input('title'),
+                'order' => $newOrder,
+                'status' => Chapter::STATUS_PUBLIC,
             ]);
-
+    
             return response()->json([
                 'result' => true,
                 'data' => new ChapterStoreResource($chapter),
@@ -148,7 +151,7 @@ class ChapterController extends Controller
                 'message' => 'Invalid course_id.',
             ], 403);
         }
-        
+
         $chapter->update([
             'status' => $request->status
         ]);

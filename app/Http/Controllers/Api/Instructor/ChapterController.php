@@ -37,7 +37,7 @@ class ChapterController extends Controller
             $user = Auth::user();
             
             // リクエストに含まれる講座IDを使用して対応する講座を取得
-            $course = Course::findOrFail($request->input('course_id'));
+            $course = Course::with('chapters')->findOrFail($request->input('course_id'));
 
             // 講座の作成者が現在の講師であるかどうかを確認
             if ($course->instructor_id !== $user->id) {
@@ -56,6 +56,9 @@ class ChapterController extends Controller
                 'order' => $newOrder,
                 'status' => Chapter::STATUS_PUBLIC,
             ]);
+
+            // 新しいチャプターが作成された後、更新されたチャプター情報を含む講座を再取得する
+            $course = $course->fresh('chapters');
 
             return response()->json([
                 'result' => true,

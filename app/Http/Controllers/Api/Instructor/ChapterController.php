@@ -158,7 +158,7 @@ class ChapterController extends Controller
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'invalid instructor_id.'
+                    'message' => 'Invalid instructor_id.'
                 ], 403);
             }
 
@@ -170,7 +170,7 @@ class ChapterController extends Controller
                 ], 403);
             }
 
-            // 削除対象チャプターのorderカラムを0に設定し、他のチャプターの順番を更新する。
+            // 削除対象チャプターのorderカラムを0に設定する
             $chapter->update(['order' => 0]);
 
             $chapter->delete();
@@ -187,7 +187,7 @@ class ChapterController extends Controller
             return response()->json([
                 "result" => true
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

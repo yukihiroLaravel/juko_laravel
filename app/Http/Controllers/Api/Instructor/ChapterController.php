@@ -174,7 +174,7 @@ class ChapterController extends Controller
             $chapter->update(['order' => 0]);
 
             $chapter->delete();
-    
+
             Chapter::where('course_id', $chapter->course_id)
                 ->orderBy('order')
                 ->get()

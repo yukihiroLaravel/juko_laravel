@@ -35,10 +35,10 @@ class ChapterController extends Controller
         try {
             // 講師の情報を取得
             $user = Instructor::find($request->user()->id);
-            
+
             // リクエストに含まれる講座IDを使用して対応する講座を取得
             $course = Course::findOrFail($request->input('course_id'));
-    
+
             // 講座の作成者が現在の講師であるかどうかを確認
             if ($course->instructor_id !== $user->id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
@@ -47,7 +47,7 @@ class ChapterController extends Controller
                     'message' => 'Invalid instructor_id for this course.',
                 ], 403);
             }
-    
+
             $order = $course->chapters->count();
             $newOrder = $order + 1;
             $chapter = Chapter::create([
@@ -56,7 +56,7 @@ class ChapterController extends Controller
                 'order' => $newOrder,
                 'status' => Chapter::STATUS_PUBLIC,
             ]);
-    
+
             return response()->json([
                 'result' => true,
                 'data' => new ChapterStoreResource($chapter),

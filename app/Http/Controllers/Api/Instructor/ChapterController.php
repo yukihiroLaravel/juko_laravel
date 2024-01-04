@@ -150,28 +150,50 @@ class ChapterController extends Controller
      */
     public function delete(ChapterDeleteRequest $request)
     {
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+        DB::beginTransaction();
 
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+        try {
+            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id.'
+                ], 403);
+            }
+
+            if ((int) $request->course_id !== $chapter->course->id) {
+                // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+                return response()->json([
+                    'result'  => false,
+                    'message' => 'Invalid course_id.',
+                ], 403);
+            }
+
+            // 削除対象チャプターのorderカラムを0に設定する
+            $chapter->update(['order' => 0]);
+
+            $chapter->delete();
+
+            Chapter::where('course_id', $chapter->course_id)
+                ->orderBy('order')
+                ->get()
+                ->each(function ($chapter, $index) {
+                    $chapter->update(['order' => $index + 1]);
+                });
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
             return response()->json([
                 'result' => false,
-                "message" => 'invalid instructor_id.'
-            ], 403);
+            ], 500);
         }
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result'  => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
-        }
-
-        $chapter->delete();
-
-        return response()->json([
-            "result" => true
-        ]);
     }
 
     /**

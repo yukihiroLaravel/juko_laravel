@@ -57,9 +57,6 @@ class ChapterController extends Controller
                 'status' => Chapter::STATUS_PUBLIC,
             ]);
 
-            // 新しいチャプターが作成された後、更新されたチャプター情報を含む講座を再取得する
-            $course = $course->fresh('chapters');
-
             return response()->json([
                 'result' => true,
                 'data' => new ChapterStoreResource($chapter),

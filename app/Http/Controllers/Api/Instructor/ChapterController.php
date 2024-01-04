@@ -163,16 +163,15 @@ class ChapterController extends Controller
     
             // 削除対象チャプターのorderカラムを0に設定し、他のチャプターの順番を更新する。
             $chapter->update(['order' => 0]);
+
+            $chapter->delete();
     
             Chapter::where('course_id', $chapter->course_id)
-                ->where('id', '!=', $chapter->id)
                 ->orderBy('order')
                 ->get()
                 ->each(function ($chapter, $index) {
                     $chapter->update(['order' => $index + 1]);
                 });
-    
-            $chapter->delete();
     
             DB::commit();
     

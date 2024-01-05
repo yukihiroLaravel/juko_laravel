@@ -34,7 +34,7 @@ class ChapterController extends Controller
     {
         try {
             // 講師の情報を取得
-            $user = Auth::user();
+            $user = Auth::guard('instructor')->user();
 
             // リクエストに含まれる講座IDを使用して対応する講座を取得
             $course = Course::with('chapters')->findOrFail($request->input('course_id'));

@@ -87,7 +87,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::patch('/', 'Api\Instructor\LessonController@update');
+                                    Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
                                 });
                             });
@@ -115,6 +115,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
+                Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');
             });
 
             // 講師-生徒
@@ -139,20 +140,29 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
 
-                // マネージャー講師-講座
+                // マネージャー-講座
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
+                    Route::post('store', 'Api\Manager\CourseController@store');
                     Route::put('status', 'Api\Manager\CourseController@status');
+                    Route::post('/', 'Api\Manager\CourseController@store');
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', 'Api\Manager\CourseController@show');
                         Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
 
+                        // マネージャー-講座-生徒
+                        Route::prefix('student')->group(function () {
+                            Route::get('index', 'Api\Manager\StudentController@index');
+                        });
+
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::prefix('{chapter_id}')->group(function () {
+                                Route::get('/', 'Api\Manager\ChapterController@show');
+                                Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
                             });
                         });
@@ -162,7 +172,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 });
-
 
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {

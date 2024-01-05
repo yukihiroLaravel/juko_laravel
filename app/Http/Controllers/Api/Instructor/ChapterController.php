@@ -33,9 +33,28 @@ class ChapterController extends Controller
     public function store(ChapterStoreRequest $request)
     {
         try {
+            // 講師の情報を取得
+            $user = Auth::guard('instructor')->user();
+
+            // リクエストに含まれる講座IDを使用して対応する講座を取得
+            $course = Course::with('chapters')->findOrFail($request->input('course_id'));
+
+            // 講座の作成者が現在の講師であるかどうかを確認
+            if ($course->instructor_id !== $user->id) {
+                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id for this course.',
+                ], 403);
+            }
+
+            $order = $course->chapters->count();
+            $newOrder = $order + 1;
             $chapter = Chapter::create([
-                'course_id' => $request->input('course_id'),
+                'course_id' => $course->id,
                 'title' => $request->input('title'),
+                'order' => $newOrder,
+                'status' => Chapter::STATUS_PUBLIC,
             ]);
 
             return response()->json([
@@ -89,6 +108,15 @@ class ChapterController extends Controller
                 'message' => 'Invalid instructor_id',
             ], 403);
         }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
         $chapter->update([
             'title' => $request->title
         ]);
@@ -107,9 +135,25 @@ class ChapterController extends Controller
      */
     public function updateStatus(ChapterPatchStatusRequest $request)
     {
-        Chapter::findOrFail($request->chapter_id)
-            ->update([
-                'status' => $request->status
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        $chapter->update([
+            'status' => $request->status
         ]);
 
         return response()->json([
@@ -125,11 +169,50 @@ class ChapterController extends Controller
      */
     public function delete(ChapterDeleteRequest $request)
     {
-        $chapter = Chapter::findOrFail($request->chapter_id);
-        $chapter->delete();
-        return response()->json([
-            "result" => true
-        ]);
+        DB::beginTransaction();
+
+        try {
+            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id.'
+                ], 403);
+            }
+
+            if ((int) $request->course_id !== $chapter->course->id) {
+                // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+                return response()->json([
+                    'result'  => false,
+                    'message' => 'Invalid course_id.',
+                ], 403);
+            }
+
+            // 削除対象チャプターのorderカラムを0に設定する
+            $chapter->update(['order' => 0]);
+
+            $chapter->delete();
+
+            Chapter::where('course_id', $chapter->course_id)
+                ->orderBy('order')
+                ->get()
+                ->each(function ($chapter, $index) {
+                    $chapter->update(['order' => $index + 1]);
+                });
+
+            DB::commit();
+
+            return response()->json([
+                "result" => true
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 
     /**

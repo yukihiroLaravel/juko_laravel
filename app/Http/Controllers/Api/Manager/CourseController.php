@@ -10,6 +10,7 @@ use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
+use App\Http\Requests\Manager\CourseStoreRequest;
 use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Controllers\Controller;
 use App\Model\Course;
@@ -18,6 +19,7 @@ use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -76,8 +78,9 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座ステータス一覧更新API
-     *
+     * マネージャ講座ステータス一覧更新API
+     *
+     * @param CoursePutStatusRequest $request
      * @return JsonResponse
      */
     public function status(CoursePutStatusRequest $request)
@@ -92,8 +95,39 @@ class CourseController extends Controller
 
         // 自分、または配下の講師の講座のステータスを一括更新
         Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
+
         return response()->json([
             'result' => 'true'
+        ]);
+    }
+
+    /**
+     * マネージャ講座登録API
+     *
+     * @param CourseStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(CourseStoreRequest $request)
+    {
+        $managerId = $request->user()->id;
+
+        $file = $request->file('image');
+        $extension = $file->getClientOriginalExtension();
+        $filename = Str::uuid() . '.' . $extension;
+        $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
+
+        $course = Course::create([
+            'instructor_id' => $managerId,
+            'title' => $request->title,
+            'image' => $filePath,
+            'status' => Course::STATUS_PRIVATE,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            "result" => true,
+            "data" => $course,
         ]);
     }
 

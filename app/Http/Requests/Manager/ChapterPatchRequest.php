@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class LessonDeleteRequest extends FormRequest
+class ChapterPatchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,7 +20,8 @@ class LessonDeleteRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -31,7 +33,9 @@ class LessonDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'title' => ['required', 'string'],
         ];
     }
 }

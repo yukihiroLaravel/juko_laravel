@@ -124,4 +124,13 @@ class ChapterController extends Controller
             "result" => true
         ]);
     }
+
+    /**
+       * マネージャ配下のチャプター更新API
+       *
+       */
+      public function status()
+      {
+          return response()->json([]);
+      }
 }

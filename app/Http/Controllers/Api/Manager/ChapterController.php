@@ -129,7 +129,7 @@ class ChapterController extends Controller
        * マネージャ配下のチャプター更新API
        *
        */
-      public function status()
+      public function updateStatus()
       {
           return response()->json([]);
       }

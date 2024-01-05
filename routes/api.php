@@ -163,7 +163,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
-                                Route::patch('status', 'Api\Manager\ChapterController@status');
+                                Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                             });
                         });
                     });

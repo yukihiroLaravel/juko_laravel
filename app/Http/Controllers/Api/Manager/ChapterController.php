@@ -51,7 +51,7 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
-    
+
     /**
      * チャプター詳細情報を取得
      *

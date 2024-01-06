@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
 use App\Model\Chapter;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
@@ -129,8 +130,42 @@ class ChapterController extends Controller
        * マネージャ配下のチャプター更新API
        *
        */
-    public function updateStatus()
+    public function updateStatus(Request $request)
     {
-        return response()->json([]);
+        // 現在のユーザーを取得（講師の場合）
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーが管理する講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        // 指定されたチャプターを取得
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        // 自分、または配下の講師の講座のチャプターでなければエラー応答
+        if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Unauthorized access to update chapter status.'
+            ], 403);
+        }
+
+        // リクエストのcourse_idとチャプターのcourse_idが一致するか確認
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        // チャプターのstatusをリクエストのstatusで更新
+        $chapter->update([
+          'status' => $request->status
+        ]);
+
+        return response()->json([
+          'result' => true,
+        ]);
     }
 }

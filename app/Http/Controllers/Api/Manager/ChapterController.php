@@ -130,7 +130,7 @@ class ChapterController extends Controller
        * マネージャ配下のチャプター更新API
        *
        */
-      public function updateStatus(Request $request)
+    public function updateStatus(Request $request)
     {
         // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -161,11 +161,11 @@ class ChapterController extends Controller
 
         // チャプターのstatusをリクエストのstatusで更新
         $chapter->update([
-            'status' => $request->status
+          'status' => $request->status
         ]);
 
         return response()->json([
-            'result' => true,
+          'result' => true,
         ]);
     }
 }

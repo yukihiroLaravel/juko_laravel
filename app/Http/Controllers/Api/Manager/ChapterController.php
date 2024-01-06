@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
+use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -130,7 +131,7 @@ class ChapterController extends Controller
        * マネージャ配下のチャプター更新API
        *
        */
-    public function updateStatus(Request $request)
+    public function updateStatus(ChapterPatchStatusRequest $request)
     {
         // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;

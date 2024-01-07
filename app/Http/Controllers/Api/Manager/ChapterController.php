@@ -60,7 +60,7 @@ class ChapterController extends Controller
             }
     }
 
-     /**
+    /**
      * チャプター詳細情報を取得
      *
      * @param ChapterShowRequest $request

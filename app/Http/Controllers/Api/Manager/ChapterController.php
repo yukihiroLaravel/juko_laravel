@@ -127,9 +127,11 @@ class ChapterController extends Controller
     }
 
     /**
-       * マネージャ配下のチャプター更新API
-       *
-       */
+     * マネージャ配下のチャプター更新API
+     *
+     * @param ChapterPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateStatus(ChapterPatchStatusRequest $request)
     {
         // 現在のユーザーを取得（講師の場合）

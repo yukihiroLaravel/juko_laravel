@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
 use App\Model\Chapter;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;

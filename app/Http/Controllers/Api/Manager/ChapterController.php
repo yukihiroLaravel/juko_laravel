@@ -53,13 +53,12 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-            
-            } catch (Exception $e) {
-                Log::error($e);
-                return response()->json([
-                    'result' => false
-                ], 500);
-            }
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false
+            ], 500);
+        }
     }
 
     /**
@@ -87,7 +86,7 @@ class ChapterController extends Controller
         }
         return new ChapterShowResource($chapter);
     }
-    
+
     /**
      * マネージャー配下のチャプター更新API
      *

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
+use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -122,6 +123,51 @@ class ChapterController extends Controller
         $chapter->delete();
         return response()->json([
             "result" => true
+        ]);
+    }
+
+    /**
+     * マネージャ配下のチャプター更新API
+     *
+     * @param ChapterPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(ChapterPatchStatusRequest $request)
+    {
+        // 現在のユーザーを取得（講師の場合）
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーが管理する講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        // 指定されたチャプターを取得
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        // 自分、または配下の講師の講座のチャプターでなければエラー応答
+        if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Unauthorized access to update chapter status.'
+            ], 403);
+        }
+
+        // リクエストのcourse_idとチャプターのcourse_idが一致するか確認
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        // チャプターのstatusをリクエストのstatusで更新
+        $chapter->update([
+          'status' => $request->status
+        ]);
+
+        return response()->json([
+          'result' => true,
         ]);
     }
 }

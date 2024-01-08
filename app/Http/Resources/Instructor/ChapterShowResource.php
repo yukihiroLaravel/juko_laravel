@@ -17,16 +17,15 @@ class ChapterShowResource extends JsonResource
         return [
             'chapter_id' => $this->id,
             'title' => $this->title,
-            'lessons' => $this->lessons->sortBy('order')->values()->map(function ($lesson) {
+            'lessons' => $this->lessons->sortBy('order')->map(function ($lesson) {
                 return [
                     'lesson_id' => $lesson->id,
                     'title' => $lesson->title,
                     'url' => $lesson->url,
                     'remarks' => $lesson->remarks,
                     'status' => $lesson->status,
-                    'order' => $lesson->order,
                 ];
-            }),
+            })->values(),
         ];
     }
 }

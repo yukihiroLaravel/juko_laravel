@@ -12,6 +12,7 @@ use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use Illuminate\Support\Facades\Auth;
+use Exception;
 
 class ChapterController extends Controller
 {
@@ -19,6 +20,7 @@ class ChapterController extends Controller
      * チャプター新規作成API
      *
      * @param ChapterStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(ChapterStoreRequest $request)
     {
@@ -78,7 +80,7 @@ class ChapterController extends Controller
         $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
         // 自身もしくは配下のinstructorでない場合はエラー応答
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
-             return response()->json([
+            return response()->json([
                 'result' => false,
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);

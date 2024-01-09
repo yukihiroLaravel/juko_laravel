@@ -21,10 +21,8 @@ class InstructorController extends Controller
      */
     public function update(InstructorPatchRequest $request)
     {
-        $file = $request->file('profile_image');
-
         try {
-            $instructor = Instructor::findOrFail($request->instructor_id);
+            $instructor = Auth::user();
 
             if (Auth::guard('instructor')->user()->id !== $instructor->id) {
                 return response()->json([
@@ -32,6 +30,9 @@ class InstructorController extends Controller
                     "message" => "Not authorized."
                 ], 403);
             }
+
+            $imagePath = $instructor->profile_image;    // 更新前の画像パスを使用
+            $file = $request->file('profile_image');
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除

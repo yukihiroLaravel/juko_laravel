@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
+use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
+use App\Http\Requests\Manager\ChapterSortRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use Illuminate\Support\Facades\Auth;
 

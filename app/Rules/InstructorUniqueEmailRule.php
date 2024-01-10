@@ -40,6 +40,6 @@ class InstructorUniqueEmailRule implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'The :attribute has already been taken.';
     }
 }

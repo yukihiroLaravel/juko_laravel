@@ -39,7 +39,7 @@ class InstructorPatchRequest extends FormRequest
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
             'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email)],
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
+            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
             'type' => ['required', 'string', 'max:30', new InstructorTypeRule()]
         ];

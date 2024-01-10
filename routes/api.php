@@ -168,7 +168,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 // マネージャー-講師-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
                                     Route::prefix('{lesson_id}')->group(function () {
-                                    Route::put('/', 'Api\Manager\LessonController@update');
+                                        Route::put('/', 'Api\Manager\LessonController@update');
                                     });
                                 });
                             });

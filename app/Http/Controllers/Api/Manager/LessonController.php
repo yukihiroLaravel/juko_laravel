@@ -9,10 +9,11 @@ class LessonController extends Controller
     /**
      * マネージャ配下のレッスン更新API
      *
-     * 
-     * 
+     *
+     *
      */
-    public function update(){
+    public function update()
+    {
         return response()->json([]);
     }
 }

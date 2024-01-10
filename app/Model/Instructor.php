@@ -40,18 +40,6 @@ class Instructor extends Authenticatable
         return $this->hasMany(Course::class);
     }
 
-    /**
-     * 画像保存パスに変換
-     *
-     * @param string $filePath
-     * @return string
-     */
-    public static function convertImagePath(string $filePath)
-    {
-        // public/を削除
-        return str_replace('public/', '', $filePath);
-    }
-
     public function managings()
     {
         return $this->belongsToMany('App\Model\Instructor', 'manage_instructors', 'manager_id', 'instructor_id');

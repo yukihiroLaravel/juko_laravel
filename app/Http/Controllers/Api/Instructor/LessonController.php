@@ -148,7 +148,7 @@ class LessonController extends Controller
                     'message' => 'Invalid instructor_id.'
                 ], 403);
             }
-            
+
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
                 return response()->json([

@@ -21,17 +21,12 @@ class InstructorController extends Controller
      */
     public function update(InstructorPatchRequest $request)
     {
-        $file = $request->file('profile_image');
-
         try {
-            $instructor = Instructor::findOrFail($request->instructor_id);
+            $instructor = Auth::user();
 
-            if (Auth::guard('instructor')->user()->id !== $instructor->id) {
-                return response()->json([
-                    'result' => 'false',
-                    "message" => "Not authorized."
-                ], 403);
-            }
+            // 更新前の画像パスを使用
+            $imagePath = $instructor->profile_image;
+            $file = $request->file('profile_image');
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -42,8 +37,7 @@ class InstructorController extends Controller
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
                 $filename = Str::uuid() . '.' . $extension;
-                $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
-                $imagePath = Instructor::convertImagePath($imagePath);
+                $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
             $instructor->update([

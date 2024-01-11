@@ -164,10 +164,14 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
+<<<<<<< HEAD
                                 // 講師-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
                                 });
+=======
+                                Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
+>>>>>>> develop
                             });
                         });
                     });

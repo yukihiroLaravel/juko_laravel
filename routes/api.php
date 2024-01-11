@@ -165,7 +165,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
                                 // 講師-講座-チャプター-レッスン
-                                Route::prefix('lessons')->group(function () {
+                                Route::prefix('lesson')->group(function () {
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
                                 });
                             });

@@ -23,7 +23,6 @@ class InstructorPatchRequest extends FormRequest
     {
         $this->merge([
             'instructor_id' => Auth::id(),
-            'type' => Auth::user()->type,
         ]);
     }
 
@@ -41,7 +40,6 @@ class InstructorPatchRequest extends FormRequest
             'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email)],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
-            'type' => ['required', 'string', 'max:30', new InstructorTypeRule()]
         ];
     }
 }

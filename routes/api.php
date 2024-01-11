@@ -165,6 +165,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
+                                // マネージャー-講師-講座-チャプター-レッスン
+                                Route::prefix('lesson')->group(function () {
+                                    Route::prefix('{lesson_id}')->group(function () {
+                                        Route::put('/', 'Api\Manager\LessonController@update');
+                                    });
+                                });
                             });
                         });
                     });

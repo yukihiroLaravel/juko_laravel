@@ -12,7 +12,6 @@ use App\Model\Lesson;
 use App\Model\Instructor;
 use Exception;
 
-
 class LessonController extends Controller
 {
         /**

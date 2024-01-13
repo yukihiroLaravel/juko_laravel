@@ -35,9 +35,9 @@ class LessonUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_id' => ['required','integer'],
-            'chapter_id' => ['required', 'integer'],
-            'course_id' => ['required', 'integer'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'lesson_id' => ['required','integer', 'exists:lessons,id,deleted_at,NULL'],
             'title' => ['required','string','max:50'],
             'url' => ['required','string'],
             'remarks' => ['nullable','string'],

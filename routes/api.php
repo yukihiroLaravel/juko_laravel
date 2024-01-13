@@ -160,7 +160,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::prefix('{chapter_id}')->group(function () {
-                                Route::post('/', 'Api\Manager\ChapterController@store');
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');

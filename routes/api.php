@@ -166,7 +166,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                  // マネージャー-講座-チャプター-レッスン
                                  Route::prefix('lesson')->group(function() {
-                                     Route::post('/', 'Api\Manager\ChapterController@store');
+                                     Route::post('/', 'Api\Manager\LessonController@store');
                                  });
                              });
                         });

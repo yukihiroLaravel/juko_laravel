@@ -170,14 +170,5 @@ class ChapterController extends Controller
           'result' => true,
         ]);
     }
-    /**
-     * マネージャー
-     * チャプター新規作成API
-     *
-     */
-    public function store()
-    {
-        return response()->json([]);
-    }
-
+   
 }

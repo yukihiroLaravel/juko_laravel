@@ -168,7 +168,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                  Route::prefix('lesson')->group(function() {
                                      Route::post('/', 'Api\Manager\LessonController@store');
                                  });
-                             });
+                            });
                         });
                     });
                 });

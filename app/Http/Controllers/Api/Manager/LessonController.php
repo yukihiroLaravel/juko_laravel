@@ -33,18 +33,18 @@ class LessonController extends Controller
                 'message' => "Forbidden, not allowed to edit this lesson.",
             ], 403);
         }
+        
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id ) {
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid chapter_id.',
-            ], 403);
-        }
-
-        if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
             ], 403);
         }
 

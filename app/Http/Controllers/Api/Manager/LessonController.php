@@ -41,7 +41,7 @@ class LessonController extends Controller
             ], 403);
         }
 
-        if ((int) $request->chapter_id !== $lesson->chapter->id ) {
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid chapter_id.',

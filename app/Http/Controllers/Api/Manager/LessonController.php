@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\LessonSortRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -76,7 +75,7 @@ class LessonController extends Controller
                 'result' => true,
             ]);
             
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

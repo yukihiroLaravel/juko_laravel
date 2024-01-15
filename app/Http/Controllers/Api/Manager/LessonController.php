@@ -33,7 +33,7 @@ class LessonController extends Controller
                 'message' => "Forbidden, not allowed to edit this lesson.",
             ], 403);
         }
-        
+
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
@@ -52,6 +52,7 @@ class LessonController extends Controller
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
+            'status' => $request->status,
         ]);
 
         return response()->json([

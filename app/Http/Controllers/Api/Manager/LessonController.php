@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Model\Instructor;
-use App\Model\Course;
 use App\Model\Lesson;
-use Illuminate\Http\Request;
+use App\Http\Requests\Manager\LessonUpdateRequest;
 use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
@@ -15,9 +14,9 @@ class LessonController extends Controller
      * マネージャ配下のレッスン更新API
      *
      *
-     *
+     *@param  LessonUpdateRequest $request
      */
-    public function update(Request $request)
+    public function update(LessonUpdateRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 配下の講師情報を取得
@@ -35,10 +34,17 @@ class LessonController extends Controller
             ], 403);
         }
 
-        if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
-                'message' => 'Invalid chapter_id or course_id.',
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid chapter_id.',
             ], 403);
         }
 
@@ -46,6 +52,7 @@ class LessonController extends Controller
             'title' => $request->title,
             'url' => $request->url,
             'remarks' => $request->remarks,
+            'status' => $request->status,
         ]);
 
         return response()->json([

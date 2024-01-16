@@ -64,8 +64,8 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
-    
-    /**   
+
+    /**
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request

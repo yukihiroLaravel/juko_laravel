@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // TODO 講師側APIはここに記述
         Route::prefix('instructor')->group(function () {
             Route::get('edit', 'Api\Instructor\InstructorController@edit');
+            Route::post('update', 'Api\Instructor\InstructorController@update');
 
             // 講師-講座
             Route::prefix('course')->group(function () {
@@ -124,11 +125,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::post('/', 'Api\Instructor\StudentController@store');
             });
 
-            // 講師
-            Route::prefix('{instructor_id}')->group(function () {
-                Route::post('/', 'Api\Instructor\InstructorController@update');
-            });
-
             // 講師-お知らせ
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
@@ -167,10 +163,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                 // マネージャー-講師-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
+                                    Route::post('sort', 'Api\Manager\LessonController@sort');
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');
                                     });
-                                });
+                                });    
                             });
                         });
                     });

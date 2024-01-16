@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Instructor;
 
-use App\Rules\InstructorTypeRule;
+use App\Rules\InstructorUniqueEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class InstructorPatchRequest extends FormRequest
 {
@@ -20,7 +21,7 @@ class InstructorPatchRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'instructor_id' => $this->route('instructor_id'),
+            'instructor_id' => Auth::id(),
         ]);
     }
 
@@ -35,10 +36,9 @@ class InstructorPatchRequest extends FormRequest
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
-            'email' => ['required', 'email'],
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email)],
+            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
-            'type' => ['required', 'string', 'max:30', new InstructorTypeRule()]
         ];
     }
 }

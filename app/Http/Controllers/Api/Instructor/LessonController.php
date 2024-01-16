@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
 {
@@ -137,17 +138,22 @@ class LessonController extends Controller
      */
     public function delete(LessonDeleteRequest $request)
     {
-
+        DB::beginTransaction();
         try {
-            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            $course = $lesson->chapter->course;
-            $user = Instructor::find($request->user()->id);
-
-            if ($course->instructor_id !== $user->id) {
+            if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid instructor_id.'
+                ], 403);
+            }
+
+            if ((int) $request->chapter_id !== $lesson->chapter->id) {
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+                return response()->json([
+                    'result'  => false,
+                    'message' => 'Invalid chapter_id.',
                 ], 403);
             }
 
@@ -158,12 +164,25 @@ class LessonController extends Controller
                 ], 403);
             }
 
+            // 削除対象レッスンのorderカラムを0に設定する
+            $lesson->update(['order' => 0]);
+
             $lesson->delete();
+
+            Lesson::where('chapter_id', $lesson->chapter_id)
+                ->orderBy('order')
+                ->get()
+                ->each(function ($lesson, $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
+
+            DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             return response()->json([
                 'result' => false,

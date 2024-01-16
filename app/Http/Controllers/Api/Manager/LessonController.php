@@ -23,7 +23,7 @@ class LessonController extends Controller
     public function delete(Request $request)
     {
         DB::beginTransaction();
-        try{
+        try {
             // 自身と配下のinstructor情報を取得
             $userId = $request->user()->id;
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);

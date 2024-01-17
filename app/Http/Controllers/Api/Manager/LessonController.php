@@ -18,8 +18,8 @@ class LessonController extends Controller
     /**
      * マネージャ配下のレッスン更新API
      *
-     *
-     *@param  LessonUpdateRequest $request
+     * @param  LessonUpdateRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -32,7 +32,7 @@ class LessonController extends Controller
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座のチャプターレッスンでなければエラー応答
+            // 配下の講師でない場合は403エラー
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this lesson.",
@@ -40,6 +40,7 @@ class LessonController extends Controller
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
+            // コースIDが不正な場合は403エラー
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid course_id.',
@@ -47,6 +48,7 @@ class LessonController extends Controller
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // チャプターIDが不正な場合は403エラー
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid chapter_id.',

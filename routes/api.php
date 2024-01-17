@@ -135,7 +135,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::middleware('manager')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
-
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {
                     Route::get('index', 'Api\Manager\CourseController@index');
@@ -147,12 +146,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
-
                         // マネージャー-講座-生徒
                         Route::prefix('student')->group(function () {
                             Route::get('index', 'Api\Manager\StudentController@index');
                         });
-
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('/', 'Api\Manager\ChapterController@store');
@@ -161,6 +158,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
                                 Route::delete('/', 'Api\Manager\ChapterController@delete');
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
+                                // マネージャー-講座-チャプター-レッスン
+                                Route::prefix('lesson')->group(function () {
+                                    Route::prefix('{lesson_id}')->group(function () {
+                                        Route::delete('/', 'Api\Manager\LessonController@delete');
+                                    });
+                                });
                             });
                         });
                     });

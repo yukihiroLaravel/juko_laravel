@@ -7,7 +7,7 @@ use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\Course;
 use App\Model\LessonAttendance;
-use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Support\Facades\DB;

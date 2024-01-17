@@ -26,7 +26,7 @@ class LessonController extends Controller
         $instructorIds[] = $instructorId;
 
         $course = Course::find($request->course_id);
-        
+
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
             return response()->json([
@@ -48,9 +48,8 @@ class LessonController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => Lesson::findOrFail($lessonId), 
+                "data" => Lesson::findOrFail($lessonId),
             ]);
-
         } catch (Exception $e) {
             Log::error($e);
             return response()->json([
@@ -59,4 +58,3 @@ class LessonController extends Controller
         }
     }
 }
-

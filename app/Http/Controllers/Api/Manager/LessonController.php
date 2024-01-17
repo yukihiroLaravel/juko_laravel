@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +20,7 @@ class LessonController extends Controller
      * @param LessonDeleteRequest $request
      * @return JsonResponse
      */
-    public function delete(Request $request)
+    public function delete(LessonDeleteRequest $request)
     {
         DB::beginTransaction();
         try {

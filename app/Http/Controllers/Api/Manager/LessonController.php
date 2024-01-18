@@ -36,7 +36,7 @@ class LessonController extends Controller
         }
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
-        
+
         try {
             $newLesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,

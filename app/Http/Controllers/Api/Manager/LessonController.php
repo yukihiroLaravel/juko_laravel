@@ -13,10 +13,9 @@ use Illuminate\Support\Facades\Auth;
 class LessonController extends Controller
 {
    /**
-     * マネージャー
-     * レッスン新規作成API
-     *
-     */
+    * レッスン新規作成API
+    *
+    */
     public function store(Request $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;

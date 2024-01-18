@@ -35,20 +35,19 @@ class LessonController extends Controller
             ], 403);
         }
 
-
+        $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
+        
         try {
-            $newlesson = Lesson::create([
+            $newLesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
-                'order' => 1
+                'order' => (int) $maxOrder + 1
             ]);
-            // 新しく作成されたレッスンのlesson_idを取得
-            $lessonId = $newlesson->id;
 
             return response()->json([
                 "result" => true,
-                "data" => Lesson::findOrFail($lessonId), 
+                "data" => $newLesson,
             ]);
 
         } catch (Exception $e) {

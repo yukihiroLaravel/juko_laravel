@@ -81,15 +81,15 @@ class LessonController extends Controller
             'data' => new LessonUpdateResource($lesson->refresh())
         ]);
     }
-    
+
     /**
      * レッスンタイトル変更API
      *
-     * 
+     *
      */
     public function updateTitle()
     {
-        return response()->json([]);   
+        return response()->json([]);
     }
 
     /**

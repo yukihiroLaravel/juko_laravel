@@ -44,6 +44,13 @@ class LessonController extends Controller
                     'message' => 'Invalid chapter_id.',
                 ], 403);
             }
+            // 指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
+            if ((int)$request->course_id !== $lesson->chapter->course->id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid course_id.',
+                ], 403);
+            }
             // 受講情報が登録されている場合は許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([

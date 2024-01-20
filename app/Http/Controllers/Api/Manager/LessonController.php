@@ -45,7 +45,7 @@ class LessonController extends Controller
                 ], 403);
             }
             // 指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
-            if ((int)$request->course_id !== $lesson->chapter->course->id) {
+            if ((int)$request->course_id !== $lesson->chapter->course_id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid course_id.',

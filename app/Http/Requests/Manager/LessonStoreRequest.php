@@ -27,6 +27,6 @@ class LessonStoreRequest extends FormRequest
         'chapter_id' => ['required','integer','exists:chapters,id'],
         'course_id' => ['required','integer','exists:courses,id'],
         'title' => ['required','string', 'max:50'],
-        ]; 
+        ];
     }
 }

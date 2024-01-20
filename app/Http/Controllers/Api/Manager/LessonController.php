@@ -18,7 +18,8 @@ use Exception;
 
 class LessonController extends Controller
 {
-    /* マネージャ配下のレッスン更新API
+    /**
+     * マネージャ配下のレッスン更新API
      *
      * @param  LessonUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse

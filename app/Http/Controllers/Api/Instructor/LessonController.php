@@ -83,6 +83,16 @@ class LessonController extends Controller
     }
 
     /**
+     * レッスンタイトル変更API
+     *
+     *
+     */
+    public function updateTitle()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request

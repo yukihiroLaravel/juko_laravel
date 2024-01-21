@@ -16,12 +16,12 @@ class LessonStoreRequest extends FormRequest
         return true;
     }
     protected function prepareForValidation()
-{
-    $this->merge([
+    {
+        $this->merge([
         'chapter_id' => $this->route('chapter_id'),
         'course_id' => $this->route('course_id'),
-    ]);
-}
+        ]);
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -34,6 +34,6 @@ class LessonStoreRequest extends FormRequest
         'chapter_id' => ['required','integer','exists:chapters,id'],
         'course_id' => ['required','integer','exists:courses,id'],
         'title' => ['required','string', 'max:50'],
-        ]; 
+        ];
     }
 }

@@ -101,8 +101,6 @@ class ChapterController extends Controller
             "result" => true
         ]);
     }
-<<<<<<< Updated upstream
-=======
 
     /**
      * チャプター並び替えAPI
@@ -162,5 +160,4 @@ class ChapterController extends Controller
             ], 500);
         }
     }
->>>>>>> Stashed changes
 }

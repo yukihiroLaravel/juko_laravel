@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
@@ -87,9 +88,39 @@ class LessonController extends Controller
      *
      *
      */
-    public function updateTitle()
+    public function updateTitle(request $request)
     {
-        return response()->json([]);
+        $user = Instructor::find($request->user()->id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if ($lesson->chapter->course->instructor_id !== $user->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'title' => $request->title,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

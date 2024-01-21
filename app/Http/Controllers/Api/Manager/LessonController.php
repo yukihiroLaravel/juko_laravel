@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\Course;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +15,8 @@ class LessonController extends Controller
    /**
     * レッスン新規作成API
     *
+    *@param LessonStoreRequest $request
+    *@return \Illuminate\Http\JsonResponse
     */
     public function store(LessonStoreRequest $request)
     {

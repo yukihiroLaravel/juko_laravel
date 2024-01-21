@@ -15,11 +15,12 @@ class LessonStoreRequest extends FormRequest
     {
         return true;
     }
+
     protected function prepareForValidation()
     {
         $this->merge([
-        'chapter_id' => $this->route('chapter_id'),
-        'course_id' => $this->route('course_id'),
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -31,9 +32,9 @@ class LessonStoreRequest extends FormRequest
     public function rules()
     {
         return [
-        'chapter_id' => ['required','integer','exists:chapters,id'],
-        'course_id' => ['required','integer','exists:courses,id'],
-        'title' => ['required','string', 'max:50'],
+            'course_id' => ['required','integer','exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required','integer','exists:chapters,id,deleted_at,NULL'],
+            'title' => ['required','string', 'max:50'],
         ];
     }
 }

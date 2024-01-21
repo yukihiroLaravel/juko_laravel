@@ -15,8 +15,8 @@ class LessonController extends Controller
    /**
     * レッスン新規作成API
     *
-    *@param LessonStoreRequest $request
-    *@return \Illuminate\Http\JsonResponse
+    * @param LessonStoreRequest $request
+    * @return \Illuminate\Http\JsonResponse
     */
     public function store(LessonStoreRequest $request)
     {

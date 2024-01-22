@@ -78,6 +78,8 @@ class LessonController extends Controller
      */
     public function sort(LessonSortRequest $request)
     {
+        DB::beginTransaction();
+
         try {
             // 現在のユーザーを取得
             $instructorId = Auth::guard('instructor')->user()->id;
@@ -126,6 +128,8 @@ class LessonController extends Controller
                     'order' => $inputLesson['order'],
                 ]);
             });
+
+            DB::commit();
 
             return response()->json([
                 'result' => true,

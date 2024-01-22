@@ -82,6 +82,41 @@ class LessonController extends Controller
         ]);
     }
 
+/**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(LessonPatchStatusRequest $request)
+    {
+        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+
+        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+
     /**
      * レッスン並び替えAPI
      *

@@ -9,6 +9,7 @@ use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
+use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
 use App\Model\Instructor;
@@ -86,11 +87,11 @@ class LessonController extends Controller
     /**
      * レッスンタイトル変更API
      *
-     *
+     *@param  LessonUpdateTitleRequest  $request
      */
-    public function updateTitle(request $request)
+    public function updateTitle(LessonUpdateTitleRequest $request)
     {
-        $user = Instructor::find($request->user()->id);
+        $user = Auth::guard('instructor')->user();
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if ($lesson->chapter->course->instructor_id !== $user->id) {

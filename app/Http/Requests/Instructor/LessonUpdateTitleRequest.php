@@ -19,12 +19,11 @@ class LessonUpdateTitleRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'lesson_id' => $this->route('lesson_id'),
         ]);
     }
-
 
     /**
      * Get the validation rules that apply to the request.

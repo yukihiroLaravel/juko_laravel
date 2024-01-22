@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
@@ -52,6 +51,12 @@ class LessonController extends Controller
         }
     }
 
+    /**
+     * レッスン更新API
+     *
+     * @param LessonUpdateRequest $request
+     * @return JsonResponse
+     */
     public function update(LessonUpdateRequest $request)
     {
         $user = Instructor::find($request->user()->id);
@@ -87,7 +92,8 @@ class LessonController extends Controller
     /**
      * レッスンタイトル変更API
      *
-     *@param  LessonUpdateTitleRequest  $request
+     * @param LessonUpdateTitleRequest $request
+     * @return JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {

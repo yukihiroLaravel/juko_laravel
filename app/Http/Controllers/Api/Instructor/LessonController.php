@@ -82,7 +82,7 @@ class LessonController extends Controller
         ]);
     }
 
-/**
+    /**
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
@@ -114,18 +114,6 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-
-    /**
-     * レッスンステータス更新API
-     *
-     * @param LessonPatchStatusRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updateStatus()
-    {
-        return response()->json([]);
     }
 
     /**

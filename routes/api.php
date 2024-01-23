@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
+                                    Route::patch('title', 'Api\Instructor\LessonController@updateTitle');
                                 });
                             });
                         });
@@ -169,6 +170,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             });
                         });
                     });
+                });
+
+                // マネージャー-受講
+                Route::prefix('attendance')->group(function () {
+                    Route::post('/', 'Api\Manager\AttendanceController@store');
                 });
             });
         });

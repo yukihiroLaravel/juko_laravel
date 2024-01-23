@@ -82,7 +82,7 @@ class LessonController extends Controller
         ]);
     }
 
- /**
+    /**
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request

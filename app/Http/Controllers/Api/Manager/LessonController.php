@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Exception;
 use App\Exceptions\ValidationErrorException;
 
-
 class LessonController extends Controller
 {
     /**

@@ -8,6 +8,7 @@ use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
+use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Model\Lesson;
 use App\Model\Instructor;
@@ -50,6 +51,12 @@ class LessonController extends Controller
         }
     }
 
+    /**
+     * レッスン更新API
+     *
+     * @param LessonUpdateRequest $request
+     * @return JsonResponse
+     */
     public function update(LessonUpdateRequest $request)
     {
         $user = Instructor::find($request->user()->id);
@@ -79,6 +86,47 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
             'data' => new LessonUpdateResource($lesson->refresh())
+        ]);
+    }
+
+    /**
+     * レッスンタイトル変更API
+     *
+     * @param LessonUpdateTitleRequest $request
+     * @return JsonResponse
+     */
+    public function updateTitle(LessonUpdateTitleRequest $request)
+    {
+        $user = Auth::guard('instructor')->user();
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if ($lesson->chapter->course->instructor_id !== $user->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'title' => $request->title,
+        ]);
+
+        return response()->json([
+            'result' => true,
         ]);
     }
 

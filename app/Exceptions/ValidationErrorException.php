@@ -18,6 +18,6 @@ class ValidationErrorException extends Exception
 
     public function getStatusCode()
     {
-        return $this->getStatusCode;
+        return $this->statusCode;
     }
 }

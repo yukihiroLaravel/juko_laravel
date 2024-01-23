@@ -180,8 +180,6 @@ class LessonController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
-            DB::rollBack();
-            Log::error($e);
             return response()->json([
                 'result' => false,
                 'error' => $e->getMessage(),

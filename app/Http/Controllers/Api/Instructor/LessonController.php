@@ -136,6 +136,7 @@ class LessonController extends Controller
             Log::error($e);
             return response()->json([
                 'result' => false,
+                'error' => $e->getMessage(),
             ], 403);
         } catch (Exception $e) {
             DB::rollBack();

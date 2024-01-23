@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+use App\Exceptions\ValidationErrorException;
+
 
 class LessonController extends Controller
 {
@@ -99,24 +101,15 @@ class LessonController extends Controller
             /// 認可
             $lessons->each(function ($lesson) use ($instructorIds, $courseId, $chapterId) {
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid instructor_id.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid instructor_id.');
                 }
 
                 if ((int) $courseId !== $lesson->chapter->course->id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid course.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid course.');
                 }
 
                 if ((int) $chapterId !== $lesson->chapter->id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid chapter.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid chapter.');
                 }
             });
 
@@ -134,6 +127,12 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (ValidationErrorException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 403);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -13,6 +13,7 @@ use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
+use App\Exceptions\ValidationErrorException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -105,24 +106,15 @@ class LessonController extends Controller
             $lessons->each(function ($lesson) use ($instructorId, $courseId, $chapterId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid instructor_id.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid instructor_id.');
                 }
                 // 指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid course.'
-                    ], 403);
+                    throw new ValidationErrorException('Invalid course.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid chapter.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid chapter.');
                 }
             });
             // orderカラムを更新（並び替え実施）
@@ -137,13 +129,19 @@ class LessonController extends Controller
             DB::commit();
 
             return response()->json([
-                "result" => true,
+                'result' => true,
             ]);
+        } catch (ValidationErrorException $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 403);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
-                "result" => false,
+                'result' => false,
             ]);
         }
     }

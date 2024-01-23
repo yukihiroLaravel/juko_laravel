@@ -118,6 +118,17 @@ class LessonController extends Controller
 
 
     /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request

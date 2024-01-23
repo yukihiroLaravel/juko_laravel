@@ -8,6 +8,7 @@ use App\Model\Lesson;
 use App\Model\Course;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Manager\LessonStoreRequest;
+use App\Http\Resources\Manager\LessonStoreResource;
 use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
@@ -48,7 +49,7 @@ class LessonController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => $newLesson,
+                "data" => new LessonStoreResource($newLesson),
             ]);
         } catch (Exception $e) {
             Log::error($e);

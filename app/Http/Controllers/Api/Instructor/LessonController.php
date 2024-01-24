@@ -141,6 +141,7 @@ class LessonController extends Controller
     public function sort(LessonSortRequest $request)
     {
         DB::beginTransaction();
+
         try {
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
@@ -148,15 +149,17 @@ class LessonController extends Controller
             $courseId = $request->input('course_id');
             $chapterId = $request->input('chapter_id');
             $inputLessons = $request->input('lessons');
+
             // レッスン一括取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
+
             // 認可
             $lessons->each(function ($lesson) use ($instructorId, $courseId, $chapterId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
-                // 指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
+                // 指定したコースIDが1レッスンのコースIDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new ValidationErrorException('Invalid course.');
                 }
@@ -165,6 +168,7 @@ class LessonController extends Controller
                     throw new ValidationErrorException('Invalid chapter.');
                 }
             });
+
             // orderカラムを更新（並び替え実施）
             $lessons->each(function ($lesson) use ($inputLessons) {
                 $collectionLessons = new Collection($inputLessons);
@@ -182,8 +186,8 @@ class LessonController extends Controller
         } catch (ValidationErrorException $e) {
             return response()->json([
                 'result' => false,
-                'error' => $e->getMessage(),
-            ], 403);
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

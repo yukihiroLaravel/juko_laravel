@@ -137,7 +137,6 @@ class ChapterController extends Controller
      *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     *
      */
     public function sort(ChapterSortRequest $request)
     {
@@ -147,12 +146,14 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);
+
             if ($user->id !== $course->instructor_id) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'You are not authorized to perform this action',
+                    'message' => 'Invalid instructor_id.',
                 ], 403);
             }
+
             foreach ($chapters as $chapter) {
                 Chapter::where('id', $chapter['chapter_id'])
                 ->where('course_id', $courseId)
@@ -161,6 +162,7 @@ class ChapterController extends Controller
                     'order' => $chapter['order']
                 ]);
             }
+
             DB::commit();
             return response()->json([
                 'result' => true,
@@ -169,8 +171,8 @@ class ChapterController extends Controller
             DB::rollBack();
             return response()->json([
                 'result' => false,
-                'message' => 'Not found course.'
-            ], 500);
+                'message' => 'Not found.',
+            ], 404);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

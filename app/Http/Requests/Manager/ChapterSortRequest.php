@@ -13,7 +13,14 @@ class ChapterSortRequest extends FormRequest
      */
     public function authorize()
     {
-        return true; // ここで認証は行わないのでtrueを返す
+        return true;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
     }
 
     /**
@@ -21,22 +28,13 @@ class ChapterSortRequest extends FormRequest
      *
      * @return array
      */
-
     public function rules()
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapters' => ['required', 'array'],
-            'chapters.*.chapter_id' => ['required', 'integer'],
+            'chapters.*.chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'chapters.*.order' => ['required', 'integer'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        // 講座IDはリクエストのURLから取得
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
     }
 }

@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -107,11 +106,9 @@ class ChapterController extends Controller
      *
      * @param ChapterSortRequest $request
      * @return \Illuminate\Http\JsonResponse
-     *
      */
     public function sort(ChapterSortRequest $request)
     {
-        // チャプターをソートする
         DB::beginTransaction();
         try {
             // 現在のユーザーを取得
@@ -130,9 +127,10 @@ class ChapterController extends Controller
                 // 失敗結果を返す
                 return response()->json([
                     'result'  => false,
-                    'message' => "Forbidden, not allowed to edit this chapter.",
+                    'message' => "Forbidden, not allowed to edit this course.",
                 ], 403);
             }
+
             foreach ($chapters as $chapter) {
                 Chapter::where('id', $chapter['chapter_id'])
                 ->where('course_id', $courseId)
@@ -141,17 +139,17 @@ class ChapterController extends Controller
                     'order' => $chapter['order']
                 ]);
             }
+
             DB::commit();
             return response()->json([
                 'result' => true,
             ]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            Log::error($e);
             return response()->json([
                 'result' => false,
-                'message' => 'Not found course.'
-            ], 500);
+                'message' => 'Not found.'
+            ], 404);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

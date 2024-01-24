@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+use App\Exceptions\ValidationErrorException;
 
 class LessonController extends Controller
 {
@@ -43,7 +44,7 @@ class LessonController extends Controller
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            // コースIDが不正な場合は403エラー
+            // 講座IDが不正な場合は403エラー
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid course_id.',
@@ -78,6 +79,8 @@ class LessonController extends Controller
      */
     public function sort(LessonSortRequest $request)
     {
+        DB::beginTransaction();
+
         try {
             // 現在のユーザーを取得
             $instructorId = Auth::guard('instructor')->user()->id;
@@ -96,25 +99,17 @@ class LessonController extends Controller
 
             /// 認可
             $lessons->each(function ($lesson) use ($instructorIds, $courseId, $chapterId) {
+                // 講座に紐づく講師でない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid instructor_id.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid instructor_id.');
                 }
-
+                // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid course.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid course.');
                 }
-
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter->id) {
-                    return response()->json([
-                        'result' => false,
-                        'message' => 'Invalid chapter.',
-                    ], 403);
+                    throw new ValidationErrorException('Invalid chapter.');
                 }
             });
 
@@ -127,9 +122,16 @@ class LessonController extends Controller
                 ]);
             });
 
+            DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -169,7 +171,7 @@ class LessonController extends Controller
                     'message' => 'Invalid chapter_id.',
                 ], 403);
             }
-            // 指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
             if ((int)$request->course_id !== $lesson->chapter->course_id) {
                 return response()->json([
                     'result' => false,

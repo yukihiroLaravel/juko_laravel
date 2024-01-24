@@ -159,7 +159,7 @@ class LessonController extends Controller
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
-                // 指定したコースIDが1レッスンのコースIDと一致しない場合は許可しない
+                // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new ValidationErrorException('Invalid course.');
                 }

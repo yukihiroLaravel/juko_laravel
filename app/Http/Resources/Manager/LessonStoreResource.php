@@ -15,10 +15,8 @@ class LessonStoreResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'chapter_id' => $this->resource->chapter_id,
+            'lesson_id' => $this->resource->id,
             'title' => $this->resource->title,
-            'status' => $this->resource->status,
             'order' => $this->resource->order,
         ];
     }

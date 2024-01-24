@@ -33,10 +33,10 @@ class InstructorPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name' => ['required', 'string'],
-            'last_name' => ['required', 'string'],
-            'first_name' => ['required', 'string'],
-            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email)],
+            'nick_name' => ['required', 'string','max:50'],
+            'last_name' => ['required', 'string','max:50'],
+            'first_name' => ['required', 'string','max:50'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email),'max:255'],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];

@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use App\Model\Lesson;
 use Illuminate\Contracts\Validation\Rule;
+use App\Model\Lesson;
 
 class LessonStatusRule implements Rule
 {
@@ -31,6 +31,7 @@ class LessonStatusRule implements Rule
         return false;
     }
 
+
     /**
      * Get the validation error message.
      *
@@ -38,6 +39,6 @@ class LessonStatusRule implements Rule
      */
     public function message()
     {
-        return 'Invalid status.';
+        return 'Invalid Status.';
     }
 }

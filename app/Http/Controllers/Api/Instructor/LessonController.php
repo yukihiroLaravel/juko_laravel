@@ -91,7 +91,7 @@ class LessonController extends Controller
      */
     public function updateStatus(LessonPatchStatusRequest $request)
     {
-        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
             return response()->json([

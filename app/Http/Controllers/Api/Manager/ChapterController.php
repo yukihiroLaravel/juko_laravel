@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
+use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Manager\ChapterSortRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Exception;
 
 class ChapterController extends Controller
 {
@@ -95,8 +100,62 @@ class ChapterController extends Controller
             "result" => true
         ]);
     }
-    public function sort(Request $request)
+
+    /**
+     * チャプター並び替えAPI
+     *
+     * @param ChapterSortRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sort(ChapterSortRequest $request)
     {
-        return response()->json([]);
+        DB::beginTransaction();
+        try {
+            // 現在のユーザーを取得
+            $userId = Auth::guard('instructor')->user()->id;
+            $courseId = $request->input('course_id');
+            $chapters = $request->input('chapters');
+            $course = Course::findOrFail($courseId);
+
+            // マネージャーが管理する講師を取得
+            $manager = Instructor::with('managings')->find($userId);
+            $instructorIds = $manager->managings->pluck('id')->toArray();
+            $instructorIds[] = $userId;
+
+            // マネージャー自身または配下の講師が担当する講座なら更新を許可
+            if (!in_array($course->instructor_id, $instructorIds, true)) {
+                // 失敗結果を返す
+                return response()->json([
+                    'result'  => false,
+                    'message' => "Forbidden, not allowed to edit this course.",
+                ], 403);
+            }
+
+            foreach ($chapters as $chapter) {
+                Chapter::where('id', $chapter['chapter_id'])
+                ->where('course_id', $courseId)
+                ->firstOrFail()
+                ->update([
+                    'order' => $chapter['order']
+                ]);
+            }
+
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => 'Not found.'
+            ], 404);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 }

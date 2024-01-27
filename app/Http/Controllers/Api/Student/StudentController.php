@@ -11,7 +11,6 @@ use App\Http\Resources\Student\StudentPostResource;
 use App\Http\Requests\Student\StudentPatchRequest;
 use App\Http\Requests\Student\UserAuthenticationRequest;
 use App\Http\Resources\Student\StudentPatchResource;
-use App\Rules\UniqueEmailRule;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Exceptions\ExpiredAuthorizationCodeException;

@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\LessonStoreRequest;
+use App\Http\Requests\Instructor\LessonSortRequest;
+use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Resources\Instructor\LessonUpdateResource;
@@ -92,6 +93,40 @@ class LessonController extends Controller
     }
 
     /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(LessonPatchStatusRequest $request)
+    {
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
@@ -124,7 +159,7 @@ class LessonController extends Controller
         }
 
         $lesson->update([
-            'title' => $request->title,
+            'title' => $request->title
         ]);
 
         return response()->json([
@@ -135,7 +170,7 @@ class LessonController extends Controller
     /**
      * レッスン並び替えAPI
      *
-     * @param  LessonSortRequest $request
+     * @param LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request)

@@ -3,17 +3,65 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Instructor;
+use App\Model\Course;
 use App\Model\Chapter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use Illuminate\Support\Facades\Auth;
+use Exception;
 
 class ChapterController extends Controller
 {
+    /**
+     * チャプター新規作成API
+     *
+     * @param ChapterStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(ChapterStoreRequest $request)
+    {
+        try {
+            $instructorId = Auth::guard('instructor')->user()->id;
+            // 配下の講師情報を取得
+            $manager = Instructor::with('managings')->find($instructorId);
+            $instructorIds = $manager->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructorId;
+
+            $course = Course::FindOrFail($request->course_id);
+
+            if (!in_array($course->instructor_id, $instructorIds, true)) {
+                // 自分、または配下の講師の講座でなければエラー応答
+                return response()->json([
+                    'result'  => false,
+                    'message' => "Forbidden, not allowed to create new chapter.",
+                ], 403);
+            }
+
+            $order =  $course->chapters->count();
+            $newOrder = $order + 1;
+            Chapter::create([
+                'course_id' => $request->course_id,
+                'title' => $request->input('title'),
+                'order' => $newOrder,
+                'status' => Chapter::STATUS_PUBLIC,
+            ]);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false
+            ], 500);
+        }
+    }
+
     /**
      * チャプター詳細情報を取得
      *
@@ -37,7 +85,6 @@ class ChapterController extends Controller
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
         }
-
         return new ChapterShowResource($chapter);
     }
 

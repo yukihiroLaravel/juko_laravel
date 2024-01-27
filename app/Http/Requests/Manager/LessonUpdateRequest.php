@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\LessonUpdateStatusRule;
@@ -20,9 +20,9 @@ class LessonUpdateRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'lesson_id' => $this->route('lesson_id'),
         ]);
     }
 

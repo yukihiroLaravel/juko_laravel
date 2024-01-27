@@ -5,6 +5,17 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property int $id
+ * @property int $lesson_id
+ * @property int $attendance_id
+ * @property 'before_attendance'|'in_attendance'|'completed_attendance' $status
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Lesson $lesson
+ * @property Attendance $attendance
+ */
 class LessonAttendance extends Model
 {
     use SoftDeletes;

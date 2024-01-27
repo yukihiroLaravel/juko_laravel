@@ -4,7 +4,23 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property int $course_id
+ * @property int $instructor_id
+ * @property string $title
+ * @property 'always'|'once' $type
+ * @property string $start_date
+ * @property string $end_date
+ * @property string $content
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Course $course
+ * @property Collection<Student> $students
+ */
 class Notification extends Model
 {
     use SoftDeletes;

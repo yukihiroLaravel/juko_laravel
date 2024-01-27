@@ -64,10 +64,10 @@ class LessonController extends Controller
             Log::error($e);
             return response()->json([
                 "result" => false,
-            ]);  
+            ]);
         }
     }
-}      
+}
 
 class LessonController extends Controller
 {

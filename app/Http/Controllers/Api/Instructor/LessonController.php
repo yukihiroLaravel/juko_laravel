@@ -129,7 +129,7 @@ class LessonController extends Controller
      *
      * @param LessonUpdateTitleRequest $request
      * @return JsonResponse
-     */
+     *  /
     public function updateTitle(LessonUpdateTitleRequest $request)
     {
         $user = Auth::guard('instructor')->user();

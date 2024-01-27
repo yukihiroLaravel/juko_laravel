@@ -16,7 +16,7 @@ class AttendanceShowResource extends JsonResource
      */
     public function toArray($request)
     {
-        /** @var Collection<int, Chapter>  */
+        /** @var Collection<Chapter>  */
         $chapters = $this->resource['chapters'];
 
         return [

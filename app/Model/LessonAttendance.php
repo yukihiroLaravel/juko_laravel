@@ -57,19 +57,4 @@ class LessonAttendance extends Model
     {
         return $this->belongsTo(Attendance::class);
     }
-
-    /**
-     * レッスンの完了した総数を取得する
-     *
-     * @param int $lessonid
-     * @param int $attendanceid
-     * @return int
-     */
-    public static function countCompletedAttendance($lessonId, $attendanceId)
-    {
-        return self::where('lesson_id', $lessonId)
-                    ->where('attendance_id', $attendanceId)
-                    ->where('status', self::STATUS_COMPLETED_ATTENDANCE)
-                    ->count();
-    }
 }

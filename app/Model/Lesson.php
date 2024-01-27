@@ -72,6 +72,18 @@ class Lesson extends Model
      */
     public function getTotalLessonsCountAttribute()
     {
-        return $this->chapter->lessons()->count();
+        return $this->chapter->lessons->count();
+    }
+
+    /**
+     * レッスンの完了数を取得する
+     *
+     * @return int
+     */
+    public function getCompletedLessonsCountAttribute()
+    {
+        return $this->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })->count();
     }
 }

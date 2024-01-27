@@ -7,6 +7,8 @@ use App\Model\Instructor;
 
 class InstructorUniqueEmailRule implements Rule
 {
+    private string $email;
+
     /**
      * Create a new rule instance.
      *

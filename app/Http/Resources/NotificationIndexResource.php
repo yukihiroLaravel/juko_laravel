@@ -2,10 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Model\Notification;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Database\Eloquent\Collection;
 
 class NotificationIndexResource extends JsonResource
 {
+    /** @var Collection<Notification> */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -14,7 +19,7 @@ class NotificationIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->map(function ($notification) {    
+        return $this->resource->map(function (Notification $notification) {
             return [
                 'id' => $notification->id,
                 'course_id' => $notification->course_id,
@@ -23,6 +28,7 @@ class NotificationIndexResource extends JsonResource
                 'title' => $notification->title,
                 'content' => $notification->content,
             ];
-        });
+        })
+            ->toArray();
     }
 }

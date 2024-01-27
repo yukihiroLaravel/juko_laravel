@@ -51,7 +51,7 @@ class Notification extends Model
     /**
      * 表示区分
      *
-     * @return string
+     * @return string|null
      */
     public function getTypeAttribute($value)
     {
@@ -77,7 +77,7 @@ class Notification extends Model
     /**
      * 受講生を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function students()
     {
@@ -87,7 +87,7 @@ class Notification extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function course()
     {

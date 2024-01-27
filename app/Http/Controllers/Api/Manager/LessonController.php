@@ -69,8 +69,8 @@ class LessonController extends Controller
     }
 }
 
-class LessonController extends Controller
-{
+
+
     /**
      * マネージャ配下のレッスン更新API
      *
@@ -257,5 +257,5 @@ class LessonController extends Controller
                 'result' => false,
             ], 500);
         }
-    }
+    
 }

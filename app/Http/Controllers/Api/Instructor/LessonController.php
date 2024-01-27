@@ -92,7 +92,7 @@ class LessonController extends Controller
         ]);
     }
 
-     /**
+    /**
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
@@ -125,11 +125,13 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
+
+    /**
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
      * @return JsonResponse
-     *  /
+     */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {
         $user = Auth::guard('instructor')->user();
@@ -168,7 +170,7 @@ class LessonController extends Controller
     /**
      * レッスン並び替えAPI
      *
-     * @param  LessonSortRequest $request
+     * @param LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request)

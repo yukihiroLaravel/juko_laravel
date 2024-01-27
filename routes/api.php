@@ -161,6 +161,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
+                                    Route::post('/', 'Api\Manager\LessonController@store');
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');

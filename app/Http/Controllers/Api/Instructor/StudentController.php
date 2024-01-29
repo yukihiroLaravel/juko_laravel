@@ -21,7 +21,7 @@ class StudentController extends Controller
      * 講師側受講生一覧取得API
      *
      * @param StudentIndexRequest $request
-     * @return StudentIndexResource
+     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
     public function index(StudentIndexRequest $request)
     {
@@ -57,7 +57,7 @@ class StudentController extends Controller
      * 講座受講生詳細情報を取得
      *
      * @param StudentShowRequest $request
-     * @return StudentShowResource
+     * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(StudentShowRequest $request)
     {

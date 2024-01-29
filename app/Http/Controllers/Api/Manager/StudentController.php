@@ -15,7 +15,7 @@ class StudentController extends Controller
      * マネージャ講座の受講生取得API
      *
      * @param StudentIndexRequest $request
-     * @return StudentIndexResource
+     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
     public function index(StudentIndexRequest $request)
     {

@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChapterPatchResource extends JsonResource
 {
+    /** @var Chapter */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,8 +19,8 @@ class ChapterPatchResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'chapter_id' => $this->id,
-            'title' => $this->title,
+            'chapter_id' => $this->resource->id,
+            'title' => $this->resource->title,
         ];
     }
 }

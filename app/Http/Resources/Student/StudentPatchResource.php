@@ -6,6 +6,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentPatchResource extends JsonResource
 {
+    /** @var \App\Model\Student */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,16 +18,16 @@ class StudentPatchResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'nick_name' => $this->nick_name,
-            'last_name' => $this->last_name,
-            'first_name' => $this->first_name,
-            'occupation' => $this->occupation,
-            'email' => $this->email,
-            'purpose' => $this->purpose,
-            'birth_date' => $this->birth_date,
-            'sex' => $this->sex,
-            'address' => $this->address,
-            'profile_image' => $this->profile_image,
+            'nick_name' => $this->resource->nick_name,
+            'last_name' => $this->resource->last_name,
+            'first_name' => $this->resource->first_name,
+            'occupation' => $this->resource->occupation,
+            'email' => $this->resource->email,
+            'purpose' => $this->resource->purpose,
+            'birth_date' => $this->resource->birth_date,
+            'sex' => $this->resource->sex,
+            'address' => $this->resource->address,
+            'profile_image' => $this->resource->profile_image,
         ];
     }
 }

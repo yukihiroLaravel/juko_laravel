@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonSortRequest extends FormRequest
+class ChapterStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,11 +24,8 @@ class LessonSortRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lessons' => ['required', 'array'],
-            'lessons.*.lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'lessons.*.order' => ['required', 'integer'],
+            'title' => ['required'],
+            'course_id' => ['required', 'integer','exists:courses,id,deleted_at,NULL'],
         ];
     }
 
@@ -36,7 +33,6 @@ class LessonSortRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 }

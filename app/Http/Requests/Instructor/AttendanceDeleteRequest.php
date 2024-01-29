@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonDeleteRequest extends FormRequest
+class AttendanceDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,13 +16,6 @@ class LessonDeleteRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,7 +24,14 @@ class LessonDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'attendance_id' => $this->route('attendance_id'),
+        ]);
     }
 }

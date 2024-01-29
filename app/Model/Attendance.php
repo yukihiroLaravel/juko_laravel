@@ -4,7 +4,20 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property int $course_id
+ * @property int $student_id
+ * @property int $progress
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Student $student
+ * @property Course $course
+ * @property Collection<LessonAttendance> $lessonAttendances
+ */
 class Attendance extends Model
 {
     use SoftDeletes;
@@ -57,6 +70,14 @@ class Attendance extends Model
     public function lessonAttendances()
     {
         return $this->hasMany(LessonAttendance::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::deleting(function ($attendance) {
+            $attendance->lessonAttendances()->delete();
+        });
     }
 
     //ソート項目

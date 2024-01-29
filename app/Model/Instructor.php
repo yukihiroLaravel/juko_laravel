@@ -3,7 +3,23 @@
 namespace App\Model;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property string $nick_name
+ * @property string $last_name
+ * @property string $first_name
+ * @property string $email
+ * @property string $password
+ * @property string|null $profile_image
+ * @property 'manager'|'instructor' $type
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Collection<Course> $courses
+ * @property Collection<Instructor> $managings
+ */
 class Instructor extends Authenticatable
 {
     /**
@@ -38,18 +54,6 @@ class Instructor extends Authenticatable
     public function courses()
     {
         return $this->hasMany(Course::class);
-    }
-
-    /**
-     * 画像保存パスに変換
-     *
-     * @param string $filePath
-     * @return string
-     */
-    public static function convertImagePath(string $filePath)
-    {
-        // public/を削除
-        return str_replace('public/', '', $filePath);
     }
 
     public function managings()

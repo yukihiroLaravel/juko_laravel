@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\LessonStatusRule;
 
-class LessonUpdateRequest extends FormRequest
+class LessonUpdateTitleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,12 +19,11 @@ class LessonUpdateRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'lesson_id' => $this->route('lesson_id'),
         ]);
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -39,9 +37,6 @@ class LessonUpdateRequest extends FormRequest
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lesson_id' => ['required','integer', 'exists:lessons,id,deleted_at,NULL'],
             'title' => ['required','string','max:50'],
-            'url' => ['required','string'],
-            'remarks' => ['nullable','string'],
-            'status' => ['required', 'string', new LessonStatusRule()],
         ];
     }
 }

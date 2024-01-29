@@ -1,15 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
-use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChapterShowResource extends JsonResource
 {
-    /** @var Chapter */
-    public $resource;
-
     /**
      * Transform the resource into an array.
      *
@@ -27,9 +23,9 @@ class ChapterShowResource extends JsonResource
                     'title' => $lesson->title,
                     'url' => $lesson->url,
                     'remarks' => $lesson->remarks,
-                    'status' => $lesson->status,
+                    'order' => $lesson->order,    
                 ];
-            })->values(),
+            })
         ];
     }
 }

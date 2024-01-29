@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\StudentUniqueEmailRule;
 use App\Rules\SexRule;
 
 class StudentPatchRequest extends FormRequest
@@ -24,11 +25,12 @@ class StudentPatchRequest extends FormRequest
      */
     public function rules()
     {
+        $user = $this->user();
         return [
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
             'first_name' => ['required', 'string'],
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', new StudentUniqueEmailRule($user->email)],
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],

@@ -17,6 +17,7 @@
     "require-dev": {
         "facade/ignition": "^1.16.15",
         "fakerphp/faker": "^1.9.1",
+        "larastan/larastan": "^1.0",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^3.0",
         "phpunit/phpunit": "^8.5.8|^9.3.3",
@@ -54,6 +55,9 @@
         ],
         "sniffer-rewrite": [
             "./vendor/bin/phpcbf --standard=phpcs.xml ./ || true"
+        ],
+        "analyze": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
         ]
     }
 }

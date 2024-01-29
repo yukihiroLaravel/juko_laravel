@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use RuntimeException;
 use App\Model\Instructor;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorEditResource;
 use App\Http\Resources\Instructor\InstructorPatchResource;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
 {
@@ -21,17 +23,12 @@ class InstructorController extends Controller
      */
     public function update(InstructorPatchRequest $request)
     {
-        $file = $request->file('profile_image');
-
         try {
-            $instructor = Instructor::findOrFail($request->instructor_id);
+            $instructor = Auth::user();
 
-            if (Auth::guard('instructor')->user()->id !== $instructor->id) {
-                return response()->json([
-                    'result' => 'false',
-                    "message" => "Not authorized."
-                ], 403);
-            }
+            // 更新前の画像パスを使用
+            $imagePath = $instructor->profile_image;
+            $file = $request->file('profile_image');
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -41,9 +38,8 @@ class InstructorController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid() . '.' . $extension;
-                $imagePath = Storage::putFileAs('public/instructor', $file, $filename);
-                $imagePath = Instructor::convertImagePath($imagePath);
+                $filename = Str::uuid()->toString() . '.' . $extension;
+                $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
             $instructor->update([

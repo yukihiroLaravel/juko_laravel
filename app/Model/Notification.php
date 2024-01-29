@@ -4,7 +4,23 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property int $course_id
+ * @property int $instructor_id
+ * @property string $title
+ * @property 'always'|'once' $type
+ * @property string $start_date
+ * @property string $end_date
+ * @property string $content
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Course $course
+ * @property Collection<Student> $students
+ */
 class Notification extends Model
 {
     use SoftDeletes;
@@ -35,7 +51,7 @@ class Notification extends Model
     /**
      * 表示区分
      *
-     * @return string
+     * @return string|null
      */
     public function getTypeAttribute($value)
     {
@@ -61,7 +77,7 @@ class Notification extends Model
     /**
      * 受講生を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function students()
     {
@@ -71,7 +87,7 @@ class Notification extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function course()
     {

@@ -97,7 +97,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * マネージャー配下のチャプター更新API
+     * チャプター更新API
      *
      * @param ChapterPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -144,7 +144,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * マネージャ配下のチャプター削除API
+     * チャプター削除API
      *
      * @param ChapterDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -239,7 +239,8 @@ class ChapterController extends Controller
         }
     }
 
-     /* マネージャ配下のチャプター更新API
+    /**
+     * チャプターの公開状態を更新するAPI
      *
      * @param ChapterPatchStatusRequest $request
      * @return \Illuminate\Http\JsonResponse

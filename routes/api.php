@@ -154,6 +154,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
+                            Route::post('sort', 'Api\Manager\ChapterController@sort');
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');

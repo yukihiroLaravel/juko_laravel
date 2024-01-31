@@ -272,7 +272,8 @@ class CourseController extends Controller
         return new CourseEditResource($course);
     }
 
-    public function index() {
+    public function index()
+    {
         return response()->json([]);
     }
 }

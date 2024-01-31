@@ -194,6 +194,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('notification')->group(function () {
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
+                Route::get('/', 'Api\Instructor\NotificationController@index');
                 Route::patch('/', 'Api\Instructor\NotificationController@update');
             });
         });

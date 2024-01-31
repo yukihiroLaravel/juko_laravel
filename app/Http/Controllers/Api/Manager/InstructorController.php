@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 
 class InstructorController extends Controller
 {
-    public function show(){
+    public function show()
+    {
         return response()->json([]);
     }
 }

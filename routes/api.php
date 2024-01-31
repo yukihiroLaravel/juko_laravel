@@ -176,6 +176,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
                 });
+                 // マネージャーお知らせ一覧
+                Route::prefix('Notification')->group(function () {
+                    Route::get('/', 'Api\Manager\NotificationController@store');
+                });
             });
         });
     });
@@ -194,7 +198,6 @@ Route::prefix('v1')->group(function () {
         Route::prefix('notification')->group(function () {
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
-                Route::get('/', 'Api\Instructor\NotificationController@index');
                 Route::patch('/', 'Api\Instructor\NotificationController@update');
             });
         });

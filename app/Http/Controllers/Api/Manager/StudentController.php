@@ -60,8 +60,8 @@ class StudentController extends Controller
         ]);
     }
 
-    public function show(){
+    public function show()
+    {
         return response()->json([]);
     }
-    
 }

@@ -59,4 +59,9 @@ class StudentController extends Controller
             'attendances' => $attendances,
         ]);
     }
+
+    public function show(){
+        return response()->json([]);
+    }
+    
 }

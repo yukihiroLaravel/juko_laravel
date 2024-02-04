@@ -174,11 +174,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
-                    Route::post('/', 'Api\Manager\AttendanceController@store');
+                    Route::post('/', 'Api\Manager\AttendanceController@');
                 });
                  // マネージャーお知らせ一覧
-                Route::prefix('Notification')->group(function () {
-                    Route::get('/', 'Api\Manager\NotificationController@store');
+                Route::prefix('notification')->group(function () {
+                    Route::get('index', 'Api\Manager\NotificationController@index');
                 });
             });
         });

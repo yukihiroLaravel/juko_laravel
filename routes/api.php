@@ -176,7 +176,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@');
                 });
-                 // マネージャーお知らせ一覧
+                 // マネージャー-お知らせ一覧
                 Route::prefix('notification')->group(function () {
                     Route::get('index', 'Api\Manager\NotificationController@index');
                 });

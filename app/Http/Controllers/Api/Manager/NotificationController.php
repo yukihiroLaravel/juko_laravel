@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -18,8 +18,7 @@ class NotificationController extends Controller
      * @param Request $request
      * @return NotificationIndexResource
      */
-    public function index()
-    {
+    public function index() {
         return response()->json([]);
     }
 }

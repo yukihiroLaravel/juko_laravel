@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Requests\Instructor\StudentShowRequest;
+use App\Http\Resources\Instructor\StudentShowResource;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -58,5 +62,31 @@ class StudentController extends Controller
             'course' => $course,
             'attendances' => $attendances,
         ]);
+    }
+
+    public function show(StudentShowRequest $request)
+    {
+       
+        // 認証された講師のIDを取得
+        $instructorCourseIds = Auth::guard('instructor')->user()->id;
+
+        // 認証された講師が作成した講座のIDを取得
+        $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
+
+        \Log::debug($courseIds);
+
+        // リクエストされた受講生を取得
+        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
+                            ->findOrFail($request->student_id);
+
+        // 受講生が講師の講座に所属しているか確認
+        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized to access this student.'
+            ], 403);
+        }
+        return new StudentShowResource($student);
     }
 }

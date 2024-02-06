@@ -18,7 +18,7 @@ class NotificationController extends Controller
      * @param Request $request
      * @return NotificationIndexResource
      */
-    public function index()
+    public function index(Request $request)
     {
         return response()->json([]);
     }

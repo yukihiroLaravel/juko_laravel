@@ -66,14 +66,12 @@ class StudentController extends Controller
 
     public function show(StudentShowRequest $request)
     {
-       
+
         // 認証された講師のIDを取得
         $instructorCourseIds = Auth::guard('instructor')->user()->id;
 
         // 認証された講師が作成した講座のIDを取得
         $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
-
-        \Log::debug($courseIds);
 
         // リクエストされた受講生を取得
         $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])

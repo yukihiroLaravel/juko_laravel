@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Model\Notification;
 
 class NotificationController extends Controller
 {
-    
     /**
      * お知らせ詳細
      *
@@ -24,6 +22,5 @@ class NotificationController extends Controller
         $notification = Notification::findOrFail($request->notification_id);
 
         return new NotificationShowResource($notification);
-
     }
 }

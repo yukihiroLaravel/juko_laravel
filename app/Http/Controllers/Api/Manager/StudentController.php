@@ -66,7 +66,6 @@ class StudentController extends Controller
 
     public function show(StudentShowRequest $request)
     {
-
         // 認証された講師のIDを取得
         $instructorCourseIds = Auth::guard('instructor')->user()->id;
 

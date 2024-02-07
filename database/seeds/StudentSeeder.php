@@ -59,15 +59,15 @@ class StudentSeeder extends Seeder
                 'occupation' => 'バックエンドエンジニア',
                 'email' => 'test_student_3@example.com',
                 'password' => Hash::make('password3'),
-                'purpose' => 'サーバーサイド知識を理解したい',
+                'purpose' => 'フロントエンドの知識を理解したい',
                 'birth_date' => Carbon::now(),
                 'sex' => 2,
-                'address' => '大阪府',
+                'address' => '北海道',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'last_login_at' => Carbon::now(),
                 'email_verified_at' => Carbon::now(),
-                'profile_image' => '/student/image2.jpg',
+                'profile_image' => '/student/image3.jpg',
             ]
         ]);
     }

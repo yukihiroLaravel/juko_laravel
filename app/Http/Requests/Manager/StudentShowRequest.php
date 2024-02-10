@@ -24,7 +24,7 @@ class StudentShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'student_id' => ['required','integer'],
+            'student_id' => ['required','integer','exists:courses,id,deleted_at,NULL'],
         ];
     }
 

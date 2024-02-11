@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {

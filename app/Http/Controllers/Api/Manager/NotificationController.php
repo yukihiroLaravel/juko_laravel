@@ -3,23 +3,33 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Resources\NotificationIndexResource;
+use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Notification;
-use App\Model\Student;
-use App\Model\Attendance;
-use Carbon\Carbon;
+use App\Model\Instructor;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     /**
-     * お知らせ一覧取得API
+     * マネージャー側のお知らせ一覧取得API
      *
-     * @param Request $request
+     * @param NotificationIndexRequest $request
      * @return NotificationIndexResource
      */
-    public function index(Request $request)
-    {
-        return response()->json([]);
+    public function index(NotificationIndexRequest $request)
+    {   
+        $instructorId = Auth::guard('instructor')->user()->id; 
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+        $perPage = $request->input('per_page',20);
+        $page = $request->input('page', 1);
+
+        $notifications = Notification::with(['course'])
+                                        ->where('instructor_id', Auth::guard('instructor')->user()->id)
+                                        ->paginate($perPage, ['*'], 'page', $page);
+       
+        return new NotificationIndexResource($notifications);
     }
 }

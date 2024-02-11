@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -47,16 +47,28 @@ class StudentController extends Controller
             ], 403);
         }
 
-        // 指定した講座の受講生情報と講座情報を取得
-        $attendances = Attendance::with(['course', 'student'])
-            ->where('course_id', $request->course_id)
+        $results = DB::table('attendances')
+            ->select(
+                'attendances.*',
+                'students.nick_name',
+                'students.email',
+                'students.profile_image',
+                'students.last_login_at'
+            )
+            ->where('attendances.course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->orderBy($sortBy, $order)
+            ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
+                $query->orderBy('attendances.created_at', $order);
+            }, function ($query) use ($sortBy, $order) {
+                $query->orderBy('students.' . $sortBy, $order);
+            })
             ->paginate($perPage, ['*'], 'page', $page);
+
+        $course = Course::find($request->course_id);
 
         return new StudentIndexResource([
             'course' => $course,
-            'attendances' => $attendances,
+            'data' => $results
         ]);
     }
 }

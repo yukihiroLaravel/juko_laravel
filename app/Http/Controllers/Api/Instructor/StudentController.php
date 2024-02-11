@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Http\Controllers\Controller;
-use App\Model\Attendance;
+use Carbon\Carbon;
 use App\Model\Course;
 use App\Model\Student;
-use App\Http\Requests\Instructor\StudentIndexRequest;
-use App\Http\Resources\Instructor\StudentIndexResource;
-use App\Http\Requests\Instructor\StudentShowRequest;
-use App\Http\Resources\Instructor\StudentShowResource;
-use App\Http\Requests\Instructor\StudentStoreRequest;
-use App\Http\Resources\Instructor\StudentStoreResource;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Instructor\StudentShowRequest;
+use App\Http\Requests\Instructor\StudentIndexRequest;
+use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Resources\Instructor\StudentShowResource;
+use App\Http\Resources\Instructor\StudentIndexResource;
+use App\Http\Resources\Instructor\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -25,7 +25,7 @@ class StudentController extends Controller
      */
     public function index(StudentIndexRequest $request)
     {
-        $perPage = $request->input('per_page', 20);
+        $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
@@ -39,17 +39,27 @@ class StudentController extends Controller
             ], 403);
         }
 
-        $attendances = Attendance::with(['student', 'course'])
-            ->where('course_id', $request->course_id)
+        $results = DB::table('attendances')
+            ->select(
+                'attendances.*',
+                'students.nick_name',
+                'students.email',
+                'students.profile_image',
+                'students.last_login_at'
+            )
+            ->where('attendances.course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->orderBy($sortBy, $order)
+            ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
+                $query->orderBy('attendances.created_at', $order);
+            }, function ($query) use ($sortBy, $order) {
+                $query->orderBy('students.' . $sortBy, $order);
+            })
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
-
         return new StudentIndexResource([
             'course' => $course,
-            'attendances' => $attendances,
+            'data' => $results
         ]);
     }
 

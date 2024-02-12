@@ -13,22 +13,17 @@ class AttendanceSeeder extends Seeder
      */
     public function run()
     {
-        Attendance::insert([
-            // 受講生1
-            [
+        for ($i = 1; $i <= 30; $i++) {
+            // 10個単位でcreated_atをずらして
+            $created_at = Carbon::now()->subDays(30 - $i);
+
+            Attendance::insert([
                 'course_id' => 1,
-                'student_id' => 1,
+                'student_id' => $i,
                 'progress' => 10,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 10,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-        ]);
+                'created_at' => $created_at,
+                'updated_at' => $created_at,
+            ]);
+        }
     }
 }

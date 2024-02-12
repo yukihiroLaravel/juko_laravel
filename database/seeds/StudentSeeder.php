@@ -14,43 +14,25 @@ class StudentSeeder extends Seeder
      */
     public function run()
     {
-        Student::insert([
-            [
-                'given_name_by_instructor' => 'ユーザー名(仮)1',
-                'nick_name' => '生徒ニックネーム1',
+        for ($i = 1; $i <= 30; $i++) {
+            Student::create([
+                'given_name_by_instructor' => 'ユーザー名(仮)' . $i,
+                'nick_name' => '生徒ニックネーム' . $i,
                 'last_name' => '生徒',
-                'first_name' => 'テスト1',
+                'first_name' => 'テスト' . $i,
                 'occupation' => 'システムエンジニア',
-                'email' => 'test_student_1@example.com',
-                'password' => Hash::make('password1'),
+                'email' => 'test_student_' . $i . '@example.com',
+                'password' => Hash::make('password' . $i),
                 'purpose' => '自己研鑽のため',
                 'birth_date' => Carbon::now(),
-                'sex' => 1,
-                'address' => '東京都',
+                'sex' => $i % 2 == 0 ? 2 : 1,
+                'address' => $i % 2 == 0 ? '大阪府' : '東京都',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
                 'last_login_at' => Carbon::now(),
                 'email_verified_at' => Carbon::now(),
-                'profile_image' => '/student/image1.jpg',
-            ],
-            [
-                'given_name_by_instructor' => 'ユーザー名(仮)2',
-                'nick_name' => '生徒ニックネーム2',
-                'last_name' => '生徒',
-                'first_name' => 'テスト2',
-                'occupation' => 'フロントエンジニア',
-                'email' => 'test_student_2@example.com',
-                'password' => Hash::make('password2'),
-                'purpose' => 'サーバーサイド知識を理解したい',
-                'birth_date' => Carbon::now(),
-                'sex' => 2,
-                'address' => '大阪府',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-                'last_login_at' => Carbon::now(),
-                'email_verified_at' => Carbon::now(),
-                'profile_image' => '/student/image2.jpg',
-            ]
-        ]);
+                'profile_image' => '/student/image' . $i . '.jpg',
+            ]);
+        }
     }
 }

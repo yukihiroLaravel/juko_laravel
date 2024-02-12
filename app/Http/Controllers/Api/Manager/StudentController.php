@@ -9,7 +9,7 @@ use App\Model\Instructor;
 use App\Model\Student;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Instructor\StudentShowResource;
+use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Requests\Manager\StudentShowRequest;
 use Illuminate\Support\Facades\Auth;
 

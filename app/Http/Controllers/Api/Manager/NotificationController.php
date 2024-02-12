@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Instructor;
-
 // use App\Http\Requests\manager\NotificationUpdateRequest;
 // use App\Http\Resources\manager\NotificationUpdateResource;
 use App\Model\Notification;

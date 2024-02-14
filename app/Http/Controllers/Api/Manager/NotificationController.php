@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Instructor;
-
-// use App\Http\Requests\manager\NotificationUpdateRequest;
-// use App\Http\Resources\manager\NotificationUpdateResource;
+use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Resources\Manager\NotificationUpdateResource;
 use App\Model\Notification;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,9 +18,7 @@ class NotificationController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-    public function update(Request $request)
-    // ※NotificationUpdateRequestは後で作成
-    // public function update(NotificationUpdateRequest $request)
+    public function update(NotificationUpdateRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
@@ -48,20 +44,9 @@ class NotificationController extends Controller
         ])
         ->save();
 
-        //※仮
-        $testResource = [
-            'type' => $notification->type,
-            'start_date' => $notification->start_date,
-            'end_date' => $notification->end_date,
-            'title' => $notification->title,
-            'content' => $notification->content,
-        ];
-
         return response()->json([
             'result' => true,
-            'data' => $testResource,
-            // ※NotificationUpdateResourceは後で作成
-            // 'data' => new NotificationUpdateResource($notification),
+            'data' => new NotificationUpdateResource($notification),
         ]);
     }
 }

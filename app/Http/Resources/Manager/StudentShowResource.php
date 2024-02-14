@@ -31,8 +31,8 @@ class StudentShowResource extends JsonResource
             'created_at' => $student->created_at->format('Y/m/d'),
             'last_login_at' => $student->last_login_at->format('Y/m/d'),
             'courses' => $student->attendances->map(function ($attendance) {
-            ];
-        }),
+            }),
+        ];
     }
 
     public function course()
@@ -43,8 +43,8 @@ class StudentShowResource extends JsonResource
             'title' => $attendance->course->title,
             'progress' => $attendance->progress,
             'chapters' => $attendance->course->chapters->map(function ($chapter) {
-            ];
-        }),
+            }),
+        ];
     }
 
     public function chapter()
@@ -53,8 +53,8 @@ class StudentShowResource extends JsonResource
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
             'lessons' => $chapter->lessons->map(function ($lesson) {
-            ];
-        }), 
+            }),
+        ]; 
     }
 
     public function lesson()
@@ -62,11 +62,12 @@ class StudentShowResource extends JsonResource
         return [
             'lesson_id' => $lesson->id,
             'lesson_attendance' => $lesson->lessonAttendances->map(function ($attendance) {
+            }),
         ];
                 return [
                     'lesson_attendance_id' => $attendance->id,
                     'status' => $attendance->status,
                 ];
-            }),
-    }          
+    } 
+    
 }

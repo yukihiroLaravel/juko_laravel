@@ -85,7 +85,8 @@ class AttendanceController extends Controller
             ], 500);
         }
         // 配下のinstructorの講座に紐づく受講情報を削除
-        public function delete() {
+        public function delete()
+        {
             return response()->json([]);
         }
     }

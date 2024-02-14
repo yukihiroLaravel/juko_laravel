@@ -29,11 +29,9 @@ class NotificationController extends Controller
 
     // 指定されたIDでお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
-    // お知らせを作成したインストラクターのIDを取得
-        $notificationInstructorId = $notification->instructor_id;
 
     // アクセス権限のチェック
-        if (!in_array($notificationInstructorId, $instructorIds, true)) {
+        if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
             'result' => false,
             'message' => "Forbidden, not allowed to access this notification.",

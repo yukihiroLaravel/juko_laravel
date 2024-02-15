@@ -8,6 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
+
 class NotificationUpdateRequest extends FormRequest
 {
     /**
@@ -66,6 +67,5 @@ class NotificationUpdateRequest extends FormRequest
                 // 'message' => "This Notification does not exist."
             ], 500);
         }
-
     }
 }

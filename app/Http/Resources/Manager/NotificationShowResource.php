@@ -6,6 +6,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationShowResource extends JsonResource
 {
+    /** @var \App\Model\Notification */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,6 +18,7 @@ class NotificationShowResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'notification_id' => $this->resource->id,
             'course_id' => $this->resource->course_id,
             'title' => $this->resource->title,
             'type' => $this->resource->type,

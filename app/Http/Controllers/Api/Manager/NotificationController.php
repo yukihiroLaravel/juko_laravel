@@ -19,12 +19,14 @@ class NotificationController extends Controller
      */
     public function index(NotificationIndexRequest $request)
     {
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+
+        // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        $perPage = $request->input('per_page', 20);
-        $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course'])
                                         ->whereIn('instructor_id', $instructorIds)

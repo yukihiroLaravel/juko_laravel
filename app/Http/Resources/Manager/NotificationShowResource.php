@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +24,7 @@ class NotificationShowResource extends JsonResource
             'type' => $this->resource->type,
             'start_date' => $this->resource->start_date,
             'end_date' => $this->resource->end_date,
-            'content' => $this->resource->content,
+            'content' => $this->resource->content
         ];
     }
 }

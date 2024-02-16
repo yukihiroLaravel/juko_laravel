@@ -6,6 +6,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationUpdateResource extends JsonResource
 {
+    /** @var \App\Model\Notification */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *

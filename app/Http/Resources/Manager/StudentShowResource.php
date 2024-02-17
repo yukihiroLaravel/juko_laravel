@@ -30,20 +30,24 @@ class StudentShowResource extends JsonResource
             'address' => $student->address,
             'created_at' => $student->created_at->format('Y/m/d'),
             'last_login_at' => $student->last_login_at->format('Y/m/d'),
-            'courses' => $student->attendances->map(function ($attendance) {
-            }),
+            'courses' => $this->course(),
         ];
     }
 
     public function course()
     {
         return [
-            'course_id' => $attendance->course->id,
-            'image' => $attendance->course->image,
-            'title' => $attendance->course->title,
-            'progress' => $attendance->progress,
-            'chapters' => $attendance->course->chapters->map(function ($chapter) {
-            }),
+            'course_id' => $this->resource->attendances,
+            // 'title' => $this->resource->course->title,
+            // 'image' => $this->resource->course->image,
+            // 'instructor' => $this->instructor(),
+            // 'chapters' => $this->chapters(),
+            // 'course_id' => $attendance->course->id,
+            // 'image' => $attendance->course->image,
+            // 'title' => $attendance->course->title,
+            // 'progress' => $attendance->progress,
+            // 'chapters' => $attendance->course->chapters->map(function ($chapter) {
+            // }),
         ];
     }
 

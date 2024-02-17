@@ -36,6 +36,17 @@ class NotificationSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'course_id' => 4,
+                'instructor_id' => 4,
+                'title' => 'TypeScript入門講座の更新について',
+                'type' => Notification::TYPE_ONCE_INT,
+                'start_date' => '2023-08-01 00:00:00',
+                'end_date' => '2023-10-10 23:59:59',
+                'content' => 'TypeScript入門講座の内容が一部追加されました。確認をお願いします。',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }

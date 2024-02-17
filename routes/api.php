@@ -179,6 +179,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
                 });
+                // マネージャー-講師
+                Route::prefix('instructor')->group(function () {
+                    Route::get('{instructor_id}', 'Api\Manager\InstructorController@edit');
+                });
             });
         });
     });

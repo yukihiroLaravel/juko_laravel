@@ -4,7 +4,21 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $course_id
+ * @property int $student_id
+ * @property int $progress
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * @property string|null $deleted_at
+ * @property Student $student
+ * @property Course $course
+ * @property Collection<LessonAttendance> $lessonAttendances
+ */
 class Attendance extends Model
 {
     use SoftDeletes;
@@ -23,7 +37,11 @@ class Attendance extends Model
     ];
 
     protected $casts = [
-        'student_id' => 'int'
+        'student_id' => 'int',
+        'course_id' => 'int',
+        'progress' => 'int',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // 受講状態初期値
@@ -70,7 +88,7 @@ class Attendance extends Model
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
     const SORT_BY_EMAIL = 'email';
-    const SORT_BY_CREATED_AT = 'created_at';
+    const SORT_BY_ATTENDANCED_AT = 'attendanced_at';
     const SORT_BY_LAST_LOGIN_AT = 'last_login_at';
 
     //$periodのバリデーションに利用する定数

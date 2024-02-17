@@ -2,7 +2,33 @@
 
 namespace App\Model;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+
+/**
+ * @property int $id
+ * @property string $given_name_by_instructor
+ * @property string $nick_name
+ * @property string $last_name
+ * @property string $first_name
+ * @property string $occupation
+ * @property string $email
+ * @property string $password
+ * @property string $purpose
+ * @property Carbon $birth_date
+ * @property int $sex
+ * @property string $address
+ * @property string $created_at
+ * @property string $updated_at
+ * @property Carbon $last_login_at
+ * @property string $email_verified_at
+ * @property string $profile_image
+ * @property string $full_name
+ * @property Collection<Course> $courses
+ * @property Collection<Notification> $notifications
+ * @property Collection<Attendance> $attendances
+ */
 
 class Student extends Authenticatable
 {
@@ -59,7 +85,7 @@ class Student extends Authenticatable
     /**
      * お知らせを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\belongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function notifications()
     {

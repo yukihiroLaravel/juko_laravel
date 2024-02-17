@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\LessonStatusRule;
 
-class LessonUpdateRequest extends FormRequest
+class ChapterSortRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,12 +19,9 @@ class LessonUpdateRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'lesson_id' => $this->route('lesson_id'),
             'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -36,12 +32,9 @@ class LessonUpdateRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lesson_id' => ['required','integer', 'exists:lessons,id,deleted_at,NULL'],
-            'title' => ['required','string','max:50'],
-            'url' => ['required','string'],
-            'remarks' => ['nullable','string'],
-            'status' => ['required', 'string', new LessonStatusRule()],
+            'chapters' => ['required', 'array'],
+            'chapters.*.chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'chapters.*.order' => ['required', 'integer'],
         ];
     }
 }

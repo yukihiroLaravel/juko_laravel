@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use Carbon\Carbon;
 use App\Model\Course;
+use RuntimeException;
 use App\Model\Attendance;
 use App\Model\Instructor;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\CourseDeleteRequest;
-use App\Http\Requests\Instructor\CourseUpdateRequest;
-use App\Http\Requests\Instructor\CoursePutStatusRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
-use App\Http\Requests\Instructor\CourseEditRequest;
-use App\Http\Resources\Instructor\CourseUpdateResource;
-use App\Http\Resources\Instructor\CourseIndexResource;
-use App\Http\Resources\Instructor\CourseShowResource;
+use App\Http\Requests\Instructor\CourseDeleteRequest;
+use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Resources\Instructor\CourseEditResource;
+use App\Http\Resources\Instructor\CourseShowResource;
+use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseStoreResource;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\Instructor\CourseUpdateResource;
+use App\Http\Requests\Instructor\CoursePutStatusRequest;
 
 class CourseController extends Controller
 {
@@ -64,7 +65,7 @@ class CourseController extends Controller
         $instructorId = $request->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
         $filePath = Course::convertImagePath($filePath);
 
@@ -125,7 +126,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid() . '.' . $extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }

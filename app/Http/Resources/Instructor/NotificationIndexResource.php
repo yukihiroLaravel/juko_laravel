@@ -2,10 +2,16 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Model\Notification;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationIndexResource extends JsonResource
 {
+    /** @var LengthAwarePaginator */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -17,7 +23,7 @@ class NotificationIndexResource extends JsonResource
         $notifications = $this->resource;
 
         return [
-            'notifications' => $this->mapNotifications($notifications),
+            'notifications' => $this->mapNotifications($notifications->getCollection()),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),
@@ -25,9 +31,13 @@ class NotificationIndexResource extends JsonResource
         ];
     }
 
+    /**
+     * @param Collection<\App\Model\Notification> $notifications
+     * @return array
+     */
     private function mapNotifications($notifications)
     {
-        return $notifications->map(function ($notification) {
+        return $notifications->map(function (Notification $notification) {
             return [
                 'id' => $notification->id,
                 'course_id' => $notification->course_id,
@@ -36,6 +46,7 @@ class NotificationIndexResource extends JsonResource
                 'type' => $notification->type,
                 'start_date' => $notification->start_date,
             ];
-        });
+        })
+            ->toArray();
     }
 }

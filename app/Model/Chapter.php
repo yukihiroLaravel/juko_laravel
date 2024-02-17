@@ -4,7 +4,21 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property int $course_id
+ * @property int $order
+ * @property string $title
+ * @property 'public'|'private' $status
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ * @property int $completed_count
+ * @property Course $course
+ * @property Collection<Lesson> $lessons
+ */
 class Chapter extends Model
 {
     use SoftDeletes;
@@ -32,6 +46,23 @@ class Chapter extends Model
     ];
 
     /**
+     * モデルのブート時の処理
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // チャプター削除時に紐づくレッスンも削除
+        static::deleting(function ($chapter) {
+            foreach ($chapter->lessons()->get() as $child) {
+                $child->delete();
+            }
+        });
+    }
+
+    /**
      * 講座を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -48,17 +79,7 @@ class Chapter extends Model
      */
     public function lessons()
     {
-        return $this->hasMany(Lesson::class);
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::deleting(function ($chapter) {
-            foreach ($chapter->lessons()->get() as $child) {
-                $child->delete();
-            }
-        });
+        return $this->hasMany(Lesson::class)->orderBy('order', 'asc');
     }
 
     /**

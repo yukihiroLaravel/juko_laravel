@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\LessonUpdateStatusRule;
+use App\Rules\LessonStatusRule;
 
 class LessonUpdateRequest extends FormRequest
 {
@@ -41,7 +41,7 @@ class LessonUpdateRequest extends FormRequest
             'title' => ['required','string','max:50'],
             'url' => ['required','string'],
             'remarks' => ['nullable','string'],
-            'status' => ['required', 'string', new LessonUpdateStatusRule()],
+            'status' => ['required', 'string', new LessonStatusRule()],
         ];
     }
 }

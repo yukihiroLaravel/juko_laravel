@@ -3,7 +3,23 @@
 namespace App\Model;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property string $nick_name
+ * @property string $last_name
+ * @property string $first_name
+ * @property string $email
+ * @property string $password
+ * @property string|null $profile_image
+ * @property 'manager'|'instructor' $type
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string|null $deleted_at
+ * @property Collection<Course> $courses
+ * @property Collection<Instructor> $managings
+ */
 class Instructor extends Authenticatable
 {
     /**

@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
+                                    Route::patch('status', 'Api\Instructor\LessonController@updateStatus');
                                     Route::patch('title', 'Api\Instructor\LessonController@updateTitle');
                                 });
                             });
@@ -153,6 +154,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
+                            Route::post('sort', 'Api\Manager\ChapterController@sort');
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');

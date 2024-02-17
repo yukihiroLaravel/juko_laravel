@@ -19,6 +19,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\ForceJsonResponse::class,
+        \App\Http\Middleware\CorsMiddleware::class
     ];
 
     /**
@@ -38,6 +40,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:60,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -61,6 +64,9 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'student' => \App\Http\Middleware\EnsureIsStudent::class,
+        'instructor' => \App\Http\Middleware\EnsureIsInstructor::class,
+        'manager' => \App\Http\Middleware\EnsureIsManager::class,
     ];
 
     /**

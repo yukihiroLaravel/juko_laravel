@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Tokyo',
 
     /*
     |--------------------------------------------------------------------------
@@ -176,6 +176,10 @@ return [
         App\Providers\RouteServiceProvider::class,
 
     ],
+
+
+    // Cache configuration
+    'allow_origin' => env('ALLOW_ORIGIN'),
 
     /*
     |--------------------------------------------------------------------------

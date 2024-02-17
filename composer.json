@@ -11,14 +11,17 @@
         "php": "^7.2.5|^8.0",
         "fideloper/proxy": "^4.4",
         "laravel/framework": "^6.20.26",
+        "laravel/sanctum": "^2.15",
         "laravel/tinker": "^2.5"
     },
     "require-dev": {
         "facade/ignition": "^1.16.15",
         "fakerphp/faker": "^1.9.1",
+        "larastan/larastan": "^1.0",
         "mockery/mockery": "^1.0",
         "nunomaduro/collision": "^3.0",
-        "phpunit/phpunit": "^8.5.8|^9.3.3"
+        "phpunit/phpunit": "^8.5.8|^9.3.3",
+        "squizlabs/php_codesniffer": "^3.7"
     },
     "config": {
         "optimize-autoloader": true,
@@ -47,15 +50,14 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+        "sniffer": [
+            "./vendor/bin/phpcs --standard=phpcs.xml ./"
         ],
-        "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        "sniffer-rewrite": [
+            "./vendor/bin/phpcbf --standard=phpcs.xml ./ || true"
         ],
-        "post-create-project-cmd": [
-            "@php artisan key:generate --ansi"
+        "analyze": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
         ]
     }
 }

@@ -9,7 +9,7 @@ use App\Model\Instructor;
 use App\Model\Student;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Instructor\StudentShowResource;
+use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Requests\Manager\StudentShowRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,8 +73,7 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
-                            ->findOrFail($request->student_id);
+        $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

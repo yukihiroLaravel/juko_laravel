@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Resources\Manager\CourseShowResource;
-use App\Http\Resources\Manager\CourseUpdateResource;
-use App\Http\Resources\Manager\CourseEditResource;
-use App\Http\Requests\Manager\CoursePutStatusRequest;
-use App\Http\Requests\Manager\CourseShowRequest;
-use App\Http\Requests\Manager\CourseUpdateRequest;
-use App\Http\Requests\Manager\CourseDeleteRequest;
-use App\Http\Requests\Manager\CourseStoreRequest;
-use App\Http\Requests\Manager\CourseEditRequest;
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Model\Course;
+use RuntimeException;
 use App\Model\Attendance;
 use App\Model\Instructor;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Manager\CourseEditRequest;
+use App\Http\Requests\Manager\CourseShowRequest;
+use App\Http\Requests\Manager\CourseStoreRequest;
+use App\Http\Requests\Manager\CourseDeleteRequest;
+use App\Http\Requests\Manager\CourseUpdateRequest;
+use App\Http\Resources\Manager\CourseEditResource;
+use App\Http\Resources\Manager\CourseShowResource;
+use App\Http\Resources\Manager\CourseIndexResource;
+use App\Http\Resources\Manager\CourseUpdateResource;
+use App\Http\Requests\Manager\CoursePutStatusRequest;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CourseController extends Controller
 {
@@ -54,26 +55,28 @@ class CourseController extends Controller
      * マネージャ講座 管理下講師の講座情報を取得
      *
      * @param CourseShowRequest $request
-     * @return CourseShowResource
+     * @return CourseShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(CourseShowRequest $request)
     {
         // ユーザID取得
         $userId = $request->user()->id;
-        // 配下のinstructor情報を取得
+
+        // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
 
-        // $course_id から chapters・lessons含めてデータ取得
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
-        // 自身 もしくは 配下のinstrctorでない場合はエラー応答
+
+        // 自身 もしくは 配下の講師でない場合はエラー応答
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
         }
+
         return new CourseShowResource($course);
     }
 
@@ -113,7 +116,7 @@ class CourseController extends Controller
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid() . '.' . $extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -165,7 +168,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid() . '.' . $extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -251,7 +254,7 @@ class CourseController extends Controller
      * マネージャ講座情報編集API
      *
      * @param CourseEditRequest $request
-     * @return CourseEditResource
+     * @return CourseEditResource|\Illuminate\Http\JsonResponse
      */
     public function edit(CourseEditRequest $request)
     {

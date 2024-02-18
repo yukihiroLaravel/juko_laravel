@@ -34,7 +34,7 @@ class NotificationShowRequest extends FormRequest
             'notification_id' => [
                 'required',
                 'integer',
-                'exists:notifications,id',
+                'exists:notifications,id,deleted_at,NULL',
             ],
         ];
     }

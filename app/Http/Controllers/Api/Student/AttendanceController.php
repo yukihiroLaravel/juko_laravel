@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Http\Controllers\Controller;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Attendance;
 use App\Model\LessonAttendance;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
-use App\Http\Requests\Student\AttendanceCourseProgressRequest;
-use App\Http\Resources\Student\AttendanceCourseProgressResource;
-use App\Http\Requests\Student\AttendanceIndexRequest;
-use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Requests\Student\AttendanceShowRequest;
+use App\Http\Requests\Student\AttendanceIndexRequest;
 use App\Http\Resources\Student\AttendanceShowResource;
+use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Requests\Student\AttendanceShowChapterRequest;
 use App\Http\Resources\Student\AttendanceShowChapterResource;
+use App\Http\Requests\Student\AttendanceCourseProgressRequest;
+use App\Http\Resources\Student\AttendanceCourseProgressResource;
 
 class AttendanceController extends Controller
 {
@@ -53,7 +53,7 @@ class AttendanceController extends Controller
      * 講座詳細取得API
      *
      * @param AttendanceShowRequest $request
-     * @return AttendanceShowResource
+     * @return AttendanceShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(AttendanceShowRequest $request)
     {
@@ -101,13 +101,6 @@ class AttendanceController extends Controller
         })
             ->first();
 
-        // 各レッスンに対して完了済みのレッスン数を計算
-        $chapter->lessons->map(function ($lesson) use ($attendance) {
-            $completedLessonsCount = LessonAttendance::countCompletedAttendance($lesson->id, $attendance->id);
-            $lesson->completed_lessons_count = $completedLessonsCount;
-            return $lesson;
-        });
-
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,
             'chapter' => $chapter,
@@ -118,7 +111,7 @@ class AttendanceController extends Controller
      * チャプター進捗状況、続きのレッスンID取得API
      *
      * @param AttendanceCourseProgressRequest $request
-     * @return AttendanceCourseProgressResource
+     * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
      */
     public function progress(AttendanceCourseProgressRequest $request)
     {

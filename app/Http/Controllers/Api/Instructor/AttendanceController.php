@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use Exception;
+use App\Model\Course;
+use App\Model\Lesson;
 use App\Model\Chapter;
 use App\Model\Attendance;
-use Illuminate\Support\Facades\Auth;
-use App\Model\Lesson;
-use App\Model\Course;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\AttendanceDeleteRequest;
-use App\Http\Requests\Instructor\LoginRateRequest;
-use App\Http\Requests\Instructor\AttendanceStoreRequest;
-use App\Http\Requests\Instructor\AttendanceShowRequest;
-use App\Http\Resources\Instructor\AttendanceShowResource;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
+use App\Http\Requests\Instructor\LoginRateRequest;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
+use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\AttendanceDeleteRequest;
+use App\Http\Resources\Instructor\AttendanceShowResource;
 
 class AttendanceController extends Controller
 {
@@ -73,20 +74,20 @@ class AttendanceController extends Controller
     public function show(AttendanceShowRequest $request)
     {
         $courseId = $request->course_id;
+
+        /** @var Collection<Chapter> */
         $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
+
+        /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
 
-        foreach ($chapters as $chapter) {
-            $completedCount = 0;
-            foreach ($chapter->lessons as $lesson) {
-                foreach ($lesson->lessonAttendances as $lessonAttendance) {
-                    if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                        $completedCount += 1;
-                    }
-                }
-            }
-            $chapter->completedCount = $completedCount;
-        }
+        $chapters->each(function (Chapter $chapter) {
+            $completedCount = $chapter->lessons->flatMap(function (Lesson $lesson) {
+                return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+            })->count();
+            $chapter->completed_count = $completedCount;
+        });
+
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
@@ -151,11 +152,16 @@ class AttendanceController extends Controller
         $endDate = new Carbon();
 
         if ($request->period === Attendance::PERIOD_WEEK) {
-            $periodAgo = $endDate->subWeek(1);
+            $periodAgo = $endDate->subWeek();
         } elseif ($request->period === Attendance::PERIOD_MONTH) {
-            $periodAgo = $endDate->subMonth(1);
+            $periodAgo = $endDate->subMonth();
         } elseif ($request->period === Attendance::PERIOD_YEAR) {
-            $periodAgo = $endDate->subYear(1);
+            $periodAgo = $endDate->subYear();
+        } else {
+            return response()->json([
+                'result' => 'false',
+                'message' => 'You could not get login rate'
+            ], 400);
         }
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
@@ -180,9 +186,9 @@ class AttendanceController extends Controller
      *
      * @param int $number
      * @param int $total
-     * @return int
+     * @return float
      */
-    public function calcLoginRate($number, $total)
+    public function calcLoginRate(int $number, int $total)
     {
         if ($total === 0) {
             return 0;

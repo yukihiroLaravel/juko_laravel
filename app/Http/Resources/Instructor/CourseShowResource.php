@@ -23,7 +23,6 @@ class CourseShowResource extends JsonResource
                 return [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
-                    'order' => $chapter->order,
                     'status' => $chapter->status,
                     'lessons' => $chapter->lessons->map(function ($lesson) {
                         return [
@@ -31,6 +30,7 @@ class CourseShowResource extends JsonResource
                            'url'=>$lesson->url,
                            'title'=>$lesson->title,
                            'remarks'=>$lesson->remarks,
+                           'status' =>$lesson->status,
                         ];
                     })
                 ];

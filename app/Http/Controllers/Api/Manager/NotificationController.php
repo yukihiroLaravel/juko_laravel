@@ -23,6 +23,7 @@ class NotificationController extends Controller
     {
         // ユーザーID取得
         $userId = $request->user()->id;
+
         // 配下のインストラクター情報を取得
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -42,28 +43,30 @@ class NotificationController extends Controller
         return new NotificationShowResource($notification);
     }
 
-
-        /**
+    /**
      * お知らせ更新API
      *
-     * @param   NotificationUpdateRequest $request
+     * @param NotificationUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-
     public function update(NotificationUpdateRequest $request)
     {
+        // ユーザーID取得
         $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下のインストラクター情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
+
+        // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        // 自分のお知らせ、または、配下instructorのお知らせでなければエラー応答
+        // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
-            //エラー応答
             return response()->json([
                 'result' => false,
-                'message' => "Forbidden, not allowed to update this notification.",
+                'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
 

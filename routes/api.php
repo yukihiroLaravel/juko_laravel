@@ -183,6 +183,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {
                     Route::prefix('{notification_id}')->group(function () {
+                        Route::get('/', 'Api\Manager\NotificationController@show');
                         Route::patch('/', 'Api\Manager\NotificationController@update');
                     });
                 });

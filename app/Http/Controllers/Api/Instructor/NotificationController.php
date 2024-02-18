@@ -43,6 +43,13 @@ class NotificationController extends Controller
     {
         $notification = Notification::findOrFail($request->notification_id);
 
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
+
         return new NotificationShowResource($notification);
     }
 

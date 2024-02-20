@@ -182,6 +182,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     Route::get('{student_id}', 'Api\Manager\StudentController@show');
+                });
 
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {

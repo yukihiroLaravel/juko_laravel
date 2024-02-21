@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 class StudentController extends Controller
 {
     /**
-     * マネージャ講座の受講生取得API
+     * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
@@ -76,6 +76,12 @@ class StudentController extends Controller
         ]);
     }
 
+    /**
+     * 受講生詳細取得API
+     *
+     * @param StudentShowRequest $request
+     * @return StudentShowResource|\Illuminate\Http\JsonResponse
+     */
     public function show(StudentShowRequest $request)
     {
         // 認証された講師のIDを取得
@@ -95,6 +101,7 @@ class StudentController extends Controller
                 'message' => 'Not authorized to access this student.'
             ], 403);
         }
+
         return new StudentShowResource($student);
     }
 }

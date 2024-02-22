@@ -29,7 +29,7 @@ class StudentController extends Controller
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
-        $account = $request->input('account','');
+        $account = $request->input('account', '');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
 

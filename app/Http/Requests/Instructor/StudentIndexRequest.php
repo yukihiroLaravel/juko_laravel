@@ -38,8 +38,8 @@ class StudentIndexRequest extends FormRequest
             'sort_by' => ['string', new IndexSortByRule()],
             'order' => ['string', 'in:asc,desc'],
             'account' => ['string'],
-            'start_date' => ['date_format:Y-m-d'],
-            'end_date' => ['date_format:Y-m-d'],
+            'start_date' => ['date_format:Y-m-d H:i:s'],
+            'end_date' => ['date_format:Y-m-d H:i:s'],
         ];
     }
 }

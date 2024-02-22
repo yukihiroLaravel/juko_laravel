@@ -29,7 +29,7 @@ class StudentController extends Controller
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
-        $account = $request->input('account','');
+        $account = $request->input('account');
         $start_date = $request->input('start_date');
         $end_date = $request->input('end_date');
 
@@ -60,7 +60,7 @@ class StudentController extends Controller
                 $query->where(function ($query) use ($account) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$account}%")
                     ->orWhere('students.email', 'LIKE', "%{$account}%")
-                    ->orWhere(DB::raw("CONCAT(students.last_name,' ',students.first_name)"), 'LIKE', "%{$account}%");
+                    ->orWhere(DB::raw("CONCAT(students.last_name,students.first_name)"), 'LIKE', "%{$account}%");
                 });
             })
             // 指定日検索: start_date ～ end_date

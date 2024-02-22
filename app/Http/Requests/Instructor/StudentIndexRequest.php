@@ -37,6 +37,9 @@ class StudentIndexRequest extends FormRequest
             'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule()],
             'order' => ['string', 'in:asc,desc'],
+            'account' => ['string'],
+            'start_date' => ['date_format:Y-m-d'],
+            'end_date' => ['date_format:Y-m-d'],
         ];
     }
 }

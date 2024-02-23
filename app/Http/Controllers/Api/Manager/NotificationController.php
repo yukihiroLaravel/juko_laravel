@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Notification;
 use App\Model\Instructor;

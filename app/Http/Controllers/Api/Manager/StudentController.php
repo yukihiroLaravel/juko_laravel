@@ -81,7 +81,7 @@ class StudentController extends Controller
 
         //認証されたマネージャーが管理する講師のIDのリストを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         //自身のIDを追加
         $instructorIds[] = $instructorId;

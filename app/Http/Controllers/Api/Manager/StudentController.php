@@ -78,11 +78,16 @@ class StudentController extends Controller
 
     public function show(StudentShowRequest $request)
     {
-        // 認証された講師のIDを取得
-        $instructorCourseIds = Auth::guard('instructor')->user()->id;
 
-        // 認証された講師が作成した講座のIDを取得
-        $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
+        //認証されたマネージャーが管理する講師のIDのリストを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        //自身のIDを追加
+        $instructorIds[] = $instructorId;
+
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         // リクエストされた受講生を取得
         $student = Student::with(['attendances.course'])->findOrFail($request->student_id);

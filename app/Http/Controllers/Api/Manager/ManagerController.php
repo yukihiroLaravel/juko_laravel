@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorPatchResource;
 
-
 class ManagerController extends Controller
 {
     public function update(InstructorPatchRequest $request)

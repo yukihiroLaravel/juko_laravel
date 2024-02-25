@@ -90,3 +90,4 @@ class AttendanceController extends Controller
     public function delete() {
         return response() ->json ([]);
     }
+}

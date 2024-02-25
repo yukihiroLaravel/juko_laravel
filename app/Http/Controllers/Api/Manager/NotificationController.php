@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;

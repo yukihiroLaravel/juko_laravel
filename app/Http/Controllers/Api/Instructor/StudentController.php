@@ -29,9 +29,9 @@ class StudentController extends Controller
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
-        $account = $request->input('account');
-        $start_date = $request->input('start_date');
-        $end_date = $request->input('end_date');
+        $inputText = $request->input('input_text');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
         $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
@@ -45,30 +45,30 @@ class StudentController extends Controller
 
         $results = DB::table('attendances')
             ->select(
-                'attendances.*',
+                'attendances.student_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
                 'students.last_login_at',
-                'students.created_at'
+                'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->where('attendances.course_id', $request->course_id)
-            // 受講生名またはメールアドレスで検索: nick_name、email、first_name + last_name
-            ->when($account, function ($query) use ($account) {
-                $account = str_replace(['　',' '], '', $account);
-                $query->where(function ($query) use ($account) {
-                    $query->orWhere('students.nick_name', 'LIKE', "%{$account}%")
-                    ->orWhere('students.email', 'LIKE', "%{$account}%")
-                    ->orWhere(DB::raw("CONCAT(students.last_name,students.first_name)"), 'LIKE', "%{$account}%");
+            // 受講生名検索（ニックネーム/メールアドレス/姓名）
+            ->when($inputText, function ($query) use ($inputText) {
+                $inputText = str_replace(['　',' '], '', $inputText);
+                $query->where(function ($query) use ($inputText) {
+                    $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
+                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
                 });
             })
-            // 指定日検索: start_date ～ end_date
-            ->when($start_date, function ($query) use ($start_date) {
-                $query->where('students.created_at', '>=', "{$start_date}");
+            // 日付検索
+            ->when($startDate, function ($query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($end_date, function ($query) use ($end_date) {
-                $query->where('students.created_at', '<=', "{$end_date}");
+            ->when($endDate, function ($query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
             })
             ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
                 $query->orderBy('attendances.created_at', $order);

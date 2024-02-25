@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class StudentIndexResource extends JsonResource
 {
@@ -14,35 +16,37 @@ class StudentIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-
+        /** @var \App\Model\Course $course */
         $course = $this->resource['course'];
-        $attendances = $this->resource['attendances'];
+
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $data */
+        $data = $this->resource['data'];
 
         return [
             'course' => [
-                'id' => $course->id,
+                'course_id' => $course->id,
                 'image' => $course->image,
                 'title' => $course->title,
             ],
             'pagination' => [
-                'page' => $attendances->currentPage(),
-                'total' => $attendances->total(),
+                'page' => $data->currentPage(),
+                'total' => $data->total(),
             ],
-            'students' => $this->mapStudents($attendances),
+            'students' => $this->mapStudents($data->getCollection(), $course),
         ];
     }
 
-    protected function mapStudents($attendances)
+    private function mapStudents(Collection $results, Course $course)
     {
-        return $attendances->map(function ($attendance) {
+        return $results->map(function ($result) use ($course) {
             return [
-                'id' => $attendance->student->id,
-                'nick_name' => $attendance->student->nick_name,
-                'email' => $attendance->student->email,
-                'profile_image' => $attendance->student->profile_image,
-                'course_title' => $attendance->course->title,
-                'last_login_at' => $attendance->student->last_login_at->format('Y/m/d  H:i:s'),
-                'attendanced_at' => $attendance->created_at->format('Y/m/d'),
+                'student_id' => $result->student_id,
+                'nick_name' => $result->nick_name,
+                'email' => $result->email,
+                'profile_image' => $result->profile_image,
+                'course_title' => $course->title,
+                'last_login_at' => $result->last_login_at,
+                'attendanced_at' => $result->created_at,
             ];
         });
     }

@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
+                                    Route::patch('status', 'Api\Instructor\LessonController@updateStatus');
                                     Route::patch('title', 'Api\Instructor\LessonController@updateTitle');
                                 });
                             });
@@ -153,6 +154,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
+                            Route::post('sort', 'Api\Manager\ChapterController@sort');
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
@@ -161,6 +163,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
+                                    Route::post('/', 'Api\Manager\LessonController@store');
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');
@@ -176,9 +179,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
                 });
-                 // マネージャー-お知らせ一覧
+                // マネージャー-お知らせ一覧
                 Route::prefix('notification')->group(function () {
                     Route::get('index', 'Api\Manager\NotificationController@index');
+                });
+                // マネージャー-お知らせ
+                Route::prefix('notification')->group(function () {
+                    Route::prefix('{notification_id}')->group(function () {
+                        Route::get('/', 'Api\Manager\NotificationController@show');
+                        Route::patch('/', 'Api\Manager\NotificationController@update');
+                    });
                 });
             });
         });

@@ -6,6 +6,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseStoreResource extends JsonResource
 {
+    /** @var \App\Model\Course */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,10 +18,10 @@ class CourseStoreResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'course_id' => $this->id,
-            'title' => $this->title,
-            'image' => $this->image,
-            'status' => $this->status,
+            'course_id' => $this->resource->id,
+            'title' => $this->resource->title,
+            'image' => $this->resource->image,
+            'status' => $this->resource->status,
         ];
     }
 }

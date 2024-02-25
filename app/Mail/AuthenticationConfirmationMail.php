@@ -15,6 +15,7 @@ class AuthenticationConfirmationMail extends Mailable
     private string $email;
     private string $fullName;
     private string $code;
+    private string $token;
 
     /**
      * Create a new message instance.
@@ -26,10 +27,10 @@ class AuthenticationConfirmationMail extends Mailable
         string $code,
         string $token
     ) {
-        $this->email     = $student->email;
-        $this->fullName  = $student->fullName;
-        $this->code      = $code;
-        $this->token     = $token;
+        $this->email = $student->email;
+        $this->fullName = $student->fullName;
+        $this->code = $code;
+        $this->token = $token;
     }
 
     /**

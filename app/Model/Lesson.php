@@ -4,7 +4,23 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int $id
+ * @property int $chapter_id
+ * @property string $title
+ * @property string $url
+ * @property string $remarks
+ * @property 'public'|'private' $status
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ * @property int $order
+ * @property-read int $total_lessons_count
+ * @property Chapter $chapter
+ * @property Collection<LessonAttendance> $lessonAttendances
+ */
 class Lesson extends Model
 {
     use SoftDeletes;
@@ -56,6 +72,18 @@ class Lesson extends Model
      */
     public function getTotalLessonsCountAttribute()
     {
-        return $this->chapter->lessons()->count();
+        return $this->chapter->lessons->count();
+    }
+
+    /**
+     * レッスンの完了数を取得する
+     *
+     * @return int
+     */
+    public function getCompletedLessonsCountAttribute()
+    {
+        return $this->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })->count();
     }
 }

@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChapterStoreResource extends JsonResource
 {
+    /** @var Chapter */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,10 +19,10 @@ class ChapterStoreResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'course_id' => $this->course_id,
+            'course_id' => $this->resource->course_id,
             'chapter' => [
-                'chapter_id' => $this->id,
-                'title' => $this->title,
+                'chapter_id' => $this->resource->id,
+                'title' => $this->resource->title,
             ]
         ];
     }

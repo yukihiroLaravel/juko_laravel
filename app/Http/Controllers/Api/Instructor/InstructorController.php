@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use RuntimeException;
 use App\Model\Instructor;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorEditResource;
 use App\Http\Resources\Instructor\InstructorPatchResource;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
 {
@@ -36,7 +38,7 @@ class InstructorController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid() . '.' . $extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 

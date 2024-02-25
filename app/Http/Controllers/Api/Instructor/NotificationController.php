@@ -27,8 +27,8 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course'])
-                                        ->where('instructor_id', Auth::guard('instructor')->user()->id)
-                                        ->paginate($perPage, ['*'], 'page', $page);
+            ->where('instructor_id', Auth::guard('instructor')->user()->id)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }
@@ -37,11 +37,18 @@ class NotificationController extends Controller
      * お知らせ詳細
      *
      * @param NotificationShowRequest $request
-     * @return NotificationShowResource
+     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(NotificationShowRequest $request)
     {
         $notification = Notification::findOrFail($request->notification_id);
+
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
 
         return new NotificationShowResource($notification);
     }

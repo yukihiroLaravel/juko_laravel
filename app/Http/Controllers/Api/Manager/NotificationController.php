@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
@@ -29,7 +28,17 @@ class NotificationController extends Controller
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $notifications = Notification::with(['course'])
+                                        ->whereIn('instructor_id', $instructorIds)
+                                        ->paginate($perPage, ['*'], 'page', $page);
+
+        return new NotificationIndexResource($notifications);
     }
+    
     /** お知らせ詳細
      *
      * @param NotificationShowRequest $request

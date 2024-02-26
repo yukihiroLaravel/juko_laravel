@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
                 Route::prefix('instructor')->group(function () {
-                    Route::post('{instructor_id}', 'Api\Manager\ManagerController@update');
+                    Route::post('{instructor_id}', 'Api\Manager\InstructorController@update');
                 });
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {

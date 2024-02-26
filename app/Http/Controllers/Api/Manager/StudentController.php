@@ -109,4 +109,16 @@ class StudentController extends Controller
 
         return new StudentShowResource($student);
     }
+
+     /**
+     * 受講生登録API
+     *
+     * @param StudentStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store()
+    {
+        return response()->json([]);
+    }
+
 }

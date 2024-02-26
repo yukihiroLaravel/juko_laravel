@@ -10,7 +10,7 @@ use App\Model\Notification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
-use App\Http\Resources\Manager\NotificSSationUpdateResource;
+use App\Http\Resources\Manager\NotificationUpdateResource;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller

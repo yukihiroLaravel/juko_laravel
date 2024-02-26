@@ -179,10 +179,18 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
                 });
+<<<<<<< HEAD
                 // マネージャー-お知らせ一覧
                 Route::prefix('notification')->group(function () {
                     Route::get('index', 'Api\Manager\NotificationController@index');
                 });
+=======
+                // マネージャー-生徒
+                Route::prefix('student')->group(function () {
+                    Route::get('{student_id}', 'Api\Manager\StudentController@show');
+                });
+
+>>>>>>> 8288a568907bfd11f2051b51fc91a8f19be68664
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {
                     Route::prefix('{notification_id}')->group(function () {

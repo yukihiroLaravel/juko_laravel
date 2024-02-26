@@ -56,7 +56,7 @@ class StudentController extends Controller
             ->where('attendances.course_id', $request->course_id)
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {
-                $inputText = str_replace(['　',' '], '', $inputText);
+                $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                     ->orWhere('students.email', 'LIKE', "%{$inputText}%")

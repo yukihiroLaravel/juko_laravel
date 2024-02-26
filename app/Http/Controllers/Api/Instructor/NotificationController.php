@@ -37,7 +37,7 @@ class NotificationController extends Controller
      * お知らせ詳細
      *
      * @param NotificationShowRequest $request
-     * @return NotificationShowResource
+     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(NotificationShowRequest $request)
     {

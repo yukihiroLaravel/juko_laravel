@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
                 Route::prefix('instructor')->group(function () {
-                    Route::post('{instructor_id}', 'Api\Manager\ManagerController@update');
+                    Route::post('{instructor_id}', 'Api\Manager\InstructorController@update');
                 });
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {
@@ -181,6 +181,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
+                });
+                // マネージャー-生徒
+                Route::prefix('student')->group(function () {
+                    Route::get('{student_id}', 'Api\Manager\StudentController@show');
                 });
 
                 // マネージャー-お知らせ

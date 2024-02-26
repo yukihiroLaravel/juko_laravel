@@ -5,14 +5,18 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Resources\Manager\StudentShowResource;
+use App\Http\Requests\Manager\StudentShowRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
     /**
-     * マネージャ講座の受講生取得API
+     * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
@@ -70,5 +74,39 @@ class StudentController extends Controller
             'course' => $course,
             'data' => $results
         ]);
+    }
+
+    /**
+     * 受講生詳細取得API
+     *
+     * @param StudentShowRequest $request
+     * @return StudentShowResource|\Illuminate\Http\JsonResponse
+     */
+    public function show(StudentShowRequest $request)
+    {
+        // 認証されたマネージャーが管理する講師のIDのリストを取得
+        $authManagerId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($authManagerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+
+        // 自身のIDを追加
+        $instructorIds[] = $authManagerId;
+
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
+
+        // リクエストされた受講生を取得
+        $student = Student::with(['attendances'])->findOrFail($request->student_id);
+
+        // 受講生が講師の講座に所属しているか確認
+        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized to access this student.'
+            ], 403);
+        }
+
+        return new StudentShowResource($student);
     }
 }

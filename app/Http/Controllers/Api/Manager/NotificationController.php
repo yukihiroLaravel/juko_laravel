@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+<<<<<<< HEAD
 use App\Http\Controllers\Controller;
+=======
+>>>>>>> a124b47cf115cc8bd219dcf6c1057535790ad54d
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;

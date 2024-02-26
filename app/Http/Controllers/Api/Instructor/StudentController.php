@@ -18,7 +18,7 @@ use App\Http\Resources\Instructor\StudentStoreResource;
 class StudentController extends Controller
 {
     /**
-     * 講師側受講生一覧取得API
+     * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
@@ -64,7 +64,7 @@ class StudentController extends Controller
     }
 
     /**
-     * 講座受講生詳細情報を取得
+     * 受講生詳細情報を取得
      *
      * @param StudentShowRequest $request
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
@@ -78,8 +78,7 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
-                            ->findOrFail($request->student_id);
+        $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

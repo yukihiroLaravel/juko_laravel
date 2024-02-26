@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-<<<<<<< HEAD
 use App\Http\Controllers\Controller;
-=======
->>>>>>> a124b47cf115cc8bd219dcf6c1057535790ad54d
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
@@ -88,5 +85,30 @@ class NotificationController extends Controller
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
+
+        // 指定されたお知らせIDでお知らせを取得
+        $notification = Notification::findOrFail($request->notification_id);
+
+        // アクセス権限のチェック
+        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to update this notification.',
+            ], 403);
+        }
+
+        $notification->fill([
+            'type' => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'title' => $request->title,
+            'content' => $request->content,
+        ])
+        ->save();
+
+        return response()->json([
+            'result' => true,
+            'data' => new NotificationUpdateResource($notification),
+        ]);
     }
 }

@@ -28,7 +28,7 @@ class NotificationController extends Controller
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        
+
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
@@ -38,9 +38,8 @@ class NotificationController extends Controller
                                         ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
-        
     }
-    
+
     /** お知らせ詳細
      *
      * @param NotificationShowRequest $request

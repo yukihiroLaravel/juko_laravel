@@ -85,6 +85,5 @@ class NotificationController extends Controller
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        return new NotificationIndexResource($notifications);
     }
 }

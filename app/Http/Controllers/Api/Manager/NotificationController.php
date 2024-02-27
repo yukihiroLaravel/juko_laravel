@@ -34,8 +34,8 @@ class NotificationController extends Controller
         $instructorIds[] = $instructorId;
 
         $notifications = Notification::with(['course'])
-                                        ->whereIn('instructor_id', $instructorIds)
-                                        ->paginate($perPage, ['*'], 'page', $page);
+            ->whereIn('instructor_id', $instructorIds)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }

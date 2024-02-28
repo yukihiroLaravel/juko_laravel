@@ -25,9 +25,12 @@ class StudentController extends Controller
      */
     public function index(StudentIndexRequest $request)
     {
+        dd($request->all());
+
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
+        // dd($sortBy);
         $order = $request->input('order', 'asc');
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
@@ -69,22 +72,10 @@ class StudentController extends Controller
             })
             ->when($endDate, function ($query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
-            });
-
-            // ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
-            //     $query->orderBy('attendances.created_at', $order);
-            // }, function ($query) use ($sortBy, $order) {
-            //     $query->orderBy('students.' . $sortBy, $order);
-            // })
-            // ->paginate($perPage, ['*'], 'page', $page);
-
-        // ソート
-        if ($sortBy === 'attendanced_at') {
-            $results->orderBy('attendances.created_at', $order);
-        } else {
-            $results->orderBy('students.' . $sortBy, $order);
-        }
-        $results = $results->paginate($perPage, ['*'], 'page', $page);
+            })
+            // ソート
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
         return new StudentIndexResource([

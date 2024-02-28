@@ -25,12 +25,9 @@ class StudentController extends Controller
      */
     public function index(StudentIndexRequest $request)
     {
-        dd($request->all());
-
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
-        // dd($sortBy);
         $order = $request->input('order', 'asc');
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');

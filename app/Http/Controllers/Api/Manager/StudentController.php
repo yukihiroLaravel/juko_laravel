@@ -10,6 +10,8 @@ use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Requests\Manager\StudentShowRequest;
+use App\Http\Requests\Manager\StudentStoreRequest;
+use App\Http\Resources\Instructor\StudentStoreResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -116,8 +118,18 @@ class StudentController extends Controller
      * @param StudentStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store()
+    public function store(StudentStoreRequest $request)
     {
-        return response()->json([]);
+        $student = Student::create([
+            'given_name_by_instructor' => $request->given_name_by_instructor,
+            'email' => $request->email,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        return response()->json([
+            'result' => true,
+            'data' => new StudentStoreResource($student)
+        ]);
     }
 }

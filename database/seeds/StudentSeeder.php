@@ -68,7 +68,7 @@ class StudentSeeder extends Seeder
                 'last_login_at' => Carbon::now(),
                 'email_verified_at' => Carbon::now(),
                 'profile_image' => '/student/image3.jpg',
-            ]
+            ],
         ]);
     }
 }

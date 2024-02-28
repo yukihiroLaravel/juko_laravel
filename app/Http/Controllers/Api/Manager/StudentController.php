@@ -11,7 +11,7 @@ use App\Http\Resources\Manager\StudentIndexResource;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Requests\Manager\StudentShowRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;
-use App\Http\Resources\Instructor\StudentStoreResource;
+use App\Http\Resources\Manager\StudentStoreResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 

@@ -13,7 +13,7 @@ class InstructorController extends Controller
 {
     /**
      * 講師情報編集API
-     * 
+     *
      * @param InstructorEditRequest $request
      * @return InstructorEditResource|\Illuminate\Http\JsonResponse
      */

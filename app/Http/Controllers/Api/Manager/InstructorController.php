@@ -34,7 +34,7 @@ class InstructorController extends Controller
         if (!in_array((int)$requestInstructor, $instructorIds, true)) {
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to edit this instructor.",
             ], 403);
         }
         

@@ -30,7 +30,7 @@ class InstructorEditRequest extends FormRequest
     public function rules()
     {
         return [
-            'instructor_id' => ['required', 'integer'],
+            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
         ];
     }
 }

@@ -23,11 +23,15 @@ class StudentController extends Controller
      */
     public function index(StudentIndexRequest $request)
     {
-        $perPage = $request->input('per_page', 20);
+        $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'nick_name');
+        $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
-        $instructorId = $request->user()->id;
+        $inputText = $request->input('input_text');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $instructorId = $request->user()->id;//Instracter側との違い確認
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
@@ -53,23 +57,36 @@ class StudentController extends Controller
 
         $results = DB::table('attendances')
             ->select(
-                'attendances.*',
+                'attendances.student_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
-                'students.last_login_at'
+                'students.last_login_at',
+                'attendances.created_at as attendanced_at'
             )
-            ->where('attendances.course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
-                $query->orderBy('attendances.created_at', $order);
-            }, function ($query) use ($sortBy, $order) {
-                $query->orderBy('students.' . $sortBy, $order);
+            ->where('attendances.course_id', $request->course_id)
+            // 受講生名検索（ニックネーム/メールアドレス/姓名）
+            ->when($inputText, function ($query) use ($inputText) {
+                $inputText = preg_replace('/[　\s]/u', '', $inputText);
+                $query->where(function ($query) use ($inputText) {
+                    $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
+                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                });
             })
+            // 日付検索
+            ->when($startDate, function ($query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
+            })
+            ->when($endDate, function ($query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
+            })
+            // ソート
+            ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
-
         return new StudentIndexResource([
             'course' => $course,
             'data' => $results

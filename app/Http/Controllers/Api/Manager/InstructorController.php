@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\Manager\InstructorEditResource;
-use App\Http\Requests\Manager\InstructorEditRequest;
 use App\Model\Instructor;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\InstructorEditRequest;
+use App\Http\Resources\Manager\InstructorEditResource;
 
 class InstructorController extends Controller
 {
@@ -18,10 +18,8 @@ class InstructorController extends Controller
      */
     public function edit(InstructorEditRequest $request)
     {
-        //フォームリクエストから講師情報の取得
         $requestInstructorId = $request->instructor_id;
 
-        // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得

@@ -28,7 +28,7 @@ class NotificationController extends Controller
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-
+        // 配下のインストラクター情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;

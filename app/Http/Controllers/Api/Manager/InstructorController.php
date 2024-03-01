@@ -20,7 +20,7 @@ class InstructorController extends Controller
     {
         //フォームリクエストから講師情報の取得
         $requestInstructorId = $request->instructor_id;
-        
+
         // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -36,9 +36,8 @@ class InstructorController extends Controller
                 'message' => "Forbidden, not allowed to edit this instructor.",
             ], 403);
         }
-        
+
         $instructor = Instructor::findOrFail($requestInstructorId);
         return new InstructorEditResource($instructor);
     }
-
 }

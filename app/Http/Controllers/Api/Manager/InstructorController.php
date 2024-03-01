@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Manager\InstructorEditResource;
 use App\Http\Requests\Manager\InstructorEditRequest;
 use App\Model\Instructor;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
@@ -20,7 +19,7 @@ class InstructorController extends Controller
     public function edit(InstructorEditRequest $request)
     {
         //フォームリクエストから講師情報の取得
-        $requestInstructor = $request->instructor_id;
+        $requestInstructorId = $request->instructor_id;
         
         // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -31,14 +30,14 @@ class InstructorController extends Controller
         $instructorIds[] = $instructorId;
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-        if (!in_array((int)$requestInstructor, $instructorIds, true)) {
+        if (!in_array((int)$requestInstructorId, $instructorIds, true)) {
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this instructor.",
             ], 403);
         }
         
-        $instructor = Instructor::findOrFail($requestInstructor);
+        $instructor = Instructor::findOrFail($requestInstructorId);
         return new InstructorEditResource($instructor);
     }
 

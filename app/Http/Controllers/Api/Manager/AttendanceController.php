@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
+use App\Http\Requests\Manager\AttendanceDeleteRequest;
 
 class AttendanceController extends Controller
 {
@@ -87,8 +88,58 @@ class AttendanceController extends Controller
     }
 
     // 配下のinstructorの講座に紐づく受講情報を削除
-    public function delete()
+    /**
+     * 受講状況削除API
+     *
+     * @param AttendanceDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete(AttendanceDeleteRequest $request)
     {
-        return response() ->json([]);
+        DB::beginTransaction();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        //自分と配下のnstructorのコースでなければエラー応答
+        $course = Course::FindOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+
+            // エラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to edit this course.",
+            ], 403);
+
+        }  
+
+        try {
+            $attendanceId = $request->route('attendance_id');
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+
+            if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+
+            $attendance->delete();
+
+            DB::commit();
+
+            return response() ->json([
+                "result" => true,
+            ]);
+
+        }catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+            ], 500);
+        }
     }
 }

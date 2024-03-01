@@ -121,9 +121,6 @@ class StudentController extends Controller
      */
     public function store(StudentStoreRequest $request)
     {
-        // return response()->json([
-        //     'result' =>  $request->given_name_by_instructor,
-        // ]);
         $student = Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,

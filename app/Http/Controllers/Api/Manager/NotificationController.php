@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
-     * マネージャー側のお知らせ一覧取得API
+     * お知らせ一覧取得API
      *
      * @param NotificationIndexRequest $request
      * @return NotificationIndexResource
@@ -28,10 +28,12 @@ class NotificationController extends Controller
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
+
         // 配下のインストラクター情報を取得
+        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         $notifications = Notification::with(['course'])
             ->whereIn('instructor_id', $instructorIds)
@@ -40,7 +42,8 @@ class NotificationController extends Controller
         return new NotificationIndexResource($notifications);
     }
 
-    /** お知らせ詳細
+    /**
+     * お知らせ詳細
      *
      * @param NotificationShowRequest $request
      * @return NotificationShowResource|\Illuminate\Http\JsonResponse
@@ -48,14 +51,16 @@ class NotificationController extends Controller
     public function show(NotificationShowRequest $request)
     {
         // ユーザーID取得
-        $userId = $request->user()->id;
+        $instructorId = $request->user()->id;
 
         // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($userId);
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId; // 自身のIDをインストラクターIDのリストに追加
+        $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
+        /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
 
         // アクセス権限のチェック
@@ -81,11 +86,13 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下のインストラクター情報を取得
+        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
+        /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
 
         // アクセス権限のチェック

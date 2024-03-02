@@ -5,25 +5,33 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Resources\Manager\StudentShowResource;
+use App\Http\Requests\Manager\StudentShowRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
     /**
-     * マネージャ講座の受講生取得API
+     * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
     public function index(StudentIndexRequest $request)
     {
-        $perPage = $request->input('per_page', 20);
+        $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
-        $sortBy = $request->input('sortBy', 'nick_name');
+        $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
-        $instructorId = $request->user()->id;
+        $inputText = $request->input('input_text');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $instructorId = $request->user()->id;//Instracter側との違い確認
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
@@ -49,26 +57,73 @@ class StudentController extends Controller
 
         $results = DB::table('attendances')
             ->select(
-                'attendances.*',
+                'attendances.student_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
-                'students.last_login_at'
+                'students.last_login_at',
+                'attendances.created_at as attendanced_at'
             )
-            ->where('attendances.course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
-                $query->orderBy('attendances.created_at', $order);
-            }, function ($query) use ($sortBy, $order) {
-                $query->orderBy('students.' . $sortBy, $order);
+            ->where('attendances.course_id', $request->course_id)
+            // 受講生名検索（ニックネーム/メールアドレス/姓名）
+            ->when($inputText, function ($query) use ($inputText) {
+                $inputText = preg_replace('/[　\s]/u', '', $inputText);
+                $query->where(function ($query) use ($inputText) {
+                    $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
+                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                });
             })
+            // 日付検索
+            ->when($startDate, function ($query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
+            })
+            ->when($endDate, function ($query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
+            })
+            // ソート
+            ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
-
         return new StudentIndexResource([
             'course' => $course,
             'data' => $results
         ]);
+    }
+
+    /**
+     * 受講生詳細取得API
+     *
+     * @param StudentShowRequest $request
+     * @return StudentShowResource|\Illuminate\Http\JsonResponse
+     */
+    public function show(StudentShowRequest $request)
+    {
+        // 認証されたマネージャーが管理する講師のIDのリストを取得
+        $authManagerId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($authManagerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+
+        // 自身のIDを追加
+        $instructorIds[] = $authManagerId;
+
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
+
+        // リクエストされた受講生を取得
+        $student = Student::with(['attendances'])->findOrFail($request->student_id);
+
+        // 受講生が講師の講座に所属しているか確認
+        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized to access this student.'
+            ], 403);
+        }
+
+        return new StudentShowResource($student);
     }
 }

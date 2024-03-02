@@ -18,7 +18,7 @@ use App\Http\Resources\Instructor\StudentStoreResource;
 class StudentController extends Controller
 {
     /**
-     * 講師側受講生一覧取得API
+     * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
@@ -29,6 +29,10 @@ class StudentController extends Controller
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'nick_name');
         $order = $request->input('order', 'asc');
+        $inputText = $request->input('input_text');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
         $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
@@ -41,19 +45,33 @@ class StudentController extends Controller
 
         $results = DB::table('attendances')
             ->select(
-                'attendances.*',
+                'attendances.student_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
-                'students.last_login_at'
+                'students.last_login_at',
+                'attendances.created_at as attendanced_at'
             )
-            ->where('attendances.course_id', $request->course_id)
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($sortBy === 'attendanced_at', function ($query) use ($order) {
-                $query->orderBy('attendances.created_at', $order);
-            }, function ($query) use ($sortBy, $order) {
-                $query->orderBy('students.' . $sortBy, $order);
+            ->where('attendances.course_id', $request->course_id)
+            // 受講生名検索（ニックネーム/メールアドレス/姓名）
+            ->when($inputText, function ($query) use ($inputText) {
+                $inputText = preg_replace('/[　\s]/u', '', $inputText);
+                $query->where(function ($query) use ($inputText) {
+                    $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
+                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                });
             })
+            // 日付検索
+            ->when($startDate, function ($query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
+            })
+            ->when($endDate, function ($query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
+            })
+            // ソート
+            ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
@@ -64,7 +82,7 @@ class StudentController extends Controller
     }
 
     /**
-     * 講座受講生詳細情報を取得
+     * 受講生詳細情報を取得
      *
      * @param StudentShowRequest $request
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
@@ -78,8 +96,7 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = Student::with(['attendances.course.chapters.lessons.lessonAttendances'])
-                            ->findOrFail($request->student_id);
+        $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

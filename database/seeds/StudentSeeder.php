@@ -50,7 +50,25 @@ class StudentSeeder extends Seeder
                 'last_login_at' => Carbon::now(),
                 'email_verified_at' => Carbon::now(),
                 'profile_image' => '/student/image2.jpg',
-            ]
+            ],
+            [
+                'given_name_by_instructor' => 'ユーザー名(仮)3',
+                'nick_name' => '生徒ニックネーム3',
+                'last_name' => '生徒',
+                'first_name' => 'テスト3',
+                'occupation' => 'バックエンドエンジニア',
+                'email' => 'test_student_3@example.com',
+                'password' => Hash::make('password3'),
+                'purpose' => 'フロントエンドの知識を理解したい',
+                'birth_date' => Carbon::now(),
+                'sex' => 2,
+                'address' => '北海道',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+                'last_login_at' => Carbon::now(),
+                'email_verified_at' => Carbon::now(),
+                'profile_image' => '/student/image3.jpg',
+            ],
         ]);
     }
 }

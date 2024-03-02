@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class NotificationUpdateResource extends JsonResource
+class NotificationShowResource extends JsonResource
 {
     /** @var \App\Model\Notification */
     public $resource;
@@ -18,11 +18,13 @@ class NotificationUpdateResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'type'       => $this->resource->type,
+            'notification_id' => $this->resource->id,
+            'course_id' => $this->resource->course_id,
+            'title' => $this->resource->title,
+            'type' => $this->resource->type,
             'start_date' => $this->resource->start_date,
-            'end_date'   => $this->resource->end_date,
-            'title'      => $this->resource->title,
-            'content'    => $this->resource->content,
+            'end_date' => $this->resource->end_date,
+            'content' => $this->resource->content
         ];
     }
 }

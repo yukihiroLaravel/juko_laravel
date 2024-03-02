@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -24,7 +24,7 @@ class StudentShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'student_id' => ['required','integer', 'exists:students,id,deleted_at,NULL'],
+            'student_id' => ['required','integer','exists:students,id,deleted_at,NULL'],
         ];
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentShowRequest extends FormRequest
+class NotificationIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +24,8 @@ class StudentShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'student_id' => ['required','integer', 'exists:students,id,deleted_at,NULL'],
+            'per_page' => ['integer', 'min:1'],
+            'page' => ['integer', 'min:1'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'student_id' => $this->route('student_id'),
-        ]);
     }
 }

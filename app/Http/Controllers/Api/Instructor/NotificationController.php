@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
-     * 講師側お知らせ一覧取得API
+     * お知らせ一覧取得API
      *
      * @param NotificationIndexRequest $request
      * @return NotificationIndexResource
@@ -37,11 +37,18 @@ class NotificationController extends Controller
      * お知らせ詳細
      *
      * @param NotificationShowRequest $request
-     * @return NotificationShowResource
+     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(NotificationShowRequest $request)
     {
         $notification = Notification::findOrFail($request->notification_id);
+
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
 
         return new NotificationShowResource($notification);
     }

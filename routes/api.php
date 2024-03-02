@@ -183,6 +183,18 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('instructor')->group(function () {
                     Route::get('{instructor_id}', 'Api\Manager\InstructorController@edit');
                 });
+                // マネージャー-生徒
+                Route::prefix('student')->group(function () {
+                    Route::get('{student_id}', 'Api\Manager\StudentController@show');
+                });
+                // マネージャー-お知らせ
+                Route::prefix('notification')->group(function () {
+                    Route::get('index', 'Api\Manager\NotificationController@index');
+                    Route::prefix('{notification_id}')->group(function () {
+                        Route::get('/', 'Api\Manager\NotificationController@show');
+                        Route::patch('/', 'Api\Manager\NotificationController@update');
+                    });
+                });
             });
         });
     });

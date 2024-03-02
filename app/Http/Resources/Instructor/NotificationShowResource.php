@@ -18,12 +18,13 @@ class NotificationShowResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'notification_id' => $this->resource->id,
             'course_id' => $this->resource->course_id,
             'title' => $this->resource->title,
             'type' => $this->resource->type,
             'start_date' => $this->resource->start_date,
             'end_date' => $this->resource->end_date,
-            'content' => $this->resource->content
+            'content' => $this->resource->content,
         ];
     }
 }

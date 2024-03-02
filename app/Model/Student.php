@@ -44,6 +44,7 @@ class Student extends Authenticatable
      * @var array
      */
     protected $fillable = [
+        'given_name_by_instructor',
         'nick_name',
         'last_name',
         'first_name',

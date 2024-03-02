@@ -100,6 +100,7 @@ class StudentController extends Controller
      */
     public function store(StudentStoreRequest $request)
     {
+        /** @var Student $student */
         $student = Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,

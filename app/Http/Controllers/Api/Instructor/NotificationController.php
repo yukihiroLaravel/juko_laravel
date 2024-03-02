@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
-     * 講師側お知らせ一覧取得API
+     * お知らせ一覧取得API
      *
      * @param NotificationIndexRequest $request
      * @return NotificationIndexResource

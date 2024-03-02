@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
 use App\Model\Notification;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationIndexResource extends JsonResource
@@ -32,7 +32,7 @@ class NotificationIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Notification> $notifications
+     * @param Collection<Notification> $notifications
      * @return array
      */
     private function mapNotifications($notifications)

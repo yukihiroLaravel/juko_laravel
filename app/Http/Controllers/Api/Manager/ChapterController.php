@@ -283,4 +283,15 @@ class ChapterController extends Controller
           'result' => true,
         ]);
     }
+
+    /**
+     * チャプター一括更新API(公開・非公開切り替え)
+     *
+     * @param ChapterPutStatusRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function putStatus()
+    {
+        return response()->json([]);
+    }
 }

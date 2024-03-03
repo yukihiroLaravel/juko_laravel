@@ -99,21 +99,19 @@ class AttendanceController extends Controller
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
         //自分と配下のnstructorのコースでなければエラー応答
         $course = Course::FindOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-
             // エラー応答
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this course.",
             ], 403);
-
-        }  
+        }
 
         try {
             $attendanceId = $request->route('attendance_id');
@@ -133,8 +131,7 @@ class AttendanceController extends Controller
             return response() ->json([
                 "result" => true,
             ]);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

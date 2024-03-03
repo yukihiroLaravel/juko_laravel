@@ -10,6 +10,7 @@ use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
@@ -102,18 +103,6 @@ class AttendanceController extends Controller
         $manager= Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-
-        //自分と配下のnstructorのコースでなければエラー応答
-        $course = Course::FindOrFail($request->course_id);
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
-
-            // エラー応答
-            return response()->json([
-                'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
-            ], 403);
-
-        }  
 
         try {
             $attendanceId = $request->route('attendance_id');

@@ -302,7 +302,7 @@ class ChapterController extends Controller
 
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
-                'result' => 'false',
+                'result' => false,
                 "message" => "Not authorized."
             ], 403);
         }
@@ -312,7 +312,7 @@ class ChapterController extends Controller
             ]);
 
         return response()->json([
-            'result' => 'true'
+            'result' => true,
         ]);
     }
 }

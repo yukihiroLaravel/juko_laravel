@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Student;
-use App\Http\Requests\Manager\StudentIndexRequest;
-use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Manager\StudentShowResource;
-use App\Http\Requests\Manager\StudentShowRequest;
-use Illuminate\Support\Facades\Auth;
+use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\StudentShowRequest;
+use App\Http\Requests\Manager\StudentIndexRequest;
+use App\Http\Requests\Manager\StudentStoreRequest;
+use App\Http\Resources\Manager\StudentShowResource;
+use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Resources\Manager\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -125,5 +128,27 @@ class StudentController extends Controller
         }
 
         return new StudentShowResource($student);
+    }
+
+    /**
+     * 受講生登録API
+     *
+     * @param StudentStoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StudentStoreRequest $request)
+    {
+        /** @var Student $student */
+        $student = Student::create([
+            'given_name_by_instructor' => $request->given_name_by_instructor,
+            'email' => $request->email,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
+
+        return response()->json([
+            'result' => true,
+            'data' => new StudentStoreResource($student)
+        ]);
     }
 }

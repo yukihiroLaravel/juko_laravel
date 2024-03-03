@@ -294,7 +294,7 @@ class ChapterController extends Controller
     public function putStatus(ChapterPutStatusRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 

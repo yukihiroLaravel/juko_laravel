@@ -263,4 +263,14 @@ class LessonController extends Controller
             ]);
         }
     }
+    /**
+     * レッスン名を更新するAPI
+     *
+     * @param
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateTitle()
+    {
+        return response()->json([]);
+    }
 }

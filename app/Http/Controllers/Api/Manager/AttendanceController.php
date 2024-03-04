@@ -100,7 +100,7 @@ class AttendanceController extends Controller
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
@@ -122,8 +122,7 @@ class AttendanceController extends Controller
             return response() ->json([
                 "result" => true,
             ]);
-
-        }catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

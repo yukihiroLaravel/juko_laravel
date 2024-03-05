@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\ChapterSortRequest;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\ChapterShowRequest;
+use App\Http\Requests\Manager\ChapterSortRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
-use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
+use App\Http\Requests\Manager\ChapterPatchStatusRequest;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ChapterController extends Controller
 {
@@ -35,7 +35,7 @@ class ChapterController extends Controller
             // 配下の講師情報を取得
             $manager = Instructor::with('managings')->find($instructorId);
             $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructorId;
+            $instructorIds[] = $manager->id;
 
             $course = Course::FindOrFail($request->course_id);
 
@@ -81,7 +81,7 @@ class ChapterController extends Controller
         // ユーザーIDから配下のinstructorを取得
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId;
+        $instructorIds[] = $manager->id;
 
         // chapter_idから属するlassons含めてデータ取得
         $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
@@ -111,7 +111,7 @@ class ChapterController extends Controller
         // マネージャーが管理する講師を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         // チャプターを取得
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
@@ -156,7 +156,7 @@ class ChapterController extends Controller
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
@@ -201,7 +201,7 @@ class ChapterController extends Controller
             // マネージャーが管理する講師を取得
             $manager = Instructor::with('managings')->find($userId);
             $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $userId;
+            $instructorIds[] = $manager->id;
 
             // マネージャー自身または配下の講師が担当する講座なら更新を許可
             if (!in_array($course->instructor_id, $instructorIds, true)) {
@@ -254,7 +254,7 @@ class ChapterController extends Controller
         // マネージャーが管理する講師を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         // 指定されたチャプターを取得
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
@@ -296,7 +296,7 @@ class ChapterController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         $course = Course::findOrFail($request->course_id);
 

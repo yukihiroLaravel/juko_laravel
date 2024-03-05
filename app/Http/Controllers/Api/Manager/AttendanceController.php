@@ -88,7 +88,6 @@ class AttendanceController extends Controller
         }
     }
 
-    // 配下のinstructorの講座に紐づく受講情報を削除
     /**
      * 受講状況削除API
      *
@@ -102,10 +101,10 @@ class AttendanceController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         try {
-            $attendanceId = $request->route('attendance_id');
+            $attendanceId = $request->attendance_id;
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
 
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {

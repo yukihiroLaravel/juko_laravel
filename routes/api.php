@@ -168,6 +168,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');
                                         Route::delete('/', 'Api\Manager\LessonController@delete');
+                                        Route::patch('status', 'Api\Manager\LessonController@updateStatus');
                                     });
                                 });
                             });

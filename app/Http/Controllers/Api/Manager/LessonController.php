@@ -9,7 +9,6 @@ use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonSortRequest;
-use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Resources\Manager\LessonStoreResource;
@@ -131,8 +130,6 @@ class LessonController extends Controller
     {
         return response()->json([]);
     }
-
-
 
     /**
      * レッスン削除API

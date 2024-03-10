@@ -276,5 +276,9 @@ class ChapterController extends Controller
     public function putStatus(ChapterPutStatusRequest $request)
     {
         Chapter::chapterupdate($request);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

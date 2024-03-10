@@ -299,5 +299,9 @@ class ChapterController extends Controller
         $instructorIds[] = $manager->id;
 
         Chapter::chapterupdate($request);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

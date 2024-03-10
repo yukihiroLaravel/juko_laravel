@@ -110,10 +110,6 @@ class Chapter extends Model
             ->update([
                 'status' => $request->status
             ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
     }
 
 }

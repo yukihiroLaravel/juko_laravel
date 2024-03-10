@@ -111,5 +111,4 @@ class Chapter extends Model
                 'status' => $request->status
             ]);
     }
-
 }

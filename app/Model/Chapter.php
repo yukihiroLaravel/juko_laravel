@@ -115,5 +115,4 @@ class Chapter extends Model
             'result' => true,
         ]);
     }
-
 }

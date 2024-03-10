@@ -5,6 +5,7 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -94,4 +95,25 @@ class Chapter extends Model
             return $chapter->status === Chapter::STATUS_PUBLIC;
         });
     }
+
+    public static function chapterupdate($request)
+    {
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => "Not authorized."
+            ], 403);
+        }
+        Chapter::where('course_id', $request->course_id)
+            ->update([
+                'status' => $request->status
+            ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
 }

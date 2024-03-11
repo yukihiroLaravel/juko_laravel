@@ -96,16 +96,8 @@ class Chapter extends Model
         });
     }
 
-    public static function chapterupdate($request)
+    public static function chapterUpdateAll($request)
     {
-        $course = Course::findOrFail($request->course_id);
-
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            return response()->json([
-                'result' => false,
-                "message" => "Not authorized."
-            ], 403);
-        }
         Chapter::where('course_id', $request->course_id)
             ->update([
                 'status' => $request->status

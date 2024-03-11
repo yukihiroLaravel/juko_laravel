@@ -298,7 +298,7 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        Chapter::chapterupdate($request);
+        Chapter::chapterUpdateAll($request);
 
         return response()->json([
             'result' => true,

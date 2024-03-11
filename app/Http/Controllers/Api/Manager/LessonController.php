@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -264,13 +265,61 @@ class LessonController extends Controller
         }
     }
     /**
-     * レッスン名を更新するAPI
+     * レッスンタイトル変更API
      *
-     * @param
+     * @param LessonUpdateTitleRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateTitle()
+    public function updateTitle(Request $request, $course_id, $chapter_id, $lesson_id)
     {
-        return response()->json([]);
+        // 現在のユーザーを取得（講師の場合）
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーが管理する講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+        
+        // 指定されたレッスンを取得
+        $user = Auth::guard('instructor')->user();
+        $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
+        $course = Course::FindOrFail($request->course_id);
+        
+        // 自分、または配下の講師の講座のレッスンでなければエラー応答
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Unauthorized access to update lesson title.'
+            ], 403);
+        }
+
+        if ((int) $instructorIds !== $user->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id',
+            ], 403);
+        }
+
+        if ((int) $course_id !== $lesson->chapter->course_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $chapter_id !== $lesson->chapter->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+        
+        $lesson->update([
+            'title' => $request->title
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

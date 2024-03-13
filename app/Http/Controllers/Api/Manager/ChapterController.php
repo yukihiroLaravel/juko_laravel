@@ -300,13 +300,29 @@ class ChapterController extends Controller
 
         $course = Course::findOrFail($request->course_id);
 
+         // 講師が管理している講座のIDを取得
+         $managedCourseIds = Instructor::with('managings')->find($instructorId)
+         ->managings->pluck('id')->toArray();
+
+         // リクエストで指定された講座のIDを取得
+         $courseId = $request->course_id;
+
+        // 講師が管理している講座でない場合、権限エラーを返す
+        if (!in_array($courseId, $managedCourseIds)) {
+            return response()->json([
+                'result' => false,
+                "message" => "Not authorized."
+            ], 403);
+        }
+
+        // 認証者と講座の講師が一致しているか確認
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
                 'result' => false,
                 "message" => "Not authorized."
             ], 403);
         }
-        Chapter::chapterUpdateAll($request);
+        Chapter::chapterUpdateAll($request ,$request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

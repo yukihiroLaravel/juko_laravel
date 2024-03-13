@@ -281,7 +281,6 @@ class LessonController extends Controller
         $instructorIds[] = $instructorId;
         
         // 指定されたレッスンを取得
-        $user = Auth::guard('instructor')->user();
         $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
         $course = Course::FindOrFail($request->course_id);
         
@@ -290,13 +289,6 @@ class LessonController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Unauthorized access to update lesson title.'
-            ], 403);
-        }
-
-        if ((int) $instructorIds !== $user->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id',
             ], 403);
         }
 

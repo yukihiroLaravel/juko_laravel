@@ -282,10 +282,9 @@ class LessonController extends Controller
         
         // 指定されたレッスンを取得
         $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
-        $course = Course::FindOrFail($request->course_id);
         
         // 自分、または配下の講師の講座のレッスンでなければエラー応答
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
+        if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => 'Unauthorized access to update lesson title.'

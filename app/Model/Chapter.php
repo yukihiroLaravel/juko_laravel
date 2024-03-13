@@ -5,7 +5,6 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -98,6 +97,11 @@ class Chapter extends Model
 
     public static function chapterUpdateAll($request)
     {
+         // $requestがnullである場合、またはcourse_idとstatusがnullである場合は処理を行わない
+        if (is_null($request) || is_null($request->course_id) || is_null($request->status)) {
+            return; // 何も処理しない
+        }
+
         Chapter::where('course_id', $request->course_id)
             ->update([
                 'status' => $request->status

@@ -275,6 +275,14 @@ class ChapterController extends Controller
      */
     public function putStatus(ChapterPutStatusRequest $request)
     {
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => "Not authorized."
+            ], 403);
+        }
         Chapter::chapterUpdateAll($request);
 
         return response()->json([

@@ -279,10 +279,10 @@ class LessonController extends Controller
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        
+
         // 指定されたレッスンを取得
         $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
-        
+
         // 自分、または配下の講師の講座のレッスンでなければエラー応答
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([
@@ -304,7 +304,7 @@ class LessonController extends Controller
                 'message' => 'Invalid chapter_id.',
             ], 403);
         }
-        
+
         $lesson->update([
             'title' => $request->title
         ]);

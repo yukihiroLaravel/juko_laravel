@@ -11,6 +11,7 @@ use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
+use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use App\Http\Resources\Manager\LessonStoreResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -270,7 +270,7 @@ class LessonController extends Controller
      * @param LessonUpdateTitleRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateTitle(Request $request, $course_id, $chapter_id, $lesson_id)
+    public function updateTitle(LessonUpdateTitleRequest $request)
     {
         // 現在のユーザーを取得（講師の場合）
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -281,7 +281,7 @@ class LessonController extends Controller
         $instructorIds[] = $instructorId;
 
         // 指定されたレッスンを取得
-        $lesson = Lesson::with('chapter.course')->findOrFail($lesson_id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         // 自分、または配下の講師の講座のレッスンでなければエラー応答
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
@@ -291,14 +291,14 @@ class LessonController extends Controller
             ], 403);
         }
 
-        if ((int) $course_id !== $lesson->chapter->course_id) {
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid course_id.',
             ], 403);
         }
 
-        if ((int) $chapter_id !== $lesson->chapter->id) {
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
             return response()->json([
                 'result' => false,
                 'message' => 'Invalid chapter_id.',

@@ -322,7 +322,7 @@ class ChapterController extends Controller
                 "message" => "Not authorized."
             ], 403);
         }
-        Chapter::chapterUpdateAll($request, $request->course_id, $request->status);
+        Chapter::chapterUpdateAll($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

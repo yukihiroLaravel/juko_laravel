@@ -284,7 +284,7 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        Chapter::chapterUpdateAll($request, $request->course_id, $request->status);
+        Chapter::chapterUpdateAll($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

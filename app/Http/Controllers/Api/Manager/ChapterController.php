@@ -300,18 +300,14 @@ class ChapterController extends Controller
 
         $course = Course::findOrFail($request->course_id);
 
-        // インストラクターが管理している講座のIDを取得
-        $managedCourseIds = Instructor::with('managings')->find($instructorId)
-        ->managings->pluck('id')->toArray();
-
-        // 自身が担当している講座のIDを追加
-        $managedCourseIds[] = $instructorId;
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         // リクエストで指定されたコースのIDを取得
         $courseId = $request->course_id;
 
         // 講師が管理している講座でない場合、権限エラーを返す
-        if (!in_array($courseId, $managedCourseIds)) {
+        if (!in_array($courseId, $courseIds)) {
             return response()->json([
                 'result' => false,
                 "message" => "Not authorized."

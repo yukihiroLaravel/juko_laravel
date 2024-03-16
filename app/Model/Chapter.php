@@ -95,9 +95,9 @@ class Chapter extends Model
         });
     }
 
-    public static function chapterUpdateAll($course_id, $status)
+    public static function chapterUpdateAll($courseId, $status)
     {
-        Chapter::where('course_id', $course_id)
+        Chapter::where('course_id', $courseId)
             ->update([
                 'status' => $status
             ]);

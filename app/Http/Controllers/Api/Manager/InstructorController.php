@@ -96,7 +96,6 @@ class InstructorController extends Controller
                 'result' => true,
                 'data' => new InstructorPatchResource($instructor)
             ]);
-
         } catch (ModelNotFoundException $exception) {
             return response()->json([
                 'result' => false,

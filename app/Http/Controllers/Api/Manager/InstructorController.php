@@ -91,6 +91,7 @@ class InstructorController extends Controller
                 'first_name' => $request->first_name,
                 'email' => $request->email,
                 'profile_image' => $imagePath,
+                'type' => $request->type,
             ]);
             return response()->json([
                 'result' => true,

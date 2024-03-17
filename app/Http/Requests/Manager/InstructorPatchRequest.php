@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Manager;
 
 use App\Rules\InstructorUniqueEmailRule;
+use App\Rules\InstructorTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class InstructorPatchRequest extends FormRequest
 {
@@ -39,6 +39,7 @@ class InstructorPatchRequest extends FormRequest
             'email' => ['required', 'email', new InstructorUniqueEmailRule($this->email),'max:255'],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
+            'type' =>  ['required', 'string', new InstructorTypeRule()],
         ];
     }
 }

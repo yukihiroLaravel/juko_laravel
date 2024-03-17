@@ -301,7 +301,7 @@ class ChapterController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
-        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id')->toArray();
 
         // リクエストで指定されたコースのIDを取得
         $courseId = $request->course_id;

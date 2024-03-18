@@ -94,82 +94,43 @@ class AttendanceController extends Controller
      * @param AttendanceDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    // public function delete(AttendanceDeleteRequest $request)
-    // {
-    //     DB::beginTransaction();
-
-    //     $instructorId = Auth::guard('instructor')->user()->id;
-    //     $manager = Instructor::with('managings')->find($instructorId);
-    //     $instructorIds = $manager->managings->pluck('id')->toArray();
-    //     $instructorIds[] = $manager->id;
-
-    //     try {
-    //         $attendanceId = $request->attendance_id;
-    //         $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
-
-    //         // if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-    //         if (!in_array($attendance->instructor_id, $instructorIds, true)) {
-    //             return response()->json([
-    //                 "result" => false,
-    //                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-    //             ], 403);
-    //         }
-
-    //         $attendance->delete();
-
-    //         DB::commit();
-
-    //         return response() ->json([
-    //             "result" => true,
-    //         ]);
-    //     } catch (Exception $e) {
-    //         DB::rollBack();
-    //         Log::error($e);
-    //         return response()->json([
-    //             "result" => false,
-    //         ], 500);
-    //     }
-    // }
     public function delete(AttendanceDeleteRequest $request)
     {
-    DB::beginTransaction();
-
-    try {
-        $attendanceId = $request->attendance_id;
-        $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
-
-        // 講師が管理する受講データを特定
+        DB::beginTransaction();
+    
         $instructorId = Auth::guard('instructor')->user()->id;
-        $managedAttendances = Attendance::whereHas('course', function($query) use ($instructorId) {
-            $query->where('instructor_id', $instructorId);
-        })->pluck('id')->toArray();
-
-        // マネージャーが管理する講師のIDも取得
         $manager = Instructor::with('managings')->find($instructorId);
-        $managerInstructorIds = $manager->managings->pluck('id')->toArray();
-        $managerInstructorIds[] = $instructorId;
-
-        // マネージャーまたはその管理する講師が削除を許可された受講データのみ削除
-        if (!in_array($attendanceId, $managedAttendances) && !in_array($attendance->instructor_id, $managerInstructorIds, true)) {
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+    
+        try {
+            $attendanceId = $request->attendance_id;
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+    
+            // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDのリストを取得
+            $managedAttendances = Attendance::whereIn('id', $instructorIds)->pluck('id')->toArray();
+    
+            // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDに含まれていない場合はエラーを返す
+            if (!in_array($attendanceId, $managedAttendances)) {
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+    
+            $attendance->delete();
+    
+            DB::commit();
+    
+            return response() ->json([
+                "result" => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
             return response()->json([
                 "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-            ], 403);
+            ], 500);
         }
-
-        $attendance->delete();
-
-        DB::commit();
-
-        return response() ->json([
-            "result" => true,
-        ]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        return response()->json([
-            "result" => false,
-        ], 500);
     }
-}
 }

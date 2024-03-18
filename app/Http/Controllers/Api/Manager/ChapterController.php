@@ -294,22 +294,32 @@ class ChapterController extends Controller
     public function putStatus(ChapterPutStatusRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $course = Course::findOrFail($request->course_id);
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id')->toArray();
 
+        // 講師が管理している講座でない場合、権限エラーを返す
+        if (!in_array($request->course_id, $courseIds)) {
+            return response()->json([
+                'result' => false,
+                "message" => "Not authorized."
+            ], 403);
+        }
+
+        $course = Course::findOrFail($request->course_id);
+        // 認証者と講座の講師が一致しているか確認
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
                 'result' => false,
                 "message" => "Not authorized."
             ], 403);
         }
-        Chapter::where('course_id', $request->course_id)
-            ->update([
-                'status' => $request->status
-            ]);
+        Chapter::chapterUpdateAll($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

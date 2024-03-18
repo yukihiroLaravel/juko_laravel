@@ -95,7 +95,14 @@ class Chapter extends Model
         });
     }
 
-    public static function chapterUpdateAll($courseId, $status)
+    /**
+     * チャプターのステータスを一括更新
+     *
+     * @param int $courseId
+     * @param 'public'|'private' $status
+     * @return void
+     */
+    public static function chapterUpdateAll(int $courseId, string $status): void
     {
         Chapter::where('course_id', $courseId)
             ->update([

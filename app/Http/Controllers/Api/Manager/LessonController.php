@@ -9,6 +9,7 @@ use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonSortRequest;
+use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Resources\Manager\LessonStoreResource;
@@ -124,11 +125,40 @@ class LessonController extends Controller
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
+  
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateStatus()
+    public function updateStatus(LessonPatchStatusRequest $request)
     {
-        return response()->json([]);
+        $userId = $request->user()->id;
+        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+        //配下の講師情報取得
+        $manager = Instructor::with('managings')->find($userId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $userId;
+        
+        if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

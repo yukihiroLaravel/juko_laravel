@@ -125,7 +125,7 @@ class LessonController extends Controller
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
-  
+
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(LessonPatchStatusRequest $request)
@@ -136,7 +136,7 @@ class LessonController extends Controller
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
-        
+
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,

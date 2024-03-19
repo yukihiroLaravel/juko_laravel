@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Model\Instructor;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Http\Requests\Manager\InstructorEditRequest;
 use App\Http\Resources\Manager\InstructorEditResource;
 use App\Http\Requests\Manager\InstructorPatchRequest;

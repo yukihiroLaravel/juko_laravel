@@ -35,7 +35,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
         $courses = Course::where('instructor_id', $instructorId)->get();
 
         return new CourseIndexResource($courses);
@@ -62,7 +62,7 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid()->toString() . '.' . $extension;
@@ -158,7 +158,7 @@ class CourseController extends Controller
     public function delete(CourseDeleteRequest $request)
     {
         try {
-            $user = Instructor::find($request->user()->id);
+            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::findOrFail($request->course_id);
 
             if ($user->id !== $course->instructor_id) {

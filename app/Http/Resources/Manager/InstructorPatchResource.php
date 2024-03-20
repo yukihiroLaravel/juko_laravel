@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class InstructorEditResource extends JsonResource
+class InstructorPatchResource extends JsonResource
 {
     /** @var \App\Model\Instructor */
     public $resource;
@@ -18,7 +18,6 @@ class InstructorEditResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->resource->id,
             'nick_name' => $this->resource->nick_name,
             'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,

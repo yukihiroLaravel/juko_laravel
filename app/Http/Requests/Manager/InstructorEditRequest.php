@@ -12,6 +12,7 @@ class InstructorEditRequest extends FormRequest
             'instructor_id' => $this->route('instructor_id'),
         ]);
     }
+
     /**
      * Determine if the user is authorized to make this request.
      *

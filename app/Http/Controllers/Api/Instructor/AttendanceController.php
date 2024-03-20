@@ -105,7 +105,7 @@ class AttendanceController extends Controller
         DB::beginTransaction();
 
         try {
-            $attendanceId = $request->route('attendance_id');
+            $attendanceId = $request->attendance_id;
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
 
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {

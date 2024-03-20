@@ -31,8 +31,8 @@ class ChapterShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required','integer'],
-            'course_id' => ['required','integer'],
+            'chapter_id' => ['required','integer', 'exists:chapters,id,deleted_at,NULL'],
+            'course_id' => ['required','integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

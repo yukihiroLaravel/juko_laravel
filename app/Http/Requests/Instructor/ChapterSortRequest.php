@@ -34,7 +34,7 @@ class ChapterSortRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapters' => ['required', 'array'],
             'chapters.*.chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'chapters.*.order' => ['required', 'integer'],
+            'chapters.*.order' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }
 }

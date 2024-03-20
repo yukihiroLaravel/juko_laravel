@@ -28,7 +28,7 @@ class LessonSortRequest extends FormRequest
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
             'lessons.*.lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'lessons.*.order' => ['required', 'integer'],
+            'lessons.*.order' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
         ];
     }
 

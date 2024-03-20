@@ -2,69 +2,72 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use RuntimeException;
 use App\Model\Instructor;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use App\Http\Requests\Manager\InstructorEditRequest;
-use App\Http\Resources\Manager\InstructorEditResource;
 use App\Http\Requests\Manager\InstructorPatchRequest;
+use App\Http\Resources\Manager\InstructorEditResource;
 use App\Http\Resources\Manager\InstructorPatchResource;
 
 class InstructorController extends Controller
 {
     /**
-     * 講師情報編集API
+     * 講師情報取得API
      *
      * @param InstructorEditRequest $request
      * @return InstructorEditResource|\Illuminate\Http\JsonResponse
      */
     public function edit(InstructorEditRequest $request)
     {
-        $requestInstructorId = $request->instructor_id;
-
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $managerId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->findOrFail($instructorId);
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-        if (!in_array((int)$requestInstructorId, $instructorIds, true)) {
+        if (!in_array((int)$request->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this instructor.",
             ], 403);
         }
 
-        $instructor = Instructor::findOrFail($requestInstructorId);
+        /** @var Instructor $instructor */
+        $instructor = Instructor::findOrFail($request->instructor_id);
+
         return new InstructorEditResource($instructor);
     }
 
     /**
-     * インストラクター情報更新API
+     * 講師更新API
      *
      * @param InstructorPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(InstructorPatchRequest $request)
     {
-        //対象の講師ID
-        $requestInstructorId = $request->instructor_id;
-
         // マネージャーと配下の講師情報を取得
-        $instructorId = $request->user()->id;
-        $manager = Instructor::with('managings')->findOrFail($instructorId);
+        $managerId = $request->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         try {
-            $instructor = Instructor::FindOrFail($requestInstructorId);
+            /** @var Instructor $instructor */
+            $instructor = Instructor::FindOrFail($request->instructor_id);
 
             //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-            if (!in_array((int)$requestInstructorId, $instructorIds, true)) {
+            if (!in_array($instructor->id, $instructorIds, true)) {
                 return response()->json([
                     'result'  => false,
                     'message' => "Forbidden, not allowed to edit this instructor.",
@@ -93,17 +96,11 @@ class InstructorController extends Controller
                 'first_name' => $request->first_name,
                 'email' => $request->email,
                 'profile_image' => $imagePath,
-                'type' => $request->type,
             ]);
             return response()->json([
                 'result' => true,
                 'data' => new InstructorPatchResource($instructor)
             ]);
-        } catch (ModelNotFoundException $exception) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not Found course.'
-            ], 404);
         } catch (RuntimeException $e) {
             Log::error($e);
             return response()->json([

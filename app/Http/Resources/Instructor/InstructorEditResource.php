@@ -6,6 +6,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class InstructorEditResource extends JsonResource
 {
+    /** @var \App\Model\Instructor */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *

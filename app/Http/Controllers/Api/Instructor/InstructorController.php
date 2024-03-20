@@ -16,7 +16,19 @@ use App\Http\Resources\Instructor\InstructorPatchResource;
 class InstructorController extends Controller
 {
     /**
-     * インストラクター情報更新API
+     * 講師情報取得API
+     *
+     * @return InstructorEditResource
+     */
+    public function edit()
+    {
+        /** @var Instructor $instructor */
+        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
+        return new InstructorEditResource($instructor);
+    }
+
+    /**
+     * 講師情報更新API
      *
      * @param InstructorPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -59,15 +71,5 @@ class InstructorController extends Controller
                 "result" => false,
             ], 500);
         }
-    }
-    /**
-     * 講師情報編集API
-     *
-     * @return InstructorEditResource
-     */
-    public function edit()
-    {
-        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
-        return new InstructorEditResource($instructor);
     }
 }

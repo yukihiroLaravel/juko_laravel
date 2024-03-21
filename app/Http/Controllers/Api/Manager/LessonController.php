@@ -129,10 +129,11 @@ class LessonController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(LessonPatchStatusRequest $request)
-    {
-        $userId = $request->user()->id;
+    {   
+        $instructorId = Auth::guard('instructor')->user()->id;
         $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
         //配下の講師情報取得
+        $userId = $request->user()->id;
         $manager = Instructor::with('managings')->find($userId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
@@ -143,7 +144,15 @@ class LessonController extends Controller
                 "message" => 'invalid instructor_id.'
             ], 403);
         }
-
+        
+        if ((int) $request->course_id !== $lesson->chapter->course->id){
+            //指定したコースIDがチャプターのコースIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+            
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
             return response()->json([

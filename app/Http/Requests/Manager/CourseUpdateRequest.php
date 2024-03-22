@@ -32,7 +32,7 @@ class CourseUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required','integer', 'exists:courses,id'],
+            'course_id' => ['required','integer', 'exists:courses,id,deleted_at,NULL'],
             'title' => ['required','string'],
             'image' => ['mimes:jpg,png'],
             'status' => ['required', 'string', new CourseStatusRule()],

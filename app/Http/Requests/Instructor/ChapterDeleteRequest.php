@@ -24,7 +24,7 @@ class ChapterDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required', 'integer'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }
 

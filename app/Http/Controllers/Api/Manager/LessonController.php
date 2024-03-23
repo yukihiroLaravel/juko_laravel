@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Controllers\Controller;
-use App\Model\Instructor;
-use App\Model\Lesson;
+use Exception;
 use App\Model\Course;
+use App\Model\Lesson;
+use App\Model\Chapter;
+use App\Model\Instructor;
 use App\Model\LessonAttendance;
-use App\Http\Requests\Manager\LessonUpdateRequest;
-use App\Http\Requests\Manager\LessonSortRequest;
-use App\Http\Requests\Manager\LessonDeleteRequest;
-use App\Http\Requests\Manager\LessonStoreRequest;
-use App\Http\Resources\Manager\LessonStoreResource;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
-use Illuminate\Support\Facades\Log;
-use Exception;
+use App\Http\Requests\Manager\LessonSortRequest;
+use App\Http\Requests\Manager\LessonStoreRequest;
+use App\Http\Requests\Manager\LessonDeleteRequest;
+use App\Http\Requests\Manager\LessonUpdateRequest;
+use App\Http\Resources\Manager\LessonStoreResource;
+use App\Http\Requests\Manager\LessonPatchStatusRequest;
 
 class LessonController extends Controller
 {
@@ -30,19 +32,30 @@ class LessonController extends Controller
      */
     public function store(LessonStoreRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->findOrfail($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $managerId = Auth::guard('instructor')->user()->id;
 
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrfail($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        /** @var Course $course */
         $course = Course::find($request->course_id);
 
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to create new lesson.",
+            ], 403);
+        }
+
+        /** @var Chapter $chapter */
+        $chapter = Chapter::find($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
             ], 403);
         }
 
@@ -69,19 +82,21 @@ class LessonController extends Controller
     }
 
     /**
-     * マネージャ配下のレッスン更新API
+     * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $managerId = Auth::guard('instructor')->user()->id;
 
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
@@ -126,9 +141,48 @@ class LessonController extends Controller
      * @param LessonPatchStatusRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateStatus()
+    public function updateStatus(LessonPatchStatusRequest $request)
     {
-        return response()->json([]);
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        /** @var Lesson $lesson */
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $lesson->chapter->course->id) {
+            //指定したコースIDがチャプターのコースIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**
@@ -140,40 +194,44 @@ class LessonController extends Controller
     public function delete(LessonDeleteRequest $request)
     {
         DB::beginTransaction();
-        try {
-            // 自身と配下のinstructor情報を取得
-            $userId = $request->user()->id;
-            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
-            $manager = Instructor::with('managings')->find($userId);
-            $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $userId;
 
-            // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
+        try {
+            $managerId = Auth::guard('instructor')->user()->id;
+
+            /** @var Instructor $manager */
+            $manager = Instructor::with('managings')->find($managerId);
+            $instructorIds = $manager->managings->pluck('id')->toArray();
+            $instructorIds[] = $manager->id;
+
+            /** @var Lesson $lesson */
+            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
             if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+                // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
                 return response()->json([
                     'result'  => false,
                     'message' => 'Invalid instructor_id.',
                 ], 403);
             }
 
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-            if ((int)$request->chapter_id !== $lesson->chapter->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid chapter_id.',
-                ], 403);
-            }
-
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
             if ((int)$request->course_id !== $lesson->chapter->course_id) {
+                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid course_id.',
                 ], 403);
             }
 
-            // 受講情報が登録されている場合は許可しない
+            if ((int)$request->chapter_id !== $lesson->chapter->id) {
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid chapter_id.',
+                ], 403);
+            }
+
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                // 受講情報が登録されている場合は許可しない
                 return response()->json([
                     'result' => false,
                     'message' => 'This lesson has attendance.',
@@ -183,6 +241,7 @@ class LessonController extends Controller
             // 対象レッスンの削除処理
             $lesson->update(['order' => 0]);
             $lesson->delete();
+
             Lesson::where('chapter_id', $lesson->chapter_id)
                 ->orderBy('order')
                 ->get()
@@ -215,13 +274,12 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            // 現在のユーザーを取得
-            $instructorId = Auth::guard('instructor')->user()->id;
+            $managerId = Auth::guard('instructor')->user()->id;
 
-            // マネージャーが管理する講師を取得
-            $manager = Instructor::with('managings')->find($instructorId);
+            /** @var Instructor $manager */
+            $manager = Instructor::with('managings')->find($managerId);
             $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructorId;
+            $instructorIds[] = $manager->id;
 
             $courseId = $request->input('course_id');
             $chapterId = $request->input('chapter_id');
@@ -230,7 +288,6 @@ class LessonController extends Controller
             // レッスンを一括取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
 
-            /// 認可
             $lessons->each(function ($lesson) use ($instructorIds, $courseId, $chapterId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
@@ -246,7 +303,7 @@ class LessonController extends Controller
                 }
             });
 
-            // レッスンのorderカラムを更新
+            // レッスンの順番を更新
             $lessons->each(function ($lesson) use ($inputLessons) {
                 $collectionLessons = new Collection($inputLessons);
                 $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);

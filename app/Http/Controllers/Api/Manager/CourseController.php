@@ -35,7 +35,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
@@ -60,7 +60,7 @@ class CourseController extends Controller
     public function show(CourseShowRequest $request)
     {
         // ユーザID取得
-        $userId = $request->user()->id;
+        $userId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($userId);
@@ -88,7 +88,7 @@ class CourseController extends Controller
      */
     public function status(CoursePutStatusRequest $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         $instructor = Instructor::with('managings')->find($instructorId);
@@ -112,7 +112,7 @@ class CourseController extends Controller
      */
     public function store(CourseStoreRequest $request)
     {
-        $managerId = $request->user()->id;
+        $managerId = Auth::guard('instructor')->user()->id;
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
@@ -141,7 +141,7 @@ class CourseController extends Controller
      */
     public function update(CourseUpdateRequest $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);
         $managingIds = $instructor->managings->pluck('id')->toArray();
         $managingIds[] = $instructorId;
@@ -204,7 +204,7 @@ class CourseController extends Controller
      */
     public function delete(CourseDeleteRequest $request)
     {
-        $instructorId = $request->user()->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);
         $managingIds = $instructor->managings->pluck('id')->toArray();
         $managingIds[] = $instructorId;

@@ -15,7 +15,6 @@ use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
 use Illuminate\Support\Facades\Auth;
 
-
 class AttendanceController extends Controller
 {
     public function store(AttendanceStoreRequest $request)
@@ -96,43 +95,43 @@ class AttendanceController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
 
-public function delete(AttendanceDeleteRequest $request)
-{
-    DB::beginTransaction();
+    public function delete(AttendanceDeleteRequest $request)
+    {
+        DB::beginTransaction();
 
-    $instructorId = Auth::guard('instructor')->user()->id;
-    $manager = Instructor::with('managings')->find($instructorId);
-    $instructorIds = $manager->managings->pluck('id')->toArray();
-    $instructorIds[] = $manager->id;
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
-    try {
-        $attendanceId = $request->attendance_id;
-        $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+        try {
+            $attendanceId = $request->attendance_id;
+            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
 
-        // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDのリストを取得
-        $managedAttendances = Attendance::whereIn('id', $instructorIds)->pluck('id')->toArray();
+            // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDのリストを取得
+            $managedAttendances = Attendance::whereIn('id', $instructorIds)->pluck('id')->toArray();
 
-        // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDに含まれていない場合はエラーを返す
-        if (!in_array($attendanceId, $managedAttendances)) {
-            return response()->json([
+            // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDに含まれていない場合はエラーを返す
+            if (!in_array($attendanceId, $managedAttendances)) {
+                return response()->json([
                 "result" => false,
                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-            ], 403);
-        }
+                ], 403);
+            }
 
-        $attendance->delete();
+            $attendance->delete();
 
-        DB::commit();
+            DB::commit();
 
-        return response() ->json([
+            return response() ->json([
             "result" => true,
-        ]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        return response()->json([
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
             "result" => false,
-        ], 500);
+            ], 500);
+        }
     }
-}
 }

@@ -173,6 +173,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 });
                             });
                         });
+                        Route::prefix('notification')->group(function () {
+                            Route::post('/', 'Api\Manager\NotificationController@store');
+                        });
                     });
                 });
 

@@ -133,10 +133,9 @@ class LessonController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
         //配下の講師情報取得
-        $userId = $request->user()->id;
-        $manager = Instructor::with('managings')->find($userId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId;
+        $instructorIds[] = $instructorId;
 
         if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([

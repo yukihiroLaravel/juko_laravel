@@ -160,7 +160,7 @@ class ChapterController extends Controller
         ]);
 
         // チャプターを非公開にする場合は、レッスンのステータスも更新する
-        if ($request->status === Chapter::STATUS_PRIVATE ) {
+        if ($request->status === Chapter::STATUS_PRIVATE) {
             Lesson::where('chapter_id', $request->chapter_id)
             ->update([
                 'status' => $request->status

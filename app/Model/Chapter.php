@@ -60,6 +60,15 @@ class Chapter extends Model
                 $child->delete();
             }
         });
+
+        // チャプター更新時に紐づくレッスンも更新（ステータスが非公開の場合）
+        static::updating(function ($chapter) {
+            if ($chapter->status === Chapter::STATUS_PRIVATE) {
+                foreach ($chapter->lessons()->get() as $child) {
+                    $child->update(['status' => Lesson::STATUS_PRIVATE]);
+                }
+            }
+        });
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -157,6 +158,14 @@ class ChapterController extends Controller
         $chapter->update([
             'status' => $request->status
         ]);
+
+        // チャプターを非公開にする場合は、レッスンのステータスも更新する
+        if ($request->status === Chapter::STATUS_PRIVATE ) {
+            Lesson::where('chapter_id', $request->chapter_id)
+            ->update([
+                'status' => $request->status
+            ]);
+        }
 
         return response()->json([
             'result' => true,

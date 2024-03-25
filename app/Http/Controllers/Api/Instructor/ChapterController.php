@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

@@ -102,7 +102,7 @@ class ChapterController extends Controller
      */
     public function update(ChapterPatchRequest $request)
     {
-        $user = Instructor::find($request->user()->id);
+        $user = Instructor::find(Auth::guard('instructor')->user()->id);
         $chapter = Chapter::findOrFail($request->chapter_id);
         if ($chapter->course->instructor_id !== $user->id) {
             return response()->json([
@@ -227,7 +227,7 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = Instructor::find($request->user()->id);
+            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
             $course = Course::findOrFail($courseId);

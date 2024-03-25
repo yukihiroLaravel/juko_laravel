@@ -55,9 +55,14 @@ class Chapter extends Model
         parent::boot();
 
         // チャプター削除時に紐づくレッスンも削除
-        static::deleting(function ($chapter) {
-            foreach ($chapter->lessons()->get() as $child) {
-                $child->delete();
+        static::deleting(function (Chapter $chapter) {
+            $chapter->lessons()->delete();
+        });
+
+        // チャプター更新時に紐づくレッスンも更新（ステータスが非公開の場合）
+        static::updating(function (Chapter $chapter) {
+            if ($chapter->status === Chapter::STATUS_PRIVATE) {
+                $chapter->lessons()->update(['status' => Lesson::STATUS_PRIVATE]);
             }
         });
     }

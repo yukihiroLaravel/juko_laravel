@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use RuntimeException;
 use App\Model\Instructor;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -16,7 +17,7 @@ use App\Http\Resources\Instructor\InstructorPatchResource;
 class InstructorController extends Controller
 {
     /**
-     * 講師情報取得API
+     * 講師取得API
      *
      * @return InstructorEditResource
      */
@@ -28,12 +29,12 @@ class InstructorController extends Controller
     }
 
     /**
-     * 講師情報更新API
+     * 講師更新API
      *
      * @param InstructorPatchRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function update(InstructorPatchRequest $request)
+    public function update(InstructorPatchRequest $request): JsonResponse
     {
         try {
             $instructor = Auth::user();

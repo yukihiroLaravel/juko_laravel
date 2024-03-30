@@ -2,25 +2,25 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\LessonStoreRequest;
-use App\Http\Requests\Instructor\LessonSortRequest;
-use App\Http\Requests\Instructor\LessonPatchStatusRequest;
-use App\Http\Requests\Instructor\LessonUpdateRequest;
-use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\LessonDeleteRequest;
-use App\Http\Resources\Instructor\LessonStoreResource;
-use App\Http\Resources\Instructor\LessonUpdateResource;
+use Exception;
 use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
-use Exception;
-use App\Exceptions\ValidationErrorException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\ValidationErrorException;
+use App\Http\Requests\Instructor\LessonSortRequest;
+use App\Http\Requests\Instructor\LessonStoreRequest;
+use App\Http\Requests\Instructor\LessonDeleteRequest;
+use App\Http\Requests\Instructor\LessonUpdateRequest;
+use App\Http\Resources\Instructor\LessonStoreResource;
+use App\Http\Resources\Instructor\LessonUpdateResource;
+use App\Http\Requests\Instructor\LessonPatchStatusRequest;
+use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
 {
@@ -30,7 +30,7 @@ class LessonController extends Controller
      * @param  LessonStoreRequest  $request
      * @return JsonResponse
      */
-    public function store(LessonStoreRequest $request)
+    public function store(LessonStoreRequest $request): JsonResponse
     {
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
@@ -60,7 +60,7 @@ class LessonController extends Controller
      * @param LessonUpdateRequest $request
      * @return JsonResponse
      */
-    public function update(LessonUpdateRequest $request)
+    public function update(LessonUpdateRequest $request): JsonResponse
     {
         $user = Instructor::find($request->user()->id);
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
@@ -96,9 +96,9 @@ class LessonController extends Controller
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function updateStatus(LessonPatchStatusRequest $request)
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
@@ -132,7 +132,7 @@ class LessonController extends Controller
      * @param LessonUpdateTitleRequest $request
      * @return JsonResponse
      */
-    public function updateTitle(LessonUpdateTitleRequest $request)
+    public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
     {
         $user = Auth::guard('instructor')->user();
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
@@ -173,7 +173,7 @@ class LessonController extends Controller
      * @param LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sort(LessonSortRequest $request)
+    public function sort(LessonSortRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
@@ -238,7 +238,7 @@ class LessonController extends Controller
      * @param LessonDeleteRequest $request
      * @return JsonResponse
      */
-    public function delete(LessonDeleteRequest $request)
+    public function delete(LessonDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {

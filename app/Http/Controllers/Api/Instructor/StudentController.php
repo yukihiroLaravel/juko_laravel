@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api\Instructor;
 use Carbon\Carbon;
 use App\Model\Course;
 use App\Model\Student;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Requests\Instructor\StudentStoreRequest;
@@ -21,7 +22,7 @@ class StudentController extends Controller
      * 受講生一覧取得API
      *
      * @param StudentIndexRequest $request
-     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
+     * @return StudentIndexResource|JsonResponse
      */
     public function index(StudentIndexRequest $request)
     {
@@ -82,10 +83,10 @@ class StudentController extends Controller
     }
 
     /**
-     * 受講生詳細情報を取得
+     * 受講生を取得
      *
      * @param StudentShowRequest $request
-     * @return StudentShowResource|\Illuminate\Http\JsonResponse
+     * @return StudentShowResource|JsonResponse
      */
     public function show(StudentShowRequest $request)
     {
@@ -96,6 +97,7 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
 
         // リクエストされた受講生を取得
+        /** @var Student $student */
         $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
@@ -114,8 +116,7 @@ class StudentController extends Controller
      * 受講生登録API
      *
      * @param StudentStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+     * @return      */
     public function store(StudentStoreRequest $request)
     {
         /** @var Student $student */

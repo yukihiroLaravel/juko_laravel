@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -28,18 +29,19 @@ class ChapterController extends Controller
      * チャプター新規作成API
      *
      * @param ChapterStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function store(ChapterStoreRequest $request)
+    public function store(ChapterStoreRequest $request): JsonResponse
     {
         try {
             // 講師の情報を取得
+            /** @var Instructor $user */
             $user = Auth::guard('instructor')->user();
 
-            // リクエストに含まれる講座IDを使用して対応する講座を取得
+            // 講座を取得
+            /** @var Course $course */
             $course = Course::with('chapters')->findOrFail($request->input('course_id'));
 
-            // 講座の作成者が現在の講師であるかどうかを確認
             if ($course->instructor_id !== $user->id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
                 return response()->json([
@@ -73,10 +75,11 @@ class ChapterController extends Controller
      * チャプター詳細情報を取得
      *
      * @param ChapterShowRequest $request
-     * @return ChapterShowResource|\Illuminate\Http\JsonResponse
+     * @return ChapterShowResource|JsonResponse
      */
     public function show(ChapterShowRequest $request)
     {
+        /** @var Chapter $chapter */
         $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
 
         if ((int) $request->course_id !== $chapter->course->id) {
@@ -98,11 +101,14 @@ class ChapterController extends Controller
      * チャプター更新API
      *
      * @param ChapterPatchRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function update(ChapterPatchRequest $request)
+    public function update(ChapterPatchRequest $request): JsonResponse
     {
+        /** @var Instructor $user */
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
+
+        /** @var Chapter $chapter */
         $chapter = Chapter::findOrFail($request->chapter_id);
         if ($chapter->course->instructor_id !== $user->id) {
             return response()->json([
@@ -130,13 +136,14 @@ class ChapterController extends Controller
     }
 
     /**
-     * チャプター更新API(公開・非公開切り替え)
+     * チャプター更新API
      *
      * @param ChapterPatchStatusRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request)
+    public function updateStatus(ChapterPatchStatusRequest $request): JsonResponse
     {
+        /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
@@ -167,13 +174,14 @@ class ChapterController extends Controller
      * チャプター削除API
      *
      * @param ChapterDeleteRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function delete(ChapterDeleteRequest $request)
+    public function delete(ChapterDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
         try {
+            /** @var Chapter $chapter */
             $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
@@ -221,9 +229,9 @@ class ChapterController extends Controller
      * チャプター並び替えAPI
      *
      * @param ChapterSortRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function sort(ChapterSortRequest $request)
+    public function sort(ChapterSortRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -268,12 +276,12 @@ class ChapterController extends Controller
     }
 
     /**
-     * チャプター一括更新API(公開・非公開切り替え)
+     * チャプター一括更新API
      *
      * @param ChapterPutStatusRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function putStatus(ChapterPutStatusRequest $request)
+    public function putStatus(ChapterPutStatusRequest $request): JsonResponse
     {
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);

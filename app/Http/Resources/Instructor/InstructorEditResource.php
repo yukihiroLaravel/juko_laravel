@@ -18,7 +18,7 @@ class InstructorEditResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->resource->id,
+            'instructor_id' => $this->resource->id,
             'nick_name' => $this->resource->nick_name,
             'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,

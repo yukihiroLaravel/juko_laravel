@@ -10,19 +10,28 @@ use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 
 class AttendanceController extends Controller
 {
-    public function store(AttendanceStoreRequest $request)
+    /**
+     * 受講状況登録API
+     *
+     * @param AttendanceStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(AttendanceStoreRequest $request): JsonResponse
     {
         // 配下のinstructor情報を取得
-        $instructorId = $request->user()->id;
-        $manager = Instructor::with('managings')->findOrFail($instructorId);
+        $managerId = $request->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
 
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        $instructorIds[] = $manager->id;
 
         // 自分と配下instructorのコース情報を取得
         $courseIds = Course::with('instructor')

@@ -116,8 +116,9 @@ class StudentController extends Controller
      * 受講生登録API
      *
      * @param StudentStoreRequest $request
-     * @return      */
-    public function store(StudentStoreRequest $request)
+     * @return JsonResponse
+     */
+    public function store(StudentStoreRequest $request): JsonResponse
     {
         /** @var Student $student */
         $student = Student::create([

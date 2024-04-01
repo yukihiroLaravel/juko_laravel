@@ -117,6 +117,7 @@ class StudentController extends Controller
     /**
      * ユーザー情報編集API
      *
+     * @param Request $request
      * @return StudentEditResource
      */
     public function edit(Request $request)

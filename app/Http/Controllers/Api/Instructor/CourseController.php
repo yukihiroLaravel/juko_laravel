@@ -8,7 +8,6 @@ use RuntimeException;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -29,11 +28,11 @@ use App\Http\Requests\Instructor\CoursePutStatusRequest;
 class CourseController extends Controller
 {
     /**
-     * 講師側講座一覧取得API
+     * 講座一覧取得API
      *
      * @return CourseIndexResource
      */
-    public function index(Request $request)
+    public function index(): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $courses = Course::where('instructor_id', $instructorId)->get();
@@ -42,16 +41,28 @@ class CourseController extends Controller
     }
 
     /**
-     * 講師側講座取得API
+     * 講座取得API
      *
      * @param CourseShowRequest $request
      * @return CourseShowResource
      */
-    public function show(CourseShowRequest $request)
+    public function show(CourseShowRequest $request): CourseShowResource
     {
         $course = Course::with(['chapters.lessons'])
             ->findOrFail($request->course_id);
         return new CourseShowResource($course);
+    }
+
+    /**
+     * 講座編集API
+     *
+     * @param CourseEditRequest $request
+     * @return CourseEditResource
+     */
+    public function edit(CourseEditRequest $request): CourseEditResource
+    {
+        $course = Course::findOrFail($request->course_id);
+        return new CourseEditResource($course);
     }
 
     /**
@@ -60,7 +71,7 @@ class CourseController extends Controller
      * @param CourseStoreRequest $request
      * @return JsonResponse
      */
-    public function store(CourseStoreRequest $request)
+    public function store(CourseStoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $file = $request->file('image');
@@ -85,24 +96,12 @@ class CourseController extends Controller
     }
 
     /**
-     * 講座編集API
-     *
-     * @param CourseEditRequest $request
-     * @return CourseEditResource
-     */
-    public function edit(CourseEditRequest $request)
-    {
-        $course = Course::findOrFail($request->course_id);
-        return new CourseEditResource($course);
-    }
-
-    /**
-     * 講師側の更新処理API
+     * 講座更新API
      *
      * @param CourseUpdateRequest $request
      * @return JsonResponse
      */
-    public function update(CourseUpdateRequest $request)
+    public function update(CourseUpdateRequest $request): JsonResponse
     {
         $file = $request->file('image');
 
@@ -155,7 +154,7 @@ class CourseController extends Controller
      * @param CourseDeleteRequest $request
      * @return JsonResponse
      */
-    public function delete(CourseDeleteRequest $request)
+    public function delete(CourseDeleteRequest $request): JsonResponse
     {
         try {
             $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -194,12 +193,12 @@ class CourseController extends Controller
     }
 
     /**
-     * 講座ステータス一括更新API(公開・非公開切り替え)
+     * 講座ステータス一括更新API
      *
      * @param CoursePutStatusRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function putStatus(coursePutStatusRequest $request)
+    public function putStatus(coursePutStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         Course::where('instructor_id', $instructorId)

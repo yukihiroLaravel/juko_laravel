@@ -19,8 +19,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property Carbon $birth_date
  * @property int $sex
  * @property string $address
- * @property string $created_at
- * @property string $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property Carbon $last_login_at
  * @property string $email_verified_at
  * @property string $profile_image
@@ -64,6 +64,8 @@ class Student extends Authenticatable
     protected $casts = [
         'birth_date' => 'date',
         'last_login_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // 性別定数

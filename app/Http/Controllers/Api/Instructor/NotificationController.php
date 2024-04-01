@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Model\Notification;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\NotificationIndexRequest;
-use App\Http\Resources\Instructor\NotificationIndexResource;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\NotificationShowRequest;
-use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
+use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationUpdateResource;
-use App\Model\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
@@ -21,7 +22,7 @@ class NotificationController extends Controller
      * @param NotificationIndexRequest $request
      * @return NotificationIndexResource
      */
-    public function index(NotificationIndexRequest $request)
+    public function index(NotificationIndexRequest $request): NotificationIndexResource
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -37,7 +38,7 @@ class NotificationController extends Controller
      * お知らせ詳細
      *
      * @param NotificationShowRequest $request
-     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
+     * @return NotificationShowResource|JsonResponse
      */
     public function show(NotificationShowRequest $request)
     {
@@ -57,9 +58,9 @@ class NotificationController extends Controller
      * お知らせ登録
      *
      * @param NotificationStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function store(NotificationStoreRequest $request)
+    public function store(NotificationStoreRequest $request): JsonResponse
     {
         Notification::create([
             'course_id'     => $request->course_id,
@@ -79,10 +80,10 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      *
-     * @param   NotificationUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param NotificationUpdateRequest $request
+     * @return JsonResponse
      */
-    public function update(NotificationUpdateRequest $request)
+    public function update(NotificationUpdateRequest $request): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
         $notification->fill([

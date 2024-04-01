@@ -21,7 +21,7 @@ class NotificationIndexResource extends JsonResource
     {
         return $this->resource->map(function (Notification $notification) {
             return [
-                'id' => $notification->id,
+                'notification_id' => $notification->id,
                 'course_id' => $notification->course_id,
                 'course_title' => $notification->course->title,
                 'type' => $notification->type,

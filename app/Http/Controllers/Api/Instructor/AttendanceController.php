@@ -9,6 +9,7 @@ use App\Model\Chapter;
 use App\Model\Attendance;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -22,7 +23,13 @@ use App\Http\Resources\Instructor\AttendanceShowResource;
 
 class AttendanceController extends Controller
 {
-    public function store(AttendanceStoreRequest $request)
+    /**
+     * 受講状況登録API
+     *
+     * @param AttendanceStoreRequest $request
+     * @return JsonResponse
+     */
+    public function store(AttendanceStoreRequest $request): JsonResponse
     {
         $attendance = Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)
@@ -71,7 +78,7 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request)
+    public function show(AttendanceShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
 
@@ -98,9 +105,9 @@ class AttendanceController extends Controller
      * 受講状況削除API
      *
      * @param AttendanceDeleteRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function delete(AttendanceDeleteRequest $request)
+    public function delete(AttendanceDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
@@ -135,9 +142,9 @@ class AttendanceController extends Controller
      * 受講生ログイン率取得API
      *
      * @param LoginRateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function loginRate(LoginRateRequest $request)
+    public function loginRate(LoginRateRequest $request): JsonResponse
     {
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
         $loginId = Auth::guard('instructor')->user()->id;
@@ -188,7 +195,7 @@ class AttendanceController extends Controller
      * @param int $total
      * @return float
      */
-    public function calcLoginRate(int $number, int $total)
+    public function calcLoginRate(int $number, int $total): float
     {
         if ($total === 0) {
             return 0;

@@ -55,13 +55,14 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->where('attendances.course_id', $request->course_id)
+            ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
-                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
-                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                        ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                        ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索

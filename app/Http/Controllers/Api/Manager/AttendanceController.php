@@ -11,6 +11,7 @@ use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 
@@ -91,5 +92,15 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+    /**
+    * マネージャー側受講状況API
+     *
+     * @param int $attendance_id
+     * @return JsonResponse
+     */
+    public function status(int $attendance_id): JsonResponse
+    {
+        return response()->json([]);
     }
 }

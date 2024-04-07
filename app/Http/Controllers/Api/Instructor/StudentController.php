@@ -51,7 +51,7 @@ class StudentController extends Controller
                 'students.email',
                 'students.profile_image',
                 'students.last_login_at',
-                'attendances.id as attendanced_id',
+                'attendances.id as attendance_id',
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')

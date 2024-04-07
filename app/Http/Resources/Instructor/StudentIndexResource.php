@@ -46,7 +46,7 @@ class StudentIndexResource extends JsonResource
                 'course_title' => $course->title,
                 'last_login_at' => $result->last_login_at,
                 'attendance' => [
-                    'attendanced_id' => $result->attendanced_id,
+                    'attendance_id' => $result->attendance_id,
                     'attendanced_at' => $result->attendanced_at,
                 ],
             ];

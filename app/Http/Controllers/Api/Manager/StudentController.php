@@ -93,7 +93,7 @@ class StudentController extends Controller
         $course = Course::find($request->course_id);
         return new StudentIndexResource([
             'course' => $course,
-            'data' => $results,
+            'data' => $results
         ]);
     }
 

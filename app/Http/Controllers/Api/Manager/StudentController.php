@@ -65,6 +65,7 @@ class StudentController extends Controller
                 'students.email',
                 'students.profile_image',
                 'students.last_login_at',
+                'attendances.course_id as attendanced_id',
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
@@ -92,7 +93,7 @@ class StudentController extends Controller
         $course = Course::find($request->course_id);
         return new StudentIndexResource([
             'course' => $course,
-            'data' => $results
+            'data' => $results,
         ]);
     }
 

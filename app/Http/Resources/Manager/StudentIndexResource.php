@@ -46,7 +46,10 @@ class StudentIndexResource extends JsonResource
                 'profile_image' => $result->profile_image,
                 'course_title' => $course->title,
                 'last_login_at' => $result->last_login_at,
-                'attendanced_at' => $result->attendanced_at,
+                'attendance' => [
+                    'attendance_id' => $result->attendance_id,
+                    'attendanced_at' => $result->attendanced_at,
+                ],
             ];
         });
     }

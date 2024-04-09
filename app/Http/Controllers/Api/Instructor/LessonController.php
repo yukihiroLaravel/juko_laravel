@@ -42,6 +42,15 @@ class LessonController extends Controller
                 'order' => (int) $maxOrder + 1,
             ]);
 
+            $attendances = $lesson->chapter->course->attendances;
+            foreach ($attendances as $attendance) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id'     => $lesson->id,
+                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                ]);
+            }
+
             return response()->json([
                 "result" => true,
                 "data" => new LessonStoreResource($lesson),

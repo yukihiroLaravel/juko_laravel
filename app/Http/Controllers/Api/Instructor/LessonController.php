@@ -22,7 +22,6 @@ use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 use App\Model\Attendance;
-use App\Model\Chapter;
 
 class LessonController extends Controller
 {

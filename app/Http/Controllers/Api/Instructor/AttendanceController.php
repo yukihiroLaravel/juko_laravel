@@ -187,7 +187,7 @@ class AttendanceController extends Controller
         $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
         return response()->json(['login_rate' => $loginRate], 200);
     }
-    
+
 /**
      * 講師側受講状況API 
      *

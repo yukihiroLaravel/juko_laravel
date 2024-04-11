@@ -120,7 +120,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
-                Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');           
+                Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');
             });
 
         // 講師-生徒

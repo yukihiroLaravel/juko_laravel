@@ -10,6 +10,7 @@ use App\Model\Attendance;
 use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -186,6 +187,17 @@ class AttendanceController extends Controller
 
         $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
         return response()->json(['login_rate' => $loginRate], 200);
+    }
+
+    /**
+     * 受講生の学習状況を取得するAPI
+     *
+     * @param int $attendance_id
+     * @return JsonResponse
+     */
+    public function learningStatus($attendance_id)
+    {
+        return response()->json([]);
     }
 
     /**

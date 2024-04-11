@@ -62,7 +62,7 @@ Route::middleware('instructor')->group(function () {
         
     // 講師-生徒学習状況
 Route::middleware('instructor')->prefix('v1')->group(function () {
-        Route::get('{attendance_id}', 'Api\Instructor\StudentLessonStatusController@index');
+        Route::get('{attendance_id}', 'Api\Instructor\AttendanceController@learningStatus');
     });
 
     // 講師-講座

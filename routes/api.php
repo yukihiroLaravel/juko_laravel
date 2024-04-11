@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生-レッスン受講
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
- // 講師側API
+    // 講師側API
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
         Route::prefix('instructor')->group(function () {
@@ -117,19 +117,19 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
             });
 
-        // 講師-受講
+            // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
                 Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');
             });
 
-        // 講師-生徒
+            // 講師-生徒
             Route::prefix('student')->group(function () {
                 Route::get('{student_id}', 'Api\Instructor\StudentController@show');
                 Route::post('/', 'Api\Instructor\StudentController@store');
             });
 
-        // 講師-お知らせ
+            // 講師-お知らせ
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
             });

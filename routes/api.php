@@ -54,24 +54,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::patch('lesson_attendance', 'Api\LessonAttendanceController@update');
 
  // 講師側API
-<<<<<<< HEAD
-Route::middleware('instructor')->group(function () {
-    // TODO 講師側APIはここに記述
-    Route::prefix('instructor')->group(function () {
-        Route::get('edit', 'Api\Instructor\InstructorController@edit');
-        Route::post('update', 'Api\Instructor\InstructorController@update');
-        
-    // 講師-生徒学習状況
-Route::middleware('instructor')->prefix('v1')->group(function () {
-        Route::get('{attendance_id}', 'Api\Instructor\AttendanceController@learningStatus');
-    });
-=======
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
         Route::prefix('instructor')->group(function () {
             Route::get('edit', 'Api\Instructor\InstructorController@edit');
             Route::post('update', 'Api\Instructor\InstructorController@update');
->>>>>>> dc9f5b9eead3c317c5009410a1ce406f7df7386e
 
         // 講師-生徒学習状況
             Route::middleware('instructor')->prefix('v1')->group(function () {

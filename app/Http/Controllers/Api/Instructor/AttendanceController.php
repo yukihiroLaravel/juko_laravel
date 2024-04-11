@@ -1,5 +1,4 @@
 <?php
-git
 
 namespace App\Http\Controllers\Api\Instructor;
 

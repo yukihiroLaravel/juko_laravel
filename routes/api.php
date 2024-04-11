@@ -61,9 +61,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::post('update', 'Api\Instructor\InstructorController@update');
 
         // 講師-生徒学習状況
-        Route::middleware('instructor')->group(function () {
-            Route::get('attendance/{attendance_id}/status', 'Api\Instructor\AttendanceController@learningStatus');
-        });
+            Route::middleware('instructor')->group(function () {
+                Route::get('attendance/{attendance_id}/status', 'Api\Instructor\AttendanceController@learningStatus');
+            });
 
         // 講師-講座
             Route::prefix('course')->group(function () {

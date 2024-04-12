@@ -29,6 +29,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
             Route::get('index', 'Api\Student\AttendanceController@index');
+            Route::prefix('notification')->group(function () {
+                Route::get('index', 'Api\Student\AttendanceController@notificationIndex');
+            });
             Route::prefix('{attendance_id}')->group(function () {
                 Route::get('/', 'Api\Student\AttendanceController@show');
                 Route::prefix('course')->group(function () {

@@ -116,11 +116,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
                 Route::delete('{attendance_id}', 'Api\Instructor\AttendanceController@delete');
-            
+
                 // 講師-生徒学習状況
-                Route::middleware('instructor')->group(function () {
-                    Route::get('{attendance_id}/status', 'Api\Instructor\AttendanceController@status');
-                });
+                Route::get('{attendance_id}/status', 'Api\Instructor\AttendanceController@status');
             });
 
             // 講師-生徒

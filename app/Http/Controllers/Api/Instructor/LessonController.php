@@ -37,7 +37,7 @@ class LessonController extends Controller
 
         DB::beginTransaction();
         try {
-            $newLesson = Lesson::create([
+            $lesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
@@ -45,7 +45,7 @@ class LessonController extends Controller
             ]);
 
             $attendances = Attendance::where('course_id', $request->course_id)->get();
-            $lesson_id = $newLesson->id;
+            $lesson_id = $lesson->id;
             $attendances->each(function ($attendance) use (&$lesson_id) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
@@ -57,14 +57,14 @@ class LessonController extends Controller
             DB::commit();
             return response()->json([
                 "result" => true,
-                "data" => new LessonStoreResource($newLesson),
+                "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
                 "result" => false,
-            ]);
+            ], 500);
         }
     }
 

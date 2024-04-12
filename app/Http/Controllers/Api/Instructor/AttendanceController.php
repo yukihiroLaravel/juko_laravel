@@ -194,7 +194,7 @@ class AttendanceController extends Controller
      * @param int $attendance_id
      * @return JsonResponse
      */
-    public function learningStatus(int $attendance_id): JsonResponse
+    public function status(int $attendance_id): JsonResponse
     {
         return response()->json([]);
     }

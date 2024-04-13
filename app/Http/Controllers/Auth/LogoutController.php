@@ -10,8 +10,20 @@ use Illuminate\Support\Facades\Auth;
 class LogoutController extends Controller
 {
     /**
-     * Handle the incoming request.
-     *
+     * @OA\Post(
+     *  path="/logout",
+     *  tags={"Student-Auth"},
+     *  summary="生徒ログアウトAPI",
+     *  description="生徒でログアウトするAPIです。",
+     * @OA\Response(
+     *     response=200,
+     *     description="OK",
+     *    @OA\JsonContent(
+     *     required={"result", "message"},
+     *     @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *    )
+     *  ),
+     * )
      * @param  \Illuminate\Http\Request  $request
      * @return JsonResponse
      */

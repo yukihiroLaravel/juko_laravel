@@ -17,7 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string $password
  * @property string $purpose
  * @property Carbon $birth_date
- * @property int $sex
+ * @property int $gender
  * @property string $address
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -29,7 +29,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property Collection<Notification> $notifications
  * @property Collection<Attendance> $attendances
  */
-
 class Student extends Authenticatable
 {
     /**
@@ -53,7 +52,7 @@ class Student extends Authenticatable
         'password',
         'purpose',
         'birth_date',
-        'sex',
+        'gender',
         'address',
         'profile_image',
     ];
@@ -69,11 +68,11 @@ class Student extends Authenticatable
     ];
 
     // 性別定数
-    const SEX_MAN = 'man';
-    const SEX_WOMAN = 'woman';
-    const SEX_MAN_INT = 1;
-    const SEX_WOMAN_INT = 2;
-    const SEX_UNKNOWN_INT = 0;
+    const GENDER_MAN = 'man';
+    const GENDER_WOMAN = 'woman';
+    const GENDER_MAN_INT = 1;
+    const GENDER_WOMAN_INT = 2;
+    const GENDER_UNKNOWN_INT = 0;
 
     /**
      * 講座を取得
@@ -105,25 +104,25 @@ class Student extends Authenticatable
         return $this->hasMany(Attendance::class);
     }
 
-    public function getSexAttribute($value)
+    public function getGenderAttribute($value)
     {
-        if ($value === self::SEX_MAN_INT) {
-            return self::SEX_MAN;
-        } elseif ($value === self::SEX_WOMAN_INT) {
-            return self::SEX_WOMAN;
+        if ($value === self::GENDER_MAN_INT) {
+            return self::GENDER_MAN;
+        } elseif ($value === self::GENDER_WOMAN_INT) {
+            return self::GENDER_WOMAN;
         }
 
         return null;
     }
 
-    public function setSexAttribute($value)
+    public function setGenderAttribute($value)
     {
-        $this->attributes['sex'] = null;
+        $this->attributes['gender'] = null;
 
-        if ($value === self::SEX_MAN) {
-            $this->attributes['sex'] = self::SEX_MAN_INT;
-        } elseif ($value === self::SEX_WOMAN) {
-            $this->attributes['sex'] = self::SEX_WOMAN_INT;
+        if ($value === self::GENDER_MAN) {
+            $this->attributes['gender'] = self::GENDER_MAN_INT;
+        } elseif ($value === self::GENDER_WOMAN) {
+            $this->attributes['gender'] = self::GENDER_WOMAN_INT;
         }
     }
 

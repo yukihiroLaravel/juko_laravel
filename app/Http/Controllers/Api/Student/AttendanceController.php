@@ -21,7 +21,7 @@ use App\Http\Resources\Student\AttendanceCourseProgressResource;
 class AttendanceController extends Controller
 {
     /**
-     * 受講中講座一覧取得API
+     * 受講一覧取得API
      *
      * @param AttendanceIndexRequest $request
      * @return AttendanceIndexResource
@@ -50,7 +50,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講座詳細取得API
+     * 受講詳細取得API
      *
      * @param AttendanceShowRequest $request
      * @return AttendanceShowResource|\Illuminate\Http\JsonResponse
@@ -108,7 +108,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * チャプター進捗状況、続きのレッスンID取得API
+     * 受講講座の進捗情報を取得
      *
      * @param AttendanceCourseProgressRequest $request
      * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
@@ -229,8 +229,8 @@ class AttendanceController extends Controller
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
                     if ($youngestUnCompletedLesson['lesson_id'] === null) {
                         $youngestUnCompletedLesson = [
-                            'lesson_id' => $lesson->id,
                             'chapter_id' => $chapter->id,
+                            'lesson_id' => $lesson->id,
                         ];
                         return;
                     }

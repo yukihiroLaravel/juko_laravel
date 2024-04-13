@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\SexRule;
+use App\Rules\GenderRule;
 
 class StudentPostRequest extends FormRequest
 {
@@ -32,7 +32,7 @@ class StudentPostRequest extends FormRequest
             'occupation' => ['required', 'string', 'max:50'],
             'purpose'    => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Y-m-d'],
-            'sex'        => ['required', 'string', new SexRule()],
+            'gender'     => ['required', 'string', new GenderRule()],
             'address'    => ['required', 'string', 'max:255'],
         ];
     }

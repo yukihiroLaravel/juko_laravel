@@ -16,11 +16,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\AuthenticationConfirmationMail;
+use App\Http\Requests\Student\StudentPutRequest;
 use App\Http\Requests\Student\StudentPostRequest;
-use App\Http\Requests\Student\StudentPatchRequest;
+use App\Http\Resources\Student\StudentPutResource;
 use App\Http\Resources\Student\StudentPostResource;
 use App\Http\Resources\Student\StudentShowResource;
-use App\Http\Resources\Student\StudentPatchResource;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
@@ -68,8 +68,53 @@ class StudentController extends Controller
     }
 
     /**
-     * ユーザー新規仮登録API
-     *
+     * @OA\Post(
+     *  path="/api/student",
+     *  summary="生徒情報新規仮登録API",
+     *  description="生徒情報を新規仮登録する。",
+     *  tags={"Student"},
+     *  @OA\RequestBody(
+     *    required=true,
+     *    @OA\JsonContent(
+     *     @OA\Property(property="nick_name", type="string", description="ニックネーム", example="ニックネーム"),
+     *     @OA\Property(property="last_name", type="string", description="姓", example="姓"),
+     *     @OA\Property(property="first_name", type="string", description="名", example="名"),
+     *     @OA\Property(property="email", type="string", description="メールアドレス", example="test@example.com"),
+     *     @OA\Property(property="occupation", type="string", description="職業", example="エンジニア"),
+     *     @OA\Property(property="purpose", type="string", description="目的", example="スキルアップ"),
+     *     @OA\Property(property="birth_date", type="string", description="生年月日", example="2000/01/01"),
+     *     @OA\Property(property="gender", type="string", description="性別", example="man"),
+     *     @OA\Property(property="address", type="string", description="住所", example="東京都渋谷区"),
+     *    )
+     *  ),
+     *  @OA\Response(
+     *   response=200,
+     *   description="OK",
+     *   @OA\JsonContent(
+     *      @OA\Property(
+     *      property="result",
+     *      type="boolean",
+     *      description="結果",
+     *      example="true"
+     *      ),
+     *      @OA\Property(
+     *       property="data",
+     *       type="object",
+     *       @OA\Property(property="student_id", type="integer", description="生徒ID", example="1"),
+     *       @OA\Property(property="nick_name", type="string", description="ニックネーム", example="ニックネーム"),
+     *       @OA\Property(property="last_name", type="string", description="姓", example="姓"),
+     *       @OA\Property(property="first_name", type="string", description="名", example="名"),
+     *       @OA\Property(property="email", type="string", description="メールアドレス", example="test@example.com"),
+     *       @OA\Property(property="occupation", type="string", description="職業", example="エンジニア"),
+     *       @OA\Property(property="purpose", type="string", description="目的", example="スキルアップ"),
+     *       @OA\Property(property="birth_date", type="string", description="生年月日", example="2000/01/01"),
+     *       @OA\Property(property="gender", type="string", description="性別", example="man"),
+     *       @OA\Property(property="address", type="string", description="住所", example="東京都渋谷区"),
+     *       @OA\Property(property="profile_image", type="string", description="プロフィール画像", example="/student/xxxxxx.jpg"),
+     *     )
+     *   )
+     *  )
+     * )
      * @param StudentPostRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -85,7 +130,7 @@ class StudentController extends Controller
                 'occupation' => $request->occupation,
                 'purpose'    => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex'        => $request->sex,
+                'gender'        => $request->gender,
                 'address'    => $request->address,
             ]);
 
@@ -153,12 +198,62 @@ class StudentController extends Controller
     }
 
     /**
-     * 生徒情報更新API
-     *
-     * @param StudentPatchRequest $request
+     * @OA\Put(
+     *  path="/api/student",
+     *  summary="生徒情報更新API",
+     *  description="生徒情報を更新する。",
+     *  tags={"Student"},
+     *  @OA\RequestBody(
+     *   required=true,
+     *   @OA\MediaType(
+     *    mediaType="multipart/form-data",
+     *    @OA\Schema(
+     *     type="object",
+     *     @OA\Property(property="nick_name", type="string", description="ニックネーム", example="ニックネーム"),
+     *     @OA\Property(property="last_name", type="string", description="姓", example="姓"),
+     *     @OA\Property(property="first_name", type="string", description="名", example="名"),
+     *     @OA\Property(property="email", type="string", description="メールアドレス", example="test@example.com"),
+     *     @OA\Property(property="occupation", type="string", description="職業", example="エンジニア"),
+     *     @OA\Property(property="purpose", type="string", description="目的", example="スキルアップ"),
+     *     @OA\Property(property="birth_date", type="string", description="生年月日", example="2000/01/01"),
+     *     @OA\Property(property="gender", type="string", description="性別", example="man"),
+     *     @OA\Property(property="address", type="string", description="住所", example="東京都渋谷区"),
+     *     @OA\Property(property="profile_image", type="file", description="プロフィール画像", example="/student/xxxxxx.jpg"),
+     *    ),
+     *   ),
+     *  ),
+     *  @OA\Response(
+     *   response=200,
+     *   description="OK",
+     *   @OA\JsonContent(
+     *    @OA\Property(
+     *     property="result",
+     *     type="boolean",
+     *     description="結果",
+     *     example="true"
+     *    ),
+     *    @OA\Property(
+     *     property="data",
+     *     type="object",
+     *     @OA\Property(property="student_id", type="integer", description="生徒ID", example="1"),
+     *     @OA\Property(property="nick_name", type="string", description="ニックネーム", example="ニックネーム"),
+     *     @OA\Property(property="last_name", type="string", description="姓", example="姓"),
+     *     @OA\Property(property="first_name", type="string", description="名", example="名"),
+     *     @OA\Property(property="email", type="string", description="メールアドレス", example="test@example.com"),
+     *     @OA\Property(property="occupation", type="string", description="職業", example="エンジニア"),
+     *     @OA\Property(property="purpose", type="string", description="目的", example="スキルアップ"),
+     *     @OA\Property(property="birth_date", type="string", description="生年月日", example="2000/01/01"),
+     *     @OA\Property(property="gender", type="string", description="性別", example="man"),
+     *     @OA\Property(property="address", type="string", description="住所", example="東京都渋谷区"),
+     *     @OA\Property(property="profile_image", type="string", description="プロフィール画像", example="/student/xxxxxx.jpg"),
+     *    )
+     *   )
+     *  )
+     * )
+     * @param StudentPutRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(StudentPatchRequest $request)
+    public function update(StudentPutRequest $request)
     {
 
         $file = $request->file('profile_image');
@@ -204,7 +299,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new StudentPatchResource($student)
+                'data' => new StudentPutResource($student)
             ]);
         } catch (Exception $e) {
             Log::error($e);

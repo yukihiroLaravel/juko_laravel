@@ -18,15 +18,17 @@ class StudentPostResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'nick_name'  => $this->resource->nick_name,
-            'last_name'  => $this->resource->last_name,
+            'student_id' => $this->resource->id,
+            'nick_name' => $this->resource->nick_name,
+            'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,
+            'email' => $this->resource->email,
             'occupation' => $this->resource->occupation,
-            'email'      => $this->resource->email,
-            'purpose'    => $this->resource->purpose,
+            'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'sex'        => $this->resource->sex,
-            'address'    => $this->resource->address,
+            'gender' => $this->resource->gender,
+            'address' => $this->resource->address,
+            'profile_image' => $this->resource->profile_image,
         ];
     }
 }

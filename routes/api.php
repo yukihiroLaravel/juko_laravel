@@ -114,13 +114,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
             // 講師-受講
             Route::prefix('attendance')->group(function () {
-            Route::prefix('{attendance_id}')->group(function () {
-                Route::post('/', 'Api\Instructor\AttendanceController@store');
-                Route::delete('/', 'Api\Instructor\AttendanceController@delete');
+                Route::prefix('{attendance_id}')->group(function () {
+                    Route::post('/', 'Api\Instructor\AttendanceController@store');
+                    Route::delete('/', 'Api\Instructor\AttendanceController@delete');
 
-                // 講師-生徒学習状況
-                Route::get('status', 'Api\Instructor\AttendanceController@status');
-            });
+                    // 講師-生徒学習状況
+                    Route::get('status', 'Api\Instructor\AttendanceController@status');
+                });
             });
 
             // 講師-生徒

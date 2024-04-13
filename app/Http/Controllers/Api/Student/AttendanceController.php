@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Attendance;
+use OpenApi\Annotations as OA;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +22,50 @@ use App\Http\Resources\Student\AttendanceCourseProgressResource;
 class AttendanceController extends Controller
 {
     /**
-     * 受講中講座一覧取得API
-     *
+     * @OA\Get(
+     *  path="/api/student/attendance/index",
+     *  summary="受講中講座一覧取得API",
+     *  description="受講中講座一覧を取得する",
+     *  tags={"Student-Attendance"},
+     *  @OA\Parameter(
+     *   name="search_word",
+     *   in="query",
+     *   description="検索ワード",
+     *   required=false,
+     *   @OA\Schema(type="string")
+     *  ),
+     *  @OA\Response(
+     *   response=200,
+     *   description="受講中講座一覧",
+     *   @OA\JsonContent(
+     *    type="object",
+     *    @OA\Property(
+     *     property="data",
+     *     type="array",
+     *     @OA\Items(
+     *      type="object",
+     *      @OA\Property(property="attendance_id", type="integer", description="受講ID", example="1"),
+     *      @OA\Property(property="progress", type="integer", description="進捗率", example="50"),
+     *      @OA\Property(property="course", type="object",
+     *      @OA\Property(property="course_id", type="integer", description="講座ID", example="1"),
+     *      @OA\Property(property="title", type="string", description="講座タイトル", example="Laravel講座"),
+     *      @OA\Property(property="image", type="string", description="講座画像", example="/course/image.jpg"),
+     *      @OA\Property(
+     *       property="instructor",
+     *       type="object",
+     *       @OA\Property(property="instructor_id", type="integer", description="講師ID", example="1"),
+     *       @OA\Property(property="nick_name", type="string", description="講師ニックネーム", example="講師A"),
+     *       @OA\Property(property="last_name", type="string", description="講師姓", example="山田"),
+     *       @OA\Property(property="first_name", type="string", description="講師名", example="太郎"),
+     *       @OA\Property(property="email", type="string", description="講師メールアドレス", example="test@example.com"),
+     *       @OA\Property(property="profile_image", type="string", description="講師プロフィール画像", example="/instructor/image.jpg"),
+     *       )
+     *      ),
+     *     )
+     *    )
+     *   )
+     *  )
+     * )
      * @param AttendanceIndexRequest $request
      * @return AttendanceIndexResource
      */

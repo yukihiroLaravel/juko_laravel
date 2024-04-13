@@ -20,6 +20,7 @@ use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Resources\Manager\LessonStoreResource;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use App\Model\Attendance;
 
 class LessonController extends Controller
 {
@@ -51,23 +52,36 @@ class LessonController extends Controller
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
+        DB::beginTransaction();
         try {
-            $newLesson = Lesson::create([
+            $lesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
                 'order' => (int) $maxOrder + 1
             ]);
 
+            $attendances = Attendance::where('course_id', $request->course_id)->get();
+            $lesson_id = $lesson->id;
+            $attendances->each(function ($attendance) use (&$lesson_id) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id'     => $lesson_id,
+                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                ]);
+            });
+
+            DB::commit();
             return response()->json([
                 "result" => true,
-                "data" => new LessonStoreResource($newLesson),
+                "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             return response()->json([
                 "result" => false,
-            ]);
+            ], 500);
         }
     }
 

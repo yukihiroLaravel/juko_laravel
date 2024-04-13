@@ -21,6 +21,7 @@ use App\Http\Resources\Instructor\LessonStoreResource;
 use App\Http\Resources\Instructor\LessonUpdateResource;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
+use App\Model\Attendance;
 
 class LessonController extends Controller
 {
@@ -34,19 +35,32 @@ class LessonController extends Controller
     {
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
+        DB::beginTransaction();
         try {
             $lesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
-                'order' => (int) $maxOrder + 1,
+                'order' => (int) $maxOrder + 1
             ]);
 
+            $attendances = Attendance::where('course_id', $request->course_id)->get();
+            $lesson_id = $lesson->id;
+            $attendances->each(function ($attendance) use (&$lesson_id) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id'     => $lesson_id,
+                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                ]);
+            });
+
+            DB::commit();
             return response()->json([
                 "result" => true,
                 "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             return response()->json([
                 "result" => false,

@@ -7,6 +7,7 @@ use App\Model\Student;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use OpenApi\Annotations as OA;
 use Illuminate\Support\Facades\DB;
 use App\Model\StudentAuthorization;
 use Illuminate\Support\Facades\Log;
@@ -14,11 +15,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\StudentEditResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Requests\Student\StudentPatchRequest;
 use App\Http\Resources\Student\StudentPostResource;
+use App\Http\Resources\Student\StudentShowResource;
 use App\Http\Resources\Student\StudentPatchResource;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationCodeException;
@@ -29,6 +30,43 @@ use App\Exceptions\TryCountOverAuthorizationCodeException;
 
 class StudentController extends Controller
 {
+    /**
+     * @OA\Get(
+     *  path="/api/student",
+     *  tags={"Student"},
+     *  summary="生徒情報取得API",
+     *  description="生徒情報を取得する。",
+     *  @OA\Response(
+     *   response=200,
+     *   description="OK",
+     *   @OA\JsonContent(
+     *      @OA\Property(
+     *       property="data",
+     *       type="object",
+     *       @OA\Property(property="student_id", type="integer", description="生徒ID", example="1"),
+     *       @OA\Property(property="nick_name", type="string", description="ニックネーム", example="ニックネーム"),
+     *       @OA\Property(property="last_name", type="string", description="姓", example="姓"),
+     *       @OA\Property(property="first_name", type="string", description="名", example="名"),
+     *       @OA\Property(property="email", type="string", description="メールアドレス", example="test@example.com"),
+     *       @OA\Property(property="occupation", type="string", description="職業", example="エンジニア"),
+     *       @OA\Property(property="purpose", type="string", description="目的", example="スキルアップ"),
+     *       @OA\Property(property="birth_date", type="string", description="生年月日", example="2000/01/01"),
+     *       @OA\Property(property="gender", type="string", description="性別", example="man"),
+     *       @OA\Property(property="address", type="string", description="住所", example="東京都渋谷区"),
+     *       @OA\Property(property="profile_image", type="string", description="プロフィール画像", example="/student/xxxxxx.jpg"),
+     *     )
+     *   )
+     *  )
+     * )
+     * @param Request $request
+     * @return StudentShowResource
+     */
+    public function show(Request $request)
+    {
+        $student = Student::findOrFail($request->user()->id);
+        return new StudentShowResource($student);
+    }
+
     /**
      * ユーザー新規仮登録API
      *
@@ -112,18 +150,6 @@ class StudentController extends Controller
               "result" => false,
             ], 500);
         }
-    }
-
-    /**
-     * ユーザー情報編集API
-     *
-     * @param Request $request
-     * @return StudentEditResource
-     */
-    public function edit(Request $request)
-    {
-        $student = Student::findOrFail($request->user()->id);
-        return new StudentEditResource($student);
     }
 
     /**

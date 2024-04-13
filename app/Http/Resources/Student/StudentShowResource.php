@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Student;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class StudentEditResource extends JsonResource
+class StudentShowResource extends JsonResource
 {
     /** @var \App\Model\Student */
     public $resource;
@@ -26,7 +26,7 @@ class StudentEditResource extends JsonResource
             'occupation' => $this->resource->occupation,
             'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'sex' => $this->resource->sex,
+            'gender' => $this->resource->gender,
             'address' => $this->resource->address,
             'profile_image' => $this->resource->profile_image,
         ];

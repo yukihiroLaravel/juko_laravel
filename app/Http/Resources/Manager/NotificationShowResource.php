@@ -20,11 +20,12 @@ class NotificationShowResource extends JsonResource
         return [
             'notification_id' => $this->resource->id,
             'course_id' => $this->resource->course_id,
+            'course_title' => $this->resource->course->title,
             'title' => $this->resource->title,
-            'type' => $this->resource->type,
+            'content' => $this->resource->content,
             'start_date' => $this->resource->start_date,
             'end_date' => $this->resource->end_date,
-            'content' => $this->resource->content
+            'type' => $this->resource->type,
         ];
     }
 }

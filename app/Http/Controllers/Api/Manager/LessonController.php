@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Lesson;
+use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
@@ -18,9 +19,7 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
-use App\Http\Resources\Manager\LessonStoreResource;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
-use App\Model\Attendance;
 
 class LessonController extends Controller
 {
@@ -74,7 +73,6 @@ class LessonController extends Controller
             DB::commit();
             return response()->json([
                 "result" => true,
-                "data" => new LessonStoreResource($lesson),
             ]);
         } catch (Exception $e) {
             DB::rollBack();

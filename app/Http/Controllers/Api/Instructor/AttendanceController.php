@@ -195,14 +195,14 @@ class AttendanceController extends Controller
      * @return JsonResponse
      */
     public function status(int $attendance_id): JsonResponse
-{
-    try {
-        $attendance = Attendance::findOrFail($attendance_id);
-    } catch (ModelNotFoundException $e) {
-        return response()->json([
+    {
+        try {
+            $attendance = Attendance::findOrFail($attendance_id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
             'error' => 'Attendance not found',
-        ], 404);
-    }
+            ], 404);
+        }
 
         $response = [
             'data' => [

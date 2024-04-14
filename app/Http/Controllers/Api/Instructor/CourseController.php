@@ -212,37 +212,37 @@ class CourseController extends Controller
     }
 
     public function chapters(): HasMany
-{
-   return $this->hasMany(Chapter::class)->orderBy('order', 'asc');
-}
+    {
+        return $this->hasMany(Chapter::class)->orderBy('order', 'asc');
+    }
 
-public function status(int $attendance_id): JsonResponse
-{
-    try {
-        $attendance = Attendance::findOrFail($attendance_id);
-    } catch (ModelNotFoundException $e) {
-        return response()->json([
+    public function status(int $attendance_id): JsonResponse
+    {
+        try {
+            $attendance = Attendance::findOrFail($attendance_id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
             'error' => 'Attendance not found',
-        ], 404);
-    }
+            ], 404);
+        }
 
-    $course = $attendance->course;
+        $course = $attendance->course;
 
-    if (!$course) {
-        return response()->json([
+        if (!$course) {
+            return response()->json([
             'error' => 'Course not found',
-        ], 404);
-    }
+            ], 404);
+        }
 
-    $course->load('chapters');
+        $course->load('chapters');
 
-    $response = [
+        $response = [
         'data' => [
             'attendance_id' => $attendance->id,
             'course' => [
                 'course_id' => $course->id,
                 'title' => $course->title,
-                'progress' => $attendance->progress, 
+                'progress' => $attendance->progress,
                 'chapter' => $course->chapters->map(function ($chapter) {
                     return [
                         'chapter_id' => $chapter->id,
@@ -252,9 +252,8 @@ public function status(int $attendance_id): JsonResponse
                 }),
             ],
         ],
-    ];
+        ];
 
-    return response()->json($response, 200);
-}
-
+        return response()->json($response, 200);
+    }
 }

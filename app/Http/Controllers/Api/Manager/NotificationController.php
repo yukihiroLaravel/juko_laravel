@@ -76,7 +76,6 @@ class NotificationController extends Controller
 
     //* お知らせ登録
     public function store()
-
     {
         return response()->json([]);
     }

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Student;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class InstructorPatchResource extends JsonResource
+class StudentShowResource extends JsonResource
 {
-    /** @var \App\Model\Instructor */
+    /** @var \App\Model\Student */
     public $resource;
 
     /**
@@ -18,12 +18,17 @@ class InstructorPatchResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'student_id' => $this->resource->id,
             'nick_name' => $this->resource->nick_name,
             'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,
             'email' => $this->resource->email,
+            'occupation' => $this->resource->occupation,
+            'purpose' => $this->resource->purpose,
+            'birth_date' => $this->resource->birth_date->format('Y/m/d'),
+            'gender' => $this->resource->gender,
+            'address' => $this->resource->address,
             'profile_image' => $this->resource->profile_image,
-            'type' => $this->resource->type,
         ];
     }
 }

@@ -9,20 +9,19 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Manager\InstructorEditRequest;
+use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
-use App\Http\Resources\Manager\InstructorEditResource;
-use App\Http\Resources\Manager\InstructorPatchResource;
+use App\Http\Resources\Manager\InstructorShowResource;
 
 class InstructorController extends Controller
 {
     /**
      * 講師情報取得API
      *
-     * @param InstructorEditRequest $request
-     * @return InstructorEditResource|\Illuminate\Http\JsonResponse
+     * @param InstructorShowRequest $request
+     * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function edit(InstructorEditRequest $request)
+    public function show(InstructorShowRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -36,14 +35,14 @@ class InstructorController extends Controller
         if (!in_array((int)$request->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this instructor.",
+                'message' => "Forbidden, not allowed to this instructor.",
             ], 403);
         }
 
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail($request->instructor_id);
 
-        return new InstructorEditResource($instructor);
+        return new InstructorShowResource($instructor);
     }
 
     /**
@@ -70,7 +69,7 @@ class InstructorController extends Controller
             if (!in_array($instructor->id, $instructorIds, true)) {
                 return response()->json([
                     'result'  => false,
-                    'message' => "Forbidden, not allowed to edit this instructor.",
+                    'message' => "Forbidden, not allowed to this instructor.",
                 ], 403);
             }
 
@@ -99,7 +98,6 @@ class InstructorController extends Controller
             ]);
             return response()->json([
                 'result' => true,
-                'data' => new InstructorPatchResource($instructor)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);

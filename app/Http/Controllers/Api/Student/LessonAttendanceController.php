@@ -1,27 +1,28 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Student;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\LessonAttendancePatchRequest;
+use RuntimeException;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\LessonAttendancePatchRequest;
 
 class LessonAttendanceController extends Controller
 {
+    /**
+     * レッスン出席状況更新API
+     *
+     * @param LessonAttendancePatchRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(LessonAttendancePatchRequest $request)
     {
         try {
+            /** @var LessonAttendance $lessonAttendance */
             $lessonAttendance =  LessonAttendance::with('attendance')
-                ->where('id', '=', $request->lesson_attendance_id)
-                ->first();
-            if ($lessonAttendance === null) {
-                return response()->json([
-                    "result" => false,
-                    "error_code" => 404,
-                    "error_message" => "Not found lesson attendance status."
-                ]);
-            }
+                ->find($request->lesson_attendance_id);
+
             if ($request->user()->id !== $lessonAttendance->attendance->student_id) {
                 return response()->json([
                     "result" => false,
@@ -37,7 +38,7 @@ class LessonAttendanceController extends Controller
             return response()->json([
                 "result" => true,
             ]);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             Log::error($e->getMessage());
             return response()->json([
                 "result" => false,

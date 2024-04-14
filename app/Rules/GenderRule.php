@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Student;
 
-class SexRule implements Rule
+class GenderRule implements Rule
 {
     /**
      * Determine if the validation rule passes.
@@ -16,7 +16,7 @@ class SexRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value === Student::SEX_MAN || $value === Student::SEX_WOMAN;
+        return $value === Student::GENDER_MAN || $value === Student::GENDER_WOMAN;
     }
 
     /**
@@ -26,6 +26,6 @@ class SexRule implements Rule
      */
     public function message()
     {
-        return 'The :attribute must be either ' . Student::SEX_MAN . ' or ' . Student::SEX_WOMAN . '.';
+        return 'The :attribute must be either ' . Student::GENDER_MAN . ' or ' . Student::GENDER_WOMAN . '.';
     }
 }

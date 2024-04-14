@@ -17,14 +17,38 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
-use App\Http\Resources\Instructor\ChapterPatchResource;
-use App\Http\Resources\Instructor\ChapterStoreResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 
 class ChapterController extends Controller
 {
+    /**
+     * チャプター詳細情報を取得
+     *
+     * @param ChapterShowRequest $request
+     * @return ChapterShowResource|JsonResponse
+     */
+    public function show(ChapterShowRequest $request)
+    {
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'message' => 'Invalid instructor_id.',
+            ], 403);
+        }
+
+        return new ChapterShowResource($chapter);
+    }
+
     /**
      * チャプター新規作成API
      *
@@ -52,7 +76,7 @@ class ChapterController extends Controller
 
             $order = $course->chapters->count();
             $newOrder = $order + 1;
-            $chapter = Chapter::create([
+            Chapter::create([
                 'course_id' => $course->id,
                 'title' => $request->input('title'),
                 'order' => $newOrder,
@@ -61,7 +85,6 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new ChapterStoreResource($chapter),
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -69,32 +92,6 @@ class ChapterController extends Controller
                 'result' => false
             ], 500);
         }
-    }
-
-    /**
-     * チャプター詳細情報を取得
-     *
-     * @param ChapterShowRequest $request
-     * @return ChapterShowResource|JsonResponse
-     */
-    public function show(ChapterShowRequest $request)
-    {
-        /** @var Chapter $chapter */
-        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            return response()->json([
-                'message' => 'Invalid course_id.',
-            ], 403);
-        }
-
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            return response()->json([
-                'message' => 'Invalid instructor_id.',
-            ], 403);
-        }
-
-        return new ChapterShowResource($chapter);
     }
 
     /**
@@ -131,7 +128,6 @@ class ChapterController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new ChapterPatchResource($chapter),
         ]);
     }
 

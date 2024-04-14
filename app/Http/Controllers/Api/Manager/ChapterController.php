@@ -46,7 +46,7 @@ class ChapterController extends Controller
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => "Forbidden, not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to this course.",
             ], 403);
         }
 
@@ -124,7 +124,7 @@ class ChapterController extends Controller
             // 失敗結果を返す
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this chapter.",
+                'message' => "Forbidden, not allowed to this chapter.",
             ], 403);
         }
 
@@ -211,7 +211,7 @@ class ChapterController extends Controller
                 // 失敗結果を返す
                 return response()->json([
                     'result'  => false,
-                    'message' => "Forbidden, not allowed to edit this course.",
+                    'message' => "Forbidden, not allowed to this course.",
                 ], 403);
             }
 

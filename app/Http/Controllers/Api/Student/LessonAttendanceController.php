@@ -6,7 +6,7 @@ use RuntimeException;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LessonAttendancePatchRequest;
+use App\Http\Requests\Student\LessonAttendancePatchRequest;
 
 class LessonAttendanceController extends Controller
 {

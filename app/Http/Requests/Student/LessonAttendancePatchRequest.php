@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Student;
 
 use App\Rules\LessonAttendanceStatusRule;
 use Illuminate\Foundation\Http\FormRequest;

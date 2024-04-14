@@ -196,13 +196,13 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
-        try {
-            $attendance = Attendance::findOrFail($attendance_id);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
+        $attendance = Attendance::findOrFail($attendance_id);
+
+    if (!$attendance) {
+        return response()->json([
             'error' => 'Attendance not found',
-            ], 404);
-        }
+        ], 404);
+    }
 
         $response = [
             'data' => [
@@ -211,6 +211,13 @@ class AttendanceController extends Controller
                     'course_id' => $attendance->course_id,
                     'title' => $attendance->course->title,
                     'progress' => $attendance->progress,
+                    'chapter' => $attendance->course->chapters->map(function ($chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'progress' => $chapter->progress,
+                        ];
+                    }),
                 ],
             ],
         ];

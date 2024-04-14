@@ -121,7 +121,6 @@ class StudentController extends Controller
      */
     public function store(StudentStoreRequest $request): JsonResponse
     {
-        /** @var Student $student */
         Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,

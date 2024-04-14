@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Model\Chapter;
 
 class ChapterShowResource extends JsonResource
 {

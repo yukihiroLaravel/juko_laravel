@@ -57,7 +57,7 @@ class StudentController extends Controller
                 'occupation' => $request->occupation,
                 'purpose'    => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex'        => $request->sex,
+                'gender'        => $request->gender,
                 'address'    => $request->address,
             ]);
 
@@ -167,7 +167,7 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex' => $request->sex,
+                'gender' => $request->gender,
                 'address' => $request->address,
                 'profile_image' => $imagePath,
             ])

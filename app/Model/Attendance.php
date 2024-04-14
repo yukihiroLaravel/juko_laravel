@@ -84,7 +84,7 @@ class Attendance extends Model
      */
     public function chapters()
     {
-       return $this->course->chapters(Chapter::class);
+        return $this->course->chapters(Chapter::class);
     }
 
     protected static function boot()

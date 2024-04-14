@@ -13,12 +13,10 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
-use App\Http\Resources\Instructor\CourseEditResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseStoreResource;
@@ -51,18 +49,6 @@ class CourseController extends Controller
         $course = Course::with(['chapters.lessons'])
             ->findOrFail($request->course_id);
         return new CourseShowResource($course);
-    }
-
-    /**
-     * 講座編集API
-     *
-     * @param CourseEditRequest $request
-     * @return CourseEditResource
-     */
-    public function edit(CourseEditRequest $request): CourseEditResource
-    {
-        $course = Course::findOrFail($request->course_id);
-        return new CourseEditResource($course);
     }
 
     /**

@@ -67,7 +67,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::put('status', 'Api\Instructor\CourseController@putStatus');
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', 'Api\Instructor\CourseController@show');
-                    Route::get('edit', 'Api\Instructor\CourseController@edit');
                     Route::post('/', 'Api\Instructor\CourseController@update');
                     Route::delete('/', 'Api\Instructor\CourseController@delete');
                     // 講師-講座-チャプター
@@ -147,7 +146,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::post('/', 'Api\Manager\CourseController@store');
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', 'Api\Manager\CourseController@show');
-                        Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
                         // マネージャー-講座-生徒

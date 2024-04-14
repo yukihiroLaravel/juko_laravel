@@ -14,12 +14,10 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseStoreRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
-use App\Http\Resources\Manager\CourseEditResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseUpdateResource;
@@ -248,30 +246,5 @@ class CourseController extends Controller
                 "result" => false,
             ], 500);
         }
-    }
-
-    /**
-     * マネージャ講座情報編集API
-     *
-     * @param CourseEditRequest $request
-     * @return CourseEditResource|\Illuminate\Http\JsonResponse
-     */
-    public function edit(CourseEditRequest $request)
-    {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
-        $course = Course::FindOrFail($request->course_id);
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
-            ], 403);
-        }
-
-        return new CourseEditResource($course);
     }
 }

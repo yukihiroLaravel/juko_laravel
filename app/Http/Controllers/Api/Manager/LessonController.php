@@ -104,7 +104,7 @@ class LessonController extends Controller
             // 配下の講師でない場合は403エラー
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this lesson.",
+                'message' => "Forbidden, not allowed to this lesson.",
             ], 403);
         }
 

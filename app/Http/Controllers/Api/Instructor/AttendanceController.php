@@ -188,7 +188,7 @@ class AttendanceController extends Controller
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
-/**
+    /**
      * 講師側受講状況API
      *
      * @param int $attendance_id

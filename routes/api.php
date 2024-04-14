@@ -120,7 +120,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // 講師-生徒学習状況
                 Route::get('status', 'Api\Instructor\AttendanceController@status');
             });
-        });
+           });
 
             // 講師-生徒
             Route::prefix('student')->group(function () {

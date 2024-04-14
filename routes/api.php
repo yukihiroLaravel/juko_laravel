@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
             });
 
-           // 講師-受講
+            // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', 'Api\Instructor\AttendanceController@store');
                 Route::prefix('{attendance_id}')->group(function () {

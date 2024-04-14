@@ -78,50 +78,12 @@ class Attendance extends Model
         return $this->hasMany(LessonAttendance::class);
     }
 
-    /**
-     * チャプターを取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function chapters(): HasMany
-    {
-       return $this->course->chapters();
-    }
-
     protected static function boot()
     {
         parent::boot();
         static::deleting(function ($attendance) {
             $attendance->lessonAttendances()->delete();
         });
-    }
-
-    /**
- * 講師側受講生詳細画面の学習状況を取得
- *
- * @param int $attendanceId
- * @return array
- */
-    public static function getInstructorAttendanceStatus(int $attendanceId): array
-    {
-
-        $attendance = self::find($attendanceId);
-
-
-        if (!$attendance) {
-            return [];
-        }
-
-
-        return [
-        'attendance_id' => $attendance->id,
-        'course' => [
-            'course_id' => $attendance->course_id,
-            'title' => $attendance->course->title,
-            'progress' => $attendance->progress,
-            'chapter' => $attendance->course->chapters()->select('id as chapter_id', 'title', 'progress')->get()->toArray(),
-        ],
-        ];
     }
 
     //ソート項目

@@ -5,6 +5,7 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -82,9 +83,9 @@ class Attendance extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function chapters()
+    public function chapters(): HasMany
     {
-       return $this->course->chapters(Chapter::class);
+       return $this->course->chapters();
     }
 
     protected static function boot()

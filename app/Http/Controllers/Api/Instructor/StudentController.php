@@ -5,16 +5,15 @@ namespace App\Http\Controllers\Api\Instructor;
 use Carbon\Carbon;
 use App\Model\Course;
 use App\Model\Student;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Resources\Instructor\StudentIndexResource;
-use App\Http\Resources\Instructor\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -123,7 +122,7 @@ class StudentController extends Controller
     public function store(StudentStoreRequest $request): JsonResponse
     {
         /** @var Student $student */
-        $student = Student::create([
+        Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),
@@ -132,7 +131,6 @@ class StudentController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new StudentStoreResource($student)
         ]);
     }
 }

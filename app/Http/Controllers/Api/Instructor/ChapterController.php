@@ -17,7 +17,6 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
-use App\Http\Resources\Instructor\ChapterPatchResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
@@ -129,7 +128,6 @@ class ChapterController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new ChapterPatchResource($chapter),
         ]);
     }
 

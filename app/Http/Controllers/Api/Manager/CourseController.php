@@ -19,7 +19,6 @@ use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -154,7 +153,6 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResource($course)
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([

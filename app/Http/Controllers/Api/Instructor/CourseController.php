@@ -19,8 +19,6 @@ use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Instructor\CourseIndexResource;
-use App\Http\Resources\Instructor\CourseStoreResource;
-use App\Http\Resources\Instructor\CourseUpdateResource;
 use App\Http\Requests\Instructor\CoursePutStatusRequest;
 
 class CourseController extends Controller
@@ -77,7 +75,6 @@ class CourseController extends Controller
 
         return response()->json([
             "result" => true,
-            "data" => new CourseStoreResource($course),
         ]);
     }
 
@@ -124,7 +121,6 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResource($course)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());

@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
-use App\Http\Resources\Manager\InstructorPatchResource;
 
 class InstructorController extends Controller
 {
@@ -99,7 +98,6 @@ class InstructorController extends Controller
             ]);
             return response()->json([
                 'result' => true,
-                'data' => new InstructorPatchResource($instructor)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);

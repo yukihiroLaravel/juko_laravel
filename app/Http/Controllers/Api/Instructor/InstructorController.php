@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
-use App\Http\Resources\Instructor\InstructorEditResource;
+use App\Http\Resources\Instructor\InstructorShowResource;
 use App\Http\Resources\Instructor\InstructorPatchResource;
 
 class InstructorController extends Controller
@@ -19,13 +19,13 @@ class InstructorController extends Controller
     /**
      * 講師取得API
      *
-     * @return InstructorEditResource
+     * @return InstructorShowResource
      */
-    public function edit()
+    public function show()
     {
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
-        return new InstructorEditResource($instructor);
+        return new InstructorShowResource($instructor);
     }
 
     /**

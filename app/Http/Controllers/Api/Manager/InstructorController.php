@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Manager\InstructorEditRequest;
+use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
-use App\Http\Resources\Manager\InstructorEditResource;
+use App\Http\Resources\Manager\InstructorShowResource;
 use App\Http\Resources\Manager\InstructorPatchResource;
 
 class InstructorController extends Controller
@@ -19,10 +19,10 @@ class InstructorController extends Controller
     /**
      * 講師情報取得API
      *
-     * @param InstructorEditRequest $request
-     * @return InstructorEditResource|\Illuminate\Http\JsonResponse
+     * @param InstructorShowRequest $request
+     * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function edit(InstructorEditRequest $request)
+    public function show(InstructorShowRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -43,7 +43,7 @@ class InstructorController extends Controller
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail($request->instructor_id);
 
-        return new InstructorEditResource($instructor);
+        return new InstructorShowResource($instructor);
     }
 
     /**

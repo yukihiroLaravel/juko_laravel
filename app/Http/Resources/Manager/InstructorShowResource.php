@@ -4,7 +4,7 @@ namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class InstructorEditResource extends JsonResource
+class InstructorShowResource extends JsonResource
 {
     /** @var \App\Model\Instructor */
     public $resource;
@@ -24,7 +24,6 @@ class InstructorEditResource extends JsonResource
             'first_name' => $this->resource->first_name,
             'email' => $this->resource->email,
             'profile_image' => $this->resource->profile_image,
-            'type' => $this->resource->type,
         ];
     }
 }

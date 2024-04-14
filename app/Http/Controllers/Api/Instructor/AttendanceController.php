@@ -204,7 +204,7 @@ class AttendanceController extends Controller
                 'error' => 'Attendance not found',
             ], 404);
         }
-        
+
         $response = [
             'data' => [
                 'attendance_id' => $attendance->id,
@@ -216,7 +216,7 @@ class AttendanceController extends Controller
                 ],
             ],
         ];
-        
+
         return response()->json($response, 200);
     }
 

@@ -91,18 +91,18 @@ class Attendance extends Model
  * @param int $attendanceId
  * @return array
  */
-public static function getInstructorAttendanceStatus(int $attendanceId): array
-{
+    public static function getInstructorAttendanceStatus(int $attendanceId): array
+    {
 
-    $attendance = self::find($attendanceId);
-
-
-    if (!$attendance) {
-        return [];
-    }
+        $attendance = self::find($attendanceId);
 
 
-    return [
+        if (!$attendance) {
+            return [];
+        }
+
+
+        return [
         'attendance_id' => $attendance->id,
         'course' => [
             'course_id' => $attendance->course_id,
@@ -110,8 +110,8 @@ public static function getInstructorAttendanceStatus(int $attendanceId): array
             'progress' => $attendance->progress,
             'chapter' => $attendance->course->chapters()->select('id as chapter_id', 'title', 'progress')->get()->toArray(),
         ],
-    ];
-}
+        ];
+    }
 
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';

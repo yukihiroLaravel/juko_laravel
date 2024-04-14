@@ -8,7 +8,6 @@ use RuntimeException;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -27,11 +26,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class CourseController extends Controller
 {
     /**
-     * マネージャ講座一覧取得API
+     * 講座一覧取得API
      *
      * @return CourseIndexResource
      */
-    public function index(Request $request)
+    public function index()
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -50,7 +49,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座 管理下講師の講座情報を取得
+     * 講座情報取得API
      *
      * @param CourseShowRequest $request
      * @return CourseShowResource|\Illuminate\Http\JsonResponse
@@ -79,31 +78,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座ステータス一覧更新API
-     *
-     * @param CoursePutStatusRequest $request
-     * @return JsonResponse
-     */
-    public function status(CoursePutStatusRequest $request)
-    {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $instructor = Instructor::with('managings')->find($instructorId);
-
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
-
-        // 自分、または配下の講師の講座のステータスを一括更新
-        Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
-
-        return response()->json([
-            'result' => 'true'
-        ]);
-    }
-
-    /**
-     * マネージャ講座登録API
+     * 講座登録API
      *
      * @param CourseStoreRequest $request
      * @return JsonResponse
@@ -133,7 +108,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座情報更新API
+     * 講座情報更新API
      *
      * @return JsonResponse
      */
@@ -195,7 +170,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座削除API
+     * 講座削除API
      *
      * @param CourseDeleteRequest $request
      * @return JsonResponse
@@ -246,5 +221,29 @@ class CourseController extends Controller
                 "result" => false,
             ], 500);
         }
+    }
+
+    /**
+     * 講座ステータス更新API
+     *
+     * @param CoursePutStatusRequest $request
+     * @return JsonResponse
+     */
+    public function status(CoursePutStatusRequest $request)
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        $instructor = Instructor::with('managings')->find($instructorId);
+
+        $managingIds = $instructor->managings->pluck('id')->toArray();
+        $managingIds[] = $instructorId;
+
+        // 自分、または配下の講師の講座のステータスを一括更新
+        Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

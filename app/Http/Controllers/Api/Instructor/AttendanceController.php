@@ -196,7 +196,28 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
-        return response()->json([]);
+
+        $attendance = Attendance::find($attendance_id);
+
+        if (!$attendance) {
+            return response()->json([
+                'error' => 'Attendance not found',
+            ], 404);
+        }
+        
+        $response = [
+            'data' => [
+                'attendance_id' => $attendance->id,
+                'course' => [
+                    'course_id' => $attendance->course_id,
+                    'title' => $attendance->course->title,
+                    'progress' => $attendance->progress,
+                    'chapter' => $attendance->chapters()->select('id as chapter_id', 'title', 'progress')->get()->toArray(),
+                ],
+            ],
+        ];
+        
+        return response()->json($response, 200);
     }
 
     /**

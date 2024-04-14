@@ -188,7 +188,7 @@ class AttendanceController extends Controller
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
-/**
+    /**
      * 講師側受講状況API
      *
      * @param int $attendance_id
@@ -205,6 +205,8 @@ class AttendanceController extends Controller
             ], 404);
         }
 
+        $attendance->load('chapters');
+
         $response = [
             'data' => [
                 'attendance_id' => $attendance->id,
@@ -212,7 +214,13 @@ class AttendanceController extends Controller
                     'course_id' => $attendance->course_id,
                     'title' => $attendance->course->title,
                     'progress' => $attendance->progress,
-                    'chapter' => $attendance->chapters()->select('id as chapter_id', 'title', 'progress')->get()->toArray(),
+                    'chapter' => $attendance->chapters->map(function ($chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'progress' => $chapter->progress,
+                        ];
+                    }),
                 ],
             ],
         ];

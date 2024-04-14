@@ -77,6 +77,16 @@ class Attendance extends Model
         return $this->hasMany(LessonAttendance::class);
     }
 
+    /**
+     * チャプターを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function chapters()
+    {
+       return $this->course->chapters(Chapter::class);
+    }
+
     protected static function boot()
     {
         parent::boot();

@@ -200,6 +200,6 @@ class CourseController extends Controller
      */
     public function showAttendanceStatus(CourseShowRequest $request): JsonResponse
     {
-        return response()->json(["kara"]);
+        return response()->json([]);
     }
 }

@@ -196,7 +196,7 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
-        $attendance = Attendance::findOrFail($attendance_id);
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             return response()->json([

@@ -202,7 +202,7 @@ class AttendanceController extends Controller
                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
             ], 403);
         }
-        
+
         $attendance = Attendance::findOrFail($attendance_id);
 
         $response = [

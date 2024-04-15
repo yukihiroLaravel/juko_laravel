@@ -198,12 +198,6 @@ class AttendanceController extends Controller
     {
         $attendance = Attendance::findOrFail($attendance_id);
 
-    if (!$attendance) {
-        return response()->json([
-            'error' => 'Attendance not found',
-        ], 404);
-    }
-
         $response = [
             'data' => [
                 'attendance_id' => $attendance->id,

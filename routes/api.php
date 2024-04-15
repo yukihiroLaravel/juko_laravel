@@ -69,7 +69,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('/', 'Api\Instructor\CourseController@show');
                     Route::post('/', 'Api\Instructor\CourseController@update');
                     Route::delete('/', 'Api\Instructor\CourseController@delete');
-                    Route::get('attendance/status/today', 'Api\Instructor\CourseController@showAttendanceStatus');
                     // 講師-講座-チャプター
                     Route::prefix('chapter')->group(function () {
                         Route::post('/', 'Api\Instructor\ChapterController@store');

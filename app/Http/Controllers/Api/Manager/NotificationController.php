@@ -74,7 +74,9 @@ class NotificationController extends Controller
         return new NotificationShowResource($notification);
     }
 
-    //* お知らせ登録
+    /**
+     * お知らせ登録API
+     */
     public function store()
     {
         return response()->json([]);

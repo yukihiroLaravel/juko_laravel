@@ -75,6 +75,14 @@ class NotificationController extends Controller
     }
 
     /**
+     * お知らせ登録API
+     */
+    public function store()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * お知らせ更新API
      *
      * @param NotificationUpdateRequest $request

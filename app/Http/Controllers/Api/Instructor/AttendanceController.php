@@ -196,6 +196,7 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
+        /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
@@ -208,15 +209,17 @@ class AttendanceController extends Controller
         $response = [
             'data' => [
                 'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
                 'course' => [
-                    'course_id' => $attendance->course_id,
+                    'course_id' => $attendance->course->id,
                     'title' => $attendance->course->title,
-                    'progress' => $attendance->progress,
-                    'chapter' => $attendance->course->chapters->map(function ($chapter) {
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
+                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
                         return [
                             'chapter_id' => $chapter->id,
                             'title' => $chapter->title,
-                            'progress' => $chapter->progress,
+                            'status' => $chapter->status,
                         ];
                     }),
                 ],

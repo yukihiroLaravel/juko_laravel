@@ -196,7 +196,37 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
-        return response()->json([]);
+        /** @var Attendance */
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
+
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
+                "result" => false,
+                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+            ], 403);
+        }
+
+        $response = [
+            'data' => [
+                'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
+                'course' => [
+                    'course_id' => $attendance->course->id,
+                    'title' => $attendance->course->title,
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
+                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'status' => $chapter->status,
+                        ];
+                    }),
+                ],
+            ],
+        ];
+
+        return response()->json($response, 200);
     }
 
     /**

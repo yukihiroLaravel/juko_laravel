@@ -212,15 +212,17 @@ class AttendanceController extends Controller
         $response = [
             'data' => [
                 'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
                 'course' => [
                     'course_id' => $attendance->course->id,
                     'title' => $attendance->course->title,
-                    'progress' => $attendance->progress,
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
                     'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
                         return [
                             'chapter_id' => $chapter->id,
                             'title' => $chapter->title,
-                            'progress' => $chapter->progress,
+                            'status' => $chapter->status,
                         ];
                     }),
                 ],

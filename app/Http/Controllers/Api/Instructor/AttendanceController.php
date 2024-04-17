@@ -211,10 +211,10 @@ class AttendanceController extends Controller
             'data' => [
                 'attendance_id' => $attendance->id,
                 'course' => [
-                    'course_id' => $attendance->course_id,
+                    'course_id' => $attendance->course->id,
                     'title' => $attendance->course->title,
                     'progress' => $attendance->progress,
-                    'chapter' => $attendance->course->chapters->map(function ($chapter) {
+                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
                         return [
                             'chapter_id' => $chapter->id,
                             'title' => $chapter->title,

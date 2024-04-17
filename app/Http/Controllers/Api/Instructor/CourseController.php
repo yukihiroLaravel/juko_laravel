@@ -192,14 +192,4 @@ class CourseController extends Controller
             'result' => 'true'
         ]);
     }
-
-    /**
-     * 講座受講状況-当日
-     *
-     * @param CourseShowRequest $request
-     */
-    public function showAttendanceStatus(CourseShowRequest $request): JsonResponse
-    {
-        return response()->json([]);
-    }
 }

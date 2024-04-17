@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::get('attendance/{attendance_id}/progress', 'Api\Student\AttendanceController@progress');
 
         // 受講生-お知らせ
-        Route::get('notification', 'Api\NotificationController@index');
+        Route::get('notification/index', 'Api\Student\NotificationController@index');
     });
 
     // 受講生-レッスン受講

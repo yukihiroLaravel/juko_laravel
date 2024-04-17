@@ -192,7 +192,6 @@ class AttendanceController extends Controller
     /**
      * 講師側受講状況API
      *
-     * @param int $attendance_id
      * @param AttendanceStatusRequest $request
      * @return JsonResponse
      */

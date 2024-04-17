@@ -204,4 +204,14 @@ class AttendanceController extends Controller
         $percent = ($number / $total) * 100;
         return floor($percent);
     }
+
+    /**
+     * 講座受講状況-当日
+     *
+     * @param AttendanceShowRequest $request
+     */
+    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
+    {
+        return response()->json([]);
+    }
 }

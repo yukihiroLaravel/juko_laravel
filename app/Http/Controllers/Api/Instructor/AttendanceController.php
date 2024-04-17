@@ -198,7 +198,7 @@ class AttendanceController extends Controller
     public function status(AttendanceStatusRequest $request): JsonResponse
     {
         $attendance_id = $request->input('attendance_id');
-        
+
         /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 

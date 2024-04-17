@@ -14,22 +14,25 @@ class AttendanceStatusResource extends JsonResource
      */
     public function toArray($request)
     {
-        $course = $this->course;
+        $attendance = $this->attendance;
 
         return [
-            'attendance_id' => $this->id,
-            'course' => [
-                'course_id' => $course->id,
-                'title' => $course->title,
-                'progress' => $this->progress,
-                'chapters' => $course->chapters->map(function ($chapter) {
-                    return [
-                        'chapter_id' => $chapter->id,
-                        'title' => $chapter->title,
-                        'progress' => $chapter->progress,
-                    ];
-                }),
-            ],
+            'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
+                'course' => [
+                    'course_id' => $attendance->course->id,
+                    'title' => $attendance->course->title,
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
+                    'chapters' => $attendance->course->chapters->map(function (Chapter $chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'status' => $chapter->status,
+                            'progress' => $attendance->progress,
+                        ];
+                    }),
+                ],
         ];
     }
 }

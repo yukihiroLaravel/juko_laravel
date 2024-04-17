@@ -210,7 +210,7 @@ class AttendanceController extends Controller
      *
      * @param AttendanceShowRequest $request
      */
-    public function showAttendanceStatus(AttendanceShowRequest $request): JsonResponse
+    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
         return response()->json([]);
     }

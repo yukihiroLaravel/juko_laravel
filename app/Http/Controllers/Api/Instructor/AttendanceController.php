@@ -18,8 +18,10 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -191,11 +193,13 @@ class AttendanceController extends Controller
     /**
      * 講師側受講状況API
      *
-     * @param int $attendance_id
+     * @param AttendanceStatusRequest $request
      * @return JsonResponse
      */
-    public function status(int $attendance_id): JsonResponse
+    public function status(AttendanceStatusRequest $request): JsonResponse
     {
+        $attendance_id = $request->input('attendance_id');
+        
         /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 
@@ -206,25 +210,7 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        $response = [
-            'data' => [
-                'attendance_id' => $attendance->id,
-                'progress' => $attendance->progress,
-                'course' => [
-                    'course_id' => $attendance->course->id,
-                    'title' => $attendance->course->title,
-                    'status' => $attendance->course->status,
-                    'image' => $attendance->course->image,
-                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
-                        return [
-                            'chapter_id' => $chapter->id,
-                            'title' => $chapter->title,
-                            'status' => $chapter->status,
-                        ];
-                    }),
-                ],
-            ],
-        ];
+        $response = new AttendanceStatusResource($attendance);
 
         return response()->json($response, 200);
     }
@@ -246,3 +232,4 @@ class AttendanceController extends Controller
         return floor($percent);
     }
 }
+

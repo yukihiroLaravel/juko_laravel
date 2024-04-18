@@ -212,6 +212,26 @@ class AttendanceController extends Controller
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $completedLessonattendancesId = LessonAttendance::with(['attendance' => function ($query) use ($request) {
+            $query->where('course_id', $request->course_id);
+        }])->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->pluck('id');
+
+        $completedLessonsCount = count($completedLessonattendancesId);
+
+        $lessons = Lesson::whereIn('id', $completedLessonattendancesId)->with(['chapter' => function ($query) {
+            $query->withCount('lessons')->get();
+        }])->get();
+        $completedChaptersCount = 0;
+        $lessons->each(function ($lesson) use (&$completedChaptersCount) {
+            $totalLessons = $lesson->chapter->lessons_count;
+            // $completedLesssons = 
+        });
+
+        return response()->json([
+            'completedLessonattendancesId' => $completedLessonattendancesId,
+            'completed_lessons_count' => $completedLessonsCount,
+            'lessons' => $lessons,
+            'completed_chapters_count' =>  $completedChaptersCount
+        ]);
     }
 }

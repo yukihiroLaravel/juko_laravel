@@ -28,6 +28,11 @@ class AttendanceStatusRequest extends FormRequest
         ];
     }
 
+    public function attendanceId()
+    {
+        return $this->route('attendance_id');
+    }
+
     protected function prepareForValidation()
     {
         $this->merge([

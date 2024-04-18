@@ -242,9 +242,4 @@ class AttendanceController extends Controller
         }
         return $youngestUnCompletedLesson;
     }
-
-    public function notificationIndex()
-    {
-        return response()->json([]);
-    }
 }

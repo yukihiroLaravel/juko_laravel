@@ -190,47 +190,67 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講師側受講状況API
-     *
-     * @param AttendanceStatusRequest $request
-     * @return JsonResponse
-     */
-    public function status(AttendanceStatusRequest $request): JsonResponse
-    {
-        $attendance_id = $request->input('attendance_id');
+ * 講師側受講状況API
+ *
+ * @param AttendanceStatusRequest $request
+ * @return JsonResponse
+ */
+public function status(AttendanceStatusRequest $request): JsonResponse
+{
+    $attendanceId = $request->attendanceId();
 
-        /** @var Attendance */
-        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
+    /** @var Attendance */
+    $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
 
-        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-            return response()->json([
-                "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-            ], 403);
-        }
-
-        $response = [
-            'data' => [
-                'attendance_id' => $attendance->id,
-                'progress' => $attendance->progress,
-                'course' => [
-                    'course_id' => $attendance->course->id,
-                    'title' => $attendance->course->title,
-                    'status' => $attendance->course->status,
-                    'image' => $attendance->course->image,
-                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
-                        return [
-                            'chapter_id' => $chapter->id,
-                            'title' => $chapter->title,
-                            'status' => $chapter->status,
-                        ];
-                    }),
-                ],
-            ],
-        ];
-
-        return response()->json($response, 200);
+    if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+        return response()->json([
+            "result" => false,
+            "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+        ], 403);
     }
+
+    $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
+        $lessons = $chapter->lessons->map(function ($lesson) use ($attendance) {
+            $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
+                ->where('attendance_id', $attendance->id)
+                ->first();
+
+            $progress = 0;
+            if ($lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                $progress = "100%";
+            }
+
+            return [
+                'lesson_id' => $lesson->id,
+                'status' => $lessonAttendance ? $lessonAttendance->status : null,
+                'progress' => $progress = "0%",
+            ];
+        });
+
+        return [
+            'chapter_id' => $chapter->id,
+            'title' => $chapter->title,
+            'status' => $chapter->status,
+            'lessons' => $lessons,
+        ];
+    });
+
+    $response = [
+        'data' => [
+            'attendance_id' => $attendance->id,
+            'progress' => $attendance->progress,
+            'course' => [
+                'course_id' => $attendance->course->id,
+                'title' => $attendance->course->title,
+                'status' => $attendance->course->status,
+                'image' => $attendance->course->image,
+                'chapter' => $chapterData,
+            ],
+        ],
+    ];
+
+    return response()->json($response, 200);
+}
 
     /**
      * 受講生ログイン率計算

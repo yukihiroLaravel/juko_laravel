@@ -195,47 +195,47 @@ class AttendanceController extends Controller
  * @param AttendanceStatusRequest $request
  * @return JsonResponse
  */
-public function status(AttendanceStatusRequest $request): JsonResponse
-{
-    $attendanceId = $request->attendanceId();
+    public function status(AttendanceStatusRequest $request): JsonResponse
+    {
+        $attendanceId = $request->attendanceId();
 
-    /** @var Attendance */
-    $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
+        /** @var Attendance */
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
 
-    if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-        return response()->json([
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
             "result" => false,
             "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-        ], 403);
-    }
+            ], 403);
+        }
 
-    $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
-        $lessons = $chapter->lessons->map(function ($lesson) use ($attendance) {
-            $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
+        $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
+            $lessons = $chapter->lessons->map(function ($lesson) use ($attendance) {
+                $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
                 ->where('attendance_id', $attendance->id)
                 ->first();
 
-            $progress = 0;
-            if ($lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                $progress = "100%";
-            }
+                $progress = 0;
+                if ($lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                    $progress = "100%";
+                }
 
-            return [
+                return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,
                 'progress' => $progress = "0%",
-            ];
-        });
+                ];
+            });
 
-        return [
+            return [
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
             'status' => $chapter->status,
             'lessons' => $lessons,
-        ];
-    });
+            ];
+        });
 
-    $response = [
+        $response = [
         'data' => [
             'attendance_id' => $attendance->id,
             'progress' => $attendance->progress,
@@ -247,10 +247,10 @@ public function status(AttendanceStatusRequest $request): JsonResponse
                 'chapter' => $chapterData,
             ],
         ],
-    ];
+        ];
 
-    return response()->json($response, 200);
-}
+        return response()->json($response, 200);
+    }
 
     /**
      * 受講生ログイン率計算

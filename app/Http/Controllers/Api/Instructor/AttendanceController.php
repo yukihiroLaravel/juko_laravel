@@ -195,19 +195,19 @@ class AttendanceController extends Controller
  * @param AttendanceStatusRequest $request
  * @return JsonResponse
  */
-public function status(AttendanceStatusRequest $request): JsonResponse
-{
-    $attendanceId = $request->attendanceId();
+    public function status(AttendanceStatusRequest $request): JsonResponse
+    {
+        $attendanceId = $request->attendanceId();
 
-    /** @var Attendance */
-    $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
+        /** @var Attendance */
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
 
-    if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-        return response()->json([
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
             "result" => false,
             "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-        ], 403);
-    }
+            ], 403);
+        }
 
     $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
         $completedCount = 0;
@@ -238,10 +238,17 @@ public function status(AttendanceStatusRequest $request): JsonResponse
             'status' => $chapter->status,
             'progress' => $chapterProgress,
             'lessons' => $lessons,
+<<<<<<< HEAD
         ];
     });
     
     $response = [
+=======
+            ];
+        });
+
+        $response = [
+>>>>>>> b0711df2ac0e146a84b2acbd0c1dd1427075feff
         'data' => [
             'attendance_id' => $attendance->id,
             'progress' => $attendance->progress,
@@ -253,10 +260,17 @@ public function status(AttendanceStatusRequest $request): JsonResponse
                 'chapter' => $chapterData,
             ],
         ],
+<<<<<<< HEAD
     ];
     
     return response()->json($response, 200);
 }
+=======
+        ];
+
+        return response()->json($response, 200);
+    }
+>>>>>>> b0711df2ac0e146a84b2acbd0c1dd1427075feff
 
     /**
      * 受講生ログイン率計算

@@ -217,26 +217,45 @@ class AttendanceController extends Controller
         }])->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->count();
 
         // withCountとcount()どちらを使う方がいいでしょうか？
-        function chapterTotalLessonCount($id)
+        function chapterTotalLessonCount($chapter_id)
         {
-            $chapter = Chapter::findOrFail($id)->with('lessons')->get();
-            return $chapter->lessons_count;
+            $lesson = Lesson::where('chapter_id', $chapter_id);
+            return $lesson->count();
         }
 
+        function chaptercompleatedLessonCount($chapter_id, $attendanceId)
+        {
+            $lessons = Lesson::with(['lessonAttendances' => function ($query) use ($attendanceId) {
+                $query->where('attendance_id', $attendanceId)->where('status', 'completed_attendance');
+            }])->where('chapter_id', $chapter_id)->get()->toArray();
+            $lessons = array_column($lessons, 'lesson_attendances');
+            $lessons = array_filter($lessons);
+
+            return count($lessons);
+        }
+        $test = chaptercompleatedLessonCount(2, 1);
+
         $completedChaptersCount = 0;
-        //レッスンアテンダンス→アテンダンスー>グループで重複削除
+
         $attendances = Attendance::where('course_id', $request->course_id)->get();
 
-        // この繰り返しの中身をどうすればいいのかうまくまとめられません
-        $attendances->each(function ($attendance) use (&$completedChaptersCount) {
-            $chapterCompleatedLessonCount = LessonAttendance::where('attendance_id', $attendance->id)->whereDate('updated_at', Carbon::today())->where('status', 'completed_attendance')->count();
-            $chapter = Lesson::with(['lessonAttendances' => function ($query) use (&$attendance) {
-                $query->where('attendance_id', $attendance->id)->whereDate('updated_at', Carbon::today());
-            }])->with('lesson')->where('attendance_id', $attendance->id)->get();
-            $chaptersTotalLessonCount = chapterTotalLessonCount($chapter->id);
-            if ($chaptersTotalLessonCount === $chapterCompleatedLessonCount) {
-                $completedChaptersCount += 1;
-            }
+
+        $attendances->each(function ($attendance) use ($completedChaptersCount) {
+            // 今日完了したという条件をどのようにつけるのかわからず、困っています。
+            $chaptersId = Chapter::whereHas('course.attendances', function ($query) use ($attendance) {
+                $query->where('id', $attendance->id);
+            })->pluck('id');
+
+            $chaptersId->each(function ($chapterId) use ($completedChaptersCount, $attendance) {
+                $chaptersTotalLessonCount = chapterTotalLessonCount($chapterId);
+                $chapterCompleatedLessonCount = chaptercompleatedLessonCount($chapterId, $attendance->id);
+
+                if ($chaptersTotalLessonCount === $chapterCompleatedLessonCount) {
+                    $completedChaptersCount += 1;
+                }
+            });
+            // ifの後にdd($completedChaptersCount);をすると1が帰ってくるのですが、ここですると0になる理由がわからず、困っています。
+            dd($completedChaptersCount);
         });
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

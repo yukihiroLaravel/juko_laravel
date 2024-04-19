@@ -214,19 +214,19 @@ public function status(AttendanceStatusRequest $request): JsonResponse
             $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
                 ->where('attendance_id', $attendance->id)
                 ->first();
-
+    
             $progress = 0;
-            if ($lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                $progress = "100%";
+            if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                $progress = 100;
             }
-
+    
             return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,
-                'progress' => $progress = "0%",
+                'progress' => $progress,
             ];
         });
-
+    
         return [
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
@@ -234,7 +234,7 @@ public function status(AttendanceStatusRequest $request): JsonResponse
             'lessons' => $lessons,
         ];
     });
-
+    
     $response = [
         'data' => [
             'attendance_id' => $attendance->id,
@@ -248,7 +248,7 @@ public function status(AttendanceStatusRequest $request): JsonResponse
             ],
         ],
     ];
-
+    
     return response()->json($response, 200);
 }
 

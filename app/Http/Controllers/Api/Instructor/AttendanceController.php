@@ -212,25 +212,34 @@ class AttendanceController extends Controller
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        $completedLessonattendancesId = LessonAttendance::with(['attendance' => function ($query) use ($request) {
+        $completedLessonsCount = LessonAttendance::with(['attendance' => function ($query) use ($request) {
             $query->where('course_id', $request->course_id);
-        }])->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->pluck('id');
+        }])->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->count();
 
-        $completedLessonsCount = count($completedLessonattendancesId);
+        // withCountとcount()どちらを使う方がいいでしょうか？
+        function chapterTotalLessonCount($id)
+        {
+            $chapter = Chapter::findOrFail($id)->with('lessons')->get();
+            return $chapter->lessons_count;
+        }
 
-        $lessons = Lesson::whereIn('id', $completedLessonattendancesId)->with(['chapter' => function ($query) {
-            $query->withCount('lessons')->get();
-        }])->get();
         $completedChaptersCount = 0;
-        $lessons->each(function ($lesson) use (&$completedChaptersCount) {
-            $totalLessons = $lesson->chapter->lessons_count;
-            // $completedLesssons = 
-        });
+        //レッスンアテンダンス→アテンダンスー>グループで重複削除
+        $attendances = Attendance::where('course_id', $request->course_id)->get();
 
+        // この繰り返しの中身をどうすればいいのかうまくまとめられません
+        $attendances->each(function ($attendance) use (&$completedChaptersCount) {
+            $chapterCompleatedLessonCount = LessonAttendance::where('attendance_id', $attendance->id)->whereDate('updated_at', Carbon::today())->where('status', 'completed_attendance')->count();
+            $chapter = Lesson::with(['lessonAttendances' => function ($query) use (&$attendance) {
+                $query->where('attendance_id', $attendance->id)->whereDate('updated_at', Carbon::today());
+            }])->with('lesson')->where('attendance_id', $attendance->id)->get();
+            $chaptersTotalLessonCount = chapterTotalLessonCount($chapter->id);
+            if ($chaptersTotalLessonCount === $chapterCompleatedLessonCount) {
+                $completedChaptersCount += 1;
+            }
+        });
         return response()->json([
-            'completedLessonattendancesId' => $completedLessonattendancesId,
             'completed_lessons_count' => $completedLessonsCount,
-            'lessons' => $lessons,
             'completed_chapters_count' =>  $completedChaptersCount
         ]);
     }

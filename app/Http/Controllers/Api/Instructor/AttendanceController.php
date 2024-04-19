@@ -189,7 +189,7 @@ class AttendanceController extends Controller
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
-    /**
+/**
  * 講師側受講状況API
  *
  * @param AttendanceStatusRequest $request
@@ -210,27 +210,33 @@ public function status(AttendanceStatusRequest $request): JsonResponse
     }
 
     $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
-        $lessons = $chapter->lessons->map(function ($lesson) use ($attendance) {
+        $completedCount = 0;
+        $lessons = $chapter->lessons->map(function ($lesson) use ($attendance, &$completedCount) {
             $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
                 ->where('attendance_id', $attendance->id)
                 ->first();
     
-            $progress = 0;
-            if ($lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                $progress = 100;
+            $isCompleted = $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+    
+            if ($isCompleted) {
+                $completedCount++;
             }
     
             return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,
-                'progress' => $progress,
+                'progress' => $isCompleted ? 100 : 0,
             ];
         });
+
+        $totalLessonsCount = $lessons->count();
+        $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
     
         return [
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
             'status' => $chapter->status,
+            'progress' => $chapterProgress,
             'lessons' => $lessons,
         ];
     });

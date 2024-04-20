@@ -189,12 +189,12 @@ class AttendanceController extends Controller
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
-/**
- * 講師側受講状況API
- *
- * @param AttendanceStatusRequest $request
- * @return JsonResponse
- */
+    /**
+     * 講師側受講状況API
+     *
+     * @param AttendanceStatusRequest $request
+     * @return JsonResponse
+     */
     public function status(AttendanceStatusRequest $request): JsonResponse
     {
         $attendanceId = $request->attendanceId();
@@ -204,8 +204,8 @@ class AttendanceController extends Controller
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             return response()->json([
-            "result" => false,
-            "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                "result" => false,
+                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
             ], 403);
         }
 
@@ -257,7 +257,7 @@ class AttendanceController extends Controller
         return response()->json($response, 200);
     }
 
-		/**
+	/**
      * 受講生ログイン率計算
      *
      * @param int $number

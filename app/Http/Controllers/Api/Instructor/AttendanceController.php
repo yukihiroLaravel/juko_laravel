@@ -229,7 +229,7 @@ class AttendanceController extends Controller
 }
 
 /**
- * 
+ * チャプターの進捗計算
  *
  * @param Attendance $attendance
  * @return array
@@ -252,7 +252,7 @@ private function calculateChapterProgress(Attendance $attendance): array
 }
 
 /**
- * 
+ * チャプター内完了済みレッスン数計算
  *
  * @param Chapter $chapter
  * @param Attendance $attendance
@@ -270,7 +270,7 @@ private function calculateCompletedLessonCount(Chapter $chapter, Attendance $att
 }
 
 /**
- * 
+ * チャプターレッスンデータ取得
  *
  * @param Chapter $chapter
  * @param Attendance $attendance

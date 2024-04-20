@@ -195,43 +195,43 @@ class AttendanceController extends Controller
  * @param AttendanceStatusRequest $request
  * @return JsonResponse
  */
-public function status(AttendanceStatusRequest $request): JsonResponse
+    public function status(AttendanceStatusRequest $request): JsonResponse
     {
         $attendanceId = $request->attendanceId();
 
         /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
 
-if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-    return response()->json([
-    "result" => false,
-    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-    ], 403);
-}
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
+            "result" => false,
+            "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+            ], 403);
+        }
 
-    $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
-        $completedCount = 0;
-        $lessons = $chapter->lessons->map(function ($lesson) use ($attendance, &$completedCount) {
-            $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
+        $chapterData = $attendance->course->chapters->map(function ($chapter) use ($attendance) {
+            $completedCount = 0;
+            $lessons = $chapter->lessons->map(function ($lesson) use ($attendance, &$completedCount) {
+                $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
                 ->where('attendance_id', $attendance->id)
                 ->first();
 
-            $isCompleted = $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+                $isCompleted = $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
 
-            if ($isCompleted) {
-                $completedCount++;
-            }
+                if ($isCompleted) {
+                    $completedCount++;
+                }
 
-            return [
+                return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,
-            ];
-        });
+                ];
+            });
 
-        $totalLessonsCount = $lessons->count();
-        $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
+            $totalLessonsCount = $lessons->count();
+            $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
 
-        return [
+            return [
             'chapter_id' => $chapter->id,
             'title' => $chapter->title,
             'status' => $chapter->status,
@@ -239,7 +239,7 @@ if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id
             'lessons' => $lessons,
             ];
         });
-    
+
         $response = [
         'data' => [
             'attendance_id' => $attendance->id,
@@ -253,7 +253,7 @@ if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id
             ],
         ],
         ];
-    
+
         return response()->json($response, 200);
     }
 

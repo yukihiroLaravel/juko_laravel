@@ -219,34 +219,32 @@ class AttendanceController extends Controller
         // withCountとcount()どちらを使う方がいいでしょうか？
         function chapterTotalLessonCount($chapter_id)
         {
-            $lesson = Lesson::where('chapter_id', $chapter_id);
-            return $lesson->count();
+            $lessons = Lesson::where('chapter_id', $chapter_id)->count();
+            return $lessons;
         }
 
         function chaptercompleatedLessonCount($chapter_id, $attendanceId)
         {
-            $lessons = Lesson::with(['lessonAttendances' => function ($query) use ($attendanceId) {
+            $lessons = Lesson::whereHas('lessonAttendances', function ($query) use ($attendanceId) {
                 $query->where('attendance_id', $attendanceId)->where('status', 'completed_attendance');
-            }])->where('chapter_id', $chapter_id)->get()->toArray();
-            $lessons = array_column($lessons, 'lesson_attendances');
-            $lessons = array_filter($lessons);
+            })->where('chapter_id', $chapter_id)->count();
 
-            return count($lessons);
+            return $lessons;
         }
-        $test = chaptercompleatedLessonCount(2, 1);
 
         $completedChaptersCount = 0;
 
-        $attendances = Attendance::where('course_id', $request->course_id)->get();
+        $attendances = Attendance::where('course_id', $request->course_id)->whereHas('lessonAttendances', function ($query) {
+            $query->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today());
+        })->get();
 
 
-        $attendances->each(function ($attendance) use ($completedChaptersCount) {
-            // 今日完了したという条件をどのようにつけるのかわからず、困っています。
+        $attendances->each(function ($attendance) use (&$completedChaptersCount) {
             $chaptersId = Chapter::whereHas('course.attendances', function ($query) use ($attendance) {
                 $query->where('id', $attendance->id);
             })->pluck('id');
 
-            $chaptersId->each(function ($chapterId) use ($completedChaptersCount, $attendance) {
+            $chaptersId->each(function ($chapterId) use (&$completedChaptersCount, $attendance) {
                 $chaptersTotalLessonCount = chapterTotalLessonCount($chapterId);
                 $chapterCompleatedLessonCount = chaptercompleatedLessonCount($chapterId, $attendance->id);
 
@@ -254,9 +252,8 @@ class AttendanceController extends Controller
                     $completedChaptersCount += 1;
                 }
             });
-            // ifの後にdd($completedChaptersCount);をすると1が帰ってくるのですが、ここですると0になる理由がわからず、困っています。
-            dd($completedChaptersCount);
         });
+
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' =>  $completedChaptersCount

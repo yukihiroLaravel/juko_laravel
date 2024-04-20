@@ -290,7 +290,7 @@ private function getChapterLessonsData(Chapter $chapter, Attendance $attendance)
     })->toArray();
 }
 
-	/**
+    /**
      * 受講生ログイン率計算
      *
      * @param int $number

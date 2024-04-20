@@ -225,7 +225,6 @@ class AttendanceController extends Controller
             return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,
-                'progress' => $isCompleted ? 100 : 0,
             ];
         });
 

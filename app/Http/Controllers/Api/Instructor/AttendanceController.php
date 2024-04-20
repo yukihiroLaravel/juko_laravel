@@ -257,7 +257,7 @@ class AttendanceController extends Controller
         return response()->json($response, 200);
     }
 
-	/**
+    /**
      * 受講生ログイン率計算
      *
      * @param int $number

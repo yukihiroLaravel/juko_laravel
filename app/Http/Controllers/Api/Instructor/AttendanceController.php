@@ -212,9 +212,9 @@ class AttendanceController extends Controller
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        $completedLessonsCount = LessonAttendance::with(['attendance' => function ($query) use ($request) {
+        $completedLessonsCount = LessonAttendance::whereHas('attendance', function ($query) use ($request) {
             $query->where('course_id', $request->course_id);
-        }])->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->count();
+        })->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->count();
 
         // withCountとcount()どちらを使う方がいいでしょうか？
         function chapterTotalLessonCount($chapter_id)

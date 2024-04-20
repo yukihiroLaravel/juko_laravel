@@ -111,7 +111,7 @@ class AttendanceController extends Controller
     public function delete(AttendanceDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
-        
+
         try {
             $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);

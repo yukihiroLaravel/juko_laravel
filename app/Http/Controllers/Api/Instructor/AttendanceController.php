@@ -111,7 +111,7 @@ class AttendanceController extends Controller
     public function delete(AttendanceDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
-
+        
         try {
             $attendanceId = $request->route('attendance_id');
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
@@ -238,17 +238,10 @@ class AttendanceController extends Controller
             'status' => $chapter->status,
             'progress' => $chapterProgress,
             'lessons' => $lessons,
-<<<<<<< HEAD
-        ];
-    });
-    
-    $response = [
-=======
             ];
         });
-
+    
         $response = [
->>>>>>> b0711df2ac0e146a84b2acbd0c1dd1427075feff
         'data' => [
             'attendance_id' => $attendance->id,
             'progress' => $attendance->progress,
@@ -260,17 +253,10 @@ class AttendanceController extends Controller
                 'chapter' => $chapterData,
             ],
         ],
-<<<<<<< HEAD
-    ];
-    
-    return response()->json($response, 200);
-}
-=======
         ];
-
+    
         return response()->json($response, 200);
     }
->>>>>>> b0711df2ac0e146a84b2acbd0c1dd1427075feff
 
     /**
      * 受講生ログイン率計算

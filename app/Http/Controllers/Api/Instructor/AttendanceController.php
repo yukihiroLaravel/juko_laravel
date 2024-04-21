@@ -286,7 +286,7 @@ class AttendanceController extends Controller
 
         return $chapter->lessons->map(function ($lesson) use ($attendance) {
             $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-            
+
             return [
                 'lesson_id' => $lesson->id,
                 'status' => $lessonAttendance ? $lessonAttendance->status : null,

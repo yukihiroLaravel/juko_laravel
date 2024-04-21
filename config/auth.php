@@ -44,6 +44,10 @@ return [
             'driver' => 'session',
             'provider' => 'instructors',
         ],
+        'student' => [
+            'driver' => 'session',
+            'provider' => 'students',
+        ],
         'api' => [
             'driver' => 'token',
             'provider' => 'users',
@@ -76,6 +80,10 @@ return [
         'instructors' => [
             'driver' => 'eloquent',
             'model' => App\Model\Instructor::class,
+        ],
+        'students' => [
+            'driver' => 'eloquent',
+            'model' => App\Model\Student::class,
         ],
 
         // 'users' => [

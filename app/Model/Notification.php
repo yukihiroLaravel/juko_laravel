@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $id
  * @property int $course_id
  * @property int $instructor_id
+ * @property int $student_id
  * @property string $title
  * @property 'always'|'once' $type
  * @property string $start_date
@@ -35,6 +36,7 @@ class Notification extends Model
     protected $fillable = [
         'course_id',
         'instructor_id',
+        'student_id',
         'title',
         'type',
         'start_date',

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Manager;
+namespace App\Http\Resources\Student;
 
 use App\Model\Notification;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationIndexResource extends JsonResource
@@ -32,7 +32,7 @@ class NotificationIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<Notification> $notifications
+     * @param Collection<\App\Model\Notification> $notifications
      * @return array
      */
     private function mapNotifications($notifications)
@@ -44,7 +44,6 @@ class NotificationIndexResource extends JsonResource
                 'course_title' => $notification->course->title,
                 'title' => $notification->title,
                 'start_date' => $notification->start_date,
-                'end_date' => $notification->end_date,
             ];
         })
             ->toArray();

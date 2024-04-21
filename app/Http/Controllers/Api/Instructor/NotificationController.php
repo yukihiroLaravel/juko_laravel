@@ -12,7 +12,6 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
-use App\Http\Resources\Instructor\NotificationUpdateResource;
 
 class NotificationController extends Controller
 {
@@ -42,7 +41,8 @@ class NotificationController extends Controller
      */
     public function show(NotificationShowRequest $request)
     {
-        $notification = Notification::findOrFail($request->notification_id);
+        $notification = Notification::with(['course'])
+            ->findOrFail($request->notification_id);
 
         if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
             return response()->json([
@@ -97,7 +97,6 @@ class NotificationController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new NotificationUpdateResource($notification),
         ]);
     }
 }

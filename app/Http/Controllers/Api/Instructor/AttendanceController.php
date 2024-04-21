@@ -246,7 +246,7 @@ class AttendanceController extends Controller
             'title' => $chapter->title,
             'status' => $chapter->status,
             'progress' => $chapterProgress,
-            'lessons' => $this->getChapterLessonsData($chapter, $attendance),
+            'lessons' => $this->getChapterLessonsForChapter($chapter, $attendance),
             ];
         })->toArray();
     }
@@ -276,7 +276,7 @@ class AttendanceController extends Controller
  * @param Attendance $attendance
  * @return array
  */
-    private function getChapterLessonsData(Chapter $chapter, Attendance $attendance): array
+    private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
     {
         return $chapter->lessons->map(function ($lesson) use ($attendance) {
             $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)

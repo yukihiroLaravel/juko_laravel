@@ -28,11 +28,16 @@ class AttendanceStatusRequest extends FormRequest
         ];
     }
 
+    /**
+     * Get the attendance ID from the request.
+     *
+     * @return int
+     */
     public function attendanceId()
     {
         return $this->route('attendance_id');
     }
-
+    
     protected function prepareForValidation()
     {
         $this->merge([

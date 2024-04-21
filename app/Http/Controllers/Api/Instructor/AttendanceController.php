@@ -236,6 +236,9 @@ class AttendanceController extends Controller
  */
     private function calculateChapterProgress(Attendance $attendance): array
     {
+
+        $chapters = $attendance->course->chapters()->with(['lessons', 'lessons.lessonAttendances'])->get();
+
         return $attendance->course->chapters->map(function ($chapter) use ($attendance) {
             $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
             $totalLessonsCount = $chapter->lessons->count();
@@ -278,14 +281,15 @@ class AttendanceController extends Controller
  */
     private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
     {
-        return $chapter->lessons->map(function ($lesson) use ($attendance) {
-            $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
-            ->where('attendance_id', $attendance->id)
-            ->first();
 
+        $chapter->load(['lessons.lessonAttendances']);
+
+        return $chapter->lessons->map(function ($lesson) use ($attendance) {
+            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+            
             return [
-            'lesson_id' => $lesson->id,
-            'status' => $lessonAttendance ? $lessonAttendance->status : null,
+                'lesson_id' => $lesson->id,
+                'status' => $lessonAttendance ? $lessonAttendance->status : null,
             ];
         })->toArray();
     }

@@ -16,6 +16,17 @@ class NotificationController extends Controller
      * お知らせ取得API
      *
      * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        return response()->json([]);
+    }
+
+    /**
+     * お知らせ既読API
+     *
+     * @param Request $request
      * @return NotificationReadResource
      */
     public function read(Request $request)

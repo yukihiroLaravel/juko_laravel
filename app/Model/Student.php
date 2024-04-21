@@ -52,7 +52,6 @@ class Student extends Authenticatable
         'email',
         'password',
         'purpose',
-        'age',
         'birth_date',
         'sex',
         'address',

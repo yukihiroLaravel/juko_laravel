@@ -210,27 +210,12 @@ class AttendanceController extends Controller
      *
      * @param AttendanceShowRequest $request
      */
+
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
         $completedLessonsCount = LessonAttendance::whereHas('attendance', function ($query) use ($request) {
             $query->where('course_id', $request->course_id);
         })->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today())->count();
-
-        // withCountとcount()どちらを使う方がいいでしょうか？
-        function chapterTotalLessonCount($chapter_id)
-        {
-            $lessons = Lesson::where('chapter_id', $chapter_id)->count();
-            return $lessons;
-        }
-
-        function chaptercompleatedLessonCount($chapter_id, $attendanceId)
-        {
-            $lessons = Lesson::whereHas('lessonAttendances', function ($query) use ($attendanceId) {
-                $query->where('attendance_id', $attendanceId)->where('status', 'completed_attendance');
-            })->where('chapter_id', $chapter_id)->count();
-
-            return $lessons;
-        }
 
         $completedChaptersCount = 0;
 
@@ -238,15 +223,14 @@ class AttendanceController extends Controller
             $query->where('status', 'completed_attendance')->whereDate('updated_at', Carbon::today());
         })->get();
 
-
         $attendances->each(function ($attendance) use (&$completedChaptersCount) {
             $chaptersId = Chapter::whereHas('course.attendances', function ($query) use ($attendance) {
                 $query->where('id', $attendance->id);
             })->pluck('id');
 
             $chaptersId->each(function ($chapterId) use (&$completedChaptersCount, $attendance) {
-                $chaptersTotalLessonCount = chapterTotalLessonCount($chapterId);
-                $chapterCompleatedLessonCount = chaptercompleatedLessonCount($chapterId, $attendance->id);
+                $chaptersTotalLessonCount = $this->chapterTotalLessonCount($chapterId);
+                $chapterCompleatedLessonCount = $this->chaptercompleatedLessonCount($chapterId, $attendance->id);
 
                 if ($chaptersTotalLessonCount === $chapterCompleatedLessonCount) {
                     $completedChaptersCount += 1;
@@ -258,5 +242,19 @@ class AttendanceController extends Controller
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' =>  $completedChaptersCount
         ]);
+    }
+
+    public function chapterTotalLessonCount($chapter_id)
+    {
+        $lessons = Lesson::where('chapter_id', $chapter_id)->count();
+        return $lessons;
+    }
+
+    public function chaptercompleatedLessonCount($chapter_id, $attendanceId)
+    {
+        $lessons = Lesson::whereHas('lessonAttendances', function ($query) use ($attendanceId) {
+            $query->where('attendance_id', $attendanceId)->where('status', 'completed_attendance');
+        })->where('chapter_id', $chapter_id)->count();
+        return $lessons;
     }
 }

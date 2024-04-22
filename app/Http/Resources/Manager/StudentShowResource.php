@@ -2,12 +2,25 @@
 
 namespace App\Http\Resources\Manager;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
 {
     /** @var \App\Model\Student */
     public $resource;
+
+    // 年齢を計算
+    public function nenrei($age){
+        // リクエストされた受講生を取得
+        $student = Student::findOrFail($request->student_id);
+        $birthDay = $student->attendances->pluck('birth_date');
+        $toDay = Carbon::today();
+        $nichi = $birthDay->diffInDays($toDay);
+        $toshi = intval($nichi/365);
+        $age = ToString($toshi)->attendances->pluck('age');
+        /* 年齢のカラム更新 */
+    }
 
     /**
      * Transform the resource into an array.

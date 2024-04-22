@@ -118,18 +118,6 @@ class StudentController extends Controller
         // リクエストされた受講生を取得
         $student = Student::with(['attendances'])->findOrFail($request->student_id);
 
-        // 年齢を計算
-        $birthDay = $student->attendances->pluck('birth_date')->format('Y/m/d');
-        $toDay = Carbon::now()->format('Y/m/d');
-        $nichi = $toDay-$birthDay;
-        $age = $nichi/365;
-        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Non.'
-            ], 403);
-        }
-
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {

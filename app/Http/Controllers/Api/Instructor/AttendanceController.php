@@ -236,7 +236,7 @@ class AttendanceController extends Controller
     */
     private function calculateChapterProgress(Attendance $attendance): array
     {
-    
+
         $attendance->course->load('chapters.lessons');
 
         return $attendance->course->chapters->map(function ($chapter) use ($attendance) {
@@ -280,20 +280,20 @@ class AttendanceController extends Controller
     * @param Attendance $attendance
     * @return array
     */
-        private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
-        {
+    private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
+    {
 
-            $chapter->load(['lessons.lessonAttendances']);
+        $chapter->load(['lessons.lessonAttendances']);
 
-            return $chapter->lessons->map(function ($lesson) use ($attendance) {
-                $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+        return $chapter->lessons->map(function ($lesson) use ($attendance) {
+            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
 
-                return [
-                    'lesson_id' => $lesson->id,
-                    'status' => $lessonAttendance ? $lessonAttendance->status : null,
-                ];
-            })->toArray();
-        }
+            return [
+                'lesson_id' => $lesson->id,
+                'status' => $lessonAttendance ? $lessonAttendance->status : null,
+            ];
+        })->toArray();
+    }
 
     /**
      * 受講生ログイン率計算

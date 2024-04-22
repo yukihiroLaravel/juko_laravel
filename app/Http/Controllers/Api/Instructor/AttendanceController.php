@@ -197,7 +197,7 @@ class AttendanceController extends Controller
      */
     public function status(AttendanceStatusRequest $request): JsonResponse
     {
-        $attendanceId = $request->attendanceId();
+        $attendanceId = $request->attendance_id;
 
         /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendanceId);
@@ -236,8 +236,6 @@ class AttendanceController extends Controller
  */
     private function calculateChapterProgress(Attendance $attendance): array
     {
-
-        $chapters = $attendance->course->chapters()->with(['lessons', 'lessons.lessonAttendances'])->get();
 
         return $attendance->course->chapters->map(function ($chapter) use ($attendance) {
             $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);

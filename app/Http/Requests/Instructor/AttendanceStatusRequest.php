@@ -34,5 +34,4 @@ class AttendanceStatusRequest extends FormRequest
             'attendance_id' => $this->route('attendance_id'),
         ]);
     }
-    
 }

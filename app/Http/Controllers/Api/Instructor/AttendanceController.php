@@ -261,21 +261,18 @@ class AttendanceController extends Controller
  */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
-        // チャプター内のレッスンIDを配列として取得
-        $lessonIds = $chapter->lessons->pluck('id')->toArray();
-    
-        // レッスンIDが含まれる LessonAttendance を一括で取得
+
+        $lessonIds = $chapter->lessons->pluck('id');
+
         $lessonAttendances = LessonAttendance::whereIn('lesson_id', $lessonIds)
             ->where('attendance_id', $attendance->id)
-            ->get();
+            ->get(['lesson_id', 'status']);
 
-        // 完了済みのレッスン数をカウント
-        $completedCount = $lessonAttendances->filter(function ($lessonAttendance) {
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
+        $completedCount = $lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
 
         return $completedCount;
     }
+
 
 /**
  * チャプターレッスンデータ取得

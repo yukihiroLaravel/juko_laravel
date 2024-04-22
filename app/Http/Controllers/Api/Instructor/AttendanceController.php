@@ -228,14 +228,16 @@ class AttendanceController extends Controller
         return response()->json($response, 200);
     }
 
-/**
- * チャプターの進捗計算
- *
- * @param Attendance $attendance
- * @return array
- */
+    /**
+    * チャプターの進捗計算
+    *
+    * @param Attendance $attendance
+    * @return array
+    */
     private function calculateChapterProgress(Attendance $attendance): array
     {
+    
+        $attendance->course->load('chapters.lessons');
 
         return $attendance->course->chapters->map(function ($chapter) use ($attendance) {
             $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
@@ -243,58 +245,55 @@ class AttendanceController extends Controller
             $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
 
             return [
-            'chapter_id' => $chapter->id,
-            'title' => $chapter->title,
-            'status' => $chapter->status,
-            'progress' => $chapterProgress,
-            'lessons' => $this->getChapterLessonsForChapter($chapter, $attendance),
+                'chapter_id' => $chapter->id,
+                'title' => $chapter->title,
+                'status' => $chapter->status,
+                'progress' => $chapterProgress,
+                'lessons' => $this->getChapterLessonsForChapter($chapter, $attendance),
             ];
         })->toArray();
     }
 
-/**
- * チャプター内完了済みレッスン数計算
- *
- * @param Chapter $chapter
- * @param Attendance $attendance
- * @return int
- */
+    /**
+    * チャプター内完了済みレッスン数計算
+    *
+    * @param Chapter $chapter
+    * @param Attendance $attendance
+    * @return int
+    */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
+        return $chapter->lessons->flatMap(function ($lesson) use ($attendance) {
+            $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
+                ->where('attendance_id', $attendance->id)
+                ->first();
 
-        $lessonIds = $chapter->lessons->pluck('id');
-
-        $lessonAttendances = LessonAttendance::whereIn('lesson_id', $lessonIds)
-            ->where('attendance_id', $attendance->id)
-            ->get(['lesson_id', 'status']);
-
-        $completedCount = $lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
-
-        return $completedCount;
+            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })->count();
     }
 
 
-/**
- * チャプターレッスンデータ取得
- *
- * @param Chapter $chapter
- * @param Attendance $attendance
- * @return array
- */
-    private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
-    {
+    /**
+    * チャプターレッスンデータ取得
+    *
+    * @param Chapter $chapter
+    * @param Attendance $attendance
+    * @return array
+    */
+        private function getChapterLessonsForChapter(Chapter $chapter, Attendance $attendance): array
+        {
 
-        $chapter->load(['lessons.lessonAttendances']);
+            $chapter->load(['lessons.lessonAttendances']);
 
-        return $chapter->lessons->map(function ($lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+            return $chapter->lessons->map(function ($lesson) use ($attendance) {
+                $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
 
-            return [
-                'lesson_id' => $lesson->id,
-                'status' => $lessonAttendance ? $lessonAttendance->status : null,
-            ];
-        })->toArray();
-    }
+                return [
+                    'lesson_id' => $lesson->id,
+                    'status' => $lessonAttendance ? $lessonAttendance->status : null,
+                ];
+            })->toArray();
+        }
 
     /**
      * 受講生ログイン率計算

@@ -215,16 +215,15 @@ class AttendanceController extends Controller
     {
         $attendances = Attendance::with(['lessonAttendances.lesson.chapter.course'])->where('course_id', $request->course_id)->get();
         $today = Carbon::today()->format('Y-m-d');
-        $completedLessonsCount = 0;
-        $attendances->each(function ($attendance) use (&$completedLessonsCount, $today) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->where('status', 'completed_attendance');
-            $compleatedLessonAttendances->each(function ($compleatedLessonAttendance) use (&$completedLessonsCount, $today) {
-                if ($compleatedLessonAttendance->updated_at->format('Y-m-d') == $today) {
-                    $completedLessonsCount += 1;
-                }
-            });
-        });
 
+        $completedLessonsCount = $attendances->flatMap(function ($attendance) use ($today) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->where('status', 'completed_attendance')->map(function ($compleatedLessonAttendance) {
+                return $compleatedLessonAttendance->updated_at->format('Y-m-d');
+            });
+            return $compleatedLessonAttendances->filter(function ($item) use ($today) {
+                return $item == $today;
+            });
+        })->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

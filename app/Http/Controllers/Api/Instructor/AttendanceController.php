@@ -263,7 +263,7 @@ class AttendanceController extends Controller
     {
         // チャプター内のレッスンIDを配列として取得
         $lessonIds = $chapter->lessons->pluck('id')->toArray();
-    
+
         // レッスンIDが含まれる LessonAttendance を一括で取得
         $lessonAttendances = LessonAttendance::whereIn('lesson_id', $lessonIds)
             ->where('attendance_id', $attendance->id)

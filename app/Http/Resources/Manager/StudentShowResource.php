@@ -18,7 +18,7 @@ class StudentShowResource extends JsonResource
         $toDay = Carbon::today();
         $nichi = $birthDay->diffInDays($toDay);
         $toshi = intval($nichi/365);
-        $age = ToString($toshi)->attendances->pluck('age');
+        $age = strval($toshi)->attendances->pluck('age');
         /* 年齢のカラム更新 */
     }
 

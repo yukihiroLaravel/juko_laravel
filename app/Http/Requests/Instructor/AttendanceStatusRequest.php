@@ -27,4 +27,12 @@ class AttendanceStatusRequest extends FormRequest
             'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'attendance_id' => $this->route('attendance_id'),
+        ]);
+    }
+    
 }

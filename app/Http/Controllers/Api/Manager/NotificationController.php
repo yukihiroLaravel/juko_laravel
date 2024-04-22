@@ -7,11 +7,13 @@ use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
 use App\Model\Notification;
+use App\Model\Course;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationUpdateResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -76,11 +78,45 @@ class NotificationController extends Controller
 
     /**
      * お知らせ登録API
+     *
+     * @param NotificationStoreRequest $request
+     * @return JsonResponse
      */
-    public function store()
-    {
-        return response()->json([]);
-    }
+
+     public function store(Request $request)
+     {
+
+         // ユーザー認証を確認
+         $instructorId = Auth::guard('instructor')->user()->id;
+         $manager = Instructor::with('managings')->find($instructorId);
+
+         // managerと配下のinstructorのIDを取得
+         $instructorIds = $manager->managings->pluck('id')->toArray();
+         array_push($instructorIds, $instructorId);
+
+         // 対象のコースを取得し、権限の確認を行う
+         $course = Course::FindOrFail($request->course_id);
+         if (!in_array($course->instructor_id, $instructorIds, true)) {
+         return response()->json([
+             'result' => false,
+             'message' => 'Forbidden, not allowed to Registration this course.',
+         ], 403);
+         }
+
+         Notification::create([
+            'course_id'     => $request->course_id,
+            'instructor_id' => Auth::guard('instructor')->user()->id,
+            'title'         => $request->title,
+            'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'content'       => $request->content,
+         ]);
+
+         return response()->json([
+             'result' => true,
+         ]);
+     }
 
     /**
      * お知らせ更新API

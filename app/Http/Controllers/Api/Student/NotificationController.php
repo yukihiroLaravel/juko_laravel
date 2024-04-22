@@ -53,7 +53,7 @@ class NotificationController extends Controller
         });
     }
 
-    public function notificationShow(id)
+    public function show()
     {    
         return response()->json([]);
     }

@@ -209,7 +209,7 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        $chapterData = $this->calculateChapterProgress($attendance);
+        $chapterCollect = $this->calculateChapterProgress($attendance);
 
         $response = [
         'data' => [
@@ -220,7 +220,7 @@ class AttendanceController extends Controller
                 'title' => $attendance->course->title,
                 'status' => $attendance->course->status,
                 'image' => $attendance->course->image,
-                'chapter' => $chapterData,
+                'chapter' => $chapterCollect,
             ],
         ],
         ];

@@ -217,17 +217,22 @@ class AttendanceController extends Controller
         $today = Carbon::today()->format('Y-m-d');
 
         $completedLessonsCount = $attendances->flatMap(function ($attendance) use ($today) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->where('status', 'completed_attendance')->map(function ($compleatedLessonAttendance) {
-                return $compleatedLessonAttendance->updated_at->format('Y-m-d');
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function ($lessonAttendance) use ($today) {
+                return $lessonAttendance->status == 'completed_attendance' && $lessonAttendance->updated_at->format('Y-m-d') == $today;
             });
-            return $compleatedLessonAttendances->filter(function ($item) use ($today) {
-                return $item == $today;
-            });
+            return $compleatedLessonAttendances;
         })->count();
+
+        // すみません、chapter_idとattendance_idを同一キーとして扱うということがよくわかりませんでした
+        $completedChaptersCount = $attendances->flatMap(function ($attendance) {
+            return $attendance->lessonAttendances;
+        })->map(function ($lessonAttendance) {
+            return $lessonAttendance->attendance_id = $lessonAttendance->lesson->chapter->id;
+        })->unique()->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
-            // 'completed_chapters_count' =>  $completedChaptersCount
+            'completed_chapters_count' =>  $completedChaptersCount
         ]);
     }
 }

@@ -92,10 +92,10 @@ class NotificationController extends Controller
 
          // managerと配下のinstructorのIDを取得
          $instructorIds = $manager->managings->pluck('id')->toArray();
-         array_push($instructorIds, $instructorId);
+         $instructorIds[] = $manager->id;
 
          // 対象のコースを取得し、権限の確認を行う
-         $course = Course::FindOrFail($request->course_id);
+         $course = Course::findOrFail($request->course_id);
          if (!in_array($course->instructor_id, $instructorIds, true)) {
          return response()->json([
              'result' => false,

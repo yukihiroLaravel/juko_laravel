@@ -83,40 +83,40 @@ class NotificationController extends Controller
      * @return JsonResponse
      */
 
-     public function store(Request $request)
-     {
+    public function store(Request $request)
+    {
 
-         // ユーザー認証を確認
-         $instructorId = Auth::guard('instructor')->user()->id;
-         $manager = Instructor::with('managings')->find($instructorId);
+        // ユーザー認証を確認
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
 
-         // managerと配下のinstructorのIDを取得
-         $instructorIds = $manager->managings->pluck('id')->toArray();
-         $instructorIds[] = $manager->id;
+        // managerと配下のinstructorのIDを取得
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
-         // 対象のコースを取得し、権限の確認を行う
-         $course = Course::findOrFail($request->course_id);
-         if (!in_array($course->instructor_id, $instructorIds, true)) {
-         return response()->json([
-             'result' => false,
-             'message' => 'Forbidden, not allowed to Registration this course.',
-         ], 403);
-         }
+        // 対象のコースを取得し、権限の確認を行う
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+            'result' => false,
+            'message' => 'Forbidden, not allowed to Registration this course.',
+            ], 403);
+        }
 
-         Notification::create([
-            'course_id'     => $request->course_id,
-            'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title'         => $request->title,
-            'type'          => $request->type,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'content'       => $request->content,
-         ]);
+        Notification::create([
+           'course_id'     => $request->course_id,
+           'instructor_id' => Auth::guard('instructor')->user()->id,
+           'title'         => $request->title,
+           'type'          => $request->type,
+           'start_date'    => $request->start_date,
+           'end_date'      => $request->end_date,
+           'content'       => $request->content,
+        ]);
 
-         return response()->json([
-             'result' => true,
-         ]);
-     }
+        return response()->json([
+            'result' => true,
+        ]);
+    }
 
     /**
      * お知らせ更新API

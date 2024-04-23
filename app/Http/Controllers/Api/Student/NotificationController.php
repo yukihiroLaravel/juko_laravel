@@ -43,9 +43,8 @@ class NotificationController extends Controller
             ->where('end_date', '>=', $currentDateTime)
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
-        
-        return new NotificationIndexResource($notifications);
 
+        return new NotificationIndexResource($notifications);
     }
 
     /**

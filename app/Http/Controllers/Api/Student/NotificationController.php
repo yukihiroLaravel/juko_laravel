@@ -52,4 +52,10 @@ class NotificationController extends Controller
             return true;
         });
     }
+
+    public function show()
+    {
+        return Notification::find(1);
+        return response()->json([]);
+    }
 }

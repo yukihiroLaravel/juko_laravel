@@ -94,7 +94,7 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * 受講状況削除API
      *
@@ -104,7 +104,7 @@ class AttendanceController extends Controller
     public function delete(AttendanceDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
-        
+
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -115,7 +115,7 @@ class AttendanceController extends Controller
 
             // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDのリストを取得
             $managedAttendances = Attendance::whereIn('id', $instructorIds)->pluck('id')->toArray();
-            
+
             // 受講データがログインしているインストラクターまたはそのマネージャーが管理するものであるかどうかを確認
             if (!in_array((int)$attendanceId, $managedAttendances, true)) {
                 return response()->json([
@@ -123,7 +123,7 @@ class AttendanceController extends Controller
                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
                 ], 403);
             }
-            
+
             // 受講状況を削除
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
             $attendance->delete();

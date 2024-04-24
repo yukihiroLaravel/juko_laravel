@@ -117,7 +117,7 @@ class AttendanceController extends Controller
             $managedAttendances = Attendance::whereIn('id', $instructorIds)->pluck('id')->toArray();
             
             // 受講データがログインしているインストラクターまたはそのマネージャーが管理するものであるかどうかを確認
-            if (!in_array($attendanceId, $managedAttendances, true)) {
+            if (!in_array((int)$attendanceId, $managedAttendances, true)) {
                 return response()->json([
                 "result" => false,
                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",

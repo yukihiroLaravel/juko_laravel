@@ -17,7 +17,7 @@ class NotificationIndexResource extends JsonResource
     {
         $notifications = $this->resource;
         return [
-            'notifications' => $this->mapNotifications($notifications),
+            'notifications' => $this->mapNotifications($notifications->getCollection()),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),

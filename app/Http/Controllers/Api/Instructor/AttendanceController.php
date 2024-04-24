@@ -263,15 +263,15 @@ class AttendanceController extends Controller
     */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
-    $lessonIds = $chapter->lessons->pluck('id')->toArray();
+        $lessonIds = $chapter->lessons->pluck('id')->toArray();
 
-    $lessonAttendances = LessonAttendance::whereIn('lesson_id', $lessonIds)
+        $lessonAttendances = LessonAttendance::whereIn('lesson_id', $lessonIds)
         ->where('attendance_id', $attendance->id)
         ->get(['lesson_id', 'status']);
 
-    $completedCount = $lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
+        $completedCount = $lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
 
-    return $completedCount;
+        return $completedCount;
     }
 
 

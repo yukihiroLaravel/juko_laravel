@@ -69,7 +69,7 @@ class NotificationController extends Controller
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
             'result' => false,
-            'message' => 'Forbidden, not allowed to access this notification.',
+            'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -78,28 +78,23 @@ class NotificationController extends Controller
 
     /**
      * お知らせ登録API
-     *
-     * @param NotificationStoreRequest $request
-     * @return JsonResponse
      */
-
     public function store(Request $request)
     {
-
-        // ユーザー認証を確認
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($instructorId);
 
-        // managerと配下のinstructorのIDを取得
+        // 配下のインストラクター情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 対象のコースを取得し、権限の確認を行う
+        /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
             'result' => false,
-            'message' => 'Forbidden, not allowed to Registration this course.',
+            'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -143,7 +138,7 @@ class NotificationController extends Controller
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 

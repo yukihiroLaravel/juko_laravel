@@ -53,9 +53,25 @@ class NotificationController extends Controller
         });
     }
 
-    public function show()
+    public function show(Request $request)
     {
-        return Notification::find(1);
-        return response()->json([]);
+        $student =  \Auth::user();
+        $notification = Notification::where('student_id', $student->id)->first();
+        if($notification){
+            $data = [
+                'course_id' => $notification->course_id,
+                'title' => $notification->title,
+                'content' => $notification->content,
+            ];
+
+            return response()->json($data, 200);
+
+        }else{
+
+            return response()->json([
+                "result" => false,
+                "message" => "Notification not found."
+            ], 404);
+        }
     }
 }

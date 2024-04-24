@@ -49,8 +49,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::patch('lesson_attendance', 'Api\Student\LessonAttendanceController@update');
 
         // 受講生-お知らせ
-        Route::get('notification/read', 'Api\Student\NotificationController@read');
-        Route::get('notification/{id}', 'Api\Student\NotificationController@show');
+        Route::prefix('notification')->group(function () {
+            Route::get('read', 'Api\Student\NotificationController@read');
+            Route::get('{id}', 'Api\Student\NotificationController@show');
+        })
     });
 
 

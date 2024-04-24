@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Manager;
 
 use Carbon\Carbon;
+use App\Model\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
@@ -14,11 +15,16 @@ class StudentShowResource extends JsonResource
     public function nenrei($age){
         // リクエストされた受講生を取得
         $student = Student::findOrFail($request->student_id);
-        $birthDay = $student->attendances->pluck('birth_date');
+        $birthDay = $student->birth_date;
         $toDay = Carbon::today();
-        $nichi = $birthDay->diffInDays($toDay);
-        $toshi = intval($nichi/365);
-        $age = strval($toshi)->attendances->pluck('age');
+        $nichi = $birthDay->diffInYears($toDay);
+        if ($nichi < 1){
+            $toshi=1;
+        }else{
+            $toshi = $nichi;
+        }
+        $age = strval($toshi); /*-> Student::findOrFail($request->age);*/
+
         /* 年齢のカラム更新 */
     }
 
@@ -30,7 +36,14 @@ class StudentShowResource extends JsonResource
      */
     public function toArray($request)
     {
+        $student = Student::findOrFail($request->student_id);
+        $birthDay = $student->birth_date; /*メンバ変数birth_date*/
+        $toDay = Carbon::today();
+        $toshi = $birthDay->diffInYears($toDay);
+        $age = strval($toshi);
+        //return var_dump($birthDay); /*配列直前のreturnは要素を一つだけ取り出す*/
         return [
+            'test' => $birthDay->diffInYears($toshi),
             'student_id' => $this->resource->id,
             'given_name_by_instructor' => $this->resource->given_name_by_instructor,
             'nick_name' => $this->resource->nick_name,
@@ -47,5 +60,5 @@ class StudentShowResource extends JsonResource
             'last_login_at' => $this->resource->last_login_at->format('Y/m/d'),
             'profile_image' => $this->resource->profile_image,
         ];
-    }
+    } 
 }

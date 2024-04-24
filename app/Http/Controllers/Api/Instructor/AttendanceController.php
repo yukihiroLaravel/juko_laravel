@@ -213,7 +213,7 @@ class AttendanceController extends Controller
 
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        $attendances = Attendance::with(['lessonAttendances.lesson.chapter.course'])->where('course_id', $request->course_id)->get();
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
         $today = Carbon::today()->format('Y-m-d');
 
         $completedLessonsCount = $attendances->flatMap(function ($attendance) use ($today) {
@@ -223,12 +223,25 @@ class AttendanceController extends Controller
             return $compleatedLessonAttendances;
         })->count();
 
-        // すみません、chapter_idとattendance_idを同一キーとして扱うということがよくわかりませんでした
-        $completedChaptersCount = $attendances->flatMap(function ($attendance) {
-            return $attendance->lessonAttendances;
-        })->map(function ($lessonAttendance) {
-            return $lessonAttendance->attendance_id = $lessonAttendance->lesson->chapter->id;
-        })->unique()->count();
+        $completedChaptersCount = $attendances->flatMap(function ($attendance) use ($today) {
+            return  $attendance->lessonAttendances;
+        })->map(function ($lessonAttendance) use ($today) {
+            if ($lessonAttendance->updated_at->format('Y-m-d') == $today) {
+                $chapter_id = $lessonAttendance->lesson->chapter_id;
+                $attendance_id = $lessonAttendance->attendance_id;
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                $compleatedLessonsCount = $lessonAttendance->where(function ($item) use ($allLessonsId, $attendance_id) {
+                    $item->where('attendance_id', $attendance_id)->where('status', 'completed_attendance')->whereIn('lesson_id', $allLessonsId);
+                })->count();
+                if ($totalLessonsCount == $compleatedLessonsCount) {
+                    return [
+                        'chapter_id' => $chapter_id,
+                        'attendance_id' => $attendance_id,
+                    ];
+                }
+            }
+        })->unique()->whereNotNull()->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

@@ -258,7 +258,7 @@ class AttendanceController extends Controller
                 'chapter_id' => $lessonAttendance->lesson->chapter_id,
                 'attendance_id' => $lessonAttendance->attendance_id,
             ];
-        })->unique();
+        })->unique()->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

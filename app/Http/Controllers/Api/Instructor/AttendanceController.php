@@ -211,7 +211,7 @@ class AttendanceController extends Controller
 
         $chapterCollect = $this->calculateChapterProgress($attendance);
 
-    $response = [
+        $response = [
         'data' => [
             'attendance_id' => $attendance->id,
             'progress' => $attendance->progress,
@@ -223,7 +223,7 @@ class AttendanceController extends Controller
                 'chapter' => $chapterCollect,
             ],
         ],
-    ];
+        ];
 
         return response()->json($response, 200);
     }

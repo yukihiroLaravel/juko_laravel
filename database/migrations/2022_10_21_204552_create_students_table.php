@@ -24,7 +24,7 @@ class CreateStudentsTable extends Migration
             $table->string('password', 255)->nullable()->comment('パスワード');
             $table->string('purpose', 50)->nullable()->comment('目的');
             $table->date('birth_date')->nullable()->comment('誕生日');
-            $table->date('age')->nullable()->comment('年齢');
+            $table->string('age')->nullable()->comment('年齢');
             $table->tinyInteger('sex')->nullable()->comment('性別');
             $table->string('address', 255)->nullable()->comment('都道府県');
             $table->dateTime('created_at');

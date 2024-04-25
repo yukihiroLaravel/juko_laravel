@@ -214,34 +214,51 @@ class AttendanceController extends Controller
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
-        $today = Carbon::today()->format('Y-m-d');
 
-        $completedLessonsCount = $attendances->flatMap(function ($attendance) use ($today) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function ($lessonAttendance) use ($today) {
-                return $lessonAttendance->status == 'completed_attendance' && $lessonAttendance->updated_at->format('Y-m-d') == $today;
+        $completedLessonsCount = $attendances->flatMap(function ($attendance) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function ($lessonAttendance) {
+                return $lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isToday();
             });
             return $compleatedLessonAttendances;
         })->count();
 
-        $completedChaptersCount = $attendances->flatMap(function ($attendance) use ($today) {
-            return  $attendance->lessonAttendances;
-        })->map(function ($lessonAttendance) use ($today) {
-            if ($lessonAttendance->updated_at->format('Y-m-d') == $today) {
-                $chapter_id = $lessonAttendance->lesson->chapter_id;
-                $attendance_id = $lessonAttendance->attendance_id;
-                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
-                $totalLessonsCount = $allLessonsId->count();
-                $compleatedLessonsCount = $lessonAttendance->where(function ($item) use ($allLessonsId, $attendance_id) {
-                    $item->where('attendance_id', $attendance_id)->where('status', 'completed_attendance')->whereIn('lesson_id', $allLessonsId);
-                })->count();
-                if ($totalLessonsCount == $compleatedLessonsCount) {
-                    return [
-                        'chapter_id' => $chapter_id,
-                        'attendance_id' => $attendance_id,
-                    ];
-                }
-            }
-        })->unique()->whereNotNull()->count();
+
+        // $completedChaptersCount = $attendances->flatMap(function ($attendance) {
+        //     return  $attendance->lessonAttendances;
+        // })->map(function ($lessonAttendance) {
+        //     if ($lessonAttendance->updated_at->isToday()) {
+        //         $chapter_id = $lessonAttendance->lesson->chapter_id;
+        //         $attendance_id = $lessonAttendance->attendance_id;
+        //         $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+        //         $totalLessonsCount = $allLessonsId->count();
+        //         $compleatedLessonsCount = $lessonAttendance->where(function ($item) use ($allLessonsId, $attendance_id) {
+        //             $item->where('attendance_id', $attendance_id)->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->whereIn('lesson_id', $allLessonsId);
+        //         })->count();
+        //         if ($totalLessonsCount == $compleatedLessonsCount) {
+        //             return [
+        //                 'chapter_id' => $chapter_id,
+        //                 'attendance_id' => $attendance_id,
+        //             ];
+        //         }
+        //     }
+        // })->unique()->whereNotNull()->count();
+
+        $completedChaptersCount = $attendances->flatMap(function ($attendance) {
+            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })->filter(function ($lessonAttendance) {
+            $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+            $totalLessonsCount = $allLessonsId->count();
+            $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                ->whereIn('lesson_id', $allLessonsId)
+                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->count();
+            return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
+        })->map(function ($lessonAttendance) {
+            return [
+                'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                'attendance_id' => $lessonAttendance->attendance_id,
+            ];
+        })->unique();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

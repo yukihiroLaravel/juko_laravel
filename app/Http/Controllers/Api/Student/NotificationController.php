@@ -55,23 +55,24 @@ class NotificationController extends Controller
 
     public function show(Request $request)
     {   
-        //ログイン中の受講生の情報を取得
-        $student =  \Auth::user();
+        //受講生の情報を取得
+        $student = Student::findOrFail($request->user()->id);
 
-        //受講生が受講しているコース情報の取得。plickでcourse_idのみ取得
+        //受講生が受講しているコース情報の取得。pluckで受講しているcourse_idのみ取得。今のDBではcourse_idは1のみ
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
 
-        //DBにあるcourse_idから受講生が受講しているcourse_idの通知を取り出す
-        $notification = Notification::whereIn('course_id', $courseIds)->first();
+        //DBにあるcourseIdから受講生が受講しているcourse_id(1)が一致した場合そのお知らせ通知を取り出す。
+        $notification = Notification::whereIn('course_id', $courseIds)->firstOrFail();
 
         //お知らせがあった場合、詳細に必要な情報のcourse_id,title,contentのデータのみ取り出して$dataに入れる
         if($notification){
+            
             $data = [
                 'course_id' => $notification->course_id,
                 'title' => $notification->title,
                 'content' => $notification->content,
             ];
-
+            
             return response()->json($data, 200);
 
         }else{

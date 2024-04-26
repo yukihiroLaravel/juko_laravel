@@ -259,10 +259,10 @@ class AttendanceController extends Controller
     */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
-        return $chapter->lessons->flatMap(function ($lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
+    return $chapter->lessons->filter(function ($lesson) use ($attendance) {
+        $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+        return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+    })->count();
     }
 
     /**

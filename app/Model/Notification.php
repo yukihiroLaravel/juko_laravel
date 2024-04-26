@@ -93,4 +93,9 @@ class Notification extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+    // ソート項目
+    const SORT_BY_TITLE = 'title';
+    const SORT_BY_COURSE_ID = 'course_id';
+    const SORT_BY_START_DATE ='start_date';
 }

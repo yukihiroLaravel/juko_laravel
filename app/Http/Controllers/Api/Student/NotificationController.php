@@ -26,14 +26,8 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'start_date');
         $order = $request->input('order', 'asc');
-
-        // ログイン中の受講生を取得
         $student = $request->user();
-
-        // 受講生が受講しているコースのIDを取得します。
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-
-        // 現在の日時を取得
         $currentDateTime = CarbonImmutable::now();
 
         $notifications = Notification::with('course')

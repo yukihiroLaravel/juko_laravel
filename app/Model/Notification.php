@@ -97,5 +97,5 @@ class Notification extends Model
     // ソート項目
     const SORT_BY_TITLE = 'title';
     const SORT_BY_COURSE_ID = 'course_id';
-    const SORT_BY_START_DATE ='start_date';
+    const SORT_BY_START_DATE = 'start_date';
 }

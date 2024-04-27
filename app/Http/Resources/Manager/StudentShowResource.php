@@ -40,7 +40,7 @@ class StudentShowResource extends JsonResource
         $birthDay = $student->birth_date; /*メンバ変数birth_date*/
         $toDay = Carbon::today();
         $toshi = $birthDay->diffInYears($toDay);
-        $age = strval($toshi)//->update();
+        $age = strval($toshi);//->update();
         //return var_dump($nenrei); /*配列直前のreturnは要素を一つだけ取り出す*/
         return [
             'student_id' => $this->resource->id,

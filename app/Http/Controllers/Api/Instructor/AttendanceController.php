@@ -21,7 +21,6 @@ use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
-use App\Http\Resources\Instructor\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -191,31 +190,6 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講師側受講状況API
-     *
-     * @param AttendanceStatusRequest $request
-     * @return JsonResponse
-     */
-    public function status(AttendanceStatusRequest $request): JsonResponse
-    {
-        $attendance_id = $request->input('attendance_id');
-
-        /** @var Attendance */
-        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
-
-        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-            return response()->json([
-                "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-            ], 403);
-        }
-
-        $response = new AttendanceStatusResource($attendance);
-
-        return response()->json($response, 200);
-    }
-
-    /**
      * 受講生ログイン率計算
      *
      * @param int $number
@@ -230,5 +204,83 @@ class AttendanceController extends Controller
 
         $percent = ($number / $total) * 100;
         return floor($percent);
+    }
+
+    /**
+     * 講師側受講状況API
+     *
+     * @param AttendanceStatusRequest $request
+     * @return JsonResponse
+     */
+    public function status(AttendanceStatusRequest $request): JsonResponse
+    {
+        $attendanceId = $request->attendance_id;
+
+        /** @var Attendance */
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
+                "result" => false,
+                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+            ], 403);
+        }
+
+        $chapterCollect = $this->calculateChapterProgress($attendance);
+
+        $response = [
+        'data' => [
+            'attendance_id' => $attendance->id,
+            'progress' => $attendance->progress,
+            'course' => [
+                'course_id' => $attendance->course->id,
+                'title' => $attendance->course->title,
+                'status' => $attendance->course->status,
+                'image' => $attendance->course->image,
+                'chapter' => $chapterCollect,
+            ],
+        ],
+        ];
+
+        return response()->json($response, 200);
+    }
+
+    /**
+     * チャプターの進捗計算
+     *
+     * @param Attendance $attendance
+     * @return array
+     */
+    private function calculateChapterProgress(Attendance $attendance): array
+    {
+        return $attendance->course->chapters->map(function (Chapter $chapter) use ($attendance) {
+            $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
+            $totalLessonsCount = $chapter->lessons->count();
+            $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
+
+            return [
+                'chapter_id' => $chapter->id,
+                'title' => $chapter->title,
+                'status' => $chapter->status,
+                'progress' => $chapterProgress,
+            ];
+        })
+        ->toArray();
+    }
+
+    /**
+     * チャプター内完了済みレッスン数計算
+     *
+     * @param Chapter $chapter
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
+    {
+        return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
+            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })
+        ->count();
     }
 }

@@ -190,6 +190,23 @@ class AttendanceController extends Controller
     }
 
     /**
+     * 受講生ログイン率計算
+     *
+     * @param int $number
+     * @param int $total
+     * @return float
+     */
+    public function calcLoginRate(int $number, int $total): float
+    {
+        if ($total === 0) {
+            return 0;
+        }
+
+        $percent = ($number / $total) * 100;
+        return floor($percent);
+    }
+
+    /**
      * 講師側受講状況API
      *
      * @param AttendanceStatusRequest $request
@@ -229,14 +246,14 @@ class AttendanceController extends Controller
     }
 
     /**
-    * チャプターの進捗計算
-    *
-    * @param Attendance $attendance
-    * @return array
-    */
+     * チャプターの進捗計算
+     *
+     * @param Attendance $attendance
+     * @return array
+     */
     private function calculateChapterProgress(Attendance $attendance): array
     {
-        return $attendance->course->chapters->map(function ($chapter) use ($attendance) {
+        return $attendance->course->chapters->map(function (Chapter $chapter) use ($attendance) {
             $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
             $totalLessonsCount = $chapter->lessons->count();
             $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
@@ -247,38 +264,23 @@ class AttendanceController extends Controller
                 'status' => $chapter->status,
                 'progress' => $chapterProgress,
             ];
-        })->toArray();
+        })
+        ->toArray();
     }
 
     /**
-    * チャプター内完了済みレッスン数計算
-    *
-    * @param Chapter $chapter
-    * @param Attendance $attendance
-    * @return int
-    */
+     * チャプター内完了済みレッスン数計算
+     *
+     * @param Chapter $chapter
+     * @param Attendance $attendance
+     * @return int
+     */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
-        return $chapter->lessons->filter(function ($lesson) use ($attendance) {
+        return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
             $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
-    }
-
-    /**
-     * 受講生ログイン率計算
-     *
-     * @param int $number
-     * @param int $total
-     * @return float
-     */
-    public function calcLoginRate(int $number, int $total): float
-    {
-        if ($total === 0) {
-            return 0;
-        }
-
-        $percent = ($number / $total) * 100;
-        return floor($percent);
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })
+        ->count();
     }
 }

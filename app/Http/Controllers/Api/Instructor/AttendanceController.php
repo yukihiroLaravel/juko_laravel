@@ -209,24 +209,25 @@ class AttendanceController extends Controller
      * 講座受講状況-当日
      *
      * @param AttendanceShowRequest $request
+     * @return JsonResponse
      */
-
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
         // 今日完了したレッスンの個数を取得
-        $completedLessonsCount = $attendances->flatMap(function ($attendance) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function ($lessonAttendance) {
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
                 return $lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isToday();
             });
             return $compleatedLessonAttendances;
         })->count();
 
         // 今日完了したチャプターの個数を取得
-        $completedChaptersCount = $attendances->flatMap(function ($attendance) {
+        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
-        })->filter(function ($lessonAttendance) {
+        })
+        ->filter(function (LessonAttendance $lessonAttendance) {
             // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が当日の日時という条件で絞り込む
             $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
             $totalLessonsCount = $allLessonsId->count();
@@ -235,13 +236,16 @@ class AttendanceController extends Controller
                 ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                 ->count();
             return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
-        })->map(function ($lessonAttendance) {
+        })
+        ->map(function (LessonAttendance $lessonAttendance) {
             // chapter_idとattendance_idをキーにもつ新しい配列を作成
             return [
                 'chapter_id' => $lessonAttendance->lesson->chapter_id,
                 'attendance_id' => $lessonAttendance->attendance_id
             ];
-        })->unique()->count();
+        })
+        ->unique()
+        ->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

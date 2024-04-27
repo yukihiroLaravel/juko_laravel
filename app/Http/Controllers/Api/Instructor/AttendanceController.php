@@ -204,4 +204,10 @@ class AttendanceController extends Controller
         $percent = ($number / $total) * 100;
         return floor($percent);
     }
+
+    public function thisMonth()
+    {
+        $emptyArray = [];
+        return $emptyArray;
+    }
 }

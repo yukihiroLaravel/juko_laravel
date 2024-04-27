@@ -205,7 +205,7 @@ class AttendanceController extends Controller
         return floor($percent);
     }
 
-    public function thisMonth()
+    public function showStatusThisMonth()
     {
         $emptyArray = [];
         return $emptyArray;

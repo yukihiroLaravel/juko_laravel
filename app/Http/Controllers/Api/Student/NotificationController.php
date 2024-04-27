@@ -75,12 +75,6 @@ class NotificationController extends Controller
             
             return response()->json($data, 200);
 
-        }else{
-
-            return response()->json([
-                "result" => false,
-                "message" => "Notification not found."
-            ], 404);
         }
     }
 }

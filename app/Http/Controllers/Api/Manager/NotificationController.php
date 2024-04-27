@@ -12,6 +12,7 @@ use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationUpdateResource;
+use App\Http\Requests\Manager\NotificationStoreRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -79,7 +80,7 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      */
-    public function store(Request $request)
+    public function store(NotificationStoreRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

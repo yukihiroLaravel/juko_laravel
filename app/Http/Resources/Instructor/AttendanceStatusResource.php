@@ -14,7 +14,7 @@ class AttendanceStatusResource extends JsonResource
      * @return array
      */
     public function toArray($request)
-{
+    {
     $attendance = $this->attendance;
 
     if ($attendance !== null && is_object($attendance)) {
@@ -27,28 +27,13 @@ class AttendanceStatusResource extends JsonResource
                     'title' => $attendance->course->title,
                     'status' => $attendance->course->status,
                     'image' => $attendance->course->image,
-                    'chapter' => $attendance->course->chapters->map(function ($chapter) {
+                    'chapters' => $attendance->course->chapters->map(function ($chapter) use ($attendance) {
                         return [
                             'chapter_id' => $chapter->id,
                             'title' => $chapter->title,
                             'status' => $chapter->status,
-                            'lessons' => $chapter->lessons->map(function ($lesson) use ($chapter) {
-                                $lessonAttendance = LessonAttendance::where('lesson_id', $lesson->id)
-                                    ->where('attendance_id', $attendance->id)
-                                    ->first();
-        
-                                $progress = 0;
-                                if ($lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                                    $progress = 100;
-                                }
-        
-                                return [
-                                    'lesson_id' => $lesson->id,
-                                    'chapter_id' => $chapter->id,
-                                    'status' => $lessonAttendance ? $lessonAttendance->status : null,
-                                    'progress' => $progress,
-                                ];
-                            }),
+                            'progress' => $this->calculateChapterProgress($chapter, $attendance),
+                            'completed_lessons_count' => $this->calculateCompletedLessonCount($chapter, $attendance),
                         ];
                     }),
                 ],
@@ -57,5 +42,34 @@ class AttendanceStatusResource extends JsonResource
     } else {
         return [];
     }
-}
+    }
+
+    /**
+     * チャプターの進捗計算
+     *
+     * @param Chapter $chapter
+     * @param Attendance $attendance
+     * @return float
+     */
+    private function calculateChapterProgress($chapter, $attendance)
+    {
+        $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
+        $totalLessonsCount = $chapter->lessons->count();
+        return $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
+    }
+
+    /**
+     * チャプター内完了済みレッスン数計算
+     *
+     * @param Chapter $chapter
+     * @param Attendance $attendance
+     * @return int
+     */
+    private function calculateCompletedLessonCount($chapter, $attendance)
+    {
+        return $chapter->lessons->filter(function ($lesson) use ($attendance) {
+            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        })->count();
+    }
 }

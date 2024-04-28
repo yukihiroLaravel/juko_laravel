@@ -64,9 +64,7 @@ class NotificationController extends Controller
         //DBにあるcourseIdから受講生が受講しているcourse_id(1)が一致した場合そのお知らせ通知を取り出す。
         $notification = Notification::whereIn('course_id', $courseIds)->firstOrFail();
 
-        //お知らせがあった場合、詳細に必要な情報のcourse_id,title,contentのデータのみ取り出して$dataに入れる
-        if($notification){
-            
+        　//お知らせがあった場合、詳細に必要な情報のcourse_id,title,contentのデータを$dataに入れて代入する
             $data = [
                 'course_id' => $notification->course_id,
                 'title' => $notification->title,
@@ -74,7 +72,5 @@ class NotificationController extends Controller
             ];
             
             return response()->json($data, 200);
-
-        }
     }
 }

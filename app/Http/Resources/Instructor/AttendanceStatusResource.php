@@ -23,7 +23,6 @@ class AttendanceStatusResource extends JsonResource
      */
     public function toArray($request)
     {
-    if ($this->attendance !== null && is_object($this->attendance)) {
         return [
             'data' => [
                 'attendance_id' => $this->attendance->id,
@@ -44,9 +43,6 @@ class AttendanceStatusResource extends JsonResource
                 ],
             ],
         ];
-    } else {
-        return [];
-    }
     }
 
     private function calculateChapterProgress($chapter)

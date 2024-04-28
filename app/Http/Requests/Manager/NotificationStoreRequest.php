@@ -25,7 +25,7 @@ class NotificationStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id'     => ['required', 'exists:courses,id', 'integer'],
+            'course_id'     => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'title'         => ['required', 'string', 'max:50'],
             'type'          => ['required', new NotificationStoreStatusRule()],
             'start_date'    => ['required', 'date_format:Y-m-d H:i:s'],

@@ -17,21 +17,24 @@ class StudentShowResource extends JsonResource
      */
     public function toArray($request)
     {
+        $student = $this->resource['student'];
+        $age = $this->resource['age'];
         return [
-            'student_id' => $this->resource->id,
-            'given_name_by_instructor' => $this->resource->given_name_by_instructor,
-            'nick_name' => $this->resource->nick_name,
-            'last_name' => $this->resource->last_name,
-            'first_name' => $this->resource->first_name,
-            'occupation' => $this->resource->occupation,
-            'email' => $this->resource->email,
-            'purpose' => $this->resource->purpose,
-            'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'sex' => $this->resource->sex,
-            'address' => $this->resource->address,
-            'created_at' => $this->resource->created_at->format('Y/m/d'),
-            'last_login_at' => $this->resource->last_login_at->format('Y/m/d'),
-            'profile_image' => $this->resource->profile_image,
+            'student_id' => $student->id,
+            'given_name_by_instructor' => $student->given_name_by_instructor,
+            'nick_name' => $student->nick_name,
+            'last_name' => $student->last_name,
+            'first_name' => $student->first_name,
+            'occupation' => $student->occupation,
+            'email' => $student->email,
+            'purpose' => $student->purpose,
+            'birth_date' => $student->birth_date->format('Y/m/d'),
+            'age' => $age,
+            'sex' => $student->sex,
+            'address' => $student->address,
+            'created_at' => $student->created_at->format('Y/m/d'),
+            'last_login_at' => $student->last_login_at->format('Y/m/d'),
+            'profile_image' => $student->profile_image,
         ];
     }
 }

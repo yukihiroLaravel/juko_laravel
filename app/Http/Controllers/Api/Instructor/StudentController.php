@@ -100,6 +100,7 @@ class StudentController extends Controller
         /** @var Student $student */
         $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
+       // dd($courseIds);
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
@@ -109,7 +110,19 @@ class StudentController extends Controller
             ], 403);
         }
 
-        return new StudentShowResource($student);
+        //受講生の年齢の算出
+
+        $student = Student::findOrFail($request->student_id);
+        $birthday = $student->birth_date;   //student_idからbirth_dateを抽出
+        $now = Carbon::today();//今の日付のみを取得
+        $age = $birthday->diffInYears($now);//Carbon同士で差を計算
+        //return response()->json([
+        //    'age' => $age,
+        //]);
+        return new StudentShowResource([
+            'student' => $student,
+            'age' => $age,
+        ]);
     }
 
     /**

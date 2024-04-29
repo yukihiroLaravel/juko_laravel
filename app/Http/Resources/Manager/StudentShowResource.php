@@ -37,5 +37,5 @@ class StudentShowResource extends JsonResource
             'last_login_at' => $student->last_login_at->format('Y/m/d'),
             'profile_image' => $student->profile_image,
         ];
-    } 
+    }
 }

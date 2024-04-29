@@ -52,7 +52,6 @@ class Student extends Authenticatable
         'email',
         'password',
         'purpose',
-        'age',
         'birth_date',
         'sex',
         'address',
@@ -63,7 +62,6 @@ class Student extends Authenticatable
      * キャスト
      */
     protected $casts = [
-        'age' => 'date',
         'birth_date' => 'date',
         'last_login_at' => 'datetime',
         'created_at' => 'datetime',

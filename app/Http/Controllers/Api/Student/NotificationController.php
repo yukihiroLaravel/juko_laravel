@@ -52,25 +52,30 @@ class NotificationController extends Controller
             return true;
         });
     }
-
-    public function show(Request $request)
+   
+    public function show(Request $request, $notification_id)
     {   
-        //受講生の情報を取得
         $student = Student::findOrFail($request->user()->id);
-
-        //受講生が受講しているコース情報の取得。pluckで受講しているcourse_idのみ取得。今のDBではcourse_idは1のみ
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-
-        //DBにあるcourseIdから受講生が受講しているcourse_id(1)が一致した場合そのお知らせ通知を取り出す。
-        $notification = Notification::whereIn('course_id', $courseIds)->firstOrFail();
-
-        　//お知らせがあった場合、詳細に必要な情報のcourse_id,title,contentのデータを$dataに入れて代入する
+        $notification = Notification::whereIn('course_id', $courseIds)
+                        ->where('id', $notification_id)
+                        ->with('course') 
+                        ->firstOrFail();
+            
             $data = [
-                'course_id' => $notification->course_id,
+                'notification_id' => $notification_id,
                 'title' => $notification->title,
                 'content' => $notification->content,
+                "start_date" => $notification->start_date,
+                "end_date" => $notification->end_date,
+                'course' => [ 
+                    'course_id' => $notification->course->id, 
+                    'title' => $notification->course->title,
+                ],
+                
+                
             ];
-            
+
             return response()->json($data, 200);
     }
 }

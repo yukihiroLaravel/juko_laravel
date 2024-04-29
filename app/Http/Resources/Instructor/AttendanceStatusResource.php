@@ -32,7 +32,7 @@ class AttendanceStatusResource extends JsonResource
     }
 
     /**
-     * Calculate chapter progress for the course.
+     * チャプターの進捗計算
      *
      * @param  \App\Models\Course  $course
      * @param  \App\Models\Attendance  $attendance
@@ -55,7 +55,7 @@ class AttendanceStatusResource extends JsonResource
     }
 
     /**
-     * Calculate the number of completed lessons within a chapter for a specific attendance.
+     * チャプター内完了済みレッスン数計算
      *
      * @param  \App\Models\Chapter  $chapter
      * @param  \App\Models\Attendance  $attendance

@@ -106,4 +106,13 @@ class InstructorController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * 講師講座情報一覧取得API
+     *
+     */
+    public function courseIndex()
+    {
+        return response()->json([]);
+    }
 }

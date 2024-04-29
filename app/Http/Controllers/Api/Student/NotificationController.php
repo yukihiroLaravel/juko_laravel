@@ -1,30 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Student;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Resources\NotificationIndexResource;
-use App\Model\Notification;
+use Carbon\Carbon;
 use App\Model\Student;
 use App\Model\Attendance;
-use Carbon\Carbon;
+use App\Model\Notification;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Student\NotificationReadResource;
 
 class NotificationController extends Controller
 {
     /**
-     * お知らせ一覧取得API
+     * お知らせ取得API
      *
      * @param Request $request
-     * @return NotificationIndexResource
+     * @return NotificationReadResource
      */
-    public function index(Request $request)
+    public function read(Request $request)
     {
         $student = Student::findOrFail($request->user()->id);
         $notifications = $this->getNotifications($student);
         $filteredNotifications = $this->filterAndMarkAsRead($student, $notifications);
 
-        return new NotificationIndexResource($filteredNotifications);
+        return new NotificationReadResource($filteredNotifications);
     }
 
     private function getNotifications(Student $student)

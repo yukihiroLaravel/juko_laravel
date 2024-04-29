@@ -13,16 +13,12 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Instructor\CourseEditRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
-use App\Http\Resources\Instructor\CourseEditResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Instructor\CourseIndexResource;
-use App\Http\Resources\Instructor\CourseStoreResource;
-use App\Http\Resources\Instructor\CourseUpdateResource;
 use App\Http\Requests\Instructor\CoursePutStatusRequest;
 
 class CourseController extends Controller
@@ -54,18 +50,6 @@ class CourseController extends Controller
     }
 
     /**
-     * 講座編集API
-     *
-     * @param CourseEditRequest $request
-     * @return CourseEditResource
-     */
-    public function edit(CourseEditRequest $request): CourseEditResource
-    {
-        $course = Course::findOrFail($request->course_id);
-        return new CourseEditResource($course);
-    }
-
-    /**
      * 講座登録API
      *
      * @param CourseStoreRequest $request
@@ -91,7 +75,6 @@ class CourseController extends Controller
 
         return response()->json([
             "result" => true,
-            "data" => new CourseStoreResource($course),
         ]);
     }
 
@@ -138,7 +121,6 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResource($course)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());

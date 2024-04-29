@@ -127,7 +127,15 @@ class StudentController extends Controller
             ], 403);
         }
 
-        return new StudentShowResource($student);
+        //受講生の年齢を算出
+        $birthDay = $student->birth_date; /*メンバ変数birth_date*/
+        $toDay = Carbon::today();
+        $ageData = $birthDay->diffInYears($toDay);
+
+        return new StudentShowResource([
+            'student' => $student, 
+            'ageData' => $ageData,
+        ]);
     }
 
     /**

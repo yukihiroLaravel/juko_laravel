@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Manager;
 
-use Carbon\Carbon;
 use App\Model\Student;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -10,23 +9,6 @@ class StudentShowResource extends JsonResource
 {
     /** @var \App\Model\Student */
     public $resource;
-
-    // 年齢を計算
-    public function nenrei($age){
-        // リクエストされた受講生を取得
-        $student = Student::findOrFail($request->student_id);
-        $birthDay = $student->birth_date;
-        $toDay = Carbon::today();
-        $nichi = $birthDay->diffInYears($toDay);
-        if ($nichi < 1){
-            $toshi=1;
-        }else{
-            $toshi = $nichi;
-        }
-        $age = strval($toshi); /*-> Student::findOrFail($request->age);*/
-
-        /* 年齢のカラム更新 */
-    }
 
     /**
      * Transform the resource into an array.
@@ -36,28 +18,24 @@ class StudentShowResource extends JsonResource
      */
     public function toArray($request)
     {
-        $student = Student::findOrFail($request->student_id);
-        $birthDay = $student->birth_date; /*メンバ変数birth_date*/
-        $toDay = Carbon::today();
-        $toshi = $birthDay->diffInYears($toDay);
-        $age = strval($toshi);//->update();
-        //return var_dump($nenrei); /*配列直前のreturnは要素を一つだけ取り出す*/
+        $student = $this->resource['student'];
+        $age = $this->resource['ageData'];
         return [
-            'student_id' => $this->resource->id,
-            'given_name_by_instructor' => $this->resource->given_name_by_instructor,
-            'nick_name' => $this->resource->nick_name,
-            'last_name' => $this->resource->last_name,
-            'first_name' => $this->resource->first_name,
-            'occupation' => $this->resource->occupation,
-            'email' => $this->resource->email,
-            'purpose' => $this->resource->purpose,
-            'age' => $this->resource->age,
-            'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'sex' => $this->resource->sex,
-            'address' => $this->resource->address,
-            'created_at' => $this->resource->created_at->format('Y/m/d'),
-            'last_login_at' => $this->resource->last_login_at->format('Y/m/d'),
-            'profile_image' => $this->resource->profile_image,
+            'student_id' => $student->id,
+            'given_name_by_instructor' => $student->given_name_by_instructor,
+            'nick_name' => $student->nick_name,
+            'last_name' => $student->last_name,
+            'first_name' => $student->first_name,
+            'occupation' => $student->occupation,
+            'email' => $student->email,
+            'purpose' => $student->purpose,
+            'age' => $age,
+            'birth_date' => $student->birth_date->format('Y/m/d'),
+            'sex' => $student->sex,
+            'address' => $student->address,
+            'created_at' => $student->created_at->format('Y/m/d'),
+            'last_login_at' => $student->last_login_at->format('Y/m/d'),
+            'profile_image' => $student->profile_image,
         ];
     } 
 }

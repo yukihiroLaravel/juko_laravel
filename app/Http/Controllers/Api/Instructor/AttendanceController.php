@@ -227,8 +227,6 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        $attendance->load('course');
-
         $response = new AttendanceStatusResource($attendance);
 
         return response()->json($response, 200);

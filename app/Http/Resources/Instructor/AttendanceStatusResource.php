@@ -2,11 +2,24 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Model\Attendance;
 use App\Model\LessonAttendance;
+use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceStatusResource extends JsonResource
 {
+    /**
+     * @var Attendance
+     */
+    protected $attendance;
+    protected $chapter;
+
+    public function __construct(Attendance $attendance)
+    {
+        $this->attendance = $attendance;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -15,57 +28,37 @@ class AttendanceStatusResource extends JsonResource
      */
     public function toArray($request)
     {
-        $attendance = $this->resource;
-        $course = $attendance->course;
-
         return [
-            'attendance_id' => $attendance->id,
-            'progress' => $attendance->progress,
-            'course' => [
-                'course_id' => $course->id,
-                'title' => $course->title,
-                'status' => $course->status,
-                'image' => $course->image,
-                'chapter' => $this->calculateChapterProgress($course, $attendance),
+            'data' => [
+                'attendance_id' => $this->attendance->id,
+                'progress' => $this->attendance->progress,
+                'course' => [
+                    'course_id' => $this->attendance->course->id,
+                    'title' => $this->attendance->course->title,
+                    'status' => $this->attendance->course->status,
+                    'image' => $this->attendance->course->image,
+                    'chapters' => $this->calculateChapterProgress($this->attendance->course->chapters),
+                ],
             ],
         ];
     }
 
     /**
-     * チャプターの進捗計算
+     * Calculate chapter progress
      *
-     * @param  \App\Models\Course  $course
-     * @param  \App\Models\Attendance  $attendance
+     * @param  \Illuminate\Database\Eloquent\Collection  $chapters
      * @return array
      */
-    private function calculateChapterProgress($course, $attendance)
+    private function calculateChapterProgress($chapters)
     {
-        return $course->chapters->map(function ($chapter) use ($attendance) {
-            $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
-            $totalLessonsCount = $chapter->lessons->count();
-            $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
-
+        return $chapters->map(function ($chapter) {
+            $chapterProgress = $chapter->calculateChapterProgress($this->attendance);
             return [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
                 'status' => $chapter->status,
                 'progress' => $chapterProgress,
             ];
-        })->toArray();
-    }
-
-    /**
-     * チャプター内完了済みレッスン数計算
-     *
-     * @param  \App\Models\Chapter  $chapter
-     * @param  \App\Models\Attendance  $attendance
-     * @return int
-     */
-    private function calculateCompletedLessonCount($chapter, $attendance)
-    {
-        return $chapter->lessons->filter(function ($lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
+        });
     }
 }

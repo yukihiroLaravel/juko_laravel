@@ -209,10 +209,10 @@ class AttendanceController extends Controller
 
     /**
      * 講師側受講状況API
-     *
-     * @param AttendanceStatusRequest $request
-     * @return JsonResponse
-     */
+    *
+    * @param AttendanceStatusRequest $request
+    * @return JsonResponse
+    */
     public function status(AttendanceStatusRequest $request): JsonResponse
     {
         $attendanceId = $request->attendance_id;
@@ -229,6 +229,6 @@ class AttendanceController extends Controller
 
         $response = new AttendanceStatusResource($attendance);
 
-        return response()->json($response, 200);
+    return response()->json($response, 200);
     }
 }

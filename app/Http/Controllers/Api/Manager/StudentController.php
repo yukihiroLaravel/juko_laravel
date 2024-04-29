@@ -133,7 +133,7 @@ class StudentController extends Controller
         $ageData = $birthDay->diffInYears($toDay);
 
         return new StudentShowResource([
-            'student' => $student, 
+            'student' => $student,
             'ageData' => $ageData,
         ]);
     }

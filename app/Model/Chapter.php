@@ -143,5 +143,4 @@ class Chapter extends Model
         })
         ->count();
     }
-
 }

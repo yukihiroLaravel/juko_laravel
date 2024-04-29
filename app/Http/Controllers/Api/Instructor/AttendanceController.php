@@ -229,6 +229,6 @@ class AttendanceController extends Controller
 
         $response = new AttendanceStatusResource($attendance);
 
-    return response()->json($response, 200);
+        return response()->json($response, 200);
     }
 }

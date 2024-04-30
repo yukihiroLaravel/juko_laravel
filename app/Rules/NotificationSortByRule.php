@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Model\Notification;
 
-class IndexSortByRule implements Rule
+class NotificationSortByRule implements Rule
 {
     /**
      * Create a new rule instance.

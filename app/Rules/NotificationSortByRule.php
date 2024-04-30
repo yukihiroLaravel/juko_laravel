@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Model\Attendance;
+use App\Model\Notification;
 
 class IndexSortByRule implements Rule
 {
@@ -30,10 +30,9 @@ class IndexSortByRule implements Rule
             in_array(
                 $value,
                 [
-                Attendance::SORT_BY_NICK_NAME,
-                Attendance::SORT_BY_EMAIL,
-                Attendance::SORT_BY_ATTENDANCED_AT,
-                Attendance::SORT_BY_LAST_LOGIN_AT,
+                Notification::SORT_BY_TITLE,
+                Notification::SORT_BY_COURSE_ID,
+                Notification::SORT_BY_START_DATE,
                 ],
                 true
             )

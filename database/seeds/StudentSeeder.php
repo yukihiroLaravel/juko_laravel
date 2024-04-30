@@ -25,7 +25,6 @@ class StudentSeeder extends Seeder
                 'password' => Hash::make('password1'),
                 'purpose' => '自己研鑽のため',
                 'birth_date' => Carbon::today(),
-
                 'sex' => 1,
                 'address' => '東京都',
                 'created_at' => Carbon::now(),

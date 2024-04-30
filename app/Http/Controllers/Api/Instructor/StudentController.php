@@ -116,9 +116,6 @@ class StudentController extends Controller
         $birthday = $student->birth_date;   //student_idからbirth_dateを抽出
         $now = Carbon::today();//今の日付のみを取得
         $age = $birthday->diffInYears($now);//Carbon同士で差を計算
-        //return response()->json([
-        //    'age' => $age,
-        //]);
         return new StudentShowResource([
             'student' => $student,
             'age' => $age,

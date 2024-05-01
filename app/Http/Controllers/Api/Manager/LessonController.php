@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Lesson;
+use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +19,6 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
-use App\Http\Resources\Manager\LessonStoreResource;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -51,23 +51,35 @@ class LessonController extends Controller
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
+        DB::beginTransaction();
         try {
-            $newLesson = Lesson::create([
+            $lesson = Lesson::create([
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
                 'order' => (int) $maxOrder + 1
             ]);
 
+            $attendances = Attendance::where('course_id', $request->course_id)->get();
+            $lesson_id = $lesson->id;
+            $attendances->each(function ($attendance) use (&$lesson_id) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id'     => $lesson_id,
+                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                ]);
+            });
+
+            DB::commit();
             return response()->json([
                 "result" => true,
-                "data" => new LessonStoreResource($newLesson),
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             return response()->json([
                 "result" => false,
-            ]);
+            ], 500);
         }
     }
 
@@ -92,7 +104,7 @@ class LessonController extends Controller
             // 配下の講師でない場合は403エラー
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this lesson.",
+                'message' => "Forbidden, not allowed to this lesson.",
             ], 403);
         }
 

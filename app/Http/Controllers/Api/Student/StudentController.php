@@ -14,12 +14,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\StudentEditResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Requests\Student\StudentPatchRequest;
-use App\Http\Resources\Student\StudentPostResource;
-use App\Http\Resources\Student\StudentPatchResource;
+use App\Http\Resources\Student\StudentShowResource;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
@@ -29,6 +27,18 @@ use App\Exceptions\TryCountOverAuthorizationCodeException;
 
 class StudentController extends Controller
 {
+    /**
+     * 生徒情報取得API
+     *
+     * @param Request $request
+     * @return StudentShowResource
+     */
+    public function show(Request $request)
+    {
+        $student = Student::findOrFail($request->user()->id);
+        return new StudentShowResource($student);
+    }
+
     /**
      * ユーザー新規仮登録API
      *
@@ -47,8 +57,12 @@ class StudentController extends Controller
                 'occupation' => $request->occupation,
                 'purpose'    => $request->purpose,
                 'birth_date' => $request->birth_date,
+<<<<<<< HEAD
                 'age'        => $request->age,
                 'sex'        => $request->sex,
+=======
+                'gender'        => $request->gender,
+>>>>>>> develop
                 'address'    => $request->address,
             ]);
 
@@ -92,7 +106,6 @@ class StudentController extends Controller
 
             return response()->json([
                 'result'  => true,
-                'data'    => new StudentPostResource($student),
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
@@ -113,18 +126,6 @@ class StudentController extends Controller
               "result" => false,
             ], 500);
         }
-    }
-
-    /**
-     * ユーザー情報編集API
-     *
-     * @param Request $request
-     * @return StudentEditResource
-     */
-    public function edit(Request $request)
-    {
-        $student = Student::findOrFail($request->user()->id);
-        return new StudentEditResource($student);
     }
 
     /**
@@ -171,7 +172,7 @@ class StudentController extends Controller
                 'email' => $request->email,
                 'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'sex' => $request->sex,
+                'gender' => $request->gender,
                 'address' => $request->address,
                 'profile_image' => $imagePath,
             ])
@@ -179,7 +180,6 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => new StudentPatchResource($student)
             ]);
         } catch (Exception $e) {
             Log::error($e);

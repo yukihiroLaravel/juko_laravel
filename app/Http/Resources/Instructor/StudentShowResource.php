@@ -30,7 +30,7 @@ class StudentShowResource extends JsonResource
             'purpose' => $student->purpose,
             'birth_date' => $student->birth_date->format('Y/m/d'),
             'age' => $age,
-            'sex' => $student->sex,
+            'gender' => $student->gender,
             'address' => $student->address,
             'created_at' => $student->created_at->format('Y/m/d'),
             'last_login_at' => $student->last_login_at->format('Y/m/d'),

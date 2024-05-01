@@ -11,21 +11,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
-use App\Http\Resources\Instructor\InstructorEditResource;
-use App\Http\Resources\Instructor\InstructorPatchResource;
+use App\Http\Resources\Instructor\InstructorShowResource;
 
 class InstructorController extends Controller
 {
     /**
      * 講師取得API
      *
-     * @return InstructorEditResource
+     * @return InstructorShowResource
      */
-    public function edit()
+    public function show()
     {
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
-        return new InstructorEditResource($instructor);
+        return new InstructorShowResource($instructor);
     }
 
     /**
@@ -64,7 +63,6 @@ class InstructorController extends Controller
             ]);
             return response()->json([
                 'result' => true,
-                'data' => new InstructorPatchResource($instructor)
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);

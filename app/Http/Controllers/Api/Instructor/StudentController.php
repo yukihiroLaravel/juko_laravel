@@ -5,16 +5,15 @@ namespace App\Http\Controllers\Api\Instructor;
 use Carbon\Carbon;
 use App\Model\Course;
 use App\Model\Student;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Requests\Instructor\StudentStoreRequest;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Http\Resources\Instructor\StudentIndexResource;
-use App\Http\Resources\Instructor\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -51,17 +50,19 @@ class StudentController extends Controller
                 'students.email',
                 'students.profile_image',
                 'students.last_login_at',
+                'attendances.id as attendance_id',
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->where('attendances.course_id', $request->course_id)
+            ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
-                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
-                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                        ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                        ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
@@ -130,8 +131,7 @@ class StudentController extends Controller
      */
     public function store(StudentStoreRequest $request): JsonResponse
     {
-        /** @var Student $student */
-        $student = Student::create([
+        Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),
@@ -140,7 +140,6 @@ class StudentController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new StudentStoreResource($student)
         ]);
     }
 }

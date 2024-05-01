@@ -21,6 +21,7 @@ use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -210,9 +211,9 @@ class AttendanceController extends Controller
      * 講師側受講状況API
      *
      * @param AttendanceStatusRequest $request
-     * @return JsonResponse
+     * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(AttendanceStatusRequest $request): JsonResponse
+    public function status(AttendanceStatusRequest $request)
     {
         $attendanceId = $request->attendance_id;
 
@@ -226,61 +227,6 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        $chapterCollect = $this->calculateChapterProgress($attendance);
-
-        $response = [
-        'data' => [
-            'attendance_id' => $attendance->id,
-            'progress' => $attendance->progress,
-            'course' => [
-                'course_id' => $attendance->course->id,
-                'title' => $attendance->course->title,
-                'status' => $attendance->course->status,
-                'image' => $attendance->course->image,
-                'chapter' => $chapterCollect,
-            ],
-        ],
-        ];
-
-        return response()->json($response, 200);
-    }
-
-    /**
-     * チャプターの進捗計算
-     *
-     * @param Attendance $attendance
-     * @return array
-     */
-    private function calculateChapterProgress(Attendance $attendance): array
-    {
-        return $attendance->course->chapters->map(function (Chapter $chapter) use ($attendance) {
-            $completedCount = $this->calculateCompletedLessonCount($chapter, $attendance);
-            $totalLessonsCount = $chapter->lessons->count();
-            $chapterProgress = $totalLessonsCount > 0 ? ($completedCount / $totalLessonsCount) * 100 : 0;
-
-            return [
-                'chapter_id' => $chapter->id,
-                'title' => $chapter->title,
-                'status' => $chapter->status,
-                'progress' => $chapterProgress,
-            ];
-        })
-        ->toArray();
-    }
-
-    /**
-     * チャプター内完了済みレッスン数計算
-     *
-     * @param Chapter $chapter
-     * @param Attendance $attendance
-     * @return int
-     */
-    private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
-    {
-        return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })
-        ->count();
+        return new AttendanceStatusResource($attendance);
     }
 }

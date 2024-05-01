@@ -136,10 +136,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
                     Route::prefix('{instructor_id}')->group(function () {
-                        Route::get('', 'Api\Manager\InstructorController@show');
-                        Route::post('', 'Api\Manager\InstructorController@update');
+                        Route::get('', 'Api\Manager\Instructor\InstructorController@show');
+                        Route::post('', 'Api\Manager\Instructor\InstructorController@update');
                         Route::prefix('course')->group(function () {
-                            Route::get('index', 'Api\Manager\Instructor\Course\CourseController@index');
+                            Route::get('index', 'Api\Manager\Instructor\CourseController@index');
                         });
                     });
                 });

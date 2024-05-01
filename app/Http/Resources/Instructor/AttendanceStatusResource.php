@@ -37,7 +37,7 @@ class AttendanceStatusResource extends JsonResource
                     'title' => $this->attendance->course->title,
                     'status' => $this->attendance->course->status,
                     'image' => $this->attendance->course->image,
-                    'chapters' => $this->calculateChapterProgress($this->attendance->course->chapters),
+                    'chapters' => $this->mapChapters($this->attendance->course->chapters),
                 ],
             ],
         ];
@@ -49,7 +49,7 @@ class AttendanceStatusResource extends JsonResource
      * @param  \Illuminate\Database\Eloquent\Collection  $chapters
      * @return array
      */
-    private function calculateChapterProgress($chapters)
+    private function mapChapters($chapters)
     {
         return $chapters->map(function ($chapter) {
             $chapterProgress = $chapter->calculateChapterProgress($this->attendance);

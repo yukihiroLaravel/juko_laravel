@@ -2,24 +2,10 @@
 
 namespace App\Http\Resources\Instructor;
 
-use App\Model\Attendance;
-use App\Model\LessonAttendance;
-use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceStatusResource extends JsonResource
 {
-    /**
-     * @var Attendance
-     */
-    protected $attendance;
-    protected $chapter;
-
-    public function __construct(Attendance $attendance)
-    {
-        $this->attendance = $attendance;
-    }
-
     /**
      * Transform the resource into an array.
      *
@@ -30,14 +16,14 @@ class AttendanceStatusResource extends JsonResource
     {
         return [
             'data' => [
-                'attendance_id' => $this->attendance->id,
-                'progress' => $this->attendance->progress,
+                'attendance_id' => $this->resource->id,
+                'progress' => $this->resource->progress,
                 'course' => [
-                    'course_id' => $this->attendance->course->id,
-                    'title' => $this->attendance->course->title,
-                    'status' => $this->attendance->course->status,
-                    'image' => $this->attendance->course->image,
-                    'chapters' => $this->mapChapters($this->attendance->course->chapters),
+                    'course_id' => $this->resource->course->id,
+                    'title' => $this->resource->course->title,
+                    'status' => $this->resource->course->status,
+                    'image' => $this->resource->course->image,
+                    'chapters' => $this->mapChapters($this->resource->course->chapters),
                 ],
             ],
         ];
@@ -52,7 +38,7 @@ class AttendanceStatusResource extends JsonResource
     private function mapChapters($chapters)
     {
         return $chapters->map(function ($chapter) {
-            $chapterProgress = $chapter->calculateChapterProgress($this->attendance);
+            $chapterProgress = $chapter->calculateChapterProgress($this->resource);
             return [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,

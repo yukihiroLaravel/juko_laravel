@@ -18,7 +18,7 @@ class NotificationController extends Controller
      * お知らせ取得API
      *
      * @param NotificationIndexRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return NotificationIndexResource
      */
     public function index(NotificationIndexRequest $request): NotificationIndexResource
     {

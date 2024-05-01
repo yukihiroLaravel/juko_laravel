@@ -138,7 +138,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('{instructor_id}')->group(function () {
                         Route::get('', 'Api\Manager\InstructorController@show');
                         Route::post('', 'Api\Manager\InstructorController@update');
-                        Route::get('course/index', 'Api\Manager\InstructorController@courseIndex');
+                        Route::prefix('course')->group(function () {
+                            Route::get('index', 'Api\Manager\Instructor\Course\CourseController@index');
+                        });
                     });
                 });
                 // マネージャー-講座

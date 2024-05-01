@@ -38,8 +38,8 @@ class InstructorCourseIndexResource extends JsonResource
         return $courses->map(function ($course) {
             return [
                 "course_id" => $course->id,
-                "title" => $course->title,
-                "status" => $course->status
+                "course_title" => $course->title,
+                "couese_status" => $course->status
             ];
         });
     }

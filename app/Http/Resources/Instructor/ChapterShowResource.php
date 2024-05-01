@@ -21,6 +21,7 @@ class ChapterShowResource extends JsonResource
         return [
             'chapter_id' => $this->resource->id,
             'title' => $this->resource->title,
+            'status' => $this->resource->status,
             'lessons' => $this->resource->lessons->sortBy('order')->map(function ($lesson) {
                 return [
                     'lesson_id' => $lesson->id,
@@ -29,7 +30,8 @@ class ChapterShowResource extends JsonResource
                     'remarks' => $lesson->remarks,
                     'status' => $lesson->status,
                 ];
-            })->values(),
+            })
+            ->values(),
         ];
     }
 }

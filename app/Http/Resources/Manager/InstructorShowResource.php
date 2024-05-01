@@ -4,7 +4,7 @@ namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class InstructorPatchResource extends JsonResource
+class InstructorShowResource extends JsonResource
 {
     /** @var \App\Model\Instructor */
     public $resource;
@@ -18,12 +18,12 @@ class InstructorPatchResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'instructor_id' => $this->resource->id,
             'nick_name' => $this->resource->nick_name,
             'last_name' => $this->resource->last_name,
             'first_name' => $this->resource->first_name,
             'email' => $this->resource->email,
             'profile_image' => $this->resource->profile_image,
-            'type' => $this->resource->type,
         ];
     }
 }

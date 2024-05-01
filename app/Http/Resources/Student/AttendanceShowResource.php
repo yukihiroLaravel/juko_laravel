@@ -2,10 +2,20 @@
 
 namespace App\Http\Resources\Student;
 
+use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowResource extends JsonResource
 {
+    /** @var Attendance */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -17,35 +27,36 @@ class AttendanceShowResource extends JsonResource
         return [
             'attendance_id' => $this->resource->id,
             'progress' => $this->resource->progress,
-            'course' => $this->course(),
+            'course' => $this->course($this->resource->course),
         ];
     }
 
-    private function course()
+    private function course(Course $course)
     {
         return [
-            'course_id' => $this->resource->course->id,
-            'title' => $this->resource->course->title,
-            'image' => $this->resource->course->image,
-            'instructor' => $this->instructor(),
-            'chapters' => $this->chapters(),
+            'course_id' => $course->id,
+            'title' => $course->title,
+            'image' => $course->image,
+            'instructor' => $this->instructor($course->instructor),
+            'chapters' => $this->chapters($course->chapters),
         ];
     }
 
-    private function instructor()
+    private function instructor(Instructor $instructor)
     {
         return [
-            'instructor_id' => $this->resource->course->instructor->id,
-            'nick_name' => $this->resource->course->instructor->nick_name,
-            'last_name' => $this->resource->course->instructor->last_name,
-            'first_name' => $this->resource->course->instructor->first_name,
-            'email' => $this->resource->course->instructor->email,
+            'instructor_id' => $instructor->id,
+            'nick_name' => $instructor->nick_name,
+            'last_name' => $instructor->last_name,
+            'first_name' => $instructor->first_name,
+            'email' => $instructor->email,
+            'profile_image' => $instructor->profile_image,
         ];
     }
 
-    private function chapters()
+    private function chapters(Collection $chapters)
     {
-        return $this->resource->course->chapters->map(function($chapter) {
+        return $chapters->map(function(Chapter $chapter) {
             return [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
@@ -54,10 +65,11 @@ class AttendanceShowResource extends JsonResource
         });
     }
 
-    private function lessons($lessons)
+    private function lessons(Collection $lessons)
     {
-        return $lessons->map(function($lesson) {
-            $lessonAttendance = $this->resource->lessonAttendances->filter(function ($lessonAttendance) use ($lesson) {
+        return $lessons->map(function(Lesson $lesson) {
+            /** @var LessonAttendance $lessonAttendance */
+            $lessonAttendance = $this->resource->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($lesson) {
                 return $lesson->id === $lessonAttendance->lesson_id;
             })->first();
             return [

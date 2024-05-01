@@ -14,7 +14,6 @@ use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Manager\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -65,6 +64,7 @@ class StudentController extends Controller
                 'students.email',
                 'students.profile_image',
                 'students.last_login_at',
+                'attendances.id as attendance_id',
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
@@ -148,7 +148,6 @@ class StudentController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new StudentStoreResource($student)
         ]);
     }
 }

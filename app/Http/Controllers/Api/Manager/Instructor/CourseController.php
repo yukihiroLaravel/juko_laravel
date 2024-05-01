@@ -15,7 +15,7 @@ class CourseController extends Controller
      * 講師-講座情報一覧取得API
      *
      * @param InstructorCourseIndexRequest $request
-     * @return InstructorCourseIndexResource|\Illuminate\Http\JsonResponse 
+     * @return InstructorCourseIndexResource|\Illuminate\Http\JsonResponse
      */
     public function index(InstructorCourseIndexRequest $request)
     {

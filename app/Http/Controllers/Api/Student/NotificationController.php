@@ -57,11 +57,10 @@ class NotificationController extends Controller
     {   
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-        $notification = Notification::whereIn('course_id', $courseIds)
-                        ->where('id', $notification_id)
-                        ->with('course') 
-                        ->firstOrFail();
+        $notification = Notification::with(['course'])
+            ->findOrFail($notification_id);
             
+        if (in_array($notification->course_id, $courseIds)) {
             $data = [
                 'notification_id' => $notification_id,
                 'title' => $notification->title,
@@ -73,9 +72,13 @@ class NotificationController extends Controller
                     'title' => $notification->course->title,
                 ],
                 
-                
             ];
-
-            return response()->json($data, 200);
+             return response()->json($data, 200);
+        }else{
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
     }
 }

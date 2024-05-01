@@ -4,14 +4,15 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $lesson_id
  * @property int $attendance_id
  * @property 'before_attendance'|'in_attendance'|'completed_attendance' $status
- * @property string $created_at
- * @property string $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property string|null $deleted_at
  * @property Lesson $lesson
  * @property Attendance $attendance
@@ -31,6 +32,12 @@ class LessonAttendance extends Model
         'lesson_id',
         'attendance_id',
         'status'
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     // ステータス定数

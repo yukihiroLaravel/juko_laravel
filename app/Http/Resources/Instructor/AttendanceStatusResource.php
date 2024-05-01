@@ -41,7 +41,6 @@ class AttendanceStatusResource extends JsonResource
                 ],
             ],
         ];
-        return response()->json($data);
     }
 
     /**

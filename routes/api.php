@@ -135,8 +135,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('manager')->group(function () {
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
-                    Route::get('{instructor_id}', 'Api\Manager\InstructorController@show');
-                    Route::post('{instructor_id}', 'Api\Manager\InstructorController@update');
+                    Route::prefix('{instructor_id}')->group(function () {
+                        Route::get('/', 'Api\Manager\Instructor\InstructorController@show');
+                        Route::post('/', 'Api\Manager\Instructor\InstructorController@update');
+                        Route::prefix('course')->group(function () {
+                            Route::get('index', 'Api\Manager\Instructor\CourseController@index');
+                        });
+                    });
                 });
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {

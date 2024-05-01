@@ -118,8 +118,8 @@ class Chapter extends Model
     /**
      * チャプターの進捗計算
      *
-     * @param Attendance  $attendance
-     * @return array
+     * @param Attendance $attendance
+     * @return int
      */
     public function calculateChapterProgress(Attendance $attendance): int
     {

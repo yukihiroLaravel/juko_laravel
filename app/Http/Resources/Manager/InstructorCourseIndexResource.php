@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,7 +22,7 @@ class InstructorCourseIndexResource extends JsonResource
     {
         $courses = $this->resource;
         return [
-            "courses" => $this->mapCourses($courses),
+            "courses" => $this->mapCourses($courses->getCollection()),
             "pagination" => [
                 "page" => $courses->currentPage(),
                 "total" => $courses->total()
@@ -30,16 +31,16 @@ class InstructorCourseIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Notification> $notifications
+     * @param Collection<\App\Model\Course> $notifications
      * @return array
      */
     private function mapCourses($courses)
     {
-        return $courses->map(function ($course) {
+        return $courses->map(function (Course $course) {
             return [
                 "course_id" => $course->id,
-                "course_title" => $course->title,
-                "couese_status" => $course->status
+                "title" => $course->title,
+                "status" => $course->status
             ];
         });
     }

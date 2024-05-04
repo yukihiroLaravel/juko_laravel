@@ -60,7 +60,13 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])
             ->findOrFail($notification_id);
             
-        if (in_array($notification->course_id, $courseIds)) {
+        if (!in_array($notification->course_id, $courseIds)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
+
             $data = [
                 'notification_id' => $notification_id,
                 'title' => $notification->title,
@@ -70,15 +76,10 @@ class NotificationController extends Controller
                 'course' => [ 
                     'course_id' => $notification->course->id, 
                     'title' => $notification->course->title,
-                ],
-                
+                ], 
             ];
-             return response()->json($data, 200);
-        }else{
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
-            ], 403);
-        }
+             
+            return response()->json($data, 200);
     }
 }
+

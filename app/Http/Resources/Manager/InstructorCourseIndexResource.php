@@ -31,10 +31,10 @@ class InstructorCourseIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Course> $notifications
+     * @param Collection<\App\Model\Course> $courses
      * @return array
      */
-    private function mapCourses($courses)
+    private function mapCourses(Collection $courses)
     {
         return $courses->map(function (Course $course) {
             return [
@@ -42,6 +42,7 @@ class InstructorCourseIndexResource extends JsonResource
                 "title" => $course->title,
                 "status" => $course->status
             ];
-        });
+        })
+        ->toArray();
     }
 }

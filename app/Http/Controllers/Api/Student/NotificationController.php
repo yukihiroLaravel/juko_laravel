@@ -52,14 +52,14 @@ class NotificationController extends Controller
             return true;
         });
     }
-   
+
     public function show(Request $request, $notification_id)
-    {   
+    {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
         $notification = Notification::with(['course'])
             ->findOrFail($notification_id);
-            
+
         if (!in_array($notification->course_id, $courseIds, true)) {
             return response()->json([
                 'result' => false,
@@ -73,13 +73,12 @@ class NotificationController extends Controller
                 'content' => $notification->content,
                 "start_date" => $notification->start_date,
                 "end_date" => $notification->end_date,
-                'course' => [ 
-                    'course_id' => $notification->course->id, 
+                'course' => [
+                    'course_id' => $notification->course->id,
                     'title' => $notification->course->title,
-                ], 
+                ],
             ];
-             
+
             return response()->json($data, 200);
     }
 }
-

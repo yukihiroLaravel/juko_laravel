@@ -92,4 +92,10 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+
+    public function showStatusThismonth()
+    {
+        $emptyArray = [];
+        return $emptyArray;
+    }
 }

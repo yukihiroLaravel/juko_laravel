@@ -148,6 +148,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('edit', 'Api\Manager\CourseController@edit');
                         Route::post('/', 'Api\Manager\CourseController@update');
                         Route::delete('/', 'Api\Manager\CourseController@delete');
+                        Route::prefix('attendance')->group(function () {
+                            Route::prefix('status')->group(function () {
+                                Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThismonth');
+                            }); 
+                        });
                         // マネージャー-講座-生徒
                         Route::prefix('student')->group(function () {
                             Route::get('index', 'Api\Manager\StudentController@index');

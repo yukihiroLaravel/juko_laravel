@@ -9,6 +9,7 @@ use App\Model\Notification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Student\NotificationReadResource;
+use App\Http\Requests\Student\NotificationShowRequest;
 
 class NotificationController extends Controller
 {
@@ -53,7 +54,7 @@ class NotificationController extends Controller
         });
     }
 
-    public function show(Request $request, $notification_id)
+    public function show(NotificationShowRequest $request, $notification_id)
     {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();

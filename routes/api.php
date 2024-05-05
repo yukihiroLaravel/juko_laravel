@@ -181,8 +181,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
                 // マネージャー-生徒学習状況
-                Route::prefix('{attendance_id}')->group(function () {
-                    Route::get('status', 'Api\Manager\AttendanceController@status');
+                    Route::prefix('{attendance_id}')->group(function () {
+                        Route::get('status', 'Api\Manager\AttendanceController@status');
                     });
                 });
                 // マネージャー-講師

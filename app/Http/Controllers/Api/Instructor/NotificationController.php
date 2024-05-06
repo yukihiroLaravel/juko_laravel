@@ -100,7 +100,8 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function updateStatus() {
+    public function updateStatus()
+    {
         return response()->json([]);
     }
 }

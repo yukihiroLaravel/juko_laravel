@@ -54,12 +54,11 @@ class NotificationController extends Controller
         });
     }
 
-    public function show(NotificationShowRequest $request, $notification_id)
+    public function show(NotificationShowRequest $request)
     {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-        $notification = Notification::with(['course'])
-            ->findOrFail($notification_id);
+        $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
         if (!in_array($notification->course_id, $courseIds, true)) {
             return response()->json([
@@ -69,7 +68,7 @@ class NotificationController extends Controller
         }
 
             $data = [
-                'notification_id' => $notification_id,
+                'notification_id' => $request->notification_id,
                 'title' => $notification->title,
                 'content' => $notification->content,
                 "start_date" => $notification->start_date,

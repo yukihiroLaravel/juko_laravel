@@ -10,7 +10,6 @@ use App\Model\Notification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
-use App\Http\Resources\Manager\NotificationUpdateResource;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -93,7 +92,8 @@ class NotificationController extends Controller
 
         // 指定されたお知らせIDでお知らせを取得
         /** @var Notification $notification */
-        $notification = Notification::findOrFail($request->notification_id);
+        $notification = Notification::with(['course'])
+            ->findOrFail($request->notification_id);
 
         // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
@@ -114,7 +114,6 @@ class NotificationController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new NotificationUpdateResource($notification),
         ]);
     }
 }

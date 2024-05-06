@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Student;
 
 use App\Rules\LessonAttendanceStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,7 +25,7 @@ class LessonAttendancePatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_attendance_id' => ['required', 'integer'],
+            'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id'],
             'status' => ['required', new LessonAttendanceStatusRule()]
         ];
     }

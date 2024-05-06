@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\NotificationSortByRule;
 
-class CourseEditRequest extends FormRequest
+class NotificationIndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +25,10 @@ class CourseEditRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'per_page' => ['integer', 'min:1'],
+            'page' => ['integer', 'min:1'],
+            'sortBy' => ['string', new NotificationSortByRule()],
+            'order' => ['string', 'in:asc,desc'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
     }
 }

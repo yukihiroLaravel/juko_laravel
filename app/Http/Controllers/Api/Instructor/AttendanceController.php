@@ -18,8 +18,10 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {

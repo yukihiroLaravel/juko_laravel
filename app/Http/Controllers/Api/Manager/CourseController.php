@@ -8,32 +8,28 @@ use RuntimeException;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Manager\CourseEditRequest;
 use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseStoreRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
-use App\Http\Resources\Manager\CourseEditResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Resources\Manager\CourseUpdateResource;
 use App\Http\Requests\Manager\CoursePutStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CourseController extends Controller
 {
     /**
-     * マネージャ講座一覧取得API
+     * 講座一覧取得API
      *
      * @return CourseIndexResource
      */
-    public function index(Request $request)
+    public function index()
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -52,7 +48,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座 管理下講師の講座情報を取得
+     * 講座情報取得API
      *
      * @param CourseShowRequest $request
      * @return CourseShowResource|\Illuminate\Http\JsonResponse
@@ -73,7 +69,7 @@ class CourseController extends Controller
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => "Forbidden, not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to this course.",
             ], 403);
         }
 
@@ -81,31 +77,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座ステータス一覧更新API
-     *
-     * @param CoursePutStatusRequest $request
-     * @return JsonResponse
-     */
-    public function status(CoursePutStatusRequest $request)
-    {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $instructor = Instructor::with('managings')->find($instructorId);
-
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
-
-        // 自分、または配下の講師の講座のステータスを一括更新
-        Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
-
-        return response()->json([
-            'result' => 'true'
-        ]);
-    }
-
-    /**
-     * マネージャ講座登録API
+     * 講座登録API
      *
      * @param CourseStoreRequest $request
      * @return JsonResponse
@@ -135,7 +107,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座情報更新API
+     * 講座情報更新API
      *
      * @return JsonResponse
      */
@@ -181,7 +153,6 @@ class CourseController extends Controller
 
             return response()->json([
                 "result" => true,
-                "data" => new CourseUpdateResource($course)
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
@@ -197,7 +168,7 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座削除API
+     * 講座削除API
      *
      * @param CourseDeleteRequest $request
      * @return JsonResponse
@@ -251,27 +222,26 @@ class CourseController extends Controller
     }
 
     /**
-     * マネージャ講座情報編集API
+     * 講座ステータス更新API
      *
-     * @param CourseEditRequest $request
-     * @return CourseEditResource|\Illuminate\Http\JsonResponse
-     */
-    public function edit(CourseEditRequest $request)
+     * @param CoursePutStatusRequest $request
+     * @return JsonResponse
+     */
+    public function status(CoursePutStatusRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
 
-        $course = Course::FindOrFail($request->course_id);
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
-            ], 403);
-        }
+        // 配下の講師情報を取得
+        $instructor = Instructor::with('managings')->find($instructorId);
 
-        return new CourseEditResource($course);
+        $managingIds = $instructor->managings->pluck('id')->toArray();
+        $managingIds[] = $instructorId;
+
+        // 自分、または配下の講師の講座のステータスを一括更新
+        Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

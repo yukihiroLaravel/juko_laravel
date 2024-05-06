@@ -18,8 +18,10 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -251,5 +253,28 @@ class AttendanceController extends Controller
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' =>  $completedChaptersCount
         ]);
+    }
+
+    /**
+     * 講師側受講状況API
+     *
+     * @param AttendanceStatusRequest $request
+     * @return AttendanceStatusResource|JsonResponse
+     */
+    public function status(AttendanceStatusRequest $request)
+    {
+        $attendanceId = $request->attendance_id;
+
+        /** @var Attendance */
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+
+        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+            return response()->json([
+                "result" => false,
+                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+            ], 403);
+        }
+
+        return new AttendanceStatusResource($attendance);
     }
 }

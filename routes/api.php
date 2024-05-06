@@ -220,7 +220,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::prefix('notification')->group(function () {
-            Route::put('status/{status}', 'Api\Instructor\NotificationController@updateStatus');
+            Route::put('type/{type}', 'Api\Instructor\NotificationController@updateStatus');
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
                 Route::patch('/', 'Api\Instructor\NotificationController@update');

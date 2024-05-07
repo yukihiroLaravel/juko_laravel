@@ -137,7 +137,7 @@ class StudentController extends Controller
 
         return new StudentShowResource([
             'student' => $student,
-            'ageData' => $ageData,
+            'ageData' => $age,
         ]);
     }
 

@@ -13,6 +13,8 @@ use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 
+use function PHPSTORM_META\type;
+
 class NotificationController extends Controller
 {
     /**
@@ -100,7 +102,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function updateStatus()
+    public function updateType()
     {
         return response()->json([]);
     }

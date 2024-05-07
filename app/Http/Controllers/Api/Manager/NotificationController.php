@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationPutTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
 use App\Model\Notification;
@@ -117,8 +118,48 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function updateType()
+    /**
+     * お知らせ一覧-タイプ変更API
+     *
+     * @param NotificationPutTypeRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateType(NotificationPutTypeRequest $request)
     {
-        return response()->json([]);
+        // 選択されたお知らせを取得
+        $notifications = Notification::whereIn('id', $request->notifications);
+
+        // ユーザーID取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下のインストラクター情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // お知らせの所有者のidを配列で取得
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
+
+        // アクセス権限のチェック
+        if (empty(array_diff($notificationsInstructorIds, $instructorIds))) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to update this notification.',
+            ], 403);
+        }
+
+        try {
+            $notifications->update(['type' => $request->type]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

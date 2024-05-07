@@ -254,5 +254,4 @@ class AttendanceController extends Controller
             'completed_chapters_count' =>  $completedChaptersCount
         ]);
     }
-
 }

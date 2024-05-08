@@ -14,7 +14,6 @@ use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Manager\StudentStoreResource;
 
 class StudentController extends Controller
 {
@@ -149,7 +148,6 @@ class StudentController extends Controller
 
         return response()->json([
             'result' => true,
-            'data' => new StudentStoreResource($student)
         ]);
     }
 }

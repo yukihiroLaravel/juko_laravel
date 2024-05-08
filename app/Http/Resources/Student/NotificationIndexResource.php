@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Student;
 
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -21,7 +21,6 @@ class NotificationIndexResource extends JsonResource
     public function toArray($request)
     {
         $notifications = $this->resource;
-
         return [
             'notifications' => $this->mapNotifications($notifications->getCollection()),
             'pagination' => [
@@ -32,7 +31,7 @@ class NotificationIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Notification> $notifications
+     * @param Collection<Notification> $notifications
      * @return array
      */
     private function mapNotifications($notifications)
@@ -41,14 +40,15 @@ class NotificationIndexResource extends JsonResource
             return [
                 'notification_id' => $notification->id,
                 'course_id' => $notification->course_id,
+                'instructor_id' => $notification->instructor_id,
                 'course_title' => $notification->course->title,
                 'title' => $notification->title,
                 'content' => $notification->content,
-                'type' => $notification->type,
                 'start_date' => $notification->start_date,
                 'end_date' => $notification->end_date,
             ];
         })
             ->toArray();
     }
+
 }

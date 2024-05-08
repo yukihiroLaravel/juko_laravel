@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Student;
 
 use App\Model\Notification;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Database\Eloquent\Collection;
 
-class NotificationIndexResource extends JsonResource
+class NotificationReadResource extends JsonResource
 {
     /** @var Collection<Notification> */
     public $resource;
@@ -24,9 +24,9 @@ class NotificationIndexResource extends JsonResource
                 'notification_id' => $notification->id,
                 'course_id' => $notification->course_id,
                 'course_title' => $notification->course->title,
-                'type' => $notification->type,
                 'title' => $notification->title,
                 'content' => $notification->content,
+                'type' => $notification->type,
             ];
         })
             ->toArray();

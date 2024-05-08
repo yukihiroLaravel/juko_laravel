@@ -149,6 +149,10 @@ class Student extends Authenticatable
 
     /**
      * 年齢計算
+     * 
+     * @param $brithDay
+     * @param $today
+     * @return $calcAge
      */
     public static function calcAge($birthDay, $today)
     {

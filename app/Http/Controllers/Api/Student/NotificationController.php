@@ -68,7 +68,7 @@ class NotificationController extends Controller
         }
 
             $data = [
-                'notification_id' => $request->notification_id,
+                'notification_id' => $notification->id,
                 'title' => $notification->title,
                 'content' => $notification->content,
                 "start_date" => $notification->start_date,

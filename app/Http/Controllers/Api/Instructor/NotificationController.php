@@ -99,4 +99,9 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
+
+    public function updateType()
+    {
+        return response()->json([]);
+    }
 }

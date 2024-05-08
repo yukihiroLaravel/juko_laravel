@@ -9,6 +9,7 @@ use App\Model\Notification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Student\NotificationReadResource;
+use App\Http\Requests\Student\NotificationShowRequest;
 
 class NotificationController extends Controller
 {
@@ -53,12 +54,11 @@ class NotificationController extends Controller
         });
     }
 
-    public function show(Request $request, $notification_id)
+    public function show(NotificationShowRequest $request)
     {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-        $notification = Notification::with(['course'])
-            ->findOrFail($notification_id);
+        $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
         if (!in_array($notification->course_id, $courseIds, true)) {
             return response()->json([
@@ -68,7 +68,7 @@ class NotificationController extends Controller
         }
 
             $data = [
-                'notification_id' => $notification_id,
+                'notification_id' => $notification->id,
                 'title' => $notification->title,
                 'content' => $notification->content,
                 "start_date" => $notification->start_date,

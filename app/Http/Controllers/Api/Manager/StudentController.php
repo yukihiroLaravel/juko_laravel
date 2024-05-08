@@ -131,9 +131,7 @@ class StudentController extends Controller
         // 受講生の年齢
         $birthDay = $student->birth_date;
         $today = CarbonImmutable::today();
-        $nenrei = new Student();
-        $calcAge = $nenrei->calcAge($birthDay, $today);
-        $age = $calcAge;
+        $age = Student::calcAge($birthDay, $today);
 
         return new StudentShowResource([
             'student' => $student,

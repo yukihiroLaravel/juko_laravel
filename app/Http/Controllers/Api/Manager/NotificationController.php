@@ -142,15 +142,21 @@ class NotificationController extends Controller
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権限のチェック
-        if (empty(array_diff($notificationsInstructorIds, $instructorIds))) {
+        if (!empty(array_diff($notificationsInstructorIds, $instructorIds))) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
 
+        if ($request->type === Notification::TYPE_ALWAYS) {
+            $type = Notification::TYPE_ALWAYS_INT;
+        } elseif ($request->type === Notification::TYPE_ONCE) {
+            $type = Notification::TYPE_ONCE_INT;
+        }
+
         try {
-            $notifications->update(['type' => $request->type]);
+            $notifications->update(['type' => $type]);
         } catch (\Exception $e) {
             return response()->json([
                 'result' => false,

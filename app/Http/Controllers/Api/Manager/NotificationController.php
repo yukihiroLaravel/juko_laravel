@@ -11,6 +11,7 @@ use App\Model\Notification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -142,30 +143,29 @@ class NotificationController extends Controller
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権限のチェック
-        if (!empty(array_diff($notificationsInstructorIds, $instructorIds))) {
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
 
-        if ($request->type === Notification::TYPE_ALWAYS) {
-            $type = Notification::TYPE_ALWAYS_INT;
-        } elseif ($request->type === Notification::TYPE_ONCE) {
-            $type = Notification::TYPE_ONCE_INT;
-        }
-
         try {
-            $notifications->update(['type' => $type]);
-        } catch (\Exception $e) {
+            $notifications->each(function ($notification) use ($request) {
+                // 指定されたお知らせIDでお知らせを取得
+                Notification::findOrFail($notification->id)
+                    ->fill([
+                        'type' => $request->type,
+                    ])->save();
+            });
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 500);
         }
-
-        return response()->json([
-            'result' => true,
-        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Manager;
 
+use App\Model\Notification;
 use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -19,6 +20,9 @@ class NotificationPutTypeRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        if (Notification::whereIn('id', $this->notifications)->exists()) {
+            # code...
+        }
         $this->merge([
             'type' => $this->route('notification_type'),
         ]);
@@ -34,7 +38,7 @@ class NotificationPutTypeRequest extends FormRequest
         return [
             'type' => ['required',  new NotificationUpdateStatusRule()],
             'notifications' => ['required', 'array'],
-            'notifications.*' => ['int'],
+            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

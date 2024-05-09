@@ -102,21 +102,34 @@ class NotificationController extends Controller
     }
 
     /**
-    * お知らせ全削除
+    * お知らせ選択削除
     *
     * @param Request $request
     * @return JsonResponse
     */
     public function delete(Request $request): JsonResponse
     {
-    $notificationIds = $request->input('notifications', []);
+        $notificationIds = $request->input('notifications', []);
 
-    $user = Auth::guard('instructor')->user();
-    Notification::whereIn('id', $notificationIds)
-                ->where('instructor_id', $user->id)
-                ->delete();
+        $user = Auth::guard('instructor')->user();
 
-    return response()->json(['result' => true]);
+        $notifications = Notification::whereIn('id', $notificationIds)
+                        ->where('instructor_id', $user->id)
+                        ->get();
+
+        if ($notifications->isEmpty()) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete notifications. Either the notifications do not exist or you are not authorized to delete them.',
+            ], 403);
+        }
+
+        Notification::whereIn('id', $notificationIds)
+                    ->where('instructor_id', $user->id)
+                    ->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
-
 }

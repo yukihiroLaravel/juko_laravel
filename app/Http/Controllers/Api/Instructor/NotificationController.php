@@ -100,8 +100,9 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
+
     /**
-    * お知らせ全削除、空の配列を返す
+    * お知らせ選択削除、空の配列を返す
     *
     * @param Request $request
     * @return JsonResponse

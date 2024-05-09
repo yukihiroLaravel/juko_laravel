@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Requests\Student\NotificationShowRequest;
+use App\Http\Resources\Student\NotificationShowResource;
 
 class NotificationController extends Controller
 {
@@ -79,6 +80,6 @@ class NotificationController extends Controller
                 ],
             ];
 
-            return response()->json($data, 200);
+            return new NotificationShowResource($notification);
     }
 }

@@ -127,9 +127,6 @@ class NotificationController extends Controller
      */
     public function updateType(NotificationPutTypeRequest $request)
     {
-        // 選択されたお知らせを取得
-        $notifications = Notification::whereIn('id', $request->notifications);
-
         // ユーザーID取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -139,6 +136,8 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
+        // 選択されたお知らせを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
         // お知らせの所有者のidを配列で取得
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
@@ -162,9 +161,10 @@ class NotificationController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
             return response()->json([
                 'result' => false,
-                'message' => $e->getMessage(),
             ], 500);
         }
     }

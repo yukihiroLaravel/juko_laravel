@@ -109,14 +109,13 @@ class NotificationController extends Controller
     */
     public function delete(Request $request): JsonResponse
     {
-    $notificationIds = $request->input('notifications', []);
+        $notificationIds = $request->input('notifications', []);
 
-    $user = Auth::guard('instructor')->user();
-    Notification::whereIn('id', $notificationIds)
+        $user = Auth::guard('instructor')->user();
+        Notification::whereIn('id', $notificationIds)
                 ->where('instructor_id', $user->id)
                 ->delete();
 
-    return response()->json(['result' => true]);
+        return response()->json(['result' => true]);
     }
-
 }

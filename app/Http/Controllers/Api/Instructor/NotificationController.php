@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Notification;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -99,23 +98,5 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-    * お知らせ全削除
-    *
-    * @param Request $request
-    * @return JsonResponse
-    */
-    public function delete(Request $request): JsonResponse
-    {
-    $notificationIds = $request->input('notifications', []);
-
-    $user = Auth::guard('instructor')->user();
-    Notification::whereIn('id', $notificationIds)
-                ->where('instructor_id', $user->id)
-                ->delete();
-
-    return response()->json(['result' => true]);
     }
 }

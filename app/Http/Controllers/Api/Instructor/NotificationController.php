@@ -113,20 +113,20 @@ class NotificationController extends Controller
 
         $user = Auth::guard('instructor')->user();
 
-        $notifications = Notification::whereIn('id', $notificationIds)
-                        ->where('instructor_id', $user->id)
-                        ->get();
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+
+        $notifications = $notifications->filter(function ($notification) use ($user) {
+            return $notification->instructor_id === $user->id;
+        });
 
         if ($notifications->isEmpty()) {
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to delete notifications. Either the notifications do not exist or you are not authorized to delete them.',
+                'message' => 'Failed to delete notifications. invalid notification_id.',
             ], 403);
         }
 
-        Notification::whereIn('id', $notificationIds)
-                    ->where('instructor_id', $user->id)
-                    ->delete();
+        $notifications->each->delete();
 
         return response()->json([
             'result' => true,

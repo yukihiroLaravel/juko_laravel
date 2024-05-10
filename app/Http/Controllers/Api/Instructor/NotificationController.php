@@ -107,7 +107,7 @@ class NotificationController extends Controller
     * @param Request $request
     * @return JsonResponse
     */
-    public function delete(Request $request): JsonResponse
+    public function bulkDelete(Request $request): JsonResponse
     {
         return response()->json([]);
     }

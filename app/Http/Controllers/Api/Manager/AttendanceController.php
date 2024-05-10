@@ -115,7 +115,7 @@ class AttendanceController extends Controller
 
             // ログインしているインストラクターまたはそのマネージャーが管理する受講データのIDのリストを取得
             $managedAttendances = Attendance::whereIn('course_id', $instructorIds)->pluck('id')->toArray();
-
+            
             // 受講データがログインしているインストラクターまたはそのマネージャーが管理するものであるかどうかを確認
             if (!in_array((int)$attendanceId, $managedAttendances, true)) {
                 return response()->json([
@@ -125,7 +125,7 @@ class AttendanceController extends Controller
             }
 
             // 受講状況を削除
-            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+            $attendance = Attendance::findOrFail($attendanceId);
             $attendance->delete();
 
             DB::commit();
@@ -134,7 +134,7 @@ class AttendanceController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error("Failed to delete attendance record: {$e->getMessage()}");
+            Log::error("Failed to delete attendance record:{$e->getMessage()}");
             return response()->json([
                 'result' => false,
             ], 500);

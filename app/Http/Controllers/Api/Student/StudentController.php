@@ -57,12 +57,7 @@ class StudentController extends Controller
                 'occupation' => $request->occupation,
                 'purpose'    => $request->purpose,
                 'birth_date' => $request->birth_date,
-<<<<<<< HEAD
-                'age'        => $request->age,
-                'sex'        => $request->sex,
-=======
                 'gender'        => $request->gender,
->>>>>>> develop
                 'address'    => $request->address,
             ]);
 

@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Model\Student;
 
 class StudentShowResource extends JsonResource
 {

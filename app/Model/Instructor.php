@@ -4,6 +4,9 @@ namespace App\Model;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Seeder\StudentSeeder;
+use Carbon\CarbonImmutable;
+use App\Model\Student;
 
 /**
  * @property int $id
@@ -60,4 +63,5 @@ class Instructor extends Authenticatable
     {
         return $this->belongsToMany('App\Model\Instructor', 'manage_instructors', 'manager_id', 'instructor_id');
     }
+
 }

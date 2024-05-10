@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use App\Model\Course;
 use App\Model\Student;
 use Illuminate\Http\JsonResponse;
@@ -101,7 +102,6 @@ class StudentController extends Controller
         /** @var Student $student */
         $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
 
-       // dd($courseIds);
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
@@ -111,17 +111,17 @@ class StudentController extends Controller
             ], 403);
         }
 
-        //受講生の年齢の算出
-
-        $student = Student::findOrFail($request->student_id);
-        $birthday = $student->birth_date;   //student_idからbirth_dateを抽出
-        $now = Carbon::today();//今の日付のみを取得
-        $age = $birthday->diffInYears($now);//Carbon同士で差を計算
-        return new StudentShowResource([
+         // 受講生の年齢
+         $birthDay = $student->birth_date;
+         $today = CarbonImmutable::today();
+         $age = new Student();
+         $age = $age ->calcAge($birthDay, $today);
+         return new StudentShowResource([
             'student' => $student,
             'age' => $age,
-        ]);
-    }
+         ]);
+        }
+
 
     /**
      * 受講生登録API

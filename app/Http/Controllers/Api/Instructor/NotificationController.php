@@ -102,31 +102,33 @@ class NotificationController extends Controller
     }
 
     /**
-    * お知らせ選択削除
+    * お知らせ一括削除
     *
     * @param Request $request
     * @return JsonResponse
     */
-    public function delete(Request $request): JsonResponse
+    public function bulkDelete(Request $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
 
         $user = Auth::guard('instructor')->user();
 
-        $notifications = Notification::whereIn('id', $notificationIds)->get();
+        $allNotifications = Notification::whereIn('id', $notificationIds)->get();
 
-        $notifications = $notifications->filter(function ($notification) use ($user) {
+        $filteredNotifications = $allNotifications->filter(function ($notification) use ($user) {
             return $notification->instructor_id === $user->id;
         });
 
-        if ($notifications->isEmpty()) {
+        if ($filteredNotifications->isEmpty()) {
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete notifications. invalid notification_id.',
             ], 403);
         }
 
-        $notifications->each->delete();
+        Notification::whereIn('id', $notificationIds)
+        ->where('instructor_id', $user->id)
+        ->delete();
 
         return response()->json([
             'result' => true,

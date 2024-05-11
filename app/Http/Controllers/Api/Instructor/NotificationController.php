@@ -109,16 +109,21 @@ class NotificationController extends Controller
     */
     public function bulkDelete(Request $request): JsonResponse
     {
+        // リクエストから削除対象の通知 ID を取得
         $notificationIds = $request->input('notifications', []);
 
+        // インストラクターのユーザー情報を取得
         $user = Auth::guard('instructor')->user();
 
+        // 指定された通知 ID を含む通知を取得
         $allNotifications = Notification::whereIn('id', $notificationIds)->get();
 
+        // インストラクターの通知のみフィルタリング
         $filteredNotifications = $allNotifications->filter(function ($notification) use ($user) {
             return $notification->instructor_id === $user->id;
         });
 
+        // フィルタリングされた通知がない場合、エラーレスポンスを返す
         if ($filteredNotifications->isEmpty()) {
             return response()->json([
                 'result' => false,
@@ -126,10 +131,12 @@ class NotificationController extends Controller
             ], 403);
         }
 
-        Notification::whereIn('id', $notificationIds)
-        ->where('instructor_id', $user->id)
+        // インストラクターに関連する通知のみ削除
+        Notification::where('instructor_id', $user->id)
+        ->whereIn('id', $notificationIds)
         ->delete();
 
+        // 削除が成功したことを示すレスポンスを返す
         return response()->json([
             'result' => true,
         ]);

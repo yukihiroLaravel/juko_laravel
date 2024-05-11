@@ -55,7 +55,13 @@ class NotificationController extends Controller
         });
     }
 
-    public function show(NotificationShowRequest $request)
+    /**
+     * お知らせ詳細
+     *
+     * @param NotificationShowRequest $request
+     * @return NotificationShowResource|JsonResponse
+     */
+    public function show(NotificationShowRequest $request):JsonResponse
     {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
@@ -67,18 +73,6 @@ class NotificationController extends Controller
                 'message' => 'Forbidden, not allowed to access this notification.',
             ], 403);
         }
-
-            $data = [
-                'notification_id' => $notification->id,
-                'title' => $notification->title,
-                'content' => $notification->content,
-                "start_date" => $notification->start_date,
-                "end_date" => $notification->end_date,
-                'course' => [
-                    'course_id' => $notification->course->id,
-                    'title' => $notification->course->title,
-                ],
-            ];
 
             return new NotificationShowResource($notification);
     }

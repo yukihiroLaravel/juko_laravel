@@ -61,7 +61,7 @@ class NotificationController extends Controller
      * @param NotificationShowRequest $request
      * @return NotificationShowResource|JsonResponse
      */
-    public function show(NotificationShowRequest $request):JsonResponse
+    public function show(NotificationShowRequest $request)
     {
         $student = Student::findOrFail($request->user()->id);
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
@@ -74,6 +74,6 @@ class NotificationController extends Controller
             ], 403);
         }
 
-            return new NotificationShowResource($notification);
+        return new NotificationShowResource($notification);
     }
 }

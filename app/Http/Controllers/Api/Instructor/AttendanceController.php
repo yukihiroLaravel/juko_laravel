@@ -268,7 +268,7 @@ class AttendanceController extends Controller
         // 今月完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
-                return $lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isCurrentMonth();
+                return $lessonAttendance->status === 'STATUS_COMPLETED_ATTENDANCE' && $lessonAttendance->updated_at->isCurrentMonth();
             });
             return $compleatedLessonAttendances;
         })->count();

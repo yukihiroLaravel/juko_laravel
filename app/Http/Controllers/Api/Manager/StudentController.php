@@ -128,10 +128,9 @@ class StudentController extends Controller
             ], 403);
         }
 
-        // 受講生の年齢
-        $birthDay = $student->birth_date;
+        // 受講生の年齢算出
         $today = CarbonImmutable::today();
-        $age = Student::calcAge($birthDay, $today);
+        $age = Student::calcAge($student, $today);
 
         return new StudentShowResource([
             'student' => $student,

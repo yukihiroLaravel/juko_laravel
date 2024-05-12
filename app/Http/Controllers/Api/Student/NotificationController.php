@@ -7,9 +7,11 @@ use App\Model\Student;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Requests\Student\NotificationShowRequest;
+use App\Http\Resources\Student\NotificationReadResource;
+use App\Http\Resources\Student\NotificationShowResource;
 
 class NotificationController extends Controller
 {
@@ -54,31 +56,30 @@ class NotificationController extends Controller
         });
     }
 
+    /**
+     * お知らせ詳細
+     *
+     * @param NotificationShowRequest $request
+     * @return NotificationShowResource|JsonResponse
+     */
     public function show(NotificationShowRequest $request)
     {
+        /** @var Student $student */
         $student = Student::findOrFail($request->user()->id);
+
+        /** @var array<int> $courseIds */
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
+
+        /** @var Notification $notification */
         $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
         if (!in_array($notification->course_id, $courseIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
-            $data = [
-                'notification_id' => $notification->id,
-                'title' => $notification->title,
-                'content' => $notification->content,
-                "start_date" => $notification->start_date,
-                "end_date" => $notification->end_date,
-                'course' => [
-                    'course_id' => $notification->course->id,
-                    'title' => $notification->course->title,
-                ],
-            ];
-
-            return response()->json($data, 200);
+        return new NotificationShowResource($notification);
     }
 }

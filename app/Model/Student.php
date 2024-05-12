@@ -150,7 +150,7 @@ class Student extends Authenticatable
     /**
      * 年齢計算
      *
-     * @param Carbon $birthDay
+     * @param $student
      * @param CarbonImmutable $today
      * @return int $calcAge
      */

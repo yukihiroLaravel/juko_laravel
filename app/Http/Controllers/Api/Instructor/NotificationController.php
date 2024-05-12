@@ -109,36 +109,28 @@ class NotificationController extends Controller
     */
     public function bulkDelete(Request $request): JsonResponse
     {
-        // リクエストから削除対象の通知 ID を取得
-        $notificationIds = $request->input('notifications', []);
+    // リクエストから削除対象の通知 ID を取得
+    $notificationIds = $request->input('notifications', []);
 
-        // インストラクターのユーザー情報を取得
-        $user = Auth::guard('instructor')->user();
+    // インストラクターのユーザー情報を取得
+    $user = Auth::guard('instructor')->user();
 
-        // 指定された通知 ID を含む通知を取得
-        $allNotifications = Notification::whereIn('id', $notificationIds)->get();
+    // 指定された通知 ID を含む通知を削除
+    $deletedCount = Notification::whereIn('id', $notificationIds)
+        ->where('instructor_id', $user->id)
+        ->delete();
 
-        // インストラクターの通知のみフィルタリング
-        $filteredNotifications = $allNotifications->filter(function ($notification) use ($user) {
-            return $notification->instructor_id === $user->id;
-        });
-
-        // フィルタリングされた通知がない場合、エラーレスポンスを返す
-        if ($filteredNotifications->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete notifications. invalid notification_id.',
-            ], 403);
-        }
-
-        // インストラクターに関連する通知のみ削除
-        $filteredNotifications->each(function ($notification) {
-            $notification->delete();
-        });
-
-        // 削除が成功したことを示すレスポンスを返す
+    // 削除された通知の数を確認し、削除が成功したことを示すレスポンスを返す
+    if ($deletedCount > 0) {
         return response()->json([
             'result' => true,
         ]);
+    } 
+    else {
+        return response()->json([
+            'result' => false,
+            'message' => 'Failed to delete notifications. invalid notification_id.',
+        ], 403);
+    }
     }
 }

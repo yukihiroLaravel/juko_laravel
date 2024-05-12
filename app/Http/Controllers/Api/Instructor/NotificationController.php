@@ -16,7 +16,8 @@ use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use Exception;
-// use 
+
+// use
 
 class NotificationController extends Controller
 {

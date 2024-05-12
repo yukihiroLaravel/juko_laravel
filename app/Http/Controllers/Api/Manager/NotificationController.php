@@ -13,6 +13,8 @@ use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {

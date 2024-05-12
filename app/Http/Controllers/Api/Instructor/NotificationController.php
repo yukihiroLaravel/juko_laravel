@@ -6,12 +6,17 @@ use App\Model\Notification;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use Exception;
+// use 
 
 class NotificationController extends Controller
 {
@@ -100,8 +105,27 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function updateType()
+    public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+
+        try {
+            $notifications->each(function ($notification) use ($request) {
+                // 指定されたお知らせIDでお知らせを取得
+                Notification::findOrFail($notification->id)
+                    ->fill([
+                        'type' => $request->type,
+                    ])->save();
+            });
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 }

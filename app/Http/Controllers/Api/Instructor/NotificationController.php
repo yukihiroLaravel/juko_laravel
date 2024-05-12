@@ -132,9 +132,9 @@ class NotificationController extends Controller
         }
 
         // インストラクターに関連する通知のみ削除
-        Notification::where('instructor_id', $user->id)
-        ->whereIn('id', $notificationIds)
-        ->delete();
+        $filteredNotifications->each(function ($notification) {
+            $notification->delete();
+        });
 
         // 削除が成功したことを示すレスポンスを返す
         return response()->json([

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
@@ -102,34 +103,36 @@ class NotificationController extends Controller
     }
 
     /**
-    * お知らせ一括削除
-    *
-    * @param Request $request
-    * @return JsonResponse
-    */
+     * お知らせ一括削除
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function bulkDelete(Request $request): JsonResponse
     {
-        // リクエストから削除対象の通知 ID を取得
         $notificationIds = $request->input('notifications', []);
 
-        // インストラクターのユーザー情報を取得
-        $user = Auth::guard('instructor')->user();
+        $instructor = Auth::guard('instructor')->user();
 
-        // インストラクターに関連し、かつ指定された通知IDを持つ通知のみ削除
-        $deletedCount = Notification::where('instructor_id', $user->id)
-            ->whereIn('id', $notificationIds)
-            ->delete();
+        /** @var Collection $notifications */
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
 
-        // 削除された通知の数を確認し、削除が成功したことを示すレスポンスを返す
-        if ($deletedCount > 0) {
-            return response()->json([
-                'result' => true,
-            ]);
-        } else {
+        if ($notifications->contains(function (Notification $notification) use ($instructor) {
+            return $notification->instructor_id !== $instructor->id;
+        })) {
+            // 認証者と一致しないお知らせが含まれている場合はエラー
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to delete notifications. invalid notification_id.',
+                'message' => 'Forbidden.',
             ], 403);
         }
+
+        $notifications->each(function (Notification $notification) {
+            $notification->delete();
+        });
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

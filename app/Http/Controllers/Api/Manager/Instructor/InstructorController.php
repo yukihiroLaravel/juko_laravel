@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Manager;
+namespace App\Http\Controllers\Api\Manager\Instructor;
 
 use RuntimeException;
 use App\Model\Instructor;

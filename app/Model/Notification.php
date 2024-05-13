@@ -42,11 +42,16 @@ class Notification extends Model
         'content',
     ];
 
-    // 表示区分定数
+    // 表示区分 定数
     const TYPE_ALWAYS_INT = 1;
     const TYPE_ONCE_INT = 2;
     const TYPE_ALWAYS = 'always';
     const TYPE_ONCE = 'once';
+
+    // ソート項目 定数
+    const SORT_BY_TITLE = 'title';
+    const SORT_BY_COURSE_ID = 'course_id';
+    const SORT_BY_START_DATE = 'start_date';
 
     /**
      * 表示区分

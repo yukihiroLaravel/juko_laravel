@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use App\Model\Student;
 use App\Model\Attendance;
 use App\Model\Notification;
@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\NotificationShowRequest;
+use App\Http\Requests\Student\NotificationIndexRequest;
+use App\Http\Resources\Student\NotificationIndexResource;
 use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Resources\Student\NotificationShowResource;
 
@@ -17,6 +19,32 @@ class NotificationController extends Controller
 {
     /**
      * お知らせ取得API
+     *
+     * @param NotificationIndexRequest $request
+     * @return NotificationIndexResource
+     */
+    public function index(NotificationIndexRequest $request): NotificationIndexResource
+    {
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sort_by', 'start_date');
+        $order = $request->input('order', 'asc');
+        $student = $request->user();
+        $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
+        $currentDateTime = CarbonImmutable::now();
+
+        $notifications = Notification::with('course')
+            ->whereIn('course_id', $courseIds)
+            ->where('start_date', '<=', $currentDateTime)
+            ->where('end_date', '>=', $currentDateTime)
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return new NotificationIndexResource($notifications);
+    }
+
+    /**
+     * お知らせ既読API
      *
      * @param Request $request
      * @return NotificationReadResource
@@ -34,7 +62,7 @@ class NotificationController extends Controller
     {
         $attendances = Attendance::where('student_id', $student->id)->get();
         $courseIds = $attendances->pluck('course.id')->toArray();
-        $currentDateTime = Carbon::now();
+        $currentDateTime = CarbonImmutable::now();
 
         return Notification::with('students')
             ->whereIn('course_id', $courseIds)

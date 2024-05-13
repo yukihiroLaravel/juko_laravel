@@ -125,8 +125,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        }
-        else {
+        } else {
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete notifications. invalid notification_id.',

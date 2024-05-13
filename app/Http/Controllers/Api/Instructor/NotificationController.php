@@ -129,9 +129,7 @@ class NotificationController extends Controller
             ], 403);
         }
 
-        $notifications->each(function (Notification $notification) {
-            $notification->delete();
-        });
+        Notification::whereIn('id', $notificationIds)->delete();
 
         return response()->json([
             'result' => true,

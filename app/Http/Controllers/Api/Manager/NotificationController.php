@@ -151,6 +151,7 @@ class NotificationController extends Controller
             ], 403);
         }
 
+        DB::beginTransaction();
         try {
             $notifications->each(function ($notification) use ($request) {
                 // 指定されたお知らせIDでお知らせを取得
@@ -159,6 +160,7 @@ class NotificationController extends Controller
                         'type' => $request->type,
                     ])->save();
             });
+            DB::commit();
             return response()->json([
                 'result' => true,
             ]);

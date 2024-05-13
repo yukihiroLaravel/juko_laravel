@@ -115,9 +115,9 @@ class NotificationController extends Controller
         // インストラクターのユーザー情報を取得
         $user = Auth::guard('instructor')->user();
 
-        // 指定された通知 ID を含む通知を削除
-        $deletedCount = Notification::whereIn('id', $notificationIds)
-            ->where('instructor_id', $user->id)
+        // 指定された通知IDがインストラクターに関連するものか確認し削除
+        $deletedCount = Notification::where('instructor_id', $user->id)
+            ->whereIn('id', $notificationIds)
             ->delete();
 
         // 削除された通知の数を確認し、削除が成功したことを示すレスポンスを返す
@@ -125,7 +125,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } 
+        }
         else {
             return response()->json([
                 'result' => false,

@@ -108,7 +108,28 @@ class NotificationController extends Controller
     public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
+        foreach ($notifications as $notificationId) {
+            // 通知が存在しない場合
+            if (!$notificationId) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Notification not found.',
+                ], 404);
+            }
+        
+            // インストラクターIDと現在のユーザーのIDが一致しない場合
+            if ($instructorId !== $notificationsInstructorIds) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Forbidden, not allowed to access this notification.',
+                ], 403);
+            }
+        }
+        
+        DB::beginTransaction();
         try {
             $notifications->each(function ($notification) use ($request) {
                 // 指定されたお知らせIDでお知らせを取得

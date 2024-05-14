@@ -20,7 +20,7 @@ class NotificationPutTypeRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'type' => $this->route('notification_type'),
+            'notification_type' => $this->route('notification_type'),
         ]);
     }
 
@@ -32,7 +32,7 @@ class NotificationPutTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'type' => ['required', new NotificationUpdateStatusRule()],
+            'notification_type' => ['required', new NotificationUpdateStatusRule()],
             'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }

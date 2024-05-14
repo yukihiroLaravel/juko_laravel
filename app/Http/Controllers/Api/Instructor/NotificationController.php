@@ -120,7 +120,7 @@ class NotificationController extends Controller
                     'message' => 'Notification not found.',
                 ], 404);
             }
-        
+
             // インストラクターIDと現在のユーザーのIDが一致しない場合
             if ($instructorId !== $notificationsInstructorIds) {
                 return response()->json([
@@ -129,7 +129,7 @@ class NotificationController extends Controller
                 ], 403);
             }
         }
-        
+
         DB::beginTransaction();
         try {
             $notifications->each(function ($notification) use ($request) {

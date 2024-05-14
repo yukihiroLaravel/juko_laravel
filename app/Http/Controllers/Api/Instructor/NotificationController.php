@@ -17,8 +17,6 @@ use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use Exception;
 
-// use
-
 class NotificationController extends Controller
 {
     /**
@@ -110,35 +108,27 @@ class NotificationController extends Controller
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
-
-        foreach ($notifications as $notificationId) {
-            // 通知が存在しない場合
-            if (!$notificationId) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Notification not found.',
-                ], 404);
-            }
         
-            // インストラクターIDと現在のユーザーのIDが一致しない場合
-            if ($instructorId !== $notificationsInstructorIds) {
+        $notifications->each(function ($notification) use ($instructorId) {
+            if ($instructorId !== $notification->instructor_id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Forbidden, not allowed to access this notification.',
                 ], 403);
             }
-        }
+        });
         
         DB::beginTransaction();
         try {
-            $notifications->each(function ($notification) use ($request) {
+            $notificationType = $request->notification_type;
+            $notifications->each(function ($notification) use ($notificationType) {
                 // 指定されたお知らせIDでお知らせを取得
-                Notification::findOrFail($notification->id)
-                    ->fill([
-                        'type' => $request->type,
-                    ])->save();
+                $notification->fill([
+                    'type' => $notificationType
+                ])
+                ->save();
             });
+            DB::commit();
             return response()->json([
                 'result' => true,
             ]);
@@ -147,6 +137,7 @@ class NotificationController extends Controller
             Log::error($e);
             return response()->json([
                 'result' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

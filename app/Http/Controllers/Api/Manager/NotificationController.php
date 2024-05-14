@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\NotificationIndexRequest;
-use App\Http\Requests\Manager\NotificationPutTypeRequest;
-use App\Http\Resources\Manager\NotificationIndexResource;
+use Exception;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Http\Requests\Manager\NotificationShowRequest;
-use App\Http\Resources\Manager\NotificationShowResource;
-use App\Http\Requests\Manager\NotificationUpdateRequest;
-use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\NotificationShowRequest;
+use App\Http\Requests\Manager\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Resources\Manager\NotificationShowResource;
+use App\Http\Requests\Manager\NotificationPutTypeRequest;
+use App\Http\Resources\Manager\NotificationIndexResource;
 
 class NotificationController extends Controller
 {
@@ -129,18 +129,17 @@ class NotificationController extends Controller
      */
     public function updateType(NotificationPutTypeRequest $request)
     {
-        // ユーザーID取得
+        // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 配下のインストラクター情報を取得
+        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 選択されたお知らせを取得
+        // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        // お知らせの所有者のidを配列で取得
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権限のチェック
@@ -151,14 +150,14 @@ class NotificationController extends Controller
             ], 403);
         }
 
+        $type = $request->type;
+
         DB::beginTransaction();
         try {
-            $notifications->each(function ($notification) use ($request) {
-                // 指定されたお知らせIDでお知らせを取得
-                Notification::findOrFail($notification->id)
-                    ->fill([
-                        'type' => $request->type,
-                    ])->save();
+            $notifications->each(function (Notification $notification) use ($type) {
+                $notification->fill([
+                    'type' => $type,
+                ])->save();
             });
             DB::commit();
             return response()->json([

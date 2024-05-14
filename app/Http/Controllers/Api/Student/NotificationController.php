@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use Carbon\CarbonImmutable;
 use App\Model\Student;
 use App\Model\Attendance;
 use App\Model\Notification;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\NotificationShowRequest;
 use App\Http\Requests\Student\NotificationIndexRequest;
-use App\Http\Resources\Student\NotificationIndexResource;
 use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Resources\Student\NotificationShowResource;
+use App\Http\Resources\Student\NotificationIndexResource;
 
 class NotificationController extends Controller
 {

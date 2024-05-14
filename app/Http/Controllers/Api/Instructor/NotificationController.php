@@ -108,7 +108,7 @@ class NotificationController extends Controller
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
-        
+
         $notifications->each(function ($notification) use ($instructorId) {
             if ($instructorId !== $notification->instructor_id) {
                 return response()->json([
@@ -117,7 +117,7 @@ class NotificationController extends Controller
                 ], 403);
             }
         });
-        
+
         DB::beginTransaction();
         try {
             $notificationType = $request->notification_type;

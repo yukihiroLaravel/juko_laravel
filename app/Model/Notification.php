@@ -99,7 +99,7 @@ class Notification extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    public static function typeUpdateAll(int $notifications,string $type): void
+    public static function typeUpdateAll(int $notifications, string $type): void
     {
         Notification::where('notificationId', $notifications)
             ->update([

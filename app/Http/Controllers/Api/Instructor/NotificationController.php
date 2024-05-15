@@ -137,20 +137,20 @@ class NotificationController extends Controller
         try {
             // viewed_once_notificationsのレコードを削除
             DB::table('viewed_once_notifications')->whereIn('notification_id', $notificationIds)->delete();
-            
+
             // お知らせを一括削除
             Notification::whereIn('id', $notificationIds)->delete();
 
             // コミット
             DB::commit();
-            
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (\Exception $e) {
             // ロールバック
             DB::rollBack();
-            
+
             // エラーレスポンスを返す
             return response()->json([
                 'result' => false,

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
@@ -103,11 +104,11 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一括削除
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
+    * お知らせ一括削除
+    *
+    * @param Request $request
+    * @return JsonResponse
+    */
     public function bulkDelete(Request $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
@@ -117,6 +118,7 @@ class NotificationController extends Controller
         /** @var Collection $notifications */
         $notifications = Notification::whereIn('id', $notificationIds)->get();
 
+        // 認証者と一致しないお知らせが含まれている場合はエラー
         if (
             $notifications->contains(function (Notification $notification) use ($instructor) {
                 return $notification->instructor_id !== $instructor->id;
@@ -129,10 +131,31 @@ class NotificationController extends Controller
             ], 403);
         }
 
-        Notification::whereIn('id', $notificationIds)->delete();
+        // トランザクション開始
+        DB::beginTransaction();
 
-        return response()->json([
-            'result' => true,
-        ]);
+        try {
+            // viewed_once_notificationsのレコードを削除
+            DB::table('viewed_once_notifications')->whereIn('notification_id', $notificationIds)->delete();
+            
+            // お知らせを一括削除
+            Notification::whereIn('id', $notificationIds)->delete();
+
+            // コミット
+            DB::commit();
+            
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (\Exception $e) {
+            // ロールバック
+            DB::rollBack();
+            
+            // エラーレスポンスを返す
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete notifications.',
+            ], 500);
+        }
     }
 }

@@ -20,7 +20,7 @@ class NotificationPutTypeRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'type' => $this->route('notification_type'),
+            'type' => $this->route('type'),
         ]);
     }
 

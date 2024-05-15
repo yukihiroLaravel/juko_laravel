@@ -77,7 +77,6 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細-削除
      *
-     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
     public function delete(): JsonResponse
     {

@@ -126,7 +126,7 @@ class AttendanceController extends Controller
 
             // 受講状況を削除
             $attendance = Attendance::findOrFail($attendanceId)->delete();
-
+            
             DB::commit();
             return response()->json([
                 'result' => true,

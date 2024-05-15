@@ -109,15 +109,16 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        $notifications->each(function ($notification) use ($instructorId) {
-            if ($instructorId !== $notification->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden, not allowed to access this notification.',
-                ], 403);
-            }
-        });
-
+        if (
+            $notifications->contains(function ($notification) use ($instructorId) {
+                return $notification->instructor_id !== $instructorId;
+            })
+        ) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
         DB::beginTransaction();
         try {
             $notificationType = $request->notification_type;

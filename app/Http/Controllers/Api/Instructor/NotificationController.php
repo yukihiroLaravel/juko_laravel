@@ -118,13 +118,13 @@ class NotificationController extends Controller
         /** @var Collection $notifications */
         $notifications = Notification::whereIn('id', $notificationIds)->get();
 
-        // 認証者と一致しないお知らせが含まれている場合はエラー
+        // 講師と一致しないお知らせが含まれている場合はエラー
         if (
             $notifications->contains(function (Notification $notification) use ($instructor) {
                 return $notification->instructor_id !== $instructor->id;
             })
         ) {
-            // 認証者と一致しないお知らせが含まれている場合はエラー
+            // 講師と一致しないお知らせが含まれている場合はエラー
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',

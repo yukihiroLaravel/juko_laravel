@@ -10,6 +10,7 @@ use App\Model\Notification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -65,12 +66,22 @@ class NotificationController extends Controller
         // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
-            'result' => false,
-            'message' => 'Forbidden, not allowed to access this notification.',
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
             ], 403);
         }
 
         return new NotificationShowResource($notification);
+    }
+
+    /**
+     * お知らせ詳細-削除
+     *
+     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
+     */
+    public function delete(): JsonResponse
+    {
+        return response()->json([]);
     }
 
     /**
@@ -110,7 +121,7 @@ class NotificationController extends Controller
             'title' => $request->title,
             'content' => $request->content,
         ])
-        ->save();
+            ->save();
 
         return response()->json([
             'result' => true,

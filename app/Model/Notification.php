@@ -108,5 +108,4 @@ class Notification extends Model
     {
         return $this->hasMany(ViewedOnceNotification::class, 'notification_id');
     }
-
 }

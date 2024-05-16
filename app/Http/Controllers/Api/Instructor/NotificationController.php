@@ -136,11 +136,11 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            // お知らせを一括削除
-            $notifications->each(function ($notification) {
-                $notification->viewedOnceNotifications()->delete();
-                $notification->delete();
-            });
+            // viewed_once_notificationsテーブルのレコードを一括削除
+            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+
+            // notificationsテーブルのレコードを一括削除
+            Notification::whereIn('id', $notificationIds)->delete();
 
             // コミット
             DB::commit();

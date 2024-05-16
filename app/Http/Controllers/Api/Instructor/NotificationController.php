@@ -99,4 +99,30 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
+
+    public function delete(Request $request, $notification_id)
+    {
+        $instructor = Instructor::findOrFail($request->user()->id);
+        $courseIds = Course::where('instructor_id', $instructor->id)->pluck('course_id')->toArray();
+
+        $notification = Notification::with(['course'])
+        ->findOrFail($request->notification_id);
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+
+            $notification->delete();
+            return response()->json([
+                'result' => true,
+                'message' => 'Notification deleted successfully.'
+            ], 200);
+        //↑をnotification_idがinstructore_idと一致しない場合は更新を許可しない。
+        //もしかしたら、course_idも全て一致しないと更新を許可しない風にする？？
+        //notification_idの中のインストラクターidと今ログインしているインストラクターidが同じか
+        //そのためにはまず、ログインしているインストラクターidを持ってくる
+    }
 }

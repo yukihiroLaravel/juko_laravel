@@ -81,16 +81,16 @@ class NotificationController extends Controller
      */
     public function delete($notification_id)
     {
-        // ログインユーザーのID取得
+        // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 配下のインストラクター情報を取得
+        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 指定されたお知らせIDでお知らせを取得
+        // 指定されたお知らせを取得
         /** @var Notification $notification */
         $notification = Notification::findOrFail($notification_id);
 
@@ -101,8 +101,6 @@ class NotificationController extends Controller
                 'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
-
-        $notification->delete();
 
         return response()->json([
             'result' => true,

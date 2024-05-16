@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Notification;
+use App\Model\ViewedOnceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
@@ -137,7 +138,7 @@ class NotificationController extends Controller
         try {
             // お知らせを一括削除
             $notifications->each(function ($notification) {
-                DB::table('viewed_once_notifications')->where('notification_id', $notification->id)->delete();
+                $notification->viewedOnceNotifications()->delete();
                 $notification->delete();
             });
 

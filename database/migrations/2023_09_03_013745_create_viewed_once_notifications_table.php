@@ -15,8 +15,8 @@ class CreateViewedOnceNotificationsTable extends Migration
     {
         Schema::create('viewed_once_notifications', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('notification_id');
-            $table->unsignedBigInteger('student_id');
+            $table->bigInteger('notification_id')->unsigned();
+            $table->bigInteger('student_id')->unsigned();
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->foreign('notification_id')->references('id')->on('notifications')->onDelete('cascade');

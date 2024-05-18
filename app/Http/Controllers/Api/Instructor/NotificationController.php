@@ -100,8 +100,23 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete()
+    public function delete(Request $request, $notification_id)
     {
-        return response()->json([]);
+        $instructor = Instructor::findOrFail($request->user()->id);
+        $courseIds = Course::where('instructor_id', $instructor->id)->pluck('id')->toArray();
+        $notification = Notification::with(['course']) ->findOrFail($notification_id);
+        
+        if(!in_array($notification->course->id, $courseIds)){
+            return response()->json([
+                'result'  => false,
+                'message' => 'Notification not associated with instructor\'s course.',
+            ], 403);
+        }
+            $notification->delete();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Notification deleted successfully.'
+            ], 200);
     }
 }

@@ -104,6 +104,12 @@ class NotificationController extends Controller
         ]);
     }
 
+    /**
+     * お知らせ一覧-タイプ変更API
+     *
+     * @param NotificationPutTypeRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();

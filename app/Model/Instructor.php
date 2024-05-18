@@ -60,5 +60,4 @@ class Instructor extends Authenticatable
     {
         return $this->belongsToMany('App\Model\Instructor', 'manage_instructors', 'manager_id', 'instructor_id');
     }
-
 }

@@ -135,6 +135,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-お知らせ
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
+                Route::delete('{notification_id}', 'Api\Instructor\NotificationController@delete');
             });
         });
 

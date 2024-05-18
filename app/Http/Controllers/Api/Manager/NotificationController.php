@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\NotificationIndexRequest;
-use App\Http\Resources\Manager\NotificationIndexResource;
+use Exception;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Http\Requests\Manager\NotificationShowRequest;
-use App\Http\Resources\Manager\NotificationShowResource;
-use App\Http\Requests\Manager\NotificationUpdateRequest;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\NotificationShowRequest;
+use App\Http\Requests\Manager\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Resources\Manager\NotificationShowResource;
+use App\Http\Requests\Manager\NotificationPutTypeRequest;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\Manager\NotificationIndexResource;
 
 class NotificationController extends Controller
 {
@@ -149,5 +153,56 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * お知らせ一覧-タイプ変更API
+     *
+     * @param NotificationPutTypeRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateType(NotificationPutTypeRequest $request)
+    {
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 選択されたお知らせリストを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
+
+        // アクセス権限のチェック
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to update this notification.',
+            ], 403);
+        }
+
+        $type = $request->type;
+
+        DB::beginTransaction();
+        try {
+            $notifications->each(function (Notification $notification) use ($type) {
+                $notification->fill([
+                    'type' => $type,
+                ])->save();
+            });
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 }

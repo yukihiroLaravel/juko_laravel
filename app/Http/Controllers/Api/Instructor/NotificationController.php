@@ -105,10 +105,10 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-タイプ変更API
+     * お知らせ種別一括更新API
      *
      * @param NotificationPutTypeRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
@@ -116,22 +116,23 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(function ($notification) use ($instructorId) {
+            $notifications->contains(function (Notification $notification) use ($instructorId) {
                 return $notification->instructor_id !== $instructorId;
             })
         ) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
+
         DB::beginTransaction();
         try {
-            $notificationType = $request->notification_type;
-            $notifications->each(function ($notification) use ($notificationType) {
+            $type = $request->type;
+            $notifications->each(function (Notification $notification) use ($type) {
                 // 指定されたお知らせIDでお知らせを取得
                 $notification->fill([
-                    'type' => $notificationType
+                    'type' => $type
                 ])
                 ->save();
             });
@@ -144,7 +145,6 @@ class NotificationController extends Controller
             Log::error($e);
             return response()->json([
                 'result' => false,
-                'message' => $e->getMessage(),
             ], 500);
         }
     }

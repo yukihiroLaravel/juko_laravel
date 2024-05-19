@@ -6,12 +6,16 @@ use App\Model\Notification;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use Exception;
 
 class NotificationController extends Controller
 {
@@ -98,5 +102,50 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * お知らせ一覧-タイプ変更API
+     *
+     * @param NotificationPutTypeRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateType(NotificationPutTypeRequest $request): JsonResponse
+    {
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        if (
+            $notifications->contains(function ($notification) use ($instructorId) {
+                return $notification->instructor_id !== $instructorId;
+            })
+        ) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to access this notification.',
+            ], 403);
+        }
+        DB::beginTransaction();
+        try {
+            $notificationType = $request->notification_type;
+            $notifications->each(function ($notification) use ($notificationType) {
+                // 指定されたお知らせIDでお知らせを取得
+                $notification->fill([
+                    'type' => $notificationType
+                ])
+                ->save();
+            });
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

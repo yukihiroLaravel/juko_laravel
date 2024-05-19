@@ -105,10 +105,21 @@ class NotificationController extends Controller
                 'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
-
-        return response()->json([
-            'result' => true,
-        ]);
+        DB::beginTransaction();
+        try {
+            $notification->students()->detach();
+            $notification->delete();
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 
     /**

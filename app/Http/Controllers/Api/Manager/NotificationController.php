@@ -81,7 +81,7 @@ class NotificationController extends Controller
 
     /**
      * お知らせ登録API
-     * 
+     *
      * @param NotificationStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */

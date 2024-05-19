@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceShowTodayRequest;
 use App\Http\Requests\Instructor\AttendanceShowThisMonthRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;

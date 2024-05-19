@@ -113,7 +113,6 @@ class StudentController extends Controller
 
          // 受講生の年齢
          $today = CarbonImmutable::today();
-         $age = new Student();
          $age = Student::calcAge($student, $today);
          return new StudentShowResource([
             'student' => $student,

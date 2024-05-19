@@ -16,7 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
-use App\Http\Requests\Instructor\AttendanceShowRequest;
+use App\Http\Requests\Instructor\AttendanceShowTodayRequest;
 use App\Http\Requests\Instructor\AttendanceShowThisMonthRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
@@ -214,7 +214,7 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return JsonResponse
      */
-    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
+    public function showStatusToday(AttendanceShowTodayRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 

@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use Exception;
 use App\Model\Notification;
 use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
-use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
-use Exception;
 
 class NotificationController extends Controller
 {

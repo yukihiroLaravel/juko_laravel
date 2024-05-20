@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use App\Model\Instructor;
 
 class NotificationController extends Controller
 {
@@ -103,7 +104,7 @@ class NotificationController extends Controller
     public function delete(Request $request, $notification_id)
     {
         $instructor = Instructor::findOrFail($request->user()->id);
-        $notification = Notification::findOrFail($request->$notification_id);
+        $notification = Notification::findOrFail($notification_id);
         
         if($notification->instructor_id !== $instructor->id){
             return response()->json([

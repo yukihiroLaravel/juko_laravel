@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Manager;
 
 use App\Model\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
@@ -18,8 +19,7 @@ class StudentShowResource extends JsonResource
      */
     public function toArray($request)
     {
-        $student = $this->resource['student'];
-        $age = $this->resource['ageData'];
+        $student = $this;
         return [
             'student_id' => $student->id,
             'given_name_by_instructor' => $student->given_name_by_instructor,
@@ -29,7 +29,7 @@ class StudentShowResource extends JsonResource
             'occupation' => $student->occupation,
             'email' => $student->email,
             'purpose' => $student->purpose,
-            'age' => $age,
+            'age' => $student->calcAge(new CarbonImmutable()),
             'birth_date' => $student->birth_date->format('Y/m/d'),
             'sex' => $student->sex,
             'address' => $student->address,

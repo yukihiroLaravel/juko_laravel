@@ -151,7 +151,6 @@ class NotificationController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
-
             // ロールバック
             DB::rollBack();
 

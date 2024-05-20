@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
@@ -105,11 +106,11 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一括削除
-     *
-     * @param NotificationBulkDeleteRequest $request
-     * @return JsonResponse
-     */
+    * お知らせ一括削除
+    *
+    * @param NotificationBulkDeleteRequest $request
+    * @return JsonResponse
+    */
     public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
@@ -125,6 +126,7 @@ class NotificationController extends Controller
                 return $notification->instructor_id !== $instructor->id;
             })
         ) {
+            // 講師と一致しないお知らせが含まれている場合はエラー
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',

@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use Exception;
 use App\Model\Notification;
-use App\Model\ViewedOnceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Model\ViewedOnceNotification;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
@@ -148,9 +150,13 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
+
             // ロールバック
             DB::rollBack();
+
+            // ログ出力
+            Log::debug($e->getMessage());
 
             // エラーレスポンスを返す
             return response()->json([

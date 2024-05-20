@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use App\Model\Course;
 use App\Model\Student;
 use App\Model\Instructor;
@@ -128,14 +127,7 @@ class StudentController extends Controller
             ], 403);
         }
 
-        // 受講生の年齢算出
-        $today = CarbonImmutable::today();
-        $age = Student::calcAge($student, $today);
-
-        return new StudentShowResource([
-            'student' => $student,
-            'ageData' => $age,
-        ]);
+        return new StudentShowResource($student);
     }
 
     /**

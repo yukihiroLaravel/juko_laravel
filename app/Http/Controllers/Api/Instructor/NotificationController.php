@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Model\Notification;
+use App\Model\ViewedOnceNotification;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
+use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 
@@ -98,5 +102,60 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * お知らせ一括削除
+     *
+     * @param NotificationBulkDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
+    {
+        $notificationIds = $request->input('notifications', []);
+
+        $instructor = Auth::guard('instructor')->user();
+
+        /** @var Collection $notifications */
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        if (
+            $notifications->contains(function (Notification $notification) use ($instructor) {
+                return $notification->instructor_id !== $instructor->id;
+            })
+        ) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden.',
+            ], 403);
+        }
+
+        // トランザクション開始
+        DB::beginTransaction();
+
+        try {
+            // viewed_once_notificationsテーブルのレコードを一括削除
+            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+
+            // notificationsテーブルのレコードを一括削除
+            Notification::whereIn('id', $notificationIds)->delete();
+
+            // コミット
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (\Exception $e) {
+            // ロールバック
+            DB::rollBack();
+
+            // エラーレスポンスを返す
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete notifications.',
+            ], 500);
+        }
     }
 }

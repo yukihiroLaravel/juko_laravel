@@ -24,8 +24,8 @@ class NotificationBulkDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'notifications' => ['required', 'array'],
-            'notifications.*' => ['integer', 'exists:notifications,id'],
+            'notifications' => ['required', 'array', 'min:1'],
+            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

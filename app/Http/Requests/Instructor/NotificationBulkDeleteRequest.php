@@ -25,7 +25,7 @@ class NotificationBulkDeleteRequest extends FormRequest
     {
         return [
             'notifications' => ['required', 'array', 'min:1'],
-            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
+            'notifications.*' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

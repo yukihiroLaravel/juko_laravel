@@ -171,4 +171,9 @@ class NotificationController extends Controller
             ], 500);
         }
     }
+
+    public function blnkDelete()
+    {
+        return response()->json([]);
+    }
 }

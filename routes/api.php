@@ -209,6 +209,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::patch('/', 'Api\Manager\NotificationController@update');
                     });
                     Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
+                    Route::delete('{notification_id}', 'Api\Manager\NotificationController@blnkDelete');
                 });
             });
         });

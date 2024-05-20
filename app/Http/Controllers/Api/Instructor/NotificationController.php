@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use Exception;
 use App\Model\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Model\ViewedOnceNotification;
+use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
@@ -102,13 +107,61 @@ class NotificationController extends Controller
     }
 
     /**
-    * お知らせ選択削除、空の配列を返す
+    * お知らせ一括削除
     *
     * @param Request $request
     * @return JsonResponse
     */
     public function bulkDelete(Request $request): JsonResponse
     {
-        return response()->json([]);
+        $notificationIds = $request->input('notifications', []);
+
+        $instructor = Auth::guard('instructor')->user();
+
+        /** @var Collection $notifications */
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        if (
+            $notifications->contains(function (Notification $notification) use ($instructor) {
+                return $notification->instructor_id !== $instructor->id;
+            })
+        ) {
+            // 講師と一致しないお知らせが含まれている場合はエラー
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden.',
+            ], 403);
+        }
+
+        // トランザクション開始
+        DB::beginTransaction();
+
+        try {
+            // viewed_once_notificationsテーブルのレコードを一括削除
+            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+
+            // notificationsテーブルのレコードを一括削除
+            Notification::whereIn('id', $notificationIds)->delete();
+
+            // コミット
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            // ロールバック
+            DB::rollBack();
+
+            // ログ出力
+            Log::debug($e->getMessage());
+
+            // エラーレスポンスを返す
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete notifications.',
+            ], 500);
+        }
     }
 }

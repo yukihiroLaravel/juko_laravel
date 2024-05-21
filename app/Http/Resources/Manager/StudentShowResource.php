@@ -19,23 +19,22 @@ class StudentShowResource extends JsonResource
      */
     public function toArray($request)
     {
-        $student = $this;
         return [
-            'student_id' => $student->id,
-            'given_name_by_instructor' => $student->given_name_by_instructor,
-            'nick_name' => $student->nick_name,
-            'last_name' => $student->last_name,
-            'first_name' => $student->first_name,
-            'occupation' => $student->occupation,
-            'email' => $student->email,
-            'purpose' => $student->purpose,
-            'age' => $student->calcAge(new CarbonImmutable()),
-            'birth_date' => $student->birth_date->format('Y/m/d'),
-            'sex' => $student->sex,
-            'address' => $student->address,
-            'created_at' => $student->created_at->format('Y/m/d'),
-            'last_login_at' => $student->last_login_at->format('Y/m/d'),
-            'profile_image' => $student->profile_image,
+            'student_id' => $this->id,
+            'given_name_by_instructor' => $this->given_name_by_instructor,
+            'nick_name' => $this->nick_name,
+            'last_name' => $this->last_name,
+            'first_name' => $this->first_name,
+            'occupation' => $this->occupation,
+            'email' => $this->email,
+            'purpose' => $this->purpose,
+            'age' => $this->calcAge(new CarbonImmutable()),
+            'birth_date' => $this->birth_date->format('Y/m/d'),
+            'sex' => $this->sex,
+            'address' => $this->address,
+            'created_at' => $this->created_at->format('Y/m/d'),
+            'last_login_at' => $this->last_login_at->format('Y/m/d'),
+            'profile_image' => $this->profile_image,
         ];
     }
 }

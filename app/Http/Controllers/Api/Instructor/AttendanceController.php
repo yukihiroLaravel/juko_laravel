@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
+use App\Http\Requests\Instructor\AttendanceShowTodayRequest;
+use App\Http\Requests\Instructor\AttendanceShowThisMonthRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
@@ -210,10 +212,10 @@ class AttendanceController extends Controller
     /**
      * 講座受講状況-当日
      *
-     * @param AttendanceShowRequest $request
+     * @param AttendanceShowTodayRequest $request
      * @return JsonResponse
      */
-    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
+    public function showStatusToday(AttendanceShowTodayRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
@@ -258,17 +260,17 @@ class AttendanceController extends Controller
     /**
      * 講座受講状況-今月
      *
-     * @param AttendanceShowRequest $request
+     * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse
      */
-    public function showStatusThisMonth(AttendanceShowRequest $request): JsonResponse
+    public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
         // 今月完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
-                return $lessonAttendance->status === 'STATUS_COMPLETED_ATTENDANCE' && $lessonAttendance->updated_at->isCurrentMonth();
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isCurrentMonth();
             });
             return $compleatedLessonAttendances;
         })->count();

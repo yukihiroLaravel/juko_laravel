@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use Illuminate\Http\Request;
 use App\Model\Instructor;
 
 class NotificationController extends Controller
@@ -103,20 +104,21 @@ class NotificationController extends Controller
 
     public function delete(Request $request, $notification_id)
     {
-        $instructor = Instructor::findOrFail($request->user()->id);
+        $instructor = Auth::guard('instructor')->user();
         $notification = Notification::findOrFail($notification_id);
-        
-        if($notification->instructor_id !== $instructor->id){
+
+        if ($notification->instructor_id !== $instructor->id) {
             return response()->json([
-                'result'  => false,
-                'message' => 'Notification not associated with instructor\'s course.',
+                'result' => false,
+                'message' => 'Notification is not associated with the instructor\'s course.',
             ], 403);
         }
-            $notification->delete();
 
-            return response()->json([
-                'result' => true,
-                'message' => 'Notification deleted successfully.'
-            ], 200);
+        $notification->delete();
+
+        return response()->json([
+            'result' => true,
+            'message' => 'Notification deleted successfully.'
+        ], 200);
     }
 }

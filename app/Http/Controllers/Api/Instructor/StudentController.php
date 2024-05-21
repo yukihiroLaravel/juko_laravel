@@ -111,13 +111,7 @@ class StudentController extends Controller
             ], 403);
         }
 
-         // 受講生の年齢
-         $today = CarbonImmutable::today();
-         $age = Student::calcAge($student, $today);
-         return new StudentShowResource([
-            'student' => $student,
-            'age' => $age,
-         ]);
+        return new StudentShowResource($student);
         }
 
     /**

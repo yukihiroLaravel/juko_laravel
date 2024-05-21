@@ -39,8 +39,6 @@ class Student extends Authenticatable
      */
     protected $table = 'students';
 
-    static $birth_date;
-
     /**
      *
      * @var array
@@ -152,13 +150,12 @@ class Student extends Authenticatable
     /**
      * 年齢計算
      * 
-     * @param $student
      * @param CarbonImmutable $today
      * @return int $calcAge
      * 
      */
-    public static function calcAge($student, $today)
+    public function calcAge($today)
     {
-        return $student->birth_date->diffInYears($today);
+        return $this->birth_date->diffInYears($today);
     }
 }

@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\Course;
-use App\Http\Requests\Manager\NotificationStoreRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationStoreRequest;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
@@ -71,8 +71,8 @@ class NotificationController extends Controller
         // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
-            'result' => false,
-            'message' => 'Forbidden.',
+                'result' => false,
+                'message' => 'Forbidden.',
             ], 403);
         }
 

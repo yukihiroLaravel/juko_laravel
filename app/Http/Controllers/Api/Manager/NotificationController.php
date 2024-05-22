@@ -81,10 +81,45 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細-削除
      *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function delete(): JsonResponse
+    public function delete($notification_id)
     {
-        return response()->json([]);
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 指定されたお知らせを取得
+        /** @var Notification $notification */
+        $notification = Notification::findOrFail($notification_id);
+
+        // アクセス権限のチェック
+        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to update this notification.',
+            ], 403);
+        }
+        DB::beginTransaction();
+        try {
+            $notification->students()->detach();
+            $notification->delete();
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use App\Model\Course;
 use App\Model\Student;
 use Illuminate\Http\JsonResponse;

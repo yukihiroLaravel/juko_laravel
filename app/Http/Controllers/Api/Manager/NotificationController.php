@@ -8,6 +8,7 @@ use App\Model\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
@@ -170,5 +171,10 @@ class NotificationController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    public function bulkDelete(): JsonResponse
+    {
+        return response()->json([]);
     }
 }

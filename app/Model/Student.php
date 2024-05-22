@@ -149,10 +149,10 @@ class Student extends Authenticatable
 
     /**
      * 年齢計算
-     * 
+     *
      * @param CarbonImmutable $today
      * @return int $calcAge
-     * 
+     *
      */
     public function calcAge($today)
     {

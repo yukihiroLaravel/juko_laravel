@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -144,5 +145,16 @@ class Student extends Authenticatable
     {
         // public/を削除
         return str_replace('public/', '', $filePath);
+    }
+
+    /**
+     * 年齢算出
+     *
+     * @param CarbonImmutable $today
+     * @return int
+     */
+    public function calcAge($today)
+    {
+        return $student->birth_date->diffInYears($today);
     }
 }

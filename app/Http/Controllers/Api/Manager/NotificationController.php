@@ -173,7 +173,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function blnkDelete(): JsonResponse
+    public function bulkDelete(): JsonResponse
     {
         return response()->json([]);
     }

@@ -16,6 +16,7 @@ use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
+use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 
@@ -109,10 +110,10 @@ class NotificationController extends Controller
     /**
     * お知らせ一括削除
     *
-    * @param Request $request
+    * @param NotificationBulkDeleteRequest $request
     * @return JsonResponse
     */
-    public function bulkDelete(Request $request): JsonResponse
+    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
 

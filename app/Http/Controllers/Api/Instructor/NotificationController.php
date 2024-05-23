@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use Exception;
 use App\Model\Notification;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

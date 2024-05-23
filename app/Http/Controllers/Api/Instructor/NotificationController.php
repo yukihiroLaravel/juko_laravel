@@ -13,12 +13,12 @@ use App\Model\ViewedOnceNotification;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
-use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
-use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 
 class NotificationController extends Controller
 {

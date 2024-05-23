@@ -8,6 +8,7 @@ use App\Model\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\NotificationDeleteRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
@@ -81,9 +82,10 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細-削除
      *
+     * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function delete($notification_id)
+    public function delete(NotificationDeleteRequest $request)
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -96,7 +98,7 @@ class NotificationController extends Controller
 
         // 指定されたお知らせを取得
         /** @var Notification $notification */
-        $notification = Notification::findOrFail($notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
         // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {

@@ -99,13 +99,4 @@ class Notification extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    /**
-     * 既読通知を取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function viewedOnceNotifications()
-    {
-        return $this->hasMany(ViewedOnceNotification::class, 'notification_id');
-    }
 }

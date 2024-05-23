@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('status', 'Api\Instructor\AttendanceController@show');
                         Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
                         Route::get('status/today', 'Api\Instructor\AttendanceController@showStatusToday');
+                        Route::get('status/this-month', 'Api\Instructor\AttendanceController@showStatusThisMonth');
                     });
                 });
             });
@@ -188,6 +189,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 });
                             });
                         });
+                        Route::prefix('notification')->group(function () {
+                            Route::post('/', 'Api\Manager\NotificationController@store');
+                        });
                     });
                 });
                 // マネージャー-受講
@@ -227,6 +231,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::prefix('notification')->group(function () {
+            Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
                 Route::patch('/', 'Api\Instructor\NotificationController@update');

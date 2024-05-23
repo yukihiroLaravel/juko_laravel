@@ -21,7 +21,6 @@ use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 
-
 class NotificationController extends Controller
 {
     /**

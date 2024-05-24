@@ -9,15 +9,14 @@ use App\Model\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\NotificationDeleteRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Requests\Manager\NotificationStoreRequest;
+use App\Http\Requests\Manager\NotificationDeleteRequest;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
-use Illuminate\Http\JsonResponse;
 use App\Http\Resources\Manager\NotificationIndexResource;
 
 class NotificationController extends Controller
@@ -129,10 +128,10 @@ class NotificationController extends Controller
      */
     public function update(NotificationUpdateRequest $request)
     {
-        // ユーザーID取得
+        // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 配下のインストラクター情報を取得
+        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();

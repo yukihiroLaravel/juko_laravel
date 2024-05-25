@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Requests\Manager\NotificationStoreRequest;
+use App\Http\Requests\Manager\NotificationDeleteRequest;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
@@ -99,19 +100,19 @@ class NotificationController extends Controller
         $course = Course::findOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
-            'result' => false,
-            'message' => 'Forbidden.',
+                'result' => false,
+                'message' => 'Forbidden.',
             ], 403);
         }
 
         Notification::create([
-           'course_id'     => $request->course_id,
-           'instructor_id' => Auth::guard('instructor')->user()->id,
-           'title'         => $request->title,
-           'type'          => $request->type,
-           'start_date'    => $request->start_date,
-           'end_date'      => $request->end_date,
-           'content'       => $request->content,
+            'course_id'     => $request->course_id,
+            'instructor_id' => Auth::guard('instructor')->user()->id,
+            'title'         => $request->title,
+            'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'content'       => $request->content,
         ]);
 
         return response()->json([
@@ -127,10 +128,10 @@ class NotificationController extends Controller
      */
     public function update(NotificationUpdateRequest $request)
     {
-        // ユーザーID取得
+        // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 配下のインストラクター情報を取得
+        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -161,6 +162,51 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * お知らせ詳細-削除
+     *
+     * @param NotificationDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete(NotificationDeleteRequest $request)
+    {
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 指定されたお知らせを取得
+        /** @var Notification $notification */
+        $notification = Notification::findOrFail($request->notification_id);
+
+        // アクセス権限のチェック
+        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden, not allowed to update this notification.',
+            ], 403);
+        }
+        DB::beginTransaction();
+        try {
+            $notification->students()->detach();
+            $notification->delete();
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 
     /**

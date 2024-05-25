@@ -214,7 +214,7 @@ class AttendanceController extends Controller
      *
      * @return JsonResponse
      */
-    public function showAttendanceStatus(): JsonResponse
+    public function showStatus(): JsonResponse
     {
         return response()->json([]);
     }

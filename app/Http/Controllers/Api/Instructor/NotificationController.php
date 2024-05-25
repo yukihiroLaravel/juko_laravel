@@ -14,6 +14,9 @@ use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use Illuminate\Http\Request;
 use App\Model\Instructor;
+use Illuminate\Support\Facades\DB;
+use App\Model\ViewedOnceNotification;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
@@ -114,11 +117,29 @@ class NotificationController extends Controller
             ], 403);
         }
 
-        $notification->delete();
+        DB::beginTransaction();
 
-        return response()->json([
-            'result' => true,
-            'message' => 'Notification deleted successfully.'
-        ], 200);
+        try{
+            ViewedOnceNotification::where('notification_id', $notification_id)->delete();
+            $notification->delete();
+       
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Notification deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+        
+            DB::rollBack();
+
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete notification.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

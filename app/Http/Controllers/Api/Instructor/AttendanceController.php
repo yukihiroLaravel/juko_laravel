@@ -210,6 +210,16 @@ class AttendanceController extends Controller
     }
 
     /**
+     * 講座受講状況
+     *
+     * @return JsonResponse
+     */
+    public function showAttendanceStatus(): JsonResponse
+    {
+        return response()->json([]);
+    }
+
+    /**
      * 講座受講状況-当日
      *
      * @param AttendanceShowTodayRequest $request
@@ -231,25 +241,25 @@ class AttendanceController extends Controller
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
-        ->filter(function (LessonAttendance $lessonAttendance) {
-            // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が当日の日時という条件で絞り込む
-            $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
-            $totalLessonsCount = $allLessonsId->count();
-            $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
-                ->whereIn('lesson_id', $allLessonsId)
-                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
-                ->count();
-            return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
-        })
-        ->map(function (LessonAttendance $lessonAttendance) {
-            // chapter_idとattendance_idをキーにもつ新しい配列を作成
-            return [
-                'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                'attendance_id' => $lessonAttendance->attendance_id
-            ];
-        })
-        ->unique()
-        ->count();
+            ->filter(function (LessonAttendance $lessonAttendance) {
+                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が当日の日時という条件で絞り込む
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+                return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
+            })
+            ->map(function (LessonAttendance $lessonAttendance) {
+                // chapter_idとattendance_idをキーにもつ新しい配列を作成
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id
+                ];
+            })
+            ->unique()
+            ->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
@@ -279,25 +289,25 @@ class AttendanceController extends Controller
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
-        ->filter(function (LessonAttendance $lessonAttendance) {
-            // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が今月の日時という条件で絞り込む
-            $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
-            $totalLessonsCount = $allLessonsId->count();
-            $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
-                ->whereIn('lesson_id', $allLessonsId)
-                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
-                ->count();
-            return $lessonAttendance->updated_at->isCurrentMonth() && $totalLessonsCount === $compleatedLessonsCount;
-        })
-        ->map(function (LessonAttendance $lessonAttendance) {
-            // chapter_idとattendance_idをキーにもつ新しい配列を作成
-            return [
-                'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                'attendance_id' => $lessonAttendance->attendance_id
-            ];
-        })
-        ->unique()
-        ->count();
+            ->filter(function (LessonAttendance $lessonAttendance) {
+                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が今月の日時という条件で絞り込む
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+                return $lessonAttendance->updated_at->isCurrentMonth() && $totalLessonsCount === $compleatedLessonsCount;
+            })
+            ->map(function (LessonAttendance $lessonAttendance) {
+                // chapter_idとattendance_idをキーにもつ新しい配列を作成
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id
+                ];
+            })
+            ->unique()
+            ->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
  * @property int $lesson_id
  * @property int $attendance_id
  * @property 'before_attendance'|'in_attendance'|'completed_attendance' $status
+ * @property 'today'|'month' $period
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property string|null $deleted_at
@@ -44,6 +45,10 @@ class LessonAttendance extends Model
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
     const STATUS_IN_ATTENDANCE = 'in_attendance';
     const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
+
+    //$periodのバリデーションに利用する定数
+    const PERIOD_TODAY = 'today';
+    const PERIOD_MONTH = 'month';
 
     /**
      * レッスン取得

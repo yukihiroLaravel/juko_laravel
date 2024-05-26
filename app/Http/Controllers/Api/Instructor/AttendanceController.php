@@ -217,7 +217,7 @@ class AttendanceController extends Controller
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
-        // 期間内に完了したレッスンの個数を取得
+        // 指定期間内に完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($request) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($request) {
                 if ($request->period === LessonAttendance::PERIOD_TODAY) {
@@ -231,12 +231,12 @@ class AttendanceController extends Controller
             return $compleatedLessonAttendances;
         })->count();
 
-        // 今月完了したチャプターの個数を取得
+        // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
             ->filter(function (LessonAttendance $lessonAttendance) use ($request) {
-                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が今月の日時という条件で絞り込む
+                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
                 $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)

@@ -8,11 +8,13 @@ use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
+use App\Http\Requests\Manager\AttendanceDeleteRequest;
 
 class AttendanceController extends Controller
 {
@@ -87,6 +89,53 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
+    }
+
+    /**
+     * 受講状況削除API
+     *
+     * @param AttendanceDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete(AttendanceDeleteRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        try {
+            $attendanceId = $request->attendance_id;
+
+            // ログインしている講師、またはそのマネージャーが管理する受講データのIDのリストを取得
+            $managedAttendances = Attendance::whereIn('course_id', $instructorIds)->pluck('id')->toArray();
+
+            if (!in_array((int) $attendanceId, $managedAttendances, true)) {
+                // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
+                return response()->json([
+                    "result" => false,
+                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                ], 403);
+            }
+
+            // 受講状況を削除
+            Attendance::findOrFail($attendanceId)->delete();
+
+            DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e->getMessage());
             return response()->json([
                 'result' => false,
             ], 500);

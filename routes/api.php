@@ -198,6 +198,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
+                    Route::delete('{attendance_id}', 'Api\Manager\AttendanceController@delete');
                 });
                 Route::prefix('instructor')->group(function () {
                 });

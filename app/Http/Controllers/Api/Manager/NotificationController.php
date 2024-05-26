@@ -194,7 +194,6 @@ class NotificationController extends Controller
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $notificationIds = $notifications->pluck('id')->toArray();
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権限のチェック
@@ -208,10 +207,10 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             // viewed_once_notificationsテーブルのレコードを一括削除
-            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+            ViewedOnceNotification::whereIn('notification_id', $notifications)->delete();
 
             // notificationsテーブルのレコードを一括削除
-            Notification::whereIn('id', $notificationIds)->delete();
+            Notification::whereIn('id', $notifications)->delete();
 
             // コミット
             DB::commit();

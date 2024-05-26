@@ -26,7 +26,7 @@ class AttendanceShowStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'period' => ['required', 'string', new LessonAttendancePeriodRule],
+            'period' => ['required', 'string', new LessonAttendancePeriodRule()],
         ];
     }
 

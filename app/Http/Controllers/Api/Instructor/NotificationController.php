@@ -120,7 +120,7 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try{
-            ViewedOnceNotification::where('notification_id', $notification_id)->delete();
+            ViewedOnceNotification::where('notification_id', $notification_id)->firstOrFail()->delete();
             $notification->delete();
        
             DB::commit();

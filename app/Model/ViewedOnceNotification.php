@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
 class ViewedOnceNotification extends Model
 {
-    protected $table = 'ViewedOnceNotifications';
+    protected $table = 'viewed_once_notifications';
 
     protected $fillable = [
         'notification_id',

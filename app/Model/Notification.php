@@ -99,7 +99,7 @@ class Notification extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    public function viewedOnceNotifications()
+    public function viewedOnceNotification()
     {
         return $this->hasMany(ViewedOnceNotification::class, 'notification_id');
     }

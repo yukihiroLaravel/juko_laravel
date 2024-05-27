@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', 'Api\Instructor\ChapterController@store');
                         Route::post('sort', 'Api\Instructor\ChapterController@sort');
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
+                        Route::patch('{chapter_id}/lessons/status', 'Api\Instructor\ChapterController@updateLessonStatus');
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', 'Api\Instructor\ChapterController@show');
                             Route::patch('/', 'Api\Instructor\ChapterController@update');
@@ -137,11 +138,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
                 Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
-            });
-
-            // レッスンの公開/非公開ステータスを更新
-            Route::prefix('course/{course_id}/chapter/{chapter_id}')->group(function () {
-                Route::patch('lessons/status', 'Api\Instructor\LessonController@updateLessonStatus');
             });
         });
 

@@ -5,12 +5,9 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -303,14 +300,5 @@ class LessonController extends Controller
                 'result' => false,
             ]);
         }
-    }
-
-    /**
-     * レッスンの公開/非公開ステータスを更新
-     *
-     */
-    public function updateLessonStatus()
-    {
-        return response()->json([]);
     }
 }

@@ -46,7 +46,7 @@ class LessonAttendance extends Model
     const STATUS_IN_ATTENDANCE = 'in_attendance';
     const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
 
-    //$periodのバリデーションに利用する定数
+    // 期間内の受講状況を取得する際の期間に関する定数
     const PERIOD_TODAY = 'today';
     const PERIOD_MONTH = 'month';
 

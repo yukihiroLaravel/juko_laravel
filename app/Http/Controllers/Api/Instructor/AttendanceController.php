@@ -211,19 +211,20 @@ class AttendanceController extends Controller
     /**
      * 講座受講状況
      *
+     * @param AttendanceShowStatusRequest $request
      * @return JsonResponse
      */
     public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得
-        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($request) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($request) {
-                if ($request->period === LessonAttendance::PERIOD_TODAY) {
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                if ($period === LessonAttendance::PERIOD_TODAY) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-                }
-                if ($request->period === LessonAttendance::PERIOD_MONTH) {
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
                 }
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
@@ -235,7 +236,7 @@ class AttendanceController extends Controller
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
-            ->filter(function (LessonAttendance $lessonAttendance) use ($request) {
+            ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
@@ -243,10 +244,9 @@ class AttendanceController extends Controller
                     ->whereIn('lesson_id', $allLessonsId)
                     ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                     ->count();
-                if ($request->period === LessonAttendance::PERIOD_TODAY) {
+                if ($period === LessonAttendance::PERIOD_TODAY) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-                }
-                if ($request->period === LessonAttendance::PERIOD_MONTH) {
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
                 }
                 return $updatedAtRequestPeriod && $totalLessonsCount === $compleatedLessonsCount;

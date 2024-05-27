@@ -301,4 +301,13 @@ class LessonController extends Controller
             ]);
         }
     }
+
+    /**
+     * 選択済みのレッスン公開/非公開API
+     */
+    public function updateVisibilityStatus()
+    {
+        return response()->json([]);
+    }
+
 }

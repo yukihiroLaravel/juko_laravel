@@ -7,7 +7,6 @@ use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -295,13 +294,5 @@ class ChapterController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-     * 選択済みのレッスン公開/非公開API
-     */
-    public function updateLessonStatus()
-    {
-        return response()->json([]);
     }
 }

@@ -78,7 +78,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', 'Api\Instructor\ChapterController@store');
                         Route::post('sort', 'Api\Instructor\ChapterController@sort');
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
-                        Route::patch('{chapter_id}/lessons/status', 'Api\Instructor\ChapterController@updateLessonStatus');
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', 'Api\Instructor\ChapterController@show');
                             Route::patch('/', 'Api\Instructor\ChapterController@update');
@@ -88,6 +87,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
+                                Route::patch('status', 'Api\Instructor\LessonController@updateVisibilityStatus');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');

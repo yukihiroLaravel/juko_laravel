@@ -186,7 +186,7 @@ class NotificationController extends Controller
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        
+
         // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::find($instructorId);

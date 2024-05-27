@@ -138,6 +138,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
                 Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
             });
+
+            // レッスンの公開/非公開ステータスを更新
+            Route::prefix('course/{course_id}/chapter/{chapter_id}')->group(function () {
+                Route::patch('lessons/status', 'Api\Instructor\LessonController@updateLessonStatus');
+            });
         });
 
         // マネージャーAPI

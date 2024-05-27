@@ -15,6 +15,7 @@ use App\Model\ViewedOnceNotification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
@@ -178,19 +179,18 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括削除API
      *
-     * @param Request $request
+     * @param NotificationBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(Request $request): JsonResponse
+    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-
+        
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        $manager = Instructor::find($instructorId);
+        $instructorIds = [$manager->id];
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();

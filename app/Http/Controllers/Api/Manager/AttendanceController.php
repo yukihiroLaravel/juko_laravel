@@ -8,9 +8,11 @@ use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
+use App\Model\Chapter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
@@ -101,6 +103,42 @@ class AttendanceController extends Controller
      */
     public function status(int $attendance_id): JsonResponse
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+        /** @var Attendance */
+
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
+
+        if (!in_array($attendance->course->instructor_id , $instructorIds, true)) {
+            return response()->json([
+                "result" => false,
+                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+            ], 403);
+        }
+        $response = [
+            'data' => [
+                'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
+                'course' => [
+                    'course_id' => $attendance->course->id,
+                    'title' => $attendance->course->title,
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
+                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'status' => $chapter->status,
+                        ];
+                    }),
+                ],
+            ],
+        ];
+
+        return response()->json($response, 200);
+    
+
     }
 }

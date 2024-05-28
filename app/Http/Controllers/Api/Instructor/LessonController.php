@@ -8,6 +8,7 @@ use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -299,6 +300,54 @@ class LessonController extends Controller
             return response()->json([
                 'result' => false,
             ]);
+        }
+    }
+
+    /**
+     * 選択済みのレッスンステータス一括更新API
+     *
+     * @param Request $request
+     * @param int $course_id
+     * @param int $chapter_id
+     * @return JsonResponse
+     */
+    public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
+    {
+        $user = Auth::guard('instructor')->user();
+
+        DB::beginTransaction();
+        try {
+            // レッスンが講師、講座、チャプターに属していることを確認
+            $lessons = Lesson::with('chapter.course')
+                ->whereIn('id', $request->lessons)
+                ->where('chapter_id', $chapter_id)
+                ->get();
+
+            foreach ($lessons as $lesson) {
+                if ($lesson->chapter->course->instructor_id !== $user->id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                if ($lesson->chapter->course_id !== $course_id) {
+                    throw new ValidationErrorException('Invalid course_id.');
+                }
+                if ($lesson->chapter_id !== $chapter_id) {
+                    throw new ValidationErrorException('Invalid chapter_id.');
+                }
+            }
+
+            // レッスンのステータスを一括更新
+            Lesson::whereIn('id', $request->lessons)
+                ->update(['status' => $request->status]);
+
+            DB::commit();
+            return response()->json(['result' => true], 200);
+        } catch (ValidationErrorException $e) {
+            DB::rollBack();
+            return response()->json(['result' => false, 'message' => $e->getMessage()], 422);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json(['result' => false], 500);
         }
     }
 }

@@ -303,7 +303,7 @@ class LessonController extends Controller
     }
 
     /**
-     * 選択済みのレッスン公開/非公開API
+     * 選択済みのレッスンステータス一括更新API
      */
     public function putStatus()
     {

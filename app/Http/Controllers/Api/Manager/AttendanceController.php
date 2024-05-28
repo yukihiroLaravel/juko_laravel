@@ -104,14 +104,14 @@ class AttendanceController extends Controller
     public function status(int $attendance_id): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
         /** @var Attendance */
 
         $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 
-        if (!in_array($attendance->course->instructor_id , $instructorIds, true)) {
+        if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 "result" => false,
                 "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
@@ -138,7 +138,5 @@ class AttendanceController extends Controller
         ];
 
         return response()->json($response, 200);
-    
-
     }
 }

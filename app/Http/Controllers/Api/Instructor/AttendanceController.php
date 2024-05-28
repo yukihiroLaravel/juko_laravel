@@ -226,6 +226,8 @@ class AttendanceController extends Controller
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
                 } elseif ($period === LessonAttendance::PERIOD_MONTH) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
                 }
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
@@ -248,6 +250,8 @@ class AttendanceController extends Controller
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
                 } elseif ($period === LessonAttendance::PERIOD_MONTH) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
                 }
                 return $updatedAtRequestPeriod && $totalLessonsCount === $compleatedLessonsCount;
             })

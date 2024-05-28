@@ -17,6 +17,7 @@ use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class NotificationController extends Controller
 {
@@ -120,7 +121,7 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try{
-            ViewedOnceNotification::where('notification_id', $notification_id)->firstOrFail()->delete();
+            ViewedOnceNotification::where('notification_id', $notification_id)->delete();
             $notification->delete();
        
             DB::commit();
@@ -129,7 +130,7 @@ class NotificationController extends Controller
                 'result' => true,
                 'message' => 'Notification deleted successfully.'
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         
             DB::rollBack();
 
@@ -137,8 +138,6 @@ class NotificationController extends Controller
 
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to delete notification.',
-                'error' => $e->getMessage()
             ], 500);
         }
     }

@@ -104,9 +104,4 @@ class Course extends Model
         // public/を削除
         return str_replace('public/', '', $filePath);
     }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
 }

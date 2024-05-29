@@ -12,8 +12,6 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
-use Illuminate\Http\Request;
-use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Support\Facades\Log;
@@ -106,7 +104,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete(Request $request, $notification_id)
+    public function delete($notification_id)
     {
         $instructor = Auth::guard('instructor')->user();
         $notification = Notification::findOrFail($notification_id);
@@ -128,7 +126,6 @@ class NotificationController extends Controller
 
             return response()->json([
                 'result' => true,
-                'message' => 'Notification deleted successfully.'
             ], 200);
         } catch (Exception $e) {
         

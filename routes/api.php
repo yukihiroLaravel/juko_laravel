@@ -189,7 +189,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             });
                         });
                         //マネージャー-講座-受講
-                        Route::prefix('attendance')->group(function() {
+                        Route::prefix('attendance')->group(function () {
                             Route::get('status/today', 'Api\Manager\AttendanceController@showStatusToday');
                         });
                     });

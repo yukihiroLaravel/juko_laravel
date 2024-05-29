@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Instructor;
 
+use App\Rules\LessonAttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceShowTodayRequest extends FormRequest
+class AttendanceShowStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +25,8 @@ class AttendanceShowTodayRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required','integer', 'exists:courses,id,deleted_at,NULL'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'period' => ['required', 'string', new LessonAttendancePeriodRule()],
         ];
     }
 
@@ -32,6 +34,7 @@ class AttendanceShowTodayRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
+            'period' => $this->route('period'),
         ]);
     }
 }

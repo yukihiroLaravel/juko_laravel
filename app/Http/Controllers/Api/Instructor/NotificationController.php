@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -104,7 +105,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete($notification_id)
+    public function delete(Request $request, $notification_id)
     {
         $instructor = Auth::guard('instructor')->user();
         $notification = Notification::findOrFail($notification_id);

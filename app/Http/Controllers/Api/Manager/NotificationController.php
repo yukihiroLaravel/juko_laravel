@@ -189,7 +189,6 @@ class NotificationController extends Controller
         // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();

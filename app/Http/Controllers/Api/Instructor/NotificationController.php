@@ -119,17 +119,16 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
 
-        try{
+        try {
             ViewedOnceNotification::where('notification_id', $notification_id)->delete();
             $notification->delete();
-       
+
             DB::commit();
 
             return response()->json([
                 'result' => true,
             ], 200);
         } catch (Exception $e) {
-        
             DB::rollBack();
 
             Log::error($e->getMessage());

@@ -95,8 +95,9 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+
     /**
-    * マネージャー側受講状況API
+     * マネージャー側受講状況API
      *
      * @param int $attendance_id
      * @return JsonResponse
@@ -107,14 +108,14 @@ class AttendanceController extends Controller
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        /** @var Attendance */
 
+        /** @var Attendance */
         $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
 
         if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                "message" => "Forbidden.",
             ], 403);
         }
         $response = [

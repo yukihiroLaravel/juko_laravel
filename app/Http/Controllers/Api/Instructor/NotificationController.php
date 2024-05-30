@@ -12,6 +12,11 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use Illuminate\Support\Facades\DB;
+use App\Model\ViewedOnceNotification;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -100,8 +105,37 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete()
+    public function delete(Request $request, $notification_id)
     {
-        return response()->json([]);
+        $instructor = Auth::guard('instructor')->user();
+        $notification = Notification::findOrFail($notification_id);
+
+        if ($notification->instructor_id !== $instructor->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Notification is not associated with the instructor\'s course.',
+            ], 403);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            ViewedOnceNotification::where('notification_id', $notification_id)->delete();
+            $notification->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
     }
 }

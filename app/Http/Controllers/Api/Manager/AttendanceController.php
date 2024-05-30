@@ -93,6 +93,6 @@ class AttendanceController extends Controller
         }
     }
     public function showStatusToday(){
-        return response()->json();
+        return response()->json([]);
     }
 }

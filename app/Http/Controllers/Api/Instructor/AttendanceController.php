@@ -19,10 +19,10 @@ use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
-use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Instructor\AttendanceStatusResource;
+use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
 
 class AttendanceController extends Controller
 {
@@ -209,7 +209,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講座受講状況
+     * 完了済みレッスン数と完了済みチャプター数取得API
      *
      * @param AttendanceShowStatusRequest $request
      * @return JsonResponse

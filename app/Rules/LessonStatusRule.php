@@ -16,21 +16,11 @@ class LessonStatusRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (
-            in_array(
-                $value,
-                [
-                Lesson::STATUS_PRIVATE,
-                Lesson::STATUS_PUBLIC
-                ],
-                true
-            )
-        ) {
-            return true;
-        }
-        return false;
+        return in_array($value, [
+            Lesson::STATUS_PRIVATE,
+            Lesson::STATUS_PUBLIC
+        ], true);
     }
-
 
     /**
      * Get the validation error message.

@@ -21,7 +21,7 @@ use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\LessonputStatusRequest;
+use App\Http\Requests\Instructor\LessonPutStatusRequest;
 
 class LessonController extends Controller
 {
@@ -307,12 +307,12 @@ class LessonController extends Controller
     /**
      * 選択済みのレッスンステータス一括更新API
      *
-     * @param LessonputStatusRequest $request
+     * @param LessonPutStatusRequest $request
      * @param int $course_id
      * @param int $chapter_id
      * @return JsonResponse
      */
-    public function putStatus(LessonputStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
+    public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
         try {
             $course = Course::findOrFail($course_id);

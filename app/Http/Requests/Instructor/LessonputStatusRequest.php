@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\LessonStatusRule;
 
-class LessonputStatusRequest extends FormRequest
+class LessonPutStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +26,8 @@ class LessonputStatusRequest extends FormRequest
     {
         return [
             'lessons' => 'required|array',
-            'lessons.*' => 'integer|exists:lessons,id',
-            'status' => 'required|string|in:public,private'
+            'lessons.*' => 'required|integer|exists:lessons,id',
+            'status' => ['required', 'string', new LessonStatusRule()]
         ];
     }
 }

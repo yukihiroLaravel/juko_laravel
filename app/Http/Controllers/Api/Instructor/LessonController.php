@@ -313,29 +313,38 @@ class LessonController extends Controller
     */
     public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        $course = Course::findOrFail($course_id);
-
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+        // $request->lessonsがnullでないことを確認
+        if (!$request->has('lessons')) {
+            // $request->lessonsがnullの場合はエラーレスポンスを返す
             return response()->json([
                 'result' => false,
-                "message" => "Not authorized."
-            ], 403);
+                'message' => 'Lessons parameter is missing.'
+            ], 400);
         }
 
-        $lessons = Lesson::where('chapter_id', $chapter_id)
+        // $request->lessonsがnullでない場合はクエリを実行
+        $lessons = Lesson::with('chapter.course')
+            ->where('chapter_id', $chapter_id)
             ->whereIn('id', $request->lessons)
             ->get();
 
-        $lessonIds = $lessons->pluck('id')->all();
-        $invalidLessons = array_diff($request->lessons, $lessonIds);
+        // 認可
+        $lessons->each(function ($lesson) use ($chapter_id, $course_id) {
+            // 講座に紐づく講師でない場合は許可しない
+            if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+                throw new ValidationErrorException('Invalid instructor_id.');
+            }
+            // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
+            if ($course_id !== $lesson->chapter->course_id) {
+                throw new ValidationErrorException('Invalid course_id.');
+            }
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+            if ($chapter_id !== $lesson->chapter_id) {
+                throw new ValidationErrorException('Invalid chapter_id.');
+            }
+        });
 
-        if (!empty($invalidLessons)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Some lessons do not belong to the specified course or chapter.',
-            ], 422);
-        }
-
+        // ステータスを一括更新
         Lesson::whereIn('id', $request->lessons)
             ->update(['status' => $request->status]);
 

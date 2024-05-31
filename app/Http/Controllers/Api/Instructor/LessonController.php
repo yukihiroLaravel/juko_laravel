@@ -314,39 +314,32 @@ class LessonController extends Controller
      */
     public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
-        try {
-            $course = Course::findOrFail($course_id);
+        $course = Course::findOrFail($course_id);
 
-            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    "message" => "Not authorized."
-                ], 403);
-            }
-
-            $chapter = Chapter::where('id', $chapter_id)
-                ->where('course_id', $course_id)
-                ->firstOrFail();
-
-            $lessons = Lesson::where('chapter_id', $chapter_id)
-                ->whereIn('id', $request->lessons)
-                ->get();
-
-            if ($lessons->count() !== count($request->lessons)) {
-                throw new ValidationErrorException('Some lessons do not belong to the specified chapter.');
-            }
-
-
-            // レッスンのステータスを一括更新
-            Lesson::whereIn('id', $request->lessons)
-                ->update(['status' => $request->status]);
-
-            return response()->json(['result' => true], 200);
-        } catch (ValidationErrorException $e) {
-            return response()->json(['result' => false, 'message' => $e->getMessage()], 422);
-        } catch (Exception $e) {
-            Log::error($e);
-            return response()->json(['result' => false], 500);
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => "Not authorized."
+            ], 403);
         }
+
+        $lessons = Lesson::where('chapter_id', $chapter_id)
+            ->whereIn('id', $request->lessons)
+            ->get();
+
+        $lessonIds = $lessons->pluck('id')->all();
+        $invalidLessons = array_diff($request->lessons, $lessonIds);
+
+        if (!empty($invalidLessons)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Some lessons do not belong to the specified course or chapter.',
+            ], 422);
+        }
+
+        Lesson::whereIn('id', $request->lessons)
+            ->update(['status' => $request->status]);
+
+        return response()->json(['result' => true], 200);
     }
 }

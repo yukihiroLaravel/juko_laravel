@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Instructor;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\LessonStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class LessonPutStatusRequest extends FormRequest
 {
@@ -17,6 +17,14 @@ class LessonPutStatusRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,11 +32,6 @@ class LessonPutStatusRequest extends FormRequest
      */
     public function rules()
     {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
-        ]);
-
         return [
             'lessons' => 'required|array',
             'lessons.*' => 'required|integer|exists:lessons,id',

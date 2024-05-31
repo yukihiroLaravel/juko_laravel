@@ -17,6 +17,8 @@ use App\Model\ViewedOnceNotification;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Http\Request;
+use App\Http\Requests\Instructor\NotificationDeleteRequest;
+
 
 class NotificationController extends Controller
 {
@@ -105,10 +107,16 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function delete(Request $request, $notification_id)
+    /**
+     * お知らせ削除
+     *
+     * @param NotificationDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function delete(NotificationDeleteRequest $request): JsonResponse
     {
         $instructor = Auth::guard('instructor')->user();
-        $notification = Notification::findOrFail($notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
         if ($notification->instructor_id !== $instructor->id) {
             return response()->json([
@@ -120,7 +128,7 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            ViewedOnceNotification::where('notification_id', $notification_id)->delete();
+            ViewedOnceNotification::where('notification_id', $notification->id)->delete();
             $notification->delete();
 
             DB::commit();

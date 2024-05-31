@@ -314,19 +314,18 @@ class LessonController extends Controller
     public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
         // $request->lessonsがnullでないことを確認
-        if (!$request->has('lessons')) {
+        if ($request->lessons === null || empty($request->lessons)) {
             // $request->lessonsがnullの場合はエラーレスポンスを返す
             return response()->json([
                 'result' => false,
-                'message' => 'Lessons parameter is missing.'
+                'message' => 'Lessons missing or empty.'
             ], 400);
         }
-
-        // $request->lessonsがnullでない場合はクエリを実行
-        $lessons = Lesson::with('chapter.course')
-            ->where('chapter_id', $chapter_id)
-            ->whereIn('id', $request->lessons)
-            ->get();
+            // $request->lessonsがnullでない場合はクエリを実行
+            $lessons = Lesson::with('chapter.course')
+                ->where('chapter_id', $chapter_id)
+                ->whereIn('id', $request->lessons)
+                ->get();
 
         // 認可
         $lessons->each(function ($lesson) use ($chapter_id, $course_id) {

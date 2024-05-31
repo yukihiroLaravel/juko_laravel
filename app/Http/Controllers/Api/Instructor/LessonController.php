@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Instructor;
-use App\Model\LessonAttendance;
+use App\Model\Course;
+use App\Model\Chapter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +21,7 @@ use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
+use App\Http\Requests\Instructor\LessonputStatusRequest;
 
 class LessonController extends Controller
 {
@@ -299,6 +301,52 @@ class LessonController extends Controller
             return response()->json([
                 'result' => false,
             ]);
+        }
+    }
+
+    /**
+     * 選択済みのレッスンステータス一括更新API
+     *
+     * @param LessonputStatusRequest $request
+     * @param int $course_id
+     * @param int $chapter_id
+     * @return JsonResponse
+     */
+    public function putStatus(LessonputStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
+    {
+        try {
+            $course = Course::findOrFail($course_id);
+
+            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    "message" => "Not authorized."
+                ], 403);
+            }
+
+            $chapter = Chapter::where('id', $chapter_id)
+                ->where('course_id', $course_id)
+                ->firstOrFail();
+
+            $lessons = Lesson::where('chapter_id', $chapter_id)
+                ->whereIn('id', $request->lessons)
+                ->get();
+
+            if ($lessons->count() !== count($request->lessons)) {
+                throw new ValidationErrorException('Some lessons do not belong to the specified chapter.');
+            }
+
+
+            // レッスンのステータスを一括更新
+            Lesson::whereIn('id', $request->lessons)
+                ->update(['status' => $request->status]);
+
+            return response()->json(['result' => true], 200);
+        } catch (ValidationErrorException $e) {
+            return response()->json(['result' => false, 'message' => $e->getMessage()], 422);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json(['result' => false], 500);
         }
     }
 }

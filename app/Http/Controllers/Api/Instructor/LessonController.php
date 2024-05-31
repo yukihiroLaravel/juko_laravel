@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Instructor;
-use App\Model\LessonAttendance;
+use App\Model\Course;
+use App\Model\Chapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -313,39 +313,37 @@ class LessonController extends Controller
      */
     public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        $user = Auth::guard('instructor')->user();
-
-        DB::beginTransaction();
         try {
-            // レッスンが講師、講座、チャプターに属していることを確認
-            $lessons = Lesson::with('chapter.course')
+            $course = Course::findOrFail($course_id);
+
+            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    "message" => "Not authorized."
+                ], 403);
+            }
+
+            $chapter = Chapter::where('id', $chapter_id)
+                ->where('course_id', $course_id)
+                ->firstOrFail();
+
+            $lessons = Lesson::where('chapter_id', $chapter_id)
                 ->whereIn('id', $request->lessons)
-                ->where('chapter_id', $chapter_id)
                 ->get();
 
-            foreach ($lessons as $lesson) {
-                if ($lesson->chapter->course->instructor_id !== $user->id) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
-                }
-                if ($lesson->chapter->course_id !== $course_id) {
-                    throw new ValidationErrorException('Invalid course_id.');
-                }
-                if ($lesson->chapter_id !== $chapter_id) {
-                    throw new ValidationErrorException('Invalid chapter_id.');
-                }
+            if ($lessons->count() !== count($request->lessons)) {
+                throw new ValidationErrorException('Some lessons do not belong to the specified chapter.');
             }
+
 
             // レッスンのステータスを一括更新
             Lesson::whereIn('id', $request->lessons)
                 ->update(['status' => $request->status]);
 
-            DB::commit();
             return response()->json(['result' => true], 200);
         } catch (ValidationErrorException $e) {
-            DB::rollBack();
             return response()->json(['result' => false, 'message' => $e->getMessage()], 422);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
             return response()->json(['result' => false], 500);
         }

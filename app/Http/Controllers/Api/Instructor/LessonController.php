@@ -313,19 +313,15 @@ class LessonController extends Controller
     */
     public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        // $request->lessonsがnullでないことを確認
-        if ($request->lessons === null || empty($request->lessons)) {
-            // $request->lessonsがnullの場合はエラーレスポンスを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Lessons missing or empty.'
-            ], 400);
-        }
-            // $request->lessonsがnullでない場合はクエリを実行
-            $lessons = Lesson::with('chapter.course')
-                ->where('chapter_id', $chapter_id)
-                ->whereIn('id', $request->lessons)
-                ->get();
+        // バリデーション
+        $validated = $request->validate([
+            'lessons' => 'required|array',
+            'lessons.*' => 'required|integer|exists:lessons,id',
+            'status' => 'required|string',
+        ]);
+
+        // クエリ実行
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $validated['lessons'])->get();
 
         // 認可
         $lessons->each(function ($lesson) use ($chapter_id, $course_id) {
@@ -344,8 +340,8 @@ class LessonController extends Controller
         });
 
         // ステータスを一括更新
-        Lesson::whereIn('id', $request->lessons)
-            ->update(['status' => $request->status]);
+        Lesson::whereIn('id', $validated['lessons'])
+            ->update(['status' => $validated['status']]);
 
         return response()->json(['result' => true], 200);
     }

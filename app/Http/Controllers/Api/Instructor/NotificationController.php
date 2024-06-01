@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\NotificationDeleteRequest;
-
 
 class NotificationController extends Controller
 {

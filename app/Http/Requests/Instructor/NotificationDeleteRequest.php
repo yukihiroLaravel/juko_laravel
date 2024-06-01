@@ -22,7 +22,7 @@ class NotificationDeleteRequest extends FormRequest
             'notification_id' => $this->route('notification_id'),
         ]);
     }
-    
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,10 +32,10 @@ class NotificationDeleteRequest extends FormRequest
     {
         return [
             'notification_id' => [
-                'required', 
-                'integer', 
+                'required',
+                'integer',
                 'exists:notifications,id,deleted_at,NULL'
             ],
         ];
-    }    
+    }
 }

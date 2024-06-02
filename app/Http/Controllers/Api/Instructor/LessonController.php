@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
@@ -312,34 +313,45 @@ class LessonController extends Controller
      * @param int $chapter_id
      * @return JsonResponse
      */
-    public function putStatus(LessonPutStatusRequest $request): JsonResponse
+    public function putStatus(LessonPutStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
     {
-        $course = Course::findOrFail($course_id);
+        // クエリ実行
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $validated['lessons'])->get();
 
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+        // ログイン中のインストラクターを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+    try {
+        // 認可
+        $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
+            // 講座に紐づく講師でない場合は許可しない
+            if ($instructorId !== $lesson->chapter->course->instructor_id) {
+                throw new AuthorizationException('Invalid instructor_id.');
+            }
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+            if ($course_id !== $lesson->chapter->course_id) {
+                throw new AuthorizationException('Invalid course_id.');
+            }
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+            if ($chapter_id !== $lesson->chapter_id) {
+                throw new AuthorizationException('Invalid chapter_id.');
+            }
+        });
+
+            // ステータスを一括更新
+            Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
+
+            return response()->json(['result' => true], 200);
+        } catch (AuthorizationException $e) {
             return response()->json([
-                'result' => false,
-                "message" => "Not authorized."
+            'result' => false,
+            'message' => $e->getMessage(),
             ], 403);
-        }
-
-        $lessons = Lesson::where('chapter_id', $chapter_id)
-            ->whereIn('id', $request->lessons)
-            ->get();
-
-        $lessonIds = $lessons->pluck('id')->all();
-        $invalidLessons = array_diff($request->lessons, $lessonIds);
-
-        if (!empty($invalidLessons)) {
+        } catch (Exception $e) {
             return response()->json([
-                'result' => false,
-                'message' => 'Some lessons do not belong to the specified course or chapter.',
-            ], 422);
+            'result' => false,
+            'message' => 'An unexpected error occurred.',
+            ], 500);
         }
-
-        Lesson::whereIn('id', $request->lessons)
-            ->update(['status' => $request->status]);
-
-        return response()->json(['result' => true], 200);
     }
 }

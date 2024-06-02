@@ -6,9 +6,9 @@ use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
+use Illuminate\Http\Request;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -305,13 +305,13 @@ class LessonController extends Controller
     }
 
     /**
-    * 選択済みのレッスンステータス一括更新API
-    *
-    * @param Request $request
-    * @param int $course_id
-    * @param int $chapter_id
-    * @return JsonResponse
-    */
+     * 選択済みのレッスンステータス一括更新API
+     *
+     * @param Request $request
+     * @param int $course_id
+     * @param int $chapter_id
+     * @return JsonResponse
+     */
     public function putStatus(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
         // バリデーション
@@ -329,7 +329,7 @@ class LessonController extends Controller
 
         try {
             // 認可
-            $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapter_id, $course_id) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ($instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new AuthorizationException('Invalid instructor_id.');
@@ -344,20 +344,15 @@ class LessonController extends Controller
                 }
             });
 
-                // ステータスを一括更新
-                Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
+            // ステータスを一括更新
+            Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
 
-                return response()->json(['result' => true], 200);
+            return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([
             'result' => false,
             'message' => $e->getMessage(),
             ], 403);
-        } catch (Exception $e) {
-            return response()->json([
-            'result' => false,
-            'message' => 'An unexpected error occurred.',
-            ], 500);
         }
     }
 }

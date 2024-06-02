@@ -322,7 +322,7 @@ class LessonController extends Controller
 
         try {
             // 認可
-            $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapter_id, $course_id) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ($instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new AuthorizationException('Invalid instructor_id.');

@@ -193,12 +193,11 @@ class NotificationController extends Controller
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $notificationIds = $notifications->pluck('id')->toArray();
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権のチェック
         if (
-            collect($notificationsInstructorIds)->contains(function ($notificationInstructorId) use ($manager) {
-                return $notificationInstructorId !== $manager->id;
+            $notifications->contains(function ($notification) use ($manager) {
+                return $notification->instructor_id !== $manager->id;
             })
         ) {
             return response()->json([

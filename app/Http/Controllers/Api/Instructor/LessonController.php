@@ -344,20 +344,20 @@ class LessonController extends Controller
             }
         });
 
-        // ステータスを一括更新
-        Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
+            // ステータスを一括更新
+            Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
 
-        return response()->json(['result' => true], 200);
-    } catch (AuthorizationException $e) {
-        return response()->json([
+            return response()->json(['result' => true], 200);
+        } catch (AuthorizationException $e) {
+            return response()->json([
             'result' => false,
             'message' => $e->getMessage(),
-        ], 403);
-    } catch (Exception $e) {
-        return response()->json([
+            ], 403);
+        } catch (Exception $e) {
+            return response()->json([
             'result' => false,
             'message' => 'An unexpected error occurred.',
-        ], 500);
-    }
+            ], 500);
+        }
     }
 }

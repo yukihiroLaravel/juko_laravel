@@ -8,7 +8,6 @@ use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

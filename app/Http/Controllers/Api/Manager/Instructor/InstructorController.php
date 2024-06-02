@@ -17,7 +17,7 @@ class InstructorController extends Controller
 {
     /**
      * 講師一覧API
-     * 
+     *
      * @return JsonResponse
      */
     public function index()

@@ -321,27 +321,27 @@ class LessonController extends Controller
         // ログイン中のインストラクターを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-    try {
-        // 認可
-        $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
-            // 講座に紐づく講師でない場合は許可しない
-            if ($instructorId !== $lesson->chapter->course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-            if ($course_id !== $lesson->chapter->course_id) {
-                throw new AuthorizationException('Invalid course_id.');
-            }
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-            if ($chapter_id !== $lesson->chapter_id) {
-                throw new AuthorizationException('Invalid chapter_id.');
-            }
-        });
+        try {
+            // 認可
+            $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
+                // 講座に紐づく講師でない場合は許可しない
+                if ($instructorId !== $lesson->chapter->course->instructor_id) {
+                    throw new AuthorizationException('Invalid instructor_id.');
+                }
+                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                if ($course_id !== $lesson->chapter->course_id) {
+                    throw new AuthorizationException('Invalid course_id.');
+                }
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ($chapter_id !== $lesson->chapter_id) {
+                    throw new AuthorizationException('Invalid chapter_id.');
+                }
+            });
 
-            // ステータスを一括更新
-            Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
+                // ステータスを一括更新
+                Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
 
-            return response()->json(['result' => true], 200);
+                return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([
             'result' => false,

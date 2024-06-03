@@ -189,20 +189,19 @@ class NotificationController extends Controller
         // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $notificationIds = $notifications->pluck('id')->toArray();
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // アクセス権のチェック
-        if (
-            $notifications->contains(function ($notification) use ($manager) {
-                return $notification->instructor_id !== $manager->id;
-            })
-        ) {
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update these notifications.',
+                'message' => 'Forbidden, not allowed to update this notification.',
             ], 403);
         }
 

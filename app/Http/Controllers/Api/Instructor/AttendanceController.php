@@ -18,10 +18,11 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
-use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
+use App\Http\Requests\Instructor\AttendanceStatusRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Instructor\AttendanceStatusResource;
+use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
 
 class AttendanceController extends Controller
 {
@@ -208,46 +209,61 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講座受講状況-当日
+     * 完了済みレッスン数と完了済みチャプター数取得API
      *
-     * @param AttendanceShowRequest $request
+     * @param AttendanceShowStatusRequest $request
      * @return JsonResponse
      */
-    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
+    public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        $period = $request->period;
 
-        // 今日完了したレッスンの個数を取得
-        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
-                return $lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isToday();
+        // 指定期間内に完了したレッスンの個数を取得
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                if ($period === LessonAttendance::PERIOD_TODAY) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
+                }
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
             return $compleatedLessonAttendances;
         })->count();
 
-        // 今日完了したチャプターの個数を取得
+        // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
-        ->filter(function (LessonAttendance $lessonAttendance) {
-            // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が当日の日時という条件で絞り込む
-            $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
-            $totalLessonsCount = $allLessonsId->count();
-            $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
-                ->whereIn('lesson_id', $allLessonsId)
-                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
-                ->count();
-            return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
-        })
-        ->map(function (LessonAttendance $lessonAttendance) {
-            // chapter_idとattendance_idをキーにもつ新しい配列を作成
-            return [
-                'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                'attendance_id' => $lessonAttendance->attendance_id
-            ];
-        })
-        ->unique()
-        ->count();
+            ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+                if ($period === LessonAttendance::PERIOD_TODAY) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
+                }
+                return $updatedAtRequestPeriod && $totalLessonsCount === $compleatedLessonsCount;
+            })
+            ->map(function (LessonAttendance $lessonAttendance) {
+                // chapter_idとattendance_idをキーにもつ新しい配列を作成
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id
+                ];
+            })
+            ->unique()
+            ->count();
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

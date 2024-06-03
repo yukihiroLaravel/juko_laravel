@@ -2,11 +2,13 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Model\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
 {
-    /** @var \App\Model\Student */
+    /** @var Student */
     public $resource;
 
     /**
@@ -27,6 +29,7 @@ class StudentShowResource extends JsonResource
             'email' => $this->resource->email,
             'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
+            'age' => $this->resource->calcAge(new CarbonImmutable()),
             'gender' => $this->resource->gender,
             'address' => $this->resource->address,
             'created_at' => $this->resource->created_at->format('Y/m/d'),

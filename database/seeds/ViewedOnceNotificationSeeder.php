@@ -3,6 +3,9 @@
 use Illuminate\Database\Seeder;
 use App\Model\ViewedOnceNotification;
 use Carbon\CarbonImmutable;
+use App\Model\ViewedOnceNotification;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Seeder;
 
 class ViewedOnceNotificationSeeder extends Seeder
 {

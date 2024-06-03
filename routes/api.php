@@ -50,9 +50,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-お知らせ
         Route::prefix('notification')->group(function () {
-            Route::get('{notification_id}', 'Api\Student\NotificationController@show');
             Route::get('index', 'Api\Student\NotificationController@index');
             Route::get('read', 'Api\Student\NotificationController@read');
+            Route::get('{notification_id}', 'Api\Student\NotificationController@show');
         });
     });
 
@@ -111,7 +111,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('attendance')->group(function () {
                         Route::get('status', 'Api\Instructor\AttendanceController@show');
                         Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
-                        Route::get('status/today', 'Api\Instructor\AttendanceController@showStatusToday');
+                        Route::get('status/{period}', 'Api\Instructor\AttendanceController@showStatus');
                     });
                 });
             });
@@ -136,6 +136,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
                 Route::delete('{notification_id}', 'Api\Instructor\NotificationController@delete');
+                Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
             });
         });
 
@@ -189,11 +190,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 });
                             });
                         });
+                        Route::prefix('notification')->group(function () {
+                            Route::post('/', 'Api\Manager\NotificationController@store');
+                        });
                     });
                 });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
+                    Route::delete('{attendance_id}', 'Api\Manager\AttendanceController@delete');
                 });
                 Route::prefix('instructor')->group(function () {
                 });
@@ -208,7 +213,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('{notification_id}')->group(function () {
                         Route::get('/', 'Api\Manager\NotificationController@show');
                         Route::patch('/', 'Api\Manager\NotificationController@update');
+                        Route::delete('/', 'Api\Manager\NotificationController@delete');
                     });
+                    Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
                 });
             });
         });
@@ -226,6 +233,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::prefix('instructor')->group(function () {
         Route::prefix('notification')->group(function () {
+            Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
             Route::prefix('{notification_id}')->group(function () {
                 Route::get('/', 'Api\Instructor\NotificationController@show');
                 Route::patch('/', 'Api\Instructor\NotificationController@update');

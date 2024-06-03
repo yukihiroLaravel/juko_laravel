@@ -315,7 +315,7 @@ class LessonController extends Controller
     public function putStatus(LessonPutStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
     {
         // クエリ実行
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $validated['lessons'])->get();
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $request->validated()['lessons'])->get();
 
         // ログイン中のインストラクターを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -338,13 +338,13 @@ class LessonController extends Controller
             });
 
             // ステータスを一括更新
-            Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
+            Lesson::whereIn('id', $request->validated()['lessons'])->update(['status' => $request->validated()['status']]);
 
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
+                'result' => false,
+                'message' => $e->getMessage(),
             ], 403);
         }
     }

@@ -308,14 +308,19 @@ class LessonController extends Controller
      * 選択済みのレッスンステータス一括更新API
      *
      * @param LessonPutStatusRequest $request
-     * @param int $course_id
-     * @param int $chapter_id
      * @return JsonResponse
      */
-    public function putStatus(LessonPutStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
+    public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
+        // リクエストからコースIDとチャプターIDを取得
+        $course_id = $request->course_id;
+        $chapter_id = $request->chapter_id;
+
+        // リクエストからバリデーション済みのレッスンIDリストを取得
+        $lessonIds = $request->validated()['lessons'];
+
         // クエリ実行
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $request->validated()['lessons'])->get();
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
         // ログイン中のインストラクターを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -338,7 +343,7 @@ class LessonController extends Controller
             });
 
             // ステータスを一括更新
-            Lesson::whereIn('id', $request->validated()['lessons'])->update(['status' => $request->validated()['status']]);
+            Lesson::whereIn('id', $lessonIds)->update(['status' => $request->validated()['status']]);
 
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {

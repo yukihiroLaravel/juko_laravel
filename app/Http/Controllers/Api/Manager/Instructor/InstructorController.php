@@ -16,6 +16,16 @@ use App\Http\Resources\Manager\InstructorShowResource;
 class InstructorController extends Controller
 {
     /**
+     * 講師一覧API
+     *
+     * @return JsonResponse
+     */
+    public function index()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * 講師情報取得API
      *
      * @param InstructorShowRequest $request

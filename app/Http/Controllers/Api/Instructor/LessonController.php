@@ -312,38 +312,36 @@ class LessonController extends Controller
      */
     public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
-        // リクエストからコースIDとチャプターIDを取得
-        $course_id = $request->course_id;
-        $chapter_id = $request->chapter_id;
-
-        // リクエストからバリデーション済みのレッスンIDリストを取得
-        $lessonIds = $request->validated()['lessons'];
-
-        // クエリ実行
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+        // リクエストから必要なデータを取得
+        $courseId = $request->input('course_id');
+        $chapterId = $request->input('chapter_id');
+        $lessonIds = $request->input('lessons');
+        $status = $request->input('status');
 
         // ログイン中のインストラクターを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
+        // クエリ実行
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+
         try {
-            // 認可
-            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapter_id, $course_id) {
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ($instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ($course_id !== $lesson->chapter->course_id) {
+                if ($courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ($chapter_id !== $lesson->chapter_id) {
+                if ($chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
 
             // ステータスを一括更新
-            Lesson::whereIn('id', $lessonIds)->update(['status' => $request->validated()['status']]);
+            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
 
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
@@ -351,6 +349,12 @@ class LessonController extends Controller
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'An error occurred.',
+            ], 500);
         }
     }
 }

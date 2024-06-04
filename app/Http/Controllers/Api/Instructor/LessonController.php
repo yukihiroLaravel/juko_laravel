@@ -31,41 +31,41 @@ class LessonController extends Controller
      * @param  LessonStoreRequest  $request
      * @return JsonResponse
      */
-public function store(LessonStoreRequest $request): JsonResponse
-{
-    $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
+    public function store(LessonStoreRequest $request): JsonResponse
+    {
+        $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
 
-    DB::beginTransaction();
-    try {
-        $lesson = Lesson::create([
+        DB::beginTransaction();
+        try {
+            $lesson = Lesson::create([
             'chapter_id' => $request->chapter_id,
             'title' => $request->title,
             'status' => Lesson::STATUS_PRIVATE,
             'order' => (int) $maxOrder + 1
-        ]);
+            ]);
 
-        $attendances = Attendance::where('course_id', $request->course_id)->get();
-        $lesson_id = $lesson->id;
-        $attendances->each(function ($attendance) use (&$lesson_id) {
-            LessonAttendance::create([
+            $attendances = Attendance::where('course_id', $request->course_id)->get();
+            $lesson_id = $lesson->id;
+            $attendances->each(function ($attendance) use (&$lesson_id) {
+                LessonAttendance::create([
                 'attendance_id' => $attendance->id,
                 'lesson_id'     => $lesson_id,
                 'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
-            ]);
-        });
+                ]);
+            });
 
-        DB::commit();
-        return response()->json([
-            "result" => true,
-        ]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        return response()->json([
+            DB::commit();
+            return response()->json([
+                "result" => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
             "result" => false,
-        ], 500);
+            ], 500);
+        }
     }
-}
 
     /**
      * レッスン更新API
@@ -73,36 +73,36 @@ public function store(LessonStoreRequest $request): JsonResponse
      * @param LessonUpdateRequest $request
      * @return JsonResponse
      */
-public function update(LessonUpdateRequest $request): JsonResponse
-{
-    $user = Instructor::find($request->user()->id);
-    $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+    public function update(LessonUpdateRequest $request): JsonResponse
+    {
+        $user = Instructor::find($request->user()->id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-    if ($lesson->chapter->course->instructor_id !== $user->id) {
-        return response()->json([
+        if ($lesson->chapter->course->instructor_id !== $user->id) {
+            return response()->json([
             'result' => false,
             'message' => 'Invalid instructor_id',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
-        return response()->json([
+        if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
+            return response()->json([
             'result' => false,
             'message' => 'Invalid chapter_id or course_id.',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    $lesson->update([
+        $lesson->update([
         'title' => $request->title,
         'url' => $request->url,
         'remarks' => $request->remarks,
         'status' => $request->status,
-    ]);
+        ]);
 
-    return response()->json([
+        return response()->json([
         'result' => true,
-    ]);
-}
+        ]);
+    }
 
     /**
      * レッスン削除API
@@ -110,59 +110,59 @@ public function update(LessonUpdateRequest $request): JsonResponse
      * @param LessonDeleteRequest $request
      * @return JsonResponse
      */
-public function delete(LessonDeleteRequest $request): JsonResponse
-{
-    DB::beginTransaction();
-    try {
-        $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+    public function delete(LessonDeleteRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-            return response()->json([
+            if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+                return response()->json([
                 'result' => false,
                 'message' => 'Invalid instructor_id.'
-            ], 403);
-        }
+                ], 403);
+            }
 
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            return response()->json([
+            if ((int) $request->chapter_id !== $lesson->chapter->id) {
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+                return response()->json([
                 'result'  => false,
                 'message' => 'Invalid chapter_id.',
-            ], 403);
-        }
+                ], 403);
+            }
 
-        if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-            return response()->json([
+            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                return response()->json([
                 'result' => false,
                 'message' => 'This lesson has attendance.'
-            ], 403);
-        }
+                ], 403);
+            }
 
-        // 削除対象レッスンのorderカラムを0に設定する
-        $lesson->update(['order' => 0]);
+            // 削除対象レッスンのorderカラムを0に設定する
+            $lesson->update(['order' => 0]);
 
-        $lesson->delete();
+            $lesson->delete();
 
-        Lesson::where('chapter_id', $lesson->chapter_id)
+            Lesson::where('chapter_id', $lesson->chapter_id)
             ->orderBy('order')
             ->get()
             ->each(function ($lesson, $index) {
                 $lesson->update(['order' => $index + 1]);
             });
 
-        DB::commit();
+            DB::commit();
 
-        return response()->json([
-            'result' => true,
-        ]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        return response()->json([
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
             'result' => false,
-        ], 500);
+            ], 500);
+        }
     }
-}
 
     /**
      * レッスンステータス更新API
@@ -170,33 +170,33 @@ public function delete(LessonDeleteRequest $request): JsonResponse
      * @param LessonPatchStatusRequest $request
      * @return JsonResponse
      */
-public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
-{
-    $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
+    {
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-    if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-        return response()->json([
+        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+            return response()->json([
             'result' => false,
             "message" => 'invalid instructor_id.'
-        ], 403);
-    }
+            ], 403);
+        }
 
-    if ((int) $request->chapter_id !== $lesson->chapter->id) {
-        // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-        return response()->json([
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
             'result'  => false,
             'message' => 'Invalid chapter_id.',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    $lesson->update([
+        $lesson->update([
         'status' => $request->status
-    ]);
+        ]);
 
-    return response()->json([
+        return response()->json([
         'result' => true,
-    ]);
-}
+        ]);
+    }
 
     /**
      * レッスンタイトル変更API
@@ -204,40 +204,40 @@ public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
      * @param LessonUpdateTitleRequest $request
      * @return JsonResponse
      */
-public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
-{
-    $user = Auth::guard('instructor')->user();
-    $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+    public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
+    {
+        $user = Auth::guard('instructor')->user();
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-    if ($lesson->chapter->course->instructor_id !== $user->id) {
-        return response()->json([
+        if ($lesson->chapter->course->instructor_id !== $user->id) {
+            return response()->json([
             'result' => false,
             'message' => 'Invalid instructor_id',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    if ((int) $request->course_id !== $lesson->chapter->course_id) {
-        return response()->json([
+        if ((int) $request->course_id !== $lesson->chapter->course_id) {
+            return response()->json([
             'result' => false,
             'message' => 'Invalid course_id.',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    if ((int) $request->chapter_id !== $lesson->chapter->id) {
-        return response()->json([
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            return response()->json([
             'result' => false,
             'message' => 'Invalid chapter_id.',
-        ], 403);
-    }
+            ], 403);
+        }
 
-    $lesson->update([
+        $lesson->update([
         'title' => $request->title
-    ]);
+        ]);
 
-    return response()->json([
+        return response()->json([
         'result' => true,
-    ]);
-}
+        ]);
+    }
 
     /**
      * レッスン並び替えAPI
@@ -245,64 +245,64 @@ public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
      * @param LessonSortRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-public function sort(LessonSortRequest $request): JsonResponse
-{
-    DB::beginTransaction();
+    public function sort(LessonSortRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
 
-    try {
-        // 認証ユーザー情報取得
-        $instructorId = Auth::guard('instructor')->user()->id;
+        try {
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
 
-        $courseId = $request->input('course_id');
-        $chapterId = $request->input('chapter_id');
-        $inputLessons = $request->input('lessons');
+            $courseId = $request->input('course_id');
+            $chapterId = $request->input('chapter_id');
+            $inputLessons = $request->input('lessons');
 
-        // レッスン一括取得
-        $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
+            // レッスン一括取得
+            $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
 
-        // 認可
-        $lessons->each(function ($lesson) use ($instructorId, $courseId, $chapterId) {
-            // 講座に紐づく講師でない場合は許可しない
-            if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                throw new ValidationErrorException('Invalid instructor_id.');
-            }
-            // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
-            if ((int) $courseId !== $lesson->chapter->course_id) {
-                throw new ValidationErrorException('Invalid course.');
-            }
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-            if ((int) $chapterId !== $lesson->chapter_id) {
-                throw new ValidationErrorException('Invalid chapter.');
-            }
-        });
+            // 認可
+            $lessons->each(function ($lesson) use ($instructorId, $courseId, $chapterId) {
+                // 講座に紐づく講師でない場合は許可しない
+                if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $lesson->chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course.');
+                }
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ((int) $chapterId !== $lesson->chapter_id) {
+                    throw new ValidationErrorException('Invalid chapter.');
+                }
+            });
 
-        // orderカラムを更新（並び替え実施）
-        $lessons->each(function ($lesson) use ($inputLessons) {
-            $collectionLessons = new Collection($inputLessons);
-            $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
-            $lesson->update([
+            // orderカラムを更新（並び替え実施）
+            $lessons->each(function ($lesson) use ($inputLessons) {
+                $collectionLessons = new Collection($inputLessons);
+                $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
+                $lesson->update([
                 'order' => $inputLesson['order'],
+                ]);
+            });
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
             ]);
-        });
-
-        DB::commit();
-
-        return response()->json([
-            'result' => true,
-        ]);
-    } catch (ValidationErrorException $e) {
-        return response()->json([
+        } catch (ValidationErrorException $e) {
+            return response()->json([
             'result' => false,
             'message' => $e->getMessage(),
-        ], 422);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        return response()->json([
+            ], 422);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
             'result' => false,
-        ]);
+            ]);
+        }
     }
-}
 
     /**
      * 選択済みのレッスンステータス一括更新API
@@ -310,8 +310,8 @@ public function sort(LessonSortRequest $request): JsonResponse
      * @param LessonPutStatusRequest $request
      * @return JsonResponse
      */
-public function putStatus(LessonPutStatusRequest $request): JsonResponse
-{
+    public function putStatus(LessonPutStatusRequest $request): JsonResponse
+    {
         // リクエストから必要なデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
@@ -347,15 +347,15 @@ public function putStatus(LessonPutStatusRequest $request): JsonResponse
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
+            'result' => false,
+            'message' => $e->getMessage(),
             ], 403);
         } catch (Exception $e) {
             Log::error($e);
             return response()->json([
-                'result' => false,
-                'message' => 'An error occurred.',
+            'result' => false,
+            'message' => 'An error occurred.',
             ], 500);
         }
-}
+    }
 }

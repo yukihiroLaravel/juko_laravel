@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Instructor;
 use App\Model\Notification;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use App\Model\ViewedOnceNotification;
 use App\Http\Requests\Manager\NotificationShowRequest;
@@ -18,6 +17,7 @@ use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
+use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
 
 class NotificationController extends Controller
 {
@@ -73,7 +73,7 @@ class NotificationController extends Controller
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -106,7 +106,7 @@ class NotificationController extends Controller
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -149,7 +149,7 @@ class NotificationController extends Controller
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -178,10 +178,10 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括削除API
      *
-     * @param Request $request
+     * @param NotificationBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(Request $request): JsonResponse
+    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -197,20 +197,20 @@ class NotificationController extends Controller
         $notificationIds = $notifications->pluck('id')->toArray();
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
-        // アクセス権限のチェック
+        // アクセス権のチェック
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
         DB::beginTransaction();
         try {
-            // viewed_once_notificationsテーブルのレコードを一括削除
+            // お知らせの閲覧状態を削除
             ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
 
-            // notificationsテーブルのレコードを一括削除
+            // お知らせを削除
             Notification::whereIn('id', $notificationIds)->delete();
 
             // コミット

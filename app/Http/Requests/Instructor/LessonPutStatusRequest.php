@@ -4,7 +4,6 @@ namespace App\Http\Requests\Instructor;
 
 use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class LessonPutStatusRequest extends FormRequest
 {
@@ -35,10 +34,10 @@ class LessonPutStatusRequest extends FormRequest
     {
         return [
             'lessons' => ['required', 'array'],
-            'lessons.*' => ['required', 'integer', Rule::exists('lessons', 'id')->whereNull('deleted_at')],
+            'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'status' => ['required', 'string', new LessonStatusRule()],
-            'course_id' => ['required', 'integer', Rule::exists('courses', 'id')->whereNull('deleted_at')],
-            'chapter_id' => ['required', 'integer', Rule::exists('chapters', 'id')->whereNull('deleted_at')],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }
 }

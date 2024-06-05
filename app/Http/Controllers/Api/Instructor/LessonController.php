@@ -343,7 +343,7 @@ class LessonController extends Controller
 
             // ステータスを一括更新
             Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
-            
+
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([

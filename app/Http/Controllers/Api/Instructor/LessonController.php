@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Course;
-use App\Model\Chapter;
+use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -318,13 +317,10 @@ class LessonController extends Controller
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
-
         // ログイン中のインストラクターを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-
         // クエリ実行
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
         try {
             // 認可
             $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
@@ -341,10 +337,8 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
-
             // ステータスを一括更新
             Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
-
             return response()->json(['result' => true], 200);
         } catch (AuthorizationException $e) {
             return response()->json([

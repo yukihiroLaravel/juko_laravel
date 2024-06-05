@@ -303,6 +303,4 @@ class LessonController extends Controller
             ]);
         }
     }
-
-    
 }

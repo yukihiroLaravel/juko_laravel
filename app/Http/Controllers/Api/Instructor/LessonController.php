@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Api\Instructor;
 use Exception;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Course;
-use App\Model\Chapter;
+use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -309,49 +308,46 @@ class LessonController extends Controller
      * 選択済みのレッスンステータス一括更新API
      *
      * @param LessonPutStatusRequest $request
-     * @param int $course_id
-     * @param int $chapter_id
      * @return JsonResponse
      */
-    public function putStatus(LessonPutStatusRequest $request, int $course_id, int $chapter_id): JsonResponse
+    public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
-        // クエリ実行
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $validated['lessons'])->get();
-
-        // ログイン中のインストラクターを取得
+        // リクエストから必要なデータを取得
+        $courseId = $request->input('course_id');
+        $chapterId = $request->input('chapter_id');
+        $lessonIds = $request->input('lessons');
+        $status = $request->input('status');
+        // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-
+        // クエリ実行
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         try {
             // 認可
-            $lessons->each(function ($lesson) use ($instructorId, $chapter_id, $course_id) {
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ($instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ($course_id !== $lesson->chapter->course_id) {
+                if ($courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ($chapter_id !== $lesson->chapter_id) {
+                if ($chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
+            // ステータスを一括更新
+            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
 
-                // ステータスを一括更新
-                Lesson::whereIn('id', $validated['lessons'])->update(['status' => $validated['status']]);
-
-                return response()->json(['result' => true], 200);
+            return response()->json([
+                'result' => true
+            ]);
         } catch (AuthorizationException $e) {
             return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
+                'result' => false,
+                'message' => $e->getMessage(),
             ], 403);
-        } catch (Exception $e) {
-            return response()->json([
-            'result' => false,
-            'message' => 'An unexpected error occurred.',
-            ], 500);
         }
     }
 }

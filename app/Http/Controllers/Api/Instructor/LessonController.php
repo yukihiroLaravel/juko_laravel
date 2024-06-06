@@ -317,7 +317,7 @@ class LessonController extends Controller
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
-        // ログイン中のインストラクターを取得
+        // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
         // クエリ実行
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
@@ -339,18 +339,15 @@ class LessonController extends Controller
             });
             // ステータスを一括更新
             Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
-            return response()->json(['result' => true], 200);
+
+            return response()->json([
+                'result' => true
+            ]);
         } catch (AuthorizationException $e) {
             return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
+                'result' => false,
+                'message' => $e->getMessage(),
             ], 403);
-        } catch (Exception $e) {
-            Log::error($e);
-            return response()->json([
-            'result' => false,
-            'message' => 'An error occurred.',
-            ], 500);
         }
     }
 }

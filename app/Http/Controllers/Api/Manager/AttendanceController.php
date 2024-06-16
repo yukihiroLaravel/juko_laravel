@@ -142,10 +142,10 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
-    /** 
+    /**
      * 完了済みレッスン数と完了済みチャプター数を取得するAPI
-     * 
-     * 
+     *
+     *
      */
     public function showStatus()
     {

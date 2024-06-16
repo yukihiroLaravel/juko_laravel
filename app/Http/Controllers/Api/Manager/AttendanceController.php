@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use Composer\DependencyResolver\Request;
 
 class AttendanceController extends Controller
 {
@@ -140,5 +141,14 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+    /** 
+     * 完了済みレッスン数と完了済みチャプター数を取得するAPI
+     * 
+     * 
+     */
+    public function showStatus()
+    {
+        return response()->json([]);
     }
 }

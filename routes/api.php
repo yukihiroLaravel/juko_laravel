@@ -193,50 +193,57 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('notification')->group(function () {
                             Route::post('/', 'Api\Manager\NotificationController@store');
                         });
+
+                        //マネージャー生徒学習状況
+                        Route::prefix('attendance')->group(
+                            function () {
+                                Route::get('status/{period}', 'Api\Manager\AttendanceController@showStatus');
+                            }
+                        );
                     });
-                });
-                // マネージャー-受講
-                Route::prefix('attendance')->group(function () {
-                    Route::post('/', 'Api\Manager\AttendanceController@store');
-                    Route::delete('{attendance_id}', 'Api\Manager\AttendanceController@delete');
-                });
-                Route::prefix('instructor')->group(function () {
-                });
-                // マネージャー-生徒
-                Route::prefix('student')->group(function () {
-                    Route::get('{student_id}', 'Api\Manager\StudentController@show');
-                    Route::post('/', 'Api\Manager\StudentController@store');
-                });
-                // マネージャー-お知らせ
-                Route::prefix('notification')->group(function () {
-                    Route::get('index', 'Api\Manager\NotificationController@index');
-                    Route::prefix('{notification_id}')->group(function () {
-                        Route::get('/', 'Api\Manager\NotificationController@show');
-                        Route::patch('/', 'Api\Manager\NotificationController@update');
-                        Route::delete('/', 'Api\Manager\NotificationController@delete');
+                    // マネージャー-受講
+                    Route::prefix('attendance')->group(function () {
+                        Route::post('/', 'Api\Manager\AttendanceController@store');
+                        Route::delete('{attendance_id}', 'Api\Manager\AttendanceController@delete');
                     });
-                    Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
+                    Route::prefix('instructor')->group(function () {
+                    });
+                    // マネージャー-生徒
+                    Route::prefix('student')->group(function () {
+                        Route::get('{student_id}', 'Api\Manager\StudentController@show');
+                        Route::post('/', 'Api\Manager\StudentController@store');
+                    });
+                    // マネージャー-お知らせ
+                    Route::prefix('notification')->group(function () {
+                        Route::get('index', 'Api\Manager\NotificationController@index');
+                        Route::prefix('{notification_id}')->group(function () {
+                            Route::get('/', 'Api\Manager\NotificationController@show');
+                            Route::patch('/', 'Api\Manager\NotificationController@update');
+                            Route::delete('/', 'Api\Manager\NotificationController@delete');
+                        });
+                        Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
+                    });
                 });
             });
         });
     });
-});
 
-Route::prefix('v1')->group(function () {
-    Route::prefix('student')->group(function () {
-        Route::post('/', 'Api\Student\StudentController@store');
-        Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+    Route::prefix('v1')->group(function () {
+        Route::prefix('student')->group(function () {
+            Route::post('/', 'Api\Student\StudentController@store');
+            Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+        });
     });
-});
 
-// 講師側API
-Route::prefix('v1')->group(function () {
-    Route::prefix('instructor')->group(function () {
-        Route::prefix('notification')->group(function () {
-            Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
-            Route::prefix('{notification_id}')->group(function () {
-                Route::get('/', 'Api\Instructor\NotificationController@show');
-                Route::patch('/', 'Api\Instructor\NotificationController@update');
+    // 講師側API
+    Route::prefix('v1')->group(function () {
+        Route::prefix('instructor')->group(function () {
+            Route::prefix('notification')->group(function () {
+                Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
+                Route::prefix('{notification_id}')->group(function () {
+                    Route::get('/', 'Api\Instructor\NotificationController@show');
+                    Route::patch('/', 'Api\Instructor\NotificationController@update');
+                });
             });
         });
     });

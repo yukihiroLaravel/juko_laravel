@@ -195,11 +195,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
 
                         //マネージャー生徒学習状況
-                        Route::prefix('attendance')->group(
-                            function () {
-                                Route::get('status/{period}', 'Api\Manager\AttendanceController@showStatus');
-                            }
-                        );
+                        Route::prefix('attendance/status')->group(function () {
+                            Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
+                        });
                     });
                     // マネージャー-受講
                     Route::prefix('attendance')->group(function () {

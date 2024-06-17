@@ -142,10 +142,10 @@ class AttendanceController extends Controller
         }
     }
 
-    /** 
+    /**
      * 本日のレッスン・チャプター完了数の取得API
-     * 
-     * 
+     *
+     *
      */
     public function showStatusToday()
     {

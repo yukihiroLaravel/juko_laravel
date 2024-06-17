@@ -194,8 +194,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::post('/', 'Api\Manager\NotificationController@store');
                         });
                         //マネージャー生徒学習状況
-                        Route::prefix('attendance/status')->group(function () {
-                            Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
+                        Route::prefix('attendance')->group(function () {
+                            Route::prefix('status')->group(function () {
+                                Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
+                            });
                         });
                     });
                 });

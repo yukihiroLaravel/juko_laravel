@@ -141,4 +141,14 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * 本日のレッスン・チャプター完了数の取得API
+     *
+     *
+     */
+    public function showStatusToday()
+    {
+        return response()->json([]);
+    }
 }

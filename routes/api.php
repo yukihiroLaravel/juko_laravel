@@ -193,6 +193,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('notification')->group(function () {
                             Route::post('/', 'Api\Manager\NotificationController@store');
                         });
+                        //マネージャー生徒学習状況
+                        Route::prefix('attendance')->group(function () {
+                            Route::prefix('status')->group(function () {
+                                Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThisMonth');
+                            });
+                        });
                     });
                 });
                 // マネージャー-受講

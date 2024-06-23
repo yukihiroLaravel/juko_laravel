@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
@@ -147,8 +148,10 @@ class AttendanceController extends Controller
      *
      *
      */
-    public function showStatusToday()
+    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $attendancd = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        dd($attendancd);
+        // return response()->json([]);
     }
 }

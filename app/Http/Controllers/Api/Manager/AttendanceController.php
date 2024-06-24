@@ -146,8 +146,8 @@ class AttendanceController extends Controller
     *
     *
     */
-   public function showStatusThisMonth()
-   {
-       return response()->json([]);
-   }
+    public function showStatusThisMonth()
+    {
+        return response()->json([]);
+    }
 }

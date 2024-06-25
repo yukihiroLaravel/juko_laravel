@@ -141,4 +141,13 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+    /**
+    * 今月のレッスン・チャプター完了数の取得API
+    *
+    *
+    */
+    public function showStatusThisMonth()
+    {
+        return response()->json([]);
+    }
 }

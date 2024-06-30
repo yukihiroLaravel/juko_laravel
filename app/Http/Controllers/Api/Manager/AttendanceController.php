@@ -165,6 +165,4 @@ class AttendanceController extends Controller
 
         // return new AttendanceStatusResource($attendance);
     }
-    
-
 }

@@ -202,7 +202,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('{attendance_id}')->group(function () {
                             Route::get('status', 'Api\Manager\AttendanceController@status');
                             Route::delete('/', 'Api\Manager\AttendanceController@delete');
-                });
+                        });
                 });
                 Route::prefix('instructor')->group(function () {
                 });

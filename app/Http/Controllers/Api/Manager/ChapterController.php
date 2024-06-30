@@ -195,7 +195,62 @@ class ChapterController extends Controller
      */
     public function bulkDelete(Request $request, $course_id)
     {
-        return response()->json([]);
+        // 現在認証されている講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 現在認証されている講師のIDを使って、その講師が管理する配下の講師の情報を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+
+        // 配下の講師のIDリストを取得し、現在の講師自身のIDも含める
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 指定されたコースIDに対応するコースを、関連するチャプターと共に取得
+        $course = Course::with('chapters')->findOrFail($course_id);
+
+        // コースの講師IDが取得した講師IDリストに含まれているか確認
+        // 含まれていない場合、アクセス禁止のレスポンスを返す
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                'result' => false,
+                'message' => "Forbidden, not allowed to delete chapters in this course.",
+            ], 403);
+        }
+
+        // リクエストから削除するチャプターIDのリストを取得
+        $chapterIds = $request->input('chapters', []);
+        $deletedChapters = [];
+
+        // トランザクションを開始
+        DB::beginTransaction();
+        try {
+            // 各チャプターIDに対して削除を実行
+            foreach ($chapterIds as $chapterId) {
+                // コースIDに一致するチャプターを検索
+                $chapter = Chapter::where('course_id', $course_id)->find($chapterId);
+                if ($chapter) {
+                    // チャプターが存在する場合は削除し、削除したチャプターIDを記録
+                    $chapter->delete();
+                    $deletedChapters[] = $chapterId;
+                }
+            }
+            // トランザクションをコミット
+            DB::commit();
+            // 成功レスポンスを返す
+            return response()->json([
+                'result' => true,
+                'deleted_chapters' => $deletedChapters,
+            ]);
+        } catch (Exception $e) {
+            // 例外発生時はトランザクションをロールバックし、エラーログを記録
+            DB::rollBack();
+            Log::error($e);
+            // エラーレスポンスを返す
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete chapters.',
+            ], 500);
+        }
     }
 
     /**

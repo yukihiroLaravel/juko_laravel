@@ -152,6 +152,7 @@ class AttendanceController extends Controller
         return response()->json([]);
         // $attendanceId = $request->attendance_id;
 
+        
         // /** @var Attendance */
         // $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 

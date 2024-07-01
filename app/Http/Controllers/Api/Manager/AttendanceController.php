@@ -8,9 +8,18 @@ use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
+<<<<<<< HEAD
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+=======
+use App\Model\Chapter;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+>>>>>>> 47bbe60a2b7de111841499462fde4e8870a44d8d
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
@@ -96,6 +105,7 @@ class AttendanceController extends Controller
     }
 
     /**
+<<<<<<< HEAD
      * 受講状況削除API
      *
      * @param AttendanceDeleteRequest $request
@@ -140,5 +150,49 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+=======
+     * マネージャー側受講状況API
+     *
+     * @param int $attendance_id
+     * @return JsonResponse
+     */
+    public function status(int $attendance_id): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        /** @var Attendance */
+        $attendance = Attendance::with('course.chapters')->findOrFail($attendance_id);
+
+        if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                "result" => false,
+                "message" => "Forbidden.",
+            ], 403);
+        }
+        $response = [
+            'data' => [
+                'attendance_id' => $attendance->id,
+                'progress' => $attendance->progress,
+                'course' => [
+                    'course_id' => $attendance->course->id,
+                    'title' => $attendance->course->title,
+                    'status' => $attendance->course->status,
+                    'image' => $attendance->course->image,
+                    'chapter' => $attendance->course->chapters->map(function (Chapter $chapter) {
+                        return [
+                            'chapter_id' => $chapter->id,
+                            'title' => $chapter->title,
+                            'status' => $chapter->status,
+                        ];
+                    }),
+                ],
+            ],
+        ];
+
+        return response()->json($response, 200);
+>>>>>>> 47bbe60a2b7de111841499462fde4e8870a44d8d
     }
 }

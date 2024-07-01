@@ -186,6 +186,14 @@ class ChapterController extends Controller
     }
 
     /**
+     * 複数のチャプター公開/非公開API
+     */
+    public function patchStatus($course_id)
+    {
+        return response()->json([]);
+    }
+
+    /**
      * チャプター並び替えAPI
      *
      * @param ChapterSortRequest $request

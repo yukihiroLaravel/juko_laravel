@@ -221,25 +221,24 @@ class ChapterController extends Controller
         $chapterIds = $request->input('chapters', []);
         $deletedChapters = [];
 
+        // 対象のチャプターを一度に取得
+        $chapters = Chapter::where('course_id', $course_id)
+            ->whereIn('id', $chapterIds)
+            ->get();
+
         // トランザクションを開始
         DB::beginTransaction();
         try {
             // 各チャプターIDに対して削除を実行
-            foreach ($chapterIds as $chapterId) {
-                // コースIDに一致するチャプターを検索
-                $chapter = Chapter::where('course_id', $course_id)->find($chapterId);
-                if ($chapter) {
-                    // チャプターが存在する場合は削除し、削除したチャプターIDを記録
-                    $chapter->delete();
-                    $deletedChapters[] = $chapterId;
-                }
+            foreach ($chapters as $chapter) {
+                $chapter->delete();
+                $deletedChapters[] = $chapter->id;
             }
             // トランザクションをコミット
             DB::commit();
             // 成功レスポンスを返す
             return response()->json([
                 'result' => true,
-                'deleted_chapters' => $deletedChapters,
             ]);
         } catch (Exception $e) {
             // 例外発生時はトランザクションをロールバックし、エラーログを記録

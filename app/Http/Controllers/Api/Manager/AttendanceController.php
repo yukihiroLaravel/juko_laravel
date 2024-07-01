@@ -141,4 +141,27 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+    /**
+     * 講師側受講状況API
+     *
+     * @param int $attendance_id
+     * @return JsonResponse
+     */
+    public function status()
+    {
+        return response()->json([]);
+        // $attendanceId = $request->attendance_id;
+
+        // /** @var Attendance */
+        // $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+
+        // if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+        //     return response()->json([
+        //         "result" => false,
+        //         "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+        //     ], 403);
+        // }
+
+        // return new AttendanceStatusResource($attendance);
+    }
 }

@@ -195,20 +195,20 @@ class ChapterController extends Controller
      */
     public function bulkDelete(Request $request, $course_id)
     {
-        // 現在認証されている講師のIDを取得
+        // 現在認証されている講師（マネージャー）のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 現在認証されている講師のIDを使って、その講師が管理する配下の講師の情報を取得
+        // 現在認証されている講師（マネージャー）の情報を取得し、その講師が管理する配下の講師の情報も取得
         $manager = Instructor::with('managings')->find($instructorId);
 
-        // 配下の講師のIDリストを取得し、現在の講師自身のIDも含める
+        // 配下の講師のIDリストを取得し、現在の講師（マネージャー）自身のIDも含める
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたコースIDに対応するコースを、関連するチャプターと共に取得
         $course = Course::with('chapters')->findOrFail($course_id);
 
-        // コースの講師IDが取得した講師IDリストに含まれているか確認
+        // コースの講師IDが取得した講師（マネージャーとその配下の講師）のIDリストに含まれているか確認
         // 含まれていない場合、アクセス禁止のレスポンスを返す
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
@@ -219,21 +219,29 @@ class ChapterController extends Controller
 
         // リクエストから削除するチャプターIDのリストを取得
         $chapterIds = $request->input('chapters', []);
-        $deletedChapters = [];
 
-        // 対象のチャプターを一度に取得
+        // 削除対象のチャプターを一度に取得して認可処理を行う
         $chapters = Chapter::where('course_id', $course_id)
             ->whereIn('id', $chapterIds)
+            ->whereHas('course', function ($query) use ($instructorIds) {
+                // 認可処理: チャプターが認証された講師（マネージャーまたはその配下の講師）のコースに属しているかを確認
+                $query->whereIn('instructor_id', $instructorIds);
+            })
             ->get();
+
+        // すべてのチャプターが認可されているかを確認
+        if (count($chapters) !== count($chapterIds)) {
+            return response()->json([
+                'result' => false,
+                'message' => 'One or more chapters are not authorized for deletion.',
+            ], 403);
+        }
 
         // トランザクションを開始
         DB::beginTransaction();
         try {
-            // 各チャプターIDに対して削除を実行
-            foreach ($chapters as $chapter) {
-                $chapter->delete();
-                $deletedChapters[] = $chapter->id;
-            }
+            // バルクデリートを実行
+            Chapter::whereIn('id', $chapterIds)->delete();
             // トランザクションをコミット
             DB::commit();
             // 成功レスポンスを返す

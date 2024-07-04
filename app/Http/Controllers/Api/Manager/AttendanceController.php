@@ -152,27 +152,14 @@ class AttendanceController extends Controller
     {
         //変数にAttendanceのリレーションをロードし、course_idがリクエストのcourse_idと一致するものを取得
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
-        // dd($attendances);
-        //デバッグするため記述
-        // $attendances->each(function (Attendance $attendance) {
-        //     $attendance->lessonAttendances->each(function (LessonAttendance $lessonAttendance) {
-        //         if ($lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isToday()) {
-        //             dd($lessonAttendance);
-        //         }
-        //     });
-        // });
-
         // 今日完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
-                return $lessonAttendance->status === 'completed_attendance' && $lessonAttendance->updated_at->isToday();
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isToday();
             });
-            //デバッグするため記述
-            // dd($compleatedLessonAttendances);
             return $compleatedLessonAttendances;
         });
         $completedLessonsCount = $completedLessonsCount->count();
-        //dd($completedLessonsCount);
         return response()->json(['completed_lessons_conut' => $completedLessonsCount]);
     }
 }

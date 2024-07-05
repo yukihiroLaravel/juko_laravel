@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
@@ -147,8 +148,18 @@ class AttendanceController extends Controller
      *
      *
      */
-    public function showStatusToday()
+    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        return response()->json([]);
+        //変数にAttendanceのリレーションをロードし、course_idがリクエストのcourse_idと一致するものを取得
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        // 今日完了したレッスンの個数を取得
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
+            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isToday();
+            });
+            return $compleatedLessonAttendances;
+        })
+            ->count();
+        return response()->json(['completed_lessons_conut' => $completedLessonsCount]);
     }
 }

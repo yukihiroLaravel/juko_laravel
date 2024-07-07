@@ -220,22 +220,24 @@ class ChapterController extends Controller
         // リクエストから削除するチャプターIDのリストを取得
         $chapterIds = $request->input('chapters', []);
 
-        // 削除対象のチャプターを一度に取得して認可処理を行う
-        $chapters = Chapter::where('course_id', $course_id)
-            ->whereIn('id', $chapterIds)
-            ->whereHas('course', function ($query) use ($instructorIds) {
-                // 認可処理: チャプターが認証された講師（マネージャーまたはその配下の講師）のコースに属しているかを確認
-                $query->whereIn('instructor_id', $instructorIds);
-            })
-            ->get();
+        // 削除対象のチャプターを一度に取得
+        $chapters = Chapter::with('course')->where('course_id', $course_id)->whereIn('id', $chapterIds)->get();
 
-        // すべてのチャプターが認可されているかを確認
-        if (count($chapters) !== count($chapterIds)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'One or more chapters are not authorized for deletion.',
-            ], 403);
-        }
+        // 各チャプターの認可処理
+        $chapters->each(function ($chapter) use ($instructorId, $course_id, $chapterIds) {
+            // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
+            if ((int) $instructorId !== $chapter->course->instructor_id) {
+                throw new ValidationErrorException('Invalid instructor_id.');
+            }
+            // 指定したコースIDがチャプターのコースIDと一致しない場合は許可しない
+            if ((int) $course_id !== $chapter->course_id) {
+                throw new ValidationErrorException('Invalid course.');
+            }
+            // 指定したチャプターIDがチャプターIDリストに含まれていない場合は許可しない
+            if (!in_array($chapter->id, $chapterIds)) {
+                throw new ValidationErrorException('Invalid chapter.');
+            }
+        });
 
         // トランザクションを開始
         DB::beginTransaction();

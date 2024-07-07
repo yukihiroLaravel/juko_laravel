@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
+use App\Http\Requests\Manager\ChapterSwitchStatusRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
@@ -188,7 +189,7 @@ class ChapterController extends Controller
     /**
      * 複数のチャプター公開/非公開API
      */
-    public function patchStatus($course_id)
+    public function patchStatus(ChapterSwitchStatusRequest $request, $course_id)
     {
         return response()->json([]);
     }

@@ -160,6 +160,38 @@ class AttendanceController extends Controller
             return $compleatedLessonAttendances;
         })
             ->count();
-        return response()->json(['completed_lessons_conut' => $completedLessonsCount]);
+
+        //今日完了したチャプターの個数を取得
+        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
+            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })
+            ->filter(function (LessonAttendance $lessonAttendance) {
+                //チャプターに含まれているレッスンが全て完了しているか
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                //最新のレッスンの完了済みステータスの更新日時が今日であるかという条件
+                $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+                // dd($compleatedLessonsCount);ここで、最新レッスンの完了済みを取得できているか確認
+                return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
+                // dd($compleatedLessonsCount);ここで更新日時が表であるかどうか確認
+            })
+            //ユニークなチャプターID取得と出席のIDを取得
+            ->map(function (LessonAttendance $lessonAttendance) {
+                //chapter_id と attendance_idをkeyにもつ新しい配列を作成
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id
+                ];
+            })
+            ->unique()
+            ->count();
+
+        return response()->json([
+            'completed_lessons_conut' => $completedLessonsCount,
+            'completed_chapters_count' => $completedChaptersCount
+        ]);
     }
 }

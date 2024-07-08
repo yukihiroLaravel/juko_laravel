@@ -174,9 +174,7 @@ class AttendanceController extends Controller
                     ->whereIn('lesson_id', $allLessonsId)
                     ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                     ->count();
-                // dd($compleatedLessonsCount);ここで、最新レッスンの完了済みを取得できているか確認
                 return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
-                // dd($compleatedLessonsCount);ここで更新日時が表であるかどうか確認
             })
             //ユニークなチャプターID取得と出席のIDを取得
             ->map(function (LessonAttendance $lessonAttendance) {

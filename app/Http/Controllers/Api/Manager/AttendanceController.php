@@ -165,8 +165,8 @@ class AttendanceController extends Controller
         });
             return $compleatedLessonAttendances;
         })->count();
-            return response()->json([
+        return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
-       ]);
-   }
+        ]);
+    }
 }

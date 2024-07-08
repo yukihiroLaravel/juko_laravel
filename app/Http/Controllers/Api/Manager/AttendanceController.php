@@ -147,22 +147,22 @@ class AttendanceController extends Controller
     *
     *
     */
-    
+
     /**
      * 講座受講状況-今月
      *
      * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse
      */
-   public function showStatusThisMonth(Request $request): JsonResponse
-   {
+    public function showStatusThisMonth(Request $request): JsonResponse
+    {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
-    
+
         // 今月完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isCurrentMonth();
-        });
+            });
             return $compleatedLessonAttendances;
         })->count();
         return response()->json([

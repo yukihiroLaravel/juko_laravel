@@ -17,7 +17,6 @@ use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
 use App\Http\Requests\Manager\AttendanceShowRequest;
 
-
 class AttendanceController extends Controller
 {
     /**

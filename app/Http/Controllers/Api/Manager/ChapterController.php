@@ -229,32 +229,32 @@ class ChapterController extends Controller
             });
 
         // トランザクションを開始
-        DB::beginTransaction();
-        try {
-            // バルクデリートを実行
-            Chapter::whereIn('id', $chapterIds)->delete();
-            // トランザクションをコミット
-            DB::commit();
-            // 成功レスポンスを返す
-            return response()->json([
+            DB::beginTransaction();
+            try {
+                // バルクデリートを実行
+                Chapter::whereIn('id', $chapterIds)->delete();
+                // トランザクションをコミット
+                DB::commit();
+                // 成功レスポンスを返す
+                return response()->json([
                 'result' => true,
-            ]);
-        } catch (Exception $e) {
-            // 例外発生時はトランザクションをロールバックし、エラーログを記録
-            DB::rollBack();
-            Log::error($e);
-            // エラーレスポンスを返す
-            return response()->json([
+                ]);
+            } catch (Exception $e) {
+                // 例外発生時はトランザクションをロールバックし、エラーログを記録
+                DB::rollBack();
+                Log::error($e);
+                // エラーレスポンスを返す
+                return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete chapters.',
-            ], 500);
-        }
+                ], 500);
+            }
         } catch (ValidationErrorException $e) {
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
-        }    
+        }
     }
 
     /**

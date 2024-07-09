@@ -205,39 +205,28 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 指定されたコースIDに対応するコースを、関連するチャプターと共に取得
-        $course = Course::with('chapters')->findOrFail($course_id);
+        try {
+            // リクエストから削除するチャプターIDのリストを取得
+            $chapterIds = $request->input('chapters', []);
 
-        // コースの講師IDが取得した講師（マネージャーとその配下の講師）のIDリストに含まれているか確認
-        // 含まれていない場合、アクセス禁止のレスポンスを返す
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => "Forbidden, not allowed to delete chapters in this course.",
-            ], 403);
-        }
+            // 削除対象のチャプターを一度に取得
+            $chapters = Chapter::with('course')->where('course_id', $course_id)->whereIn('id', $chapterIds)->get();
 
-        // リクエストから削除するチャプターIDのリストを取得
-        $chapterIds = $request->input('chapters', []);
-
-        // 削除対象のチャプターを一度に取得
-        $chapters = Chapter::with('course')->where('course_id', $course_id)->whereIn('id', $chapterIds)->get();
-
-        // 各チャプターの認可処理
-        $chapters->each(function ($chapter) use ($instructorId, $course_id, $chapterIds) {
-            // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
-            if ((int) $instructorId !== $chapter->course->instructor_id) {
-                throw new ValidationErrorException('Invalid instructor_id.');
-            }
-            // 指定したコースIDがチャプターのコースIDと一致しない場合は許可しない
-            if ((int) $course_id !== $chapter->course_id) {
-                throw new ValidationErrorException('Invalid course.');
-            }
-            // 指定したチャプターIDがチャプターIDリストに含まれていない場合は許可しない
-            if (!in_array($chapter->id, $chapterIds)) {
-                throw new ValidationErrorException('Invalid chapter.');
-            }
-        });
+            // 各チャプターの認可処理
+            $chapters->each(function ($chapter) use ($instructorId, $course_id, $chapterIds) {
+                // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
+                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                // 指定したコースIDがチャプターのコースIDと一致しない場合は許可しない
+                if ((int) $course_id !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course.');
+                }
+                // 指定したチャプターIDがチャプターIDリストに含まれていない場合は許可しない
+                if (!in_array($chapter->id, $chapterIds)) {
+                    throw new ValidationErrorException('Invalid chapter.');
+                }
+            });
 
         // トランザクションを開始
         DB::beginTransaction();
@@ -260,6 +249,12 @@ class ChapterController extends Controller
                 'message' => 'Failed to delete chapters.',
             ], 500);
         }
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }    
     }
 
     /**

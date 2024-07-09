@@ -159,7 +159,7 @@ class AttendanceController extends Controller
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        
+
         // 指定されたattendance_idに関連するAttendanceレコードを取得
 
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendance_id);

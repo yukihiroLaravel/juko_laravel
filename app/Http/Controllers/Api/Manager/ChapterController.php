@@ -249,7 +249,7 @@ class ChapterController extends Controller
             // 例外発生時はトランザクションをロールバックし、エラーログを記録
             DB::rollBack();
             Log::error($e);
-    
+
             // エラーレスポンスを返す
             return response()->json([
                 'result' => false,

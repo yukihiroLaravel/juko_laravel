@@ -6,13 +6,9 @@ use Exception;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\Attendance;
-use App\Model\Chapter;
-use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -146,69 +142,26 @@ class AttendanceController extends Controller
         }
     }
     /**
-     * マネージャー受講状況取得API
+     * 講師側受講状況API
      *
      * @param int $attendance_id
      * @return JsonResponse
      */
-    public function status(int $attendance_id): JsonResponse
+    public function status()
     {
-        // ログイン中のインストラクターのIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // マネージャーとその配下のインストラクターのIDを取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
+        return response()->json([]);
+        // $attendanceId = $request->attendance_id;
 
-        // 指定されたattendance_idに関連するAttendanceレコードを取得
+        // /** @var Attendance */
+        // $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
-        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendance_id);
+        // if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
+        //     return response()->json([
+        //         "result" => false,
+        //         "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+        //     ], 403);
+        // }
 
-        // コースのインストラクターが現在のインストラクターまたはその配下のインストラクターでなければエラー応答
-        if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to view this attendance record",
-            ], 403);
-        }
-
-        // 受講状況のデータを構築
-        $response = [
-            'data' => [
-                'attendance_id' => $attendance->id,
-                'progress' => $attendance->progress,
-                'course' => [
-                    'course_id' => $attendance->course->id,
-                    'title' => $attendance->course->title,
-                    'status' => $attendance->course->status,
-                    'image' => $attendance->course->image,
-                    'chapters' => $this->mapChapters($attendance->course->chapters, $attendance),
-                ],
-            ],
-        ];
-
-        return response()->json($response, 200);
-    }
-
-    /**
-     * チャプターの進捗計算
-     *
-     * @param Collection $chapters
-     * @param Attendance $attendance
-     * @return array
-     */
-    private function mapChapters(Collection $chapters, Attendance $attendance): array
-        // 各チャプターの進捗を計算する
-    {
-        return $chapters->map(function (Chapter $chapter) use ($attendance) {
-            $chapterProgress = $chapter->calculateChapterProgress($attendance);
-            return [
-                'chapter_id' => $chapter->id,
-                'title' => $chapter->title,
-                'status' => $chapter->status,
-                'progress' => $chapterProgress,
-            ];
-        })
-        ->toArray();
+        // return new AttendanceStatusResource($attendance);
     }
 }

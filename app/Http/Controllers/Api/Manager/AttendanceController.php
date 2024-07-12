@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Lesson;
-use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
@@ -13,12 +12,13 @@ use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceStatusRequest;
+
 
 class AttendanceController extends Controller
 {
@@ -151,7 +151,7 @@ class AttendanceController extends Controller
      * @param int $attendance_id
      * @return JsonResponse
      */
-    public function status(int $attendance_id): JsonResponse
+    public function status(AttendanceStatusRequest $request, int $attendance_id): JsonResponse
     {
         // ログイン中のインストラクターのIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

@@ -164,7 +164,7 @@ class AttendanceController extends Controller
         //自分と配下のnstructorのコースでなければエラー応答
         $course = Course::FindOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-            // Error response 
+            // Error response
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to edit this course.",

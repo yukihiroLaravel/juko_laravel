@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
@@ -195,7 +196,63 @@ class ChapterController extends Controller
      */
     public function bulkDelete(Request $request, $course_id)
     {
-        return response()->json([]);
+        // 現在認証されている講師（マネージャー）のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 現在認証されている講師（マネージャー）の情報を取得し、その講師が管理する配下の講師の情報も取得
+        $manager = Instructor::with('managings')->find($instructorId);
+
+        // 配下の講師のIDリストを取得し、現在の講師（マネージャー）自身のIDも含める
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        try {
+            // リクエストから削除するチャプターIDのリストを取得
+            $chapterIds = $request->input('chapters', []);
+
+            // 削除対象のチャプターを一度に取得
+            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+
+            // 各チャプターの認可処理
+                $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
+                // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
+                    if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                        throw new ValidationErrorException('Invalid instructor_id.');
+                    }
+                // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
+                    if ((int) $course_id !== $chapter->course_id) {
+                        throw new ValidationErrorException('Invalid course.');
+                    }
+                });
+
+            // トランザクションを開始
+            DB::beginTransaction();
+            // バルクデリートを実行
+            Chapter::whereIn('id', $chapterIds)->delete();
+            // トランザクションをコミット
+            DB::commit();
+            // 成功レスポンスを返す
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            // バリデーションエラーの場合の処理
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            // 一般的なエラーの場合の処理
+            // 例外発生時はトランザクションをロールバックし、エラーログを記録
+            DB::rollBack();
+            Log::error($e);
+
+            // エラーレスポンスを返す
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete chapters.',
+            ], 500);
+        }
     }
 
     /**

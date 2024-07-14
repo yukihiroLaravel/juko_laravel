@@ -20,6 +20,7 @@ use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
+use App\Http\Requests\Manager\ChapterbulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -190,11 +191,11 @@ class ChapterController extends Controller
     /**
      * 複数のチャプター削除API
      *
-     * @param Request $request
+     * @param ChapterbulkDeleteRequest $request
      * @param int $course_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(Request $request, $course_id)
+    public function bulkDelete(ChapterbulkDeleteRequest $request, $course_id)
     {
         // 現在認証されている講師（マネージャー）のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -214,16 +215,16 @@ class ChapterController extends Controller
             $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
             // 各チャプターの認可処理
-                $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
+            $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
                 // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
-                    if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                        throw new ValidationErrorException('Invalid instructor_id.');
-                    }
+                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
-                    if ((int) $course_id !== $chapter->course_id) {
-                        throw new ValidationErrorException('Invalid course.');
-                    }
-                });
+                if ((int) $course_id !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course.');
+                }
+            });
 
             // トランザクションを開始
             DB::beginTransaction();

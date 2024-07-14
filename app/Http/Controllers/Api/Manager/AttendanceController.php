@@ -162,12 +162,12 @@ class AttendanceController extends Controller
         //instructorIdsにinstructor_idを追加
         $instructorIds[] = $instructorId;
         //自分と配下のnstructorのコースでなければエラー応答
-        $course = Course::FindOrFail($request->course_id);
+        $course = Course::findOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             // Error response 
             return response()->json([
                 'result'  => false,
-                'message' => "Forbidden, not allowed to edit this course.",
+                'message' => "Forbidden, not allowed to access this course.",
             ], 403);
         }
 
@@ -207,7 +207,6 @@ class AttendanceController extends Controller
             ->count();
 
         return response()->json([
-            'coures' => $course,
             'completed_lessons_conut' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount
         ]);

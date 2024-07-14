@@ -216,14 +216,14 @@ class ChapterController extends Controller
             // 各チャプターの認可処理
                 $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
                 // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
-                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
-                }
+                    if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                        throw new ValidationErrorException('Invalid instructor_id.');
+                    }
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
-                if ((int) $course_id !== $chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course.');
-                }
-            });
+                    if ((int) $course_id !== $chapter->course_id) {
+                        throw new ValidationErrorException('Invalid course.');
+                    }
+                });
 
             // トランザクションを開始
             DB::beginTransaction();

@@ -214,7 +214,7 @@ class ChapterController extends Controller
             $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
             // 各チャプターの認可処理
-            $chapters->each(function ($chapter) use ($instructorIds, $course_id, $chapterIds) {
+                $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
                 // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');

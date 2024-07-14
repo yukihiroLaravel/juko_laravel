@@ -191,7 +191,18 @@ class ChapterController extends Controller
      */
     public function bulkPatchStatus(BulkPatchStatusRequest $request, $course_id)
     {
-        return response()->json([]);
+        // 該当するchaptersを取得
+        $chapters = Chapter::where('course_id', $course_id)
+                           ->whereIn('id', $request->chapters);
+
+        // chaptersのstatusを更新
+        $chapters->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

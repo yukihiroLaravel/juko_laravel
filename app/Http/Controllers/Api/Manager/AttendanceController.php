@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceStatusRequest;
 
 class AttendanceController extends Controller
 {
@@ -146,11 +147,13 @@ class AttendanceController extends Controller
     /**
      * マネージャー受講状況取得API
      *
-     * @param int $attendance_id
+     * @param AttendanceStatusRequest $request
      * @return JsonResponse
      */
-    public function status(int $attendance_id): JsonResponse
+    public function status(AttendanceStatusRequest $request): JsonResponse
     {
+        $attendanceId = $request->attendance_id;
+
         // ログイン中のインストラクターのIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
         // マネージャーとその配下のインストラクターのIDを取得
@@ -160,7 +163,7 @@ class AttendanceController extends Controller
 
         // 指定されたattendance_idに関連するAttendanceレコードを取得
 
-        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendance_id);
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
         // コースのインストラクターが現在のインストラクターまたはその配下のインストラクターでなければエラー応答
         if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {

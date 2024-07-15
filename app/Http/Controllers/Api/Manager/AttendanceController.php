@@ -157,6 +157,27 @@ class AttendanceController extends Controller
     public function showStatusThisMonth(Request $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+         
+        //現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        //ログインしているインストラクターとその管理しているインストラクターを取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        //管理しているインストラクターのIDを配列として取得し、自分自身のIDも追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+        
+        //自分と配下のinstructorのコースでなければエラー応答
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            
+            // エラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to access this course.",
+            ], 403);
+        }
+ 
+
         // 今月完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
@@ -191,7 +212,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
-            'completed_chapters_count' =>  $completedChaptersCount
+            'completed_chapters_count' => $completedChaptersCount
         ]);
     }
 }

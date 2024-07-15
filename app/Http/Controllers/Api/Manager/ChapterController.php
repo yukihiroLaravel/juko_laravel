@@ -195,7 +195,7 @@ class ChapterController extends Controller
      * @param int $course_id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(ChapterbulkDeleteRequest $request, $course_id)
+    public function bulkDelete(ChapterbulkDeleteRequest $request)
     {
         // 現在認証されている講師（マネージャー）のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

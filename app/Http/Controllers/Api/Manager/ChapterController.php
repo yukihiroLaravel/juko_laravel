@@ -20,7 +20,7 @@ use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
-use App\Http\Requests\Manager\ChapterbulkDeleteRequest;
+use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -191,11 +191,10 @@ class ChapterController extends Controller
     /**
      * 複数のチャプター削除API
      *
-     * @param ChapterbulkDeleteRequest $request
-     * @param int $course_id
+     * @param ChapterBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(ChapterbulkDeleteRequest $request)
+    public function bulkDelete(ChapterBulkDeleteRequest $request)
     {
         // 現在認証されている講師（マネージャー）のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -211,11 +210,14 @@ class ChapterController extends Controller
             // リクエストから削除するチャプターIDのリストを取得
             $chapterIds = $request->input('chapters', []);
 
+            // リクエストからcourse_idを取得
+            $course_id = $request->input('course_id');
+
             // 削除対象のチャプターを一度に取得
             $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
             // 各チャプターの認可処理
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id, $chapterIds) {
+            $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id) {
                 // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');

@@ -189,13 +189,22 @@ class ChapterController extends Controller
     /**
      * 複数のチャプター公開/非公開API
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request, $course_id)
+    public function bulkPatchStatus(BulkPatchStatusRequest $request)
     {
-        // 該当するchaptersを取得
-        $chapters = Chapter::where('course_id', $course_id)
-                           ->whereIn('id', $request->chapters);
+        // $chaptersの中に$course_idと一致しないidが含まれている場合はエラーを返す
+        foreach ($request->chapters as $chapter_id) {
+            $chapter = Chapter::findOrFail($chapter_id);
+            if ($chapter->course_id !== intval($request->course_id)) {
+                return response()->json([
+                    'result' => false,
+                ]);
+            }
+        }
 
-        // chaptersのstatusを更新
+        // 該当するchaptersを取得
+        $chapters = Chapter::whereIn('id', $request->chapters);
+
+        // chaptersのstatusを一括で更新
         $chapters->update([
             'status' => $request->status,
         ]);

@@ -25,10 +25,10 @@ class AttendanceStatusResource extends JsonResource
             'progress' => $this->resource->progress,
             'course' => [
                 'course_id' => $this->resource->course->id,
-                'title' => $this->resource->course->title,
                 'status' => $this->resource->course->status,
                 'image' => $this->resource->course->image,
                 'chapters' => $this->mapChapters($this->resource->course->chapters),
+                'title' => $this->resource->course->title,
             ],
         ];
     }

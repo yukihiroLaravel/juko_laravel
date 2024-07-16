@@ -21,15 +21,15 @@ class AttendanceStatusResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'progress' => $this->resource->progress,
             'attendance_id' => $this->resource->id,
-            'course_id' => $this->resource->course->id,
+            'progress' => $this->resource->progress,
             'course' => [
+                'course_id' => $this->resource->course->id,
                 'status' => $this->resource->course->status,
                 'image' => $this->resource->course->image,
                 'chapters' => $this->mapChapters($this->resource->course->chapters),
                 'title' => $this->resource->course->title,
-                ],
+            ],
         ];
     }
 

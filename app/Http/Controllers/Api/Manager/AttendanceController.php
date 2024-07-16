@@ -176,7 +176,6 @@ class AttendanceController extends Controller
                 'message' => "Forbidden, not allowed to access this course.",
             ], 403);
         }
- 
 
         // 今月完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {

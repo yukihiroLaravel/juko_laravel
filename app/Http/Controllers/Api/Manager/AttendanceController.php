@@ -157,7 +157,7 @@ class AttendanceController extends Controller
     public function showStatusThisMonth(Request $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
-         
+
         //現在ログインしているinstructorのidを取得
         $instructorId = Auth::guard('instructor')->user()->id;
         //ログインしているインストラクターとその管理しているインストラクターを取得
@@ -165,11 +165,10 @@ class AttendanceController extends Controller
         //管理しているインストラクターのIDを配列として取得し、自分自身のIDも追加
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
-        
+
         //自分と配下のinstructorのコースでなければエラー応答
         $course = Course::findOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-            
             // エラー応答
             return response()->json([
                 'result'  => false,

@@ -152,6 +152,25 @@ class AttendanceController extends Controller
     {
         //変数にAttendanceのリレーションをロードし、course_idがリクエストのcourse_idと一致するものを取得
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+
+        //変数にAuthのguardを使用して現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        //instructor_idをキーにしてmanagingsリレーションをロードし、instructor_idが一致するものを取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        //managingsリレーションのidを取得
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        //instructorIdsにinstructor_idを追加
+        $instructorIds[] = $instructorId;
+        //自分と配下のnstructorのコースでなければエラー応答
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // Error response
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to access this course.",
+            ], 403);
+        }
+
         // 今日完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {

@@ -210,20 +210,20 @@ class ChapterController extends Controller
             // リクエストから削除するチャプターIDのリストを取得
             $chapterIds = $request->input('chapters', []);
 
-            // リクエストからcourse_idを取得
-            $course_id = $request->input('course_id');
+            // リクエストからcourseIdを取得
+            $courseId = $request->input('course_id');
 
             // 削除対象のチャプターを一度に取得
             $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
             // 各チャプターの認可処理
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $course_id) {
+            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 // 認証された講師（マネージャー）のIDとチャプターに紐づく講師IDが一致しない場合は許可しない
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
-                if ((int) $course_id !== $chapter->course_id) {
+                if ((int) $courseId !== $chapter->course_id) {
                     throw new ValidationErrorException('Invalid course.');
                 }
             });

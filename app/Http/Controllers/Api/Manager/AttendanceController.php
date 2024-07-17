@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
 
 class AttendanceController extends Controller
@@ -145,12 +146,12 @@ class AttendanceController extends Controller
         }
     }
     /**
-     * マネージャー受講状況取得API
+     * マネージャー側受講状況取得API
      *
      * @param AttendanceStatusRequest $request
-     * @return JsonResponse
+     * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(AttendanceStatusRequest $request): JsonResponse
+    public function status(AttendanceStatusRequest $request)
     {
         $attendanceId = $request->attendance_id;
 
@@ -161,8 +162,7 @@ class AttendanceController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        // 指定されたattendance_idに関連するAttendanceレコードを取得
-
+        /** @var Attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
         // コースのインストラクターが現在のインストラクターまたはその配下のインストラクターでなければエラー応答
@@ -173,43 +173,6 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        // 受講状況のデータを構築
-        $response = [
-            'data' => [
-                'attendance_id' => $attendance->id,
-                'progress' => $attendance->progress,
-                'course' => [
-                    'course_id' => $attendance->course->id,
-                    'title' => $attendance->course->title,
-                    'status' => $attendance->course->status,
-                    'image' => $attendance->course->image,
-                    'chapters' => $this->mapChapters($attendance->course->chapters, $attendance),
-                ],
-            ],
-        ];
-
-        return response()->json($response, 200);
-    }
-
-    /**
-     * チャプターの進捗計算
-     *
-     * @param Collection $chapters
-     * @param Attendance $attendance
-     * @return array
-     */
-    private function mapChapters(Collection $chapters, Attendance $attendance): array
-        // 各チャプターの進捗を計算する
-    {
-        return $chapters->map(function (Chapter $chapter) use ($attendance) {
-            $chapterProgress = $chapter->calculateChapterProgress($attendance);
-            return [
-                'chapter_id' => $chapter->id,
-                'title' => $chapter->title,
-                'status' => $chapter->status,
-                'progress' => $chapterProgress,
-            ];
-        })
-        ->toArray();
+        return new AttendanceStatusResource($attendance);
     }
 }

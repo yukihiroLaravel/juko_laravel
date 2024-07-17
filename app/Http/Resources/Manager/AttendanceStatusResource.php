@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
 use App\Model\Chapter;
 use App\Model\Attendance;

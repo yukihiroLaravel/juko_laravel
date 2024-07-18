@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
 
 class AttendanceController extends Controller
 {
@@ -154,7 +154,7 @@ class AttendanceController extends Controller
      * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse
      */
-    public function showStatusThisMonth(Request $request): JsonResponse
+    public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 

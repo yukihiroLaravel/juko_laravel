@@ -196,7 +196,7 @@ class ChapterController extends Controller
 
         // $chaptersの中に$course_idと一致しないidが含まれている場合はエラーを返す
         $courseIdFlg = false;
-        $chapters->map(function($chapter) use ($request, &$courseIdFlg) {
+        $chapters->map(function ($chapter) use ($request, &$courseIdFlg) {
             if ($chapter->course_id !== intval($request->course_id)) {
                 $courseIdFlg = true;
             }

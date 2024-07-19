@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -47,7 +49,7 @@ class AttendanceController extends Controller
             // 自分もしくは配下の講師の講座でない場合はエラーを返す
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Forbidden.'
             ], 403);
         }
 
@@ -146,7 +148,8 @@ class AttendanceController extends Controller
     /**
      * 本日のレッスン・チャプター完了数の取得API
      *
-     *@param AttendanceShowRequest $request
+     * @param AttendanceStatusRequest $request
+     * @return AttendanceStatusResource|JsonResponse@param AttendanceShowRequest $request
      *@return \Illuminate\Http\JsonResponse
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse

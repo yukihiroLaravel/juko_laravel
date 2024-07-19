@@ -146,7 +146,8 @@ class AttendanceController extends Controller
     /**
      * 本日のレッスン・チャプター完了数の取得API
      *
-     *
+     * @param AttendanceShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {

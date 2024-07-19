@@ -5,20 +5,18 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Lesson;
-use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
-use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -50,7 +48,7 @@ class AttendanceController extends Controller
             // 自分もしくは配下の講師の講座でない場合はエラーを返す
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Forbidden.'
             ], 403);
         }
 
@@ -126,7 +124,7 @@ class AttendanceController extends Controller
                 // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
                 return response()->json([
                     "result" => false,
-                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                    "message" => "Forbidden.",
                 ], 403);
             }
 
@@ -145,8 +143,9 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
+
     /**
-     * マネージャー側受講状況取得API
+     * 受講状況取得API
      *
      * @param AttendanceStatusRequest $request
      * @return AttendanceStatusResource|JsonResponse
@@ -154,10 +153,9 @@ class AttendanceController extends Controller
     public function status(AttendanceStatusRequest $request)
     {
         $attendanceId = $request->attendance_id;
-
-        // ログイン中のインストラクターのIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        // マネージャーとその配下のインストラクターのIDを取得
+
+        // マネージャーとその配下の講師のIDを取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
@@ -165,11 +163,10 @@ class AttendanceController extends Controller
         /** @var Attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
-        // コースのインストラクターが現在のインストラクターまたはその配下のインストラクターでなければエラー応答
         if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to view this attendance record",
+                "message" => "Forbidden.",
             ], 403);
         }
 

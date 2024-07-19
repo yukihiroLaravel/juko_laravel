@@ -272,7 +272,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講師側受講状況API
+     * 受講状況API
      *
      * @param AttendanceStatusRequest $request
      * @return AttendanceStatusResource|JsonResponse
@@ -287,7 +287,7 @@ class AttendanceController extends Controller
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             return response()->json([
                 "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                "message" => "Forbidden.",
             ], 403);
         }
 

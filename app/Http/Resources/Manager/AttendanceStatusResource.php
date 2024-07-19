@@ -34,9 +34,7 @@ class AttendanceStatusResource extends JsonResource
     }
 
     /**
-     * Calculate chapter progress
-     *
-     * @param Collection $chapters
+     * @param Collection<Chapter> $chapters
      * @return array
      */
     private function mapChapters(Collection $chapters)

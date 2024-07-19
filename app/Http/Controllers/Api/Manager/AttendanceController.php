@@ -15,6 +15,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -46,7 +48,7 @@ class AttendanceController extends Controller
             // 自分もしくは配下の講師の講座でない場合はエラーを返す
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Forbidden.'
             ], 403);
         }
 
@@ -122,7 +124,7 @@ class AttendanceController extends Controller
                 // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
                 return response()->json([
                     "result" => false,
-                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                    "message" => "Forbidden.",
                 ], 403);
             }
 
@@ -140,5 +142,34 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * 受講状況取得API
+     *
+     * @param AttendanceStatusRequest $request
+     * @return AttendanceStatusResource|JsonResponse
+     */
+    public function status(AttendanceStatusRequest $request)
+    {
+        $attendanceId = $request->attendance_id;
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーとその配下の講師のIDを取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        /** @var Attendance */
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+
+        if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                "result" => false,
+                "message" => "Forbidden.",
+            ], 403);
+        }
+
+        return new AttendanceStatusResource($attendance);
     }
 }

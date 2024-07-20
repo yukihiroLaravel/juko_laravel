@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Exceptions\ValidationErrorException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -175,9 +176,44 @@ class ChapterController extends Controller
      */
     public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
     {
-        return response()->json([
-            'result' => true,
-        ]);
+        try {
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // 選択されたchapterを取得
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+
+            $chapters->map(function($chapter) use ($instructorId) {
+                // チャプターに紐づく講師でない場合は許可しない
+                if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+            });
+
+            // 該当するchaptersのidをコレクションで取得
+            $chapterIds = $chapters->pluck('id');
+
+            // chaptersのstatusを一括で更新
+            Chapter::whereIn('id', $chapterIds)->update([
+                'status' => $request->status,
+            ]);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

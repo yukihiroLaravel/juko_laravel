@@ -20,6 +20,7 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 
 class ChapterController extends Controller
 {
@@ -161,6 +162,19 @@ class ChapterController extends Controller
             'status' => $request->status
         ]);
 
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * 複数チャプターの公開/非公開API
+     *
+     * @param BulkPatchStatusRequest $request
+     * @return JsonResponse
+     */
+    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    {
         return response()->json([
             'result' => true,
         ]);

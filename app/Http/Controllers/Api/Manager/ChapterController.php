@@ -19,7 +19,6 @@ use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
-use App\Http\Requests\Manager\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ChapterController extends Controller
@@ -183,40 +182,6 @@ class ChapterController extends Controller
         $chapter->delete();
         return response()->json([
             "result" => true
-        ]);
-    }
-
-    /**
-     * 複数のチャプター公開/非公開API
-     */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request)
-    {
-        // 選択されたchapterを取得
-        $chapters = Chapter::whereIn('id', $request->chapters)->get();
-
-        // $chaptersの中に$course_idと一致しないidが含まれている場合はエラーを返す
-        $courseIdFlg = false;
-        $chapters->map(function ($chapter) use ($request, &$courseIdFlg) {
-            if ($chapter->course_id !== intval($request->course_id)) {
-                $courseIdFlg = true;
-            }
-        });
-        if ($courseIdFlg) {
-            return response()->json([
-                'result' => false,
-            ]);
-        }
-
-        // 該当するchaptersのidをコレクションで取得
-        $chapterIds = $chapters->pluck('id');
-
-        // chaptersのstatusを一括で更新
-        Chapter::whereIn('id', $chapterIds)->update([
-            'status' => $request->status,
-        ]);
-
-        return response()->json([
-            'result' => true,
         ]);
     }
 

@@ -173,6 +173,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::post('sort', 'Api\Manager\ChapterController@sort');
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::put('status', 'Api\Manager\ChapterController@putStatus');
+                            Route::delete('/', 'Api\Manager\ChapterController@bulkDelete');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');

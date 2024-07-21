@@ -54,7 +54,7 @@ class InstructorController extends Controller
     {
         return response()->json([]);
     }
-    
+
     /**
      * 講師更新API
      *

@@ -153,21 +153,17 @@ class AttendanceController extends Controller
      */
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
-        //変数にAttendanceのリレーションをロードし、course_idがリクエストのcourse_idと一致するものを取得
+        // 受講状況を取得
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
-        //変数にAuthのguardを使用して現在ログインしているinstructorのidを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        //instructor_idをキーにしてmanagingsリレーションをロードし、instructor_idが一致するものを取得
         $manager = Instructor::with('managings')->find($instructorId);
-        //managingsリレーションのidを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        //instructorIdsにinstructor_idを追加
         $instructorIds[] = $instructorId;
-        //自分と配下のnstructorのコースでなければエラー応答
+
         $course = Course::findOrFail($request->course_id);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-            // Error response
+            // 自分と配下の講師の講座でない場合はエラーを返す
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to access this course.",
@@ -183,24 +179,23 @@ class AttendanceController extends Controller
         })
             ->count();
 
-        //今日完了したチャプターの個数を取得
+        // 今日完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
             return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
         })
             ->filter(function (LessonAttendance $lessonAttendance) {
-                //チャプターに含まれているレッスンが全て完了しているか
+                // チャプターに含まれているレッスンが全て完了しているか
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
-                //最新のレッスンの完了済みステータスの更新日時が今日であるかという条件
+                // 最新のレッスンの完了済みステータスの更新日時が今日であるかという条件
                 $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
                     ->whereIn('lesson_id', $allLessonsId)
                     ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                     ->count();
                 return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $compleatedLessonsCount;
             })
-            //ユニークなチャプターID取得と出席のIDを取得
             ->map(function (LessonAttendance $lessonAttendance) {
-                //chapter_id と attendance_idをkeyにもつ新しい配列を作成
+                // ユニークなチャプターIDと受講IDを取得
                 return [
                     'chapter_id' => $lessonAttendance->lesson->chapter_id,
                     'attendance_id' => $lessonAttendance->attendance_id

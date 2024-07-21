@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
 use App\Http\Requests\Manager\ChapterPatchRequest;
@@ -18,6 +19,7 @@ use App\Http\Requests\Manager\ChapterStoreRequest;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
+use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -183,6 +185,62 @@ class ChapterController extends Controller
         return response()->json([
             "result" => true
         ]);
+    }
+
+    /**
+     * 複数のチャプター削除API
+     *
+     * @param ChapterBulkDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkDelete(ChapterBulkDeleteRequest $request)
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $manager = Instructor::with('managings')->find($instructorId);
+
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        try {
+            $chapterIds = $request->input('chapters', []);
+
+            $courseId = $request->input('course_id');
+
+            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+
+            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
+                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                if ((int) $courseId !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course.');
+                }
+            });
+
+            DB::beginTransaction();
+
+            Chapter::whereIn('id', $chapterIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete chapters.',
+            ], 500);
+        }
     }
 
     /**

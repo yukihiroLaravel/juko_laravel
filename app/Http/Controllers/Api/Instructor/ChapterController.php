@@ -183,7 +183,7 @@ class ChapterController extends Controller
             // 選択されたchapterを取得
             $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
-            $chapters->map(function($chapter) use ($instructorId, $request) {
+            $chapters->map(function ($chapter) use ($instructorId, $request) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');

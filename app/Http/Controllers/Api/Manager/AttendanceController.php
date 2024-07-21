@@ -216,7 +216,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 受講状況取得API 
+     * 受講状況取得API
      *
      * @param AttendanceStatusRequest $request
      * @return AttendanceStatusResource|JsonResponse

@@ -215,7 +215,7 @@ class AttendanceController extends Controller
             'completed_chapters_count' => $completedChaptersCount
         ]);
     }
-    
+
     /**
      * 受講状況取得API
      *

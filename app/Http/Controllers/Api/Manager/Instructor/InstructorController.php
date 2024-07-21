@@ -46,6 +46,16 @@ class InstructorController extends Controller
     }
 
     /**
+     * 講師一覧取得API
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * 講師更新API
      *
      * @param InstructorPatchRequest $request

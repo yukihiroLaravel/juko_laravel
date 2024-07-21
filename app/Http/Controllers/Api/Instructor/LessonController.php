@@ -164,6 +164,10 @@ class LessonController extends Controller
         }
     }
 
+    public function bulkDelete(){
+        return response()->json([]);
+    }
+
     /**
      * レッスンステータス更新API
      *

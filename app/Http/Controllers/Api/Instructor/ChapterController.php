@@ -183,7 +183,7 @@ class ChapterController extends Controller
             // 選択されたchapterを取得
             $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
-            $chapters->map(function ($chapter) use ($instructorId, $request) {
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $request) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');
@@ -194,11 +194,8 @@ class ChapterController extends Controller
                 }
             });
 
-            // 該当するchaptersのidをコレクションで取得
-            $chapterIds = $chapters->pluck('id');
-
             // chaptersのstatusを一括で更新
-            Chapter::whereIn('id', $chapterIds)->update([
+            Chapter->update([
                 'status' => $request->status,
             ]);
 
@@ -206,7 +203,6 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
-            Log::error($e);
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),

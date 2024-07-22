@@ -195,7 +195,7 @@ class ChapterController extends Controller
             });
 
             // chaptersのstatusを一括で更新
-            Chapter->update([
+            $chapters->update([
                 'status' => $request->status,
             ]);
 

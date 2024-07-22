@@ -145,14 +145,9 @@ class AttendanceController extends Controller
             ], 500);
         }
     }
-    /**
-    * 今月のレッスン・チャプター完了数の取得API
-    *
-    *
-    */
 
     /**
-     * 講座受講状況-今月
+     * 今月のレッスン・チャプター完了数の取得API
      *
      * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse

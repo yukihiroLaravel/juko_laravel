@@ -19,7 +19,6 @@ use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
-use App\Http\Requests\Manager\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ChapterController extends Controller
@@ -184,14 +183,6 @@ class ChapterController extends Controller
         return response()->json([
             "result" => true
         ]);
-    }
-
-    /**
-     * 複数のチャプター公開/非公開API
-     */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request, $course_id)
-    {
-        return response()->json([]);
     }
 
     /**

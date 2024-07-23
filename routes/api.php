@@ -174,6 +174,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::post('sort', 'Api\Manager\ChapterController@sort');
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::put('status', 'Api\Manager\ChapterController@putStatus');
+                            Route::delete('/', 'Api\Manager\ChapterController@bulkDelete');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
@@ -194,12 +195,22 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('notification')->group(function () {
                             Route::post('/', 'Api\Manager\NotificationController@store');
                         });
+                        //マネージャー生徒学習状況
+                        Route::prefix('attendance')->group(function () {
+                            Route::prefix('status')->group(function () {
+                                Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
+                            });
+                        });
                     });
                 });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', 'Api\Manager\AttendanceController@store');
-                    Route::delete('{attendance_id}', 'Api\Manager\AttendanceController@delete');
+                    // 講師-生徒学習状況
+                    Route::prefix('{attendance_id}')->group(function () {
+                        Route::get('status', 'Api\Manager\AttendanceController@status');
+                        Route::delete('/', 'Api\Manager\AttendanceController@delete');
+                    });
                 });
                 Route::prefix('instructor')->group(function () {
                 });

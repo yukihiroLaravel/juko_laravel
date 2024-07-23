@@ -336,4 +336,15 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
+
+    /**
+     * 選択済みレッスンステータス一括更新API
+     * 
+     * @param 
+     * @return JsonResponse
+     */
+    public function updateStatus()
+    {
+        return response()->json([]);
+    }
 }

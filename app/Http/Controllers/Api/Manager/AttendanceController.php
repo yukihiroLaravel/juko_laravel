@@ -152,7 +152,6 @@ class AttendanceController extends Controller
      * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse
      */
-    
      public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
@@ -219,7 +218,6 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-
     public function showStatusToday(AttendanceShowRequest $request): JsonResponse
     {
         // 受講状況を取得

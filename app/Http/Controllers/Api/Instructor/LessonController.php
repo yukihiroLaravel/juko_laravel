@@ -164,7 +164,8 @@ class LessonController extends Controller
         }
     }
 
-    public function bulkDelete(){
+    public function bulkDelete()
+    {
         return response()->json([]);
     }
 

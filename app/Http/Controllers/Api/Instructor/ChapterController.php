@@ -6,22 +6,22 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
-use App\Exceptions\ValidationErrorException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
+use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
-use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 
 class ChapterController extends Controller
 {

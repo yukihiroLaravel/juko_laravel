@@ -180,22 +180,25 @@ class ChapterController extends Controller
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            // 選択されたchapterを取得
+            // リクエストから講座IDを取得
+            $courseId = $request->course_id;
+
+            // 選択されたチャプターを取得
             $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
-            $chapters->each(function (Chapter $chapter) use ($instructorId, $request) {
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
-                // $chaptersの中に$course_idと一致しないidが含まれている場合はエラーを返す
-                if ((int) $request->course_id !== $chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course_id.', 422);
+                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course_id.');
                 }
             });
 
-            // chaptersのstatusを一括で更新
-            $chapters->update([
+            // チャプターの状態を一括で更新
+            Chapter::whereIn('id', $chapters->pluck('id'))->update([
                 'status' => $request->status,
             ]);
 

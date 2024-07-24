@@ -20,6 +20,7 @@ use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -340,11 +341,23 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      *
-     * @param
+     * @param LessonUpdateStatusRequest $request
      * @return JsonResponse
      */
-    public function updateStatus()
+    public function updateStatus(Request $request): JsonResponse
     {
+        $managerId = Auth::guard('instructor')->user()->id;
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+        dd($instructorIds);
+
+        // ログイン中の講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        //
+
         return response()->json([]);
     }
 }

@@ -340,11 +340,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      *
-<<<<<<< HEAD
-     * @param LessonUpdateStatusRequest $request
-=======
      * @param
->>>>>>> c91a9bd19e7769ce54a47f5a1da83ce7af9fae7c
      * @return JsonResponse
      */
     public function putStatus(): JsonResponse

@@ -72,7 +72,7 @@ class InstructorController extends Controller
         $instructors = Instructor::whereIn('id', $instructorIds)
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
-        
+
         // レスポンスデータの整形
         $data = [
             'pagination' => [

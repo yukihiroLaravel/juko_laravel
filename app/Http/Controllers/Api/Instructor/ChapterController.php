@@ -220,6 +220,16 @@ class ChapterController extends Controller
     }
 
     /**
+     * 選択済チャプターの削除API
+     *
+     * @return JsonResponse
+     */
+    public function bulkDelete(): JsonResponse
+    {
+        return response()->json([]);
+    }
+
+    /**
      * チャプター削除API
      *
      * @param ChapterDeleteRequest $request

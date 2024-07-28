@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use RuntimeException;
 use App\Model\Instructor;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -48,18 +50,47 @@ class InstructorController extends Controller
     /**
      * 講師一覧取得API
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 現在ログインしているユーザーのIDを取得
-        $managerId = Auth::guard('manager')->user()->id;
+        // デフォルト値を設定
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sort_by', 'email');
+        $order = $request->input('order', 'desc');
 
-        // マネージャーとその管理している講師を取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
+
+        // 講師情報を取得
+        $instructors = Instructor::whereIn('id', $instructorIds)
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
+        
+        // レスポンスデータの整形
+        $data = [
+            'pagination' => [
+                'page' => $instructors->currentPage(),
+                'total' => $instructors->total(),
+            ],
+            'instructor' => $instructors->map(function ($instructor) {
+                return [
+                    'instructor_id' => $instructor->id,
+                    'nick_name' => $instructor->nick_name,
+                    'email' => $instructor->email,
+                    'profile_image' => $instructor->profile_image,
+                    'created_at' => $instructor->created_at->format('Y-m-d H:i:s'),
+                ];
+            }),
+        ];
+
+        return response()->json(['data' => $data]);
     }
 
     /**

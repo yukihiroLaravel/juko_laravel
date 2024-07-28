@@ -52,7 +52,14 @@ class InstructorController extends Controller
      */
     public function index()
     {
-        return response()->json([]);
+        // 現在ログインしているユーザーのIDを取得
+        $managerId = Auth::guard('manager')->user()->id;
+
+        // マネージャーとその管理している講師を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
     }
 
     /**

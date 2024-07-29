@@ -249,7 +249,7 @@ class ChapterController extends Controller
                 }
             });
 
-            // チャプターの状態を一括で削除
+            // チャプターを一括で削除
             Chapter::whereIn('id', $chapters->pluck('id'))->delete();
 
             return response()->json([
@@ -267,8 +267,6 @@ class ChapterController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
-
-        return response()->json([]);
     }
 
     /**

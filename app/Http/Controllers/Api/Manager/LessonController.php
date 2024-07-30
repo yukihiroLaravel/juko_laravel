@@ -357,14 +357,10 @@ class LessonController extends Controller
         //リクエストから必要なデータを取得
         $lessonIds =  $request->input('lessons');
         $chapterId = $chapter_id;
-        // dd($chapter_id);
         $courseId = $course_id;
-        // dd($courseId);
         $status = $request->input('status');
-        // dd($status);
         //レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-        // dd($lessons);
         //認可チェックとデータ更新
         try {
             //レッスンデータの認可チェック

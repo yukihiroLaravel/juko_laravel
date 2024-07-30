@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
+use App\Http\Requests\Instructor\BulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
@@ -224,19 +225,17 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function bulkDelete(): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         try {
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
             // リクエストから講座IDを取得
-            // TODO：1 → $request->course_id
-            $courseId = 1;
+            $courseId = $request->course_id;
 
             // 選択されたチャプターを取得
-            // TODO：[1, 2, 3] → $request->chapters
-            $chapters = Chapter::whereIn('id', [1, 2, 3])->with('course')->get();
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない

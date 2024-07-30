@@ -226,7 +226,47 @@ class ChapterController extends Controller
      */
     public function bulkDelete(): JsonResponse
     {
-        return response()->json([]);
+        try {
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // リクエストから講座IDを取得
+            // TODO：1 → $request->course_id
+            $courseId = 1;
+
+            // 選択されたチャプターを取得
+            // TODO：[1, 2, 3] → $request->chapters
+            $chapters = Chapter::whereIn('id', [1, 2, 3])->with('course')->get();
+
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
+                // チャプターに紐づく講師でない場合は許可しない
+                if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course_id.');
+                }
+            });
+
+            // チャプターを一括で削除
+            Chapter::whereIn('id', $chapters->pluck('id'))->delete();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

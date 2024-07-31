@@ -386,4 +386,15 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
+
+    /**
+     * 選択済みチャプターを公開/非公開にするAPI
+     *
+     * @param
+     * @return JsonResponse
+     */
+    public function patchStatus()
+    {
+        return response()->json([]);
+    }
 }

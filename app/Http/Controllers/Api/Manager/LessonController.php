@@ -342,7 +342,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      *
-     * @param LessonUpdateStatusRequest $request
+     * @param 
      * @return JsonResponse
      */
     public function putStatus(Request $request, $course_id, $chapter_id): JsonResponse
@@ -383,7 +383,7 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-            //エラーハンドリング、認可に失敗した場合エラーを返す
+        //エラーハンドリング、認可に失敗した場合エラーを返す　
         } catch (AuthorizationException $e) {
             return response()->json([
                 'result' => false,

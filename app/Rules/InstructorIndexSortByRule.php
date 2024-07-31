@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Model\Instructor;
 use Illuminate\Contracts\Validation\Rule;
 
 class InstructorIndexSortByRule implements Rule
@@ -17,9 +18,9 @@ class InstructorIndexSortByRule implements Rule
     }
 
     protected $validSortByFields = [
-        'email',
-        'nick_name',
-        'created_at',
+        Instructor::SORT_BY_EMAIL,
+        Instructor::SORT_BY_NICK_NAME,
+        Instructor::SORT_BY_CREATED_AT,
     ];
 
     /**

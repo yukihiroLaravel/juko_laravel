@@ -9,8 +9,9 @@ use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+use App\Services\ChapterDetailsService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
@@ -178,14 +179,8 @@ class ChapterController extends Controller
     public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
     {
         try {
-            // 認証ユーザー情報取得
-            $instructorId = Auth::guard('instructor')->user()->id;
-
-            // リクエストから講座IDを取得
-            $courseId = $request->course_id;
-
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            // Serviceにて認証ユーザー、講座ID、選択済チャプターを取得
+            list($instructorId, $courseId, $chapters) = ChapterDetailsService::chapterRelatedInfo($request);
 
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
@@ -228,14 +223,8 @@ class ChapterController extends Controller
     public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         try {
-            // 認証ユーザー情報取得
-            $instructorId = Auth::guard('instructor')->user()->id;
-
-            // リクエストから講座IDを取得
-            $courseId = $request->course_id;
-
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            // Serviceにて認証ユーザー、講座ID、選択済チャプターを取得
+            list($instructorId, $courseId, $chapters) = ChapterDetailsService::chapterRelatedInfo($request);
 
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない

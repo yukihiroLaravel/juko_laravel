@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Manager;
 
+use App\Rules\InstructorIndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InstructorIndexRequest extends FormRequest
@@ -26,7 +27,7 @@ class InstructorIndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1', 'max:100'],
             'page' => ['integer', 'min:1'],
-            'sort_by' => ['string', 'in:email,nick_name,created_at'],
+            'sort_by' => ['string', new InstructorIndexSortByRule()],
             'order' => ['string', 'in:asc,desc'],
         ];
     }

@@ -365,7 +365,7 @@ class LessonController extends Controller
         try {
             //レッスンデータの認可チェック
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
-                //講座に紐づく講師でない場合は許可しない(自分、または配下であればOK)    
+                //講座に紐づく講師でない場合は許可しない(自分、または配下であればOK)
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
                     throw new AuthorizationException('Invalid instructor_id.');
                 }

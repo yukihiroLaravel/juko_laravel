@@ -26,13 +26,13 @@ class LessonPutStatusRequest extends FormRequest
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
-
+    
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array
      */
-    
+
     //リクエストに適応されるバリデーションルールを取得
     public function rules()
     {
@@ -44,7 +44,7 @@ class LessonPutStatusRequest extends FormRequest
             //statusが文字列で必須であり、new LessonStatusRule()で指定したルールに従うことを指定
             'status' => ['required', 'string', new LessonStatusRule()],
             //course_idは必須で整数であることを指定し、coursesテーブルのidカラムに存在すること、deleted_atカラムがNULLであることを確認
-            'course_id' => ['rewquired', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

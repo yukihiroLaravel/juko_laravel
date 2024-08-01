@@ -21,7 +21,7 @@ use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
+use App\Http\Requests\Manager\LessonPutStatusRequest;
 
 class LessonController extends Controller
 {
@@ -342,10 +342,10 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      *
-     * @param 
+     * @param LessonPutStatusRequest $request
      * @return JsonResponse
      */
-    public function putStatus(Request $request, $course_id, $chapter_id): JsonResponse
+    public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
         //ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -356,8 +356,8 @@ class LessonController extends Controller
         $instructorIds[] = $manager->id;
         //リクエストから必要なデータを取得
         $lessonIds =  $request->input('lessons');
-        $chapterId = $chapter_id;
-        $courseId = $course_id;
+        $chapterId = $request->input('chapter_id');
+        $courseId = $request->input('course_id');
         $status = $request->input('status');
         //レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();

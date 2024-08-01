@@ -20,6 +20,8 @@ use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -343,8 +345,50 @@ class LessonController extends Controller
      * @param
      * @return JsonResponse
      */
-    public function putStatus(): JsonResponse
+    public function putStatus(Request $request, $course_id, $chapter_id): JsonResponse
     {
-        return response()->json([]);
+        //ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+        //リクエストから必要なデータを取得
+        $lessonIds =  $request->input('lessons');
+        $chapterId = $chapter_id;
+        $courseId = $course_id;
+        $status = $request->input('status');
+        //レッスンデータの取得
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+        //認可チェックとデータ更新
+        try {
+            //レッスンデータの認可チェック
+            $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+                //講座に紐づく講師でない場合は許可しない(自分、または配下であればOK)
+                if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new AuthorizationException('Invalid instructor_id.');
+                }
+                //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                if ((int)$courseId !== $lesson->chapter->course->id) {
+                    throw new AuthorizationException('Invalid course_id.');
+                }
+                //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ((int)$chapterId !== $lesson->chapter_id) {
+                    throw new AuthorizationException('Invalid chapter_id.');
+                }
+            });
+            //レッスンデータのステータス一括更新
+            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
+            return response()->json([
+                'result' => true,
+            ]);
+        //エラーハンドリング、認可に失敗した場合エラーを返す　
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
     }
 }

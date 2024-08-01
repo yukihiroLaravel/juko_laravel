@@ -31,7 +31,7 @@ class InstructorIndexSortByRule implements Rule
             Instructor::SORT_BY_NICK_NAME,
             Instructor::SORT_BY_CREATED_AT,
         ];
-        
+
         return in_array($value, $validSortByFields, true);
     }
 

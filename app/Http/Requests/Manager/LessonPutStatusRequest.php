@@ -17,10 +17,8 @@ class LessonPutStatusRequest extends FormRequest
         return true;
     }
 
-    //リクエストのバリデーション前にデータを準備する
     protected function prepareForValidation()
     {
-        //リクエストのルートパラメータをマージする
         $this->merge([
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
@@ -33,17 +31,12 @@ class LessonPutStatusRequest extends FormRequest
      * @return array
      */
 
-    //リクエストに適応されるバリデーションルールを取得
     public function rules()
     {
         return [
-            //lessonsは必須で配列であることを指定
             'lessons' => ['required', 'array'],
-            //*をつけることで配列の全ての要素に対してバリデーションを行う
             'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            //statusが文字列で必須であり、new LessonStatusRule()で指定したルールに従うことを指定
             'status' => ['required', 'string', new LessonStatusRule()],
-            //course_idは必須で整数であることを指定し、coursesテーブルのidカラムに存在すること、deleted_atカラムがNULLであることを確認
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];

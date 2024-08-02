@@ -221,7 +221,7 @@ class AttendanceController extends Controller
 
         // 指定期間内に完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
-            $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+            $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 if ($period === LessonAttendance::PERIOD_TODAY) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
                 } elseif ($period === LessonAttendance::PERIOD_MONTH) {
@@ -231,7 +231,7 @@ class AttendanceController extends Controller
                 }
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
-            return $compleatedLessonAttendances;
+            return $completedLessonAttendances;
         })->count();
 
         // 指定期間内に完了したチャプターの個数を取得
@@ -242,7 +242,7 @@ class AttendanceController extends Controller
                 // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
-                $compleatedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
                     ->whereIn('lesson_id', $allLessonsId)
                     ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                     ->count();
@@ -253,7 +253,7 @@ class AttendanceController extends Controller
                 } else {
                     throw new Exception('Invalid period');
                 }
-                return $updatedAtRequestPeriod && $totalLessonsCount === $compleatedLessonsCount;
+                return $updatedAtRequestPeriod && $totalLessonsCount === $completedLessonsCount;
             })
             ->map(function (LessonAttendance $lessonAttendance) {
                 // chapter_idとattendance_idをキーにもつ新しい配列を作成
@@ -272,7 +272,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講師側受講状況API
+     * 受講状況API
      *
      * @param AttendanceStatusRequest $request
      * @return AttendanceStatusResource|JsonResponse
@@ -287,7 +287,7 @@ class AttendanceController extends Controller
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             return response()->json([
                 "result" => false,
-                "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                "message" => "Forbidden.",
             ], 403);
         }
 

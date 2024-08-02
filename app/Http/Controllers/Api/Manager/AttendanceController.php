@@ -13,8 +13,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
+use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceStatusResource;
 
 class AttendanceController extends Controller
 {
@@ -46,7 +50,7 @@ class AttendanceController extends Controller
             // 自分もしくは配下の講師の講座でない場合はエラーを返す
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Forbidden.'
             ], 403);
         }
 
@@ -122,7 +126,7 @@ class AttendanceController extends Controller
                 // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
                 return response()->json([
                     "result" => false,
-                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
+                    "message" => "Forbidden.",
                 ], 403);
             }
 
@@ -140,5 +144,164 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * 今月のレッスン・チャプター完了数の取得API
+     *
+     * @param AttendanceShowThisMonthRequest $request
+     * @return JsonResponse
+     */
+    public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
+    {
+        // 現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // ログインしている講師とその管理している講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to access this course.",
+            ], 403);
+        }
+
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+
+        // 今月完了したレッスンの個数を取得
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
+            $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isCurrentMonth();
+            });
+            return $completedLessonAttendances;
+        })->count();
+
+        // 今月完了したチャプターの個数を取得
+        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
+            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })
+        ->filter(function (LessonAttendance $lessonAttendance) {
+            // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスへの更新日時が今月の日時という条件で絞り込む
+            $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+            $totalLessonsCount = $allLessonsId->count();
+            $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                ->whereIn('lesson_id', $allLessonsId)
+                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->count();
+            return $lessonAttendance->updated_at->isCurrentMonth() && $totalLessonsCount === $completedLessonsCount;
+        })
+        ->map(function (LessonAttendance $lessonAttendance) {
+            // chapter_idとattendance_idをキーにもつ新しい配列を作成
+            return [
+                'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                'attendance_id' => $lessonAttendance->attendance_id
+            ];
+        })
+        ->unique()
+        ->count();
+
+        return response()->json([
+           'completed_lessons_count' => $completedLessonsCount,
+           'completed_chapters_count' => $completedChaptersCount
+        ]);
+    }
+
+     /**
+     * 本日のレッスン・チャプター完了数の取得API
+     *
+     * @param AttendanceShowRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showStatusToday(AttendanceShowRequest $request): JsonResponse
+    {
+        // 受講状況を取得
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to access this course.",
+            ], 403);
+        }
+
+        // 今日完了したレッスンの個数を取得
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
+            $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->updated_at->isToday();
+            });
+            return $completedLessonAttendances;
+        })
+            ->count();
+
+        // 今日完了したチャプターの個数を取得
+        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
+            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })
+            ->filter(function (LessonAttendance $lessonAttendance) {
+                // チャプターに含まれているレッスンが全て完了しているか
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $totalLessonsCount = $allLessonsId->count();
+                // 最新のレッスンの完了済みステータスの更新日時が今日であるかという条件
+                $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+                return $lessonAttendance->updated_at->isToday() && $totalLessonsCount === $completedLessonsCount;
+            })
+            ->map(function (LessonAttendance $lessonAttendance) {
+                // ユニークなチャプターIDと受講IDを取得
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id
+                ];
+            })
+            ->unique()
+            ->count();
+
+        return response()->json([
+            'completed_lessons_conut' => $completedLessonsCount,
+            'completed_chapters_count' => $completedChaptersCount
+        ]);
+    }
+
+    /**
+     * 受講状況取得API
+     *
+     * @param AttendanceStatusRequest $request
+     * @return AttendanceStatusResource|JsonResponse
+     */
+    public function status(AttendanceStatusRequest $request)
+    {
+        $attendanceId = $request->attendance_id;
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーとその配下の講師のIDを取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        /** @var Attendance */
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+
+        if (!in_array($attendance->course->instructor_id, $instructorIds, true)) {
+            return response()->json([
+                "result" => false,
+                "message" => "Forbidden.",
+            ], 403);
+        }
+
+        return new AttendanceStatusResource($attendance);
     }
 }

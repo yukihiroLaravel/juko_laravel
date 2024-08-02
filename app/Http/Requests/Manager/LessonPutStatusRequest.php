@@ -24,7 +24,7 @@ class LessonPutStatusRequest extends FormRequest
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
-    
+
     /**
      * Get the validation rules that apply to the request.
      *

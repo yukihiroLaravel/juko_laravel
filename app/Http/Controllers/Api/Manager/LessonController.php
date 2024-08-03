@@ -336,4 +336,16 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
+
+    /**
+     * 
+     * 選択されたレッスン削除API
+     * 
+     * @param
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkDelete()
+    {
+        return response()->json([]);
+    }
 }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Services\ChapterDetailsService;
+use App\Services\FilteringDataAndAuthService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
@@ -176,11 +176,15 @@ class ChapterController extends Controller
      * @param BulkPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    public function bulkPatchStatus(BulkPatchStatusRequest $request, FilteringDataAndAuthService $filteringDataAndAuthService): JsonResponse
     {
         try {
-            // Serviceにて認証ユーザー、講座ID、選択済チャプターを取得
-            list($instructorId, $courseId, $chapters) = ChapterDetailsService::chapterRelatedInfo($request);
+            // リクエストで送られたcourseとchapterのidを変数に格納
+            $courseId = $request->course_id;
+            $chapterIds = $request->chapters;
+
+            // Serviceにて認証ユーザー、選択済チャプターを取得
+            list($instructorId, $chapters) = $filteringDataAndAuthService->chapterRelatedInfo($chapterIds);
 
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
@@ -220,11 +224,15 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, FilteringDataAndAuthService $filteringDataAndAuthService): JsonResponse
     {
         try {
-            // Serviceにて認証ユーザー、講座ID、選択済チャプターを取得
-            list($instructorId, $courseId, $chapters) = ChapterDetailsService::chapterRelatedInfo($request);
+            // リクエストで送られたcourseとchapterのidを変数に格納
+            $courseId = $request->course_id;
+            $chapterIds = $request->chapters;
+
+            // Serviceにて認証ユーザー、選択済チャプターを取得
+            list($instructorId, $chapters) = $filteringDataAndAuthService->chapterRelatedInfo($chapterIds);
 
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない

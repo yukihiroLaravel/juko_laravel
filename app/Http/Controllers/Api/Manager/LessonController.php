@@ -338,9 +338,9 @@ class LessonController extends Controller
     }
 
     /**
-     * 
+     *
      * 選択されたレッスン削除API
-     * 
+     *
      * @param
      * @return \Illuminate\Http\JsonResponse
      */

@@ -336,4 +336,14 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
+    /**
+     * 選択ずみレッスン削除API
+     *
+     * @param 
+     * @return JsonResponse
+     */
+    public function bulkDelete()
+    {
+        return response()->json([]);
+    }
 }

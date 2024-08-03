@@ -366,7 +366,6 @@ class LessonController extends Controller
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
         try {
-
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
                     //講座に紐づく講師でない場合は許可しない
@@ -387,7 +386,6 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (AuthorizationException $e) {
             // エラーハンドリング、認可に失敗した場合エラーを返す
             return response()->json([

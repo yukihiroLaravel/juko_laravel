@@ -10,8 +10,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Manager\InstructorShowRequest;
-use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Requests\Manager\InstructorIndexRequest;
+use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
 
 class InstructorController extends Controller

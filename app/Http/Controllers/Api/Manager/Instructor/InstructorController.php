@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use RuntimeException;
 use App\Model\Instructor;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Manager\InstructorShowRequest;
+use App\Http\Requests\Manager\InstructorIndexRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
 
@@ -50,10 +49,10 @@ class InstructorController extends Controller
     /**
      * 講師一覧取得API
      *
-     * @param Request $request
+     * @param InstructorIndexRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(InstructorIndexRequest $request)
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);

@@ -11,12 +11,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
+use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
@@ -164,6 +166,57 @@ class ChapterController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * 複数チャプターの公開/非公開API
+     *
+     * @param BulkPatchStatusRequest $request
+     * @return JsonResponse
+     */
+    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    {
+        try {
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // リクエストから講座IDを取得
+            $courseId = $request->course_id;
+
+            // 選択されたチャプターを取得
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
+                // チャプターに紐づく講師でない場合は許可しない
+                if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course_id.');
+                }
+            });
+
+            // チャプターの状態を一括で更新
+            Chapter::whereIn('id', $chapters->pluck('id'))->update([
+                'status' => $request->status,
+            ]);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', 'Api\Instructor\ChapterController@store');
                         Route::post('sort', 'Api\Instructor\ChapterController@sort');
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
+                        Route::patch('status', 'Api\Instructor\ChapterController@bulkPatchStatus');
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', 'Api\Instructor\ChapterController@show');
                             Route::patch('/', 'Api\Instructor\ChapterController@update');
@@ -197,6 +198,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         //マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {
+                                Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThisMonth');
                                 Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
                             });
                         });

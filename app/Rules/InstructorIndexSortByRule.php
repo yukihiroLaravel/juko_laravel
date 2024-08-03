@@ -26,13 +26,11 @@ class InstructorIndexSortByRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $validSortByFields = [
+        return in_array($value, [
             Instructor::SORT_BY_EMAIL,
             Instructor::SORT_BY_NICK_NAME,
             Instructor::SORT_BY_CREATED_AT,
-        ];
-
-        return in_array($value, $validSortByFields, true);
+        ], true);
     }
 
     /**

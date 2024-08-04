@@ -339,7 +339,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスン削除API
      *
-     * @param 
+     * @param
      * @return JsonResponse
      */
     public function bulkDelete()

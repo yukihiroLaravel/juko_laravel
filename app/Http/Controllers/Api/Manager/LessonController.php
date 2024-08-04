@@ -340,7 +340,7 @@ class LessonController extends Controller
      * 選択ずみレッスン削除API
      *
      * @param 
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function bulkDelete()
     {

@@ -176,15 +176,18 @@ class ChapterController extends Controller
      * @param BulkPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    public function bulkPatchStatus(BulkPatchStatusRequest $request, QueryService $queryService): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
             $courseId = $request->course_id;
             $chapterIds = $request->chapters;
 
-            // Serviceにて認証ユーザー、選択済チャプターを取得
-            list($instructorId, $chapters) = QueryService::getChapter($chapterIds);
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // Serviceにて選択済チャプターを取得
+            $chapters = $queryService->getChapter($chapterIds);
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
@@ -226,15 +229,18 @@ class ChapterController extends Controller
      * @param BulkDeleteRequest $request
      * @return JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, QueryService $queryService): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
             $courseId = $request->course_id;
             $chapterIds = $request->chapters;
 
-            // Serviceにて認証ユーザー、選択済チャプターを取得
-            list($instructorId, $chapters) = QueryService::getChapter($chapterIds);
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // Serviceにて選択済チャプターを取得
+            $chapters = $queryService->getChapter($chapterIds);
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {

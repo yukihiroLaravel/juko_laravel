@@ -3,18 +3,20 @@
 namespace App\Services\Chapter;
 
 use App\Model\Chapter;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
 
 class QueryService
 {
-    public static function getChapter($chapterIds)
+    /**
+     * 選択されたチャプターを取得
+     *
+     * @param  array  $chapterIds
+     * @return Collection
+     */
+    public function getChapter(array $chapterIds): Collection
     {
-        // 認証ユーザー情報取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 選択されたチャプターを取得
         $chapters = Chapter::whereIn('id', $chapterIds)->with('course')->get();
 
-        return [$instructorId, $chapters];
+        return $chapters;
     }
 }

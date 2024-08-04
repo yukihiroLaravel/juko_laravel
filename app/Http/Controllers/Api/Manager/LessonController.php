@@ -382,7 +382,8 @@ class LessonController extends Controller
             });
 
             // レッスンのステータスを一括更新
-            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
+            Lesson::whereIn('id', $lessons->pluck('id')->toArray())->update(['status' => $status]);
+
             return response()->json([
                 'result' => true,
             ]);

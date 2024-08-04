@@ -22,6 +22,8 @@ use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
@@ -390,11 +392,55 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
-     * @param
+     * @param PatchStatusRequest $request
      * @return JsonResponse
      */
-    public function patchStatus()
+    public function patchStatus(Request $request, $course_id): JsonResponse
     {
-        return response()->json([]);
+        //ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+         
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+        
+        //リクエストから必要なデータを取得
+        $chapterIds =  $request->input('chapters');
+        $courseId = $course_id;
+        $status = $request->input('status');
+        
+        //チャプターデータの取得
+        $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+        
+        //認可チェックとデータ更新
+        try {
+            //チャプターデータの認可チェック
+            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
+                //講座に紐づく講師でない場合は許可しない(自分、または配下であればOK)
+                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new AuthorizationException('Invalid instructor_id.');
+                }
+
+                //指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
+                if ((int)$courseId !== $chapter->course->id) {
+                    throw new AuthorizationException('Invalid course_id.');
+                }
+            });
+
+            //チャプターデータのステータス一括更新
+            Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
+            return response()->json([
+                'result' => true,
+            ]);
+
+        //エラーハンドリング、認可に失敗した場合エラーを返す　
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        }
     }
 }

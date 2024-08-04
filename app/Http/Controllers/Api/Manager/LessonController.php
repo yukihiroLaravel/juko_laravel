@@ -337,7 +337,7 @@ class LessonController extends Controller
         ]);
     }
     /**
-     * 選択ずみレッスン削除API
+     * 選択済みレッスン削除API
      *
      * @param 
      * @return JsonResponse

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Services\FilteringDataAndAuthService;
+use App\Services\Chapter\QueryService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
@@ -176,7 +176,7 @@ class ChapterController extends Controller
      * @param BulkPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request, FilteringDataAndAuthService $filteringDataAndAuthService): JsonResponse
+    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -184,8 +184,9 @@ class ChapterController extends Controller
             $chapterIds = $request->chapters;
 
             // Serviceにて認証ユーザー、選択済チャプターを取得
-            list($instructorId, $chapters) = $filteringDataAndAuthService->chapterRelatedInfo($chapterIds);
+            list($instructorId, $chapters) = QueryService::getChapter($chapterIds);
 
+            // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
@@ -222,9 +223,10 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      *
+     * @param BulkDeleteRequest $request
      * @return JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request, FilteringDataAndAuthService $filteringDataAndAuthService): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -232,8 +234,9 @@ class ChapterController extends Controller
             $chapterIds = $request->chapters;
 
             // Serviceにて認証ユーザー、選択済チャプターを取得
-            list($instructorId, $chapters) = $filteringDataAndAuthService->chapterRelatedInfo($chapterIds);
+            list($instructorId, $chapters) = QueryService::getChapter($chapterIds);
 
+            // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {

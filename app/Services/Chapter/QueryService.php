@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Auth;
 
 class QueryService
 {
-    public static function getChapter($chapterIds) {
+    public static function getChapter($chapterIds)
+    {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
 

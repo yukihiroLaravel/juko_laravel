@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Model\Instructor;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -16,16 +17,16 @@ class InstructorIndexResource extends JsonResource
     public function toArray($request)
     {
         /** @var LengthAwarePaginator $data */
-        $data = $this->resource['data'];
+        $data = $this->resource;
 
         return [
-            'instructors' => $data->map(function ($instructor) {
+            'instructors' => $data->getCollection()->map(function (Instructor $instructor) {
                 return [
                     'instructor_id' => $instructor->id,
                     'nick_name' => $instructor->nick_name,
                     'email' => $instructor->email,
                     'profile_image' => $instructor->profile_image,
-                    'created_at' => $instructor->created_at->format('Y-m-d H:i:s'),
+                    'created_at' => $instructor->created_at,
                 ];
             }),
             'pagination' => [

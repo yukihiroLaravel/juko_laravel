@@ -73,9 +73,7 @@ class InstructorController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return new InstructorIndexResource([
-            'data' => $instructors
-        ]);
+        return new InstructorIndexResource($instructors);
     }
 
     /**

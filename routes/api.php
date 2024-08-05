@@ -230,6 +230,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Manager\NotificationController@delete');
                     });
                     Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
+                    Route::delete('/', 'Api\Manager\NotificationController@bulkDelete');
                 });
             });
         });

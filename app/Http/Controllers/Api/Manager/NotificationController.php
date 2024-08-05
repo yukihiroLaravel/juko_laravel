@@ -6,10 +6,12 @@ use Exception;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Model\ViewedOnceNotification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
 use App\Http\Requests\Manager\NotificationStoreRequest;
@@ -18,6 +20,7 @@ use App\Http\Requests\Manager\NotificationUpdateRequest;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Http\Requests\Manager\NotificationPutTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
+use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
 
 class NotificationController extends Controller
 {
@@ -234,7 +237,7 @@ class NotificationController extends Controller
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             return response()->json([
                 'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
+                'message' => 'Forbidden.',
             ], 403);
         }
 
@@ -248,6 +251,59 @@ class NotificationController extends Controller
                 ])->save();
             });
             DB::commit();
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+            ], 500);
+        }
+    }
+
+    /**
+     * お知らせ一覧-一括削除API
+     *
+     * @param NotificationBulkDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
+    {
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 選択されたお知らせリストを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $notificationIds = $notifications->pluck('id')->toArray();
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
+
+        // アクセス権のチェック
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Forbidden.',
+            ], 403);
+        }
+
+        DB::beginTransaction();
+        try {
+            // お知らせの閲覧状態を削除
+            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+
+            // お知らせを削除
+            Notification::whereIn('id', $notificationIds)->delete();
+
+            // コミット
+            DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);

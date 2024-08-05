@@ -180,7 +180,7 @@ class LessonController extends Controller
         
         $lessonIds = $request->input('lessons');
         
-        $lessons = Lesson::with('course')->whereIn('id', $lessonIds)->get();
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         
         Lesson::whereIn('id', $lessonIds)->delete();
 

@@ -86,24 +86,4 @@ class Lesson extends Model
             return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
         })->count();
     }
-
-    /**
-     * モデルのブート時の処理
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // レッスン削除時に紐づくレッスンも削除
-        static::deleting(function (Lesson $lesson) {
-            $lesson->lessons()->delete();
-        });
-    }
-
-    public function course() 
-    { 
-        return $this->belongsTo(Course::class); 
-    } 
 }

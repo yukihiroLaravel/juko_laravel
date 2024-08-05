@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Chapter\QueryService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
@@ -175,18 +176,20 @@ class ChapterController extends Controller
      * @param BulkPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    public function bulkPatchStatus(BulkPatchStatusRequest $request, QueryService $queryService): JsonResponse
     {
         try {
+            // リクエストで送られたcourseとchapterのidを変数に格納
+            $courseId = $request->course_id;
+            $chapterIds = $request->chapters;
+
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            // リクエストから講座IDを取得
-            $courseId = $request->course_id;
+            // Serviceにて選択済チャプターを取得
+            $chapters = $queryService->getChapters($chapterIds);
 
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
-
+            // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
@@ -223,20 +226,23 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      *
+     * @param BulkDeleteRequest $request
      * @return JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, QueryService $queryService): JsonResponse
     {
         try {
+            // リクエストで送られたcourseとchapterのidを変数に格納
+            $courseId = $request->course_id;
+            $chapterIds = $request->chapters;
+
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            // リクエストから講座IDを取得
-            $courseId = $request->course_id;
+            // Serviceにて選択済チャプターを取得
+            $chapters = $queryService->getChapters($chapterIds);
 
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
-
+            // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {

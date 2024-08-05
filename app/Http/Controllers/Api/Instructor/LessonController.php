@@ -175,13 +175,13 @@ class LessonController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         $courseId = $course_id;
-        
+
         $chapterId = $chapter_id;
-        
+
         $lessonIds = $request->input('lessons');
-        
+
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-        
+
         Lesson::whereIn('id', $lessonIds)->delete();
 
         return response()->json([

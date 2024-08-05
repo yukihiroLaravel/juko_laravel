@@ -392,28 +392,28 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
-     * @param 
+     * @param
      * @return JsonResponse
      */
     public function patchStatus(Request $request, $course_id): JsonResponse
     {
         //ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
-         
+
         // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
-        
+
         //リクエストから必要なデータを取得
         $chapterIds =  $request->input('chapters');
         $courseId = $course_id;
         $status = $request->input('status');
-        
+
         //チャプターデータの取得
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
-        
+
         //認可チェックとデータ更新
         try {
             //チャプターデータの認可チェック

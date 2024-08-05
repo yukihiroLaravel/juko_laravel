@@ -392,7 +392,7 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
-     * @param PatchStatusRequest $request
+     * @param 
      * @return JsonResponse
      */
     public function patchStatus(Request $request, $course_id): JsonResponse

@@ -185,6 +185,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::prefix('lesson')->group(function () {
                                     Route::post('/', 'Api\Manager\LessonController@store');
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
+                                    Route::put('status', 'Api\Manager\LessonController@putStatus');
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');
                                         Route::delete('/', 'Api\Manager\LessonController@delete');
@@ -230,6 +231,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Manager\NotificationController@delete');
                     });
                     Route::put('type/{type}', 'Api\Manager\NotificationController@updateType');
+                    Route::delete('/', 'Api\Manager\NotificationController@bulkDelete');
                 });
             });
         });

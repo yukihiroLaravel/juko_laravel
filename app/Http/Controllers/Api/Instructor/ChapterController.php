@@ -9,8 +9,8 @@ use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Services\Chapter\QueryService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
@@ -187,7 +187,7 @@ class ChapterController extends Controller
             $instructorId = Auth::guard('instructor')->user()->id;
 
             // Serviceにて選択済チャプターを取得
-            $chapters = $queryService->getChapter($chapterIds);
+            $chapters = $queryService->getChapters($chapterIds);
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
@@ -240,7 +240,7 @@ class ChapterController extends Controller
             $instructorId = Auth::guard('instructor')->user()->id;
 
             // Serviceにて選択済チャプターを取得
-            $chapters = $queryService->getChapter($chapterIds);
+            $chapters = $queryService->getChapters($chapterIds);
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {

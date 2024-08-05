@@ -8,15 +8,13 @@ use Illuminate\Database\Eloquent\Collection;
 class QueryService
 {
     /**
-     * 選択されたチャプターを取得
+     * 選択されたチャプターリストを取得
      *
-     * @param  array  $chapterIds
-     * @return Collection
+     * @param array<int> $chapterIds
+     * @return Collection<Chapter>
      */
-    public function getChapter(array $chapterIds): Collection
+    public function getChapters(array $chapterIds): Collection
     {
-        $chapters = Chapter::whereIn('id', $chapterIds)->with('course')->get();
-
-        return $chapters;
+        return Chapter::with('course')->whereIn('id', $chapterIds)->get();
     }
 }

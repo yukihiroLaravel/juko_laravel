@@ -51,6 +51,11 @@ class Instructor extends Authenticatable
         'type',
     ];
 
+    protected $casts = [
+        'created_at' => 'immutable_datetime',
+        'updated_at' => 'immutable_datetime',
+    ];
+
     /**
      * 講座を取得
      *

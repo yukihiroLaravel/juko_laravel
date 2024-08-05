@@ -13,6 +13,7 @@ use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Requests\Manager\InstructorIndexRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
+use App\Http\Resources\Manager\InstructorIndexResource;
 
 class InstructorController extends Controller
 {
@@ -72,24 +73,7 @@ class InstructorController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        // レスポンスデータの整形
-        $data = [
-            'pagination' => [
-                'page' => $instructors->currentPage(),
-                'total' => $instructors->total(),
-            ],
-            'instructor' => $instructors->map(function ($instructor) {
-                return [
-                    'instructor_id' => $instructor->id,
-                    'nick_name' => $instructor->nick_name,
-                    'email' => $instructor->email,
-                    'profile_image' => $instructor->profile_image,
-                    'created_at' => $instructor->created_at->format('Y-m-d H:i:s'),
-                ];
-            }),
-        ];
-
-        return response()->json(['data' => $data]);
+        return new InstructorIndexResource($instructors);
     }
 
     /**

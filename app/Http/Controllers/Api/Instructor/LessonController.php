@@ -22,6 +22,7 @@ use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 use App\Http\Requests\Instructor\LessonPutStatusRequest;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -163,10 +164,29 @@ class LessonController extends Controller
             ], 500);
         }
     }
-
-    public function bulkDelete()
+    /**
+     * 複数のチャプター削除API
+     *
+     * @param lessonBulkDeleteRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkDelete(Request $request, $course_id, $chapter_id)
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $courseId = $course_id;
+        
+        $chapterId = $chapter_id;
+        
+        $lessonIds = $request->input('lessons');
+        
+        $lessons = Lesson::with('course')->whereIn('id', $lessonIds)->get();
+        
+        Lesson::whereIn('id', $lessonIds)->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

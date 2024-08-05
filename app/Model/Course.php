@@ -104,4 +104,14 @@ class Course extends Model
         // public/を削除
         return str_replace('public/', '', $filePath);
     }
+
+     /**
+     * レッスンリストを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function lesson()
+    {
+        return $this->hasMany(Lesson::class)->orderBy('order', 'asc');
+    }
 }

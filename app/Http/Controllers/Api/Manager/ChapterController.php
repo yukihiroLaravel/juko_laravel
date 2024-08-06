@@ -23,7 +23,7 @@ use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
+use App\Http\Requests\Manager\ChaptersPatchStatusRequest;
 
 class ChapterController extends Controller
 {
@@ -392,15 +392,15 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
-     * @param PatchStatusRequest $request
+     * @param ChaptersPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function patchStatus(Request $request, $course_id): JsonResponse
+    public function patchStatus(ChaptersPatchStatusRequest $request): JsonResponse
     {
         //ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
 
-        // 配下の講師情報を取得
+        //配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -408,7 +408,7 @@ class ChapterController extends Controller
 
         //リクエストから必要なデータを取得
         $chapterIds =  $request->input('chapters');
-        $courseId = $course_id;
+        $courseId = $request->input('course_id');
         $status = $request->input('status');
 
         //チャプターデータの取得
@@ -429,7 +429,7 @@ class ChapterController extends Controller
                 }
             });
 
-            //チャプターデータのステータス一括更新
+            //チャプターのステータスを一括更新
             Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
             return response()->json([
                 'result' => true,

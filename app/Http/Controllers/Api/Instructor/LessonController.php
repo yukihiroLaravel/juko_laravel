@@ -182,6 +182,15 @@ class LessonController extends Controller
 
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
+        $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId) {
+            if (!in_array($lesson->chapter->course->instructor_id, $instructorId, true)) {
+                throw new ValidationErrorException('Invalid instructor_id.');
+            }
+            if ((int) $chapterId !== $lesson->chapter_id) {
+                throw new ValidationErrorException('Invalid course.');
+            }
+        });
+
         Lesson::whereIn('id', $lessonIds)->delete();
 
         return response()->json([

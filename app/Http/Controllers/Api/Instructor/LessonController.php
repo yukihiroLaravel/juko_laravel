@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use Exception;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
@@ -182,11 +183,14 @@ class LessonController extends Controller
 
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
-        $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId) {
-            if (!in_array($lesson->chapter->course->instructor_id, $instructorId, true)) {
+        $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
+            if ($lesson->chapter->course->instructor_id !== $instructorId) {
                 throw new ValidationErrorException('Invalid instructor_id.');
             }
             if ((int) $chapterId !== $lesson->chapter_id) {
+                throw new ValidationErrorException('Invalid chapter.');
+            }
+            if ((int) $courseId !== $lesson->chapter->course_id) {
                 throw new ValidationErrorException('Invalid course.');
             }
         });

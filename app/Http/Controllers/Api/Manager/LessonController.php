@@ -341,7 +341,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスン削除API
      *
-     * @param 
+     * @param
      * @return \Illuminate\Http\JsonResponse
      */
     public function bulkDelete(Request $request, $course_id, $chapter_id): JsonResponse

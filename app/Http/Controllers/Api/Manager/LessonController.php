@@ -387,16 +387,18 @@ class LessonController extends Controller
             DB::beginTransaction();
 
             //対象レッスンの削除処理
-            $lesson->update(['order' => 0]);
-            $lesson->delete();
+            // $lesson->update(['order' => 0]);
+            // $lesson->delete();
+
+            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+            Lesson::whereIn('id', $lessonIds)->delete();
             //レッスン順序の更新
-            Lesson::where('chapter_id', $lesson->chapter_id)
+            Lesson::where('chapter_id', $chapterId)
                 ->orderBy('order')
                 ->get()
                 ->each(function ($lesson, $index) {
                     $lesson->update(['order' => $index + 1]);
                 });
-
             DB::commit();
 
             return response()->json([

@@ -167,7 +167,7 @@ class LessonController extends Controller
         }
     }
     /**
-     * 複数のチャプター削除API
+     * 複数のレッスン削除API
      *
      * @param lessonBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse

@@ -21,6 +21,8 @@ use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use Illuminate\Http\Request;
+use App\Http\Requests\Manager\LessonBulkDeleteRequest;
+
 
 class LessonController extends Controller
 {
@@ -344,7 +346,7 @@ class LessonController extends Controller
      * @param
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(Request $request, $course_id, $chapter_id): JsonResponse
+    public function bulkDelete(LessonBulkDeleteRequest $request, $course_id, $chapter_id): JsonResponse
     {
         //ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

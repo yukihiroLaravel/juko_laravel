@@ -362,10 +362,12 @@ class LessonController extends Controller
         //レッスン情報を取得
         /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+        //アテンダンス情報を取得
+        $attendedLessons = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id')->toArray();
         //認可チェック
         try {
             //レッスンデータの認可チェック
-            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId, $attendedLessons) {
                 //自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
@@ -379,16 +381,12 @@ class LessonController extends Controller
                     throw new ValidationErrorException('Invalid chapter_id.');
                 }
                 //受講情報が登録されている場合は許可しない
-                if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                if (in_array($lesson->id, $attendedLessons)) {
                     throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
 
             DB::beginTransaction();
-
-            //対象レッスンの削除処理
-            // $lesson->update(['order' => 0]);
-            // $lesson->delete();
 
             Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
             Lesson::whereIn('id', $lessonIds)->delete();
@@ -396,7 +394,7 @@ class LessonController extends Controller
             Lesson::where('chapter_id', $chapterId)
                 ->orderBy('order')
                 ->get()
-                ->each(function ($lesson, $index) {
+                ->each(function (Lesson $lesson, int $index) {
                     $lesson->update(['order' => $index + 1]);
                 });
             DB::commit();

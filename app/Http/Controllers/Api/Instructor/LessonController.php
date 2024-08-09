@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use Exception;
 use App\Model\Lesson;
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
@@ -165,7 +167,7 @@ class LessonController extends Controller
         }
     }
     /**
-     * 複数のチャプター削除API
+     * 複数のレッスン削除API
      *
      * @param lessonBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -181,6 +183,18 @@ class LessonController extends Controller
         $lessonIds = $request->input('lessons');
 
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+
+        $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
+            if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
+                throw new ValidationErrorException('Invalid instructor_id.');
+            }
+            if ((int) $chapterId !== $lesson->chapter_id) {
+                throw new ValidationErrorException('Invalid chapter.');
+            }
+            if ((int) $courseId !== $lesson->chapter->course_id) {
+                throw new ValidationErrorException('Invalid course.');
+            }
+        });
 
         Lesson::whereIn('id', $lessonIds)->delete();
 

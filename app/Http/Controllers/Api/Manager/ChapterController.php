@@ -33,7 +33,7 @@ class ChapterController extends Controller
      * @param ChapterShowRequest $request
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request)
+    public function show(ChapterShowRequest $request, QueryService $queryService)
     {
         // ユーザーID取得
         $userId = $request->user()->id;
@@ -44,7 +44,8 @@ class ChapterController extends Controller
         $instructorIds[] = $manager->id;
 
         // chapter_idから属するlassons含めてデータ取得
-        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
+        // QueryServiceにてチャプターを取得
+        $chapter = $queryService->getChapter($request->chapter_id);
 
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答

@@ -104,13 +104,14 @@ class ChapterController extends Controller
      * @param ChapterPatchRequest $request
      * @return JsonResponse
      */
-    public function update(ChapterPatchRequest $request, QueryService $queryService): JsonResponse
+    public function update(ChapterPatchRequest $request): JsonResponse
     {
         /** @var Instructor $user */
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
 
-        // QueryServiceにてチャプターを取得
-        $chapter = $queryService->getChapter($request->chapter_id);
+        /** @var Chapter $chapter */
+        $chapter = Chapter::findOrFail($request->chapter_id);
+
         if ($chapter->course->instructor_id !== $user->id) {
             return response()->json([
                 'result' => false,
@@ -141,10 +142,10 @@ class ChapterController extends Controller
      * @param ChapterPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request, QueryService $queryService): JsonResponse
+    public function updateStatus(ChapterPatchStatusRequest $request): JsonResponse
     {
-        // QueryServiceにてチャプターを取得
-        $chapter = $queryService->getChapter($request->chapter_id);
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             return response()->json([
@@ -280,13 +281,13 @@ class ChapterController extends Controller
      * @param ChapterDeleteRequest $request
      * @return JsonResponse
      */
-    public function delete(ChapterDeleteRequest $request, QueryService $queryService): JsonResponse
+    public function delete(ChapterDeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
         try {
-            // QueryServiceにてチャプターを取得
-            $chapter = $queryService->getChapter($request->chapter_id);
+            /** @var Chapter $chapter */
+            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
                 return response()->json([

@@ -152,7 +152,7 @@ class AttendanceController extends Controller
      * @param AttendanceShowThisMonthRequest $request
      * @return JsonResponse
      */
-    public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
+     public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
 
@@ -212,7 +212,7 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /**
+     /** 
      * 本日のレッスン・チャプター完了数の取得API
      *
      * @param AttendanceShowRequest $request
@@ -236,7 +236,7 @@ class AttendanceController extends Controller
                 'message' => "Forbidden, not allowed to access this course.",
             ], 403);
         }
-
+    
         // 今日完了したレッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) {
             $compleatedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
@@ -276,7 +276,7 @@ class AttendanceController extends Controller
             'completed_chapters_count' => $completedChaptersCount
         ]);
     }
-
+    
     /**
      * 受講状況取得API
      *

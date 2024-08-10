@@ -10,8 +10,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Manager\InstructorShowRequest;
+use App\Http\Requests\Manager\InstructorIndexRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
+use App\Http\Resources\Manager\InstructorIndexResource;
 
 class InstructorController extends Controller
 {
@@ -43,6 +45,35 @@ class InstructorController extends Controller
         $instructor = Instructor::findOrFail($request->instructor_id);
 
         return new InstructorShowResource($instructor);
+    }
+
+    /**
+     * 講師一覧取得API
+     *
+     * @param InstructorIndexRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(InstructorIndexRequest $request)
+    {
+        // デフォルト値を設定
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sort_by', 'email');
+        $order = $request->input('order', 'desc');
+
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 講師情報を取得
+        $instructors = Instructor::whereIn('id', $instructorIds)
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return new InstructorIndexResource($instructors);
     }
 
     /**

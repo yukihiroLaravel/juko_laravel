@@ -346,7 +346,7 @@ class LessonController extends Controller
      * @param
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(LessonBulkDeleteRequest $request, $course_id, $chapter_id): JsonResponse
+    public function bulkDelete(LessonBulkDeleteRequest $request): JsonResponse
     {
         //ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -358,8 +358,8 @@ class LessonController extends Controller
 
         //リクエストからデータを取得
         $lessonIds = $request->input('lessons');
-        $chapterId = $chapter_id;
-        $courseId =  $course_id;
+        $chapterId = $request->input('chapter_id');
+        $courseId =  $request->input('course_id');
 
         //レッスン情報を取得
         /** @var Lesson $lesson */

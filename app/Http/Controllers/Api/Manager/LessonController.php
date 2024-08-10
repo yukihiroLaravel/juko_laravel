@@ -23,7 +23,6 @@ use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 
-
 class LessonController extends Controller
 {
     /**

@@ -10,12 +10,12 @@ class QueryService
     /**
      * 選択されたチャプターを取得
      *
-     * @param int $chapter_id
-     * @return Collection<Chapter>
+     * @param int $chapterId
+     * @return Chapter
      */
-    public function getChapter(int $chapter_id): Collection
+    public function getChapter(int $chapterId): Chapter
     {
-        return Chapter::with(['lessons','course'])->findOrFail($chapter_id);
+        return Chapter::with(['lessons','course'])->findOrFail($chapterId);
     }
 
     /**

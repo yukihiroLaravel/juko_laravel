@@ -35,7 +35,7 @@ class ChapterController extends Controller
      */
     public function show(ChapterShowRequest $request, QueryService $queryService)
     {
-        // QueryServiceにてチャプターを取得
+        // チャプターを取得
         $chapter = $queryService->getChapter($request->chapter_id);
 
         if ((int) $request->course_id !== $chapter->course->id) {
@@ -177,18 +177,17 @@ class ChapterController extends Controller
      * @param BulkPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request, QueryService $queryService): JsonResponse
+    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
             $courseId = $request->course_id;
-            $chapterIds = $request->chapters;
 
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            // QueryServiceにてチャプターリストを取得
-            $chapters = $queryService->getChapters($chapterIds);
+            // 選択されたチャプターを取得
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
@@ -230,18 +229,15 @@ class ChapterController extends Controller
      * @param BulkDeleteRequest $request
      * @return JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request, QueryService $queryService): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         try {
-            // リクエストで送られたcourseとchapterのidを変数に格納
             $courseId = $request->course_id;
-            $chapterIds = $request->chapters;
 
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            // QueryServiceにてチャプターリストを取得
-            $chapters = $queryService->getChapters($chapterIds);
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {

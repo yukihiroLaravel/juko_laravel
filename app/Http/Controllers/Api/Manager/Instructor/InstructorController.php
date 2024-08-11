@@ -51,7 +51,7 @@ class InstructorController extends Controller
      * 講師一覧取得API
      *
      * @param InstructorIndexRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return InstructorIndexResource
      */
     public function index(InstructorIndexRequest $request)
     {

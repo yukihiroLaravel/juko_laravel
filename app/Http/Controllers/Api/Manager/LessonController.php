@@ -361,7 +361,7 @@ class LessonController extends Controller
 
         //レッスン情報を取得
         /** @var Lesson $lesson */
-        $lesson = Lesson::with('chapter.course', 'attendances')->whereIn('id', $lessonIds)->get();
+        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         //認可チェック
         try {
             //レッスンデータの認可チェック
@@ -379,7 +379,7 @@ class LessonController extends Controller
                     throw new ValidationErrorException('Invalid chapter_id.');
                 }
                 //受講情報が登録されている場合は許可しない
-                if ($lesson->attendances->isNotEmpty()) {
+                if ($lesson->lessonAttendances->isNotEmpty()) {
                     throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
@@ -405,7 +405,6 @@ class LessonController extends Controller
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
-            //
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

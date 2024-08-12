@@ -176,31 +176,51 @@ class LessonController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        $courseId = $course_id;
+        try {
 
-        $chapterId = $chapter_id;
+            $courseId = $course_id;
 
-        $lessonIds = $request->input('lessons');
+            $chapterId = $chapter_id;
 
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+            $lessonIds = $request->input('lessons');
 
-        $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
-            if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                throw new ValidationErrorException('Invalid instructor_id.');
-            }
-            if ((int) $chapterId !== $lesson->chapter_id) {
-                throw new ValidationErrorException('Invalid chapter.');
-            }
-            if ((int) $courseId !== $lesson->chapter->course_id) {
-                throw new ValidationErrorException('Invalid course.');
-            }
-        });
+            $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
-        Lesson::whereIn('id', $lessonIds)->delete();
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
+                if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                if ((int) $chapterId !== $lesson->chapter_id) {
+                    throw new ValidationErrorException('Invalid chapter.');
+                }
+                if ((int) $courseId !== $lesson->chapter->course_id) {
+                    throw new ValidationErrorException('Invalid course.');
+                }
+            });
 
-        return response()->json([
-            'result' => true,
-        ]);
+            DB::beginTransaction();
+
+            Lesson::whereIn('id', $lessonIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lessons.',
+            ], 500);
+        }
     }
 
     /**

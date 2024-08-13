@@ -363,13 +363,11 @@ class LessonController extends Controller
 
         //レッスン情報を取得
         /** @var Lesson $lesson */
-        $lesson = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-        //アテンダンス情報を取得
-        $attendedLessons = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id')->toArray();
+        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         //認可チェック
         try {
             //レッスンデータの認可チェック
-            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId, $attendedLessons) {
+            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 //自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
@@ -383,7 +381,7 @@ class LessonController extends Controller
                     throw new ValidationErrorException('Invalid chapter_id.');
                 }
                 //受講情報が登録されている場合は許可しない
-                if (in_array($lesson->id, $attendedLessons)) {
+                if ($lesson->lessonAttendances->isNotEmpty()) {
                     throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
@@ -409,7 +407,6 @@ class LessonController extends Controller
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
-            //
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

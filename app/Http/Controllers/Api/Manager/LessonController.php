@@ -20,6 +20,7 @@ use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -336,14 +337,81 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
+
     /**
-     * 選択済みレッスンの削除API
+     * 選択済みレッスン削除API
      *
      * @param
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete()
+    public function bulkDelete(Request $request, $course_id, $chapter_id): JsonResponse
     {
-        return response()->json([]);
+        //ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        //リクエストからデータを取得
+        $lessonIds = $request->input('lessons');
+        $chapterId = $chapter_id;
+        $courseId =  $course_id;
+
+        //レッスン情報を取得
+        /** @var Lesson $lesson */
+        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
+        //認可チェック
+        try {
+            //レッスンデータの認可チェック
+            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+                //自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
+                if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $lesson->chapter->course->id) {
+                    throw new ValidationErrorException('Invalid course_id.');
+                }
+                //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ((int) $chapterId !== $lesson->chapter->id) {
+                    throw new ValidationErrorException('Invalid chapter_id.');
+                }
+                //受講情報が登録されている場合は許可しない
+                if ($lesson->lessonAttendances->isNotEmpty()) {
+                    throw new ValidationErrorException('This lesson has attendance.');
+                }
+            });
+
+            DB::beginTransaction();
+
+            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+            Lesson::whereIn('id', $lessonIds)->delete();
+            //レッスン順序の更新
+            Lesson::where('chapter_id', $chapterId)
+                ->orderBy('order')
+                ->get()
+                ->each(function (Lesson $lesson, int $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lesson.',
+            ], 500);
+        }
     }
 }

@@ -19,8 +19,8 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
+use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
-use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -28,7 +28,7 @@ class LessonController extends Controller
      * レッスン新規作成API
      *
      * @param LessonStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(LessonStoreRequest $request)
     {
@@ -88,7 +88,7 @@ class LessonController extends Controller
      * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -220,7 +220,7 @@ class LessonController extends Controller
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function sort(LessonSortRequest $request)
     {
@@ -290,7 +290,7 @@ class LessonController extends Controller
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {
@@ -341,12 +341,12 @@ class LessonController extends Controller
     /**
      * 選択済みレッスン削除API
      *
-     * @param
-     * @return \Illuminate\Http\JsonResponse
+     * @param LessonBulkDeleteRequest $request
+     * @return JsonResponse
      */
-    public function bulkDelete(Request $request, $course_id, $chapter_id): JsonResponse
+    public function bulkDelete(LessonBulkDeleteRequest $request): JsonResponse
     {
-        //ログイン中の講師IDを取得
+        // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
 
         /** @var Instructor $manager */
@@ -356,29 +356,27 @@ class LessonController extends Controller
 
         //リクエストからデータを取得
         $lessonIds = $request->input('lessons');
-        $chapterId = $chapter_id;
-        $courseId =  $course_id;
+        $chapterId = $request->input('chapter_id');
+        $courseId =  $request->input('course_id');
 
-        //レッスン情報を取得
+        // レッスン情報を取得
         /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
-        //認可チェック
         try {
-            //レッスンデータの認可チェック
             $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
-                //自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
+                // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
-                //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
                     throw new ValidationErrorException('Invalid course_id.');
                 }
-                //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter->id) {
                     throw new ValidationErrorException('Invalid chapter_id.');
                 }
-                //受講情報が登録されている場合は許可しない
+                // 受講情報が登録されている場合は許可しない
                 if ($lesson->lessonAttendances->isNotEmpty()) {
                     throw new ValidationErrorException('This lesson has attendance.');
                 }

@@ -178,7 +178,6 @@ class LessonController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
-
             //リクエストからデータを取得
             $courseId = $course_id;
 
@@ -215,7 +214,7 @@ class LessonController extends Controller
             Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
 
             Lesson::whereIn('id', $lessonIds)->delete();
-            
+
             //レッスン順序の更新
             Lesson::where('chapter_id', $chapterId)
                 ->orderBy('order')

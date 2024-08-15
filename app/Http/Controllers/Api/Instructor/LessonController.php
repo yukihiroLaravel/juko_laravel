@@ -174,33 +174,55 @@ class LessonController extends Controller
      */
     public function bulkDelete(Request $request, $course_id, $chapter_id)
     {
+        //ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
 
+            //リクエストからデータを取得
             $courseId = $course_id;
 
             $chapterId = $chapter_id;
 
             $lessonIds = $request->input('lessons');
 
+            //レッスン情報を取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
+            //レッスンデータの認可チェック
             $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
+                //自身の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
+                //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new ValidationErrorException('Invalid chapter.');
                 }
+                //指定したコースIDがレッスンのコースIDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new ValidationErrorException('Invalid course.');
+                }
+                //受講情報が登録されている場合は許可しない
+                if ($lesson->lessonAttendances->isNotEmpty()) {
+                    throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
 
             DB::beginTransaction();
 
+            // 削除対象レッスンのorderカラムを0に設定する
+            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+
             Lesson::whereIn('id', $lessonIds)->delete();
+            
+            //レッスン順序の更新
+            Lesson::where('chapter_id', $chapterId)
+                ->orderBy('order')
+                ->get()
+                ->each(function (Lesson $lesson, int $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
 
             DB::commit();
 

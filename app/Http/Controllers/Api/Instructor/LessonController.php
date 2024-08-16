@@ -182,7 +182,6 @@ class LessonController extends Controller
         $lessonIds = $request->input('lessons');
 
         try {
-
             // レッスン情報を取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 

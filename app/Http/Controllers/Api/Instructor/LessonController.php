@@ -18,6 +18,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
+use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
@@ -167,18 +168,16 @@ class LessonController extends Controller
     /**
      * 複数のレッスン削除API
      *
-     * @param Request $request
-     * @param $course_id
-     * @param $chapter_id
+     * @param LessonBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(Request $request, $course_id, $chapter_id)
+    public function bulkDelete(LessonBulkDeleteRequest $request)
     {
         // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
         // リクエストからデータを取得
-        $courseId = $course_id;
-        $chapterId = $chapter_id;
+        $courseId = $request->input('course_id');
+        $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
 
         try {

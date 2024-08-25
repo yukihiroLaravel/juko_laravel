@@ -19,8 +19,7 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
-use Illuminate\Auth\Access\AuthorizationException;
-use App\Http\Requests\Manager\LessonPutStatusRequest;
+use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -29,7 +28,7 @@ class LessonController extends Controller
      * レッスン新規作成API
      *
      * @param LessonStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(LessonStoreRequest $request)
     {
@@ -89,7 +88,7 @@ class LessonController extends Controller
      * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -221,7 +220,7 @@ class LessonController extends Controller
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function sort(LessonSortRequest $request)
     {
@@ -291,7 +290,7 @@ class LessonController extends Controller
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {
@@ -340,59 +339,77 @@ class LessonController extends Controller
     }
 
     /**
-     * 選択済みレッスンステータス一括更新API
+     * 選択済みレッスン削除API
      *
-     * @param LessonPutStatusRequest $request
+     * @param LessonBulkDeleteRequest $request
      * @return JsonResponse
      */
-    public function putStatus(LessonPutStatusRequest $request): JsonResponse
+    public function bulkDelete(LessonBulkDeleteRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
 
-        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // リクエストからデータを取得
-        $lessonIds =  $request->input('lessons');
+        //リクエストからデータを取得
+        $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
-        $courseId = $request->input('course_id');
-        $status = $request->input('status');
+        $courseId =  $request->input('course_id');
 
-        //レッスンデータの取得
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
+        // レッスン情報を取得
+        /** @var Lesson $lesson */
+        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         try {
-            $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+                // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                    //講座に紐づく講師でない場合は許可しない
-                    throw new AuthorizationException('Invalid instructor_id.');
+                    throw new ValidationErrorException('Invalid instructor_id.');
                 }
-                if ((int)$courseId !== $lesson->chapter->course->id) {
-                    //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid course_id.');
+                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $lesson->chapter->course->id) {
+                    throw new ValidationErrorException('Invalid course_id.');
                 }
-                if ((int)$chapterId !== $lesson->chapter_id) {
-                    //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid chapter_id.');
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ((int) $chapterId !== $lesson->chapter->id) {
+                    throw new ValidationErrorException('Invalid chapter_id.');
+                }
+                // 受講情報が登録されている場合は許可しない
+                if ($lesson->lessonAttendances->isNotEmpty()) {
+                    throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
 
-            // レッスンのステータスを一括更新
-            Lesson::whereIn('id', $lessons->pluck('id')->toArray())->update(['status' => $status]);
+            DB::beginTransaction();
+
+            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+            Lesson::whereIn('id', $lessonIds)->delete();
+            //レッスン順序の更新
+            Lesson::where('chapter_id', $chapterId)
+                ->orderBy('order')
+                ->get()
+                ->each(function (Lesson $lesson, int $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
+            DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            // エラーハンドリング、認可に失敗した場合エラーを返す
+        } catch (ValidationErrorException $e) {
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lesson.',
+            ], 500);
         }
     }
 }

@@ -18,12 +18,11 @@ use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Requests\Instructor\LessonStoreRequest;
 use App\Http\Requests\Instructor\LessonDeleteRequest;
-use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
+use App\Http\Requests\Instructor\LessonPutStatusRequest;
+use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\LessonPutStatusRequest;
-use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -165,6 +164,7 @@ class LessonController extends Controller
             ], 500);
         }
     }
+
     /**
      * 複数のレッスン削除API
      *

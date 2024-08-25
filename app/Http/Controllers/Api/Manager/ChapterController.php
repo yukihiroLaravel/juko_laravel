@@ -23,7 +23,9 @@ use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\Manager\ChaptersPatchStatusRequest;//追加
+use App\Http\Requests\Manager\ChaptersPatchStatusRequest;
+
+//追加
 
 class ChapterController extends Controller
 {

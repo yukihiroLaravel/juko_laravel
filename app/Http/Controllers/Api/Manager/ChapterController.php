@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
-use App\Http\Requests\Manager\ChapterPatchRequest;//追加
+use App\Http\Requests\Manager\ChapterPatchRequest;
 use App\Http\Requests\Manager\ChapterStoreRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
@@ -23,7 +23,7 @@ use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\Manager\ChaptersPatchStatusRequest;//追加
+use App\Http\Requests\Manager\ChaptersPatchStatusRequest;
 
 class ChapterController extends Controller
 {
@@ -388,8 +388,7 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
-
-   /**追加
+   /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
      * @param ChaptersPatchStatusRequest $request

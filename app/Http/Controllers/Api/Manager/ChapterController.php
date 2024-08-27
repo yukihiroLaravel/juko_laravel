@@ -427,7 +427,7 @@ class ChapterController extends Controller
                 }
             });
 
-            //チャプターのステータスを一括更新
+            // チャプターのステータスを一括更新
             Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
             return response()->json([
                 'result' => true,

@@ -19,6 +19,7 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
+use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
@@ -285,6 +286,34 @@ class LessonController extends Controller
                 "result" => false,
             ]);
         }
+    }
+
+    public function updateStatus( ): JsonResponse
+    {
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (Auth::guard('manager')->user()->id !== $lesson->chapter->course->manager_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid manager_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

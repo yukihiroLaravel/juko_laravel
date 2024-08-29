@@ -317,6 +317,40 @@ class LessonController extends Controller
     }
 
     /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return JsonResponse
+     */
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
+    {
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (Auth::guard('instructors')->user()->id !== $lesson->chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request

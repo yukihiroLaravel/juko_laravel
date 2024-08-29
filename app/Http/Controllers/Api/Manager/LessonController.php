@@ -30,7 +30,7 @@ class LessonController extends Controller
      * レッスン新規作成API
      *
      * @param LessonStoreRequest $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(LessonStoreRequest $request)
     {
@@ -90,7 +90,7 @@ class LessonController extends Controller
      * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
-     * @return JsonResponse
+     *  @return \Illuminate\Http\JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -222,7 +222,7 @@ class LessonController extends Controller
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request)
     {
@@ -292,7 +292,7 @@ class LessonController extends Controller
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {
@@ -351,33 +351,32 @@ class LessonController extends Controller
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
         
-        //配下の講師情報を取得
+        // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        //リクエストからデータを取得
+        // リクエストからデータを取得
         $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
         $courseId = $request->input('course_id');
         $status = $request->input('status');
 
-        // レッスン情報を取得
-        /** @var Lesson $lesson */
-        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
+        //レッスンデータの取得
+        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         try {
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                //講座に紐づく講師でない場合は許可しない
+                    //講座に紐づく講師でない場合は許可しない
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 if ((int)$courseId !== $lesson->chapter->course->id) {
-                //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                    //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 if ((int)$chapterId !== $lesson->chapter_id) {
-                //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                    //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });

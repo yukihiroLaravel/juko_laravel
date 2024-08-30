@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,7 +26,6 @@ class DeleteAllLessonsRequest extends FormRequest
         return [
             'chapter_id' => ['required', 'integer', 'exists:chapters,id'],
             'course_id' => ['required', 'integer', 'exists:courses,id'],
-            'lesson_status' => ['required', 'in:active,inactive'], // 例として追加のルール
         ];
     }
 }

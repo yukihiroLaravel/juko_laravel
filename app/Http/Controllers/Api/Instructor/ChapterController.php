@@ -24,6 +24,7 @@ use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use App\Http\Requests\Instructor\DeleteAllLessonsRequest;
 
 class ChapterController extends Controller
 {

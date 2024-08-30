@@ -350,7 +350,7 @@ class LessonController extends Controller
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
-        
+
         // 配下の講師情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);

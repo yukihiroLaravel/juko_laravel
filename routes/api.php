@@ -85,7 +85,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::patch('/', 'Api\Instructor\ChapterController@update');
                             Route::patch('status', 'Api\Instructor\ChapterController@updateStatus');
                             Route::delete('/', 'Api\Instructor\ChapterController@delete');
-                            Route::delete('lessons/all', 'Api\Instructor\ChapterController@deleteAllLessons');
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');

@@ -412,7 +412,7 @@ class LessonController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        //リクエストからデータを取得
+        // リクエストからデータを取得
         $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
         $courseId =  $request->input('course_id');
@@ -421,6 +421,8 @@ class LessonController extends Controller
         /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         try {
+            DB::beginTransaction();
+
             $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
@@ -439,8 +441,6 @@ class LessonController extends Controller
                     throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
-
-            DB::beginTransaction();
 
             Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
             Lesson::whereIn('id', $lessonIds)->delete();

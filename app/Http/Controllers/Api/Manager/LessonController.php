@@ -287,6 +287,11 @@ class LessonController extends Controller
         }
     }
 
+    public function updateStatus()
+    {
+        return response()->json([]);
+    }
+
     /**
      * レッスンタイトル変更API
      *

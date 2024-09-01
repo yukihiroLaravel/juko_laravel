@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::put('status', 'Api\Instructor\LessonController@putStatus');
+                                Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
@@ -177,6 +178,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::post('/', 'Api\Manager\ChapterController@store');
                             Route::put('status', 'Api\Manager\ChapterController@putStatus');
                             Route::delete('/', 'Api\Manager\ChapterController@bulkDelete');
+                            Route::patch('status', 'Api\Manager\ChapterController@patchStatus');
                             Route::prefix('{chapter_id}')->group(function () {
                                 Route::get('/', 'Api\Manager\ChapterController@show');
                                 Route::patch('/', 'Api\Manager\ChapterController@update');
@@ -186,6 +188,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::prefix('lesson')->group(function () {
                                     Route::post('/', 'Api\Manager\LessonController@store');
                                     Route::post('sort', 'Api\Manager\LessonController@sort');
+                                    Route::patch('status', 'Api\Manager\LessonController@updateStatus');
                                     Route::put('status', 'Api\Manager\LessonController@putStatus');
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', 'Api\Manager\LessonController@update');

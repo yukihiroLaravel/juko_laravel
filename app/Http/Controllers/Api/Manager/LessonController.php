@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
@@ -19,8 +20,8 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
-use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
+use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -89,7 +90,7 @@ class LessonController extends Controller
      * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     *  @return \Illuminate\Http\JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -362,14 +363,13 @@ class LessonController extends Controller
         $instructorIds[] = $manager->id;
 
         // リクエストからデータを取得
-        $lessonIds =  $request->input('lessons');
+        $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
         $courseId = $request->input('course_id');
         $status = $request->input('status');
 
         //レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
         try {
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
@@ -398,6 +398,81 @@ class LessonController extends Controller
                 'result' => false,
                 'message' => $e->getMessage(),
             ], 403);
+        }
+    }
+
+    /**
+     * 選択済みレッスン削除API
+     *
+     * @param LessonBulkDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function bulkDelete(LessonBulkDeleteRequest $request): JsonResponse
+    {
+        // ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // リクエストからデータを取得
+        $lessonIds = $request->input('lessons');
+        $chapterId = $request->input('chapter_id');
+        $courseId =  $request->input('course_id');
+
+        // レッスン情報を取得
+        /** @var Lesson $lesson */
+        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
+        try {
+            DB::beginTransaction();
+
+            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+                // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
+                if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $lesson->chapter->course->id) {
+                    throw new ValidationErrorException('Invalid course_id.');
+                }
+                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                if ((int) $chapterId !== $lesson->chapter->id) {
+                    throw new ValidationErrorException('Invalid chapter_id.');
+                }
+                // 受講情報が登録されている場合は許可しない
+                if ($lesson->lessonAttendances->isNotEmpty()) {
+                    throw new ValidationErrorException('This lesson has attendance.');
+                }
+            });
+
+            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+            Lesson::whereIn('id', $lessonIds)->delete();
+            //レッスン順序の更新
+            Lesson::where('chapter_id', $chapterId)
+                ->orderBy('order')
+                ->get()
+                ->each(function (Lesson $lesson, int $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ValidationErrorException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lesson.',
+            ], 500);
         }
     }
 }

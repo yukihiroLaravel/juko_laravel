@@ -293,7 +293,7 @@ class LessonController extends Controller
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
-     * @return JsonResponse
+     * @return LessonPatchStatusResource
      */
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
@@ -313,6 +313,7 @@ class LessonController extends Controller
             ], 403);
 
         }  
+        return response()->json($course);
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
-use App\Http\Resources\Manager\LessonPatchStatusResource;
+use App\Http\Resources\Manager\LessonPatchResource;
 use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
@@ -293,7 +293,7 @@ class LessonController extends Controller
      * レッスンステータス更新API
      *
      * @param LessonPatchStatusRequest $request
-     * @return LessonPatchStatusResource
+     * @return LessonPatchResource
      */
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
@@ -313,7 +313,7 @@ class LessonController extends Controller
             ], 403);
 
         }  
-        return response()->json($course);
+        return response()->json($lesson);
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 

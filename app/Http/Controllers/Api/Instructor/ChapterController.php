@@ -326,7 +326,7 @@ class ChapterController extends Controller
         }
     }
 
-    /**
+    /****
      * チャプターに紐づく全レッスンを削除するAPI
      *
      * @param DeleteAllLessonsRequest $request

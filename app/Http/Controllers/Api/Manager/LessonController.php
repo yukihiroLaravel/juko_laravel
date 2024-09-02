@@ -15,13 +15,14 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
+use App\Http\Resources\Manager\LessonPatchResource;
 use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
-use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
+use Illuminate\Auth\Access\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -288,66 +289,9 @@ class LessonController extends Controller
         }
     }
 
-    public function updateStatus( ): JsonResponse
+    public function updateStatus()
     {
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        if (Auth::guard('manager')->user()->id !== $lesson->chapter->course->manager_id) {
-            return response()->json([
-                'result' => false,
-                "message" => 'invalid manager_id.'
-            ], 403);
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result'  => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
-        }
-
-        $lesson->update([
-            'status' => $request->status
-        ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
-    /**
-     * レッスンステータス更新API
-     *
-     * @param LessonPatchStatusRequest $request
-     * @return JsonResponse
-     */
-    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
-    {
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        if (Auth::guard('instructors')->user()->id !== $lesson->chapter->course->instructor_id) {
-            return response()->json([
-                'result' => false,
-                "message" => 'invalid instructor_id.'
-            ], 403);
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result'  => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
-        }
-
-        $lesson->update([
-            'status' => $request->status
-        ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json([]);
     }
 
     /**
@@ -395,6 +339,58 @@ class LessonController extends Controller
 
         $lesson->update([
             'title' => $request->title
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return LessonPatchStatusResource
+     */
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager= Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        //自分と配下のinstructorのレッスンでなければエラー応答
+        $lesson = Lesson::FindOrFail($request->lesson_id);
+        if (!in_array($lesson->instructor_id, $instructorIds, true)) {
+
+            // エラー応答
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to update this lesson.",
+            ], 403);
+
+        }  
+        return response()->json($course);
+
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                "message" => 'invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
         ]);
 
         return response()->json([

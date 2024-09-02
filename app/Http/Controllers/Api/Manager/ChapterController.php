@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Chapter\QueryService;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Requests\Manager\ChapterShowRequest;
 use App\Http\Requests\Manager\ChapterSortRequest;
@@ -33,7 +34,7 @@ class ChapterController extends Controller
      * @param ChapterShowRequest $request
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request)
+    public function show(ChapterShowRequest $request, QueryService $queryService)
     {
         // ユーザーID取得
         $userId = $request->user()->id;
@@ -44,7 +45,9 @@ class ChapterController extends Controller
         $instructorIds[] = $manager->id;
 
         // chapter_idから属するlassons含めてデータ取得
-        $chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
+        //$chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
+        // QueryServiceにてチャプターを取得
+        $chapter = $queryService->getChapter($request->chapter_id);
 
         // 自身もしくは配下のinstructorでない場合はエラー応答
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {

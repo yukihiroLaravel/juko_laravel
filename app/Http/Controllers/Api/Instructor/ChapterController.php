@@ -327,6 +327,13 @@ class ChapterController extends Controller
     }
 
     /**
+    * チャプターに紐づく全レッスンを削除するAPI
+    */
+    public function deleteAllLessons() {
+        return response()->json([]);
+    }
+
+    /**
      * チャプター並び替えAPI
      *
      * @param ChapterSortRequest $request

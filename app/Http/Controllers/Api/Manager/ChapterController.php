@@ -45,7 +45,6 @@ class ChapterController extends Controller
         $instructorIds[] = $manager->id;
 
         // chapter_idから属するlassons含めてデータ取得
-        //$chapter = Chapter::with(['lessons','course'])->findOrFail($request->chapter_id);
         // QueryServiceにてチャプターを取得
         $chapter = $queryService->getChapter($request->chapter_id);
 

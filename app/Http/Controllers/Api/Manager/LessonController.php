@@ -303,7 +303,7 @@ class LessonController extends Controller
         $instructorIds[] = $instructorId;
 
         //自分と配下のinstructorのレッスンでなければエラー応答
-        $lesson = Lesson::FindOrFail($request->lesson_id);
+        $lesson = Lesson::findOrFail($request->lesson_id);
         if (!in_array($lesson->instructor_id, $instructorIds, true)) {
 
             // エラー応答

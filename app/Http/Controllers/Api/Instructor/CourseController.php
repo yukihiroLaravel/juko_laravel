@@ -26,7 +26,8 @@ class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
-     *
+     * 
+     * @param QueryService $queryService
      * @return CourseIndexResource
      */
     public function index(QueryService $queryService): CourseIndexResource
@@ -41,6 +42,7 @@ class CourseController extends Controller
      * 講座取得API
      *
      * @param CourseShowRequest $request
+     * @param QueryService $queryService
      * @return CourseShowResource
      */
     public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource

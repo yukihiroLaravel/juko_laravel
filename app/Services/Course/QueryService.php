@@ -21,10 +21,10 @@ class QueryService
     /**
      * 選択されたコースリストを取得
      *
-     * @param array<int> $courseIds
+     * @param int $instructorId
      * @return Collection<Course>
      */
-    public function getCourses(int $instructorId): Collection
+    public function getCoursesByInstructorId(int $instructorId): Collection
     {
         return Course::where('instructor_id', $instructorId)->get();
     }

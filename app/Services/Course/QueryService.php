@@ -19,7 +19,7 @@ class QueryService
     }
 
     /**
-     * 選択されたコースリストを取得
+     * ログイン中のインストラクターの所有するコースリストを取得
      *
      * @param int $instructorId
      * @return Collection<Course>

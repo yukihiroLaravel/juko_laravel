@@ -84,7 +84,6 @@ class ChapterController extends Controller
         }
 
         try {
-
             $order =  $course->chapters->count();
             $newOrder = $order + 1;
             Chapter::create([

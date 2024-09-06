@@ -33,7 +33,7 @@ class CourseController extends Controller
     public function index(QueryService $queryService): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCourses($instructorId);
+        $courses = $queryService->getCoursesByInstructorId($instructorId);
 
         return new CourseIndexResource($courses);
     }

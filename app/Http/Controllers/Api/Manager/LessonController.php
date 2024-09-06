@@ -306,7 +306,7 @@ class LessonController extends Controller
         //自分と配下のinstructorのレッスンでなければエラー応答
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-        if (!in_array($lesson->chapter->course->$instructorIds, true)) {
+        if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 "message" => 'invalid instructor_id.'

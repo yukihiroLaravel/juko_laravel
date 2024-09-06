@@ -26,7 +26,7 @@ class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
-     * 
+     *
      * @param QueryService $queryService
      * @return CourseIndexResource
      */

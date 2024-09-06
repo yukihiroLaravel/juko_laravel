@@ -245,7 +245,8 @@ class ChapterController extends Controller
         }
     }
 
-    public function alldelete() {
+    public function alldelete()
+    {
         return response()->json([]);
     }
 

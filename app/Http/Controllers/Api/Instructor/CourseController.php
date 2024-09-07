@@ -12,8 +12,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Services\Course\QueryService;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
@@ -66,7 +66,7 @@ class CourseController extends Controller
         $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
         $filePath = Course::convertImagePath($filePath);
 
-        $course = Course::create([
+        Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
             'image' => $filePath,

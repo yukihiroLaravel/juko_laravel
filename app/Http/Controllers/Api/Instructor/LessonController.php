@@ -315,6 +315,13 @@ class LessonController extends Controller
     }
 
     /**
+    * チャプターに紐づく全レッスンを削除するAPI
+    */
+    public function allDelete() {
+        return response()->json([]);
+    }
+
+    /**
      * レッスン並び替えAPI
      *
      * @param LessonSortRequest $request

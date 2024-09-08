@@ -245,6 +245,11 @@ class ChapterController extends Controller
         }
     }
 
+    public function deleteAll()
+    {
+        return response()->json([]);
+    }
+
     /**
      * チャプター並び替えAPI
      *

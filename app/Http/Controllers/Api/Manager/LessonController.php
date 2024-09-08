@@ -22,7 +22,8 @@ use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
-use Illuminate\Auth\Access\LessonPatchStatusRequest;
+use App\Http\Requests\Manager\LessonBulkDeleteRequest;
+use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -340,24 +341,28 @@ class LessonController extends Controller
     }
 
 
-    public function updateStatus()
+    /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return LessonPatchResource
+     */
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
         //自分と配下のinstructorのレッスンでなければエラー応答
         $lesson = Lesson::FindOrFail($request->lesson_id);
         if (!in_array($lesson->instructor_id, $instructorIds, true)) {
-
             // エラー応答
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to update this lesson.",
             ], 403);
-
-        }  
+        }
         return response()->json($course);
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);

@@ -243,7 +243,7 @@ class LessonController extends Controller
     * @param DeleteAllLessonsRequest $request
     * @return JsonResponse
     */
-   public function deleteAllLessons(DeleteAllLessonsRequest $request): JsonResponse
+   public function dallDelete(DeleteAllLessonsRequest $request): JsonResponse
    {
        DB::beginTransaction();
 

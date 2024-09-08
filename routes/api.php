@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::put('status', 'Api\Instructor\LessonController@putStatus');
                                 Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
+                                Route::delete('all', 'Api\Instructor\ChapterController@allDelete');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');

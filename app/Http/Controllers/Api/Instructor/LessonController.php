@@ -317,7 +317,8 @@ class LessonController extends Controller
     /**
     * チャプターに紐づく全レッスンを削除するAPI
     */
-    public function allDelete() {
+    public function allDelete()
+    {
         return response()->json([]);
     }
 

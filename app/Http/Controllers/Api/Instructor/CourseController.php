@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Course\QueryService;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\CourseShowRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
@@ -26,12 +27,13 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      *
+     * @param QueryService $queryService
      * @return CourseIndexResource
      */
-    public function index(): CourseIndexResource
+    public function index(QueryService $queryService): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = Course::where('instructor_id', $instructorId)->get();
+        $courses = $queryService->getCoursesByInstructorId($instructorId);
 
         return new CourseIndexResource($courses);
     }
@@ -40,12 +42,12 @@ class CourseController extends Controller
      * 講座取得API
      *
      * @param CourseShowRequest $request
+     * @param QueryService $queryService
      * @return CourseShowResource
      */
-    public function show(CourseShowRequest $request): CourseShowResource
+    public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource
     {
-        $course = Course::with(['chapters.lessons'])
-            ->findOrFail($request->course_id);
+        $course = $queryService->getCourse($request->course_id);
         return new CourseShowResource($course);
     }
 
@@ -64,7 +66,7 @@ class CourseController extends Controller
         $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
         $filePath = Course::convertImagePath($filePath);
 
-        $course = Course::create([
+        Course::create([
             'instructor_id' => $instructorId,
             'title' => $request->title,
             'image' => $filePath,

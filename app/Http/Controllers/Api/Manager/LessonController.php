@@ -300,7 +300,7 @@ class LessonController extends Controller
         /** @var Instructor $manager */
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $manager= Instructor::with('managings')->find($managerId);
+        $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -338,7 +338,7 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
-     
+
 
     /**
      * レッスンステータス更新API
@@ -349,21 +349,19 @@ class LessonController extends Controller
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
         //自分と配下のinstructorのレッスンでなければエラー応答
         $lesson = Lesson::FindOrFail($request->lesson_id);
         if (!in_array($lesson->instructor_id, $instructorIds, true)) {
-
             // エラー応答
             return response()->json([
                 'result'  => false,
                 'message' => "Forbidden, not allowed to update this lesson.",
             ], 403);
-
-        }  
+        }
         return response()->json($course);
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);

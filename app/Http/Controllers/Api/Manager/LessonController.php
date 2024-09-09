@@ -298,9 +298,9 @@ class LessonController extends Controller
      */
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
-        /** @var Instructor $manager */
+        
         $managerId = Auth::guard('instructor')->user()->id;
-
+        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;

@@ -56,7 +56,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 
-
     // 講師側API
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
@@ -85,14 +84,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::patch('/', 'Api\Instructor\ChapterController@update');
                             Route::patch('status', 'Api\Instructor\ChapterController@updateStatus');
                             Route::delete('/', 'Api\Instructor\ChapterController@delete');
-                            Route::delete('lessons/all', 'Api\Instructor\ChapterController@deleteAllLessons');
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');
                                 Route::post('sort', 'Api\Instructor\LessonController@sort');
                                 Route::put('status', 'Api\Instructor\LessonController@putStatus');
                                 Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
-                                Route::delete('all', 'Api\Instructor\ChapterController@allDelete');
+                                Route::delete('all', 'Api\Instructor\LessonController@allDelete');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', 'Api\Instructor\LessonController@update');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');

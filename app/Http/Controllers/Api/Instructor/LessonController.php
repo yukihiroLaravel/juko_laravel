@@ -23,6 +23,7 @@ use App\Http\Requests\Instructor\LessonPutStatusRequest;
 use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -237,58 +238,7 @@ class LessonController extends Controller
                 'message' => 'Failed to delete lessons.',
             ], 500);
         }
-    } /****
-    * チャプターに紐づく全レッスンを削除するAPI
-    *
-    * @param DeleteAllLessonsRequest $request
-    * @return JsonResponse
-    */
-   public function dallDelete(DeleteAllLessonsRequest $request): JsonResponse
-   {
-       DB::beginTransaction();
-
-       try {
-           // チャプターを取得
-           /** @var Chapter $chapter */
-           $chapter = Chapter::with('course.lessons')->findOrFail($request->chapter_id);
-
-           // 現在の講師がチャプターの講座の作成者であるか確認
-           if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-               return response()->json([
-                   'result' => false,
-                   'message' => 'Invalid instructor_id.'
-               ], 403);
-           }
-
-           // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-           if ((int) $request->course_id !== $chapter->course->id) {
-               return response()->json([
-                   'result' => false,
-                   'message' => 'Invalid course_id.',
-               ], 403);
-           }
-
-           // チャプターに紐づく全レッスンを削除
-           $chapter->lessons()->delete();
-
-           DB::commit();
-
-           return response()->json([
-               'result' => true,
-               'message' => 'All lessons deleted successfully.',
-           ]);
-       } catch (Exception $e) {
-           DB::rollBack();
-           Log::error($e);
-           return response()->json([
-               'result' => false,
-               'message' => 'Failed to delete lessons.',
-           ], 500);
-       }
-   }
-
-
-
+    }
 
     /**
      * レッスンステータス更新API
@@ -363,6 +313,56 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+    * チャプターに紐づく全レッスンを削除するAPI
+    *
+    * @param Requestt $request
+    * @return JsonResponse
+    */
+    public function allDelete(Request $request, int $course_id, int $chapter_id): JsonResponse
+    {
+        DB::beginTransaction();
+ 
+        try {
+            // チャプターを取得
+            /** @var Chapter $chapter */
+            $chapter = Chapter::with('course.lessons')->findOrFail($request->chapter_id);
+ 
+            // 現在の講師がチャプターの講座の作成者であるか確認
+            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id.'
+                ], 403);
+            }
+ 
+            // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
+            if ((int) $request->course_id !== $chapter->course->id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid course_id.',
+                ], 403);
+            }
+ 
+            // チャプターに紐づく全レッスンを削除
+            $chapter->lessons()->delete();
+ 
+            DB::commit();
+ 
+            return response()->json([
+                'result' => true,
+                'message' => 'All lessons deleted successfully.',
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lessons.',
+            ], 500);
+        }
     }
 
     /**

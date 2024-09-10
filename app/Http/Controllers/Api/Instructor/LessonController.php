@@ -325,8 +325,7 @@ class LessonController extends Controller
     public function allDelete(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
         DB::beginTransaction();
- 
-        try {
+
             // チャプターを取得
             /** @var Chapter $chapter */
             $chapter = Chapter::with('course.lessons')->findOrFail($request->chapter_id);
@@ -355,15 +354,14 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
                 'message' => 'All lessons deleted successfully.',
-            ]);
-        } catch (Exception $e) {
+            ]);        
             DB::rollBack();
             Log::error($e);
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete lessons.',
             ], 500);
-        }
+        
     }
 
     /**

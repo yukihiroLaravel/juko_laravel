@@ -24,6 +24,7 @@ use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
 use Illuminate\Http\Request;
+use App\Model\Chapter;
 
 class LessonController extends Controller
 {

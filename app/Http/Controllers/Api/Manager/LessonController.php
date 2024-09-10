@@ -298,7 +298,6 @@ class LessonController extends Controller
      */
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
-        
         $managerId = Auth::guard('instructor')->user()->id;
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
@@ -320,57 +319,6 @@ class LessonController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'Invalid course_id.',
-            ], 403);
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result'  => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
-        }
-
-        $lesson->update([
-            'status' => $request->status
-        ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
-
-    /**
-     * レッスンステータス更新API
-     *
-     * @param LessonPatchStatusRequest $request
-     * @return LessonPatchResource
-     */
-    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
-    {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
-        //自分と配下のinstructorのレッスンでなければエラー応答
-        $lesson = Lesson::FindOrFail($request->lesson_id);
-        if (!in_array($lesson->instructor_id, $instructorIds, true)) {
-            // エラー応答
-            return response()->json([
-                'result'  => false,
-                'message' => "Forbidden, not allowed to update this lesson.",
-            ], 403);
-        }
-        return response()->json($course);
-
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-            return response()->json([
-                'result' => false,
-                "message" => 'invalid instructor_id.'
             ], 403);
         }
 

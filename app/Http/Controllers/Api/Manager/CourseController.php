@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Course\QueryService;
 use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseStoreRequest;
 use App\Http\Requests\Manager\CourseDeleteRequest;
@@ -27,9 +28,10 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      *
+     * @param QueryService $queryService
      * @return CourseIndexResource
      */
-    public function index()
+    public function index(QueryService $queryService): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -40,9 +42,7 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')
-                    ->whereIn('instructor_id', $instructorIds)
-                    ->get();
+        $courses = $queryService->getCoursesByInstructorIds($instructorIds);
 
         return new CourseIndexResource($courses);
     }
@@ -51,9 +51,10 @@ class CourseController extends Controller
      * 講座情報取得API
      *
      * @param CourseShowRequest $request
+     * @param QueryService $queryService
      * @return CourseShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(CourseShowRequest $request)
+    public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource
     {
         // ユーザID取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -63,7 +64,7 @@ class CourseController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
 
-        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        $course = $queryService->getCourse($request->course_id);
 
         // 自身 もしくは 配下の講師でない場合はエラー応答
         if (!in_array($course->instructor_id, $instructorIds, true)) {

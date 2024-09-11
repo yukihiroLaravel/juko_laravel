@@ -328,7 +328,7 @@ class LessonController extends Controller
 
             // チャプターを取得
             /** @var Chapter $chapter */
-            $chapter = Chapter::with('course.lessons')->findOrFail($request->chapter_id);
+            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
  
             // 現在の講師がチャプターの講座の作成者であるか確認
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
@@ -354,7 +354,7 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
                 'message' => 'All lessons deleted successfully.',
-            ]);        
+            ]);
             DB::rollBack();
             Log::error($e);
             return response()->json([

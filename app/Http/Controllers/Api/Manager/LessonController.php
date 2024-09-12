@@ -396,7 +396,7 @@ class LessonController extends Controller
         }
     }
 
-    public function allDelete() {
+    public function deleteAll() {
         return response()->json([]);
     }
 

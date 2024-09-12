@@ -41,4 +41,15 @@ class QueryService
         ->whereIn('instructor_id', $instructorIds)
         ->get();
     }
+
+    /**
+     * ログイン中のマネージャー及び配下の講師の所有するコースリストを個別指定して取得
+     *
+     * @param int $instructorId
+     * @return Collection<Course>
+     */
+    public function getCoursesByManagerInstructorId(int $instructorId): Collection
+    {
+        return Course::where('instructor_id', $instructorId)->get();
+    }
 }

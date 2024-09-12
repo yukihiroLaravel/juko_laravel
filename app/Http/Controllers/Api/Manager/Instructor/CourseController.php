@@ -8,6 +8,7 @@ use App\Http\Resources\Manager\InstructorCourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Course\QueryService;
 
 class CourseController extends Controller
 {
@@ -15,9 +16,10 @@ class CourseController extends Controller
      * 講師-講座情報一覧取得API
      *
      * @param InstructorCourseIndexRequest $request
+     * @param QueryService $queryService
      * @return InstructorCourseIndexResource|\Illuminate\Http\JsonResponse
      */
-    public function index(InstructorCourseIndexRequest $request)
+    public function index(InstructorCourseIndexRequest $request, QueryService $queryService): InstructorCourseIndexResource
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -35,9 +37,8 @@ class CourseController extends Controller
             ], 403);
         }
 
-        $courses = Course::where('instructor_id', $request->instructor_id)
-            ->paginate(5);
-
+        $courses = $queryService->getCoursesByManagerInstructorId($request->instructor_id);
+            
         return new InstructorCourseIndexResource($courses);
     }
 }

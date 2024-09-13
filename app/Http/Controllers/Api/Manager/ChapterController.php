@@ -296,7 +296,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            
+
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete chapters.',

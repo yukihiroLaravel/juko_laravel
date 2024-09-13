@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 class QueryService
 {
     /**
-     * 選択されたコースを取得
+     * 選択された講座の情報を取得
      *
      * @param int $courseId
      * @return Course
@@ -19,7 +19,7 @@ class QueryService
     }
 
     /**
-     * ログイン中のインストラクターの所有するコースリストを取得
+     * 選択された講師の講座情報を取得
      *
      * @param int $instructorId
      * @return Collection<Course>

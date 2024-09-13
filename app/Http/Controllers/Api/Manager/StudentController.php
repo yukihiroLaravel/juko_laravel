@@ -41,7 +41,7 @@ class StudentController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        // 自分と配下instructorのコース情報を取得
+        // 自分、または配下の講師の講座IDのリストを取得
         $courseIds = Course::with('instructor')
             ->whereIn('instructor_id', $instructorIds)
             ->pluck('id')
@@ -49,8 +49,8 @@ class StudentController extends Controller
 
         $course = Course::find($request->course_id);
 
-        // 自分もしくは配下instructorのコースでない場合はエラーを返す
         if (!in_array($course->id, $courseIds, true)) {
+            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
             return response()->json([
                 'result' => false,
                 'message' => 'Not authorized.'

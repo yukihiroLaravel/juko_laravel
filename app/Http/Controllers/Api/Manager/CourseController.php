@@ -123,9 +123,8 @@ class CourseController extends Controller
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            // 自分のコース、または、配下instructorのコースでなければエラー応答
             if (!in_array($course->instructor_id, $managingIds, true)) {
-                // エラー応答
+                // 自分、または配下の講師の講座でなければエラー応答
                 return response()->json([
                     'result'  => false,
                     'message' => "Forbidden, not allowed to update this course.",

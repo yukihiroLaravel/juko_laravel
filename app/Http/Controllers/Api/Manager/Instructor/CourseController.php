@@ -28,7 +28,7 @@ class CourseController extends Controller
         $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
-
+        
         // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (!in_array((int)$request->instructor_id, $instructorIds, true)) {
             return response()->json([
@@ -37,7 +37,7 @@ class CourseController extends Controller
             ], 403);
         }
 
-        $courses = $queryService->getCoursesByManagerInstructorId($request->instructor_id);
+        $courses = $queryService->getCoursesByInstructorId($request->instructor_id);
             
         return new InstructorCourseIndexResource($courses);
     }

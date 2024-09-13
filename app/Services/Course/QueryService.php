@@ -50,6 +50,6 @@ class QueryService
      */
     public function getCoursesByManagerInstructorId(int $instructorId): Collection
     {
-        return Course::where('instructor_id', $instructorId)->paginate(5);
+        return Course::where('instructor_id', $instructorId)->get();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services\Course;
 
 use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class QueryService
 {
@@ -46,10 +47,10 @@ class QueryService
      * ログイン中のマネージャー及び配下の講師の所有するコースリストを個別指定して取得
      *
      * @param int $instructorId
-     * @return Collection<Course>
+     * @return LengthAwarePaginator
      */
-    public function getCoursesByManagerInstructorId(int $instructorId): Collection
+    public function getCoursesByManagerInstructorId(int $instructorId): LengthAwarePaginator
     {
-        return Course::where('instructor_id', $instructorId)->get();
+        return Course::where('instructor_id', $instructorId)->paginate(5);
     }
 }

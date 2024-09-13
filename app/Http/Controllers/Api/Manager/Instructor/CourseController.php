@@ -37,7 +37,7 @@ class CourseController extends Controller
             ], 403);
         }
 
-        $courses = $queryService->getCoursesByInstructorId($request->instructor_id);
+        $courses = $queryService->getCoursesByManagerInstructorId($request->instructor_id);
             
         return new InstructorCourseIndexResource($courses);
     }

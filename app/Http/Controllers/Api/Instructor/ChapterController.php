@@ -325,7 +325,7 @@ class ChapterController extends Controller
             ], 500);
         }
     }
-   
+
     /**
      * チャプター並び替えAPI
      *

@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 
+    
     // 講師側API
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述

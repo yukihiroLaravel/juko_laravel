@@ -322,7 +322,7 @@ class LessonController extends Controller
     * @param Requestt $request
     * @return JsonResponse
     */
-    public function allDelete(Request $request, int $course_id, int $chapter_id): JsonResponse
+    public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
         DB::beginTransaction();
 	
@@ -355,7 +355,6 @@ class LessonController extends Controller
  
             return response()->json([
                 'result' => true,
-                'message' => 'All lessons deleted successfully.',
             ]);
 	} catch (Exception $e) {
             DB::rollBack();

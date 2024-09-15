@@ -324,13 +324,12 @@ class LessonController extends Controller
     */
     public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-	
-	try {
 
+        try {
             // チャプターを取得
             /** @var Chapter $chapter */
             $chapter = Chapter::with('course')->findOrFail($chapter_id);
- 
+
             // 現在の講師がチャプターの講座の作成者であるか確認
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
                 return response()->json([
@@ -338,7 +337,7 @@ class LessonController extends Controller
                     'message' => 'Invalid instructor_id.'
                 ], 403);
             }
- 
+
             // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
             if ((int) $course_id !== $chapter->course->id) {
                 return response()->json([
@@ -346,28 +345,27 @@ class LessonController extends Controller
                     'message' => 'Invalid course_id.',
                 ], 403);
             }
- 
+
             // 認可チェックをパスした後にトランザクションを開始
             DB::beginTransaction();
 
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
- 
+
             DB::commit();
- 
+
             return response()->json([
                 'result' => true,
             ]);
-	        } catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete lessons.',
+            'result' => false,
+            'message' => 'Failed to delete lessons.',
             ], 500);
-        
         }
-}
+    }
 
     /**
      * レッスン並び替えAPI

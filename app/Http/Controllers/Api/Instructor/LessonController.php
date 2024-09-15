@@ -324,7 +324,6 @@ class LessonController extends Controller
     */
     public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        DB::beginTransaction();
 	
 	try {
 
@@ -348,6 +347,9 @@ class LessonController extends Controller
                 ], 403);
             }
  
+            // 認可チェックをパスした後にトランザクションを開始
+            DB::beginTransaction();
+
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
  
@@ -356,7 +358,7 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-	} catch (Exception $e) {
+	        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

@@ -267,14 +267,10 @@ class ChapterController extends Controller
             // course_id に紐づくすべてのチャプターを取得
             $chapters = Chapter::where('course_id', $courseId)->get();
 
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
-                //インストラクターIDのバリデーション
+            $chapters->each(function (Chapter $chapter) use ($instructorIds) {
+                // 自分、または配下の講師の講座のチャプターでなければエラー応答
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
-                }
-                //コースIDのバリデーション
-                if ((int) $courseId !== $chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course.');
                 }
             });
 

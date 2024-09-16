@@ -25,8 +25,6 @@ class ChapterDeleteAllRequest extends FormRequest
     {
         return [
            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-           'chapters' => ['required', 'array'],
-           'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }
 

@@ -322,7 +322,7 @@ class LessonController extends Controller
     * @param RDeleteAllLessonsRequest $request
     * @return JsonResponse
     */
-    public function deleteAll(DeleteAllLessonsRequest $request ): JsonResponse
+    public function deleteAll(DeleteAllLessonsRequest $request): JsonResponse
     {
 
         try {

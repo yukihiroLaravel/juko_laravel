@@ -13,7 +13,7 @@ class DeleteAllLessonsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // 認証チェックが必要であれば、適宜追加してください。
+        return true;
     }
 
     /**

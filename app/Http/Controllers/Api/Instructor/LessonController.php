@@ -23,7 +23,7 @@ use App\Http\Requests\Instructor\LessonPutStatusRequest;
 use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Instructor\DeleteAllLessonsRequest;
 use App\Model\Chapter;
 
 class LessonController extends Controller
@@ -319,16 +319,16 @@ class LessonController extends Controller
     /**
     * チャプターに紐づく全レッスンを削除するAPI
     *
-    * @param Requestt $request
+    * @param RDeleteAllLessonsRequest $request
     * @return JsonResponse
     */
-    public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
+    public function deleteAll(DeleteAllLessonsRequest $request ): JsonResponse
     {
 
         try {
             // チャプターを取得
             /** @var Chapter $chapter */
-            $chapter = Chapter::with('course')->findOrFail($chapter_id);
+            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
             // 現在の講師がチャプターの講座の作成者であるか確認
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
@@ -339,7 +339,7 @@ class LessonController extends Controller
             }
 
             // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-            if ((int) $course_id !== $chapter->course->id) {
+            if ((int) $request->course_id !== $chapter->course->id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid course_id.',

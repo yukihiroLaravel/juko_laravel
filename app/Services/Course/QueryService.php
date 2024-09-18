@@ -47,10 +47,11 @@ class QueryService
      * ログイン中のマネージャー及び配下の講師の所有するコースリストを個別指定して取得
      *
      * @param int $instructorId
+     * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getCoursesByManagerInstructorId(int $instructorId): LengthAwarePaginator
+    public function getPaginatedCoursesByInstructorId(int $instructorId, int $perPage): LengthAwarePaginator
     {
-        return Course::where('instructor_id', $instructorId)->paginate(5);
+        return Course::where('instructor_id', $instructorId)->paginate($perPage);
     }
 }

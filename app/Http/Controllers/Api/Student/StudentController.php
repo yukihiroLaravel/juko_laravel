@@ -14,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Student\QueryService;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Http\Requests\Student\StudentPostRequest;
 use App\Http\Requests\Student\StudentPatchRequest;
@@ -33,9 +34,9 @@ class StudentController extends Controller
      * @param Request $request
      * @return StudentShowResource
      */
-    public function show(Request $request)
+    public function show(Request $request, QueryService $queryService)
     {
-        $student = Student::findOrFail($request->user()->id);
+        $student = $queryService->get($request->student_id);
         return new StudentShowResource($student);
     }
 

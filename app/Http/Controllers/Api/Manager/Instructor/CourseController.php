@@ -8,6 +8,7 @@ use App\Http\Resources\Manager\InstructorCourseIndexResource;
 use App\Model\Instructor;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Course\QueryService;
+use Illuminate\Http\JsonResponse;
 
 class CourseController extends Controller
 {
@@ -16,9 +17,9 @@ class CourseController extends Controller
      *
      * @param InstructorCourseIndexRequest $request
      * @param QueryService $queryService
-     * @return InstructorCourseIndexResource|\Illuminate\Http\JsonResponse
+     * @return InstructorCourseIndexResource|JsonResponse
      */
-    public function index(InstructorCourseIndexRequest $request, QueryService $queryService): InstructorCourseIndexResource
+    public function index(InstructorCourseIndexRequest $request, QueryService $queryService)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -27,7 +28,7 @@ class CourseController extends Controller
         $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
-        
+
         // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (!in_array((int)$request->instructor_id, $instructorIds, true)) {
             return response()->json([
@@ -37,7 +38,7 @@ class CourseController extends Controller
         }
 
         $courses = $queryService->getPaginatedCoursesByInstructorId($request->instructor_id, 5);
-            
+
         return new InstructorCourseIndexResource($courses);
     }
 }

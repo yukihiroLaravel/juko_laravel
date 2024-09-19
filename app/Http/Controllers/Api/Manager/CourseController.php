@@ -52,11 +52,11 @@ class CourseController extends Controller
      *
      * @param CourseShowRequest $request
      * @param QueryService $queryService
-     * @return CourseShowResource|\Illuminate\Http\JsonResponse
+     * @return CourseShowResource|JsonResponse
      */
-    public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(CourseShowRequest $request, QueryService $queryService)
     {
-        // ユーザID取得
+        // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得

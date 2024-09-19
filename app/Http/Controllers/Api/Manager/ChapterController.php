@@ -261,11 +261,13 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
+        DB::beginTransaction();
+
         try {
             // リクエストから course_id を取得
             $courseId = $request->input('course_id');
             // course_id に紐づくすべてのチャプターを取得
-            $chapters = Chapter::where('course_id', $courseId)->get();
+            $chapters = Chapter::with('course')->where('course_id', $courseId)->get();
 
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -274,7 +276,6 @@ class ChapterController extends Controller
                 }
             });
 
-            DB::beginTransaction();
             //course_idに関連する全てのチャプターを削除
             Chapter::where('course_id', $courseId)->delete();
             //全て成功した場合にコミット
@@ -285,6 +286,8 @@ class ChapterController extends Controller
             ]);
         } catch (ValidationErrorException $e) {
             //バリデーションエラーが発生した場合の処理
+            DB::rollBack();
+            Log::error($e);
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),

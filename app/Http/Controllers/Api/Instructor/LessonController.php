@@ -23,7 +23,7 @@ use App\Http\Requests\Instructor\LessonPutStatusRequest;
 use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\DeleteAllLessonsRequest;
+use App\Http\Requests\Instructor\LessonsAllDeleteRequest;
 use App\Model\Chapter;
 
 class LessonController extends Controller
@@ -319,10 +319,10 @@ class LessonController extends Controller
     /**
     * チャプターに紐づく全レッスンを削除するAPI
     *
-    * @param RDeleteAllLessonsRequest $request
+    * @param LessonsAllDeleteRequest $request
     * @return JsonResponse
     */
-    public function deleteAll(DeleteAllLessonsRequest $request ): JsonResponse
+    public function deleteAll(LessonsAllDeleteRequest $request ): JsonResponse
     {
 
         try {

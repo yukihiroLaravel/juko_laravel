@@ -24,8 +24,20 @@ class LessonsAllDeleteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id','deleted_at,NULL'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id','deleted_at,NULL'],
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id'],
         ];
     }
+
+    /**
+     * バリデーション前にリクエストデータを加工する
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
+    }
 }
+

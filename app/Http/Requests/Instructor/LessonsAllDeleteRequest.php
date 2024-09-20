@@ -37,4 +37,3 @@ class LessonsAllDeleteRequest extends FormRequest
         ];
     }
 }
-

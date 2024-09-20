@@ -19,9 +19,9 @@ use App\Http\Requests\Manager\ChapterStoreRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\ChapterDeleteRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
+use App\Http\Requests\Manager\ChapterDeleteAllRequest;
 use App\Http\Requests\Manager\ChapterPutStatusRequest;
 use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
-use App\Http\Requests\Manager\ChapterDeleteAllRequest;
 use App\Http\Requests\Manager\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Manager\ChaptersPatchStatusRequest;
@@ -250,23 +250,25 @@ class ChapterController extends Controller
      * 全チャプター削除API
      *
      * @param ChapterDeleteAllRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function deleteAll(ChapterDeleteAllRequest $request)
     {
-        //現在のユーザーを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
+        // ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
         // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         DB::beginTransaction();
 
         try {
-            // リクエストから course_id を取得
+            // リクエストから講座IDを取得
             $courseId = $request->input('course_id');
-            // course_id に紐づくすべてのチャプターを取得
+
+            // チャプターを取得
             $chapters = Chapter::with('course')->where('course_id', $courseId)->get();
 
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
@@ -276,16 +278,16 @@ class ChapterController extends Controller
                 }
             });
 
-            //course_idに関連する全てのチャプターを削除
+            // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
-            //全て成功した場合にコミット
+
             DB::commit();
-            //成功した場合のレスポンス
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
-            //バリデーションエラーが発生した場合の処理
+            // バリデーションエラーが発生した場合の処理
             DB::rollBack();
             Log::error($e);
             return response()->json([

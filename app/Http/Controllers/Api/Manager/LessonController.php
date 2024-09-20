@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
@@ -20,8 +19,10 @@ use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonUpdateRequest;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
+use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 
 class LessonController extends Controller
@@ -30,7 +31,7 @@ class LessonController extends Controller
      * レッスン新規作成API
      *
      * @param LessonStoreRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(LessonStoreRequest $request)
     {
@@ -90,7 +91,7 @@ class LessonController extends Controller
      * レッスン更新API
      *
      * @param  LessonUpdateRequest $request
-     *  @return \Illuminate\Http\JsonResponse
+     *  @return JsonResponse
      */
     public function update(LessonUpdateRequest $request)
     {
@@ -222,7 +223,7 @@ class LessonController extends Controller
      * レッスン並び替えAPI
      *
      * @param  LessonSortRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function sort(LessonSortRequest $request)
     {
@@ -288,16 +289,62 @@ class LessonController extends Controller
         }
     }
 
-    public function updateStatus()
+     /**
+     * レッスンステータス更新API
+     *
+     * @param LessonPatchStatusRequest $request
+     * @return JsonResponse
+     */
+    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 指定されたレッスンを取得
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+
+        if (!in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
+            // 自身もしくは配下の講師の講座でなければエラー応答
+            return response()->json([
+                'result' => false,
+                "message" => 'Invalid instructor_id.'
+            ], 403);
+        }
+
+        if ((int) $request->course_id !== $lesson->chapter->course->id) {
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if ((int) $request->chapter_id !== $lesson->chapter->id) {
+            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
+            return response()->json([
+                'result'  => false,
+                'message' => 'Invalid chapter_id.',
+            ], 403);
+        }
+
+        $lesson->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**
      * レッスンタイトル変更API
      *
      * @param LessonUpdateTitleRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request)
     {

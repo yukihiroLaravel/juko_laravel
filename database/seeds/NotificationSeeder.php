@@ -32,7 +32,7 @@ class NotificationSeeder extends Seeder
                 'type' => Notification::TYPE_ONCE_INT,
                 'start_date' => '2023-08-01 00:00:00',
                 'end_date' => CarbonImmutable::now()->addMonth(),
-                'content' => '受講生管理画面にお知らせ機能が追加されました。コースごとにお知らせをお送りします。',
+                'content' => '受講生管理画面にお知らせ機能が追加されました。講座ごとにお知らせをお送りします。',
                 'created_at' => CarbonImmutable::now(),
                 'updated_at' => CarbonImmutable::now(),
             ],

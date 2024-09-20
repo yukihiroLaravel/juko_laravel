@@ -4,7 +4,7 @@ namespace App\Services\Course;
 
 use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class QueryService
 {
@@ -31,7 +31,7 @@ class QueryService
     }
 
     /**
-     * 講師IDのリストから講座情報を取得
+     * ログイン中のマネージャーの所有するコースリストと配下の講師の所有するコースリストを取得
      *
      * @param array<int> $instructorIds
      * @return Collection<Course>
@@ -44,7 +44,7 @@ class QueryService
     }
 
     /**
-     * 講師IDから講座情報を取得（ページネーション）
+     * ログイン中のマネージャー及び配下の講師の所有するコースリストを個別指定して取得
      *
      * @param int $instructorId
      * @param int $perPage

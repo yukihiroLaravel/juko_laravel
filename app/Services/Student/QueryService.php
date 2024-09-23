@@ -12,7 +12,7 @@ class QueryService
      * @param int $studentId
      * @return Student
      */
-    public function getStudent(int $studentId):Student
+    public function getStudent(int $studentId): Student
     {
         return Student::find($studentId);
     }

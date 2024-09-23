@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\StudentAuthorization;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -32,11 +33,16 @@ class StudentController extends Controller
      * 生徒情報取得API
      *
      * @param Request $request
+     * @param QueryService $queryService
      * @return StudentShowResource
      */
     public function show(Request $request, QueryService $queryService)
     {
-        $student = $queryService->get($request->student_id);
+        // ユーザーID取得(認証済みのユーザーを取得)
+        $studentId = $request->user()->id;
+        // 生徒情報を取得 (getStudent メソッドを使用)
+        $student = $queryService->getStudent($studentId);
+        // 生徒の詳細情報をリソース形式で返す
         return new StudentShowResource($student);
     }
 

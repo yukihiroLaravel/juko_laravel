@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Instructor;
+namespace App\Services\Manager;
 
 use App\Model\Student;
 

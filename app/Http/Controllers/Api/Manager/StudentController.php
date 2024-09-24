@@ -9,7 +9,7 @@ use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Services\Chapter\QueryService;
+use App\Services\Manager\QueryService;
 use App\Http\Requests\Manager\StudentShowRequest;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;

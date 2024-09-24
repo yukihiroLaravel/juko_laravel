@@ -431,12 +431,11 @@ class LessonController extends Controller
                 ], 403);
             }
     
-            // マネージャーがチャプターのコース作成者かを確認
-            if ($instructorId !== $chapter->course->instructor_id) {
+            if ((int) $course_id !== $chapter->course_id) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Invalid instructor_id.'
-                ], 403); // 認可エラー
+                    'message' => 'Invalid course_id.',
+                ], 403);
             }
     
             // チャプターに紐づく全レッスンを削除

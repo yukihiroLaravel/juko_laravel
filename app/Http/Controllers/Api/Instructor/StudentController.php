@@ -88,6 +88,7 @@ class StudentController extends Controller
      * 受講生を取得
      *
      * @param StudentShowRequest $request
+     * @param QueryService $queryService
      * @return StudentShowResource|JsonResponse
      */
     public function show(StudentShowRequest $request, QueryService $queryService)

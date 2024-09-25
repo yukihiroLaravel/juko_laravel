@@ -101,6 +101,7 @@ class StudentController extends Controller
      * 受講生詳細取得API
      *
      * @param StudentShowRequest $request
+     * @param QueryService $queryService
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(StudentShowRequest $request, QueryService $queryService)

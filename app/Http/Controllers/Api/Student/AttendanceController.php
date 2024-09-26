@@ -9,6 +9,7 @@ use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Attendance\QueryService;
 use App\Http\Requests\Student\AttendanceShowRequest;
 use App\Http\Requests\Student\AttendanceIndexRequest;
 use App\Http\Resources\Student\AttendanceShowResource;
@@ -22,29 +23,16 @@ class AttendanceController extends Controller
 {
     /**
      * 受講一覧取得API
-     *
+     * 
      * @param AttendanceIndexRequest $request
+     * @param QueryService $queryService
      * @return AttendanceIndexResource
      */
-    public function index(AttendanceIndexRequest $request)
+    public function index(AttendanceIndexRequest $request, QueryService $queryService)
     {
         $studentId = Auth::id();
 
-        if (!$request->search_word) {
-            $attendances = Attendance::with('course.instructor')
-            ->where('student_id', $studentId)
-            ->whereHas('course', function (Builder $query) {
-                $query->where('status', Course::STATUS_PUBLIC);
-            })->get();
-            return new AttendanceIndexResource($attendances);
-        }
-
-        $attendances = Attendance::with('course.instructor')
-        ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use ($request) {
-            $query->where('title', 'like', "%{$request->search_word}%");
-            $query->where('status', Course::STATUS_PUBLIC);
-        })->get();
+        $attendances = $queryService->getAttendances($studentId, $request);
 
         return new AttendanceIndexResource($attendances);
     }

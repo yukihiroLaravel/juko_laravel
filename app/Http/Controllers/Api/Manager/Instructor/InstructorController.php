@@ -65,6 +65,7 @@ class InstructorController extends Controller
 
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 講師情報を取得

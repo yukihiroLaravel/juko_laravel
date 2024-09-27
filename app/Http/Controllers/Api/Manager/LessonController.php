@@ -427,7 +427,7 @@ class LessonController extends Controller
                 // 認可されていない場合はエラーを返す
                 return response()->json([
                     'result'  => false,
-                    'message' => "Forbidden, not allowed to edit this course.",
+                    'message' => "Invalid instructor_id.",
                 ], 403);
             }
     

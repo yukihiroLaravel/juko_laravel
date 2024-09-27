@@ -65,7 +65,6 @@ class InstructorController extends Controller
 
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 講師情報を取得
@@ -74,6 +73,23 @@ class InstructorController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new InstructorIndexResource($instructors);
+    }
+
+    /**
+     * 講師が所有する講座の一覧を取得するAPI
+     *
+     * @return InstructorCourseIndexResource
+     */
+    public function courses()
+    {
+        // 現在の講師を取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 講師が所有する講座をページネーション付きで取得
+        $courses = Course::where('instructor_id', $instructorId)
+            ->paginate(10);  // 1ページあたりの講座数を設定（例：10）
+
+        return new InstructorCourseIndexResource($courses);
     }
 
     /**

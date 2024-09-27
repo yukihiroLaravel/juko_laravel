@@ -35,4 +35,18 @@ class InstructorIndexResource extends JsonResource
             ],
         ];
     }
+    private function mapCourses(Collection $courses)
+    {
+    return $courses->map(function (Course $course) {
+        return [
+            "course_id" => $course->id,
+            "title" => $course->title,
+            "status" => $course->status,
+            "created_at" => $course->created_at,  // 作成日を追加
+            "updated_at" => $course->updated_at,  // 更新日を追加
+        ];
+    })
+    ->toArray();
+    }
+
 }

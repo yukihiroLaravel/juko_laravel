@@ -37,10 +37,8 @@ class StudentController extends Controller
      */
     public function show(Request $request, QueryService $queryService)
     {
-        // ユーザーID取得(認証済みのユーザーを取得)
-        $studentId = $request->user()->id;
-        // 生徒情報を取得 (getStudent メソッドを使用)
-        $student = $queryService->getStudent($studentId);
+        // 生徒情報を取得
+        $student = $queryService->getStudent($request->user()->id);
         // 生徒の詳細情報をリソース形式で返す
         return new StudentShowResource($student);
     }

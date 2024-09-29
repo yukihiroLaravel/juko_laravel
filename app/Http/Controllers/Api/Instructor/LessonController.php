@@ -349,6 +349,16 @@ class LessonController extends Controller
             DB::beginTransaction();
 
             try {
+                 // チャプターに紐づく各レッスンを確認
+            foreach ($chapter->lessons as $lesson) {
+            // レッスンに受講者がいる場合、削除を禁止
+            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Lesson ID ' . $lesson->id . ' has attendance and cannot be deleted.'
+                ], 403);
+            }
+            }
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
 
@@ -357,7 +367,7 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
+            } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             return response()->json([

@@ -2,10 +2,7 @@
 
 namespace App\Services\Student;
 
-
 use App\Model\Student;
-use Http\Controllers\Api\Instructor;
-use Http\Controllers\Api\Manager;
 
 class QueryService 
 

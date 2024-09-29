@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Services\Instructor\QueryService;
+use App\Services\Student\QueryService;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Requests\Instructor\StudentStoreRequest;

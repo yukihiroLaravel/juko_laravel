@@ -95,7 +95,7 @@ class StudentController extends Controller
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        
+
         // 認証された講師のIDを取得
         $instructorCourseIds = Auth::guard('instructor')->user()->id;
 

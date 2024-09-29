@@ -40,9 +40,9 @@ class InstructorCourseIndexResource extends JsonResource
             return [
                 "course_id" => $course->id,
                 "title" => $course->title,
-                "status" => $course->status
+                "status" => $course->status,
             ];
         })
         ->toArray();
-    }
+    } 
 }

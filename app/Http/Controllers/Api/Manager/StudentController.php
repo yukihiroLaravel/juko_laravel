@@ -9,6 +9,7 @@ use App\Model\Instructor;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Student\QueryService;
 use App\Http\Requests\Manager\StudentShowRequest;
 use App\Http\Requests\Manager\StudentIndexRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;
@@ -100,9 +101,10 @@ class StudentController extends Controller
      * 受講生詳細取得API
      *
      * @param StudentShowRequest $request
+     * @param QueryService $queryService
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request)
+    public function show(StudentShowRequest $request, QueryService $queryService)
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -116,7 +118,7 @@ class StudentController extends Controller
         $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = Student::with(['attendances'])->findOrFail($request->student_id);
+        $student = $queryService->getStudent($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorShowResource;
+use App\Services\Instructor\QueryService;
 
 class InstructorController extends Controller
 {

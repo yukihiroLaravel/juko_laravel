@@ -14,6 +14,7 @@ use App\Http\Requests\Manager\InstructorIndexRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Resources\Manager\InstructorShowResource;
 use App\Http\Resources\Manager\InstructorIndexResource;
+use App\Services\Instructor\QueryService;
 
 class InstructorController extends Controller
 {
@@ -23,13 +24,13 @@ class InstructorController extends Controller
      * @param InstructorShowRequest $request
      * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(InstructorShowRequest $request)
+    public function show(InstructorShowRequest $request,QueryService $queryService)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
+        $manager = $queryService->getManagerWithSubordinates($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -42,7 +43,7 @@ class InstructorController extends Controller
         }
 
         /** @var Instructor $instructor */
-        $instructor = Instructor::findOrFail($request->instructor_id);
+        $instructor = $queryService->getInstructor($request->instructor_id);
 
         return new InstructorShowResource($instructor);
     }
@@ -53,7 +54,7 @@ class InstructorController extends Controller
      * @param InstructorIndexRequest $request
      * @return InstructorIndexResource
      */
-    public function index(InstructorIndexRequest $request)
+    public function index(InstructorIndexRequest $request,QueryService $queryService)
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);
@@ -64,14 +65,12 @@ class InstructorController extends Controller
         $managerId = Auth::guard('instructor')->user()->id;
 
         /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
+        $manager = $queryService->getManagerWithSubordinates($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 講師情報を取得
-        $instructors = Instructor::whereIn('id', $instructorIds)
-            ->orderBy($sortBy, $order)
-            ->paginate($perPage, ['*'], 'page', $page);
+        $instructors = $queryService->getInstructorsWithPagination($instructorIds, $sortBy, $order, $perPage, $page);
 
         return new InstructorIndexResource($instructors);
     }

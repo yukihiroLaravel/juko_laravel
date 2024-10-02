@@ -325,55 +325,56 @@ class LessonController extends Controller
     public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
     {
 
-            // チャプターを取得
-            /** @var Chapter $chapter */
-            $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+        // チャプターを取得
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
-            // 現在の講師がチャプターの講座の作成者であるか確認
-            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.'
-                ], 403);
-            }
+        // 現在の講師がチャプターの講座の作成者であるか確認
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id.'
+            ], 403);
+        }
 
-            // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-            if ((int) $request->course_id !== $chapter->course->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid course_id.',
-                ], 403);
-            }
+        // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
 
-            // 認可チェックをパスした後にトランザクションを開始
-            DB::beginTransaction();
-
-            try {
-                 // チャプターに紐づく各レッスンを確認
-            foreach ($chapter->lessons as $lesson) {
+        // チャプターに紐づく各レッスンを確認
+        foreach ($chapter->lessons as $lesson) {
             // レッスンに受講者がいる場合、削除を禁止
-            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Lesson ID ' . $lesson->id . ' has attendance and cannot be deleted.'
-                ], 403);
-            }
-            }
-            // チャプターに紐づく全レッスンを削除
-            $chapter->lessons()->delete();
+                 ], 403);
+            }              
+        }
+        // 認可チェックをパスした後にトランザクションを開始
+        DB::beginTransaction();
 
-            DB::commit();
+        try {
+                 
+        // チャプターに紐づく全レッスンを削除
+        $chapter->lessons()->delete();
+
+        DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-            } catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-            'result' => false,
-            'message' => 'Failed to delete lessons.',
-            ], 500);
+                return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lessons.',
+                ], 500);
         }
     }
 

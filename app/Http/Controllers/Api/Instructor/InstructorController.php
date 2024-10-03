@@ -21,10 +21,10 @@ class InstructorController extends Controller
      *
      * @return InstructorShowResource
      */
-    public function show()
+    public function show(QueryService $queryService)
     {
         /** @var Instructor $instructor */
-        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
+        $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);
         return new InstructorShowResource($instructor);
     }
 

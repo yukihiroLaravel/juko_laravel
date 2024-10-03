@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Services\Instructor;
+
 use App\Model\Instructor;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -26,7 +28,7 @@ class QueryService
     {
         return Instructor::with('managings')->findOrFail($managerId);
     }
-    
+
      /**
      * マネージャーとその配下の講師をIDリストで取得し、ソートおよびページネーションを適用
      *

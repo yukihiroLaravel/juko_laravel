@@ -24,7 +24,7 @@ class InstructorController extends Controller
      * @param InstructorShowRequest $request
      * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(InstructorShowRequest $request,QueryService $queryService)
+    public function show(InstructorShowRequest $request, QueryService $queryService)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -54,7 +54,7 @@ class InstructorController extends Controller
      * @param InstructorIndexRequest $request
      * @return InstructorIndexResource
      */
-    public function index(InstructorIndexRequest $request,QueryService $queryService)
+    public function index(InstructorIndexRequest $request, QueryService $queryService)
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);

@@ -2,6 +2,7 @@
 namespace App\Services\Instructor;
 use App\Model\Instructor;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class QueryService
 {
@@ -22,7 +23,7 @@ class QueryService
      * @param int $managerId
      * @return Instructor
      */
-    public function getManagerWithSubordinates(int $managerId): Instructor
+    public function getManagerWithManagings(int $managerId): Instructor
     {
         return Instructor::with('managings')->findOrFail($managerId);
     }
@@ -37,7 +38,7 @@ class QueryService
      * @param int $page
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getInstructorsWithPagination(array $instructorIds, string $sortBy, string $order, int $perPage, int $page)
+    public function getInstructorsWithPagination(array $instructorIds, string $sortBy, string $order, int $perPage, int $page): LengthAwarePaginator
     {
         return Instructor::whereIn('id', $instructorIds)
             ->orderBy($sortBy, $order)

@@ -30,7 +30,7 @@ class InstructorController extends Controller
 
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = $queryService->getManagerWithSubordinates($managerId);
+        $manager = $queryService->getManagerWithManagings($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -65,7 +65,7 @@ class InstructorController extends Controller
         $managerId = Auth::guard('instructor')->user()->id;
 
         /** @var Instructor $manager */
-        $manager = $queryService->getManagerWithSubordinates($managerId);
+        $manager = $queryService->getManagerWithManagings($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 

@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -274,8 +275,15 @@ class ChapterController extends Controller
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
+                // 受講中の講座があれば、エラー応答
+                if (LessonAttendance::where('course_id', $chapter->course->id)->exists()){
+                    return response()->json([
+                         'result' => false,
+                         'message' => 'This lesson has attendance.'    
+                    ], 403);
+                }
             });
-
+                
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
 
@@ -300,7 +308,7 @@ class ChapterController extends Controller
                 'result' => false,
                 'message' => 'Failed to delete chapters.',
             ], 500);
-        }
+        } 
     }
 
     /**

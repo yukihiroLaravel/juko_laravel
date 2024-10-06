@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Student\QueryService;
 use App\Http\Requests\Instructor\StudentShowRequest;
 use App\Http\Requests\Instructor\StudentIndexRequest;
 use App\Http\Requests\Instructor\StudentStoreRequest;
@@ -87,19 +88,20 @@ class StudentController extends Controller
      * 受講生を取得
      *
      * @param StudentShowRequest $request
+     * @param QueryService $queryService
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request)
+    public function show(StudentShowRequest $request, QueryService $queryService)
     {
-        // 認証された講師のIDを取得
-        $instructorCourseIds = Auth::guard('instructor')->user()->id;
+        // 認証ユーザー情報取得
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         // 認証された講師が作成した講座のIDを取得
-        $courseIds = Course::where('instructor_id', $instructorCourseIds)->pluck('id');
+        $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // リクエストされた受講生を取得
         /** @var Student $student */
-        $student = Student::with(['attendances.course'])->findOrFail($request->student_id);
+        $student = $queryService->getStudent($request->student_id);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

@@ -40,7 +40,7 @@ class QueryService
      * @param int $page
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getInstructorsWithPagination(array $instructorIds, string $sortBy, string $order, int $perPage, int $page): LengthAwarePaginator
+    public function getPaginatedInstructors(array $instructorIds, string $sortBy, string $order, int $perPage, int $page): LengthAwarePaginator
     {
         return Instructor::whereIn('id', $instructorIds)
             ->orderBy($sortBy, $order)

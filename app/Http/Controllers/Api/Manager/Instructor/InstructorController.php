@@ -70,7 +70,7 @@ class InstructorController extends Controller
         $instructorIds[] = $manager->id;
 
         // 講師情報を取得
-        $instructors = $queryService->getInstructorsWithPagination($instructorIds, $sortBy, $order, $perPage, $page);
+        $instructors = $queryService->getPaginatedInstructors($instructorIds, $sortBy, $order, $perPage, $page);
 
         return new InstructorIndexResource($instructors);
     }

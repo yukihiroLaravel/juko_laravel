@@ -336,7 +336,7 @@ class LessonController extends Controller
                 'message' => 'Invalid instructor_id.'
             ], 403);
         }
-        
+
         // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
         if ((int) $request->course_id !== $chapter->course->id) {
             return response()->json([
@@ -355,15 +355,13 @@ class LessonController extends Controller
         if ($attendedLessons->isNotEmpty()) {
             return response()->json([
                 'result' => false,
-                'message' => 'Lesson IDs' .implode(', ',$attendedLessons->toArray()). 'have attendance and cannot be deleted.'
-            ],403);
-        
+                'message' => 'Lesson IDs' . implode(', ', $attendedLessons->toArray()) . 'have attendance and cannot be deleted.'
+            ], 403);
         }
         // 認可チェックをパスした後にトランザクションを開始
         DB::beginTransaction();
 
         try {
-                 
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
 

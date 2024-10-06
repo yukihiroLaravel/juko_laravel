@@ -3,8 +3,7 @@
 namespace App\Services\Instructor;
 
 use App\Model\Instructor;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class QueryService
 {
@@ -20,7 +19,7 @@ class QueryService
     }
 
     /**
-     * マネージャーとその配下の講師を取得する
+     * 講師とその配下の講師を取得
      *
      * @param int $managerId
      * @return Instructor
@@ -30,15 +29,15 @@ class QueryService
         return Instructor::with('managings')->findOrFail($managerId);
     }
 
-     /**
-     * マネージャーとその配下の講師をIDリストで取得し、ソートおよびページネーションを適用
+    /**
+     * 講師とその配下の講師を取得(ページネーション)
      *
      * @param array $instructorIds
      * @param string $sortBy
      * @param string $order
      * @param int $perPage
      * @param int $page
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
     public function getPaginatedInstructors(array $instructorIds, string $sortBy, string $order, int $perPage, int $page): LengthAwarePaginator
     {

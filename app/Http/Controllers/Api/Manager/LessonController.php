@@ -437,6 +437,17 @@ class LessonController extends Controller
                     'message' => 'Invalid course_id.',
                 ], 403);
             }
+            
+            // 学生が登録しているか、コース/章で進歩しているかどうかを確認します
+            $hasAttendance = Attendance::where('course_id', $course_id)->exists();
+
+            if ($hasAttendance) {
+            // 学生が登録している場合、または進歩している場合はエラーを返します
+                return response()->json([
+                    'result' => false,
+                    'message' => 'This course has attendance.',
+                ], 403);
+            }
     
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();

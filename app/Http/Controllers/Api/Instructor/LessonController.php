@@ -345,19 +345,17 @@ class LessonController extends Controller
             ], 403);
         }
 
-        // チャプターに紐づく各レッスンを確認（各レッスンのIDだけを取り出す）
+        // チャプターに紐づく全レッスンIDを取得
         $lessonIds = $chapter->lessons->pluck('id');
-
-        //そのレッスンに出席があるか確認
-        $attendedLessons = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-
-        //出席のあるレッスンがあれば削除を禁止
-        if ($attendedLessons->isNotEmpty()) {
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+        if ($attendedLessonIds->isNotEmpty()) {
+            // 出席のあるレッスンがあれば削除を許可しない
             return response()->json([
                 'result' => false,
-                'message' => 'Lesson IDs' . implode(', ', $attendedLessons->toArray()) . 'have attendance and cannot be deleted.'
+                'message' => 'This lessons contains attendance.'
             ], 403);
         }
+
         // 認可チェックをパスした後にトランザクションを開始
         DB::beginTransaction();
 

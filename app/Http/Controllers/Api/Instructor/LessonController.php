@@ -330,32 +330,32 @@ class LessonController extends Controller
             $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
             // 現在の講師がチャプターの講座の作成者であるか確認
-            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.'
-                ], 403);
-            }
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id.'
+            ], 403);
+        }
 
             // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-            if ((int) $request->course_id !== $chapter->course->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid course_id.',
-                ], 403);
-            }
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
 
             // 認可チェックをパスした後にトランザクションを開始
             DB::beginTransaction();
 
-            try {
+        try {
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
 
             DB::commit();
 
             return response()->json([
-                'result' => true,
+            'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

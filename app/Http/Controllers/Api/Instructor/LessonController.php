@@ -23,6 +23,8 @@ use App\Http\Requests\Instructor\LessonPutStatusRequest;
 use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
 use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
+use App\Http\Requests\Instructor\LessonsAllDeleteRequest;
+use App\Model\Chapter;
 
 class LessonController extends Controller
 {
@@ -312,6 +314,68 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+    * チャプターに紐づく全レッスンを削除するAPI
+    *
+    * @param LessonsAllDeleteRequest $request
+    * @return JsonResponse
+    */
+    public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
+    {
+
+        // チャプターを取得
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        // 現在の講師がチャプターの講座の作成者であるか確認
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid instructor_id.'
+            ], 403);
+        }
+
+        // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
+        if ((int) $request->course_id !== $chapter->course->id) {
+            return response()->json([
+                'result' => false,
+                'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id');
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+        if ($attendedLessonIds->isNotEmpty()) {
+            // 出席のあるレッスンがあれば削除を許可しない
+            return response()->json([
+                'result' => false,
+                'message' => 'This lessons contains attendance.'
+            ], 403);
+        }
+
+        // 認可チェックをパスした後にトランザクションを開始
+        DB::beginTransaction();
+
+        try {
+            // チャプターに紐づく全レッスンを削除
+            $chapter->lessons()->delete();
+
+            DB::commit();
+
+                return response()->json([
+                    'result' => true,
+                ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lessons.',
+            ], 500);
+        }
     }
 
     /**

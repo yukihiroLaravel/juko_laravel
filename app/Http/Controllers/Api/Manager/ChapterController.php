@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
@@ -268,21 +269,24 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
 
             // チャプターを取得
-            $chapters = Chapter::with('course')->where('course_id', $courseId)->get();
-
+            $chapters = Chapter::with('course', 'lessons')->where('course_id', $courseId)->get();
+        
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
-                // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
-                }
-                // 受講中の講座があれば、エラー応答
-                if (LessonAttendance::where('course_id', $chapter->course->id)->exists()){
-                    return response()->json([
-                         'result' => false,
-                         'message' => 'This lesson has attendance.'    
-                    ], 403);
-                }
-            });
+            // 自分、または配下の講師の講座のチャプターでなければエラー応答
+            if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                throw new ValidationErrorException('Invalid instructor_id.');
+            }
+            // チャプターに紐づく全レッスンIDを取得
+            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+            $attendedLessonIds = LessonAttendance::where('lesson_id', $lesson->id)->exists();
+            if ($attendedLessonIds) {
+                // 受講中のレッスンがあれば、エラー応答
+                return response()->json([
+                    'result' => false,
+                    'message' => 'This lesson has attendance.'
+               ], 403);
+           }
+        });
                 
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();

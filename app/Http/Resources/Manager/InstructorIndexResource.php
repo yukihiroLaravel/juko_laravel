@@ -27,6 +27,7 @@ class InstructorIndexResource extends JsonResource
                     'email' => $instructor->email,
                     'profile_image' => $instructor->profile_image,
                     'created_at' => $instructor->created_at,
+                    'course_count' => $instructor->courses()->count(),
                 ];
             }),
             'pagination' => [

@@ -66,7 +66,7 @@ class InstructorController extends Controller
 
         /** @var Instructor $manager */
         $manager = $queryService->getManagerWithManagings($managerId);
-    
+
         // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
 

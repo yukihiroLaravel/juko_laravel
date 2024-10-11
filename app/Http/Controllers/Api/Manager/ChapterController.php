@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
@@ -247,11 +246,11 @@ class ChapterController extends Controller
     }
 
     /**
-     * 全チャプター削除API
-     *
-     * @param ChapterDeleteAllRequest $request
-     * @return JsonResponse
-     */
+    * 全チャプター削除API
+    *
+    * @param ChapterDeleteAllRequest $request
+    * @return JsonResponse
+    */
     public function deleteAll(ChapterDeleteAllRequest $request)
     {
         // ログイン中の講師IDを取得
@@ -269,25 +268,24 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
 
             // チャプターを取得
-            $chapters = Chapter::with('course', 'lessons')->where('course_id', $courseId)->get();
-        
+            $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            \Log::debug($lessonIds);
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
-            // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                throw new ValidationErrorException('Invalid instructor_id.');
-            }
+                // 自分、または配下の講師の講座のチャプターでなければエラー応答
+                if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                    throw new ValidationErrorException('Invalid instructor_id.');
+                }
+            });
             // チャプターに紐づく全レッスンIDを取得
-            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
-            $attendedLessonIds = LessonAttendance::where('lesson_id', $lesson->id)->exists();
-            if ($attendedLessonIds) {
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            // whereIn で複数の lesson_id があるかどうかを確認
+            $attendedLessonExists = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
+            if ($attendedLessonExists) {
                 // 受講中のレッスンがあれば、エラー応答
-                return response()->json([
-                    'result' => false,
-                    'message' => 'This lesson has attendance.'
-               ], 403);
-           }
-        });
-                
+                throw new ValidationErrorException('This lesson has attendance.');
+            }
+
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
 
@@ -312,8 +310,9 @@ class ChapterController extends Controller
                 'result' => false,
                 'message' => 'Failed to delete chapters.',
             ], 500);
-        } 
+        }
     }
+
 
     /**
      * チャプター並び替えAPI

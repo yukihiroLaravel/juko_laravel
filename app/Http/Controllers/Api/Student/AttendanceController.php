@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 use App\Services\Attendance\QueryService;
 use App\Http\Requests\Student\AttendanceShowRequest;
 use App\Http\Requests\Student\AttendanceIndexRequest;
@@ -41,17 +39,14 @@ class AttendanceController extends Controller
      * 受講詳細取得API
      *
      * @param AttendanceShowRequest $request
+     * @param QueryService $queryService
      * @return AttendanceShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(AttendanceShowRequest $request)
+    public function show(AttendanceShowRequest $request, QueryService $queryService)
     {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'course.instructor',
-            'lessonAttendances'
-        ])
-        ->findOrFail($request->attendance_id);
-
+        $attendance = $queryService->getAttendanceInDetails($request->attendance_id);
+        
+        //ログインユーザ本人の場合のみリクエストを返す
         if ($attendance->student_id !== $request->user()->id) {
             return response()->json([
                 "result" => false,
@@ -68,16 +63,28 @@ class AttendanceController extends Controller
      * チャプター詳細情報を取得
      *
      * @param AttendanceShowChapterRequest $request
+     * @param QueryService $queryService
      * @return AttendanceShowChapterResource
      */
-    public function showChapter(AttendanceShowChapterRequest $request)
+    public function showChapter(AttendanceShowChapterRequest $request, QueryService $queryService)
     {
-        $attendance = Attendance::with([
-                'course.chapters.lessons',
-                'lessonAttendances'
-            ])
-            ->where('id', $request->attendance_id)
-            ->firstOrFail();
+        $attendance = $queryService->getChapterInDetails($request->attendance_id);
+
+        //ログインユーザ本人の場合のみリクエストを返す
+        if ($attendance->student_id !== $request->user()->id) {
+            return response()->json([
+                "result" => false,
+                "message" => "Access forbidden."
+            ], 403);
+        }
+
+        //存在しないコースIDでエラーを出す認可処理
+        if ($attendance->course_id !== (int) $request->course_id) {
+            return response()->json([
+                "result" => false,
+                "message" => "Forbidden, not allowed to this course."
+            ], 403);
+        }
 
         // 公開されているチャプターのみ抽出
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);

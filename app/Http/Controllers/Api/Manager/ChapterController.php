@@ -269,8 +269,6 @@ class ChapterController extends Controller
 
             // チャプターを取得
             $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
-            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
-            \Log::debug($lessonIds);
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
@@ -279,6 +277,7 @@ class ChapterController extends Controller
             });
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            \Log::debug($lessonIds);
             // whereIn で複数の lesson_id があるかどうかを確認
             $attendedLessonExists = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
             if ($attendedLessonExists) {

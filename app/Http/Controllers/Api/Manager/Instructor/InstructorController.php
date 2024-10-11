@@ -64,12 +64,13 @@ class InstructorController extends Controller
 
         $managerId = Auth::guard('instructor')->user()->id;
 
-        /** @var Instructor $manager */
+         /** @var Instructor $manager */
         $manager = $queryService->getManagerWithManagings($managerId);
+    
+        // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
 
-        // 講師情報を取得
+        // マネージャー自身のIDを除外
         $instructors = $queryService->getPaginatedInstructors($instructorIds, $sortBy, $order, $perPage, $page);
 
         return new InstructorIndexResource($instructors);

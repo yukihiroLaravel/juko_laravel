@@ -64,7 +64,7 @@ class InstructorController extends Controller
 
         $managerId = Auth::guard('instructor')->user()->id;
 
-        //** @var Instructor $manager */
+        /** @var Instructor $manager */
         $manager = $queryService->getManagerWithManagings($managerId);
     
         // 管理する講師のIDを取得

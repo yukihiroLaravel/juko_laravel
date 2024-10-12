@@ -277,7 +277,6 @@ class ChapterController extends Controller
             });
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
-            \Log::debug($lessonIds);
             // whereIn で複数の lesson_id があるかどうかを確認
             $attendedLessonExists = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
             if ($attendedLessonExists) {

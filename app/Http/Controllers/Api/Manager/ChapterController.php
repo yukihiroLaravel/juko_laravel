@@ -274,7 +274,6 @@ class ChapterController extends Controller
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
-<<<<<<< HEAD
             });
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
@@ -284,16 +283,6 @@ class ChapterController extends Controller
                 // 受講中のレッスンがあれば、エラー応答
                 throw new ValidationErrorException('This lesson has attendance.');
             }
-=======
-                // 受講中の講座があれば、エラー応答
-                if (LessonAttendance::where('course_id', $chapter->course->id)->exists()) {
-                    return response()->json([
-                         'result' => false,
-                         'message' => 'This lesson has attendance.'
-                    ], 403);
-                }
-            });
->>>>>>> be2f2620c9bb2e38ec82637acbd242c63615f677
 
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();

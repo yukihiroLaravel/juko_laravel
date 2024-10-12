@@ -223,8 +223,9 @@ class ChapterController extends Controller
                     throw new ValidationErrorException('Invalid course.');
                 }
                 $lessonIds = $chapter->lessons->pluck('id');
-                $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)->pluck('lesson_id');
+                $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
                 if ($attendedLessonIds->isNotEmpty()) {
+                    // 出席情報が存在する場合エラー応答
                     throw new ValidationErrorException('This lesson has attendance.');
                 }
             });

@@ -184,6 +184,16 @@ class ChapterController extends Controller
             ], 403);
         }
 
+        // チャプターが受講中か確認し受講中であればエラー応答
+        $inProgressChapters = ChapterAttendance::whereIn('chapter_id', [$chapter->id])->exists();
+
+        if ($inProgressChapters) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'This chapter is currently in progress and cannot be deleted.',
+            ], 403);
+        }
+
         $chapter->delete();
         return response()->json([
             "result" => true

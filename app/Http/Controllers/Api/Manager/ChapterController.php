@@ -278,12 +278,11 @@ class ChapterController extends Controller
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
             // whereIn で複数の lesson_id があるかどうかを確認
-            $attendedLessonExists = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
-            if ($attendedLessonExists) {
+            $hasAttendedLessons = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
+            if ($hasAttendedLessons) {
                 // 受講中のレッスンがあれば、エラー応答
                 throw new ValidationErrorException('This lesson has attendance.');
             }
-
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
 

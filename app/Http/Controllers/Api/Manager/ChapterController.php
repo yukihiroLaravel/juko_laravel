@@ -246,11 +246,11 @@ class ChapterController extends Controller
     }
 
     /**
-    * 全チャプター削除API
-    *
-    * @param ChapterDeleteAllRequest $request
-    * @return JsonResponse
-    */
+     * 全チャプター削除API
+     *
+     * @param ChapterDeleteAllRequest $request
+     * @return JsonResponse
+     */
     public function deleteAll(ChapterDeleteAllRequest $request)
     {
         // ログイン中の講師IDを取得

@@ -91,7 +91,7 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $queryService->getChapterByRequest($attendance, $request->chapter_id);
+        $chapter = $queryService->getChapterByChapterId($attendance, $request->chapter_id);
 
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,

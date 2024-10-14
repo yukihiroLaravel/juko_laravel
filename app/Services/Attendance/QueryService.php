@@ -52,7 +52,7 @@ class QueryService
      * @param int $chapterId
      * @return Chapter
      */
-    public function getChapterByRequest($attendance, int $chapterId): Chapter
+    public function getChapterByChapterId($attendance, int $chapterId): Chapter
     {
         return $chapter = $attendance->course->chapters->filter(function ($chapter) use ($chapterId) {
             return $chapter->id === $chapterId;

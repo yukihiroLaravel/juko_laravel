@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -229,6 +230,7 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
+            DB::rollBack();
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -267,8 +269,7 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
 
             // チャプターを取得
-            $chapters = Chapter::with('course')->where('course_id', $courseId)->get();
-
+            $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
@@ -276,6 +277,12 @@ class ChapterController extends Controller
                 }
             });
 
+            // チャプターに紐づく全レッスンIDを取得
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new ValidationErrorException('This lesson has attendance.');
+            }
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
 

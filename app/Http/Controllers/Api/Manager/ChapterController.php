@@ -310,7 +310,6 @@ class ChapterController extends Controller
         }
     }
 
-
     /**
      * チャプター並び替えAPI
      *

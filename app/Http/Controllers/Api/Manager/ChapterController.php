@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -185,12 +186,13 @@ class ChapterController extends Controller
         }
 
         // チャプターが受講中か確認し受講中であればエラー応答
-        $inProgressChapters = ChapterAttendance::whereIn('chapter_id', [$chapter->id])->exists();
+        $lessonIds = $chapter->lessons->pluck('id');
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
 
-        if ($inProgressChapters) {
+        if ($attendedLessonIds->isNotEmpty()) {
             return response()->json([
                 'result'  => false,
-                'message' => 'This chapter is currently in progress and cannot be deleted.',
+                'message' => 'This chapter contains attendance.',
             ], 403);
         }
 

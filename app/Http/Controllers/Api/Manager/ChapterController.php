@@ -230,6 +230,7 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
+            DB::rollBack();
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -275,11 +276,10 @@ class ChapterController extends Controller
                     throw new ValidationErrorException('Invalid instructor_id.');
                 }
             });
+
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
-            // whereIn で複数の lesson_id があるかどうかを確認
-            $hasAttendedLessons = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('id')->isNotEmpty();
-            if ($hasAttendedLessons) {
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
                 throw new ValidationErrorException('This lesson has attendance.');
             }

@@ -196,10 +196,27 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        $chapter->delete();
-        return response()->json([
+        // 認可チェックをパスした後にトランザクションを開始
+        DB::beginTransaction();
+
+        try {
+            //チャプターを削除
+            $chapter->delete();
+
+            DB::commit();
+
+            return response()->json([
             "result" => true
-        ]);
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+                "message" => 'Failed to delete chapter.',
+            ], 500);
+        }
+    
     }
 
     /**

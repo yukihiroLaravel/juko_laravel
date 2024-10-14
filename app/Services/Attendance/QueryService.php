@@ -3,6 +3,7 @@
 namespace App\Services\Attendance;
 
 use App\Model\Course;
+use App\Model\Chapter;
 use App\Model\Attendance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -45,15 +46,16 @@ class QueryService
     }
 
     /**
-     * チャプター詳細情報を取得
+     * チャプターIDと一致するチャプター詳細情報を取得
      *
-     * @param int $attendanceId
-     * @return Attendance
+     * @param $attendance
+     * @param int $chapterId
+     * @return Chapter
      */
-    public function getChapterByRequest($attendance, $request): Attendance
+    public function getChapterByRequest($attendance, int $chapterId): Chapter
     {
-        return $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
-            return $chapter->id === (int) $request->chapter_id;
+        return $chapter = $attendance->course->chapters->filter(function ($chapter) use ($chapterId) {
+            return $chapter->id === $chapterId;
     })
         ->first();
     }

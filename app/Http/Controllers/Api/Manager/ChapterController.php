@@ -215,8 +215,7 @@ class ChapterController extends Controller
                 "result" => false,
                 "message" => 'Failed to delete chapter.',
             ], 500);
-        }
-    
+        }    
     }
 
     /**

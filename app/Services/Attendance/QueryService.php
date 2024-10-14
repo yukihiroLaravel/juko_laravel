@@ -13,16 +13,16 @@ class QueryService
      * 受講中の講座一覧を取得
      *
      * @param int $studentId
-     * @param $request
+     * @param string $request
      * @return Collection<Attendance>
      */
-    public function getAttendancesByStudentIdAndSearchWords(int $studentId, string $request): Collection
+    public function getAttendancesByStudentIdAndSearchWords(int $studentId, string $searchWord): Collection
     {
         return Attendance::with('course.instructor')
         ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use($request) {
+        ->whereHas('course', function (Builder $query) use($searchWord) {
             $query->where('status', Course::STATUS_PUBLIC)
-                ->when($request, function (Builder $query, $searchWord) {
+                ->when($searchWord, function (Builder $query, $searchWord) {
                     return $query->where('title', 'like', "%{$searchWord}%");
                 });
         })->get();

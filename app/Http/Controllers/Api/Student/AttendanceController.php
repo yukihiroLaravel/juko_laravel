@@ -30,7 +30,7 @@ class AttendanceController extends Controller
     {
         $studentId = Auth::id();
 
-        $attendances = $queryService->getAttendances($studentId, $request);
+        $attendances = $queryService->getAttendancesByStudentIdAndSearchWords($studentId, $request->search_word);
 
         return new AttendanceIndexResource($attendances);
     }
@@ -44,7 +44,7 @@ class AttendanceController extends Controller
      */
     public function show(AttendanceShowRequest $request, QueryService $queryService)
     {
-        $attendance = $queryService->getAttendanceInDetails($request->attendance_id);
+        $attendance = $queryService->getAttendanceById($request->attendance_id);
         
         //ログインユーザ本人の場合のみリクエストを返す
         if ($attendance->student_id !== $request->user()->id) {
@@ -68,7 +68,7 @@ class AttendanceController extends Controller
      */
     public function showChapter(AttendanceShowChapterRequest $request, QueryService $queryService)
     {
-        $attendance = $queryService->getChapterInDetails($request->attendance_id);
+        $attendance = $queryService->getAttendanceById($request->attendance_id);
 
         //ログインユーザ本人の場合のみリクエストを返す
         if ($attendance->student_id !== $request->user()->id) {
@@ -91,10 +91,7 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
-                return $chapter->id === (int) $request->chapter_id;
-        })
-            ->first();
+        $chapter = $queryService->getChapterByRequest($attendance, $request);
 
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,

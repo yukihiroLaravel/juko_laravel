@@ -16,13 +16,13 @@ class QueryService
      * @param $request
      * @return Collection<Attendance>
      */
-    public function getAttendances(int $studentId, $request): Collection
+    public function getAttendancesByStudentIdAndSearchWords(int $studentId, string $request): Collection
     {
         return Attendance::with('course.instructor')
         ->where('student_id', $studentId)
         ->whereHas('course', function (Builder $query) use($request) {
             $query->where('status', Course::STATUS_PUBLIC)
-                ->when($request->search_word, function (Builder $query, $searchWord) {
+                ->when($request, function (Builder $query, $searchWord) {
                     return $query->where('title', 'like', "%{$searchWord}%");
                 });
         })->get();
@@ -34,7 +34,7 @@ class QueryService
      * @param int $attendanceId
      * @return Attendance
      */
-    public function getAttendanceInDetails(int $attendanceId): Attendance
+    public function getAttendanceById(int $attendanceId): Attendance
     {
         return $attendance = Attendance::with([
             'course.chapters.lessons',
@@ -50,13 +50,11 @@ class QueryService
      * @param int $attendanceId
      * @return Attendance
      */
-    public function getChapterInDetails(int $attendanceId): Attendance
+    public function getChapterByRequest($attendance, $request): Attendance
     {
-        return $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances'
-        ])
-        ->where('id', $attendanceId)
-        ->firstOrFail();
+        return $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
+            return $chapter->id === (int) $request->chapter_id;
+    })
+        ->first();
     }
 }

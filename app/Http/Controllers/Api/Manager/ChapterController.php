@@ -185,10 +185,37 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        $chapter->delete();
-        return response()->json([
+        // チャプターが受講中か確認し受講中であればエラー応答
+        $lessonIds = $chapter->lessons->pluck('id');
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+
+        if ($attendedLessonIds->isNotEmpty()) {
+            return response()->json([
+                'result'  => false,
+                'message' => 'This chapter contains attendance.',
+            ], 403);
+        }
+
+        // 認可チェックをパスした後にトランザクションを開始
+        DB::beginTransaction();
+
+        try {
+            //チャプターを削除
+            $chapter->delete();
+
+            DB::commit();
+
+            return response()->json([
             "result" => true
-        ]);
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                "result" => false,
+                "message" => 'Failed to delete chapter.',
+            ], 500);
+        }
     }
 
     /**

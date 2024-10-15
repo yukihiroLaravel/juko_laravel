@@ -241,6 +241,11 @@ class ChapterController extends Controller
             $chapters = Chapter::whereIn('id', $request->chapters)->with(['course','lessons'])->get();
 
             // バリデーション
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id');
+            // 出席情報が存在する場合エラー応答
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                throw new ValidationErrorException('Lesson attendance exists.');
+            }
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
@@ -249,12 +254,6 @@ class ChapterController extends Controller
                 // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course_id) {
                     throw new ValidationErrorException('Invalid course_id.');
-                }
-                $lessonIds = $chapter->lessons->pluck('id');
-                $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-                // 出席情報が存在する場合エラー応答
-                if ($attendedLessonIds->isNotEmpty()) {
-                    throw new ValidationErrorException('This lesson has attendance.');
                 }
             });
 

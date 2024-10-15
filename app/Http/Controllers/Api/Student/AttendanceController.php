@@ -30,7 +30,7 @@ class AttendanceController extends Controller
     {
         $studentId = Auth::id();
 
-        $attendances = $queryService->getAttendancesByStudentIdAndSearchWords($studentId, $request->search_word);
+        $attendances = $queryService->getAttendancesByStudentIdAndSearchWord($studentId, $request->search_word);
 
         return new AttendanceIndexResource($attendances);
     }
@@ -87,11 +87,13 @@ class AttendanceController extends Controller
         }
 
         // 公開されているチャプターのみ抽出
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
+        $attendance = $queryService->getPublicChapterById($request->attendance_id);
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $queryService->getChapterByChapterId($attendance, $request->chapter_id);
+        $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
+            return $chapter->id === (int) $request->chapter_id;
+        })
+            ->first();
 
         return new AttendanceShowChapterResource([
             'attendance' => $attendance,

@@ -17,7 +17,7 @@ class QueryService
      * @param string $request
      * @return Collection<Attendance>
      */
-    public function getAttendancesByStudentIdAndSearchWords(int $studentId, string $searchWord): Collection
+    public function getAttendancesByStudentIdAndSearchWord(int $studentId, string $searchWord): Collection
     {
         return Attendance::with('course.instructor')
         ->where('student_id', $studentId)
@@ -46,17 +46,16 @@ class QueryService
     }
 
     /**
-     * チャプターIDと一致するチャプター詳細情報を取得
+     * 公開されているチャプターのみ抽出
      *
-     * @param $attendance
-     * @param int $chapterId
-     * @return Chapter
+     * @param int $attendanceId
+     * @return Attendance
      */
-    public function getChapterByChapterId($attendance, int $chapterId): Chapter
+    public function getPublicChapterById(int $attendanceId): Attendance
     {
-        return $chapter = $attendance->course->chapters->filter(function ($chapter) use ($chapterId) {
-            return $chapter->id === $chapterId;
-    })
-        ->first();
+        $attendance = QueryService::getAttendanceById($attendanceId);
+        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
+        $attendance->course->chapters = $publicChapters;
+        return $attendance;
     }
 }

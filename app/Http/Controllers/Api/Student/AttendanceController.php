@@ -21,7 +21,7 @@ class AttendanceController extends Controller
 {
     /**
      * 受講一覧取得API
-     * 
+     *
      * @param AttendanceIndexRequest $request
      * @param QueryService $queryService
      * @return AttendanceIndexResource
@@ -45,7 +45,7 @@ class AttendanceController extends Controller
     public function show(AttendanceShowRequest $request, QueryService $queryService)
     {
         $attendance = $queryService->getAttendanceById($request->attendance_id);
-        
+
         //ログインユーザ本人の場合のみリクエストを返す
         if ($attendance->student_id !== $request->user()->id) {
             return response()->json([

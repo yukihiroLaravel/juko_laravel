@@ -21,7 +21,7 @@ class QueryService
     {
         return Attendance::with('course.instructor')
         ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use($searchWord) {
+        ->whereHas('course', function (Builder $query) use ($searchWord) {
             $query->where('status', Course::STATUS_PUBLIC)
                 ->when($searchWord, function (Builder $query, $searchWord) {
                     return $query->where('title', 'like', "%{$searchWord}%");

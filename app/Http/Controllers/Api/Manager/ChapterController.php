@@ -212,7 +212,12 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+            $chapters = Chapter::with('course', 'lessons')->whereIn('id', $chapterIds)->get();
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id');
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 出席情報が存在する場合エラー応答
+                throw new ValidationErrorException('Lesson attendance exists.');
+            }
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答

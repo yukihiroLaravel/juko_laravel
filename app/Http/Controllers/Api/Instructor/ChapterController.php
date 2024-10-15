@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -237,9 +238,14 @@ class ChapterController extends Controller
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            $chapters = Chapter::whereIn('id', $request->chapters)->with(['course','lessons'])->get();
 
             // バリデーション
+            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id');
+            // 出席情報が存在する場合エラー応答
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                throw new ValidationErrorException('Lesson attendance exists.');
+            }
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {

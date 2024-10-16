@@ -438,16 +438,17 @@ class LessonController extends Controller
                 ], 403);
             }
             
-            // 学生が登録しているか、コース/章で進歩しているかどうかを確認します
-            $hasAttendance = Attendance::where('course_id', $course_id)->exists();
-
-            if ($hasAttendance) {
-            // 学生が登録している場合、または進歩している場合はエラーを返します
+            // チャプターに紐づく全レッスンIDを取得
+            $lessonIds = $chapter->lessons->pluck('id');
+            $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+            if ($attendedLessonIds->isNotEmpty()) {
+            // 出席のあるレッスンがあれば削除を許可しない
                 return response()->json([
                     'result' => false,
-                    'message' => 'This course has attendance.',
+                    'message' => 'This lessons contains attendance.'
                 ], 403);
             }
+
     
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();

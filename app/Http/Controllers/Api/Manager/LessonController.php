@@ -449,7 +449,6 @@ class LessonController extends Controller
                 ], 403);
             }
 
-    
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
     

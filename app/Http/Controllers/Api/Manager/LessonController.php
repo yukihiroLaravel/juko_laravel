@@ -407,20 +407,20 @@ class LessonController extends Controller
     public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
         DB::beginTransaction(); // トランザクションの開始
-    
+
         try {
             // チャプターを取得し、関連するコースも取得
             /** @var Chapter $chapter */
             $chapter = Chapter::with('course')->findOrFail($chapter_id);
-    
+
             // 現在ログイン中のインストラクターのID取得
             $instructorId = Auth::guard('instructor')->user()->id;
             $manager = Instructor::with('managings')->find($instructorId);
-    
+
             // 管理しているインストラクターIDリストを取得
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructorId; // 自分自身のIDをリストに追加
-    
+
             // コースを取得し、認可チェック（自分または管理しているインストラクターのコースかどうか）
             $course = Course::findOrFail($course_id);
             if (!in_array($course->instructor_id, $instructorIds, true)) {
@@ -430,14 +430,14 @@ class LessonController extends Controller
                     'message' => "Invalid instructor_id.",
                 ], 403);
             }
-    
+
             if ((int) $course_id !== $chapter->course_id) {
                 return response()->json([
                     'result' => false,
                     'message' => 'Invalid course_id.',
                 ], 403);
             }
-            
+
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $chapter->lessons->pluck('id');
             $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
@@ -451,20 +451,19 @@ class LessonController extends Controller
 
             // チャプターに紐づく全レッスンを削除
             $chapter->lessons()->delete();
-    
+
             // トランザクションをコミットして変更を確定
             DB::commit();
-    
+
             // 成功レスポンスを返す
             return response()->json([
                 'result' => true,
             ]);
-    
         } catch (Exception $e) {
             // エラーが発生したらトランザクションをロールバック
             DB::rollBack();
             Log::error($e); // エラーをログに記録
-    
+
             // エラーレスポンスを返す
             return response()->json([
                 'result' => false,

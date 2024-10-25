@@ -7,18 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-/**
- * @property int $id
- * @property int $course_id
- * @property int $student_id
- * @property int $progress
- * @property Carbon $created_at
- * @property Carbon $updated_at
- * @property string|null $deleted_at
- * @property Student $student
- * @property Course $course
- * @property Collection<LessonAttendance> $lessonAttendances
- */
 class Attendance extends Model
 {
     use SoftDeletes;

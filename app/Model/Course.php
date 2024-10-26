@@ -6,19 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 
-/**
- * @property int $id
- * @property int $instructor_id
- * @property string $title
- * @property string $image
- * @property 'public'|'private' $status
- * @property string $created_at
- * @property string $updated_at
- * @property string|null $deleted_at
- * @property Instructor $instructor
- * @property Collection<Chapter> $chapters
- * @property Collection<Attendance> $attendances
- */
 class Course extends Model
 {
     use SoftDeletes;

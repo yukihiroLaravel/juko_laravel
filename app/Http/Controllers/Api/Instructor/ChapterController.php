@@ -237,7 +237,7 @@ class ChapterController extends Controller
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            $chapters = Chapter::whereIn('id', $request->chapters)->with(['course', 'lessons.lessonAttendances'])->get();
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
@@ -248,6 +248,19 @@ class ChapterController extends Controller
                 // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course_id) {
                     throw new ValidationErrorException('Invalid course_id.');
+                }
+
+                /*
+                    「$chapter->lessons」が0件時、->every()はtrueを返すため
+                    「紐づくlessonsが0件」、または、「全ての紐づくlessonが配下のlessonAttendancesが0件である」
+                    場合に削除可能($canDelete=true)となる。
+                */
+                $canDelete = $chapter->lessons->every(function ($lesson) {
+                    return $lesson->lessonAttendances->isEmpty();
+                });
+
+                if(!$canDelete) {
+                    throw new ValidationErrorException("The chapter '{$chapter->title}' contains some lessons with attendance.");
                 }
             });
 

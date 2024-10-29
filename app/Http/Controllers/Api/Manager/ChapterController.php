@@ -212,7 +212,7 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+            $chapters = Chapter::with(['course', 'lessons.lessonAttendances'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -221,6 +221,19 @@ class ChapterController extends Controller
                 if ((int) $courseId !== $chapter->course_id) {
                     // 指定した講座に属するチャプターでなければエラー応答
                     throw new ValidationErrorException('Invalid course.');
+                }
+
+                /*
+                    「$chapter->lessons」が0件時、->every()はtrueを返すため
+                    「紐づくlessonsが0件」、または、「全ての紐づくlessonが配下のlessonAttendancesが0件である」
+                    場合に削除可能($canDelete=true)となる。
+                */
+                $canDelete = $chapter->lessons->every(function ($lesson) {
+                    return $lesson->lessonAttendances->isEmpty();
+                });
+
+                if(!$canDelete) {
+                    throw new ValidationErrorException("The chapter '{$chapter->title}' contains some lessons with attendance.");
                 }
             });
 

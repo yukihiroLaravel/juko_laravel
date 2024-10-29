@@ -259,7 +259,7 @@ class ChapterController extends Controller
                     return $lesson->lessonAttendances->isEmpty();
                 });
 
-                if(!$canDelete) {
+                if (!$canDelete) {
                     throw new ValidationErrorException("The chapter '{$chapter->title}' contains some lessons with attendance.");
                 }
             });

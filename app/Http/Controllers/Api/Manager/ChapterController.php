@@ -229,7 +229,7 @@ class ChapterController extends Controller
                     場合に削除可能($canDelete=true)となる。
                 */
                 $canDelete = $chapter->lessons->every(function ($lesson) {
-                    return !$lesson->lessonAttendances()->exists();
+                    return !LessonAttendance::where("lesson_id", $lesson->id)->exists();
                 });
 
                 if (!$canDelete) {

@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -256,7 +257,7 @@ class ChapterController extends Controller
                     場合に削除可能($canDelete=true)となる。
                 */
                 $canDelete = $chapter->lessons->every(function ($lesson) {
-                    return !$lesson->lessonAttendances()->exists();
+                    return !LessonAttendance::where("lesson_id", $lesson->id)->exists();
                 });
 
                 if (!$canDelete) {

@@ -252,13 +252,15 @@ class ChapterController extends Controller
                 }
 
                 /*
-                    「$chapter->lessons」が0件時、->every()はtrueを返すため
-                    「紐づくlessonsが0件」、または、「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
-                    場合に削除可能($canDelete=true)となる。
+                    「紐づくlessonsが0件」、または、
+                    「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
+                    の場合に削除可能($canDelete=true)となる。
                 */
-                $canDelete = $chapter->lessons->every(function ($lesson) {
-                    return !LessonAttendance::where("lesson_id", $lesson->id)->exists();
-                });
+                $canDelete = true;
+                if (!$chapter->lessons->isEmpty()) {
+                    $lessonIds = $chapter->lessons->pluck('id');
+                    $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
+                }
 
                 if (!$canDelete) {
                     throw new ValidationErrorException("The chapter '{$chapter->title}' contains some lessons with attendance.");

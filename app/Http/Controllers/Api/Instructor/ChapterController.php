@@ -250,22 +250,21 @@ class ChapterController extends Controller
                 if ((int) $courseId !== $chapter->course_id) {
                     throw new ValidationErrorException('Invalid course_id.');
                 }
-
-                /*
-                    「紐づくlessonsが0件」、または、
-                    「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
-                    の場合に削除可能($canDelete=true)となる。
-                */
-                $canDelete = true;
-                if (!$chapter->lessons->isEmpty()) {
-                    $lessonIds = $chapter->lessons->pluck('id');
-                    $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
-                }
-
-                if (!$canDelete) {
-                    throw new ValidationErrorException("The chapter '{$chapter->title}' contains some lessons with attendance.");
-                }
             });
+
+            /*
+                「紐づくlessonsが0件」、または、
+                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
+                の場合に削除可能($canDelete=true)となる。
+            */
+            $canDelete = true;
+            $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
+            if (!$lessonIds->isEmpty()) {
+                $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
+            }
+            if (!$canDelete) {
+                throw new ValidationErrorException("Some chapters contain lessons with attendance records.");
+            }
 
             // チャプターを一括で削除
             Chapter::whereIn('id', $chapters->pluck('id'))->delete();

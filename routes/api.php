@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 
 /*
+
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
@@ -140,7 +141,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-お知らせ
             Route::prefix('notification')->group(function () {
                 Route::get('index', 'Api\Instructor\NotificationController@index');
+                Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
                 Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
+                Route::prefix('{notification_id}')->group(function () {
+                    Route::get('/', 'Api\Instructor\NotificationController@show');
+                    Route::patch('/', 'Api\Instructor\NotificationController@update');
+                });
             });
         });
 
@@ -249,18 +255,5 @@ Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {
         Route::post('/', 'Api\Student\StudentController@store');
         Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
-    });
-});
-
-// 講師側API
-Route::prefix('v1')->group(function () {
-    Route::prefix('instructor')->group(function () {
-        Route::prefix('notification')->group(function () {
-            Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
-            Route::prefix('{notification_id}')->group(function () {
-                Route::get('/', 'Api\Instructor\NotificationController@show');
-                Route::patch('/', 'Api\Instructor\NotificationController@update');
-            });
-        });
     });
 });

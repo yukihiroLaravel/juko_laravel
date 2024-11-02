@@ -25,8 +25,9 @@ class ShowService
 
         if ($attendance->student_id !== $showDto->getUserId()) {
             throw new AuthorizationException(
-                "The attendance's student ID {$attendance->student_id} " . 
-                "does not match User ID {$showDto->getUserId()}.");
+                "The attendance's student ID {$attendance->student_id} " .
+                "does not match User ID {$showDto->getUserId()}."
+            );
         }
 
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);

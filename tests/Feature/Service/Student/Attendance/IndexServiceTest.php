@@ -1,5 +1,7 @@
 <?php
+
 namespace Tests\Feature\Service\Student\Attendance;
+
 use Tests\TestCase;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -12,6 +14,7 @@ use Illuminate\Support\Carbon;
 class IndexServiceTest extends TestCase
 {
     use RefreshDatabase;
+
     // setup
     public function setUp(): void
     {
@@ -39,7 +42,7 @@ class IndexServiceTest extends TestCase
                 データベースシーダーの内容でSQLiteへ反映させるイメージで、
                 「$this->seed();」を実施後に、
                 各テスト毎に、必要であれば、データの補完などの調整をSQLiteに対して行う方針となった。
-                
+
                 上記の前提がまずあって、postmanでの動作テストを行っていた時の話ですが、
                 2024/11/02時点、
                 app/Http/Controllers/Api/Student/AttendanceController.php

@@ -1,5 +1,7 @@
 <?php
+
 namespace Tests\Feature\Service\Student\Attendance;
+
 use Tests\TestCase;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -12,6 +14,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class ShowServiceTest extends TestCase
 {
     use RefreshDatabase;
+
     // setup
     public function setUp(): void
     {

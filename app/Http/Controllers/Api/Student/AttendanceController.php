@@ -26,7 +26,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class AttendanceController extends Controller
 {
-
     /**
      * 受講一覧取得API
      *

@@ -212,7 +212,7 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+            $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -223,6 +223,20 @@ class ChapterController extends Controller
                     throw new ValidationErrorException('Invalid course.');
                 }
             });
+
+            /*
+                「紐づくlessonsが0件」、または、
+                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
+                の場合に削除可能($canDelete=true)となる。
+            */
+            $canDelete = true;
+            $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
+            if (!$lessonIds->isEmpty()) {
+                $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
+            }
+            if (!$canDelete) {
+                throw new ValidationErrorException("Some chapters contain lessons with attendance records.");
+            }
 
             Chapter::whereIn('id', $chapterIds)->delete();
             DB::commit();

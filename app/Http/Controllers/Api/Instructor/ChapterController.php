@@ -6,6 +6,7 @@ use Exception;
 use App\Model\Course;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -237,7 +238,7 @@ class ChapterController extends Controller
             // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            $chapters = Chapter::whereIn('id', $request->chapters)->with(['course', 'lessons'])->get();
 
             // バリデーション
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
@@ -250,6 +251,20 @@ class ChapterController extends Controller
                     throw new ValidationErrorException('Invalid course_id.');
                 }
             });
+
+            /*
+                「紐づくlessonsが0件」、または、
+                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
+                の場合に削除可能($canDelete=true)となる。
+            */
+            $canDelete = true;
+            $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
+            if (!$lessonIds->isEmpty()) {
+                $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
+            }
+            if (!$canDelete) {
+                throw new ValidationErrorException("Some chapters contain lessons with attendance records.");
+            }
 
             // チャプターを一括で削除
             Chapter::whereIn('id', $chapters->pluck('id'))->delete();

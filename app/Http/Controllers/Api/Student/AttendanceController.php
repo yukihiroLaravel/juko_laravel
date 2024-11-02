@@ -8,7 +8,12 @@ use App\Model\Attendance;
 use App\Model\LessonAttendance;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
+use App\Dto\Student\Attendance\IndexDto;
+use App\Dto\Student\Attendance\ShowDto;
+use App\Services\Student\Attendance\IndexService;
+use App\Services\Student\Attendance\ShowService;
 use App\Http\Requests\Student\AttendanceShowRequest;
 use App\Http\Requests\Student\AttendanceIndexRequest;
 use App\Http\Resources\Student\AttendanceShowResource;
@@ -17,35 +22,25 @@ use App\Http\Requests\Student\AttendanceShowChapterRequest;
 use App\Http\Resources\Student\AttendanceShowChapterResource;
 use App\Http\Requests\Student\AttendanceCourseProgressRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class AttendanceController extends Controller
 {
+
     /**
      * 受講一覧取得API
      *
      * @param AttendanceIndexRequest $request
+     * @param IndexService $service
      * @return AttendanceIndexResource
      */
-    public function index(AttendanceIndexRequest $request)
-    {
+    public function index(
+        AttendanceIndexRequest $request,
+        IndexService $service
+    ): AttendanceIndexResource {
         $studentId = Auth::id();
-
-        if (!$request->search_word) {
-            $attendances = Attendance::with('course.instructor')
-            ->where('student_id', $studentId)
-            ->whereHas('course', function (Builder $query) {
-                $query->where('status', Course::STATUS_PUBLIC);
-            })->get();
-            return new AttendanceIndexResource($attendances);
-        }
-
-        $attendances = Attendance::with('course.instructor')
-        ->where('student_id', $studentId)
-        ->whereHas('course', function (Builder $query) use ($request) {
-            $query->where('title', 'like', "%{$request->search_word}%");
-            $query->where('status', Course::STATUS_PUBLIC);
-        })->get();
-
+        $indexDto = new IndexDto($studentId, $request->search_word);
+        $attendances = $service($indexDto);
         return new AttendanceIndexResource($attendances);
     }
 
@@ -53,27 +48,23 @@ class AttendanceController extends Controller
      * 受講詳細取得API
      *
      * @param AttendanceShowRequest $request
-     * @return AttendanceShowResource|\Illuminate\Http\JsonResponse
+     * @param ShowService $service
+     * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request)
-    {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'course.instructor',
-            'lessonAttendances'
-        ])
-        ->findOrFail($request->attendance_id);
-
-        if ($attendance->student_id !== $request->user()->id) {
-            return response()->json([
-                "result" => false,
-                "message" => "Access forbidden."
-            ], 403);
+    public function show(
+        AttendanceShowRequest $request,
+        ShowService $service
+    ): AttendanceShowResource {
+        try {
+            $attendanceId = (int)$request->attendance_id;
+            $userId = $request->user()->id;
+            $showDto = new ShowDto($attendanceId, $userId);
+            $attendance = $service($showDto);
+            return new AttendanceShowResource($attendance);
+        } catch (AuthorizationException $e) {
+            Log::error([$e->getMessage(), $e->getTraceAsString()]);
+            throw $e;
         }
-
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
-        return new AttendanceShowResource($attendance);
     }
 
     /**

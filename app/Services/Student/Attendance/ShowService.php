@@ -17,7 +17,7 @@ class ShowService
         ShowDto $showDto
     ): Attendance {
         $attendance = Attendance::with([
-            'course.chapters.lessons',
+            'course.publicChapters.lessons',
             'course.instructor',
             'lessonAttendances'
         ])
@@ -29,9 +29,6 @@ class ShowService
                 "does not match User ID {$showDto->getUserId()}."
             );
         }
-
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
 
         return $attendance;
     }

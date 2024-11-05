@@ -38,7 +38,7 @@ class AttendanceShowResource extends JsonResource
             'title' => $course->title,
             'image' => $course->image,
             'instructor' => $this->instructor($course->instructor),
-            'chapters' => $this->chapters($course->chapters),
+            'chapters' => $this->chapters($course->publicChapters),
         ];
     }
 

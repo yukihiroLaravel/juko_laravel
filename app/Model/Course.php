@@ -81,6 +81,16 @@ class Course extends Model
     }
 
     /**
+     * 公開済みのチャプターリストを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function publicChapters()
+    {
+        return $this->chapters()->where('status', Chapter::STATUS_PUBLIC);
+    }
+
+    /**
      * 画像保存パスに変換
      *
      * @param string $filePath

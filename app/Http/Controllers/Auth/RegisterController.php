@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
-    use RegistersUsers;
+    //TODO Laravel 7より、削除されたためコメントアウト
+    // use RegistersUsers;
 
     /**
      * Where to redirect users after registration.

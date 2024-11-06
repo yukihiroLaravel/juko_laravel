@@ -7,5 +7,6 @@ use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 
 class ForgotPasswordController extends Controller
 {
-    use SendsPasswordResetEmails;
+    //TODO Laravel 7より、削除されたためコメントアウト
+    // use SendsPasswordResetEmails;
 }

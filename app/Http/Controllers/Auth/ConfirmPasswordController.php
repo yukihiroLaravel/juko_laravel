@@ -8,7 +8,8 @@ use Illuminate\Foundation\Auth\ConfirmsPasswords;
 
 class ConfirmPasswordController extends Controller
 {
-    use ConfirmsPasswords;
+    //TODO Laravel 7より、削除されたためコメントアウト
+    // use ConfirmsPasswords;
 
     /**
      * Where to redirect users when the intended url fails.

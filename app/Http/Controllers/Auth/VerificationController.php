@@ -8,7 +8,8 @@ use Illuminate\Foundation\Auth\VerifiesEmails;
 
 class VerificationController extends Controller
 {
-    use VerifiesEmails;
+    //TODO Laravel 7より、削除されたためコメントアウト
+    // use VerifiesEmails;
 
     /**
      * Where to redirect users after verification.

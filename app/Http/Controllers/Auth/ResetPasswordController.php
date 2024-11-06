@@ -8,7 +8,8 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller
 {
-    use ResetsPasswords;
+    //TODO Laravel 7より、削除されたためコメントアウト
+    // use ResetsPasswords;
 
     /**
      * Where to redirect users after resetting their password.

@@ -4,13 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Auth\VerifiesEmails;
 
 class VerificationController extends Controller
 {
-    //TODO Laravel 7より、削除されたためコメントアウト
-    // use VerifiesEmails;
-
     /**
      * Where to redirect users after verification.
      *

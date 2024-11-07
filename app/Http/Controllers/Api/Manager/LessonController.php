@@ -522,4 +522,9 @@ class LessonController extends Controller
             ], 500);
         }
     }
+
+    public function deleteAll()
+    {
+        return response()->json([]);
+    }
 }

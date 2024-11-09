@@ -36,6 +36,9 @@ class Instructor extends Authenticatable
         'type',
     ];
 
+    /**
+     * @var array<string>
+     */
     protected $casts = [
         'created_at' => 'immutable_datetime',
         'updated_at' => 'immutable_datetime',

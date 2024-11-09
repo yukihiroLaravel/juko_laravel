@@ -8,6 +8,9 @@ class ViewedOnceNotification extends Model
 {
     protected $table = 'viewed_once_notifications';
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = [
         'notification_id',
         'student_id',

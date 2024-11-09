@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Course extends Model
 {
@@ -20,6 +19,9 @@ class Course extends Model
     const STATUS_PUBLIC = 'public';
     const STATUS_PRIVATE = 'private';
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = [
         'instructor_id',
         'title',
@@ -29,6 +31,9 @@ class Course extends Model
         'updated_at',
     ];
 
+    /**
+     * @var array<string>
+     */
     protected $casts = [
         'instructor_id' => 'int'
     ];

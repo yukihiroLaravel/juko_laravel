@@ -2,9 +2,7 @@
 
 namespace App\Model;
 
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Student extends Authenticatable
@@ -17,8 +15,7 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     /**
-     *
-     * @var array
+     * @var array<string>
      */
     protected $fillable = [
         'given_name_by_instructor',
@@ -36,7 +33,7 @@ class Student extends Authenticatable
     ];
 
     /**
-     * キャスト
+     * @var array<string>
      */
     protected $casts = [
         'birth_date' => 'date',

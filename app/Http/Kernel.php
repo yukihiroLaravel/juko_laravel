@@ -74,7 +74,7 @@ class Kernel extends HttpKernel
      *
      * This forces non-global middleware to always be in the given order.
      *
-     * @var array
+     * @var array<string>
      */
     protected $middlewarePriority = [
         \Illuminate\Session\Middleware\StartSession::class,

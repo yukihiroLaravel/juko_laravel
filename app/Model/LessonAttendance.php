@@ -17,12 +17,18 @@ class LessonAttendance extends Model
      */
     protected $table = 'lesson_attendances';
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = [
         'lesson_id',
         'attendance_id',
         'status'
     ];
 
+    /**
+     * @var array<string>
+     */
     protected $dates = [
         'created_at',
         'updated_at',

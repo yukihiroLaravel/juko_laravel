@@ -1,10 +1,12 @@
 <?php
 
-use App\Model\Attendance;
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
-class AttendanceSeeder extends Seeder
+class ManageInstructorsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,19 +15,16 @@ class AttendanceSeeder extends Seeder
      */
     public function run()
     {
-        Attendance::insert([
-            // 受講生1
+        DB::table('manage_instructors')->insert([
             [
-                'course_id' => 1,
-                'student_id' => 1,
-                'progress' => 10,
+                'instructor_id' => 2,
+                'manager_id' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'course_id' => 1,
-                'student_id' => 2,
-                'progress' => 10,
+                'instructor_id' => 3,
+                'manager_id' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

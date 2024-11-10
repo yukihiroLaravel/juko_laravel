@@ -4,8 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -18,12 +16,18 @@ class Attendance extends Model
      */
     protected $table = 'attendances';
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = [
         'course_id',
         'student_id',
         'progress'
     ];
 
+    /**
+     * @var array<string>
+     */
     protected $casts = [
         'student_id' => 'int',
         'course_id' => 'int',

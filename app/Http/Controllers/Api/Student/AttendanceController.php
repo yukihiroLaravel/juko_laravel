@@ -61,7 +61,7 @@ class AttendanceController extends Controller
             $attendance = $service($showDto);
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error([$e->getMessage(), $e->getTraceAsString()]);
+            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
             throw $e;
         }
     }

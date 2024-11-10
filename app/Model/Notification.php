@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Notification extends Model
 {
@@ -17,6 +16,9 @@ class Notification extends Model
      */
     protected $table = 'notifications';
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = [
         'course_id',
         'instructor_id',

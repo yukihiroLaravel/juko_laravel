@@ -189,13 +189,15 @@ class ChapterController extends Controller
             ], 403);
         }
 
-        if (LessonAttendance::whereIn('lesson_id', $lessonIds)
+        if (
+            LessonAttendance::whereIn('lesson_id', $lessonIds)
             ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
-            ->exists()) {
+            ->exists()
+        ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             return response()->json([
                 'result' => false,
-                'message' => 'This chapter has attendance.'    
+                'message' => 'This chapter has attendance.'
             ], 403);
         }
 

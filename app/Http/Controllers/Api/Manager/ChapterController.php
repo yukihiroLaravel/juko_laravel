@@ -167,7 +167,11 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+        // チャプターを取得
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id')->toArray();
 
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -182,6 +186,16 @@ class ChapterController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if (LessonAttendance::whereIn('lesson_id', $lessonIds)
+            ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
+            ->exists()) {
+            // 指定したチャプター内に受講中のレッスンがあればエラー応答
+            return response()->json([
+                'result' => false,
+                'message' => 'This chapter has attendance.'    
             ], 403);
         }
 

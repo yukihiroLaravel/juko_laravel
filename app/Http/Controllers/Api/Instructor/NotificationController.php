@@ -119,7 +119,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(function ($notification) use ($instructorId) {
+            $notifications->contains(function (Notification $notification) use ($instructorId) {
                 return $notification->instructor_id !== $instructorId;
             })
         ) {

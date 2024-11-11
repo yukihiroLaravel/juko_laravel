@@ -195,7 +195,7 @@ class ChapterController extends Controller
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             return response()->json([
                 'result' => false,
-                'message' => 'This chapter has attendance.'    
+                'message' => 'The lessons in this chapter are currently attended.'    
             ], 403);
         }
 

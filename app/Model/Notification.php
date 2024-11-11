@@ -17,7 +17,7 @@ class Notification extends Model
     protected $table = 'notifications';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'course_id',

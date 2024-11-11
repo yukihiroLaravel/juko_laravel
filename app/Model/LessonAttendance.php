@@ -17,7 +17,7 @@ class LessonAttendance extends Model
     protected $table = 'lesson_attendances';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'lesson_id',
@@ -26,12 +26,12 @@ class LessonAttendance extends Model
     ];
 
     /**
-     * @var array<string>
+     * @var array<string, string>
      */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at'
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // ステータス定数

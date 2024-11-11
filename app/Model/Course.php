@@ -20,7 +20,7 @@ class Course extends Model
     const STATUS_PRIVATE = 'private';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'instructor_id',
@@ -32,7 +32,7 @@ class Course extends Model
     ];
 
     /**
-     * @var array<string>
+     * @var array<string, string>
      */
     protected $casts = [
         'instructor_id' => 'int'

@@ -21,7 +21,7 @@ class Lesson extends Model
     const STATUS_PRIVATE = 'private';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'chapter_id',

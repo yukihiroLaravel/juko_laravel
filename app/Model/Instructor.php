@@ -25,7 +25,7 @@ class Instructor extends Authenticatable
     const SORT_BY_CREATED_AT = 'created_at';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'nick_name',
@@ -37,7 +37,7 @@ class Instructor extends Authenticatable
     ];
 
     /**
-     * @var array<string>
+     * @var array<string, string>
      */
     protected $casts = [
         'created_at' => 'immutable_datetime',

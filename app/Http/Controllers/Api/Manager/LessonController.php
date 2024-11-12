@@ -528,7 +528,7 @@ class LessonController extends Controller
     /**
      * チャプターに紐づくレッスン全削除API
      *
-     * @param 
+     * @param
      * @return JsonResponse
      */
     public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse

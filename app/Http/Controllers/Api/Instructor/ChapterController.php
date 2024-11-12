@@ -298,7 +298,7 @@ class ChapterController extends Controller
 
         try {
             /** @var Chapter $chapter */
-            $chapter = Chapter::with('course','lessons')->findOrFail($request->chapter_id);
+            $chapter = Chapter::with('course', 'lessons')->findOrFail($request->chapter_id);
 
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
                 return response()->json([

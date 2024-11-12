@@ -14,7 +14,7 @@ class StudentAuthorization extends Model
     protected $table = 'student_authorization';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'student_id',

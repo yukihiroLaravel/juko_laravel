@@ -17,7 +17,7 @@ class Attendance extends Model
     protected $table = 'attendances';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'course_id',
@@ -26,7 +26,7 @@ class Attendance extends Model
     ];
 
     /**
-     * @var array<string>
+     * @var array<string, string>
      */
     protected $casts = [
         'student_id' => 'int',

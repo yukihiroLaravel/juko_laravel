@@ -16,7 +16,7 @@ class Student extends Authenticatable
 
     /**
      *
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'given_name_by_instructor',
@@ -35,7 +35,7 @@ class Student extends Authenticatable
 
     /**
      * キャスト
-     * @var array<string>
+     * @var array<string, string>
      */
     protected $casts = [
         'birth_date' => 'date',

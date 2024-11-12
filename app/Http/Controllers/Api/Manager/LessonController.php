@@ -533,10 +533,6 @@ class LessonController extends Controller
      */
     public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        // チャプターを取得
-        /** @var Chapter $chapter */
-        $chapter = Chapter::with('course')->findOrFail($chapter_id);
-
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -545,6 +541,10 @@ class LessonController extends Controller
         $manager = Instructor::with('managings')->find($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
+
+        // チャプターを取得
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with('course')->findOrFail($chapter_id);
 
         // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければfalse
         if (!in_array($chapter->course->instructor_id, $instructorIds)) {
@@ -582,9 +582,9 @@ class LessonController extends Controller
 
             DB::commit();
 
-                return response()->json([
-                    'result' => true,
-                ]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

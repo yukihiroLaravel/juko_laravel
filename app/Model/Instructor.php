@@ -57,7 +57,7 @@ class Instructor extends Authenticatable
     /**
      * 配下の講師を取得
      *
-     * @return BelongsToMany<Instructor>
+     * @return BelongsToMany<Instructor, Instructor>
      */
     public function managings(): BelongsToMany
     {

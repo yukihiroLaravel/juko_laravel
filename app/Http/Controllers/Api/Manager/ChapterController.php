@@ -191,13 +191,12 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-            ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
             ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             return response()->json([
                 'result' => false,
-                'message' => 'The lessons in this chapter are currently attended.'    
+                'message' => 'This lesson has attendance.'
             ], 403);
         }
 
@@ -357,11 +356,11 @@ class ChapterController extends Controller
         try {
             foreach ($chapters as $chapter) {
                 Chapter::where('id', $chapter['chapter_id'])
-                ->where('course_id', $courseId)
-                ->firstOrFail()
-                ->update([
-                    'order' => $chapter['order']
-                ]);
+                    ->where('course_id', $courseId)
+                    ->firstOrFail()
+                    ->update([
+                        'order' => $chapter['order']
+                    ]);
             }
 
             DB::commit();
@@ -420,11 +419,11 @@ class ChapterController extends Controller
 
         // チャプターのステータスを更新
         $chapter->update([
-          'status' => $request->status
+            'status' => $request->status
         ]);
 
         return response()->json([
-          'result' => true,
+            'result' => true,
         ]);
     }
 
@@ -470,7 +469,7 @@ class ChapterController extends Controller
         ]);
     }
 
-   /**
+    /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
      * @param ChaptersPatchStatusRequest $request

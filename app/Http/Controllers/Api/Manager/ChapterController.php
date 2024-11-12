@@ -167,7 +167,11 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+        // チャプターを取得
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id')->toArray();
 
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -182,6 +186,17 @@ class ChapterController extends Controller
             return response()->json([
                 'result'  => false,
                 'message' => 'Invalid course_id.',
+            ], 403);
+        }
+
+        if (
+            LessonAttendance::whereIn('lesson_id', $lessonIds)
+            ->exists()
+        ) {
+            // 指定したチャプター内に受講中のレッスンがあればエラー応答
+            return response()->json([
+                'result' => false,
+                'message' => 'This lesson has attendance.'
             ], 403);
         }
 
@@ -355,11 +370,11 @@ class ChapterController extends Controller
         try {
             foreach ($chapters as $chapter) {
                 Chapter::where('id', $chapter['chapter_id'])
-                ->where('course_id', $courseId)
-                ->firstOrFail()
-                ->update([
-                    'order' => $chapter['order']
-                ]);
+                    ->where('course_id', $courseId)
+                    ->firstOrFail()
+                    ->update([
+                        'order' => $chapter['order']
+                    ]);
             }
 
             DB::commit();
@@ -418,11 +433,11 @@ class ChapterController extends Controller
 
         // チャプターのステータスを更新
         $chapter->update([
-          'status' => $request->status
+            'status' => $request->status
         ]);
 
         return response()->json([
-          'result' => true,
+            'result' => true,
         ]);
     }
 
@@ -468,7 +483,7 @@ class ChapterController extends Controller
         ]);
     }
 
-   /**
+    /**
      * 選択済みチャプターを公開/非公開にするAPI
      *
      * @param ChaptersPatchStatusRequest $request

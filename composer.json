@@ -58,6 +58,9 @@
         ],
         "analyze": [
             "./vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
+        ],
+        "rector": [
+            "vendor/bin/rector process --dry-run"
         ]
     }
 }

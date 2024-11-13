@@ -21,6 +21,6 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->sets([
         LevelSetList::UP_TO_PHP_83,
-        LaravelLevelSetList::UP_TO_LARAVEL_100,
+        LaravelLevelSetList::UP_TO_LARAVEL_110,
     ]);
 };

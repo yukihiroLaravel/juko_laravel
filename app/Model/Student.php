@@ -131,6 +131,6 @@ class Student extends Authenticatable
      */
     public function calcAge($today): int
     {
-        return $this->birth_date->diffInYears($today);
+        return (int) $this->birth_date->diffInYears($today);
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class NotificationReadResource extends JsonResource
 {
-    /** @var Collection<Notification> */
+    /** @var Collection<int, Notification> */
     public $resource;
 
     /**
@@ -19,7 +19,7 @@ class NotificationReadResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function (Notification $notification) {
+        return $this->resource->map(function (Notification $notification, $key) {
             return [
                 'notification_id' => $notification->id,
                 'course_id' => $notification->course_id,

@@ -85,18 +85,11 @@ class AttendanceController extends Controller
     {
         $courseId = $request->course_id;
 
-        /** @var Collection<Chapter> */
+        /** @var Collection<int, Chapter> */
         $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
-
-        $chapters->each(function (Chapter $chapter) {
-            $completedCount = $chapter->lessons->flatMap(function (Lesson $lesson) {
-                return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
-            })->count();
-            $chapter->completed_count = $completedCount;
-        });
 
         return new AttendanceShowResource([
             'chapters' => $chapters,

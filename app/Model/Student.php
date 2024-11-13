@@ -129,7 +129,7 @@ class Student extends Authenticatable
      * @param CarbonImmutable $today
      * @return int
      */
-    public function calcAge($today): int
+    public function calcAge(CarbonImmutable $today): int
     {
         return (int) $this->birth_date->diffInYears($today);
     }

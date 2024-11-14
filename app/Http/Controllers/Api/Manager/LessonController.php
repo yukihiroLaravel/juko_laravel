@@ -552,8 +552,8 @@ class LessonController extends Controller
         }
 
         // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-        if ((int) $course_id !== $chapter->course->id) { 
-            throw new AuthorizationException('Invalid course_id.'); 
+        if ((int) $course_id !== $chapter->course->id) {
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         // チャプターに紐づく全レッスンIDを取得
@@ -561,7 +561,7 @@ class LessonController extends Controller
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
         // 出席のあるレッスンがあれば削除を許可しない
         if ($attendedLessonIds->isNotEmpty()) {
-            throw new AuthorizationException('This lessons contains attendance.'); 
+            throw new AuthorizationException('This lessons contains attendance.');
         }
 
         // 認可チェックをパスした後にトランザクションを開始

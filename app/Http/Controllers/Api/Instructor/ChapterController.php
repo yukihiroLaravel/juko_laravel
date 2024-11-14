@@ -400,4 +400,8 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
+
+    public function deleteAll() {       
+         return response()->json([]);    
+    }
 }

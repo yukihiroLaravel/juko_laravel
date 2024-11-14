@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
 use App\Model\Course;
+use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
@@ -24,6 +25,7 @@ use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
@@ -523,8 +525,64 @@ class LessonController extends Controller
         }
     }
 
-    public function deleteAll()
+    /**
+     * チャプターに紐づくレッスン全削除API
+     *
+     * @param
+     * @return JsonResponse
+     */
+    public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
     {
-        return response()->json([]);
+        // ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーと その管理下の講師を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($managerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // チャプターを取得
+        /** @var Chapter $chapter */
+        $chapter = Chapter::with('course')->findOrFail($chapter_id);
+
+        // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければfalse
+        if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
+        if ((int) $course_id !== $chapter->course->id) {
+            throw new AuthorizationException('Invalid course_id.');
+        }
+
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id');
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+        // 出席のあるレッスンがあれば削除を許可しない
+        if ($attendedLessonIds->isNotEmpty()) {
+            throw new AuthorizationException('This lessons contains attendance.');
+        }
+
+        // 認可チェックをパスした後にトランザクションを開始
+        DB::beginTransaction();
+
+        try {
+            // チャプターに紐づく全レッスンを削除
+            $chapter->lessons()->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete lessons.',
+            ], 500);
+        }
     }
 }

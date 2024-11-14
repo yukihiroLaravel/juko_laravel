@@ -547,30 +547,21 @@ class LessonController extends Controller
         $chapter = Chapter::with('course')->findOrFail($chapter_id);
 
         // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければfalse
-        if (!in_array($chapter->course->instructor_id, $instructorIds)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id.'
-            ], 403);
+        if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-        if ((int) $course_id !== $chapter->course->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+        if ((int) $course_id !== $chapter->course->id) { 
+            throw new AuthorizationException('Invalid course_id.'); 
         }
 
         // チャプターに紐づく全レッスンIDを取得
         $lessonIds = $chapter->lessons->pluck('id');
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+        // 出席のあるレッスンがあれば削除を許可しない
         if ($attendedLessonIds->isNotEmpty()) {
-            // 出席のあるレッスンがあれば削除を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'This lessons contains attendance.'
-            ], 403);
+            throw new AuthorizationException('This lessons contains attendance.'); 
         }
 
         // 認可チェックをパスした後にトランザクションを開始

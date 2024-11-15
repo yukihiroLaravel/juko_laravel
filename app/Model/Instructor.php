@@ -63,6 +63,5 @@ class Instructor extends Authenticatable
     public function managings(): BelongsToMany
     {
         return $this->belongsToMany(Instructor::class, 'manage_instructors', 'manager_id', 'instructor_id');
-
     }
 }

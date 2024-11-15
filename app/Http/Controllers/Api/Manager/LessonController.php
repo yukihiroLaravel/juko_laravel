@@ -25,7 +25,7 @@ use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Manager\LessonsAllDeleteRequest;
 
 class LessonController extends Controller
 {
@@ -526,12 +526,12 @@ class LessonController extends Controller
     }
 
     /**
-     * チャプターに紐づくレッスン全削除API
-     *
-     * @param
-     * @return JsonResponse
-     */
-    public function deleteAll(Request $request, int $course_id, int $chapter_id): JsonResponse
+    * チャプターに紐づく全レッスンを削除するAPI
+    *
+    * @param LessonsAllDeleteRequest $request
+    * @return JsonResponse
+    */
+    public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -544,7 +544,7 @@ class LessonController extends Controller
 
         // チャプターを取得
         /** @var Chapter $chapter */
-        $chapter = Chapter::with('course')->findOrFail($chapter_id);
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
         // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければfalse
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
@@ -552,7 +552,7 @@ class LessonController extends Controller
         }
 
         // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-        if ((int) $course_id !== $chapter->course->id) {
+        if ((int) $request->course_id !== $chapter->course->id) {
             throw new AuthorizationException('Invalid course_id.');
         }
 

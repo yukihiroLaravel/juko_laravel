@@ -72,7 +72,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', 'Api\Instructor\CourseController@show');
                     Route::post('/', 'Api\Instructor\CourseController@update');
-                    Route::delete('all', 'Api\Instructor\ChapterController@deleteAll');
                     // 講師-講座-チャプター
                     Route::delete('/', 'Api\Instructor\CourseController@delete');
                     Route::prefix('chapter')->group(function () {
@@ -81,6 +80,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
                         Route::patch('status', 'Api\Instructor\ChapterController@bulkPatchStatus');
                         Route::delete('/', 'Api\Instructor\ChapterController@bulkDelete');
+                        Route::delete('all', 'Api\Instructor\ChapterController@deleteAll');
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', 'Api\Instructor\ChapterController@show');
                             Route::patch('/', 'Api\Instructor\ChapterController@update');

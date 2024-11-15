@@ -54,6 +54,9 @@ class AttendanceShowResource extends JsonResource
         ];
     }
 
+    /**
+     * @param Collection<int, Chapter> $chapters
+     */
     private function chapters(Collection $chapters)
     {
         return $chapters->map(function(Chapter $chapter) {
@@ -65,6 +68,9 @@ class AttendanceShowResource extends JsonResource
         });
     }
 
+    /**
+     * @param Collection<int, Lesson> $lessons
+     */
     private function lessons(Collection $lessons)
     {
         return $lessons->map(function(Lesson $lesson) {

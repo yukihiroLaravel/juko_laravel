@@ -34,7 +34,7 @@ class AttendanceStatusResource extends JsonResource
     }
 
     /**
-     * @param Collection<Chapter> $chapters
+     * @param Collection<int, Chapter> $chapters
      * @return array
      */
     private function mapChapters(Collection $chapters)

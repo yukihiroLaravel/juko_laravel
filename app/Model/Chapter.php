@@ -129,4 +129,14 @@ class Chapter extends Model
         })
         ->count();
     }
+
+    /**
+     * @return int
+     */
+    public function getCompletedCountAttribute(): int
+    {
+        return $this->lessons->flatMap(function (Lesson $lesson) {
+            return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })->count();
+    }
 }

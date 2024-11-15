@@ -3,6 +3,8 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
@@ -58,9 +60,9 @@ class Course extends Model
     /**
      * 講師を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Instructor, $this>
      */
-    public function instructor()
+    public function instructor(): BelongsTo
     {
         return $this->belongsTo(Instructor::class);
     }
@@ -68,9 +70,9 @@ class Course extends Model
     /**
      * 受講状態を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Attendance, $this>
      */
-    public function attendances()
+    public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
@@ -78,9 +80,9 @@ class Course extends Model
     /**
      * チャプターリストを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Chapter, $this>
      */
-    public function chapters()
+    public function chapters(): HasMany
     {
         return $this->hasMany(Chapter::class)->orderBy('order', 'asc');
     }
@@ -88,9 +90,9 @@ class Course extends Model
     /**
      * 公開済みのチャプターリストを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Chapter, $this>
      */
-    public function publicChapters()
+    public function publicChapters(): HasMany
     {
         return $this->chapters()->where('status', Chapter::STATUS_PUBLIC);
     }

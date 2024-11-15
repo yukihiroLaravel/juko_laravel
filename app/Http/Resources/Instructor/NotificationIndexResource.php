@@ -32,7 +32,7 @@ class NotificationIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Notification> $notifications
+     * @param Collection<int, Notification> $notifications
      * @return array
      */
     private function mapNotifications($notifications)

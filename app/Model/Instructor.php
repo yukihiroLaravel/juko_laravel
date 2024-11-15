@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Instructor extends Authenticatable
@@ -47,9 +48,9 @@ class Instructor extends Authenticatable
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Course, $this>
      */
-    public function courses()
+    public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
     }
@@ -57,10 +58,10 @@ class Instructor extends Authenticatable
     /**
      * 配下の講師を取得
      *
-     * @return BelongsToMany<Instructor, Instructor>
+     * @return BelongsToMany<Instructor, $this>
      */
     public function managings(): BelongsToMany
     {
-        return $this->belongsToMany(Instructor::class, 'manage_instructors', 'instructor_id', 'manager_id');
+        return $this->belongsToMany(Instructor::class, 'manage_instructors', 'manager_id', 'instructor_id');
     }
 }

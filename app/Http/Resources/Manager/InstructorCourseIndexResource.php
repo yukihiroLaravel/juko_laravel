@@ -31,7 +31,7 @@ class InstructorCourseIndexResource extends JsonResource
     }
 
     /**
-     * @param Collection<\App\Model\Course> $courses
+     * @param Collection<int, Course> $courses
      * @return array
      */
     private function mapCourses(Collection $courses)

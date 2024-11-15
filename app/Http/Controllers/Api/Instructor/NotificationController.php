@@ -164,7 +164,7 @@ class NotificationController extends Controller
 
         $instructor = Auth::guard('instructor')->user();
 
-        /** @var Collection $notifications */
+        /** @var Collection<int, Notification> $notifications */
         $notifications = Notification::whereIn('id', $notificationIds)->get();
 
         // 講師と一致しないお知らせが含まれている場合はエラー

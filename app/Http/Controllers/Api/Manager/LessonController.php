@@ -526,11 +526,11 @@ class LessonController extends Controller
     }
 
     /**
-    * チャプターに紐づく全レッスンを削除するAPI
-    *
-    * @param LessonsAllDeleteRequest $request
-    * @return JsonResponse
-    */
+     * チャプターに紐づく全レッスンを削除するAPI
+     *
+     * @param LessonsAllDeleteRequest $request
+     * @return JsonResponse
+     */
     public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得

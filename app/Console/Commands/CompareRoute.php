@@ -55,7 +55,7 @@ class CompareRoute extends Command
      * 「:」を取り除きtrimする
      *
      * @param string $string
-     * @return void
+     * @return string
      */
     private function trimAndRemoveColon($string): string
     {
@@ -98,6 +98,7 @@ class CompareRoute extends Command
             throw new Exception("Failed to open file: {$filePath}");
         }
 
+        /** @var string[] $lines */
         $lines = [];
 
         $initialSkip = true;
@@ -194,6 +195,7 @@ class CompareRoute extends Command
     {
 
         // ルートリストを取得「php artisan route:list」と同じものが取得できるのは検証済
+        /** @var \Illuminate\Routing\Route[] $routes */
         $routes = Route::getRoutes();
 
         $routeList = [];

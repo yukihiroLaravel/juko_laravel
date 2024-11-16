@@ -47,7 +47,7 @@ class CompareRoute extends Command
 
         // 返却値
         $ret = ($ret1 && $ret2);
-        
+
         return $ret;
     }
 
@@ -57,11 +57,13 @@ class CompareRoute extends Command
      * @param string $string
      * @return void
      */
-    private function trimAndRemoveColon($string) : string {
+    private function trimAndRemoveColon($string): string
+    {
         return trim(str_replace(":", "", $string));
     }
 
-    private function loadOpenapi() {
+    private function loadOpenapi()
+    {
         /*
             当コマンドを実行するにあたっての前提
 
@@ -114,16 +116,16 @@ class CompareRoute extends Command
                     paths:
                     までの部分を読み捨てることにした
                 */
-                if($line === "paths:") {
+                if ($line === "paths:") {
                     $initialSkip = false;
-                    continue; 
+                    continue;
                 }
-                if($initialSkip) {
+                if ($initialSkip) {
                     continue;
                 }
 
                 $lines[] = $line;
-            }    
+            }
         } finally {
             fclose($file);
         }
@@ -131,7 +133,7 @@ class CompareRoute extends Command
         $lineCount = count($lines);
 
         $routeList = [];
-        for($index = 0 ; $index < $lineCount ; ++$index) {
+        for ($index = 0; $index < $lineCount; ++$index) {
             $line = $lines[$index];
 
             $retUri = false;
@@ -143,26 +145,25 @@ class CompareRoute extends Command
             $isAddRouteList = false;
 
             $retUri = $this->startsSpacesN($line, 2);
-            if($retUri) {
-
+            if ($retUri) {
                 $checkFlag = false;
 
                 $uri = $this->trimAndRemoveColon($line);
 
                 $nextIndex = ( $index + 1 );
 
-                if($nextIndex < $lineCount) {
+                if ($nextIndex < $lineCount) {
                     $nextLine = $lines[$nextIndex];
 
                     $retMethod = $this->startsSpacesN($nextLine, 4);
-                    if($retMethod) {
+                    if ($retMethod) {
                         $method = $this->trimAndRemoveColon($nextLine);
 
                         $checkFlag = true;
                     }
                 }
 
-                if(!$checkFlag) {
+                if (!$checkFlag) {
                     //「uri」の次の行としての「method」が取得できない状況は、想定外の状況なので例外を投げる。
                     throw new Exception("invalid status. 00100 lines:" . ( $index + 1 ));
                 }
@@ -170,7 +171,7 @@ class CompareRoute extends Command
                 $isAddRouteList = true;
             }
 
-            if(!$isAddRouteList) {
+            if (!$isAddRouteList) {
                 continue;
             }
 
@@ -189,7 +190,8 @@ class CompareRoute extends Command
         return $routeList;
     }
 
-    private function loadRoutes() {
+    private function loadRoutes()
+    {
 
         // ルートリストを取得「php artisan route:list」と同じものが取得できるのは検証済
         $routes = Route::getRoutes();
@@ -203,7 +205,7 @@ class CompareRoute extends Command
             $method = implode('|', $route->methods());
             $uri = "/" . $route->uri();
 
-            if($method == "GET|HEAD") {
+            if ($method == "GET|HEAD") {
                 $method = "get";
             }
 
@@ -224,9 +226,10 @@ class CompareRoute extends Command
         return $routeList;
     }
 
-    function sortRouteListByKey(& $routeList) {
+    function sortRouteListByKey(&$routeList)
+    {
         // keyで昇順ソート
-        usort($routeList, function($a, $b) {
+        usort($routeList, function ($a, $b) {
             return $a['key'] <=> $b['key'];
         });
     }
@@ -240,7 +243,8 @@ class CompareRoute extends Command
      * @param int $rightLength
      * @return boolean 次ループ処理ありかどうか
      */
-    function hasNext($leftIndex, $leftLength, $rightIndex, $rightLength) : bool {
+    function hasNext($leftIndex, $leftLength, $rightIndex, $rightLength): bool
+    {
         $isLeftEnd = ($leftIndex >= $leftLength);
         $isRightEnd = ($rightIndex >= $rightLength);
 
@@ -252,9 +256,9 @@ class CompareRoute extends Command
     function compare(
         $leftRouteList,
         $rightRouteList,
-        & $leftOnlyRouteList,
-        & $matchRouteList,
-        & $rightOnlyRouteList
+        &$leftOnlyRouteList,
+        &$matchRouteList,
+        &$rightOnlyRouteList
     ) {
 
         $leftLength = count($leftRouteList);
@@ -265,13 +269,13 @@ class CompareRoute extends Command
 
         $bigKey = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzz';
 
-        while($this->hasNext($leftIndex, $leftLength, $rightIndex, $rightLength)) {
+        while ($this->hasNext($leftIndex, $leftLength, $rightIndex, $rightLength)) {
             $currentLeft = [
                 'key' => $bigKey,
                 'method' => '',
                 'uri' => '',
             ];
-            if($leftIndex < $leftLength) {
+            if ($leftIndex < $leftLength) {
                 $currentLeft = $leftRouteList[$leftIndex];
             }
 
@@ -280,11 +284,11 @@ class CompareRoute extends Command
                 'method' => '',
                 'uri' => '',
             ];
-            if($rightIndex < $rightLength) {
+            if ($rightIndex < $rightLength) {
                 $currentRight = $rightRouteList[$rightIndex];
             }
 
-            if(
+            if (
                 ($currentLeft['key'] === $bigKey)
                 &&
                 ($currentRight['key'] === $bigKey)
@@ -294,12 +298,12 @@ class CompareRoute extends Command
 
             $currentCompare = $currentLeft['key'] <=> $currentRight['key'];
 
-            if($currentCompare < 0) {
+            if ($currentCompare < 0) {
                 // left only
                 $leftOnlyRouteList[] = $currentLeft;
 
                 ++$leftIndex;
-            } else if($currentCompare === 0) {
+            } elseif ($currentCompare === 0) {
                 // match
                 $matchRouteList[] = $currentLeft;
 

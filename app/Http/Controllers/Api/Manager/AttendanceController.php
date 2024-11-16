@@ -105,7 +105,7 @@ class AttendanceController extends Controller
      * 受講状況取得API
      *
      * @param AttendanceShowRequest $request
-     * @return AttendanceShowResource
+     * @return AttendanceShowResource|JsonResponse
      */
     public function show(AttendanceShowRequest $request)
     {
@@ -128,7 +128,6 @@ class AttendanceController extends Controller
             ], 403);
         }
 
-        /** @var Collection<int, Chapter> */
         $chapters = Chapter::where('course_id', $courseId)->get();
 
         /** @var int */

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
 use App\Model\Course;
+use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\AttendanceShowRequest;
+use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
 use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
@@ -97,6 +99,45 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * 受講状況取得API
+     *
+     * @param AttendanceShowRequest $request
+     * @return AttendanceShowResource
+     */
+    public function show(AttendanceShowRequest $request)
+    {
+        $courseId = $request->course_id;
+
+        // 現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // ログインしている講師とその管理している講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($courseId);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            return response()->json([
+                'result'  => false,
+                'message' => "Forbidden, not allowed to access this course.",
+            ], 403);
+        }
+
+        /** @var Collection<int, Chapter> */
+        $chapters = Chapter::where('course_id', $courseId)->get();
+
+        /** @var int */
+        $studentsCount = Attendance::where('course_id', $courseId)->count();
+
+        return new AttendanceShowResource([
+            'chapters' => $chapters,
+            'studentsCount' => $studentsCount,
+        ]);
     }
 
     /**

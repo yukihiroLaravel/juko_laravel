@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
@@ -105,9 +106,9 @@ class AttendanceController extends Controller
      * 受講状況取得API
      *
      * @param AttendanceShowRequest $request
-     * @return AttendanceShowResource|JsonResponse
+     * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request)
+    public function show(AttendanceShowRequest $request) : AttendanceShowResource
     {
         $courseId = $request->course_id;
 
@@ -122,10 +123,9 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($courseId);
         if (!in_array($course->instructor_id, $instructorIds, true)) {
             // 自分と配下の講師の講座でない場合はエラーを返す
-            return response()->json([
-                'result'  => false,
-                'message' => "Forbidden, not allowed to access this course.",
-            ], 403);
+            throw new AuthorizationException(
+                "Forbidden, not allowed to access this course."
+            );
         }
 
         $chapters = Chapter::where('course_id', $courseId)->get();

@@ -108,7 +108,7 @@ class AttendanceController extends Controller
      * @param AttendanceShowRequest $request
      * @return AttendanceShowResource
      */
-    public function show(AttendanceShowRequest $request) : AttendanceShowResource
+    public function show(AttendanceShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
 

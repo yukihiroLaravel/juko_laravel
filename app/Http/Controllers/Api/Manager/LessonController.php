@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
 use App\Model\Course;
-use App\Model\Chapter;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
@@ -23,9 +23,9 @@ use App\Http\Requests\Manager\LessonUpdateRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
+use App\Http\Requests\Manager\LessonsAllDeleteRequest;
 use App\Http\Requests\Manager\LessonPatchStatusRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
-use App\Http\Requests\Manager\LessonsAllDeleteRequest;
 
 class LessonController extends Controller
 {
@@ -546,25 +546,25 @@ class LessonController extends Controller
         /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
-        // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければfalse
         if (!in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければエラー応答
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
         if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定された講座がチャプターに関連付けられている講座と一致しない場合はエラー応答
             throw new AuthorizationException('Invalid course_id.');
         }
 
         // チャプターに紐づく全レッスンIDを取得
         $lessonIds = $chapter->lessons->pluck('id');
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-        // 出席のあるレッスンがあれば削除を許可しない
+
         if ($attendedLessonIds->isNotEmpty()) {
+            // 出席のあるレッスンがあれば削除を許可しない
             throw new AuthorizationException('This lessons contains attendance.');
         }
 
-        // 認可チェックをパスした後にトランザクションを開始
         DB::beginTransaction();
 
         try {
@@ -578,11 +578,8 @@ class LessonController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e);
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete lessons.',
-            ], 500);
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 }

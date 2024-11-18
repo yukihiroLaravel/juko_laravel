@@ -241,13 +241,13 @@ class NotificationController extends Controller
             ], 403);
         }
 
-        $type = $request->type;
+        $notificationType = $request->notification_type;
 
         DB::beginTransaction();
         try {
-            $notifications->each(function (Notification $notification) use ($type) {
+            $notifications->each(function (Notification $notification) use ($notificationType) {
                 $notification->fill([
-                    'type' => $type,
+                    'type' => $notificationType,
                 ])->save();
             });
             DB::commit();

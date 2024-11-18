@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\NotificationShowRequest;
@@ -123,10 +124,9 @@ class NotificationController extends Controller
                 return $notification->instructor_id !== $instructorId;
             })
         ) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this notification.'
+            );
         }
         DB::beginTransaction();
         try {
@@ -145,10 +145,7 @@ class NotificationController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            throw $e;
         }
     }
 

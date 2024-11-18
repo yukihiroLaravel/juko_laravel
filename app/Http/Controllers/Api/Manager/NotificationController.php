@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Model\ViewedOnceNotification;
 use App\Http\Requests\Manager\NotificationShowRequest;
 use App\Http\Requests\Manager\NotificationIndexRequest;
@@ -218,7 +219,7 @@ class NotificationController extends Controller
      * @param NotificationPutTypeRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateType(NotificationPutTypeRequest $request)
+    public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -235,10 +236,9 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this notification.'
+            );
         }
 
         $notificationType = $request->notification_type;
@@ -257,9 +257,7 @@ class NotificationController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

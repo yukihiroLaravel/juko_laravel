@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
@@ -146,10 +147,9 @@ class AttendanceController extends Controller
         $loginId = Auth::guard('instructor')->user()->id;
 
         if ($instructorId !== $loginId) {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
         $endDate = new Carbon();
@@ -161,10 +161,10 @@ class AttendanceController extends Controller
         } elseif ($request->period === Attendance::PERIOD_YEAR) {
             $periodAgo = $endDate->subYear();
         } else {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 400);
+            // バリデーションチェックがあり、本来「この分岐」に到達すべきでないため例外とする。
+            throw new Exception(
+                'Invalid period. [' . $request->period . ']'
+            );
         }
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();

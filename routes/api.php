@@ -212,6 +212,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         //マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
+                            Route::get('{period}', 'Api\Manager\AttendanceController@loginRate');
                             Route::prefix('status')->group(function () {
                                 Route::get('/', 'Api\Manager\AttendanceController@show');
                                 Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThisMonth');

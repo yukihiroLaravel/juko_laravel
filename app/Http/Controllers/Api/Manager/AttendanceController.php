@@ -9,12 +9,14 @@ use App\Model\Lesson;
 use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
+use App\Http\Requests\Manager\LoginRateRequest;
 use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
@@ -184,6 +186,79 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * 受講生ログイン率取得API
+     *
+     * @param LoginRateRequest $request
+     * @return JsonResponse
+     */
+    public function loginRate(LoginRateRequest $request): JsonResponse
+    {
+        // 現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // ログインしている講師とその管理している講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
+        }
+
+        $endDate = new Carbon();
+
+        if ($request->period === Attendance::PERIOD_WEEK) {
+            $periodAgo = $endDate->subWeek();
+        } elseif ($request->period === Attendance::PERIOD_MONTH) {
+            $periodAgo = $endDate->subMonth();
+        } elseif ($request->period === Attendance::PERIOD_YEAR) {
+            $periodAgo = $endDate->subYear();
+        } else {
+            // バリデーションチェックがあり、本来「この分岐」に到達すべきでないため例外とする。
+            throw new Exception(
+                'Invalid period. [' . $request->period . ']'
+            );
+        }
+
+        $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
+        $studentsCount = $attendances->count();
+
+        // 期間内にログインした受講生数
+        $loginCount = 0;
+
+        foreach ($attendances as $attendance) {
+            $lastLoginDate = $attendance->student->last_login_at;
+            if ($lastLoginDate->gte($periodAgo)) {
+                $loginCount++;
+            }
+        }
+
+        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        return response()->json(['login_rate' => $loginRate], 200);
+    }
+
+    /**
+     * 受講生ログイン率計算
+     *
+     * @param int $number
+     * @param int $total
+     * @return float
+     */
+    public function calcLoginRate(int $number, int $total): float
+    {
+        if ($total === 0) {
+            return 0;
+        }
+
+        $percent = ($number / $total) * 100;
+        return floor($percent);
     }
 
     /**

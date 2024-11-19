@@ -21,10 +21,10 @@ use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
-use App\Http\Requests\Instructor\BulkPatchStatusRequest;
+use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
-use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use App\Http\Requests\Instructor\ChapterUpdateStatusRequest;
 
 class ChapterController extends Controller
 {
@@ -140,10 +140,10 @@ class ChapterController extends Controller
     /**
      * チャプター更新API
      *
-     * @param ChapterPatchStatusRequest $request
+     * @param ChapterUpdateStatusRequest $request
      * @return JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request): JsonResponse
+    public function updateStatus(ChapterUpdateStatusRequest $request): JsonResponse
     {
         /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
@@ -175,10 +175,10 @@ class ChapterController extends Controller
     /**
      * 複数チャプターの公開/非公開API
      *
-     * @param BulkPatchStatusRequest $request
+     * @param ChapterPatchStatusRequest $request
      * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    public function patchStatus(ChapterPatchStatusRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納

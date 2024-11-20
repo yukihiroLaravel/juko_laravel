@@ -109,6 +109,17 @@ class NotificationController extends Controller
     }
 
     /**
+     * お知らせ詳細-削除
+     *
+     * @param 
+     * @return 
+     */
+    public function delete()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * お知らせ一覧-タイプ変更API
      *
      * @param NotificationPutTypeRequest $request

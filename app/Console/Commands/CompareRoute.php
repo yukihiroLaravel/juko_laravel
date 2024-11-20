@@ -74,7 +74,7 @@ class CompareRoute extends Command
     {
         for ($index = 0; $index < $uriIndexesExCount; ++$index) {
             $currentIndex = $uriIndexesEx[$index];
-            if($currentIndex > $argIndex) {
+            if ($currentIndex > $argIndex) {
                 return $currentIndex;
             }
         }
@@ -155,7 +155,7 @@ class CompareRoute extends Command
 
         /*
             「uriがあった位置のindex」および、末尾に「$lineCount」を追加
-            
+
             「uriの行index」から「 「次のの行index」の1つ手前の行index  または  「$lineCount」の1つ手前の行index　」
             までの間で、該当のuriに関連するmethodの繰り返しを複数個、拾うための探索処理の範囲の制御を
             するためには、あらかじめ、「uriの行index」および、末尾に「$lineCount」の値を
@@ -200,8 +200,7 @@ class CompareRoute extends Command
 
                 $methodLoopStartIndex = $index;
                 $methodLoopEndIndex = $this->getNextUriIndex($methodLoopStartIndex, $uriIndexesEx, $uriIndexesExCount);
-                for ( $methodSearchIndex = $methodLoopStartIndex; $methodSearchIndex < $methodLoopEndIndex; ++$methodSearchIndex) {
-
+                for ($methodSearchIndex = $methodLoopStartIndex; $methodSearchIndex < $methodLoopEndIndex; ++$methodSearchIndex) {
                     $methodSearchLine = $lines[$methodSearchIndex];
 
                     $retMethod = $this->startsSpacesN($methodSearchLine, 4);
@@ -224,14 +223,14 @@ class CompareRoute extends Command
                 continue;
             }
 
-            foreach($methods as $method) {
+            foreach ($methods as $method) {
                 $key = $uri . "###" . $method;
 
                 $routeList[] = [
                     'key' => $key,
                     'method' => $method,
                     'uri' => $uri,
-                ];    
+                ];
             }
         }
 

@@ -111,8 +111,8 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細-削除
      *
-     * @param 
-     * @return 
+     * @param
+     * @return
      */
     public function delete()
     {

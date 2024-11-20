@@ -82,6 +82,41 @@ class CompareRoute extends Command
         throw new Exception("invalid status. 00300");
     }
 
+    /**
+     * methodSortIndexを返す
+     *
+     * @param string $method HTTPのmethod
+     * @return string methodSortIndexを返す
+     */
+    private function getMethodSortIndex(string $method) : string {
+        /*
+            GET
+            POST
+            PATCH
+            PUT
+            DELETE
+            の順番になるようにするためのmethodSortIndexを返す
+        */
+        if($method === "get") {
+            return "0";
+        }
+        if($method === "post") {
+            return "1";
+        }
+        if($method === "patch") {
+            return "2";
+        }
+        if($method === "put") {
+            return "3";
+        }
+        if($method === "delete") {
+            return "4";
+        }
+
+        // $methodが上記以外となるのは、想定外のため例外を投げる
+        throw new Exception("invalid status. 00400");
+    }
+
     private function loadOpenapi()
     {
         /*
@@ -224,7 +259,10 @@ class CompareRoute extends Command
             }
 
             foreach ($methods as $method) {
-                $key = $uri . "###" . $method;
+                // methodSortIndexを返す
+                $methodSortIndex = $this->getMethodSortIndex($method);
+
+                $key = $uri . "###" . $methodSortIndex;
 
                 $routeList[] = [
                     'key' => $key,
@@ -262,7 +300,10 @@ class CompareRoute extends Command
 
             $method = strtolower($method);
 
-            $key = $uri . "###" . $method;
+            // methodSortIndexを返す
+            $methodSortIndex = $this->getMethodSortIndex($method);
+
+            $key = $uri . "###" . $methodSortIndex;
 
             $routeList[] = [
                 'key' => $key,

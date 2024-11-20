@@ -88,7 +88,8 @@ class CompareRoute extends Command
      * @param string $method HTTPのmethod
      * @return string methodSortIndexを返す
      */
-    private function getMethodSortIndex(string $method) : string {
+    private function getMethodSortIndex(string $method): string
+    {
         /*
             GET
             POST
@@ -97,19 +98,19 @@ class CompareRoute extends Command
             DELETE
             の順番になるようにするためのmethodSortIndexを返す
         */
-        if($method === "get") {
+        if ($method === "get") {
             return "0";
         }
-        if($method === "post") {
+        if ($method === "post") {
             return "1";
         }
-        if($method === "patch") {
+        if ($method === "patch") {
             return "2";
         }
-        if($method === "put") {
+        if ($method === "put") {
             return "3";
         }
-        if($method === "delete") {
+        if ($method === "delete") {
             return "4";
         }
 

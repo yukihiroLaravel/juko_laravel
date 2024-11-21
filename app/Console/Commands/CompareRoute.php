@@ -62,6 +62,62 @@ class CompareRoute extends Command
         return trim(str_replace(":", "", $string));
     }
 
+    /**
+     * 「$argIndexの次のuriのindexまたは、末尾のindex」を取得する。
+     *
+     * @param int $argIndex 指定index
+     * @param array $uriIndexesEx uriまたは「末尾に「$lineCount」」のindex
+     * @param int $uriIndexesExCount 要素数
+     * @return int 「$argIndexの次のuriのindexまたは、末尾のindex」
+     */
+    private function getNextUriIndex(int $argIndex, array $uriIndexesEx, int $uriIndexesExCount): int
+    {
+        for ($index = 0; $index < $uriIndexesExCount; ++$index) {
+            $currentIndex = $uriIndexesEx[$index];
+            if ($currentIndex > $argIndex) {
+                return $currentIndex;
+            }
+        }
+        // $uriIndexesExを作る時に、「  末尾に「$lineCount」を追加  」してるため、あり得ないはず。
+        throw new Exception("invalid status. 00300");
+    }
+
+    /**
+     * methodSortIndexを返す
+     *
+     * @param string $method HTTPのmethod
+     * @return string methodSortIndexを返す
+     */
+    private function getMethodSortIndex(string $method): string
+    {
+        /*
+            GET
+            POST
+            PATCH
+            PUT
+            DELETE
+            の順番になるようにするためのmethodSortIndexを返す
+        */
+        if ($method === "get") {
+            return "0";
+        }
+        if ($method === "post") {
+            return "1";
+        }
+        if ($method === "patch") {
+            return "2";
+        }
+        if ($method === "put") {
+            return "3";
+        }
+        if ($method === "delete") {
+            return "4";
+        }
+
+        // $methodが上記以外となるのは、想定外のため例外を投げる
+        throw new Exception("invalid status. 00400");
+    }
+
     private function loadOpenapi()
     {
         /*
@@ -133,6 +189,33 @@ class CompareRoute extends Command
 
         $lineCount = count($lines);
 
+        /*
+            「uriがあった位置のindex」および、末尾に「$lineCount」を追加
+
+            「uriの行index」から「 「次のの行index」の1つ手前の行index  または  「$lineCount」の1つ手前の行index　」
+            までの間で、該当のuriに関連するmethodの繰り返しを複数個、拾うための探索処理の範囲の制御を
+            するためには、あらかじめ、「uriの行index」および、末尾に「$lineCount」の値を
+            $uriIndexesExで保持しておく必要がある
+            名前に「Ex」をつけてるのは、末尾に「$lineCount」の値を指定しているため
+            ループを継続する判定式では、「<」で判定のため
+            「$lineCount」の値をindex指定したアクセスが行われないことを前提にしてる。
+        */
+        $retUri = false;
+        $uriIndexesEx = [];
+        for ($index = 0; $index < $lineCount; ++$index) {
+            $line = $lines[$index];
+
+            $retUri = $this->startsSpacesN($line, 2);
+            if ($retUri) {
+                // 「uriがあった位置のindex」を追加
+                $uriIndexesEx[] = $index;
+            }
+        }
+        // 末尾に「$lineCount」を追加 ( passed the end )
+        $uriIndexesEx[] = $lineCount;
+        $uriIndexesExCount = count($uriIndexesEx);
+
+
         $routeList = [];
         for ($index = 0; $index < $lineCount; ++$index) {
             $line = $lines[$index];
@@ -141,7 +224,7 @@ class CompareRoute extends Command
             $retMethod = false;
 
             $uri = "";
-            $method = "";
+            $methods = [];
 
             $isAddRouteList = false;
 
@@ -151,14 +234,14 @@ class CompareRoute extends Command
 
                 $uri = $this->trimAndRemoveColon($line);
 
-                $nextIndex = ( $index + 1 );
+                $methodLoopStartIndex = $index;
+                $methodLoopEndIndex = $this->getNextUriIndex($methodLoopStartIndex, $uriIndexesEx, $uriIndexesExCount);
+                for ($methodSearchIndex = $methodLoopStartIndex; $methodSearchIndex < $methodLoopEndIndex; ++$methodSearchIndex) {
+                    $methodSearchLine = $lines[$methodSearchIndex];
 
-                if ($nextIndex < $lineCount) {
-                    $nextLine = $lines[$nextIndex];
-
-                    $retMethod = $this->startsSpacesN($nextLine, 4);
+                    $retMethod = $this->startsSpacesN($methodSearchLine, 4);
                     if ($retMethod) {
-                        $method = $this->trimAndRemoveColon($nextLine);
+                        $methods[] = $this->trimAndRemoveColon($methodSearchLine);
 
                         $checkFlag = true;
                     }
@@ -176,13 +259,18 @@ class CompareRoute extends Command
                 continue;
             }
 
-            $key = $method . "###" . $uri;
+            foreach ($methods as $method) {
+                // methodSortIndexを返す
+                $methodSortIndex = $this->getMethodSortIndex($method);
 
-            $routeList[] = [
-                'key' => $key,
-                'method' => $method,
-                'uri' => $uri,
-            ];
+                $key = $uri . "###" . $methodSortIndex;
+
+                $routeList[] = [
+                    'key' => $key,
+                    'method' => $method,
+                    'uri' => $uri,
+                ];
+            }
         }
 
         // $routeListをkeyで昇順ソート
@@ -213,7 +301,10 @@ class CompareRoute extends Command
 
             $method = strtolower($method);
 
-            $key = $method . "###" . $uri;
+            // methodSortIndexを返す
+            $methodSortIndex = $this->getMethodSortIndex($method);
+
+            $key = $uri . "###" . $methodSortIndex;
 
             $routeList[] = [
                 'key' => $key,

@@ -34,7 +34,8 @@ class ChapterPatchStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'chapters' => ['required', 'array'],
+            'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'status' => ['required', 'string', new ChapterStatusRule()],
         ];
     }

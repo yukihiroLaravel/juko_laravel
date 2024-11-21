@@ -152,20 +152,14 @@ class AttendanceController extends Controller
             );
         }
 
-        $endDate = new Carbon();
+        $nowDate = new Carbon();
 
-        if ($request->period === Attendance::PERIOD_WEEK) {
-            $periodAgo = $endDate->subWeek();
-        } elseif ($request->period === Attendance::PERIOD_MONTH) {
-            $periodAgo = $endDate->subMonth();
-        } elseif ($request->period === Attendance::PERIOD_YEAR) {
-            $periodAgo = $endDate->subYear();
-        } else {
-            // バリデーションチェックがあり、本来「この分岐」に到達すべきでないため例外とする。
-            throw new Exception(
-                'Invalid period. [' . $request->period . ']'
-            );
-        }
+        $periodAgo = match ($request->period) {
+            Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
+            Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
+            Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
+            default => throw new Exception('Invalid period. [' . $request->period . ']'),
+        };
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
         $studentsCount = $attendances->count();
@@ -180,25 +174,8 @@ class AttendanceController extends Controller
             }
         }
 
-        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        $loginRate = Attendance::calcLoginRate($loginCount, $studentsCount);
         return response()->json(['login_rate' => $loginRate], 200);
-    }
-
-    /**
-     * 受講生ログイン率計算
-     *
-     * @param int $number
-     * @param int $total
-     * @return float
-     */
-    public function calcLoginRate(int $number, int $total): float
-    {
-        if ($total === 0) {
-            return 0;
-        }
-
-        $percent = ($number / $total) * 100;
-        return floor($percent);
     }
 
     /**

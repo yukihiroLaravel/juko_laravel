@@ -77,6 +77,23 @@ class Attendance extends Model
         });
     }
 
+    /**
+     * 受講生ログイン率計算
+     *
+     * @param int $number
+     * @param int $total
+     * @return float
+     */
+    public static function calcLoginRate(int $number, int $total): float
+    {
+        if ($total === 0) {
+            return 0;
+        }
+
+        $percent = ($number / $total) * 100;
+        return floor($percent);
+    }
+
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
     const SORT_BY_EMAIL = 'email';

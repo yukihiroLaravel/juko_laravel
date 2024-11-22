@@ -4,26 +4,26 @@ namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
 use App\Model\Course;
-use App\Model\Chapter;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
-use App\Model\LessonAttendance;
 use Illuminate\Support\Carbon;
+use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\LoginRateRequest;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\AttendanceShowRequest;
-use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
-use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
+use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
 
 class AttendanceController extends Controller
 {

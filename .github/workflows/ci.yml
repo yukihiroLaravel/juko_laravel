@@ -24,7 +24,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --ansi
 
     - name: Check code style
-      run: composer sniffer-rewrite
+      run: composer pint
 
     - name: Commit and Push changes
       run: |

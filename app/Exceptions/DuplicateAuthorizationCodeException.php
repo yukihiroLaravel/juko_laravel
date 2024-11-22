@@ -16,7 +16,7 @@ class DuplicateAuthorizationCodeException extends Exception
         // メッセージにユーザー情報のemailを追加
         $message = [
             $message,
-            'email: ' . $student->email,
+            'email: '.$student->email,
         ];
 
         $this->message = implode("\n", $message);

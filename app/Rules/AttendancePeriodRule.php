@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Attendance;
+use Illuminate\Contracts\Validation\Rule;
 
 class AttendancePeriodRule implements Rule
 {
@@ -30,15 +30,16 @@ class AttendancePeriodRule implements Rule
             in_array(
                 $value,
                 [
-                Attendance::PERIOD_WEEK,
-                Attendance::PERIOD_MONTH,
-                Attendance::PERIOD_YEAR,
+                    Attendance::PERIOD_WEEK,
+                    Attendance::PERIOD_MONTH,
+                    Attendance::PERIOD_YEAR,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

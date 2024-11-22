@@ -56,7 +56,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 
-
     // 講師側API
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
@@ -230,8 +229,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Manager\AttendanceController@delete');
                     });
                 });
-                Route::prefix('instructor')->group(function () {
-                });
+                Route::prefix('instructor')->group(function () {});
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     Route::get('{student_id}', 'Api\Manager\StudentController@show');

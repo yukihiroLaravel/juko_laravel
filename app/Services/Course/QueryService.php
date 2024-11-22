@@ -3,16 +3,13 @@
 namespace App\Services\Course;
 
 use App\Model\Course;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class QueryService
 {
     /**
      * 講座情報を取得
-     *
-     * @param int $courseId
-     * @return Course
      */
     public function getCourse(int $courseId): Course
     {
@@ -22,7 +19,6 @@ class QueryService
     /**
      * 講師IDから講座情報を取得
      *
-     * @param int $instructorId
      * @return Collection<Course>
      */
     public function getCoursesByInstructorId(int $instructorId): Collection
@@ -33,22 +29,18 @@ class QueryService
     /**
      * 講師IDのリストから講座情報を取得
      *
-     * @param array<int> $instructorIds
+     * @param  array<int>  $instructorIds
      * @return Collection<Course>
      */
     public function getCoursesByInstructorIds(array $instructorIds): Collection
     {
         return Course::with('instructor')
-        ->whereIn('instructor_id', $instructorIds)
-        ->get();
+            ->whereIn('instructor_id', $instructorIds)
+            ->get();
     }
 
     /**
      * 講師IDから講座情報を取得（ページネーション）
-     *
-     * @param int $instructorId
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginatedCoursesByInstructorId(int $instructorId, int $perPage): LengthAwarePaginator
     {

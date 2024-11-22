@@ -31,9 +31,9 @@ class CourseShowResource extends JsonResource
                             'url' => $lesson->url,
                             'remarks' => $lesson->remarks,
                         ];
-                    })
+                    }),
                 ];
-            })
+            }),
         ];
     }
 }

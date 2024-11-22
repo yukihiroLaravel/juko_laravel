@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Instructor;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\LessonStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class LessonUpdateRequest extends FormRequest
 {
@@ -26,7 +26,6 @@ class LessonUpdateRequest extends FormRequest
         ]);
     }
 
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -37,11 +36,11 @@ class LessonUpdateRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lesson_id' => ['required','integer', 'exists:lessons,id,deleted_at,NULL'],
-            'title' => ['required','string','max:50'],
-            'url' => ['required','string'],
-            'remarks' => ['nullable','string'],
-            'status' => ['required', 'string', new LessonStatusRule()],
+            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'title' => ['required', 'string', 'max:50'],
+            'url' => ['required', 'string'],
+            'remarks' => ['nullable', 'string'],
+            'status' => ['required', 'string', new LessonStatusRule],
         ];
     }
 }

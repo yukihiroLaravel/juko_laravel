@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Manager;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Model\Chapter;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChapterShowResource extends JsonResource
 {
@@ -31,7 +31,7 @@ class ChapterShowResource extends JsonResource
                     'status' => $lesson->status,
                 ];
             })
-            ->values(),
+                ->values(),
         ];
     }
 }

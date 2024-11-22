@@ -70,7 +70,7 @@ class LessonSeeder extends Seeder
                 'chapter_id' => 3,
                 'url' => 'KH4MmQsCDuw',
                 'title' => '環境構築',
-                'remarks' => "",
+                'remarks' => '',
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

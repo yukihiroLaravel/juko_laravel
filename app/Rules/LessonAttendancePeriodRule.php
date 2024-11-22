@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\LessonAttendance;
+use Illuminate\Contracts\Validation\Rule;
 
 class LessonAttendancePeriodRule implements Rule
 {
@@ -38,6 +38,7 @@ class LessonAttendancePeriodRule implements Rule
         ) {
             return true;
         }
+
         return false;
     }
 

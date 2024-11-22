@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Manager;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ChapterStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class ChapterPutStatusRequest extends FormRequest
 {
@@ -33,7 +33,7 @@ class ChapterPutStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule()],
+            'status' => ['required', 'string', new ChapterStatusRule],
         ];
     }
 }

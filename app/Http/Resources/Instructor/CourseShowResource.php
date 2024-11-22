@@ -19,24 +19,22 @@ class CourseShowResource extends JsonResource
             'title' => $this->resource->title,
             'image' => $this->resource->image,
             'status' => $this->resource->status,
-            'chapters'=> $this->resource->chapters->map(function ($chapter) {
+            'chapters' => $this->resource->chapters->map(function ($chapter) {
                 return [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
                     'status' => $chapter->status,
                     'lessons' => $chapter->lessons->map(function ($lesson) {
                         return [
-                           'lesson_id'=>$lesson->id,
-                           'url'=>$lesson->url,
-                           'title'=>$lesson->title,
-                           'remarks'=>$lesson->remarks,
-                           'status' =>$lesson->status,
+                            'lesson_id' => $lesson->id,
+                            'url' => $lesson->url,
+                            'title' => $lesson->title,
+                            'remarks' => $lesson->remarks,
+                            'status' => $lesson->status,
                         ];
-                    })
+                    }),
                 ];
-            })
+            }),
         ];
     }
-
-
 }

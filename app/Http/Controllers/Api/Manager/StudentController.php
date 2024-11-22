@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use Carbon\Carbon;
-use App\Model\Course;
-use App\Model\Student;
-use App\Model\Instructor;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Services\Student\QueryService;
-use App\Http\Requests\Manager\StudentShowRequest;
 use App\Http\Requests\Manager\StudentIndexRequest;
+use App\Http\Requests\Manager\StudentShowRequest;
 use App\Http\Requests\Manager\StudentStoreRequest;
-use App\Http\Resources\Manager\StudentShowResource;
 use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Resources\Manager\StudentShowResource;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\Student;
+use App\Services\Student\QueryService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
      *
-     * @param StudentIndexRequest $request
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
     public function index(StudentIndexRequest $request)
@@ -34,7 +33,7 @@ class StudentController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $instructorId = $request->user()->id;//Instracter側との違い確認
+        $instructorId = $request->user()->id; //Instracter側との違い確認
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
@@ -50,11 +49,11 @@ class StudentController extends Controller
 
         $course = Course::find($request->course_id);
 
-        if (!in_array($course->id, $courseIds, true)) {
+        if (! in_array($course->id, $courseIds, true)) {
             // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Not authorized.',
             ], 403);
         }
 
@@ -75,8 +74,8 @@ class StudentController extends Controller
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
-                    ->orWhere('students.email', 'LIKE', "%{$inputText}%")
-                    ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                        ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                        ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
@@ -91,17 +90,16 @@ class StudentController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
+
         return new StudentIndexResource([
             'course' => $course,
-            'data' => $results
+            'data' => $results,
         ]);
     }
 
     /**
      * 受講生詳細取得API
      *
-     * @param StudentShowRequest $request
-     * @param QueryService $queryService
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(StudentShowRequest $request, QueryService $queryService)
@@ -125,7 +123,7 @@ class StudentController extends Controller
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized to access this student.'
+                'message' => 'Not authorized to access this student.',
             ], 403);
         }
 
@@ -135,7 +133,6 @@ class StudentController extends Controller
     /**
      * 受講生登録API
      *
-     * @param StudentStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StudentStoreRequest $request)
@@ -145,7 +142,7 @@ class StudentController extends Controller
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now()
+            'updated_at' => Carbon::now(),
         ]);
 
         return response()->json([

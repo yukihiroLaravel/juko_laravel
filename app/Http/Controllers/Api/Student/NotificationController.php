@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Model\Student;
-use App\Model\Attendance;
-use App\Model\Notification;
-use Carbon\CarbonImmutable;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\NotificationShowRequest;
 use App\Http\Requests\Student\NotificationIndexRequest;
+use App\Http\Requests\Student\NotificationShowRequest;
+use App\Http\Resources\Student\NotificationIndexResource;
 use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Resources\Student\NotificationShowResource;
-use App\Http\Resources\Student\NotificationIndexResource;
+use App\Model\Attendance;
+use App\Model\Notification;
+use App\Model\Student;
+use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
     /**
      * お知らせ取得API
-     *
-     * @param NotificationIndexRequest $request
-     * @return NotificationIndexResource
      */
     public function index(NotificationIndexRequest $request): NotificationIndexResource
     {
@@ -46,7 +43,6 @@ class NotificationController extends Controller
     /**
      * お知らせ既読API
      *
-     * @param Request $request
      * @return NotificationReadResource
      */
     public function read(Request $request)
@@ -80,6 +76,7 @@ class NotificationController extends Controller
                 }
                 $notification->students()->attach($student->id);
             }
+
             return true;
         });
     }
@@ -87,7 +84,6 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      *
-     * @param NotificationShowRequest $request
      * @return NotificationShowResource|JsonResponse
      */
     public function show(NotificationShowRequest $request)
@@ -101,7 +97,7 @@ class NotificationController extends Controller
         /** @var Notification $notification */
         $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
-        if (!in_array($notification->course_id, $courseIds, true)) {
+        if (! in_array($notification->course_id, $courseIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',

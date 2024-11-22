@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Course;
+use Illuminate\Contracts\Validation\Rule;
 
 class CourseStatusRule implements Rule
 {
@@ -20,14 +20,15 @@ class CourseStatusRule implements Rule
             in_array(
                 $value,
                 [
-                Course::STATUS_PRIVATE,
-                Course::STATUS_PUBLIC
+                    Course::STATUS_PRIVATE,
+                    Course::STATUS_PUBLIC,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

@@ -2,32 +2,29 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Exception;
-use App\Model\Notification;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\AuthorizationException;
-use App\Model\ViewedOnceNotification;
-use Illuminate\Database\Eloquent\Collection;
-use App\Http\Requests\Instructor\NotificationShowRequest;
+use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Instructor\NotificationPutTypeRequest;
+use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
-use App\Http\Resources\Instructor\NotificationShowResource;
-use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
-use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
+use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Model\Notification;
+use App\Model\ViewedOnceNotification;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
     /**
      * お知らせ一覧取得API
-     *
-     * @param NotificationIndexRequest $request
-     * @return NotificationIndexResource
      */
     public function index(NotificationIndexRequest $request): NotificationIndexResource
     {
@@ -44,7 +41,6 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      *
-     * @param NotificationShowRequest $request
      * @return NotificationShowResource|JsonResponse
      */
     public function show(NotificationShowRequest $request)
@@ -64,20 +60,17 @@ class NotificationController extends Controller
 
     /**
      * お知らせ登録
-     *
-     * @param NotificationStoreRequest $request
-     * @return JsonResponse
      */
     public function store(NotificationStoreRequest $request): JsonResponse
     {
         Notification::create([
-            'course_id'     => $request->course_id,
+            'course_id' => $request->course_id,
             'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title'         => $request->title,
-            'type'          => $request->type,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'content'       => $request->content,
+            'title' => $request->title,
+            'type' => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'content' => $request->content,
         ]);
 
         return response()->json([
@@ -87,21 +80,18 @@ class NotificationController extends Controller
 
     /**
      * お知らせ更新API
-     *
-     * @param NotificationUpdateRequest $request
-     * @return JsonResponse
      */
     public function update(NotificationUpdateRequest $request): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
         $notification->fill([
-            'type'  => $request->type,
+            'type' => $request->type,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'title' => $request->title,
             'content' => $request->content,
         ])
-        ->save();
+            ->save();
 
         return response()->json([
             'result' => true,
@@ -110,9 +100,6 @@ class NotificationController extends Controller
 
     /**
      * お知らせ一覧-タイプ変更API
-     *
-     * @param NotificationPutTypeRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
@@ -134,11 +121,12 @@ class NotificationController extends Controller
             $notifications->each(function ($notification) use ($notificationType) {
                 // 指定されたお知らせIDでお知らせを取得
                 $notification->fill([
-                    'type' => $notificationType
+                    'type' => $notificationType,
                 ])
-                ->save();
+                    ->save();
             });
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
@@ -150,11 +138,8 @@ class NotificationController extends Controller
     }
 
     /**
-    * お知らせ一括削除
-    *
-    * @param NotificationBulkDeleteRequest $request
-    * @return JsonResponse
-    */
+     * お知らせ一括削除
+     */
     public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);

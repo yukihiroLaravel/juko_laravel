@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Model\Student;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class StudentSeeder extends Seeder
 {

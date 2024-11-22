@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StudentAuthorization extends Model
 {
-     /**
+    /**
      * モデルと関連しているテーブル
      *
      * @var string

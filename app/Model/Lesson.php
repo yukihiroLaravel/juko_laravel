@@ -18,6 +18,7 @@ class Lesson extends Model
 
     // ステータス定数
     const STATUS_PUBLIC = 'public';
+
     const STATUS_PRIVATE = 'private';
 
     /**

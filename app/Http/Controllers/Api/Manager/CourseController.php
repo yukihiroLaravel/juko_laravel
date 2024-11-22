@@ -2,34 +2,31 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use Carbon\Carbon;
-use App\Model\Course;
-use RuntimeException;
-use App\Model\Attendance;
-use App\Model\Instructor;
-use Illuminate\Support\Str;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Services\Course\QueryService;
+use App\Http\Requests\Manager\CourseDeleteRequest;
+use App\Http\Requests\Manager\CoursePutStatusRequest;
 use App\Http\Requests\Manager\CourseShowRequest;
 use App\Http\Requests\Manager\CourseStoreRequest;
-use App\Http\Requests\Manager\CourseDeleteRequest;
 use App\Http\Requests\Manager\CourseUpdateRequest;
-use App\Http\Resources\Manager\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Requests\Manager\CoursePutStatusRequest;
+use App\Http\Resources\Manager\CourseShowResource;
+use App\Model\Attendance;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Services\Course\QueryService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
-     *
-     * @param QueryService $queryService
-     * @return CourseIndexResource
      */
     public function index(QueryService $queryService): CourseIndexResource
     {
@@ -50,8 +47,6 @@ class CourseController extends Controller
     /**
      * 講座情報取得API
      *
-     * @param CourseShowRequest $request
-     * @param QueryService $queryService
      * @return CourseShowResource|JsonResponse
      */
     public function show(CourseShowRequest $request, QueryService $queryService)
@@ -67,10 +62,10 @@ class CourseController extends Controller
         $course = $queryService->getCourse($request->course_id);
 
         // 自身 もしくは 配下の講師でない場合はエラー応答
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
+        if (! in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
-                'message' => "Forbidden, not allowed to this course.",
+                'message' => 'Forbidden, not allowed to this course.',
             ], 403);
         }
 
@@ -80,16 +75,15 @@ class CourseController extends Controller
     /**
      * 講座登録API
      *
-     * @param CourseStoreRequest $request
-     * @return JsonResponse
-     */
+     * @return JsonResponse
+     */
     public function store(CourseStoreRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString() . '.' . $extension;
+        $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -102,16 +96,16 @@ class CourseController extends Controller
         ]);
 
         return response()->json([
-            "result" => true,
-            "data" => $course,
+            'result' => true,
+            'data' => $course,
         ]);
     }
 
     /**
-     * 講座情報更新API
-     *
-     * @return JsonResponse
-     */
+     * 講座情報更新API
+     *
+     * @return JsonResponse
+     */
     public function update(CourseUpdateRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -124,11 +118,11 @@ class CourseController extends Controller
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if (!in_array($course->instructor_id, $managingIds, true)) {
+            if (! in_array($course->instructor_id, $managingIds, true)) {
                 // 自分、または配下の講師の講座でなければエラー応答
                 return response()->json([
-                    'result'  => false,
-                    'message' => "Forbidden, not allowed to update this course.",
+                    'result' => false,
+                    'message' => 'Forbidden, not allowed to update this course.',
                 ], 403);
             }
 
@@ -140,7 +134,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -152,17 +146,18 @@ class CourseController extends Controller
             ]);
 
             return response()->json([
-                "result" => true,
+                'result' => true,
             ]);
         } catch (ModelNotFoundException $exception) {
             return response()->json([
                 'result' => false,
-                'message' => 'Not Found course.'
+                'message' => 'Not Found course.',
             ], 404);
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
+
             return response()->json([
-                "result" => false,
+                'result' => false,
             ], 500);
         }
     }
@@ -170,7 +165,6 @@ class CourseController extends Controller
     /**
      * 講座削除API
      *
-     * @param CourseDeleteRequest $request
      * @return JsonResponse
      */
     public function delete(CourseDeleteRequest $request)
@@ -183,18 +177,18 @@ class CourseController extends Controller
         try {
             $course = Course::findOrFail($request->course_id);
 
-            if (!in_array($course->instructor_id, $managingIds, true)) {
+            if (! in_array($course->instructor_id, $managingIds, true)) {
                 // 自分、または配下の講師の講座でなければエラー応答
                 return response()->json([
-                    'result'  => false,
-                    'message' => "Forbidden, not allowed to delete this course.",
+                    'result' => false,
+                    'message' => 'Forbidden, not allowed to delete this course.',
                 ], 403);
             }
 
             if (Attendance::where('course_id', $request->course_id)->exists()) {
                 return new JsonResponse([
-                    "result" => false,
-                    "message" => "This course has already been taken by students."
+                    'result' => false,
+                    'message' => 'This course has already been taken by students.',
                 ], 403);
             }
 
@@ -206,17 +200,18 @@ class CourseController extends Controller
             $course->delete();
 
             return response()->json([
-                "result" => true,
+                'result' => true,
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                "result" => false,
-                "message" => "Not Found course."
+                'result' => false,
+                'message' => 'Not Found course.',
             ], 404);
         } catch (RuntimeException $e) {
             Log::error($e);
+
             return response()->json([
-                "result" => false,
+                'result' => false,
             ], 500);
         }
     }
@@ -224,9 +219,8 @@ class CourseController extends Controller
     /**
      * 講座ステータス更新API
      *
-     * @param CoursePutStatusRequest $request
-     * @return JsonResponse
-     */
+     * @return JsonResponse
+     */
     public function status(CoursePutStatusRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -241,7 +235,7 @@ class CourseController extends Controller
         Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
 
         return response()->json([
-            'result' => 'true'
+            'result' => 'true',
         ]);
     }
 }

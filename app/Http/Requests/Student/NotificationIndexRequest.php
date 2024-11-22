@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Student;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\NotificationSortByRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class NotificationIndexRequest extends FormRequest
 {
@@ -27,7 +27,7 @@ class NotificationIndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new NotificationSortByRule()],
+            'sortBy' => ['string', new NotificationSortByRule],
             'order' => ['string', 'in:asc,desc'],
         ];
     }

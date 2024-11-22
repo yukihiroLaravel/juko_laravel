@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Model\Chapter;
 use App\Model\Attendance;
+use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -34,13 +34,14 @@ class AttendanceStatusResource extends JsonResource
     }
 
     /**
-     * @param Collection<int, Chapter> $chapters
+     * @param  Collection<int, Chapter>  $chapters
      * @return array
      */
     private function mapChapters(Collection $chapters)
     {
         return $chapters->map(function (Chapter $chapter) {
             $chapterProgress = $chapter->calculateChapterProgress($this->resource);
+
             return [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
@@ -48,6 +49,6 @@ class AttendanceStatusResource extends JsonResource
                 'progress' => $chapterProgress,
             ];
         })
-        ->toArray();
+            ->toArray();
     }
 }

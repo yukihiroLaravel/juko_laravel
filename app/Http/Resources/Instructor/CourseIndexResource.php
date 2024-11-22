@@ -14,7 +14,7 @@ class CourseIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function($course) {
+        return $this->resource->map(function ($course) {
             return [
                 'course_id' => $course->id,
                 'image' => $course->image,

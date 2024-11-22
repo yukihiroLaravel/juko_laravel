@@ -71,7 +71,7 @@ class CoursesSeeder extends Seeder
                 'status' => Course::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ]);
     }
 }

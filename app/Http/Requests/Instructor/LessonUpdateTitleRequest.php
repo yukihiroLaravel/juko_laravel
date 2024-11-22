@@ -35,8 +35,8 @@ class LessonUpdateTitleRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lesson_id' => ['required','integer', 'exists:lessons,id,deleted_at,NULL'],
-            'title' => ['required','string','max:50'],
+            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'title' => ['required', 'string', 'max:50'],
         ];
     }
 }

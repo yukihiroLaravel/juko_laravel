@@ -2,18 +2,11 @@
 
 ## コード整形処理
 
-コード整形検出
-- APIコンテナ内で下記コマンドを実行する。
+1. `laravel_next_docker/backend/laravelapp`ディレクトリにて下記コマンドを実行する。
 
-````
-composer sniffer
-````
-
-コード上書き (可能な限りで上書き)
-- APIコンテナ内で下記コマンドを実行する。
-````
-composer sniffer-rewrite
-````
+```shell
+composer pint
+```
 
 ## OpenAPIとルーティングの比較チェック
 1. `laravel_next_docker/backend/laravelapp`ディレクトリにて下記コマンドを実行する。

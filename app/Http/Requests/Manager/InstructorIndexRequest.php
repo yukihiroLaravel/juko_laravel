@@ -27,7 +27,7 @@ class InstructorIndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1', 'max:100'],
             'page' => ['integer', 'min:1'],
-            'sort_by' => ['string', new InstructorIndexSortByRule()],
+            'sort_by' => ['string', new InstructorIndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
         ];
     }

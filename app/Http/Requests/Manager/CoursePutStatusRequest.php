@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Manager;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\CourseStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CoursePutStatusRequest extends FormRequest
 {
@@ -25,7 +25,7 @@ class CoursePutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => ['required', 'string', new CourseStatusRule()],
+            'status' => ['required', 'string', new CourseStatusRule],
         ];
     }
 }

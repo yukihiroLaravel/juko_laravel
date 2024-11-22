@@ -22,7 +22,7 @@ class LessonAttendance extends Model
     protected $fillable = [
         'lesson_id',
         'attendance_id',
-        'status'
+        'status',
     ];
 
     /**
@@ -36,11 +36,14 @@ class LessonAttendance extends Model
 
     // ステータス定数
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
+
     const STATUS_IN_ATTENDANCE = 'in_attendance';
+
     const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
 
     // 期間内の受講状況を取得する際の期間に関する定数
     const PERIOD_TODAY = 'today';
+
     const PERIOD_MONTH = 'month';
 
     /**

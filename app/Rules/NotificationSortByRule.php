@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Notification;
+use Illuminate\Contracts\Validation\Rule;
 
 class NotificationSortByRule implements Rule
 {
@@ -30,15 +30,16 @@ class NotificationSortByRule implements Rule
             in_array(
                 $value,
                 [
-                Notification::SORT_BY_TITLE,
-                Notification::SORT_BY_COURSE_ID,
-                Notification::SORT_BY_START_DATE,
+                    Notification::SORT_BY_TITLE,
+                    Notification::SORT_BY_COURSE_ID,
+                    Notification::SORT_BY_START_DATE,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

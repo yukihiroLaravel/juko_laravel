@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\LessonAttendance;
+use Illuminate\Contracts\Validation\Rule;
 
 class LessonAttendanceStatusRule implements Rule
 {
@@ -30,18 +30,18 @@ class LessonAttendanceStatusRule implements Rule
             in_array(
                 $value,
                 [
-                LessonAttendance::STATUS_IN_ATTENDANCE,
-                LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                    LessonAttendance::STATUS_IN_ATTENDANCE,
+                    LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                    LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
-
 
     /**
      * Get the validation error message.

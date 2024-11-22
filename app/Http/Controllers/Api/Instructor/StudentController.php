@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\StudentIndexRequest;
+use App\Http\Requests\Instructor\StudentShowRequest;
+use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Resources\Instructor\StudentIndexResource;
+use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Services\Student\QueryService;
-use App\Http\Requests\Instructor\StudentShowRequest;
-use App\Http\Requests\Instructor\StudentIndexRequest;
-use App\Http\Requests\Instructor\StudentStoreRequest;
-use App\Http\Resources\Instructor\StudentShowResource;
-use App\Http\Resources\Instructor\StudentIndexResource;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
      *
-     * @param StudentIndexRequest $request
      * @return StudentIndexResource|JsonResponse
      */
     public function index(StudentIndexRequest $request)
@@ -40,7 +39,7 @@ class StudentController extends Controller
         if ($loginId !== $instructorId) {
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized.'
+                'message' => 'Not authorized.',
             ], 403);
         }
 
@@ -63,7 +62,7 @@ class StudentController extends Controller
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
-                        ->orWhere(DB::raw("CONCAT(students.last_name, students.first_name)"), 'LIKE', "%{$inputText}%");
+                        ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
@@ -78,17 +77,16 @@ class StudentController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         $course = Course::find($request->course_id);
+
         return new StudentIndexResource([
             'course' => $course,
-            'data' => $results
+            'data' => $results,
         ]);
     }
 
     /**
      * 受講生を取得
      *
-     * @param StudentShowRequest $request
-     * @param QueryService $queryService
      * @return StudentShowResource|JsonResponse
      */
     public function show(StudentShowRequest $request, QueryService $queryService)
@@ -108,7 +106,7 @@ class StudentController extends Controller
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
             return response()->json([
                 'result' => false,
-                'message' => 'Not authorized to access this student.'
+                'message' => 'Not authorized to access this student.',
             ], 403);
         }
 
@@ -117,9 +115,6 @@ class StudentController extends Controller
 
     /**
      * 受講生登録API
-     *
-     * @param StudentStoreRequest $request
-     * @return JsonResponse
      */
     public function store(StudentStoreRequest $request): JsonResponse
     {
@@ -127,7 +122,7 @@ class StudentController extends Controller
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now()
+            'updated_at' => Carbon::now(),
         ]);
 
         return response()->json([

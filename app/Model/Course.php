@@ -17,8 +17,10 @@ class Course extends Model
      * @var string
      */
     protected $table = 'courses';
+
     // ステータス定数
     const STATUS_PUBLIC = 'public';
+
     const STATUS_PRIVATE = 'private';
 
     /**
@@ -37,7 +39,7 @@ class Course extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'instructor_id' => 'int'
+        'instructor_id' => 'int',
     ];
 
     /**
@@ -100,7 +102,6 @@ class Course extends Model
     /**
      * 画像保存パスに変換
      *
-     * @param string $filePath
      * @return string
      */
     public static function convertImagePath(string $filePath)

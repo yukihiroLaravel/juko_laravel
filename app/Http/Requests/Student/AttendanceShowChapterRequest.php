@@ -21,7 +21,7 @@ class AttendanceShowChapterRequest extends FormRequest
         $this->merge([
             'course_id' => $this->route('course_id'),
             'attendance_id' => $this->route('attendance_id'),
-            'chapter_id' => $this->route('chapter_id')
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Student;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\GenderRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StudentPostRequest extends FormRequest
 {
@@ -25,15 +25,15 @@ class StudentPostRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name'  => ['required', 'string', 'max:50'],
-            'last_name'  => ['required', 'string', 'max:30'],
+            'nick_name' => ['required', 'string', 'max:50'],
+            'last_name' => ['required', 'string', 'max:30'],
             'first_name' => ['required', 'string', 'max:30'],
-            'email'      => ['required', 'email', 'max:255', 'unique:students'],
+            'email' => ['required', 'email', 'max:255', 'unique:students'],
             'occupation' => ['required', 'string', 'max:50'],
-            'purpose'    => ['required', 'string', 'max:255'],
+            'purpose' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date_format:Y-m-d'],
-            'gender'        => ['required', 'string', new GenderRule()],
-            'address'    => ['required', 'string', 'max:255'],
+            'gender' => ['required', 'string', new GenderRule],
+            'address' => ['required', 'string', 'max:255'],
         ];
     }
 }

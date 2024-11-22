@@ -25,8 +25,8 @@ class CompareRoute extends Command
     /**
      * 「文字列長がnより大きく、かつ、先頭が半角スペースn個である、かつ、先頭が半角スペースn個の次の文字が半角スペースでない」かどうかを判定する。
      *
-     * @param string $string 対象文字列
-     * @param int $n 半角スペースの数
+     * @param  string  $string  対象文字列
+     * @param  int  $n  半角スペースの数
      * @return bool 判定結果
      */
     private function startsSpacesN(string $string, int $n): bool
@@ -36,14 +36,14 @@ class CompareRoute extends Command
             return false;
         }
 
-         // 半角スペースをn個作成
+        // 半角スペースをn個作成
         $spaces = str_repeat(' ', $n);
 
         // 先頭が半角スペースn個で始まること
-        $ret1 = ( substr($string, 0, $n) === $spaces );
+        $ret1 = (substr($string, 0, $n) === $spaces);
 
         // 先頭が半角スペースn個の次の文字が半角スペースでないこと
-        $ret2 = ( substr($string, $n, 1) !== ' ' );
+        $ret2 = (substr($string, $n, 1) !== ' ');
 
         // 返却値
         $ret = ($ret1 && $ret2);
@@ -54,38 +54,37 @@ class CompareRoute extends Command
     /**
      * 「:」を取り除きtrimする
      *
-     * @param string $string
-     * @return string
+     * @param  string  $string
      */
     private function trimAndRemoveColon($string): string
     {
-        return trim(str_replace(":", "", $string));
+        return trim(str_replace(':', '', $string));
     }
 
     /**
      * 「$argIndexの次のuriのindexまたは、末尾のindex」を取得する。
      *
-     * @param int $argIndex 指定index
-     * @param array $uriIndexesEx uriまたは「末尾に「$lineCount」」のindex
-     * @param int $uriIndexesExCount 要素数
+     * @param  int  $argIndex  指定index
+     * @param  array  $uriIndexesEx  uriまたは「末尾に「$lineCount」」のindex
+     * @param  int  $uriIndexesExCount  要素数
      * @return int 「$argIndexの次のuriのindexまたは、末尾のindex」
      */
     private function getNextUriIndex(int $argIndex, array $uriIndexesEx, int $uriIndexesExCount): int
     {
-        for ($index = 0; $index < $uriIndexesExCount; ++$index) {
+        for ($index = 0; $index < $uriIndexesExCount; $index++) {
             $currentIndex = $uriIndexesEx[$index];
             if ($currentIndex > $argIndex) {
                 return $currentIndex;
             }
         }
         // $uriIndexesExを作る時に、「  末尾に「$lineCount」を追加  」してるため、あり得ないはず。
-        throw new Exception("invalid status. 00300");
+        throw new Exception('invalid status. 00300');
     }
 
     /**
      * methodSortIndexを返す
      *
-     * @param string $method HTTPのmethod
+     * @param  string  $method  HTTPのmethod
      * @return string methodSortIndexを返す
      */
     private function getMethodSortIndex(string $method): string
@@ -98,24 +97,24 @@ class CompareRoute extends Command
             DELETE
             の順番になるようにするためのmethodSortIndexを返す
         */
-        if ($method === "get") {
-            return "0";
+        if ($method === 'get') {
+            return '0';
         }
-        if ($method === "post") {
-            return "1";
+        if ($method === 'post') {
+            return '1';
         }
-        if ($method === "patch") {
-            return "2";
+        if ($method === 'patch') {
+            return '2';
         }
-        if ($method === "put") {
-            return "3";
+        if ($method === 'put') {
+            return '3';
         }
-        if ($method === "delete") {
-            return "4";
+        if ($method === 'delete') {
+            return '4';
         }
 
         // $methodが上記以外となるのは、想定外のため例外を投げる
-        throw new Exception("invalid status. 00400");
+        throw new Exception('invalid status. 00400');
     }
 
     private function loadOpenapi()
@@ -143,14 +142,14 @@ class CompareRoute extends Command
         // カレントディレクトリを取得
         $currentDirectory = getcwd();
 
-        $filePath = $currentDirectory . '/openapi.yaml';
+        $filePath = $currentDirectory.'/openapi.yaml';
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             throw new Exception("File not found: {$filePath}");
         }
 
         $file = fopen($filePath, 'r');
-        if (!$file) {
+        if (! $file) {
             throw new Exception("Failed to open file: {$filePath}");
         }
 
@@ -173,8 +172,9 @@ class CompareRoute extends Command
                     paths:
                     までの部分を読み捨てることにした
                 */
-                if ($line === "paths:") {
+                if ($line === 'paths:') {
                     $initialSkip = false;
+
                     continue;
                 }
                 if ($initialSkip) {
@@ -202,7 +202,7 @@ class CompareRoute extends Command
         */
         $retUri = false;
         $uriIndexesEx = [];
-        for ($index = 0; $index < $lineCount; ++$index) {
+        for ($index = 0; $index < $lineCount; $index++) {
             $line = $lines[$index];
 
             $retUri = $this->startsSpacesN($line, 2);
@@ -215,15 +215,14 @@ class CompareRoute extends Command
         $uriIndexesEx[] = $lineCount;
         $uriIndexesExCount = count($uriIndexesEx);
 
-
         $routeList = [];
-        for ($index = 0; $index < $lineCount; ++$index) {
+        for ($index = 0; $index < $lineCount; $index++) {
             $line = $lines[$index];
 
             $retUri = false;
             $retMethod = false;
 
-            $uri = "";
+            $uri = '';
             $methods = [];
 
             $isAddRouteList = false;
@@ -236,7 +235,7 @@ class CompareRoute extends Command
 
                 $methodLoopStartIndex = $index;
                 $methodLoopEndIndex = $this->getNextUriIndex($methodLoopStartIndex, $uriIndexesEx, $uriIndexesExCount);
-                for ($methodSearchIndex = $methodLoopStartIndex; $methodSearchIndex < $methodLoopEndIndex; ++$methodSearchIndex) {
+                for ($methodSearchIndex = $methodLoopStartIndex; $methodSearchIndex < $methodLoopEndIndex; $methodSearchIndex++) {
                     $methodSearchLine = $lines[$methodSearchIndex];
 
                     $retMethod = $this->startsSpacesN($methodSearchLine, 4);
@@ -247,15 +246,15 @@ class CompareRoute extends Command
                     }
                 }
 
-                if (!$checkFlag) {
+                if (! $checkFlag) {
                     //「uri」の次の行としての「method」が取得できない状況は、想定外の状況なので例外を投げる。
-                    throw new Exception("invalid status. 00100 lines:" . ( $index + 1 ));
+                    throw new Exception('invalid status. 00100 lines:'.($index + 1));
                 }
 
                 $isAddRouteList = true;
             }
 
-            if (!$isAddRouteList) {
+            if (! $isAddRouteList) {
                 continue;
             }
 
@@ -263,7 +262,7 @@ class CompareRoute extends Command
                 // methodSortIndexを返す
                 $methodSortIndex = $this->getMethodSortIndex($method);
 
-                $key = $uri . "###" . $methodSortIndex;
+                $key = $uri.'###'.$methodSortIndex;
 
                 $routeList[] = [
                     'key' => $key,
@@ -293,10 +292,10 @@ class CompareRoute extends Command
                 openapi.yamlとの比較がしやすいように加工
             */
             $method = implode('|', $route->methods());
-            $uri = "/" . $route->uri();
+            $uri = '/'.$route->uri();
 
-            if ($method == "GET|HEAD") {
-                $method = "get";
+            if ($method == 'GET|HEAD') {
+                $method = 'get';
             }
 
             $method = strtolower($method);
@@ -304,7 +303,7 @@ class CompareRoute extends Command
             // methodSortIndexを返す
             $methodSortIndex = $this->getMethodSortIndex($method);
 
-            $key = $uri . "###" . $methodSortIndex;
+            $key = $uri.'###'.$methodSortIndex;
 
             $routeList[] = [
                 'key' => $key,
@@ -319,7 +318,7 @@ class CompareRoute extends Command
         return $routeList;
     }
 
-    function sortRouteListByKey(&$routeList)
+    public function sortRouteListByKey(&$routeList)
     {
         // keyで昇順ソート
         usort($routeList, function ($a, $b) {
@@ -330,23 +329,23 @@ class CompareRoute extends Command
     /**
      * 「次ループ処理ありかどうか」を判定する。
      *
-     * @param int $leftIndex
-     * @param int $leftLength
-     * @param int $rightIndex
-     * @param int $rightLength
-     * @return boolean 次ループ処理ありかどうか
+     * @param  int  $leftIndex
+     * @param  int  $leftLength
+     * @param  int  $rightIndex
+     * @param  int  $rightLength
+     * @return bool 次ループ処理ありかどうか
      */
-    function hasNext($leftIndex, $leftLength, $rightIndex, $rightLength): bool
+    public function hasNext($leftIndex, $leftLength, $rightIndex, $rightLength): bool
     {
         $isLeftEnd = ($leftIndex >= $leftLength);
         $isRightEnd = ($rightIndex >= $rightLength);
 
         $isEnd = ($isLeftEnd && $isRightEnd);
 
-        return !$isEnd;
+        return ! $isEnd;
     }
 
-    function compare(
+    public function compare(
         $leftRouteList,
         $rightRouteList,
         &$leftOnlyRouteList,
@@ -386,7 +385,7 @@ class CompareRoute extends Command
                 &&
                 ($currentRight['key'] === $bigKey)
             ) {
-                throw new Exception("Invalid status 00200");
+                throw new Exception('Invalid status 00200');
             }
 
             $currentCompare = $currentLeft['key'] <=> $currentRight['key'];
@@ -395,25 +394,25 @@ class CompareRoute extends Command
                 // left only
                 $leftOnlyRouteList[] = $currentLeft;
 
-                ++$leftIndex;
+                $leftIndex++;
             } elseif ($currentCompare === 0) {
                 // match
                 $matchRouteList[] = $currentLeft;
 
-                ++$leftIndex;
-                ++$rightIndex;
+                $leftIndex++;
+                $rightIndex++;
             } else {
                 // right only
                 $rightOnlyRouteList[] = $currentRight;
 
-                ++$rightIndex;
+                $rightIndex++;
             }
         }
     }
 
     public function echoOneRoute($route)
     {
-        echo 'Method: ' . strtoupper($route['method']) . ', URI: ' . $route['uri'] . "\n";
+        echo 'Method: '.strtoupper($route['method']).', URI: '.$route['uri']."\n";
     }
 
     /**
@@ -421,23 +420,23 @@ class CompareRoute extends Command
      */
     public function handle()
     {
-        echo '#################################################################################################################' . "\n";
-        echo '全出力' . "\n";
-        echo '#################################################################################################################' . "\n";
+        echo '#################################################################################################################'."\n";
+        echo '全出力'."\n";
+        echo '#################################################################################################################'."\n";
 
         $openapiRouteList = $this->loadOpenapi();
-        echo '#######################################################################' . "\n";
-        echo '「openapi.yaml」全出力' . "\n";
-        echo '#######################################################################' . "\n";
+        echo '#######################################################################'."\n";
+        echo '「openapi.yaml」全出力'."\n";
+        echo '#######################################################################'."\n";
         foreach ($openapiRouteList as $route) {
             $this->echoOneRoute($route);
         }
 
         $applicationRouteList = $this->loadRoutes();
 
-        echo '#######################################################################' . "\n";
-        echo '「アプリ側」全出力' . "\n";
-        echo '#######################################################################' . "\n";
+        echo '#######################################################################'."\n";
+        echo '「アプリ側」全出力'."\n";
+        echo '#######################################################################'."\n";
         foreach ($applicationRouteList as $route) {
             $this->echoOneRoute($route);
         }
@@ -454,27 +453,27 @@ class CompareRoute extends Command
             $applicationOnlyRouteList
         );
 
-        echo '#################################################################################################################' . "\n";
-        echo '比較結果出力' . "\n";
-        echo '#################################################################################################################' . "\n";
+        echo '#################################################################################################################'."\n";
+        echo '比較結果出力'."\n";
+        echo '#################################################################################################################'."\n";
 
-        echo '#######################################################################' . "\n";
-        echo '「openapi.yaml」のみある分' . "\n";
-        echo '#######################################################################' . "\n";
+        echo '#######################################################################'."\n";
+        echo '「openapi.yaml」のみある分'."\n";
+        echo '#######################################################################'."\n";
         foreach ($openapiOnlyRouteList as $route) {
             $this->echoOneRoute($route);
         }
 
-        echo '#######################################################################' . "\n";
-        echo '両方ある分(keyマッチ分)' . "\n";
-        echo '#######################################################################' . "\n";
+        echo '#######################################################################'."\n";
+        echo '両方ある分(keyマッチ分)'."\n";
+        echo '#######################################################################'."\n";
         foreach ($matchRouteList as $route) {
             $this->echoOneRoute($route);
         }
 
-        echo '#######################################################################' . "\n";
-        echo '「アプリ側」のみある分' . "\n";
-        echo '#######################################################################' . "\n";
+        echo '#######################################################################'."\n";
+        echo '「アプリ側」のみある分'."\n";
+        echo '#######################################################################'."\n";
         foreach ($applicationOnlyRouteList as $route) {
             $this->echoOneRoute($route);
         }

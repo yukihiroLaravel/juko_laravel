@@ -29,7 +29,7 @@ class StudentShowResource extends JsonResource
             'email' => $this->resource->email,
             'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'age' => $this->resource->calcAge(new CarbonImmutable()),
+            'age' => $this->resource->calcAge(new CarbonImmutable),
             'gender' => $this->resource->gender,
             'address' => $this->resource->address,
             'created_at' => $this->resource->created_at->format('Y/m/d'),

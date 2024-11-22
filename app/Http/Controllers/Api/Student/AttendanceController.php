@@ -2,36 +2,30 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Model\Course;
-use App\Model\Chapter;
-use App\Model\Attendance;
-use App\Model\LessonAttendance;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\Eloquent\Builder;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\AttendanceCourseProgressRequest;
+use App\Http\Requests\Student\AttendanceIndexRequest;
+use App\Http\Requests\Student\AttendanceShowChapterRequest;
+use App\Http\Requests\Student\AttendanceShowRequest;
+use App\Http\Resources\Student\AttendanceCourseProgressResource;
+use App\Http\Resources\Student\AttendanceIndexResource;
+use App\Http\Resources\Student\AttendanceShowChapterResource;
+use App\Http\Resources\Student\AttendanceShowResource;
+use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
-use App\Http\Requests\Student\AttendanceShowRequest;
-use App\Http\Requests\Student\AttendanceIndexRequest;
-use App\Http\Resources\Student\AttendanceShowResource;
-use App\Http\Resources\Student\AttendanceIndexResource;
-use App\Http\Requests\Student\AttendanceShowChapterRequest;
-use App\Http\Resources\Student\AttendanceShowChapterResource;
-use App\Http\Requests\Student\AttendanceCourseProgressRequest;
-use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
     /**
      * 受講一覧取得API
-     *
-     * @param AttendanceIndexRequest $request
-     * @param IndexService $service
-     * @return AttendanceIndexResource
      */
     public function index(
         AttendanceIndexRequest $request,
@@ -40,28 +34,26 @@ class AttendanceController extends Controller
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
         $attendances = $service($indexDto);
+
         return new AttendanceIndexResource($attendances);
     }
 
     /**
      * 受講詳細取得API
-     *
-     * @param AttendanceShowRequest $request
-     * @param ShowService $service
-     * @return AttendanceShowResource
      */
     public function show(
         AttendanceShowRequest $request,
         ShowService $service
     ): AttendanceShowResource {
         try {
-            $attendanceId = (int)$request->attendance_id;
+            $attendanceId = (int) $request->attendance_id;
             $userId = $request->user()->id;
             $showDto = new ShowDto($attendanceId, $userId);
             $attendance = $service($showDto);
+
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
     }
@@ -69,15 +61,14 @@ class AttendanceController extends Controller
     /**
      * チャプター詳細情報を取得
      *
-     * @param AttendanceShowChapterRequest $request
      * @return AttendanceShowChapterResource
      */
     public function showChapter(AttendanceShowChapterRequest $request)
     {
         $attendance = Attendance::with([
-                'course.chapters.lessons',
-                'lessonAttendances'
-            ])
+            'course.chapters.lessons',
+            'lessonAttendances',
+        ])
             ->where('id', $request->attendance_id)
             ->firstOrFail();
 
@@ -87,7 +78,7 @@ class AttendanceController extends Controller
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
         $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
-                return $chapter->id === (int) $request->chapter_id;
+            return $chapter->id === (int) $request->chapter_id;
         })
             ->first();
 
@@ -100,7 +91,6 @@ class AttendanceController extends Controller
     /**
      * 受講講座の進捗情報を取得
      *
-     * @param AttendanceCourseProgressRequest $request
      * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
      */
     public function progress(AttendanceCourseProgressRequest $request)
@@ -108,14 +98,14 @@ class AttendanceController extends Controller
         $authId = Auth::id();
         $attendance = Attendance::with([
             'course.chapters.lessons',
-            'lessonAttendances'
+            'lessonAttendances',
         ])
-        ->findOrFail($request->attendance_id);
+            ->findOrFail($request->attendance_id);
 
         if ($authId !== $attendance->student_id) {
             return response()->json([
                 'result' => false,
-                'error_message' => 'Not authorized.'
+                'error_message' => 'Not authorized.',
             ], 403);
         }
 
@@ -124,7 +114,7 @@ class AttendanceController extends Controller
             'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
             'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance)
+            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance),
         ];
 
         return new AttendanceCourseProgressResource([
@@ -136,7 +126,7 @@ class AttendanceController extends Controller
     /**
      * 完了済みのチャプター数を取得する
      *
-     * @param Attendance $attendance
+     * @param  Attendance  $attendance
      * @return int
      */
     private function getCompletedChaptersCount($attendance)
@@ -148,10 +138,12 @@ class AttendanceController extends Controller
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
                     $isCompleted = false;
+
                     return false;
                 }
                 $isCompleted = true;
             });
+
             return $isCompleted;
         })->count();
     }
@@ -159,7 +151,7 @@ class AttendanceController extends Controller
     /**
      * チャプター合計を取得する
      *
-     * @param Attendance $attendance
+     * @param  Attendance  $attendance
      * @return int
      */
     private function getTotalChaptersCount($attendance)
@@ -170,7 +162,7 @@ class AttendanceController extends Controller
     /**
      * 完了済みのレッスン数を取得する
      *
-     * @param Attendance $attendance
+     * @param  Attendance  $attendance
      * @return int
      */
     private function getCompletedLessonsCount($attendance)
@@ -183,7 +175,7 @@ class AttendanceController extends Controller
     /**
      * レッスン合計を取得する
      *
-     * @param Attendance $attendance
+     * @param  Attendance  $attendance
      * @return int
      */
     private function getTotalLessonsCount($attendance)
@@ -193,13 +185,14 @@ class AttendanceController extends Controller
             $lessonCount = $chapter->lessons->count();
             $totalLessonsCount += $lessonCount;
         }
+
         return $totalLessonsCount;
     }
 
     /**
      * 続きのレッスンIDと、それを含むチャプターのIDを取得する
      *
-     * @param Attendance $attendance
+     * @param  Attendance  $attendance
      * @return array | null
      */
     private function getYoungestUnCompletedLesson($attendance)
@@ -222,6 +215,7 @@ class AttendanceController extends Controller
                             'chapter_id' => $chapter->id,
                             'lesson_id' => $lesson->id,
                         ];
+
                         return;
                     }
                 }
@@ -230,6 +224,7 @@ class AttendanceController extends Controller
         if ($youngestUnCompletedLesson['lesson_id'] === null) {
             return null;
         }
+
         return $youngestUnCompletedLesson;
     }
 }

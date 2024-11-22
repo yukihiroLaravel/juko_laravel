@@ -13,6 +13,7 @@ class ChapterShowRequest extends FormRequest
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,8 +32,8 @@ class ChapterShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required','integer', 'exists:chapters,id,deleted_at,NULL'],
-            'course_id' => ['required','integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

@@ -60,7 +60,7 @@ class InstructorSeeder extends Seeder
                 'profile_image' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ]);
     }
 }

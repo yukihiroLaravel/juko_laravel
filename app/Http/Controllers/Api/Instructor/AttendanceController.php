@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Http\Requests\Instructor\LoginRateRequest;
+use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
@@ -146,26 +147,19 @@ class AttendanceController extends Controller
         $loginId = Auth::guard('instructor')->user()->id;
 
         if ($instructorId !== $loginId) {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
-        $endDate = new Carbon();
+        $nowDate = new Carbon();
 
-        if ($request->period === Attendance::PERIOD_WEEK) {
-            $periodAgo = $endDate->subWeek();
-        } elseif ($request->period === Attendance::PERIOD_MONTH) {
-            $periodAgo = $endDate->subMonth();
-        } elseif ($request->period === Attendance::PERIOD_YEAR) {
-            $periodAgo = $endDate->subYear();
-        } else {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 400);
-        }
+        $periodAgo = match ($request->period) {
+            Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
+            Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
+            Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
+            default => throw new Exception('Invalid period. [' . $request->period . ']'),
+        };
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
         $studentsCount = $attendances->count();
@@ -180,25 +174,8 @@ class AttendanceController extends Controller
             }
         }
 
-        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        $loginRate = Attendance::calcLoginRate($loginCount, $studentsCount);
         return response()->json(['login_rate' => $loginRate], 200);
-    }
-
-    /**
-     * 受講生ログイン率計算
-     *
-     * @param int $number
-     * @param int $total
-     * @return float
-     */
-    public function calcLoginRate(int $number, int $total): float
-    {
-        if ($total === 0) {
-            return 0;
-        }
-
-        $percent = ($number / $total) * 100;
-        return floor($percent);
     }
 
     /**

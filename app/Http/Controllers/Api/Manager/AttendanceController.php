@@ -4,24 +4,26 @@ namespace App\Http\Controllers\Api\Manager;
 
 use Exception;
 use App\Model\Course;
-use App\Model\Chapter;
 use App\Model\Lesson;
+use App\Model\Chapter;
 use App\Model\Attendance;
 use App\Model\Instructor;
+use Illuminate\Support\Carbon;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Manager\LoginRateRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\AttendanceShowRequest;
-use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
-use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
+use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
+use App\Http\Requests\Manager\AttendanceShowThisMonthRequest;
 
 class AttendanceController extends Controller
 {
@@ -184,6 +186,56 @@ class AttendanceController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
+
+    /**
+     * 受講生ログイン率取得API
+     *
+     * @param LoginRateRequest $request
+     * @return JsonResponse
+     */
+    public function loginRate(LoginRateRequest $request): JsonResponse
+    {
+        // 現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // ログインしている講師とその管理している講師を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($request->course_id);
+        if (!in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
+        }
+
+        $nowDate = new Carbon();
+
+        $periodAgo = match ($request->period) {
+            Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
+            Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
+            Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
+            default => throw new Exception('Invalid period. [' . $request->period . ']'),
+        };
+
+        $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
+        $studentsCount = $attendances->count();
+
+        // 期間内にログインした受講生数
+        $loginCount = 0;
+
+        foreach ($attendances as $attendance) {
+            $lastLoginDate = $attendance->student->last_login_at;
+            if ($lastLoginDate->gte($periodAgo)) {
+                $loginCount++;
+            }
+        }
+
+        $loginRate = Attendance::calcLoginRate($loginCount, $studentsCount);
+        return response()->json(['login_rate' => $loginRate], 200);
     }
 
     /**

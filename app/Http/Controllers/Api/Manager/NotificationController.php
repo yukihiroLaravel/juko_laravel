@@ -169,7 +169,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細-削除
+     * お知らせ削除
      *
      * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse

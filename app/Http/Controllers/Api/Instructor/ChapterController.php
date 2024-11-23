@@ -24,6 +24,7 @@ use App\Http\Requests\Instructor\BulkPatchStatusRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use Illuminate\Http\Request;
 
 class ChapterController extends Controller
 {
@@ -401,8 +402,46 @@ class ChapterController extends Controller
         ]);
     }
 
-    public function deleteAll()
+    /**
+     * 全チャプターを削除するAPI
+     *
+     * @param CourseDeletAllRequest $request
+     * @return JsonResponse
+     */
+
+    public function deleteAll(Request $request, int $course_id): JsonResponse
     {
-         return response()->json([]);
+        try {
+            // チャプターを取得
+            /** @var course $chapter */
+            $course = Course::with('instructor_id')->findOrFail($course_id);
+
+            // 現在の講師がチャプターの講座の作成者であるか確認
+            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Invalid instructor_id.'
+                 ], 403);
+            }
+
+            // 認可チェックをパスした後にトランザクションを開始
+            DB::beginTransaction();
+
+            // 全チャプターを削除
+            $course->lessons()->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        }   catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete chapters.',
+            ], 500);
+        }
     }
 }

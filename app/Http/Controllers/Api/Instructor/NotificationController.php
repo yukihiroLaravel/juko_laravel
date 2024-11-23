@@ -135,15 +135,14 @@ class NotificationController extends Controller
             $notification->students()->detach();
             $notification->delete();
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

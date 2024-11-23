@@ -378,10 +378,9 @@ class AttendanceController extends Controller
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
         if (! in_array($attendance->course->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
         return new AttendanceStatusResource($attendance);

@@ -22,7 +22,6 @@ class AttendanceStatusResource extends JsonResource
     {
         return [
             'attendance_id' => $this->resource->id,
-            'progress' => $this->resource->progress,
             'course' => [
                 'course_id' => $this->resource->course->id,
                 'status' => $this->resource->course->status,

@@ -169,7 +169,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細-削除
+     * お知らせ削除
      *
      * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
@@ -191,25 +191,22 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to update this notification.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to delete this notification.');
         }
+
         DB::beginTransaction();
         try {
             $notification->students()->detach();
             $notification->delete();
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

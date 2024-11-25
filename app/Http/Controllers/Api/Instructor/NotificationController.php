@@ -19,8 +19,8 @@ use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
+use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -112,17 +112,17 @@ class NotificationController extends Controller
     /**
      * お知らせ削除
      *
-     * @param
+     * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function delete(Request $request, int $notification_id)
+    public function delete(NotificationDeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 指定されたお知らせを取得
         /** @var Notification $notification */
-        $notification = Notification::findOrFail($notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
         // お知らせが、現在ログインしている講師のものでなければエラー
         if ($instructorId !== $notification->instructor_id) {

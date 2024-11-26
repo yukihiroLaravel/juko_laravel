@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use RuntimeException;
-use App\Model\Instructor;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
 use App\Http\Resources\Instructor\InstructorShowResource;
+use App\Model\Instructor;
 use App\Services\Instructor\QueryService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class InstructorController extends Controller
 {
@@ -25,14 +25,12 @@ class InstructorController extends Controller
     {
         /** @var Instructor $instructor */
         $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);
+
         return new InstructorShowResource($instructor);
     }
 
     /**
      * 講師更新API
-     *
-     * @param InstructorPatchRequest $request
-     * @return JsonResponse
      */
     public function update(InstructorPatchRequest $request): JsonResponse
     {
@@ -51,7 +49,7 @@ class InstructorController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -62,13 +60,15 @@ class InstructorController extends Controller
                 'email' => $request->email,
                 'profile_image' => $imagePath,
             ]);
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);
+
             return response()->json([
-                "result" => false,
+                'result' => false,
             ], 500);
         }
     }

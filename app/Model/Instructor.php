@@ -15,14 +15,16 @@ class Instructor extends Authenticatable
      */
     protected $table = 'instructors';
 
-
     // ステータス定数
     const TYPE_MANAGER = 'manager';
+
     const TYPE_INSTRUCTOR = 'instructor';
 
     // ソート対象フィールドの定数
     const SORT_BY_EMAIL = 'email';
+
     const SORT_BY_NICK_NAME = 'nick_name';
+
     const SORT_BY_CREATED_AT = 'created_at';
 
     /**

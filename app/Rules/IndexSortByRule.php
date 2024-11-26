@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Attendance;
+use Illuminate\Contracts\Validation\Rule;
 
 class IndexSortByRule implements Rule
 {
@@ -30,16 +30,17 @@ class IndexSortByRule implements Rule
             in_array(
                 $value,
                 [
-                Attendance::SORT_BY_NICK_NAME,
-                Attendance::SORT_BY_EMAIL,
-                Attendance::SORT_BY_ATTENDANCED_AT,
-                Attendance::SORT_BY_LAST_LOGIN_AT,
+                    Attendance::SORT_BY_NICK_NAME,
+                    Attendance::SORT_BY_EMAIL,
+                    Attendance::SORT_BY_ATTENDANCED_AT,
+                    Attendance::SORT_BY_LAST_LOGIN_AT,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

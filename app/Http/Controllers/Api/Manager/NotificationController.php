@@ -2,33 +2,32 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use Exception;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
+use App\Http\Requests\Manager\NotificationDeleteRequest;
+use App\Http\Requests\Manager\NotificationIndexRequest;
+use App\Http\Requests\Manager\NotificationPutTypeRequest;
+use App\Http\Requests\Manager\NotificationShowRequest;
+use App\Http\Requests\Manager\NotificationStoreRequest;
+use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Resources\Manager\NotificationIndexResource;
+use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
+use App\Model\ViewedOnceNotification;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\AuthorizationException;
-use App\Model\ViewedOnceNotification;
-use App\Http\Requests\Manager\NotificationShowRequest;
-use App\Http\Requests\Manager\NotificationIndexRequest;
-use App\Http\Requests\Manager\NotificationStoreRequest;
-use App\Http\Requests\Manager\NotificationDeleteRequest;
-use App\Http\Requests\Manager\NotificationUpdateRequest;
-use App\Http\Resources\Manager\NotificationShowResource;
-use App\Http\Requests\Manager\NotificationPutTypeRequest;
-use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
 
 class NotificationController extends Controller
 {
     /**
      * お知らせ一覧取得API
      *
-     * @param NotificationIndexRequest $request
      * @return NotificationIndexResource
      */
     public function index(NotificationIndexRequest $request)
@@ -55,7 +54,6 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      *
-     * @param NotificationShowRequest $request
      * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
     public function show(NotificationShowRequest $request)
@@ -74,7 +72,7 @@ class NotificationController extends Controller
         $notification = Notification::findOrFail($request->notification_id);
 
         // アクセス権限のチェック
-        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+        if (! in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',
@@ -87,7 +85,6 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      *
-     * @param NotificationStoreRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(NotificationStoreRequest $request)
@@ -102,7 +99,7 @@ class NotificationController extends Controller
 
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
-        if (!in_array($course->instructor_id, $instructorIds, true)) {
+        if (! in_array($course->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',
@@ -110,13 +107,13 @@ class NotificationController extends Controller
         }
 
         Notification::create([
-            'course_id'     => $request->course_id,
+            'course_id' => $request->course_id,
             'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title'         => $request->title,
-            'type'          => $request->type,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'content'       => $request->content,
+            'title' => $request->title,
+            'type' => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'content' => $request->content,
         ]);
 
         return response()->json([
@@ -127,7 +124,6 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      *
-     * @param NotificationUpdateRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(NotificationUpdateRequest $request)
@@ -147,7 +143,7 @@ class NotificationController extends Controller
             ->findOrFail($request->notification_id);
 
         // アクセス権限のチェック
-        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+        if (! in_array($notification->instructor_id, $instructorIds, true)) {
             return response()->json([
                 'result' => false,
                 'message' => 'Forbidden.',
@@ -171,7 +167,6 @@ class NotificationController extends Controller
     /**
      * お知らせ削除
      *
-     * @param NotificationDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function delete(NotificationDeleteRequest $request)
@@ -190,7 +185,7 @@ class NotificationController extends Controller
         $notification = Notification::findOrFail($request->notification_id);
 
         // アクセス権限のチェック
-        if (!in_array($notification->instructor_id, $instructorIds, true)) {
+        if (! in_array($notification->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to delete this notification.');
         }
 
@@ -212,9 +207,6 @@ class NotificationController extends Controller
 
     /**
      * お知らせ一覧-タイプ変更API
-     *
-     * @param NotificationPutTypeRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function updateType(NotificationPutTypeRequest $request): JsonResponse
     {
@@ -248,6 +240,7 @@ class NotificationController extends Controller
                 ])->save();
             });
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
@@ -260,9 +253,6 @@ class NotificationController extends Controller
 
     /**
      * お知らせ一覧-一括削除API
-     *
-     * @param NotificationBulkDeleteRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
     {
@@ -305,6 +295,7 @@ class NotificationController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);

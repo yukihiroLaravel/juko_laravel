@@ -26,7 +26,7 @@ class LessonAttendancePatchRequest extends FormRequest
     {
         return [
             'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id'],
-            'status' => ['required', new LessonAttendanceStatusRule()]
+            'status' => ['required', new LessonAttendanceStatusRule],
         ];
     }
 }

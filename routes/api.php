@@ -56,7 +56,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 
-
     // 講師側API
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
@@ -78,7 +77,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', 'Api\Instructor\ChapterController@store');
                         Route::post('sort', 'Api\Instructor\ChapterController@sort');
                         Route::put('status', 'Api\Instructor\ChapterController@putStatus');
-                        Route::patch('status', 'Api\Instructor\ChapterController@bulkPatchStatus');
+                        Route::patch('status', 'Api\Instructor\ChapterController@patchStatus');
                         Route::delete('/', 'Api\Instructor\ChapterController@bulkDelete');
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', 'Api\Instructor\ChapterController@show');
@@ -213,6 +212,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         //マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
+                            Route::get('{period}', 'Api\Manager\AttendanceController@loginRate');
                             Route::prefix('status')->group(function () {
                                 Route::get('/', 'Api\Manager\AttendanceController@show');
                                 Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThisMonth');
@@ -230,8 +230,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', 'Api\Manager\AttendanceController@delete');
                     });
                 });
-                Route::prefix('instructor')->group(function () {
-                });
+                Route::prefix('instructor')->group(function () {});
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     Route::get('{student_id}', 'Api\Manager\StudentController@show');

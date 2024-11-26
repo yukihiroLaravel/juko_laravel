@@ -9,23 +9,20 @@ class QueryService
 {
     /**
      * 選択されたチャプターを取得
-     *
-     * @param int $chapterId
-     * @return Chapter
      */
     public function getChapter(int $chapterId): Chapter
     {
-        return Chapter::with(['lessons','course'])->findOrFail($chapterId);
+        return Chapter::with(['lessons', 'course'])->findOrFail($chapterId);
     }
 
     /**
      * 選択されたチャプターリストを取得
      *
-     * @param array<int> $chapterIds
+     * @param  array<int>  $chapterIds
      * @return Collection<Chapter>
      */
     public function getChapters(array $chapterIds): Collection
     {
-        return Chapter::with(['lessons','course'])->whereIn('id', $chapterIds)->get();
+        return Chapter::with(['lessons', 'course'])->whereIn('id', $chapterIds)->get();
     }
 }

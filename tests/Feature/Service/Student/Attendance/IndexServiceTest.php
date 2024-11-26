@@ -2,21 +2,21 @@
 
 namespace Tests\Feature\Service\Student\Attendance;
 
-use Tests\TestCase;
+use App\Dto\Student\Attendance\IndexDto;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Student;
-use App\Dto\Student\Attendance\IndexDto;
 use App\Services\Student\Attendance\IndexService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Tests\TestCase;
 
 class IndexServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     // setup
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->seed();
@@ -109,7 +109,7 @@ class IndexServiceTest extends TestCase
         /** @var Student $student */
         $student = Student::find(1);
         $indexDto = new IndexDto($student->id, null);
-        $service = new IndexService();
+        $service = new IndexService;
         // act
         $attendances = $service($indexDto);
         // assert
@@ -150,9 +150,9 @@ class IndexServiceTest extends TestCase
         // arrange
         /** @var Student $student */
         $student = Student::find(1);
-        $searchWord = "ython";
+        $searchWord = 'ython';
         $indexDto = new IndexDto($student->id, $searchWord);
-        $service = new IndexService();
+        $service = new IndexService;
         // act
         $attendances = $service($indexDto);
         // assert

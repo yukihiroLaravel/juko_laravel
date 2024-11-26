@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
-use App\Rules\ChapterStatusRule;
+use App\Rules\AttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterPatchStatusRequest extends FormRequest
+class LoginRateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,13 +17,6 @@ class ChapterPatchStatusRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,9 +26,15 @@ class ChapterPatchStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule],
-            'chapters' => ['required', 'array'],
-            'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'period' => ['required', 'string', new AttendancePeriodRule],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'period' => $this->route('period'),
+        ]);
     }
 }

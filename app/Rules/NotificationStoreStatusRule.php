@@ -20,14 +20,15 @@ class NotificationStoreStatusRule implements Rule
             in_array(
                 $value,
                 [
-                Notification::TYPE_ALWAYS,
-                Notification::TYPE_ONCE
+                    Notification::TYPE_ALWAYS,
+                    Notification::TYPE_ONCE,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

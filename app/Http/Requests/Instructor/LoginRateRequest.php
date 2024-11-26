@@ -26,7 +26,7 @@ class LoginRateRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'period' => ['required', 'string', new AttendancePeriodRule()],
+            'period' => ['required', 'string', new AttendancePeriodRule],
         ];
     }
 

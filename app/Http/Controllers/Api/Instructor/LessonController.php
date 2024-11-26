@@ -2,37 +2,34 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Exception;
-use App\Model\Lesson;
-use App\Model\Attendance;
-use App\Model\Instructor;
-use App\Model\LessonAttendance;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
+use App\Http\Requests\Instructor\LessonDeleteRequest;
+use App\Http\Requests\Instructor\LessonPatchStatusRequest;
+use App\Http\Requests\Instructor\LessonPutStatusRequest;
+use App\Http\Requests\Instructor\LessonsAllDeleteRequest;
 use App\Http\Requests\Instructor\LessonSortRequest;
 use App\Http\Requests\Instructor\LessonStoreRequest;
-use App\Http\Requests\Instructor\LessonDeleteRequest;
 use App\Http\Requests\Instructor\LessonUpdateRequest;
-use App\Http\Requests\Instructor\LessonPutStatusRequest;
-use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
-use App\Http\Requests\Instructor\LessonPatchStatusRequest;
 use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
-use App\Http\Requests\Instructor\LessonsAllDeleteRequest;
+use App\Model\Attendance;
 use App\Model\Chapter;
+use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LessonController extends Controller
 {
     /**
      * レッスン新規作成API
-     *
-     * @param  LessonStoreRequest  $request
-     * @return JsonResponse
      */
     public function store(LessonStoreRequest $request): JsonResponse
     {
@@ -44,7 +41,7 @@ class LessonController extends Controller
                 'chapter_id' => $request->chapter_id,
                 'title' => $request->title,
                 'status' => Lesson::STATUS_PRIVATE,
-                'order' => (int) $maxOrder + 1
+                'order' => (int) $maxOrder + 1,
             ]);
 
             $attendances = Attendance::where('course_id', $request->course_id)->get();
@@ -52,29 +49,28 @@ class LessonController extends Controller
             $attendances->each(function ($attendance) use (&$lesson_id) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
-                    'lesson_id'     => $lesson_id,
-                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                    'lesson_id' => $lesson_id,
+                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ]);
             });
 
             DB::commit();
+
             return response()->json([
-                "result" => true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
-                "result" => false,
+                'result' => false,
             ], 500);
         }
     }
 
     /**
      * レッスン更新API
-     *
-     * @param LessonUpdateRequest $request
-     * @return JsonResponse
      */
     public function update(LessonUpdateRequest $request): JsonResponse
     {
@@ -109,9 +105,6 @@ class LessonController extends Controller
 
     /**
      * レッスン削除API
-     *
-     * @param LessonDeleteRequest $request
-     * @return JsonResponse
      */
     public function delete(LessonDeleteRequest $request): JsonResponse
     {
@@ -122,14 +115,14 @@ class LessonController extends Controller
             if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Invalid instructor_id.'
+                    'message' => 'Invalid instructor_id.',
                 ], 403);
             }
 
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
                 return response()->json([
-                    'result'  => false,
+                    'result' => false,
                     'message' => 'Invalid chapter_id.',
                 ], 403);
             }
@@ -137,7 +130,7 @@ class LessonController extends Controller
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'This lesson has attendance.'
+                    'message' => 'This lesson has attendance.',
                 ], 403);
             }
 
@@ -161,6 +154,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);
@@ -170,7 +164,6 @@ class LessonController extends Controller
     /**
      * 複数のレッスン削除API
      *
-     * @param LessonBulkDeleteRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function bulkDelete(LessonBulkDeleteRequest $request)
@@ -243,9 +236,6 @@ class LessonController extends Controller
 
     /**
      * レッスンステータス更新API
-     *
-     * @param LessonPatchStatusRequest $request
-     * @return JsonResponse
      */
     public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
     {
@@ -254,20 +244,20 @@ class LessonController extends Controller
         if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
             return response()->json([
                 'result' => false,
-                "message" => 'invalid instructor_id.'
+                'message' => 'invalid instructor_id.',
             ], 403);
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
             return response()->json([
-                'result'  => false,
+                'result' => false,
                 'message' => 'Invalid chapter_id.',
             ], 403);
         }
 
         $lesson->update([
-            'status' => $request->status
+            'status' => $request->status,
         ]);
 
         return response()->json([
@@ -277,9 +267,6 @@ class LessonController extends Controller
 
     /**
      * レッスンタイトル変更API
-     *
-     * @param LessonUpdateTitleRequest $request
-     * @return JsonResponse
      */
     public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
     {
@@ -308,7 +295,7 @@ class LessonController extends Controller
         }
 
         $lesson->update([
-            'title' => $request->title
+            'title' => $request->title,
         ]);
 
         return response()->json([
@@ -317,11 +304,8 @@ class LessonController extends Controller
     }
 
     /**
-    * チャプターに紐づく全レッスンを削除するAPI
-    *
-    * @param LessonsAllDeleteRequest $request
-    * @return JsonResponse
-    */
+     * チャプターに紐づく全レッスンを削除するAPI
+     */
     public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
     {
 
@@ -333,7 +317,7 @@ class LessonController extends Controller
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             return response()->json([
                 'result' => false,
-                'message' => 'Invalid instructor_id.'
+                'message' => 'Invalid instructor_id.',
             ], 403);
         }
 
@@ -352,7 +336,7 @@ class LessonController extends Controller
             // 出席のあるレッスンがあれば削除を許可しない
             return response()->json([
                 'result' => false,
-                'message' => 'This lessons contains attendance.'
+                'message' => 'This lessons contains attendance.',
             ], 403);
         }
 
@@ -365,12 +349,13 @@ class LessonController extends Controller
 
             DB::commit();
 
-                return response()->json([
-                    'result' => true,
-                ]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to delete lessons.',
@@ -380,9 +365,6 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     *
-     * @param LessonSortRequest $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function sort(LessonSortRequest $request): JsonResponse
     {
@@ -437,6 +419,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ]);
@@ -445,9 +428,6 @@ class LessonController extends Controller
 
     /**
      * 選択済みのレッスンステータス一括更新API
-     *
-     * @param LessonPutStatusRequest $request
-     * @return JsonResponse
      */
     public function putStatus(LessonPutStatusRequest $request): JsonResponse
     {
@@ -480,7 +460,7 @@ class LessonController extends Controller
             Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
 
             return response()->json([
-                'result' => true
+                'result' => true,
             ]);
         } catch (AuthorizationException $e) {
             return response()->json([

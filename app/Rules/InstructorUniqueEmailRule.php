@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Instructor;
+use Illuminate\Contracts\Validation\Rule;
 
 class InstructorUniqueEmailRule implements Rule
 {

@@ -2,36 +2,35 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Exception;
-use App\Model\Course;
-use App\Model\Chapter;
-use App\Model\Instructor;
-use App\Model\LessonAttendance;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use App\Services\Chapter\QueryService;
 use App\Exceptions\ValidationErrorException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\BulkDeleteRequest;
+use App\Http\Requests\Instructor\ChapterDeleteRequest;
+use App\Http\Requests\Instructor\ChapterPatchRequest;
+use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use App\Http\Requests\Instructor\ChapterPutStatusRequest;
 use App\Http\Requests\Instructor\ChapterShowRequest;
 use App\Http\Requests\Instructor\ChapterSortRequest;
-use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterStoreRequest;
-use App\Http\Requests\Instructor\ChapterDeleteRequest;
+use App\Http\Requests\Instructor\ChapterUpdateStatusRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
-use App\Http\Requests\Instructor\BulkPatchStatusRequest;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\LessonAttendance;
+use App\Services\Chapter\QueryService;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\Instructor\ChapterPutStatusRequest;
-use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ChapterController extends Controller
 {
     /**
      * チャプター詳細情報を取得
      *
-     * @param ChapterShowRequest $request
      * @return ChapterShowResource|JsonResponse
      */
     public function show(ChapterShowRequest $request, QueryService $queryService)
@@ -56,9 +55,6 @@ class ChapterController extends Controller
 
     /**
      * チャプター新規作成API
-     *
-     * @param ChapterStoreRequest $request
-     * @return JsonResponse
      */
     public function store(ChapterStoreRequest $request): JsonResponse
     {
@@ -93,17 +89,15 @@ class ChapterController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error($e);
+
             return response()->json([
-                'result' => false
+                'result' => false,
             ], 500);
         }
     }
 
     /**
      * チャプター更新API
-     *
-     * @param ChapterPatchRequest $request
-     * @return JsonResponse
      */
     public function update(ChapterPatchRequest $request): JsonResponse
     {
@@ -123,13 +117,13 @@ class ChapterController extends Controller
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
             return response()->json([
-                'result'  => false,
+                'result' => false,
                 'message' => 'Invalid course_id.',
             ], 403);
         }
 
         $chapter->update([
-            'title' => $request->title
+            'title' => $request->title,
         ]);
 
         return response()->json([
@@ -139,11 +133,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API
-     *
-     * @param ChapterPatchStatusRequest $request
-     * @return JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request): JsonResponse
+    public function updateStatus(ChapterUpdateStatusRequest $request): JsonResponse
     {
         /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
@@ -151,20 +142,20 @@ class ChapterController extends Controller
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             return response()->json([
                 'result' => false,
-                "message" => 'invalid instructor_id.'
+                'message' => 'invalid instructor_id.',
             ], 403);
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
             return response()->json([
-                'result'  => false,
+                'result' => false,
                 'message' => 'Invalid course_id.',
             ], 403);
         }
 
         $chapter->update([
-            'status' => $request->status
+            'status' => $request->status,
         ]);
 
         return response()->json([
@@ -174,11 +165,8 @@ class ChapterController extends Controller
 
     /**
      * 複数チャプターの公開/非公開API
-     *
-     * @param BulkPatchStatusRequest $request
-     * @return JsonResponse
      */
-    public function bulkPatchStatus(BulkPatchStatusRequest $request): JsonResponse
+    public function patchStatus(ChapterPatchStatusRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -217,6 +205,7 @@ class ChapterController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error($e);
+
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -226,9 +215,6 @@ class ChapterController extends Controller
 
     /**
      * 選択済チャプターの削除API
-     *
-     * @param BulkDeleteRequest $request
-     * @return JsonResponse
      */
     public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
@@ -259,11 +245,11 @@ class ChapterController extends Controller
             */
             $canDelete = true;
             $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (!$lessonIds->isEmpty()) {
-                $canDelete = !LessonAttendance::whereIn("lesson_id", $lessonIds)->exists();
+            if (! $lessonIds->isEmpty()) {
+                $canDelete = ! LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
             }
-            if (!$canDelete) {
-                throw new ValidationErrorException("Some chapters contain lessons with attendance records.");
+            if (! $canDelete) {
+                throw new ValidationErrorException('Some chapters contain lessons with attendance records.');
             }
 
             // チャプターを一括で削除
@@ -279,6 +265,7 @@ class ChapterController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error($e);
+
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -288,9 +275,6 @@ class ChapterController extends Controller
 
     /**
      * チャプター削除API
-     *
-     * @param ChapterDeleteRequest $request
-     * @return JsonResponse
      */
     public function delete(ChapterDeleteRequest $request): JsonResponse
     {
@@ -303,14 +287,14 @@ class ChapterController extends Controller
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'Invalid instructor_id.'
+                    'message' => 'Invalid instructor_id.',
                 ], 403);
             }
 
             if ((int) $request->course_id !== $chapter->course->id) {
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
                 return response()->json([
-                    'result'  => false,
+                    'result' => false,
                     'message' => 'Invalid course_id.',
                 ], 403);
             }
@@ -320,7 +304,7 @@ class ChapterController extends Controller
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 return response()->json([
                     'result' => false,
-                    'message' => 'This chapter contains attendance.'
+                    'message' => 'This chapter contains attendance.',
                 ], 403);
             }
 
@@ -339,11 +323,12 @@ class ChapterController extends Controller
             DB::commit();
 
             return response()->json([
-                "result" => true
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);
@@ -352,9 +337,6 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     *
-     * @param ChapterSortRequest $request
-     * @return JsonResponse
      */
     public function sort(ChapterSortRequest $request): JsonResponse
     {
@@ -374,19 +356,21 @@ class ChapterController extends Controller
 
             foreach ($chapters as $chapter) {
                 Chapter::where('id', $chapter['chapter_id'])
-                ->where('course_id', $courseId)
-                ->firstOrFail()
-                ->update([
-                    'order' => $chapter['order']
-                ]);
+                    ->where('course_id', $courseId)
+                    ->firstOrFail()
+                    ->update([
+                        'order' => $chapter['order'],
+                    ]);
             }
 
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => 'Not found.',
@@ -394,6 +378,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);
@@ -402,9 +387,6 @@ class ChapterController extends Controller
 
     /**
      * チャプター一括更新API
-     *
-     * @param ChapterPutStatusRequest $request
-     * @return JsonResponse
      */
     public function putStatus(ChapterPutStatusRequest $request): JsonResponse
     {
@@ -414,7 +396,7 @@ class ChapterController extends Controller
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             return response()->json([
                 'result' => false,
-                "message" => "Not authorized."
+                'message' => 'Not authorized.',
             ], 403);
         }
 

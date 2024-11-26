@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Chapter;
+use Illuminate\Contracts\Validation\Rule;
 
 class ChapterStatusRule implements Rule
 {
@@ -30,14 +30,15 @@ class ChapterStatusRule implements Rule
             in_array(
                 $value,
                 [
-                Chapter::STATUS_PRIVATE,
-                Chapter::STATUS_PUBLIC
+                    Chapter::STATUS_PRIVATE,
+                    Chapter::STATUS_PUBLIC,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
 

@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Student;
 
-use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\StudentUniqueEmailRule;
 use App\Rules\GenderRule;
+use App\Rules\StudentUniqueEmailRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StudentPatchRequest extends FormRequest
 {
@@ -26,6 +26,7 @@ class StudentPatchRequest extends FormRequest
     public function rules()
     {
         $user = $this->user();
+
         return [
             'nick_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
@@ -34,9 +35,9 @@ class StudentPatchRequest extends FormRequest
             'occupation' => ['required', 'string'],
             'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],
-            'gender' => ['required', 'string', new GenderRule()],
+            'gender' => ['required', 'string', new GenderRule],
             'address' => ['required', 'string'],
-            'profile_image' => ['sometimes','mimes:jpg,png', 'max:2048'],
+            'profile_image' => ['sometimes', 'mimes:jpg,png', 'max:2048'],
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
+use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
 use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationShowRequest;
@@ -96,6 +97,40 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * お知らせ削除
+     */
+    public function delete(NotificationDeleteRequest $request): JsonResponse
+    {
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 指定されたお知らせを取得
+        /** @var Notification $notification */
+        $notification = Notification::findOrFail($request->notification_id);
+
+        // お知らせが、現在ログインしている講師のものでなければエラー
+        if ($instructorId !== $notification->instructor_id) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // 中間テーブルにお知らせと生徒の関係があれば行を削除
+            $notification->students()->detach();
+            $notification->delete();
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

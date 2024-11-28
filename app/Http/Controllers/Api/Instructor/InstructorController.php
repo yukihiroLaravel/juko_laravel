@@ -7,28 +7,28 @@ use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\InstructorPostRequest;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
+use App\Http\Requests\Instructor\InstructorPostRequest;
 use App\Http\Requests\Instructor\UserAuthenticationRequest;
 use App\Http\Resources\Instructor\InstructorShowResource;
-use App\Services\Instructor\CredentialGeneratorService;
-use App\Services\Instructor\VerifyCodeService;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use App\Model\TemporaryInstructor;
+use App\Services\Instructor\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
+use App\Services\Instructor\VerifyCodeService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class InstructorController extends Controller
@@ -48,16 +48,11 @@ class InstructorController extends Controller
 
     /**
      * ユーザー新規仮登録API
-     *
-     * @param InstructorPostRequest $request
-     * @param CredentialGeneratorService $credentialGeneratorService
-     * @return JsonResponse
      */
     public function store(
         InstructorPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
-    ): JsonResponse
-    {
+    ): JsonResponse {
         DB::beginTransaction();
         try {
             $email = $request->email;
@@ -173,16 +168,11 @@ class InstructorController extends Controller
 
     /**
      * 「認証コードチェック」と「講師の本登録」
-     *
-     * @param UserAuthenticationRequest $request
-     * @param VerifyCodeService $service
-     * @return JsonResponse
      */
     public function verifyCode(
         UserAuthenticationRequest $request,
         VerifyCodeService $service
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $token = $request->token;
         $code = $request->code;
         $password = $request->password;
@@ -199,7 +189,7 @@ class InstructorController extends Controller
                 $currentTime,
                 $code
             );
-            if(!$ret) {
+            if (! $ret) {
                 // 認証失敗
 
                 // エラー応答
@@ -224,7 +214,7 @@ class InstructorController extends Controller
                 'type' => $temporaryInstructor->nick_name,
             ]);
 
-            if($temporaryInstructor->manager_id) {
+            if ($temporaryInstructor->manager_id) {
                 /*
                    manager_idが値ある場合、つまり、「講師の仮登録の操作」をマネージャが行った場合に相当する。
 
@@ -242,10 +232,10 @@ class InstructorController extends Controller
                    の値になっている状況を想定し、
                    下記のmanage_instructorsへのデータ登録を行う。
                  */
-                 $manageInstructor = ManageInstructor::create([
+                $manageInstructor = ManageInstructor::create([
                     'instructor_id' => $instructor->id,
-                    'manager_id' => $temporaryInstructor->manager_id,            
-                ]);    
+                    'manager_id' => $temporaryInstructor->manager_id,
+                ]);
             }
 
             // 講師仮登録認証情報を物理削除
@@ -260,18 +250,18 @@ class InstructorController extends Controller
                 'message' => 'Authorization success.',
             ]);
         } catch (ModelNotFoundException $e) {
-            if($isTransaction) {
+            if ($isTransaction) {
                 DB::rollback();
                 $isTransaction = false;
-            }           
+            }
             Log::error($e);
             throw $e;
         } catch (ExpiredAuthorizationCodeException $e) {
-            if($isTransaction) {
+            if ($isTransaction) {
                 DB::rollback();
                 $isTransaction = false;
-            }           
-            if($temporaryInstructor) {
+            }
+            if ($temporaryInstructor) {
                 // 講師仮登録認証情報を物理削除
                 $temporaryInstructor->delete();
             }
@@ -281,11 +271,11 @@ class InstructorController extends Controller
                 'message' => 'Expired authrization period.',
             ], 400);
         } catch (TryCountOverAuthorizationCodeException $e) {
-            if($isTransaction) {
+            if ($isTransaction) {
                 DB::rollback();
                 $isTransaction = false;
-            }           
-            if($temporaryInstructor) {
+            }
+            if ($temporaryInstructor) {
                 // 講師仮登録認証情報を物理削除
                 $temporaryInstructor->delete();
             }

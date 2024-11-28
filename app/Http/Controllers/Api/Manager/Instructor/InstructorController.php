@@ -6,25 +6,25 @@ use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\InstructorIndexRequest;
-use App\Http\Requests\Manager\InstructorPostRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
+use App\Http\Requests\Manager\InstructorPostRequest;
 use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
-use App\Services\Instructor\CredentialGeneratorService;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
+use App\Services\Instructor\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class InstructorController extends Controller
@@ -150,16 +150,11 @@ class InstructorController extends Controller
 
     /**
      * ユーザー新規仮登録API
-     *
-     * @param InstructorPostRequest $request
-     * @param CredentialGeneratorService $credentialGeneratorService
-     * @return JsonResponse
      */
     public function store(
         InstructorPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
-    ): JsonResponse
-    {
+    ): JsonResponse {
         DB::beginTransaction();
         try {
             $email = $request->email;

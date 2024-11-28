@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use App\Model\Student;
 use Exception;
 
 class TryCountOverAuthorizationCodeException extends Exception

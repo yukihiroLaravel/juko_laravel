@@ -26,7 +26,7 @@ class TemporaryInstructor extends Model
         'last_name',
         'first_name',
         'email',
-        'type',      
+        'type',
     ];
 
     /**

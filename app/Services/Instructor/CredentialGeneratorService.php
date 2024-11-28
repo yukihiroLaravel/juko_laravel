@@ -5,8 +5,8 @@ namespace App\Services\Instructor;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Model\TemporaryInstructor;
-use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Str;
 
 /**
  * 認証情報生成サービス
@@ -19,7 +19,6 @@ class CredentialGeneratorService
     /**
      * emailを設定する。
      *
-     * @param string $email
      * @return void
      */
     public function setEmail(string $email)
@@ -29,12 +28,11 @@ class CredentialGeneratorService
 
     /**
      * 認証コードを生成する。
-     *
-     * @return string
      */
-    public function createCode(): string {
+    public function createCode(): string
+    {
 
-        if(!$this->email) {
+        if (! $this->email) {
             throw new Exception('email is empty. at createCode()');
         }
 
@@ -57,12 +55,11 @@ class CredentialGeneratorService
 
     /**
      * トークンを生成する。
-     *
-     * @return string
      */
-    public function createToken(): string {
+    public function createToken(): string
+    {
 
-        if(!$this->email) {
+        if (! $this->email) {
             throw new Exception('email is empty. at createToken()');
         }
 

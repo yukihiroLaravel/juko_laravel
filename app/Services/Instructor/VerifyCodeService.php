@@ -2,9 +2,9 @@
 
 namespace App\Services\Instructor;
 
-use App\Model\TemporaryInstructor;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\TryCountOverAuthorizationCodeException;
+use App\Model\TemporaryInstructor;
 
 /**
  * 認証コードチェックサービス
@@ -14,10 +14,11 @@ class VerifyCodeService
     /**
      * インボーカブル(Invokable)メソッド
      *
-     * @param TemporaryInstructor $temporaryInstructor 講師仮登録認証情報
-     * @param string $currentTime 現在日時のタイムスタンプ( date('Y-m-d H:i:s')の値を想定 )
-     * @param string $code 認証コード
-     * @return boolean 認証コードがマッチするかどうか
+     * @param  TemporaryInstructor  $temporaryInstructor  講師仮登録認証情報
+     * @param  string  $currentTime  現在日時のタイムスタンプ( date('Y-m-d H:i:s')の値を想定 )
+     * @param  string  $code  認証コード
+     * @return bool 認証コードがマッチするかどうか
+     *
      * @throws ExpiredAuthorizationCodeException 認証コードが有効期限切れの場合
      * @throws TryCountOverAuthorizationCodeException 試行回数が上限を超えた場合
      */

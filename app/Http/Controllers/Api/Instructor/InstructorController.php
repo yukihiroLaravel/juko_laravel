@@ -248,7 +248,7 @@ class InstructorController extends Controller
                    の値になっている状況を想定し、
                    下記のmanage_instructorsへのデータ登録を行う。
                  */
-                $manageInstructor = ManageInstructor::create([
+                ManageInstructor::create([
                     'instructor_id' => $instructor->id,
                     'manager_id' => $temporaryInstructor->manager_id,
                 ]);

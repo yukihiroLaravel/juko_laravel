@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Model\Student;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -26,12 +25,13 @@ class AuthenticationConfirmationMail extends Mailable
      * @return void
      */
     public function __construct(
-        Student $student,
+        string $email,
+        string $fullName,
         string $code,
         string $token
     ) {
-        $this->email = $student->email;
-        $this->fullName = $student->fullName;
+        $this->email = $email;
+        $this->fullName = $fullName;
         $this->code = $code;
         $this->token = $token;
     }

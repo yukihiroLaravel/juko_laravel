@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers\Api\Manager\Instructor;
 
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\InstructorIndexRequest;
+use App\Http\Requests\Manager\InstructorPostRequest;
 use App\Http\Requests\Manager\InstructorPatchRequest;
 use App\Http\Requests\Manager\InstructorShowRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
+use App\Services\Instructor\CredentialGeneratorService;
+use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
+use App\Model\TemporaryInstructor;
 use App\Services\Instructor\QueryService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class InstructorController extends Controller
@@ -134,6 +145,87 @@ class InstructorController extends Controller
             return response()->json([
                 'result' => false,
             ], 500);
+        }
+    }
+
+    /**
+     * ユーザー新規仮登録API
+     *
+     * @param InstructorPostRequest $request
+     * @param CredentialGeneratorService $credentialGeneratorService
+     * @return JsonResponse
+     */
+    public function store(
+        InstructorPostRequest $request,
+        CredentialGeneratorService $credentialGeneratorService
+    ): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $email = $request->email;
+            $credentialGeneratorService->setEmail($email);
+
+            // 「講師の仮登録の操作」をマネージャが行った場合に相当する。
+            $managerId = Auth::guard('instructor')->user()->id;
+
+            $trialCount = 0;
+
+            // 認証コードを生成する。
+            $code = $credentialGeneratorService->createCode();
+            // トークンを生成する。
+            $token = $credentialGeneratorService->createToken();
+
+            $expireAt = Carbon::now()->addMinutes(60);
+            $nickName = $request->nick_name;
+            $lastName = $request->last_name;
+            $firstName = $request->first_name;
+
+            /*
+               講師の新規登録時に'manager'として登録のケースは、
+               フロントエンドからrequestBodyに、typeに、Instructor::TYPE_MANAGERを指定すればよい。
+               そうでなければ、requestBodyに、typeを指定する必要もなく、その際はnullであり、
+               そのケースでは、Instructor::TYPE_INSTRUCTORとすることを意図している。
+             */
+            $type = $request->filled('type') ? $request->type : Instructor::TYPE_INSTRUCTOR;
+
+            $temporaryInstructor = TemporaryInstructor::create([
+                'manager_id' => $managerId,
+                'trial_count' => $trialCount,
+                'code' => $code,
+                'token' => $token,
+                'expire_at' => $expireAt,
+                'nick_name' => $nickName,
+                'last_name' => $lastName,
+                'first_name' => $firstName,
+                'email' => $email,
+                'type' => $type,
+            ]);
+
+            DB::commit();
+
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->fullName, $code, $token));
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (DuplicateAuthorizationCodeException $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+            ], 400);
+        } catch (DuplicateAuthorizationTokenException $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+            ], 400);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
         }
     }
 }

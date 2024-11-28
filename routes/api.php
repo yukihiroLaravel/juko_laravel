@@ -155,6 +155,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('manager')->group(function () {
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
+                    Route::post('/', 'Api\Manager\Instructor\InstructorController@store');
                     Route::get('index', 'Api\Manager\Instructor\InstructorController@index');
                     Route::prefix('{instructor_id}')->group(function () {
                         Route::get('/', 'Api\Manager\Instructor\InstructorController@show');
@@ -256,5 +257,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {
         Route::post('/', 'Api\Student\StudentController@store');
         Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+    });
+    Route::prefix('instructor')->group(function () {
+        Route::post('/', 'Api\Instructor\InstructorController@store');
+        Route::post('verification/{token}', 'Api\Instructor\InstructorController@verifyCode');
     });
 });

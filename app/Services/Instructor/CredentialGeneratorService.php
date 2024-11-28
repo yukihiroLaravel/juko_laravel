@@ -40,7 +40,8 @@ class CredentialGeneratorService
         $code = sprintf('%04d', mt_rand(0, 9999));
 
         for ($i = 1; $i <= 5; $i++) {
-            if (! TemporaryInstructor::where('code', $code)->exists()) {
+            $isExists = TemporaryInstructor::where('code', $code)->exists();
+            if (! $isExists) {
                 break;
             }
             $code = sprintf('%04d', mt_rand(0, 9999));
@@ -66,7 +67,8 @@ class CredentialGeneratorService
         //トークンの生成
         $token = Str::random(10);
         for ($i = 1; $i <= 5; $i++) {
-            if (! TemporaryInstructor::where('token', $token)->exists()) {
+            $isExists = TemporaryInstructor::where('token', $token)->exists();
+            if (! $isExists) {
                 break;
             }
             $token = Str::random(10);

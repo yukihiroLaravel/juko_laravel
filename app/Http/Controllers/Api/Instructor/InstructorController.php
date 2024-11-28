@@ -227,7 +227,7 @@ class InstructorController extends Controller
                 'email' => $temporaryInstructor->email,
                 'password' => Hash::make($password),
                 'profile_image' => null,
-                'type' => $temporaryInstructor->nick_name,
+                'type' => $temporaryInstructor->type,
             ]);
 
             if ($temporaryInstructor->manager_id) {

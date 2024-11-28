@@ -50,7 +50,7 @@ class NotificationController extends Controller
             ->findOrFail($request->notification_id);
 
         if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Forbidden, not allowed to access this notification.');
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         return new NotificationShowResource($notification);
@@ -143,9 +143,7 @@ class NotificationController extends Controller
                 return $notification->instructor_id !== $instructorId;
             })
         ) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this notification.'
-            );
+            throw new AuthorizationException('Invalid instructor_id.');
         }
         DB::beginTransaction();
         try {
@@ -188,7 +186,7 @@ class NotificationController extends Controller
             })
         ) {
             // 講師と一致しないお知らせが含まれている場合はエラー
-            throw new AuthorizationException('Forbidden.');
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         // トランザクション開始

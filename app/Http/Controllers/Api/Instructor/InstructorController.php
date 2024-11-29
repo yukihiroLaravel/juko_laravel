@@ -19,7 +19,6 @@ use App\Services\Instructor\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
 use App\Services\Instructor\VerifyCodeService;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -186,7 +185,7 @@ class InstructorController extends Controller
                 );
                 if (! $ret) {
                     // 認証失敗
-    
+
                     // エラー応答
                     return response()->json([
                         'result' => false,
@@ -204,7 +203,7 @@ class InstructorController extends Controller
             } catch (TryCountOverAuthorizationCodeException $e) {
                 // 講師仮登録認証情報を物理削除
                 $temporaryInstructor->delete();
-    
+
                 return response()->json([
                     'result' => false,
                     'message' => 'Not match authorization code three times.',

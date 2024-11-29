@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Instructor;
 
-use App\Rules\InstructorTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InstructorPostRequest extends FormRequest

@@ -36,7 +36,7 @@ class TemporaryInstructor extends Model
     protected function fullName(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->last_name . ' ' . $this->first_name,
+            get: fn () => $this->last_name.' '.$this->first_name,
         );
     }
 }

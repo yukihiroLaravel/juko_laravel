@@ -5,6 +5,9 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read string $full_name
+ */
 class TemporaryInstructor extends Model
 {
     /**

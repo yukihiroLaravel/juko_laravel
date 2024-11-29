@@ -11,30 +11,17 @@ class AuthenticationConfirmationMail extends Mailable
     use Queueable;
     use SerializesModels;
 
-    private string $email;
-
-    private string $fullName;
-
-    private string $code;
-
-    private string $token;
-
     /**
      * Create a new message instance.
      *
      * @return void
      */
     public function __construct(
-        string $email,
-        string $fullName,
-        string $code,
-        string $token
-    ) {
-        $this->email = $email;
-        $this->fullName = $fullName;
-        $this->code = $code;
-        $this->token = $token;
-    }
+        private string $email,
+        private string $fullName,
+        private string $code,
+        private string $token
+    ) {}
 
     /**
      * Build the message.

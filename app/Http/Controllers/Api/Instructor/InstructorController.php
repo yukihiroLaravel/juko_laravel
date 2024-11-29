@@ -74,6 +74,7 @@ class InstructorController extends Controller
 
             $type = Instructor::TYPE_INSTRUCTOR;
 
+            /** @var TemporaryInstructor $temporaryInstructor */
             $temporaryInstructor = TemporaryInstructor::create([
                 'manager_id' => $managerId,
                 'trial_count' => $trialCount,
@@ -89,7 +90,7 @@ class InstructorController extends Controller
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->fullName, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
 
             return response()->json([
                 'result' => true,

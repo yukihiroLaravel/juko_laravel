@@ -149,7 +149,7 @@ class InstructorController extends Controller
     }
 
     /**
-     * ユーザー新規仮登録API
+     * 講師新規仮登録API
      */
     public function store(
         InstructorPostRequest $request,
@@ -177,6 +177,7 @@ class InstructorController extends Controller
 
             $type = Instructor::TYPE_INSTRUCTOR;
 
+            /** @var TemporaryInstructor $temporaryInstructor */
             $temporaryInstructor = TemporaryInstructor::create([
                 'manager_id' => $managerId,
                 'trial_count' => $trialCount,
@@ -192,7 +193,7 @@ class InstructorController extends Controller
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->fullName, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
 
             return response()->json([
                 'result' => true,

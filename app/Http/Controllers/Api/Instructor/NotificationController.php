@@ -50,10 +50,7 @@ class NotificationController extends Controller
             ->findOrFail($request->notification_id);
 
         if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to access this notification.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         return new NotificationShowResource($notification);
@@ -146,9 +143,7 @@ class NotificationController extends Controller
                 return $notification->instructor_id !== $instructorId;
             })
         ) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this notification.'
-            );
+            throw new AuthorizationException('Invalid instructor_id.');
         }
         DB::beginTransaction();
         try {
@@ -191,10 +186,7 @@ class NotificationController extends Controller
             })
         ) {
             // 講師と一致しないお知らせが含まれている場合はエラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         // トランザクション開始
@@ -214,17 +206,9 @@ class NotificationController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
-            // ロールバック
             DB::rollBack();
-
-            // ログ出力
-            Log::debug($e->getMessage());
-
-            // エラーレスポンスを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete notifications.',
-            ], 500);
+            Log::error($e);
+            throw $e;
         }
     }
 }

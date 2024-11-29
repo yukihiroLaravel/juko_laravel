@@ -73,10 +73,7 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         return new NotificationShowResource($notification);
@@ -100,10 +97,7 @@ class NotificationController extends Controller
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         Notification::create([
@@ -144,10 +138,7 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         $notification->fill([
@@ -186,7 +177,7 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, not allowed to delete this notification.');
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         DB::beginTransaction();
@@ -225,9 +216,7 @@ class NotificationController extends Controller
 
         // アクセス権限のチェック
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this notification.'
-            );
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         $notificationType = $request->notification_type;
@@ -272,10 +261,7 @@ class NotificationController extends Controller
 
         // アクセス権のチェック
         if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         DB::beginTransaction();
@@ -295,10 +281,7 @@ class NotificationController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 }

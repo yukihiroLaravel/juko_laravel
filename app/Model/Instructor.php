@@ -35,6 +35,7 @@ class Instructor extends Authenticatable
         'last_name',
         'first_name',
         'email',
+        'password',
         'profile_image',
         'type',
     ];

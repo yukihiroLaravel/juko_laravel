@@ -73,7 +73,7 @@ class StudentController extends Controller
                 $code = sprintf('%04d', mt_rand(0, 9999));
 
                 if ($i === 5) {
-                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
+                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student->email);
                 }
             }
 
@@ -85,7 +85,7 @@ class StudentController extends Controller
                 }
                 $token = Str::random(10);
                 if ($i === 5) {
-                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student);
+                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student->email);
                 }
             }
 
@@ -99,7 +99,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($student, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($student->email, $student->fullName, $code, $token));
 
             return response()->json([
                 'result' => true,
@@ -110,6 +110,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
             ], 500);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
@@ -117,6 +118,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
             ], 500);
         } catch (Exception $e) {
             DB::rollBack();
@@ -203,7 +205,7 @@ class StudentController extends Controller
             // 有効期限の判定
             if (strtotime($studentAuth->expire_at) < strtotime($currentTime)) {
                 // 有効期限切れ
-                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student);
+                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student->email);
             }
 
             // 認証コードチェック
@@ -215,7 +217,7 @@ class StudentController extends Controller
                 // 試行回数制限の判定
                 if ($studentAuth->trial_count >= 3) {
                     // 認証失敗回数が3回以上
-                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student);
+                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student->email);
                 }
 
                 // 試行回数を更新
@@ -253,14 +255,14 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
-                'message' => 'Expired authrization period.',
+                'message' => 'Expired authorization period.',
             ], 406);
         } catch (TryCountOverAuthorizationCodeException $e) {
             $studentAuth->delete();
 
             return response()->json([
                 'result' => false,
-                'message' => 'Not match authrization code three times.',
+                'message' => 'Not match authorization code three times.',
             ], 400);
         } catch (Exception $e) {
             DB::rollback();

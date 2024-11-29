@@ -110,6 +110,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
             ], 500);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
@@ -117,6 +118,7 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
             ], 500);
         } catch (Exception $e) {
             DB::rollBack();
@@ -253,14 +255,14 @@ class StudentController extends Controller
 
             return response()->json([
                 'result' => false,
-                'message' => 'Expired authrization period.',
+                'message' => 'Expired authorization period.',
             ], 406);
         } catch (TryCountOverAuthorizationCodeException $e) {
             $studentAuth->delete();
 
             return response()->json([
                 'result' => false,
-                'message' => 'Not match authrization code three times.',
+                'message' => 'Not match authorization code three times.',
             ], 400);
         } catch (Exception $e) {
             DB::rollback();

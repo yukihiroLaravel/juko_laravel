@@ -73,13 +73,7 @@ class InstructorController extends Controller
             $lastName = $request->last_name;
             $firstName = $request->first_name;
 
-            /*
-               講師の新規登録時に'manager'として登録のケースは、
-               フロントエンドからrequestBodyに、typeに、Instructor::TYPE_MANAGERを指定すればよい。
-               そうでなければ、requestBodyに、typeを指定する必要もなく、その際はnullであり、
-               そのケースでは、Instructor::TYPE_INSTRUCTORとすることを意図している。
-             */
-            $type = $request->filled('type') ? $request->type : Instructor::TYPE_INSTRUCTOR;
+            $type = Instructor::TYPE_INSTRUCTOR;
 
             $temporaryInstructor = TemporaryInstructor::create([
                 'manager_id' => $managerId,
@@ -107,6 +101,7 @@ class InstructorController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
@@ -114,6 +109,7 @@ class InstructorController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
             ], 400);
         } catch (Exception $e) {
             DB::rollBack();
@@ -175,133 +171,119 @@ class InstructorController extends Controller
     ): JsonResponse {
         $token = $request->token;
         $code = $request->code;
-        $password = $request->password;
         $currentTime = date('Y-m-d H:i:s');
 
-        $isTransaction = false;
         $temporaryInstructor = null;
         try {
             $temporaryInstructor = TemporaryInstructor::where('token', $token)->firstOrFail();
 
             // 認証コードチェック
-            $ret = $service(
-                $temporaryInstructor,
-                $currentTime,
-                $code
-            );
-            if (! $ret) {
-                // 認証失敗
+            try {
+                $ret = $service(
+                    $temporaryInstructor,
+                    $currentTime,
+                    $code
+                );
+                if (! $ret) {
+                    // 認証失敗
+    
+                    // エラー応答
+                    return response()->json([
+                        'result' => false,
+                        'message' => 'Not match authentication code.',
+                    ], 400);
+                }
+            } catch (ExpiredAuthorizationCodeException $e) {
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
 
-                // エラー応答
                 return response()->json([
                     'result' => false,
-                    'message' => 'Not match authentication code.',
+                    'message' => 'Expired authorization period.',
+                ], 400);
+            } catch (TryCountOverAuthorizationCodeException $e) {
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
+    
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Not match authorization code three times.',
                 ], 400);
             }
 
             // 認証成功
 
             /*
-                「 トランザクション開始をこの位置とした経緯の説明 」
+                「   「DB::transaction(function () use (」で、トランザクションの範囲を限定した経緯の説明   」
 
-                    VerifyCodeServiceの内部にて「試行回数をカウント」のDB値の更新がある。
-                    それ以前に、トランザクションを開始していた場合に、
-                    コミットしてから、400でreturnをしなければ、DB更新値が反映されない事象があった。
+                    1) VerifyCodeServiceの内部にて「試行回数をカウント」のDB値の更新
+                    2) VerifyCodeServiceでの例外制御時の、
+                        // 講師仮登録認証情報を物理削除
+                        $temporaryInstructor->delete();
+                    上記の、1)、2)などは、
+                    トランザクションの範囲外実行したい。
+                    「DB::beginTransaction();」していた場合に、「DB::commit();」して、returnしないとDBに反映されない。
+                    「DB::beginTransaction();」せず、SQL実行が即時コミットとして、途中returnでもDBに反映される形としたい。
 
-                    トランザクション開始せずにテストすると、即時コミットのため、途中returnでも反映された。
+                    上記のチェック系などの実装でのDB処理は、トランザクション範囲外とするが、
+                    本登録に関係があるところ、メイン処理に関して限定し、トランザクション制御としたかった。
 
-                    チェック系での回数などの状態更新はトランザクション外として、
-                    トランザクションは、本登録に関係があるところのみとした。
-
-                    その結果、「$isTransaction」を用いた制御としています。
-                    その目的は、「catch句にてトランザクションがあるケースのみロールバックを確実に行うため」
+                    上記を実現するにあたって、当API全体の実装が簡素となるように、
+                    「  DB::transaction(function () use (  」での
+                    自動コミット（例外で抜けたら、自動ロールバック)
+                    の形で対処することにした。
             */
-            DB::beginTransaction();
-            $isTransaction = true;
+            DB::transaction(function () use (
+                $request,
+                $temporaryInstructor
+            ) {
+                $password = $request->password;
 
-            // 講師の本登録
-            $instructor = Instructor::create([
-                'nick_name' => $temporaryInstructor->nick_name,
-                'last_name' => $temporaryInstructor->last_name,
-                'first_name' => $temporaryInstructor->first_name,
-                'email' => $temporaryInstructor->email,
-                'password' => Hash::make($password),
-                'profile_image' => null,
-                'type' => $temporaryInstructor->type,
-            ]);
-
-            if ($temporaryInstructor->manager_id) {
-                /*
-                   manager_idが値ある場合、つまり、「講師の仮登録の操作」をマネージャが行った場合に相当する。
-
-                   この場合は、マネージャが配下の講師を仮登録した後、
-                   仮登録された講師の本人が自分宛てに来たメールの本文にある
-                   トークンが含まれたurlから表示したページで認証コードを入力し、当APIを動作させた状況である。
-
-                   その結果として、認証に成功し、その講師が本登録処理され、当ロジックに至ったケースに相当する。
-
-                   そのため、仮登録の操作を行ったマネージャの配下に、今、本登録された講師を紐づけるための
-                   manage_instructorsへのデータ登録を行う。
-
-                   $temporaryInstructor->manager_idには、仮登録の操作を行ったマネージャのinstructorsテーブルのid項目値
-                   $instructor->idには、今、本登録された講師のinstructorsテーブルのid項目値
-                   の値になっている状況を想定し、
-                   下記のmanage_instructorsへのデータ登録を行う。
-                 */
-                ManageInstructor::create([
-                    'instructor_id' => $instructor->id,
-                    'manager_id' => $temporaryInstructor->manager_id,
+                // 講師の本登録
+                $instructor = Instructor::create([
+                    'nick_name' => $temporaryInstructor->nick_name,
+                    'last_name' => $temporaryInstructor->last_name,
+                    'first_name' => $temporaryInstructor->first_name,
+                    'email' => $temporaryInstructor->email,
+                    'password' => Hash::make($password),
+                    'profile_image' => null,
+                    'type' => $temporaryInstructor->type,
                 ]);
-            }
 
-            // 講師仮登録認証情報を物理削除
-            $temporaryInstructor->delete();
+                if ($temporaryInstructor->manager_id) {
+                    /*
+                    manager_idが値ある場合、つまり、「講師の仮登録の操作」をマネージャが行った場合に相当する。
 
-            DB::commit();
-            $isTransaction = false;
+                    この場合は、マネージャが配下の講師を仮登録した後、
+                    仮登録された講師の本人が自分宛てに来たメールの本文にある
+                    トークンが含まれたurlから表示したページで認証コードを入力し、当APIを動作させた状況である。
+
+                    その結果として、認証に成功し、その講師が本登録処理され、当ロジックに至ったケースに相当する。
+
+                    そのため、仮登録の操作を行ったマネージャの配下に、今、本登録された講師を紐づけるための
+                    manage_instructorsへのデータ登録を行う。
+
+                    $temporaryInstructor->manager_idには、仮登録の操作を行ったマネージャのinstructorsテーブルのid項目値
+                    $instructor->idには、今、本登録された講師のinstructorsテーブルのid項目値
+                    の値になっている状況を想定し、
+                    下記のmanage_instructorsへのデータ登録を行う。
+                    */
+                    ManageInstructor::create([
+                        'instructor_id' => $instructor->id,
+                        'manager_id' => $temporaryInstructor->manager_id,
+                    ]);
+                }
+
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
+            });
 
             // 成功応答
             return response()->json([
                 'result' => true,
                 'message' => 'Authorization success.',
             ]);
-        } catch (ModelNotFoundException $e) {
-            if ($isTransaction) {
-                DB::rollback();
-                $isTransaction = false;
-            }
-            Log::error($e);
-            throw $e;
-        } catch (ExpiredAuthorizationCodeException $e) {
-            if ($isTransaction) {
-                DB::rollback();
-                $isTransaction = false;
-            }
-            if ($temporaryInstructor) {
-                // 講師仮登録認証情報を物理削除
-                $temporaryInstructor->delete();
-            }
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Expired authrization period.',
-            ], 400);
-        } catch (TryCountOverAuthorizationCodeException $e) {
-            if ($isTransaction) {
-                DB::rollback();
-                $isTransaction = false;
-            }
-            if ($temporaryInstructor) {
-                // 講師仮登録認証情報を物理削除
-                $temporaryInstructor->delete();
-            }
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Not match authrization code three times.',
-            ], 400);
         } catch (Exception $e) {
-            DB::rollback();
             Log::error($e);
             throw $e;
         }

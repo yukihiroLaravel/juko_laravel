@@ -175,13 +175,7 @@ class InstructorController extends Controller
             $lastName = $request->last_name;
             $firstName = $request->first_name;
 
-            /*
-               講師の新規登録時に'manager'として登録のケースは、
-               フロントエンドからrequestBodyに、typeに、Instructor::TYPE_MANAGERを指定すればよい。
-               そうでなければ、requestBodyに、typeを指定する必要もなく、その際はnullであり、
-               そのケースでは、Instructor::TYPE_INSTRUCTORとすることを意図している。
-             */
-            $type = $request->filled('type') ? $request->type : Instructor::TYPE_INSTRUCTOR;
+            $type = Instructor::TYPE_INSTRUCTOR;
 
             $temporaryInstructor = TemporaryInstructor::create([
                 'manager_id' => $managerId,
@@ -209,6 +203,7 @@ class InstructorController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
@@ -216,6 +211,7 @@ class InstructorController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
             ], 400);
         } catch (Exception $e) {
             DB::rollBack();

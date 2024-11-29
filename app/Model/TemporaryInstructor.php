@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class TemporaryInstructor extends Model
@@ -32,8 +33,10 @@ class TemporaryInstructor extends Model
     /**
      * フルネームアクセサー
      */
-    public function getFullNameAttribute()
+    protected function fullName(): Attribute
     {
-        return $this->last_name.' '.$this->first_name;
+        return Attribute::make(
+            get: fn () => $this->last_name . ' ' . $this->first_name,
+        );
     }
 }

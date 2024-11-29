@@ -29,7 +29,6 @@ class InstructorPostRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:50'],
             'first_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:instructors'],
-            'type' => ['nullable', new InstructorTypeRule],
         ];
     }
 }

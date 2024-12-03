@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\BulkDeleteRequest;
+use App\Http\Requests\Instructor\ChapterBulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterDeleteRequest;
 use App\Http\Requests\Instructor\ChapterPatchRequest;
 use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
@@ -216,7 +216,7 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(ChapterBulkDeleteRequest $request): JsonResponse
     {
         try {
             $courseId = $request->course_id;

@@ -17,6 +17,7 @@ use App\Model\StudentAuthorization;
 use App\Services\Student\QueryService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -191,7 +192,7 @@ class StudentController extends Controller
         }
     }
 
-    public function verifyCode(UserAuthenticationRequest $request, $token)
+    public function verifyCode(UserAuthenticationRequest $request): JsonResponse
     {
 
         $code = $request->code;
@@ -199,7 +200,7 @@ class StudentController extends Controller
         $currentTime = date('Y-m-d H:i:s');
 
         try {
-            $studentAuth = StudentAuthorization::where('token', $token)->firstOrFail();
+            $studentAuth = StudentAuthorization::where('token', $request->token)->firstOrFail();
             $student = student::findOrFail($studentAuth->student_id);
 
             // 有効期限の判定

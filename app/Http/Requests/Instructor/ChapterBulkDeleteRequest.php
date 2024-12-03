@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BulkDeleteRequest extends FormRequest
+class ChapterBulkDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

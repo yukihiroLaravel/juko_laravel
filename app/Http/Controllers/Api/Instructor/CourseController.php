@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use RuntimeException;
 
 class CourseController extends Controller
 {
@@ -110,7 +110,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (RuntimeException $e) {
+        } catch (Exception $e) {
             Log::error($e);
             throw $e;
         }
@@ -143,7 +143,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (RuntimeException $e) {
+        } catch (Exception $e) {
             Log::error($e);
             throw $e;
         }

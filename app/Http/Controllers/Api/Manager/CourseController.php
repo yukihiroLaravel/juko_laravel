@@ -15,6 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +23,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class CourseController extends Controller
 {
@@ -180,7 +180,7 @@ class CourseController extends Controller
             if (Storage::disk('public')->exists($course->image)) {
                 Storage::disk('public')->delete($course->image);
             }
-            
+
             $course->delete();
 
             return response()->json([

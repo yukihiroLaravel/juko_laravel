@@ -15,12 +15,13 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class CourseController extends Controller
 {
@@ -84,10 +85,7 @@ class CourseController extends Controller
             $imagePath = $course->image;
 
             if ($user->id !== $course->instructor_id) {
-                return new JsonResponse([
-                    'result' => false,
-                    'message' => 'Not authorized.',
-                ], 403);
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             if (isset($file)) {
@@ -112,12 +110,9 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (RuntimeException $e) {
-            Log::error($e->getMessage());
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+        } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
         }
     }
 
@@ -131,17 +126,11 @@ class CourseController extends Controller
             $course = Course::findOrFail($request->course_id);
 
             if ($user->id !== $course->instructor_id) {
-                return new JsonResponse([
-                    'result' => false,
-                    'message' => 'Not authorized.',
-                ], 403);
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             if (Attendance::where('course_id', $request->course_id)->exists()) {
-                return new JsonResponse([
-                    'result' => false,
-                    'message' => 'This course has already been taken by students.',
-                ], 403);
+                throw new AuthorizationException('This course has already been taken by students.');
             }
 
             // publicディレクトリ配下の画像ファイルを削除
@@ -154,12 +143,9 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (RuntimeException $e) {
+        } catch (Exception $e) {
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

@@ -37,10 +37,9 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Attendance record already exists.',
-            ], 409);
+            throw new AuthorizationException(
+                'Attendance record already exists.'
+            );
         }
 
         DB::beginTransaction();
@@ -68,10 +67,7 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -106,10 +102,9 @@ class AttendanceController extends Controller
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
 
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Unauthorized: The authenticated instructor does not have permission to delete this attendance record',
-                ], 403);
+                throw new AuthorizationException(
+                    'Unauthorized: The authenticated instructor does not have permission to delete this attendance record.'
+                );
             }
 
             $attendance->delete();
@@ -122,10 +117,7 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

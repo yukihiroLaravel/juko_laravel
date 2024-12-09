@@ -50,18 +50,14 @@ class AttendanceController extends Controller
 
         if (! in_array($course->id, $courseIds, true)) {
             // 自分もしくは配下の講師の講座でない場合はエラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Forbidden.');
         }
 
         if (Attendance::where('course_id', $request->course_id)->where('student_id', $request->student_id)->exists()) {
             // 受講状況が存在すれば、エラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Attendance record already exists.',
-            ], 409);
+            throw new AuthorizationException(
+                'Attendance record already exists.'
+            );
         }
 
         DB::beginTransaction();
@@ -96,10 +92,7 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -159,10 +152,7 @@ class AttendanceController extends Controller
 
             if (! in_array((int) $attendanceId, $managedAttendances, true)) {
                 // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden.',
-                ], 403);
+                throw new AuthorizationException('Forbidden.');
             }
 
             // 受講状況を削除
@@ -176,10 +166,7 @@ class AttendanceController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -247,10 +234,9 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($request->course_id);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分と配下の講師の講座でない場合はエラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to access this course.',
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
@@ -311,10 +297,9 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($request->course_id);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分と配下の講師の講座でない場合はエラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to access this course.',
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
         // 今日完了したレッスンの個数を取得

@@ -338,8 +338,16 @@ class ChapterController extends Controller
     /**
      * チャプター全削除API
      */
-    public function deleteAll(){
-        return response()->json([]);
+    public function deleteAll($course_id){
+        
+        $courseId = $course_id;
+
+        // チャプターを削除
+        Chapter::where('course_id', $courseId)->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

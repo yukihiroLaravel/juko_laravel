@@ -41,4 +41,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('temporary_students');
     }
-}
+};

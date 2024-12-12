@@ -336,6 +336,13 @@ class ChapterController extends Controller
     }
 
     /**
+     * チャプター全削除API
+     */
+    public function deleteAll(){
+        return response()->json([]);
+    }
+
+    /**
      * チャプター並び替えAPI
      */
     public function sort(ChapterSortRequest $request): JsonResponse

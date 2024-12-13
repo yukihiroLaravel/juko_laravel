@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('temporary_students', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->tinyInteger('trial_count')->unsigned()->comment('試行回数');
             $table->string('code', 4)->unique()->comment('認証コード');
             $table->string('token', 10)->unique()->comment('トークン');

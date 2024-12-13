@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('temporary_instructors', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->unsignedBigInteger('manager_id')->nullable();
             $table->tinyInteger('trial_count')->unsigned()->comment('試行回数');
             $table->string('code', 4)->unique()->comment('認証コード');

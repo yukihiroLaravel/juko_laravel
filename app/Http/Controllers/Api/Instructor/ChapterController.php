@@ -17,6 +17,7 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\QueryService;
 use Exception;
@@ -339,11 +340,19 @@ class ChapterController extends Controller
      * チャプター全削除API
      */
     public function deleteAll($course_id){
-        
+
         $courseId = $course_id;
+        //コースに紐づくチャプター情報とレッスン情報を取得
+        $course = Course::with('chapters.lessons')->
+        get();
+        //find($courseId);
+        //return $course;
+        //$lessonIds = $course->pluck('lessons.*.id')->flatten();
+
+        $chapterIds = $course->chapters->pluck('chapter_id')->toArray();
 
         // チャプターを削除
-        Chapter::where('course_id', $courseId)->delete();
+        Lesson::whereIn('chapter_id',$chapterIds)->delete();
 
         return response()->json([
             'result' => true,

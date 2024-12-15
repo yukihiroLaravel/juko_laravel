@@ -339,7 +339,8 @@ class ChapterController extends Controller
     /**
      * チャプター全削除API
      */
-    public function deleteAll($course_id){
+    public function deleteAll($course_id)
+    {
 
         $courseId = $course_id;
         //コースに紐づくチャプター情報とレッスン情報を取得
@@ -352,7 +353,7 @@ class ChapterController extends Controller
         $chapterIds = $course->chapters->pluck('chapter_id')->toArray();
 
         // チャプターを削除
-        Lesson::whereIn('chapter_id',$chapterIds)->delete();
+        Lesson::whereIn('chapter_id', $chapterIds)->delete();
 
         return response()->json([
             'result' => true,

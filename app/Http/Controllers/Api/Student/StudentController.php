@@ -13,7 +13,7 @@ use App\Http\Requests\Student\UserAuthenticationRequest;
 use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
-use App\Model\StudentAuthorization;
+use App\Model\TemporaryStudent;
 use App\Services\Student\QueryService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -48,59 +48,52 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StudentPostRequest $request)
-    {
+    public function store(
+        StudentPostRequest $request,
+        CredentialGeneratorService $credentialGeneratorService
+    ): JsonResponse {
         DB::beginTransaction();
         try {
-            $student = Student::create([
-                'nick_name' => $request->nick_name,
-                'last_name' => $request->last_name,
-                'first_name' => $request->first_name,
-                'email' => $request->email,
-                'occupation' => $request->occupation,
-                'purpose' => $request->purpose,
-                'birth_date' => $request->birth_date,
-                'gender' => $request->gender,
-                'address' => $request->address,
-            ]);
+            $email = $request->email;
+            $credentialGeneratorService->setEmail($email);
 
-            //認証コードの生成
-            $code = sprintf('%04d', mt_rand(0, 9999));
+            $trialCount = 0;
 
-            for ($i = 1; $i <= 5; $i++) {
-                if (! StudentAuthorization::where('code', $code)->exists()) {
-                    break;
-                }
-                $code = sprintf('%04d', mt_rand(0, 9999));
+            // 認証コードを生成する。
+            $code = $credentialGeneratorService->createCode();
+            // トークンを生成する。
+            $token = $credentialGeneratorService->createToken();
 
-                if ($i === 5) {
-                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student->email);
-                }
-            }
+            $expireAt = Carbon::now()->addMinutes(60);
+            $nickName = $request->nick_name;
+            $lastName = $request->last_name;
+            $firstName = $request->first_name;
+            $occupation = $request->occupation;
+            $purpose = $request->purpose;
+            $birthDate = $request->birth_date;
+            $gender = $request->gender;
+            $address = $request->address;
 
-            //トークンの生成
-            $token = Str::random(10);
-            for ($i = 1; $i <= 5; $i++) {
-                if (! StudentAuthorization::where('token', $token)->exists()) {
-                    break;
-                }
-                $token = Str::random(10);
-                if ($i === 5) {
-                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student->email);
-                }
-            }
-
-            StudentAuthorization::create([
-                'student_id' => $student->id,
-                'trial_count' => 0,
+            /** @var TemporaryStudent $temporaryStudent */
+            $temporaryStudent = TemporaryStudent::create([
+                'trial_count' => $trialCount,
                 'code' => $code,
                 'token' => $token,
-                'expire_at' => Carbon::now()->addMinutes(60),
+                'expire_at' => $expireAt,
+                'nick_name' => $nickName,
+                'last_name' => $lastName,
+                'first_name' => $firstName,
+                'email' => $email,
+                'occupation' => $occupation,
+                'purpose' => $purpose,
+                'birth_date' => $birthDate,
+                'gender' => $gender,
+                'address' => $address,
             ]);
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($student->email, $student->fullName, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryStudent->fullName, $code, $token));
 
             return response()->json([
                 'result' => true,
@@ -112,7 +105,7 @@ class StudentController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to generate unique authorization code.',
-            ], 500);
+            ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
             Log::error($e);
@@ -120,14 +113,11 @@ class StudentController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to generate unique authorization token.',
-            ], 500);
+            ], 400);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

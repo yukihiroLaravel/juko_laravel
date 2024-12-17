@@ -45,8 +45,6 @@ class StudentController extends Controller
 
     /**
      * ユーザー新規仮登録API
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(
         StudentPostRequest $request,

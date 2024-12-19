@@ -340,10 +340,11 @@ class ChapterController extends Controller
     /**
      * チャプター全削除API
      */
-    public function deleteAll($course_id){
+    public function deleteAll($course_id)
+    {
 
         $courseId = $course_id;
-        
+
         DB::beginTransaction();
         try {
 
@@ -366,7 +367,7 @@ class ChapterController extends Controller
 
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
-            Lesson::whereIn('chapter_id',$chapterIds)->delete();
+            Lesson::whereIn('chapter_id', $chapterIds)->delete();
 
             DB::commit();
 
@@ -379,7 +380,6 @@ class ChapterController extends Controller
             DB::rollBack();
             Log::error($e);
             throw $e;
-            
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

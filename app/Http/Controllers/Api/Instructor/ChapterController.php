@@ -17,9 +17,11 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\QueryService;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -332,6 +334,54 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => false,
             ], 500);
+        }
+    }
+
+    /**
+     * チャプター全削除API
+     */
+    public function deleteAll($course_id)
+    {
+        $courseId = $course_id;
+
+        DB::beginTransaction();
+        try {
+
+            //コースに紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with('chapters.lessons')->find($courseId);
+            $chapterIds = $course->chapters->pluck('id')->toArray();
+
+            // ログイン中の講師の講座のチャプターでなければエラー応答
+            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+                throw new AuthorizationException('Invalid instructor_id.');
+            }
+
+            // チャプターに紐づく全レッスンIDを取得
+            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new AuthorizationException('This lesson has attendance.');
+            }
+
+            // チャプターを削除
+            Chapter::where('course_id', $courseId)->delete();
+            Lesson::whereIn('chapter_id', $chapterIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+
+        } catch (ValidationErrorException $e) {
+            // バリデーションエラーが発生した場合の処理
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
         }
     }
 

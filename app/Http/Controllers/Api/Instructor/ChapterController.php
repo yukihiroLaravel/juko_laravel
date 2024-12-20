@@ -342,15 +342,13 @@ class ChapterController extends Controller
      */
     public function deleteAll($course_id)
     {
-
         $courseId = $course_id;
 
         DB::beginTransaction();
         try {
 
             //コースに紐づくチャプター情報とレッスン情報を取得
-            $course = Course::with('chapters.lessons')->
-            find($courseId);
+            $course = Course::with('chapters.lessons')->find($courseId);
             $chapterIds = $course->chapters->pluck('id')->toArray();
 
             // ログイン中の講師の講座のチャプターでなければエラー応答

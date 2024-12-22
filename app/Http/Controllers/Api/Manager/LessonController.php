@@ -48,10 +48,7 @@ class LessonController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to create new lesson.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to create new lesson.');
         }
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
@@ -83,10 +80,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -108,26 +102,17 @@ class LessonController extends Controller
 
         if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             // 配下の講師でない場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this lesson.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             // 講座IDが不正な場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // チャプターIDが不正な場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid chapter_id.');
         }
 
         $lesson->update([
@@ -150,7 +135,7 @@ class LessonController extends Controller
     public function delete(LessonDeleteRequest $request)
     {
         DB::beginTransaction();
-        try {
+        try {throw new Exception('テスト');
             // 自身と配下のinstructor情報を取得
             $managerId = Auth::guard('instructor')->user()->id;
 
@@ -165,34 +150,22 @@ class LessonController extends Controller
 
             // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
             if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid chapter_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid chapter_id.');
             }
 
             // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
             if ((int) $request->course_id !== $lesson->chapter->course_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid course_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid course_id.');
             }
 
             // 受講情報が登録されている場合は許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'This lesson has attendance.',
-                ], 403);
+                throw new AuthorizationException('This lesson has attendance.');
             }
 
             // 対象レッスンの削除処理
@@ -213,10 +186,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

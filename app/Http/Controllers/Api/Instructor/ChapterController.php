@@ -340,10 +340,8 @@ class ChapterController extends Controller
 
     /**
      * 全チャプター削除API
-     *
-     * @return JsonResponse
      */
-    public function deleteAll(ChapterDeleteAllRequest $request)
+    public function deleteAll(ChapterDeleteAllRequest $request): JsonResponse
     {
         $courseId = $request->input('course_id');
 

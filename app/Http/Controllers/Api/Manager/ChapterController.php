@@ -204,11 +204,11 @@ class ChapterController extends Controller
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    // 自分、または配下の講師の講座のチャプターでなければエラー応答                   
+                    // 自分、または配下の講師の講座のチャプターでなければエラー応答
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 if ((int) $courseId !== $chapter->course_id) {
-                    // 指定した講座に属するチャプターでなければエラー応答                   
+                    // 指定した講座に属するチャプターでなければエラー応答
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
             });
@@ -223,9 +223,9 @@ class ChapterController extends Controller
             if (! $lessonIds->isEmpty()) {
                 $canDelete = ! LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
             }
-            if (! $canDelete) {               
+            if (! $canDelete) {
                 throw new AuthorizationException('Some chapters contain lessons with attendance records.');
-             }
+            }
 
             Chapter::whereIn('id', $chapterIds)->delete();
             DB::commit();
@@ -268,7 +268,7 @@ class ChapterController extends Controller
             $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {                                       
+                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
             });
@@ -447,7 +447,7 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new Exception('テスト5'); 
+                    throw new Exception('テスト5');
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
 

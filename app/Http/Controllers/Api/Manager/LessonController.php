@@ -135,7 +135,8 @@ class LessonController extends Controller
     public function delete(LessonDeleteRequest $request)
     {
         DB::beginTransaction();
-        try {throw new Exception('テスト');
+        try {
+            throw new Exception('テスト');
             // 自身と配下のinstructor情報を取得
             $managerId = Auth::guard('instructor')->user()->id;
 

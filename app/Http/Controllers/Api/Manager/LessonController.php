@@ -136,7 +136,6 @@ class LessonController extends Controller
     {
         DB::beginTransaction();
         try {
-            throw new Exception('テスト');
             // 自身と配下のinstructor情報を取得
             $managerId = Auth::guard('instructor')->user()->id;
 

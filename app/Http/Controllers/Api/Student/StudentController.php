@@ -54,7 +54,7 @@ class StudentController extends Controller
         DB::beginTransaction();
         try {
 
-            throw new \DuplicateAuthorizationCodeException('Failed to generate unique authorization code.');
+            throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.');
 
             $email = $request->email;
             $credentialGeneratorService->setEmail($email);

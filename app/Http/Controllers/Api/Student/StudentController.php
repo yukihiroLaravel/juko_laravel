@@ -53,9 +53,6 @@ class StudentController extends Controller
     ): JsonResponse {
         DB::beginTransaction();
         try {
-
-            throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.');
-
             $email = $request->email;
             $credentialGeneratorService->setEmail($email);
 

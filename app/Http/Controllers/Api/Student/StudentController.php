@@ -14,6 +14,7 @@ use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
 use App\Model\TemporaryStudent;
+use App\Services\Instructor\CredentialGeneratorService;
 use App\Services\Student\QueryService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -26,7 +27,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Instructor\CredentialGeneratorService;
 
 class StudentController extends Controller
 {

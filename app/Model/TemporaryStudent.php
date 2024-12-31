@@ -37,12 +37,54 @@ class TemporaryStudent extends Model
     ];
 
     /**
+     * キャスト
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'birth_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    // 性別定数
+    const GENDER_MAN = 'man';
+
+    const GENDER_WOMAN = 'woman';
+
+    const GENDER_MAN_INT = 1;
+
+    const GENDER_WOMAN_INT = 2;
+
+    const GENDER_UNKNOWN_INT = 0;
+
+    public function getGenderAttribute($value)
+    {
+        if ($value === self::GENDER_MAN_INT) {
+            return self::GENDER_MAN;
+        } elseif ($value === self::GENDER_WOMAN_INT) {
+            return self::GENDER_WOMAN;
+        }
+
+        return null;
+    }
+
+    public function setGenderAttribute($value)
+    {
+        $this->attributes['gender'] = null;
+
+        if ($value === self::GENDER_MAN) {
+            $this->attributes['gender'] = self::GENDER_MAN_INT;
+        } elseif ($value === self::GENDER_WOMAN) {
+            $this->attributes['gender'] = self::GENDER_WOMAN_INT;
+        }
+    }
+
+    /**
      * フルネームアクセサー
      */
-    protected function fullName(): Attribute
+    public function getFullNameAttribute()
     {
-        return Attribute::make(
-            get: fn () => $this->last_name.' '.$this->first_name,
-        );
+        return $this->last_name.' '.$this->first_name;
     }
 }

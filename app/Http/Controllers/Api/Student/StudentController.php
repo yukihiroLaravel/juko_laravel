@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\Instructor\CredentialGeneratorService;
 
 class StudentController extends Controller
 {
@@ -52,6 +53,9 @@ class StudentController extends Controller
     ): JsonResponse {
         DB::beginTransaction();
         try {
+
+            throw new \DuplicateAuthorizationCodeException('Failed to generate unique authorization code.');
+
             $email = $request->email;
             $credentialGeneratorService->setEmail($email);
 

@@ -42,6 +42,7 @@ class InstructorCourseIndexResource extends JsonResource
                 'course_id' => $course->id,
                 'title' => $course->title,
                 'status' => $course->status,
+                'updated_at' => $course->updated_at->format('Y/m/d H:i:s'),
             ];
         })
             ->toArray();

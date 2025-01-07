@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Services\Student;
+
+use App\Exceptions\ExpiredAuthorizationCodeException;
+use App\Exceptions\TryCountOverAuthorizationCodeException;
+use App\Model\TemporaryStudent;
+
+/**
+ * 認証コードチェックサービス
+ */
+class VerifyCodeService
+{
+    /**
+     * インボーカブル(Invokable)メソッド
+     *
+     * @param  TemporaryStudent  $temporaryStudent  生徒仮登録認証情報
+     * @param  string  $currentTime  現在日時のタイムスタンプ( date('Y-m-d H:i:s')の値を想定 )
+     * @param  string  $code  認証コード
+     * @return bool 認証コードがマッチするかどうか
+     *
+     * @throws ExpiredAuthorizationCodeException 認証コードが有効期限切れの場合
+     * @throws TryCountOverAuthorizationCodeException 試行回数が上限を超えた場合
+     */
+    public function __invoke(
+        TemporaryStudent $temporaryStudent,
+        string $currentTime,
+        string $code
+    ): bool {
+        $email = $temporaryStudent->email;
+
+        // 有効期限の判定
+        if (strtotime($temporaryStudent->expire_at) < strtotime($currentTime)) {
+            // 有効期限切れ
+            throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $email);
+        }
+
+        // 認証コードチェック
+        if ($code !== $temporaryStudent->code) {
+            // 認証失敗
+
+            // 試行回数をカウント
+            $temporaryStudent->trial_count += 1;
+            // 試行回数制限の判定
+            if ($temporaryStudent->trial_count >= 3) {
+                // 認証失敗回数が3回以上
+                throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $email);
+            }
+
+            // 試行回数を更新
+            $temporaryStudent->update();
+
+            return false;
+        }
+
+        return true;
+    }
+}

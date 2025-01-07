@@ -3,6 +3,8 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\Student\Gender;
+
 
 /**
  * @property-read string $full_name
@@ -44,39 +46,26 @@ class TemporaryStudent extends Model
         'birth_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'gender' => Gender::class,
     ];
-
-    // 性別定数
-    const GENDER_MAN = 'man';
-
-    const GENDER_WOMAN = 'woman';
-
-    const GENDER_MAN_INT = 1;
-
-    const GENDER_WOMAN_INT = 2;
-
-    const GENDER_UNKNOWN_INT = 0;
 
     public function getGenderAttribute($value)
     {
-        if ($value === self::GENDER_MAN_INT) {
-            return self::GENDER_MAN;
-        } elseif ($value === self::GENDER_WOMAN_INT) {
-            return self::GENDER_WOMAN;
-        }
-
-        return null;
+        // データベースのgenderカラムの数値を Gender enumに変換し、対応するラベル（文字列）を返す
+        return Gender::from($value)->label();
     }
 
     public function setGenderAttribute($value)
     {
-        $this->attributes['gender'] = null;
-
-        if ($value === self::GENDER_MAN) {
-            $this->attributes['gender'] = self::GENDER_MAN_INT;
-        } elseif ($value === self::GENDER_WOMAN) {
-            $this->attributes['gender'] = self::GENDER_WOMAN_INT;
-        }
+        // ユーザー入力の値（$value）に基づき Gender enumのインスタンスを決定
+        $gender = match ($value) {
+            'man' => Gender::MAN, // 'man' の場合は Gender::MAN に対応
+            'woman' => Gender::WOMAN,
+            default => Gender::UNKNOWN,
+        };
+    
+        // $genderはGender::MAN 等に対応していてこれらのインスタンスはenumのcaseで数値が定義されているので$gender->valueは対応する数値になる。
+        $this->attributes['gender'] = $gender->value;
     }
 
     /**

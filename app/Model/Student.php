@@ -2,9 +2,9 @@
 
 namespace App\Model;
 
+use App\Enums\Student\Gender;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Enums\Student\Gender;
 
 class Student extends Authenticatable
 {
@@ -90,11 +90,11 @@ class Student extends Authenticatable
             'woman' => Gender::WOMAN,
             default => Gender::UNKNOWN,
         };
-    
+
         // $genderはGender::MAN 等に対応していてこれらのインスタンスはenumのcaseで数値が定義されているので$gender->valueは対応する数値になる。
         $this->attributes['gender'] = $gender->value;
     }
-    
+
     /**
      * フルネームアクセサー
      */

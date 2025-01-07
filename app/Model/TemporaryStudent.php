@@ -2,9 +2,8 @@
 
 namespace App\Model;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Enums\Student\Gender;
-
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property-read string $full_name
@@ -63,7 +62,7 @@ class TemporaryStudent extends Model
             'woman' => Gender::WOMAN,
             default => Gender::UNKNOWN,
         };
-    
+
         // $genderはGender::MAN 等に対応していてこれらのインスタンスはenumのcaseで数値が定義されているので$gender->valueは対応する数値になる。
         $this->attributes['gender'] = $gender->value;
     }

@@ -29,4 +29,3 @@ class GenderRule implements Rule
         return 'The :attribute must be either "man" or "woman".';
     }
 }
-

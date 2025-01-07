@@ -12,7 +12,7 @@ enum Gender: int
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::MAN => 'man',
             self::WOMAN => 'woman',
             self::UNKNOWN => 'unknown',

@@ -2,17 +2,33 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use RuntimeException;
-use App\Model\Instructor;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
+use App\Exceptions\ExpiredAuthorizationCodeException;
+use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Instructor\InstructorPatchRequest;
+use App\Http\Requests\Instructor\InstructorPostRequest;
+use App\Http\Requests\Instructor\UserAuthenticationRequest;
 use App\Http\Resources\Instructor\InstructorShowResource;
+use App\Mail\AuthenticationConfirmationMail;
+use App\Model\Instructor;
+use App\Model\ManageInstructor;
+use App\Model\TemporaryInstructor;
+use App\Services\Instructor\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
+use App\Services\Instructor\VerifyCodeService;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class InstructorController extends Controller
 {
@@ -25,14 +41,85 @@ class InstructorController extends Controller
     {
         /** @var Instructor $instructor */
         $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);
+
         return new InstructorShowResource($instructor);
     }
 
     /**
+     * ユーザー新規仮登録API
+     */
+    public function store(
+        InstructorPostRequest $request,
+        CredentialGeneratorService $credentialGeneratorService
+    ): JsonResponse {
+        DB::beginTransaction();
+        try {
+            $email = $request->email;
+            $credentialGeneratorService->setEmail($email);
+
+            // 登録対象の講師が自分で仮登録するケースなので、$managerIdはnull固定
+            $managerId = null;
+
+            $trialCount = 0;
+
+            // 認証コードを生成する。
+            $code = $credentialGeneratorService->createCode();
+            // トークンを生成する。
+            $token = $credentialGeneratorService->createToken();
+
+            $expireAt = Carbon::now()->addMinutes(60);
+            $nickName = $request->nick_name;
+            $lastName = $request->last_name;
+            $firstName = $request->first_name;
+
+            $type = Instructor::TYPE_INSTRUCTOR;
+
+            /** @var TemporaryInstructor $temporaryInstructor */
+            $temporaryInstructor = TemporaryInstructor::create([
+                'manager_id' => $managerId,
+                'trial_count' => $trialCount,
+                'code' => $code,
+                'token' => $token,
+                'expire_at' => $expireAt,
+                'nick_name' => $nickName,
+                'last_name' => $lastName,
+                'first_name' => $firstName,
+                'email' => $email,
+                'type' => $type,
+            ]);
+
+            DB::commit();
+
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (DuplicateAuthorizationCodeException $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
+            ], 400);
+        } catch (DuplicateAuthorizationTokenException $e) {
+            DB::rollBack();
+            Log::error($e);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
+            ], 400);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
      * 講師更新API
-     *
-     * @param InstructorPatchRequest $request
-     * @return JsonResponse
      */
     public function update(InstructorPatchRequest $request): JsonResponse
     {
@@ -51,7 +138,7 @@ class InstructorController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -62,14 +149,143 @@ class InstructorController extends Controller
                 'email' => $request->email,
                 'profile_image' => $imagePath,
             ]);
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);
+
             return response()->json([
-                "result" => false,
+                'result' => false,
             ], 500);
+        }
+    }
+
+    /**
+     * 「認証コードチェック」と「講師の本登録」
+     */
+    public function verifyCode(
+        UserAuthenticationRequest $request,
+        VerifyCodeService $service
+    ): JsonResponse {
+        $token = $request->token;
+        $code = $request->code;
+        $currentTime = date('Y-m-d H:i:s');
+
+        $temporaryInstructor = null;
+        try {
+            $temporaryInstructor = TemporaryInstructor::where('token', $token)->firstOrFail();
+
+            // 認証コードチェック
+            try {
+                $ret = $service(
+                    $temporaryInstructor,
+                    $currentTime,
+                    $code
+                );
+                if (! $ret) {
+                    // 認証失敗
+
+                    // エラー応答
+                    return response()->json([
+                        'result' => false,
+                        'message' => 'Not match authentication code.',
+                    ], 400);
+                }
+            } catch (ExpiredAuthorizationCodeException $e) {
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
+
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Expired authorization period.',
+                ], 400);
+            } catch (TryCountOverAuthorizationCodeException $e) {
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
+
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Not match authorization code three times.',
+                ], 400);
+            }
+
+            // 認証成功
+
+            /*
+                「   「DB::transaction(function () use (」で、トランザクションの範囲を限定した経緯の説明   」
+
+                    1) VerifyCodeServiceの内部にて「試行回数をカウント」のDB値の更新
+                    2) VerifyCodeServiceでの例外制御時の、
+                        // 講師仮登録認証情報を物理削除
+                        $temporaryInstructor->delete();
+                    上記の、1)、2)などは、
+                    トランザクションの範囲外実行したい。
+                    「DB::beginTransaction();」していた場合に、「DB::commit();」して、returnしないとDBに反映されない。
+                    「DB::beginTransaction();」せず、SQL実行が即時コミットとして、途中returnでもDBに反映される形としたい。
+
+                    上記のチェック系などの実装でのDB処理は、トランザクション範囲外とするが、
+                    本登録に関係があるところ、メイン処理に関して限定し、トランザクション制御としたかった。
+
+                    上記を実現するにあたって、当API全体の実装が簡素となるように、
+                    「  DB::transaction(function () use (  」での
+                    自動コミット（例外で抜けたら、自動ロールバック)
+                    の形で対処することにした。
+            */
+            DB::transaction(function () use (
+                $request,
+                $temporaryInstructor
+            ) {
+                $password = $request->password;
+
+                // 講師の本登録
+                $instructor = Instructor::create([
+                    'nick_name' => $temporaryInstructor->nick_name,
+                    'last_name' => $temporaryInstructor->last_name,
+                    'first_name' => $temporaryInstructor->first_name,
+                    'email' => $temporaryInstructor->email,
+                    'password' => Hash::make($password),
+                    'profile_image' => null,
+                    'type' => $temporaryInstructor->type,
+                ]);
+
+                if ($temporaryInstructor->manager_id) {
+                    /*
+                    manager_idが値ある場合、つまり、「講師の仮登録の操作」をマネージャが行った場合に相当する。
+
+                    この場合は、マネージャが配下の講師を仮登録した後、
+                    仮登録された講師の本人が自分宛てに来たメールの本文にある
+                    トークンが含まれたurlから表示したページで認証コードを入力し、当APIを動作させた状況である。
+
+                    その結果として、認証に成功し、その講師が本登録処理され、当ロジックに至ったケースに相当する。
+
+                    そのため、仮登録の操作を行ったマネージャの配下に、今、本登録された講師を紐づけるための
+                    manage_instructorsへのデータ登録を行う。
+
+                    $temporaryInstructor->manager_idには、仮登録の操作を行ったマネージャのinstructorsテーブルのid項目値
+                    $instructor->idには、今、本登録された講師のinstructorsテーブルのid項目値
+                    の値になっている状況を想定し、
+                    下記のmanage_instructorsへのデータ登録を行う。
+                    */
+                    ManageInstructor::create([
+                        'instructor_id' => $instructor->id,
+                        'manager_id' => $temporaryInstructor->manager_id,
+                    ]);
+                }
+
+                // 講師仮登録認証情報を物理削除
+                $temporaryInstructor->delete();
+            });
+
+            // 成功応答
+            return response()->json([
+                'result' => true,
+                'message' => 'Authorization success.',
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
         }
     }
 }

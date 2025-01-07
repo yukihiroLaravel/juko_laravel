@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Instructor extends Authenticatable
@@ -14,28 +15,34 @@ class Instructor extends Authenticatable
      */
     protected $table = 'instructors';
 
-
     // ステータス定数
     const TYPE_MANAGER = 'manager';
+
     const TYPE_INSTRUCTOR = 'instructor';
 
     // ソート対象フィールドの定数
     const SORT_BY_EMAIL = 'email';
+
     const SORT_BY_NICK_NAME = 'nick_name';
+
     const SORT_BY_CREATED_AT = 'created_at';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'nick_name',
         'last_name',
         'first_name',
         'email',
+        'password',
         'profile_image',
         'type',
     ];
 
+    /**
+     * @var array<string, string>
+     */
     protected $casts = [
         'created_at' => 'immutable_datetime',
         'updated_at' => 'immutable_datetime',
@@ -44,9 +51,9 @@ class Instructor extends Authenticatable
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Course, $this>
      */
-    public function courses()
+    public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
     }
@@ -54,7 +61,7 @@ class Instructor extends Authenticatable
     /**
      * 配下の講師を取得
      *
-     * @return BelongsToMany<Instructor>
+     * @return BelongsToMany<Instructor, $this>
      */
     public function managings(): BelongsToMany
     {

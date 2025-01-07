@@ -3,8 +3,9 @@
 namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Course extends Model
 {
@@ -16,10 +17,15 @@ class Course extends Model
      * @var string
      */
     protected $table = 'courses';
+
     // ステータス定数
     const STATUS_PUBLIC = 'public';
+
     const STATUS_PRIVATE = 'private';
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'instructor_id',
         'title',
@@ -29,8 +35,11 @@ class Course extends Model
         'updated_at',
     ];
 
+    /**
+     * @var array<string, string>
+     */
     protected $casts = [
-        'instructor_id' => 'int'
+        'instructor_id' => 'int',
     ];
 
     /**
@@ -53,9 +62,9 @@ class Course extends Model
     /**
      * 講師を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Instructor, $this>
      */
-    public function instructor()
+    public function instructor(): BelongsTo
     {
         return $this->belongsTo(Instructor::class);
     }
@@ -63,9 +72,9 @@ class Course extends Model
     /**
      * 受講状態を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Attendance, $this>
      */
-    public function attendances()
+    public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
@@ -73,9 +82,9 @@ class Course extends Model
     /**
      * チャプターリストを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Chapter, $this>
      */
-    public function chapters()
+    public function chapters(): HasMany
     {
         return $this->hasMany(Chapter::class)->orderBy('order', 'asc');
     }
@@ -83,9 +92,9 @@ class Course extends Model
     /**
      * 公開済みのチャプターリストを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Chapter, $this>
      */
-    public function publicChapters()
+    public function publicChapters(): HasMany
     {
         return $this->chapters()->where('status', Chapter::STATUS_PUBLIC);
     }
@@ -93,7 +102,6 @@ class Course extends Model
     /**
      * 画像保存パスに変換
      *
-     * @param string $filePath
      * @return string
      */
     public static function convertImagePath(string $filePath)

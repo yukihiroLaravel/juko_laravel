@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class LessonAttendance extends Model
 {
@@ -17,25 +16,34 @@ class LessonAttendance extends Model
      */
     protected $table = 'lesson_attendances';
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'lesson_id',
         'attendance_id',
-        'status'
+        'status',
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at'
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     // ステータス定数
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
+
     const STATUS_IN_ATTENDANCE = 'in_attendance';
+
     const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
 
     // 期間内の受講状況を取得する際の期間に関する定数
     const PERIOD_TODAY = 'today';
+
     const PERIOD_MONTH = 'month';
 
     /**

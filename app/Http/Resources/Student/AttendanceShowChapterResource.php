@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Model\Lesson;
-use App\Model\Chapter;
 use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,17 +28,17 @@ class AttendanceShowChapterResource extends JsonResource
                 'chapter' => [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
-                    'lessons' => $chapter->lessons->map(function(Lesson $lesson) {
-                        $lessonAttendance = $lesson->lessonAttendances->filter(function ($lessonAttendance) use($lesson) {
+                    'lessons' => $chapter->lessons->map(function (Lesson $lesson) {
+                        $lessonAttendance = $lesson->lessonAttendances->filter(function ($lessonAttendance) use ($lesson) {
                             return $lessonAttendance->lesson_id === $lesson->id;
                         })
-                        ->map(function(LessonAttendance $lessonAttendance) {
-                            return [
-                                'lesson_attendance_id' => $lessonAttendance->id,
-                                'status' => $lessonAttendance->status,
-                            ];
-                        })
-                        ->first();
+                            ->map(function (LessonAttendance $lessonAttendance) {
+                                return [
+                                    'lesson_attendance_id' => $lessonAttendance->id,
+                                    'status' => $lessonAttendance->status,
+                                ];
+                            })
+                            ->first();
 
                         return [
                             'lesson_id' => $lesson->id,
@@ -47,7 +47,7 @@ class AttendanceShowChapterResource extends JsonResource
                             'total_lessons_count' => $lesson->total_lessons_count,
                             'url' => $lesson->url,
                             'remarks' => $lesson->remarks,
-                            'lessonAttendance' => $lessonAttendance
+                            'lessonAttendance' => $lessonAttendance,
                         ];
                     }),
                 ],

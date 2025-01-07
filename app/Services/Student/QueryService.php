@@ -8,9 +8,6 @@ class QueryService
 {
     /**
      * 選択された生徒の情報を取得
-     *
-     * @param int $studentId
-     * @return Student
      */
     public function getStudent(int $studentId): Student
     {

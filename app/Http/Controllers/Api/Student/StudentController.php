@@ -2,43 +2,43 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use Exception;
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
+use App\Exceptions\ExpiredAuthorizationCodeException;
+use App\Exceptions\TryCountOverAuthorizationCodeException;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\StudentPatchRequest;
+use App\Http\Requests\Student\StudentPostRequest;
+use App\Http\Requests\Student\UserAuthenticationRequest;
+use App\Http\Resources\Student\StudentShowResource;
+use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
-use Illuminate\Support\Str;
+use App\Model\StudentAuthorization;
+use App\Services\Student\QueryService;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Model\StudentAuthorization;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Services\Student\QueryService;
-use App\Mail\AuthenticationConfirmationMail;
-use App\Http\Requests\Student\StudentPostRequest;
-use App\Http\Requests\Student\StudentPatchRequest;
-use App\Http\Resources\Student\StudentShowResource;
-use App\Exceptions\ExpiredAuthorizationCodeException;
-use App\Exceptions\DuplicateAuthorizationCodeException;
-use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Http\Requests\Student\UserAuthenticationRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Exceptions\TryCountOverAuthorizationCodeException;
+use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
     /**
      * 生徒情報取得API
      *
-     * @param Request $request
-     * @param QueryService $queryService
      * @return StudentShowResource
      */
     public function show(Request $request, QueryService $queryService)
     {
         // 生徒情報を取得
         $student = $queryService->getStudent($request->user()->id);
+
         // 生徒の詳細情報をリソース形式で返す
         return new StudentShowResource($student);
     }
@@ -46,7 +46,6 @@ class StudentController extends Controller
     /**
      * ユーザー新規仮登録API
      *
-     * @param StudentPostRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StudentPostRequest $request)
@@ -54,75 +53,80 @@ class StudentController extends Controller
         DB::beginTransaction();
         try {
             $student = Student::create([
-                'nick_name'  => $request->nick_name,
-                'last_name'  => $request->last_name,
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
                 'first_name' => $request->first_name,
-                'email'      => $request->email,
+                'email' => $request->email,
                 'occupation' => $request->occupation,
-                'purpose'    => $request->purpose,
+                'purpose' => $request->purpose,
                 'birth_date' => $request->birth_date,
-                'gender'        => $request->gender,
-                'address'    => $request->address,
+                'gender' => $request->gender,
+                'address' => $request->address,
             ]);
 
             //認証コードの生成
             $code = sprintf('%04d', mt_rand(0, 9999));
 
             for ($i = 1; $i <= 5; $i++) {
-                if (!StudentAuthorization::where('code', $code)->exists()) {
+                if (! StudentAuthorization::where('code', $code)->exists()) {
                     break;
                 }
                 $code = sprintf('%04d', mt_rand(0, 9999));
 
                 if ($i === 5) {
-                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student);
+                    throw new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.', $student->email);
                 }
             }
 
             //トークンの生成
             $token = Str::random(10);
             for ($i = 1; $i <= 5; $i++) {
-                if (!StudentAuthorization::where('token', $token)->exists()) {
+                if (! StudentAuthorization::where('token', $token)->exists()) {
                     break;
                 }
                 $token = Str::random(10);
                 if ($i === 5) {
-                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student);
+                    throw new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.', $student->email);
                 }
             }
 
             StudentAuthorization::create([
-                'student_id'  => $student->id,
+                'student_id' => $student->id,
                 'trial_count' => 0,
-                'code'        => $code,
-                'token'       => $token,
-                'expire_at'   => Carbon::now()->addMinutes(60),
+                'code' => $code,
+                'token' => $token,
+                'expire_at' => Carbon::now()->addMinutes(60),
             ]);
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($student, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($student->email, $student->fullName, $code, $token));
 
             return response()->json([
-                'result'  => true,
+                'result' => true,
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
-              "result" => false,
+                'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
             ], 500);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
-            "result" => false,
+                'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
             ], 500);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+
             return response()->json([
-              "result" => false,
+                'result' => false,
             ], 500);
         }
     }
@@ -130,7 +134,6 @@ class StudentController extends Controller
     /**
      * 生徒情報更新API
      *
-     * @param StudentPatchRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(StudentPatchRequest $request)
@@ -144,7 +147,7 @@ class StudentController extends Controller
             if ($request->user()->id !== $student->id) {
                 return response()->json([
                     'result' => 'false',
-                    "message" => "Not authorized."
+                    'message' => 'Not authorized.',
                 ], 403);
             }
 
@@ -158,7 +161,7 @@ class StudentController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::putFileAs('public/student', $file, $filename);
                 $imagePath = Student::convertImagePath($imagePath);
             }
@@ -175,20 +178,21 @@ class StudentController extends Controller
                 'address' => $request->address,
                 'profile_image' => $imagePath,
             ])
-            ->save();
+                ->save();
 
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);
         }
     }
 
-    public function verifyCode(UserAuthenticationRequest $request, $token)
+    public function verifyCode(UserAuthenticationRequest $request): JsonResponse
     {
 
         $code = $request->code;
@@ -196,13 +200,13 @@ class StudentController extends Controller
         $currentTime = date('Y-m-d H:i:s');
 
         try {
-            $studentAuth = StudentAuthorization::where('token', $token)->firstOrFail();
+            $studentAuth = StudentAuthorization::where('token', $request->token)->firstOrFail();
             $student = student::findOrFail($studentAuth->student_id);
 
             // 有効期限の判定
             if (strtotime($studentAuth->expire_at) < strtotime($currentTime)) {
                 // 有効期限切れ
-                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student);
+                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student->email);
             }
 
             // 認証コードチェック
@@ -214,15 +218,16 @@ class StudentController extends Controller
                 // 試行回数制限の判定
                 if ($studentAuth->trial_count >= 3) {
                     // 認証失敗回数が3回以上
-                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student);
+                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student->email);
                 }
 
                 // 試行回数を更新
                 $studentAuth->update();
+
                 // エラー応答
                 return response()->json([
-                    'result'  => false,
-                    'message' => "Not match authentication code.",
+                    'result' => false,
+                    'message' => 'Not match authentication code.',
                 ], 400);
             }
 
@@ -238,29 +243,32 @@ class StudentController extends Controller
 
             // 成功応答
             return response()->json([
-                'result'  => true,
-                'message' => "Authorization success.",
+                'result' => true,
+                'message' => 'Authorization success.',
             ]);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'result'  => false,
-                'message' => "Not Found data to match token.",
+                'result' => false,
+                'message' => 'Not Found data to match token.',
             ], 404);
         } catch (ExpiredAuthorizationCodeException $e) {
             $studentAuth->delete();
+
             return response()->json([
-                'result'  => false,
-                'message' => "Expired authrization period.",
+                'result' => false,
+                'message' => 'Expired authorization period.',
             ], 406);
         } catch (TryCountOverAuthorizationCodeException $e) {
             $studentAuth->delete();
+
             return response()->json([
-                'result'  => false,
-                'message' => "Not match authrization code three times.",
+                'result' => false,
+                'message' => 'Not match authorization code three times.',
             ], 400);
         } catch (Exception $e) {
             DB::rollback();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);

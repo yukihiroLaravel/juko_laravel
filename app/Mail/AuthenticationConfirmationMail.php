@@ -5,17 +5,11 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use App\Model\Student;
 
 class AuthenticationConfirmationMail extends Mailable
 {
     use Queueable;
     use SerializesModels;
-
-    private string $email;
-    private string $fullName;
-    private string $code;
-    private string $token;
 
     /**
      * Create a new message instance.
@@ -23,15 +17,11 @@ class AuthenticationConfirmationMail extends Mailable
      * @return void
      */
     public function __construct(
-        Student $student,
-        string $code,
-        string $token
-    ) {
-        $this->email = $student->email;
-        $this->fullName = $student->fullName;
-        $this->code = $code;
-        $this->token = $token;
-    }
+        private string $email,
+        private string $fullName,
+        private string $code,
+        private string $token
+    ) {}
 
     /**
      * Build the message.
@@ -41,12 +31,12 @@ class AuthenticationConfirmationMail extends Mailable
     public function build()
     {
         return $this->to($this->email)
-        ->subject('認証コードのお知らせです')
-        ->view('AuthenticationConfirmationMail')
-        ->with([
-            'fullName' => $this->fullName,
-            'code' => $this->code,
-            'token' => $this->token,
-        ]);
+            ->subject('認証コードのお知らせです')
+            ->view('AuthenticationConfirmationMail')
+            ->with([
+                'fullName' => $this->fullName,
+                'code' => $this->code,
+                'token' => $this->token,
+            ]);
     }
 }

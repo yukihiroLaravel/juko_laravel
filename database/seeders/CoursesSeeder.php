@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Model\Course;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -69,7 +71,7 @@ class CoursesSeeder extends Seeder
                 'status' => Course::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ]);
     }
 }

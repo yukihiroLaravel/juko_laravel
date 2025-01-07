@@ -19,7 +19,7 @@ class AttendanceCourseProgressRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'attendance_id' => $this->route('attendance_id')
+            'attendance_id' => $this->route('attendance_id'),
         ]);
     }
 
@@ -31,7 +31,7 @@ class AttendanceCourseProgressRequest extends FormRequest
     public function rules()
     {
         return [
-            'attendance_id' => ['required', 'integer', 'exists:attendances,id']
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
         ];
     }
 }

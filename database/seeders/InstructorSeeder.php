@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Model\Instructor;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -58,7 +60,7 @@ class InstructorSeeder extends Seeder
                 'profile_image' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ]);
     }
 }

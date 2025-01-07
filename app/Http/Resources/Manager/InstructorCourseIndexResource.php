@@ -3,8 +3,8 @@
 namespace App\Http\Resources\Manager;
 
 use App\Model\Course;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class InstructorCourseIndexResource extends JsonResource
@@ -21,29 +21,30 @@ class InstructorCourseIndexResource extends JsonResource
     public function toArray($request)
     {
         $courses = $this->resource;
+
         return [
-            "courses" => $this->mapCourses($courses->getCollection()),
-            "pagination" => [
-                "page" => $courses->currentPage(),
-                "total" => $courses->total()
-            ]
+            'courses' => $this->mapCourses($courses->getCollection()),
+            'pagination' => [
+                'page' => $courses->currentPage(),
+                'total' => $courses->total(),
+            ],
         ];
     }
 
     /**
-     * @param Collection<\App\Model\Course> $courses
+     * @param  Collection<int, Course>  $courses
      * @return array
      */
     private function mapCourses(Collection $courses)
     {
         return $courses->map(function (Course $course) {
             return [
-                "course_id" => $course->id,
-                "title" => $course->title,
-                "status" => $course->status,
-                "updated_at" => $course->updated_at->format('Y/m/d H:i:s'),
+                'course_id' => $course->id,
+                'title' => $course->title,
+                'status' => $course->status,
+                'updated_at' => $course->updated_at->format('Y/m/d H:i:s'),
             ];
         })
-        ->toArray();
+            ->toArray();
     }
 }

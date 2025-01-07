@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Notification extends Model
 {
@@ -17,6 +16,9 @@ class Notification extends Model
      */
     protected $table = 'notifications';
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'course_id',
         'instructor_id',
@@ -29,13 +31,18 @@ class Notification extends Model
 
     // 表示区分 定数
     const TYPE_ALWAYS_INT = 1;
+
     const TYPE_ONCE_INT = 2;
+
     const TYPE_ALWAYS = 'always';
+
     const TYPE_ONCE = 'once';
 
     // ソート項目 定数
     const SORT_BY_TITLE = 'title';
+
     const SORT_BY_COURSE_ID = 'course_id';
+
     const SORT_BY_START_DATE = 'start_date';
 
     /**
@@ -50,6 +57,7 @@ class Notification extends Model
         } elseif ($value === self::TYPE_ONCE_INT) {
             return self::TYPE_ONCE;
         }
+
         return null;
     }
 

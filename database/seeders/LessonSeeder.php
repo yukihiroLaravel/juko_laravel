@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Model\Lesson;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -68,7 +70,7 @@ class LessonSeeder extends Seeder
                 'chapter_id' => 3,
                 'url' => 'KH4MmQsCDuw',
                 'title' => '環境構築',
-                'remarks' => "",
+                'remarks' => '',
                 'status' => Lesson::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

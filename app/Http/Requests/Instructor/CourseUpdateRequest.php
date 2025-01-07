@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Instructor;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\CourseStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CourseUpdateRequest extends FormRequest
 {
@@ -32,10 +32,10 @@ class CourseUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required','integer', 'exists:courses,id,deleted_at,NULL'],
-            'title' => ['required','string'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'title' => ['required', 'string'],
             'image' => ['mimes:jpg,png'],
-            'status' => ['required', 'string', new CourseStatusRule()],
+            'status' => ['required', 'string', new CourseStatusRule],
         ];
     }
 }

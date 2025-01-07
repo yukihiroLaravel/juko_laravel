@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\ChapterStatusRule;
 
-class BulkPatchStatusRequest extends FormRequest
+class NotificationDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,7 +19,7 @@ class BulkPatchStatusRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
+            'notification_id' => $this->route('notification_id'),
         ]);
     }
 
@@ -32,10 +31,7 @@ class BulkPatchStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule()],
-            'chapters' => ['required', 'array'],
-            'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

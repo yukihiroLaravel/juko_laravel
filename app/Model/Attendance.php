@@ -4,8 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -18,12 +16,18 @@ class Attendance extends Model
      */
     protected $table = 'attendances';
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'course_id',
         'student_id',
-        'progress'
+        'progress',
     ];
 
+    /**
+     * @var array<string, string>
+     */
     protected $casts = [
         'student_id' => 'int',
         'course_id' => 'int',
@@ -73,14 +77,33 @@ class Attendance extends Model
         });
     }
 
+    /**
+     * 受講生ログイン率計算
+     */
+    public static function calcLoginRate(int $number, int $total): float
+    {
+        if ($total === 0) {
+            return 0;
+        }
+
+        $percent = ($number / $total) * 100;
+
+        return floor($percent);
+    }
+
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
+
     const SORT_BY_EMAIL = 'email';
+
     const SORT_BY_ATTENDANCED_AT = 'attendanced_at';
+
     const SORT_BY_LAST_LOGIN_AT = 'last_login_at';
 
     //$periodのバリデーションに利用する定数
     const PERIOD_WEEK = 'week';
+
     const PERIOD_MONTH = 'month';
+
     const PERIOD_YEAR = 'year';
 }

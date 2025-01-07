@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Model\Lesson;
+use Illuminate\Contracts\Validation\Rule;
 
 class LessonStatusRule implements Rule
 {
@@ -20,17 +20,17 @@ class LessonStatusRule implements Rule
             in_array(
                 $value,
                 [
-                Lesson::STATUS_PRIVATE,
-                Lesson::STATUS_PUBLIC
+                    Lesson::STATUS_PRIVATE,
+                    Lesson::STATUS_PUBLIC,
                 ],
                 true
             )
         ) {
             return true;
         }
+
         return false;
     }
-
 
     /**
      * Get the validation error message.

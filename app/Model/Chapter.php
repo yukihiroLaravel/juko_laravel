@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Chapter extends Model
 {
@@ -19,17 +18,18 @@ class Chapter extends Model
 
     // ステータス定数
     const STATUS_PUBLIC = 'public';
+
     const STATUS_PRIVATE = 'private';
 
     /**
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'chapter_id',
         'course_id',
         'order',
         'title',
-        'status'
+        'status',
     ];
 
     /**
@@ -77,7 +77,7 @@ class Chapter extends Model
     /**
      * 公開中のチャプターを抽出
      *
-     * @param \Illuminate\Support\Collection $chapters
+     * @param  \Illuminate\Support\Collection  $chapters
      * @return \Illuminate\Support\Collection
      */
     public static function extractPublicChapter($chapters)
@@ -90,44 +90,44 @@ class Chapter extends Model
     /**
      * チャプターのステータスを一括更新
      *
-     * @param int $courseId
-     * @param 'public'|'private' $status
-     * @return void
+     * @param  'public'|'private'  $status
      */
     public static function chapterUpdateAll(int $courseId, string $status): void
     {
         Chapter::where('course_id', $courseId)
             ->update([
-                'status' => $status
+                'status' => $status,
             ]);
     }
 
     /**
      * チャプターの進捗計算
-     *
-     * @param Attendance $attendance
-     * @return int
      */
     public function calculateChapterProgress(Attendance $attendance): int
     {
         $completedLessonsCount = $this->calculateCompletedLessonCount($this, $attendance);
         $totalLessonsCount = $this->lessons->count();
+
         return $totalLessonsCount > 0 ? ($completedLessonsCount / $totalLessonsCount) * 100 : 0;
     }
 
     /**
      * チャプター内完了済みレッスン数計算
-     *
-     * @param Chapter $chapter
-     * @param Attendance $attendance
-     * @return int
      */
     private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
     {
         return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
             $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
+
             return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
         })
-        ->count();
+            ->count();
+    }
+
+    public function getCompletedCountAttribute(): int
+    {
+        return $this->lessons->flatMap(function (Lesson $lesson) {
+            return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })->count();
     }
 }

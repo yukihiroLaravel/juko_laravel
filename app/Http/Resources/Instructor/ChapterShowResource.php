@@ -31,7 +31,7 @@ class ChapterShowResource extends JsonResource
                     'status' => $lesson->status,
                 ];
             })
-            ->values(),
+                ->values(),
         ];
     }
 }

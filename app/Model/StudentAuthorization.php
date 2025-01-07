@@ -6,16 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class StudentAuthorization extends Model
 {
-     /**
+    /**
      * モデルと関連しているテーブル
      *
      * @var string
      */
     protected $table = 'student_authorization';
 
-     /**
-     *
-     * @var array
+    /**
+     * @var array<int, string>
      */
     protected $fillable = [
         'student_id',

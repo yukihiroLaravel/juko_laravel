@@ -4,7 +4,6 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Collection;
 
 class Lesson extends Model
 {
@@ -19,8 +18,12 @@ class Lesson extends Model
 
     // ステータス定数
     const STATUS_PUBLIC = 'public';
+
     const STATUS_PRIVATE = 'private';
 
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'chapter_id',
         'title',

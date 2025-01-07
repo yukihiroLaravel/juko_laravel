@@ -2,35 +2,33 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Exception;
-use App\Model\Course;
-use App\Model\Lesson;
-use App\Model\Chapter;
-use App\Model\Attendance;
-use Illuminate\Support\Carbon;
-use App\Model\LessonAttendance;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Collection;
-use App\Http\Requests\Instructor\LoginRateRequest;
-use App\Http\Requests\Instructor\AttendanceShowRequest;
-use App\Http\Requests\Instructor\AttendanceStoreRequest;
 use App\Http\Requests\Instructor\AttendanceDeleteRequest;
+use App\Http\Requests\Instructor\AttendanceShowRequest;
+use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
+use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Instructor\AttendanceStatusResource;
-use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
+use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
     /**
      * 受講状況登録API
-     *
-     * @param AttendanceStoreRequest $request
-     * @return JsonResponse
      */
     public function store(AttendanceStoreRequest $request): JsonResponse
     {
@@ -39,18 +37,17 @@ class AttendanceController extends Controller
             ->first();
 
         if ($attendance) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Attendance record already exists.'
-            ], 409);
+            throw new AuthorizationException(
+                'Attendance record already exists.'
+            );
         }
 
         DB::beginTransaction();
         try {
             $attendance = Attendance::create([
-                'course_id'  => $request->course_id,
+                'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
-                'progress'   => Attendance::PROGRESS_DEFAULT_VALUE
+                'progress' => Attendance::PROGRESS_DEFAULT_VALUE,
             ]);
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);
@@ -58,45 +55,34 @@ class AttendanceController extends Controller
             foreach ($lessons as $lesson) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
-                    'lesson_id'     => $lesson->id,
-                    'status'        => LessonAttendance::STATUS_BEFORE_ATTENDANCE
+                    'lesson_id' => $lesson->id,
+                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ]);
             }
             DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
     /**
      * 受講状況取得API
-     *
-     * @param AttendanceShowRequest $request
-     * @return AttendanceShowResource
      */
     public function show(AttendanceShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
 
-        /** @var Collection<Chapter> */
+        /** @var Collection<int, Chapter> */
         $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
-
-        $chapters->each(function (Chapter $chapter) {
-            $completedCount = $chapter->lessons->flatMap(function (Lesson $lesson) {
-                return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
-            })->count();
-            $chapter->completed_count = $completedCount;
-        });
 
         return new AttendanceShowResource([
             'chapters' => $chapters,
@@ -106,9 +92,6 @@ class AttendanceController extends Controller
 
     /**
      * 受講状況削除API
-     *
-     * @param AttendanceDeleteRequest $request
-     * @return JsonResponse
      */
     public function delete(AttendanceDeleteRequest $request): JsonResponse
     {
@@ -119,10 +102,9 @@ class AttendanceController extends Controller
             $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
 
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-                return response()->json([
-                    "result" => false,
-                    "message" => "Unauthorized: The authenticated instructor does not have permission to delete this attendance record",
-                ], 403);
+                throw new AuthorizationException(
+                    'Unauthorized: The authenticated instructor does not have permission to delete this attendance record.'
+                );
             }
 
             $attendance->delete();
@@ -130,22 +112,17 @@ class AttendanceController extends Controller
             DB::commit();
 
             return response()->json([
-                "result" => true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            return response()->json([
-                "result" => false,
-            ], 500);
+            throw $e;
         }
     }
 
     /**
      * 受講生ログイン率取得API
-     *
-     * @param LoginRateRequest $request
-     * @return JsonResponse
      */
     public function loginRate(LoginRateRequest $request): JsonResponse
     {
@@ -153,26 +130,19 @@ class AttendanceController extends Controller
         $loginId = Auth::guard('instructor')->user()->id;
 
         if ($instructorId !== $loginId) {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
-        $endDate = new Carbon();
+        $nowDate = new Carbon;
 
-        if ($request->period === Attendance::PERIOD_WEEK) {
-            $periodAgo = $endDate->subWeek();
-        } elseif ($request->period === Attendance::PERIOD_MONTH) {
-            $periodAgo = $endDate->subMonth();
-        } elseif ($request->period === Attendance::PERIOD_YEAR) {
-            $periodAgo = $endDate->subYear();
-        } else {
-            return response()->json([
-                'result' => 'false',
-                'message' => 'You could not get login rate'
-            ], 400);
-        }
+        $periodAgo = match ($request->period) {
+            Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
+            Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
+            Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
+            default => throw new Exception('Invalid period. ['.$request->period.']'),
+        };
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
         $studentsCount = $attendances->count();
@@ -187,32 +157,13 @@ class AttendanceController extends Controller
             }
         }
 
-        $loginRate = $this->calcLoginRate($loginCount, $studentsCount);
+        $loginRate = Attendance::calcLoginRate($loginCount, $studentsCount);
+
         return response()->json(['login_rate' => $loginRate], 200);
     }
 
     /**
-     * 受講生ログイン率計算
-     *
-     * @param int $number
-     * @param int $total
-     * @return float
-     */
-    public function calcLoginRate(int $number, int $total): float
-    {
-        if ($total === 0) {
-            return 0;
-        }
-
-        $percent = ($number / $total) * 100;
-        return floor($percent);
-    }
-
-    /**
      * 完了済みレッスン数と完了済みチャプター数取得API
-     *
-     * @param AttendanceShowStatusRequest $request
-     * @return JsonResponse
      */
     public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
     {
@@ -229,8 +180,10 @@ class AttendanceController extends Controller
                 } else {
                     throw new Exception('Invalid period');
                 }
+
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
+
             return $completedLessonAttendances;
         })->count();
 
@@ -253,13 +206,14 @@ class AttendanceController extends Controller
                 } else {
                     throw new Exception('Invalid period');
                 }
+
                 return $updatedAtRequestPeriod && $totalLessonsCount === $completedLessonsCount;
             })
             ->map(function (LessonAttendance $lessonAttendance) {
                 // chapter_idとattendance_idをキーにもつ新しい配列を作成
                 return [
                     'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                    'attendance_id' => $lessonAttendance->attendance_id
+                    'attendance_id' => $lessonAttendance->attendance_id,
                 ];
             })
             ->unique()
@@ -267,14 +221,13 @@ class AttendanceController extends Controller
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
-            'completed_chapters_count' =>  $completedChaptersCount
+            'completed_chapters_count' => $completedChaptersCount,
         ]);
     }
 
     /**
      * 受講状況API
      *
-     * @param AttendanceStatusRequest $request
      * @return AttendanceStatusResource|JsonResponse
      */
     public function status(AttendanceStatusRequest $request)
@@ -285,10 +238,9 @@ class AttendanceController extends Controller
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-            return response()->json([
-                "result" => false,
-                "message" => "Forbidden.",
-            ], 403);
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
         }
 
         return new AttendanceStatusResource($attendance);

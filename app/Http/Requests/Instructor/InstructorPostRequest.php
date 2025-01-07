@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BulkDeleteRequest extends FormRequest
+class InstructorPostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,13 +16,6 @@ class BulkDeleteRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,9 +24,10 @@ class BulkDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapters' => ['required', 'array'],
-            'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'nick_name' => ['required', 'string', 'max:50'],
+            'last_name' => ['required', 'string', 'max:50'],
+            'first_name' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255', 'unique:instructors'],
         ];
     }
 }

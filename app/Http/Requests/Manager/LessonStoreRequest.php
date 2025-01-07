@@ -32,9 +32,9 @@ class LessonStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required','integer','exists:courses,id,deleted_at,NULL'],
-            'chapter_id' => ['required','integer','exists:chapters,id,deleted_at,NULL'],
-            'title' => ['required','string', 'max:50'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'title' => ['required', 'string', 'max:50'],
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Model\LessonAttendance;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;

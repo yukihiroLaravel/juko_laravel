@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;

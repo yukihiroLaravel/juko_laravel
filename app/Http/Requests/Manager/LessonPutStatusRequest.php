@@ -30,7 +30,6 @@ class LessonPutStatusRequest extends FormRequest
      *
      * @return array
      */
-
     public function rules()
     {
         return [
@@ -38,7 +37,7 @@ class LessonPutStatusRequest extends FormRequest
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
             'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new LessonStatusRule()],
+            'status' => ['required', 'string', new LessonStatusRule],
         ];
     }
 }

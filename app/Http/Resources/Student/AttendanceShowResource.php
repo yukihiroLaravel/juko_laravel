@@ -54,9 +54,12 @@ class AttendanceShowResource extends JsonResource
         ];
     }
 
+    /**
+     * @param  Collection<int, Chapter>  $chapters
+     */
     private function chapters(Collection $chapters)
     {
-        return $chapters->map(function(Chapter $chapter) {
+        return $chapters->map(function (Chapter $chapter) {
             return [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
@@ -65,13 +68,17 @@ class AttendanceShowResource extends JsonResource
         });
     }
 
+    /**
+     * @param  Collection<int, Lesson>  $lessons
+     */
     private function lessons(Collection $lessons)
     {
-        return $lessons->map(function(Lesson $lesson) {
+        return $lessons->map(function (Lesson $lesson) {
             /** @var LessonAttendance $lessonAttendance */
             $lessonAttendance = $this->resource->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($lesson) {
                 return $lesson->id === $lessonAttendance->lesson_id;
             })->first();
+
             return [
                 'lesson_id' => $lesson->id,
                 'title' => $lesson->title,
@@ -80,7 +87,7 @@ class AttendanceShowResource extends JsonResource
                 'lessonAttendance' => [
                     'lesson_attendance_id' => $lessonAttendance->id,
                     'status' => $lessonAttendance->status,
-                ]
+                ],
             ];
         });
     }

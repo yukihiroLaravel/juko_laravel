@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Manager;
 
 use App\Rules\InstructorUniqueEmailRule;
-use App\Rules\InstructorTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class InstructorPatchRequest extends FormRequest
@@ -33,10 +32,10 @@ class InstructorPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name' => ['required', 'string','max:50'],
-            'last_name' => ['required', 'string','max:50'],
-            'first_name' => ['required', 'string','max:50'],
-            'email' => ['required', 'email', new InstructorUniqueEmailRule($this->email),'max:255'],
+            'nick_name' => ['required', 'string', 'max:50'],
+            'last_name' => ['required', 'string', 'max:50'],
+            'first_name' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule($this->email), 'max:255'],
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];

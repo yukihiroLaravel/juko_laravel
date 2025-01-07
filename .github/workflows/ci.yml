@@ -16,15 +16,15 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '8.3'
         extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
-        tools: composer:v2.5.8
+        tools: composer:v2.8.2
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest --ansi
+      run: composer install --prefer-dist --no-progress --ansi
 
     - name: Check code style
-      run: composer sniffer-rewrite
+      run: composer pint
 
     - name: Commit and Push changes
       run: |

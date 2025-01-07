@@ -2,9 +2,7 @@
 
 namespace App\Model;
 
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Student extends Authenticatable
@@ -17,8 +15,7 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     /**
-     *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'given_name_by_instructor',
@@ -37,6 +34,8 @@ class Student extends Authenticatable
 
     /**
      * キャスト
+     *
+     * @var array<string, string>
      */
     protected $casts = [
         'birth_date' => 'date',
@@ -47,9 +46,13 @@ class Student extends Authenticatable
 
     // 性別定数
     const GENDER_MAN = 'man';
+
     const GENDER_WOMAN = 'woman';
+
     const GENDER_MAN_INT = 1;
+
     const GENDER_WOMAN_INT = 2;
+
     const GENDER_UNKNOWN_INT = 0;
 
     /**
@@ -104,18 +107,17 @@ class Student extends Authenticatable
         }
     }
 
-     /**
+    /**
      * フルネームアクセサー
      */
     public function getFullNameAttribute()
     {
-        return $this->last_name . ' ' . $this->first_name;
+        return $this->last_name.' '.$this->first_name;
     }
 
     /**
      * 画像保存パスに変換
      *
-     * @param string $filePath
      * @return string
      */
     public static function convertImagePath(string $filePath)
@@ -126,12 +128,9 @@ class Student extends Authenticatable
 
     /**
      * 年齢計算
-     *
-     * @param CarbonImmutable $today
-     * @return int
      */
-    public function calcAge($today): int
+    public function calcAge(CarbonImmutable $today): int
     {
-        return $this->birth_date->diffInYears($today);
+        return (int) $this->birth_date->diffInYears($today);
     }
 }

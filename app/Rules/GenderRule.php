@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
 use App\Enums\Student\Gender;
+use Illuminate\Contracts\Validation\Rule;
 
 class GenderRule implements Rule
 {
@@ -29,6 +29,6 @@ class GenderRule implements Rule
      */
     public function message()
     {
-        return 'The :attribute must be either ' . Gender::MAN->label() . ' or ' . Gender::WOMAN->label() . '.';
+        return 'The :attribute must be either '.Gender::MAN->label().' or '.Gender::WOMAN->label().'.';
     }
 }

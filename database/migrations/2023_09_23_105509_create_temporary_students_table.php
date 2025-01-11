@@ -8,12 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('temporary_instructors', function (Blueprint $table) {
+        Schema::create('temporary_students', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('manager_id')->nullable();
             $table->tinyInteger('trial_count')->unsigned()->comment('試行回数');
             $table->string('code', 4)->unique()->comment('認証コード');
             $table->string('token', 10)->unique()->comment('トークン');
@@ -22,16 +23,22 @@ return new class extends Migration
             $table->string('last_name', 50)->comment('苗字');
             $table->string('first_name', 50)->comment('名前');
             $table->string('email', 255)->comment('メールアドレス');
-            $table->string('type', 30)->comment('講師タイプ');
+            $table->string('occupation', 50)->nullable()->comment('職業');
+            $table->string('purpose', 50)->nullable()->comment('目的');
+            $table->date('birth_date')->nullable()->comment('誕生日');
+            $table->tinyInteger('gender')->nullable()->comment('性別');
+            $table->string('address', 255)->nullable()->comment('都道府県');
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('temporary_instructors');
+        Schema::dropIfExists('temporary_students');
     }
 };

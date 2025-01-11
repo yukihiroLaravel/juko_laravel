@@ -33,6 +33,10 @@ class TemporaryInstructor extends Model
         'type',
     ];
 
+    protected $casts = [
+        'expire_at' => 'immutable_datetime',
+    ];
+
     /**
      * フルネームアクセサー
      */

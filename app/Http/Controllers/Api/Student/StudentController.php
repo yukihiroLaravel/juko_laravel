@@ -14,7 +14,7 @@ use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
 use App\Model\TemporaryStudent;
-use App\Services\Student\CredentialGeneratorService;
+use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
 use Exception;
@@ -51,44 +51,33 @@ class StudentController extends Controller
         StudentPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
+        $email = $request->email;
         DB::beginTransaction();
         try {
-            $email = $request->email;
-            $credentialGeneratorService->setEmail($email);
-
-            $trialCount = 0;
 
             // 認証コードを生成する。
             $code = $credentialGeneratorService->createCode();
+
             // トークンを生成する。
             $token = $credentialGeneratorService->createToken();
 
-            $expireAt = Carbon::now()->addMinutes(60);
-            $nickName = $request->nick_name;
-            $lastName = $request->last_name;
-            $firstName = $request->first_name;
-            $occupation = $request->occupation;
-            $purpose = $request->purpose;
-            $birthDate = $request->birth_date;
-            $gender = $request->gender;
-            $address = $request->address;
-
-            /** @var TemporaryStudent $temporaryStudent */
             $temporaryStudent = TemporaryStudent::create([
-                'trial_count' => $trialCount,
+                'trial_count' => 0,
                 'code' => $code,
                 'token' => $token,
-                'expire_at' => $expireAt,
-                'nick_name' => $nickName,
-                'last_name' => $lastName,
-                'first_name' => $firstName,
+                'expire_at' => Carbon::now()->addMinutes(60),
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
                 'email' => $email,
-                'occupation' => $occupation,
-                'purpose' => $purpose,
-                'birth_date' => $birthDate,
-                'gender' => $gender,
-                'address' => $address,
+                'occupation' => $request->occupation,
+                'purpose' => $request->purpose,
+                'birth_date' => $request->birth_date,
+                'gender' => $request->gender,
+                'address' => $request->address,
             ]);
+
+            assert($temporaryStudent instanceof TemporaryStudent);
 
             DB::commit();
 
@@ -99,7 +88,7 @@ class StudentController extends Controller
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,
@@ -107,7 +96,7 @@ class StudentController extends Controller
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,

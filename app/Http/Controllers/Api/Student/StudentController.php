@@ -14,10 +14,11 @@ use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
 use App\Model\TemporaryStudent;
-use App\Services\Instructor\CredentialGeneratorService;
+use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Student\QueryService;
+use App\Services\Student\VerifyCodeService;
+use Carbon\CarbonImmutable;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -51,44 +52,33 @@ class StudentController extends Controller
         StudentPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
+        $email = $request->email;
         DB::beginTransaction();
         try {
-            $email = $request->email;
-            $credentialGeneratorService->setEmail($email);
-
-            $trialCount = 0;
 
             // 認証コードを生成する。
             $code = $credentialGeneratorService->createCode();
+
             // トークンを生成する。
             $token = $credentialGeneratorService->createToken();
 
-            $expireAt = Carbon::now()->addMinutes(60);
-            $nickName = $request->nick_name;
-            $lastName = $request->last_name;
-            $firstName = $request->first_name;
-            $occupation = $request->occupation;
-            $purpose = $request->purpose;
-            $birthDate = $request->birth_date;
-            $gender = $request->gender;
-            $address = $request->address;
-
-            /** @var TemporaryStudent $temporaryStudent */
             $temporaryStudent = TemporaryStudent::create([
-                'trial_count' => $trialCount,
+                'trial_count' => 0,
                 'code' => $code,
                 'token' => $token,
-                'expire_at' => $expireAt,
-                'nick_name' => $nickName,
-                'last_name' => $lastName,
-                'first_name' => $firstName,
+                'expire_at' => Carbon::now()->addMinutes(60),
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
                 'email' => $email,
-                'occupation' => $occupation,
-                'purpose' => $purpose,
-                'birth_date' => $birthDate,
-                'gender' => $gender,
-                'address' => $address,
+                'occupation' => $request->occupation,
+                'purpose' => $request->purpose,
+                'birth_date' => $request->birth_date,
+                'gender' => $request->gender,
+                'address' => $request->address,
             ]);
+
+            assert($temporaryStudent instanceof TemporaryStudent);
 
             DB::commit();
 
@@ -99,7 +89,7 @@ class StudentController extends Controller
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,
@@ -107,7 +97,7 @@ class StudentController extends Controller
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,
@@ -181,86 +171,93 @@ class StudentController extends Controller
         }
     }
 
-    public function verifyCode(UserAuthenticationRequest $request): JsonResponse
-    {
-
-        $code = $request->code;
-        $password = $request->password;
-        $currentTime = date('Y-m-d H:i:s');
+    /**
+     * 認証コード検証API
+     */
+    public function verifyCode(
+        UserAuthenticationRequest $request,
+        VerifyCodeService $service
+    ): JsonResponse {
+        $token = $request->token;
 
         try {
-            $studentAuth = StudentAuthorization::where('token', $request->token)->firstOrFail();
-            $student = student::findOrFail($studentAuth->student_id);
-
-            // 有効期限の判定
-            if (strtotime($studentAuth->expire_at) < strtotime($currentTime)) {
-                // 有効期限切れ
-                throw new ExpiredAuthorizationCodeException('Expired the period of authorization code.', $student->email);
-            }
+            $temporaryStudent = TemporaryStudent::where('token', $token)->firstOrFail();
 
             // 認証コードチェック
-            if ($code !== $studentAuth->code) {
-                // 認証失敗
-
-                // 試行回数をカウント
-                $studentAuth->trial_count += 1;
-                // 試行回数制限の判定
-                if ($studentAuth->trial_count >= 3) {
-                    // 認証失敗回数が3回以上
-                    throw new TryCountOverAuthorizationCodeException('The authentication failure count exceeded three times.', $student->email);
+            try {
+                $result = $service(
+                    temporaryStudent: $temporaryStudent,
+                    currentTime: CarbonImmutable::now(),
+                    code: $request->code
+                );
+                if (! $result) {
+                    // 認証コード不一致
+                    return response()->json([
+                        'result' => false,
+                        'message' => 'Not match authentication code.',
+                    ], 400);
                 }
+            } catch (ExpiredAuthorizationCodeException $e) {
+                // 仮登録情報を物理削除
+                $temporaryStudent->delete();
 
-                // 試行回数を更新
-                $studentAuth->update();
-
-                // エラー応答
                 return response()->json([
                     'result' => false,
-                    'message' => 'Not match authentication code.',
+                    'message' => 'Expired authorization period.',
+                ], 400);
+            } catch (TryCountOverAuthorizationCodeException $e) {
+                // 仮登録情報を物理削除
+                $temporaryStudent->delete();
+
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Not match authorization code three times.',
                 ], 400);
             }
 
             // 認証成功
-            DB::beginTransaction();
-            // 生徒認証情報を物理削除
-            $studentAuth->delete();
-            // 生徒情報を更新
-            $student->email_verified_at = $currentTime;
-            $student->password = Hash::make($password);
-            $student->update();
-            DB::commit();
+
+            /*
+                トランザクションの範囲を限定する理由:
+                1) VerifyCodeService内での試行回数カウントのDB更新
+                2) VerifyCodeServiceでの例外発生時の仮登録情報削除
+                上記はトランザクション外で実行したい。
+                本登録に関する処理のみトランザクション内で実行するため、
+                DB::transaction(function () use (...) で自動コミット/ロールバックを利用。
+            */
+            DB::transaction(function () use (
+                $temporaryStudent,
+                $request
+            ) {
+                // 生徒の本登録
+                $student = Student::create([
+                    'given_name_by_instructor' => null,
+                    'nick_name' => $temporaryStudent->nick_name,
+                    'last_name' => $temporaryStudent->last_name,
+                    'first_name' => $temporaryStudent->first_name,
+                    'occupation' => $temporaryStudent->occupation,
+                    'email' => $temporaryStudent->email,
+                    'password' => Hash::make($request->password),
+                    'purpose' => $temporaryStudent->purpose,
+                    'birth_date' => $temporaryStudent->birth_date,
+                    'gender' => $temporaryStudent->gender,
+                    'address' => $temporaryStudent->address,
+                    'profile_image' => null,
+                ]);
+                assert($student instanceof Student);
+
+                // 仮登録情報を物理削除
+                $temporaryStudent->delete();
+            });
 
             // 成功応答
             return response()->json([
                 'result' => true,
                 'message' => 'Authorization success.',
             ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not Found data to match token.',
-            ], 404);
-        } catch (ExpiredAuthorizationCodeException $e) {
-            $studentAuth->delete();
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Expired authorization period.',
-            ], 406);
-        } catch (TryCountOverAuthorizationCodeException $e) {
-            $studentAuth->delete();
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Not match authorization code three times.',
-            ], 400);
         } catch (Exception $e) {
-            DB::rollback();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 }

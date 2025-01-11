@@ -17,6 +17,7 @@ use App\Model\TemporaryStudent;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -171,38 +172,33 @@ class StudentController extends Controller
     }
 
     /**
-     * 「認証コードチェック」と「生徒の本登録」
+     * 認証コード検証API
      */
     public function verifyCode(
         UserAuthenticationRequest $request,
         VerifyCodeService $service
     ): JsonResponse {
         $token = $request->token;
-        $code = $request->code;
-        $currentTime = date('Y-m-d H:i:s');
 
-        $temporaryStudent = null;
         try {
             $temporaryStudent = TemporaryStudent::where('token', $token)->firstOrFail();
 
             // 認証コードチェック
             try {
-                $ret = $service(
-                    $temporaryStudent,
-                    $currentTime,
-                    $code
+                $result = $service(
+                    temporaryStudent: $temporaryStudent,
+                    currentTime: CarbonImmutable::now(),
+                    code: $request->code
                 );
-                if (! $ret) {
-                    // 認証失敗
-
-                    // エラー応答
+                if (! $result) {
+                    // 認証コード不一致
                     return response()->json([
                         'result' => false,
                         'message' => 'Not match authentication code.',
                     ], 400);
                 }
             } catch (ExpiredAuthorizationCodeException $e) {
-                // 生徒仮登録認証情報を物理削除
+                // 仮登録情報を物理削除
                 $temporaryStudent->delete();
 
                 return response()->json([
@@ -210,7 +206,7 @@ class StudentController extends Controller
                     'message' => 'Expired authorization period.',
                 ], 400);
             } catch (TryCountOverAuthorizationCodeException $e) {
-                // 生徒仮登録認証情報を物理削除
+                // 仮登録情報を物理削除
                 $temporaryStudent->delete();
 
                 return response()->json([
@@ -220,12 +216,19 @@ class StudentController extends Controller
             }
 
             // 認証成功
-            DB::transaction(function () use (
-                $request,
-                $temporaryStudent
-            ) {
-                $password = $request->password;
 
+            /*
+                トランザクションの範囲を限定する理由:
+                1) VerifyCodeService内での試行回数カウントのDB更新
+                2) VerifyCodeServiceでの例外発生時の仮登録情報削除
+                上記はトランザクション外で実行したい。
+                本登録に関する処理のみトランザクション内で実行するため、
+                DB::transaction(function () use (...) で自動コミット/ロールバックを利用。
+            */
+            DB::transaction(function () use (
+                $temporaryStudent,
+                $request
+            ) {
                 // 生徒の本登録
                 $student = Student::create([
                     'given_name_by_instructor' => null,
@@ -234,15 +237,16 @@ class StudentController extends Controller
                     'first_name' => $temporaryStudent->first_name,
                     'occupation' => $temporaryStudent->occupation,
                     'email' => $temporaryStudent->email,
-                    'password' => Hash::make($password),
+                    'password' => Hash::make($request->password),
                     'purpose' => $temporaryStudent->purpose,
                     'birth_date' => $temporaryStudent->birth_date,
                     'gender' => $temporaryStudent->gender,
                     'address' => $temporaryStudent->address,
                     'profile_image' => null,
                 ]);
+                assert($student instanceof Student);
 
-                // 生徒仮登録認証情報を物理削除
+                // 仮登録情報を物理削除
                 $temporaryStudent->delete();
             });
 

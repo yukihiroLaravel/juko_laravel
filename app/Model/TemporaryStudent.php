@@ -46,6 +46,7 @@ class TemporaryStudent extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'gender' => Gender::class,
+        'expire_at' => 'immutable_datetime',
     ];
 
     public function getGenderAttribute($value)

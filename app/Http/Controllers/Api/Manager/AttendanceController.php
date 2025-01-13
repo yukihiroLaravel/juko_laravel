@@ -221,7 +221,8 @@ class AttendanceController extends Controller
     /**
      * 完了済みレッスン数と完了済みチャプター数取得API
      */
-    public function showStatus() {
+    public function showStatus()
+    {
         return response()->json([]);
     }
 

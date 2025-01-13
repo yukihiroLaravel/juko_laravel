@@ -58,10 +58,14 @@ class InstructorController extends Controller
         try {
 
             // 認証コードを生成する。
-            $code = $credentialGeneratorService->createCode();
+            $code = $credentialGeneratorService->createCode(
+                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
+            );
 
             // トークンを生成する。
-            $token = $credentialGeneratorService->createToken();
+            $token = $credentialGeneratorService->createToken(
+                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
+            );
 
             $temporaryInstructor = TemporaryInstructor::create([
                 'manager_id' => null,

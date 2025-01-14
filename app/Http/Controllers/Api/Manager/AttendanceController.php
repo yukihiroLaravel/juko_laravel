@@ -219,6 +219,14 @@ class AttendanceController extends Controller
     }
 
     /**
+     * 完了済みレッスン数と完了済みチャプター数取得API
+     */
+    public function showStatus()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * 今月のレッスン・チャプター完了数の取得API
      */
     public function showStatusThisMonth(AttendanceShowThisMonthRequest $request): JsonResponse

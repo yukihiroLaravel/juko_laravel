@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+
 
 class InstructorController extends Controller
 {
@@ -46,10 +50,7 @@ class InstructorController extends Controller
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this instructor.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
         }
 
         /** @var Instructor $instructor */
@@ -106,10 +107,7 @@ class InstructorController extends Controller
 
             //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
             if (! in_array($instructor->id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden, not allowed to this instructor.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to this instructor.');
             }
 
             // 更新前の画像情報を取得
@@ -124,7 +122,7 @@ class InstructorController extends Controller
 
                 // 画像ファイルを保存
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -139,12 +137,14 @@ class InstructorController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (RuntimeException $e) {
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
         }
     }
 
@@ -155,13 +155,14 @@ class InstructorController extends Controller
         InstructorPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
-        $email = $request->email;
         DB::beginTransaction();
         try {
+            // 一時的にテスト用の例外をスロー
+            throw new Exception('テスト'); // これを使って動作確認する
 
-            // 認証コードを生成する。
+            // 通常の処理
+            $email = $request->email;
             $code = $credentialGeneratorService->createCode();
-            // トークンを生成する。
             $token = $credentialGeneratorService->createToken();
 
             $temporaryInstructor = TemporaryInstructor::create([
@@ -177,8 +178,6 @@ class InstructorController extends Controller
                 'type' => Instructor::TYPE_INSTRUCTOR,
             ]);
 
-            assert($temporaryInstructor instanceof TemporaryInstructor);
-
             DB::commit();
 
             Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
@@ -188,7 +187,7 @@ class InstructorController extends Controller
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
+            Log::error($e->getMessage() . ' email: ' . $request->email);
 
             return response()->json([
                 'result' => false,
@@ -196,16 +195,20 @@ class InstructorController extends Controller
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
+            Log::error($e->getMessage() . ' email: ' . $request->email);
 
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to generate unique authorization token.',
             ], 400);
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;  // ここで例外を再スローして確認
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            throw $e;
+            throw $e;  // ここで例外を再スローして確認
         }
     }
 }

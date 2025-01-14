@@ -155,14 +155,13 @@ class InstructorController extends Controller
         InstructorPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
+        $email = $request->email;
         DB::beginTransaction();
         try {
-            // 一時的にテスト用の例外をスロー
-            throw new Exception('テスト'); // これを使って動作確認する
 
-            // 通常の処理
-            $email = $request->email;
+            // 認証コードを生成する。
             $code = $credentialGeneratorService->createCode();
+            // トークンを生成する。
             $token = $credentialGeneratorService->createToken();
 
             $temporaryInstructor = TemporaryInstructor::create([
@@ -177,6 +176,8 @@ class InstructorController extends Controller
                 'email' => $email,
                 'type' => Instructor::TYPE_INSTRUCTOR,
             ]);
+
+            assert($temporaryInstructor instanceof TemporaryInstructor);
 
             DB::commit();
 
@@ -204,11 +205,11 @@ class InstructorController extends Controller
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             Log::error($e);
-            throw $e;  // ここで例外を再スローして確認
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            throw $e;  // ここで例外を再スローして確認
+            throw $e;
         }
     }
 }

@@ -265,7 +265,7 @@ class ChapterController extends Controller
             $chapter = Chapter::with('course', 'lessons')->findOrFail($request->chapter_id);
 
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-                 // ログインしている講師が作成していないチャプターの更新を許可しない
+                // ログインしている講師が作成していないチャプターの更新を許可しない
                 throw new AuthorizationException('Invalid instructor_id.');
             }
 

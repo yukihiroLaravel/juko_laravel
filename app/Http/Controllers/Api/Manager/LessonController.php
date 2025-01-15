@@ -246,17 +246,11 @@ class LessonController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 422);
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ]);
+            throw $e;
         }
     }
 

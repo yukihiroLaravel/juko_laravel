@@ -247,10 +247,10 @@ class StudentController extends Controller
                 'message' => 'Authorization success.',
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not Found data to match token.',
-            ], 404);
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }        
         } catch (ExpiredAuthorizationCodeException $e) {
             $studentAuth->delete();
 

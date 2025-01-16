@@ -6,7 +6,7 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class StoreTest extends TestCase
+class PutTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -17,29 +17,29 @@ class StoreTest extends TestCase
         $this->seed();
     }
 
-    public function test_マネージャーのレッスン登録_成功(): void
+    public function test_マネージャーのレッスン更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/1/lesson', [
+        $response = $this->putJson('/api/v1/manager/course/1/chapter/1/lesson/1', [
             'title' => 'title',
+            'url' => 'url',
+            'remarks' => 'remarks',
+            'status' => 'public',
         ]);
 
         // assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
-            'lesson_id',
         ]);
         $this->assertDatabaseHas('lessons', [
+            'id' => 1,
             'chapter_id' => 1,
             'title' => 'title',
-        ]);
-        $this->assertDatabaseHas('lesson_attendances', [
-            'lesson_id' => $response['lesson_id'],
         ]);
     }
 
@@ -50,17 +50,20 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/2/chapter/4/lesson', [
+        $response = $this->putJson('/api/v1/manager/course/2/chapter/4/lesson/7', [
             'title' => 'title',
+            'url' => 'url',
+            'remarks' => 'remarks',
+            'status' => 'public',
         ]);
 
         // assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
-            'lesson_id',
         ]);
         $this->assertDatabaseHas('lessons', [
+            'id' => 7,
             'chapter_id' => 4,
             'title' => 'title',
         ]);
@@ -74,8 +77,11 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/2/chapter/4/lesson', [
+        $response = $this->putJson('/api/v1/manager/course/2/chapter/4/lesson/7', [
             'title' => 'title',
+            'url' => 'url',
+            'remarks' => 'remarks',
+            'status' => 'public',
         ]);
 
         // assert
@@ -92,8 +98,11 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/2/chapter/4/lesson', [
+        $response = $this->putJson('/api/v1/manager/course/2/chapter/4/lesson/7', [
             'title' => 'title',
+            'url' => 'url',
+            'remarks' => 'remarks',
+            'status' => 'public',
         ]);
 
         // assert
@@ -110,14 +119,17 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/aaa/chapter/bbb/lesson', []);
+        $response = $this->putJson('/api/v1/manager/course/aaa/chapter/bbb/lesson/ccc', []);
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',
             'chapter_id',
+            'lesson_id',
             'title',
+            'url',
+            'status',
         ]);
     }
 }

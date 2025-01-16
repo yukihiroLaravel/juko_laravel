@@ -7,11 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonPatchStatusRequest;
+use App\Http\Requests\Manager\LessonPutRequest;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonsAllDeleteRequest;
 use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
-use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -48,7 +48,7 @@ class LessonController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to create new lesson.');
+            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
         }
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
@@ -91,16 +91,19 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(LessonUpdateRequest $request)
+    public function put(LessonPutRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
+
         // 配下の講師情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
+        assert($manager instanceof Instructor);
+
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+        assert($lesson instanceof Lesson);
 
         if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             // 配下の講師でない場合は403エラー

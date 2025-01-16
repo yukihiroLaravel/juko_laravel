@@ -155,7 +155,7 @@ class LessonController extends Controller
 
             // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
             if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                throw new AuthorizationException('Invalid instructor_id.');
+                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
@@ -170,7 +170,7 @@ class LessonController extends Controller
 
             // 受講情報が登録されている場合は許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                throw new AuthorizationException('This lesson has attendance.');
+                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
             // 対象レッスンの削除処理

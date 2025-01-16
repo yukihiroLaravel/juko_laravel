@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InstructorController extends Controller
 {
@@ -46,10 +48,7 @@ class InstructorController extends Controller
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this instructor.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
         }
 
         /** @var Instructor $instructor */
@@ -79,6 +78,11 @@ class InstructorController extends Controller
         // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
 
+        // 認可処理：配下の講師IDが取得できることを確認
+        if (! $instructorIds) {
+            throw new AuthorizationException('Forbidden, no instructors found under this manager.');
+        }
+
         // 講師情報を取得
         $instructors = $queryService->getPaginatedInstructors($instructorIds, $sortBy, $order, $perPage, $page);
 
@@ -106,10 +110,7 @@ class InstructorController extends Controller
 
             //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
             if (! in_array($instructor->id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden, not allowed to this instructor.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to this instructor.');
             }
 
             // 更新前の画像情報を取得
@@ -139,9 +140,11 @@ class InstructorController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (ModelNotFoundException $e) {
+            Log::error($e);
+            throw $e;  // 再スロー
         } catch (RuntimeException $e) {
             Log::error($e);
-
             return response()->json([
                 'result' => false,
             ], 500);

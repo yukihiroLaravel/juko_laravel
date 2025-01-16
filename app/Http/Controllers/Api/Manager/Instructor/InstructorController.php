@@ -17,6 +17,8 @@ use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -26,8 +28,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InstructorController extends Controller
 {
@@ -145,6 +145,7 @@ class InstructorController extends Controller
             throw $e;  // 再スロー
         } catch (RuntimeException $e) {
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);

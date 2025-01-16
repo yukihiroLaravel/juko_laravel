@@ -40,7 +40,7 @@ class LessonController extends Controller
 
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrfail($managerId);
+        $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -61,13 +61,14 @@ class LessonController extends Controller
                 'status' => Lesson::STATUS_PRIVATE,
                 'order' => (int) $maxOrder + 1,
             ]);
+            assert($lesson instanceof Lesson);
 
             $attendances = Attendance::where('course_id', $request->course_id)->get();
-            $lesson_id = $lesson->id;
-            $attendances->each(function ($attendance) use (&$lesson_id) {
+            $lessonId = $lesson->id;
+            $attendances->each(function (Attendance $attendance) use ($lessonId) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson_id,
+                    'lesson_id' => $lessonId,
                     'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ]);
             });
@@ -76,6 +77,7 @@ class LessonController extends Controller
 
             return response()->json([
                 'result' => true,
+                'lesson_id' => $lesson->id,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

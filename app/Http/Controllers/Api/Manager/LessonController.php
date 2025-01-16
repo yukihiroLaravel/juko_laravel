@@ -413,7 +413,6 @@ class LessonController extends Controller
             DB::beginTransaction();
 
             throw new Exception('テスト');
-
             $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {

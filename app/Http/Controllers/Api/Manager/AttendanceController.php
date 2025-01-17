@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -221,9 +222,86 @@ class AttendanceController extends Controller
     /**
      * 完了済みレッスン数と完了済みチャプター数取得API
      */
-    public function showStatus()
+    public function showStatus(Request $request, int $course_id, string $period)
     {
-        return response()->json([]);
+        // 現在ログインしているinstructorのidを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        // 現在の講師（マネージャー）とその管理下の講師情報を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+        // 管理している講師のIDを取得して配列に変換し、マネージャー本人のIDを追加
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $course = Course::findOrFail($course_id);
+        if (! in_array($course->instructor_id, $instructorIds, true)) {
+            // 自分と配下の講師の講座でない場合はエラーを返す
+            throw new AuthorizationException(
+                'Forbidden, not allowed to access this course.'
+            );
+        }
+
+        // 出席情報（関連する情報を含む）を取得
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $course_id)->get();
+
+        // 完了したレッスンの数を取得
+        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
+            $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                if ($period === LessonAttendance::PERIOD_TODAY) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
+                }
+
+                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
+            });
+
+            return $completedLessonAttendances;
+        })->count();
+
+        // 完了したチャプターの数を取得
+        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
+            // 各出席情報に関連するレッスン出席情報をフィルタリング
+            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
+        })
+            ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                // チャプターに含まれているすべてのレッスンIDを取得
+                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                // チャプター内の全レッスン数をカウント
+                $totalLessonsCount = $allLessonsId->count();
+                // チャプター内で完了したレッスン数をカウント
+                $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
+                    ->whereIn('lesson_id', $allLessonsId)
+                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->count();
+
+                if ($period === LessonAttendance::PERIOD_TODAY) {
+                    // 本日の日付であるか確認し、
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
+                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
+                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
+                } else {
+                    throw new Exception('Invalid period');
+                }
+
+                // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
+                return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);
+            })
+            ->map(function (LessonAttendance $lessonAttendance) {
+                // chapter_idとattendance_idをキーにもつ新しい配列を作成
+                return [
+                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                    'attendance_id' => $lessonAttendance->attendance_id,
+                ];
+            })
+            ->unique() // 重複するチャプターと出席情報の組み合わせを削除
+            ->count();
+
+        return response()->json([
+            'completed_lessons_count' => $completedLessonsCount,
+            'completed_chapters_count' => $completedChaptersCount,
+        ]);
     }
 
     /**
@@ -347,7 +425,7 @@ class AttendanceController extends Controller
             ->count();
 
         return response()->json([
-            'completed_lessons_conut' => $completedLessonsCount,
+            'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount,
         ]);
     }

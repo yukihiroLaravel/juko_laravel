@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
 
         // 受講生-レッスン受講
-        Route::patch('lesson_attendance', 'Api\Student\LessonAttendanceController@update');
+        Route::patch('lesson_attendance/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus']);
 
         // 受講生-お知らせ
         Route::prefix('notification')->group(function () {

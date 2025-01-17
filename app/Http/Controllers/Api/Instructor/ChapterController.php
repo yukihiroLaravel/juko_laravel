@@ -345,11 +345,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-        
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            throw $e;
         }
     }
 

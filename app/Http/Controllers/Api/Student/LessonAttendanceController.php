@@ -19,7 +19,6 @@ class LessonAttendanceController extends Controller
     public function update(LessonAttendancePatchRequest $request)
     {
         try {
-            throw new RuntimeException('テスト');
             /** @var LessonAttendance $lessonAttendance */
             $lessonAttendance = LessonAttendance::with('attendance')
                 ->find($request->lesson_attendance_id);

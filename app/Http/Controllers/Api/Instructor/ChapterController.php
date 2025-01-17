@@ -41,16 +41,14 @@ class ChapterController extends Controller
         // チャプターを取得
         $chapter = $queryService->getChapter($request->chapter_id);
 
-        if ((int) $request->course_id !== $chapter->course->id) {
-            return response()->json([
-                'message' => 'Invalid course_id.',
-            ], 403);
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            return response()->json([
-                'message' => 'Invalid instructor_id.',
-            ], 403);
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         return new ChapterShowResource($chapter);
@@ -72,10 +70,7 @@ class ChapterController extends Controller
 
             if ($course->instructor_id !== $user->id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id for this course.',
-                ], 403);
+                throw new AuthorizationException('Invalid instructor_id for this course.');
             }
 
             $order = $course->chapters->count();
@@ -93,9 +88,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -111,18 +104,13 @@ class ChapterController extends Controller
         $chapter = Chapter::findOrFail($request->chapter_id);
 
         if ($chapter->course->instructor_id !== $user->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id',
-            ], 403);
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('Invalid instructor_id.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         $chapter->update([
@@ -143,18 +131,13 @@ class ChapterController extends Controller
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'invalid instructor_id.',
-            ], 403);
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('invalid instructor_id.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         $chapter->update([
@@ -209,10 +192,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ]);
+            throw $e;
         }
     }
 
@@ -269,10 +249,7 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ]);
+            throw $e;
         }
     }
 
@@ -288,27 +265,19 @@ class ChapterController extends Controller
             $chapter = Chapter::with('course', 'lessons')->findOrFail($request->chapter_id);
 
             if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.',
-                ], 403);
+                // ログインしている講師が作成していないチャプターの更新を許可しない
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             if ((int) $request->course_id !== $chapter->course->id) {
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid course_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid course_id.');
             }
 
             //受講中のチャプターは削除できないようにする
             $lessonIds = $chapter->lessons->pluck('id')->toArray();
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'This chapter contains attendance.',
-                ], 403);
+                throw new AuthorizationException('This chapter contains attendance.');
             }
 
             // 削除対象チャプターのorderカラムを0に設定する
@@ -332,9 +301,7 @@ class ChapterController extends Controller
             DB::rollBack();
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -373,7 +340,6 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -394,10 +360,8 @@ class ChapterController extends Controller
             $course = Course::findOrFail($courseId);
 
             if ($user->id !== $course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.',
-                ], 403);
+                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             foreach ($chapters as $chapter) {
@@ -417,17 +381,12 @@ class ChapterController extends Controller
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
 
-            return response()->json([
-                'result' => false,
-                'message' => 'Not found.',
-            ], 404);
+            throw new AuthorizationException('Not found.');
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -440,10 +399,8 @@ class ChapterController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+            // ログインしていない講師の更新を許可しない
+            throw new AuthorizationException('Not authorized.');
         }
 
         Chapter::chapterUpdateAll($request->course_id, $request->status);

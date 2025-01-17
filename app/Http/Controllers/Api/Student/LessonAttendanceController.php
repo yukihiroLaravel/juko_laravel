@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\LessonAttendancePatchRequest;
 use App\Model\LessonAttendance;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class LessonAttendanceController extends Controller
 {

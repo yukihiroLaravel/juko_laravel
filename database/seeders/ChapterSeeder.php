@@ -56,6 +56,14 @@ class ChapterSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'course_id' => 5,
+                'order' => 1,
+                'title' => 'Pythonとは？',
+                'status' => Chapter::STATUS_PUBLIC,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }

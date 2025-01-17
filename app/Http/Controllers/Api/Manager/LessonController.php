@@ -7,11 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\LessonBulkDeleteRequest;
 use App\Http\Requests\Manager\LessonDeleteRequest;
 use App\Http\Requests\Manager\LessonPatchStatusRequest;
+use App\Http\Requests\Manager\LessonPutRequest;
 use App\Http\Requests\Manager\LessonPutStatusRequest;
 use App\Http\Requests\Manager\LessonsAllDeleteRequest;
 use App\Http\Requests\Manager\LessonSortRequest;
 use App\Http\Requests\Manager\LessonStoreRequest;
-use App\Http\Requests\Manager\LessonUpdateRequest;
 use App\Http\Requests\Manager\LessonUpdateTitleRequest;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -40,7 +40,7 @@ class LessonController extends Controller
 
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrfail($managerId);
+        $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -48,10 +48,7 @@ class LessonController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to create new lesson.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
         }
 
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
@@ -64,13 +61,14 @@ class LessonController extends Controller
                 'status' => Lesson::STATUS_PRIVATE,
                 'order' => (int) $maxOrder + 1,
             ]);
+            assert($lesson instanceof Lesson);
 
             $attendances = Attendance::where('course_id', $request->course_id)->get();
-            $lesson_id = $lesson->id;
-            $attendances->each(function ($attendance) use (&$lesson_id) {
+            $lessonId = $lesson->id;
+            $attendances->each(function (Attendance $attendance) use ($lessonId) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson_id,
+                    'lesson_id' => $lessonId,
                     'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ]);
             });
@@ -79,14 +77,12 @@ class LessonController extends Controller
 
             return response()->json([
                 'result' => true,
+                'lesson_id' => $lesson->id,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -95,39 +91,33 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(LessonUpdateRequest $request)
+    public function put(LessonPutRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
+
         // 配下の講師情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($managerId);
+        assert($manager instanceof Instructor);
+
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+        assert($lesson instanceof Lesson);
 
         if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             // 配下の講師でない場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this lesson.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             // 講座IDが不正な場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid course_id.');
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // チャプターIDが不正な場合は403エラー
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid chapter_id.');
         }
 
         $lesson->update([
@@ -165,34 +155,22 @@ class LessonController extends Controller
 
             // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
             if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid chapter_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid chapter_id.');
             }
 
             // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
             if ((int) $request->course_id !== $lesson->chapter->course_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid course_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid course_id.');
             }
 
             // 受講情報が登録されている場合は許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'This lesson has attendance.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
             // 対象レッスンの削除処理
@@ -213,10 +191,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -283,10 +258,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ]);
+            throw $e;
         }
     }
 
@@ -307,26 +279,17 @@ class LessonController extends Controller
 
         if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
             // 自身もしくは配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id.',
-            ], 403);
+            throw new ValidationErrorException('Invalid instructor_id.');
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course->id) {
             // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new ValidationErrorException('Invalid course_id.');
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
+            throw new ValidationErrorException('Invalid chapter_id.');
         }
 
         $lesson->update([
@@ -360,24 +323,15 @@ class LessonController extends Controller
 
         // 自分、または配下の講師の講座のレッスンでなければエラー応答
         if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Unauthorized access to update lesson title.',
-            ], 403);
+            throw new ValidationErrorException('Unauthorized access to update lesson title.');
         }
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new ValidationErrorException('Invalid course_id.');
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid chapter_id.',
-            ], 403);
+            throw new ValidationErrorException('Invalid chapter_id.');
         }
 
         $lesson->update([
@@ -507,11 +461,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete lesson.',
-            ], 500);
+            throw $e;
         }
     }
 

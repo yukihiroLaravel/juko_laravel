@@ -200,7 +200,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                     Route::delete('/', 'Api\Manager\LessonController@bulkDelete');
                                     Route::delete('all', 'Api\Manager\LessonController@deleteAll');
                                     Route::prefix('{lesson_id}')->group(function () {
-                                        Route::put('/', 'Api\Manager\LessonController@update');
+                                        Route::put('/', 'Api\Manager\LessonController@put');
                                         Route::delete('/', 'Api\Manager\LessonController@delete');
                                         Route::patch('status', 'Api\Manager\LessonController@updateStatus');
                                         Route::patch('title', 'Api\Manager\LessonController@updateTitle');

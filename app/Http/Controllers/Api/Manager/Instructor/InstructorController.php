@@ -17,6 +17,7 @@ use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -46,10 +47,7 @@ class InstructorController extends Controller
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this instructor.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
         }
 
         /** @var Instructor $instructor */
@@ -106,10 +104,7 @@ class InstructorController extends Controller
 
             //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
             if (! in_array($instructor->id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden, not allowed to this instructor.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to this instructor.');
             }
 
             // 更新前の画像情報を取得

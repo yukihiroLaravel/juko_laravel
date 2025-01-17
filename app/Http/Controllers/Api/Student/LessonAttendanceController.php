@@ -16,16 +16,15 @@ class LessonAttendanceController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(LessonAttendancePatchRequest $request)
+    public function patchStatus(LessonAttendancePatchRequest $request)
     {
         try {
-            /** @var LessonAttendance $lessonAttendance */
             $lessonAttendance = LessonAttendance::with('attendance')
                 ->find($request->lesson_attendance_id);
+            assert($lessonAttendance instanceof LessonAttendance);
 
             if ($request->user()->id !== $lessonAttendance->attendance->student_id) {
-                // ログインしている生徒が受講しているコースではない
-                throw new AuthorizationException('Forbidden.');
+                throw new AuthorizationException('Forbidden, invalid student');
             }
 
             $lessonAttendance->update([
@@ -37,7 +36,6 @@ class LessonAttendanceController extends Controller
             ]);
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
-
             throw $e;
         }
     }

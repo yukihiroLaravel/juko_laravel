@@ -202,17 +202,20 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
+            DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ], 403);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
 
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ], 500);
         }
     }
 
@@ -262,10 +265,12 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (ValidationErrorException $e) {
+            DB::rollBack();
+    
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
-            ]);
+            ], 403);    
         } catch (Exception $e) {
             Log::error($e);
 
@@ -334,6 +339,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -377,7 +383,11 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-            throw $e;
+        
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -427,6 +437,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

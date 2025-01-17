@@ -245,11 +245,11 @@ class ChapterController extends Controller
             ]);
         } catch (ValidationErrorException $e) {
             DB::rollBack();
-    
+
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
-            ], 403);    
+            ], 403);
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

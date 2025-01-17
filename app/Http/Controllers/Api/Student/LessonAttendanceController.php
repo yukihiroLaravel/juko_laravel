@@ -7,6 +7,7 @@ use App\Http\Requests\Student\LessonAttendancePatchRequest;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class LessonAttendanceController extends Controller
 {
@@ -18,16 +19,14 @@ class LessonAttendanceController extends Controller
     public function update(LessonAttendancePatchRequest $request)
     {
         try {
+            throw new RuntimeException('テスト');
             /** @var LessonAttendance $lessonAttendance */
             $lessonAttendance = LessonAttendance::with('attendance')
                 ->find($request->lesson_attendance_id);
 
             if ($request->user()->id !== $lessonAttendance->attendance->student_id) {
-                return response()->json([
-                    'result' => false,
-                    'error_code' => 403,
-                    'error_message' => 'Forbidden.',
-                ]);
+                // ログインしている生徒が受講しているコースではない
+                throw new AuthorizationException('Forbidden.');
             }
 
             $lessonAttendance->update([
@@ -40,9 +39,7 @@ class LessonAttendanceController extends Controller
         } catch (RuntimeException $e) {
             Log::error($e->getMessage());
 
-            return response()->json([
-                'result' => false,
-            ]);
+            throw $e;
         }
     }
 }

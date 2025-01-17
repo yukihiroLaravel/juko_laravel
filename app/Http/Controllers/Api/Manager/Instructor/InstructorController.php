@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InstructorController extends Controller
 {
@@ -77,11 +76,6 @@ class InstructorController extends Controller
 
         // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
-
-        // 認可処理：配下の講師IDが取得できることを確認
-        if (! $instructorIds) {
-            throw new AuthorizationException('Forbidden, no instructors found under this manager.');
-        }
 
         // 講師情報を取得
         $instructors = $queryService->getPaginatedInstructors($instructorIds, $sortBy, $order, $perPage, $page);
@@ -140,9 +134,6 @@ class InstructorController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
-            Log::error($e);
-            throw $e;  // 再スロー
         } catch (RuntimeException $e) {
             Log::error($e);
             return response()->json([

@@ -62,10 +62,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -78,17 +75,11 @@ class LessonController extends Controller
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         if ($lesson->chapter->course->instructor_id !== $user->id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid instructor_id',
-            ], 403);
+            throw new AuthorizationException('Invalid instructor_id');
         }
 
         if ((int) $request->chapter_id !== $lesson->chapter->id || (int) $request->course_id !== $lesson->chapter->course_id) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid chapter_id or course_id.',
-            ], 403);
+            throw new AuthorizationException('Invalid chapter_id or course_id.');
         }
 
         $lesson->update([
@@ -113,25 +104,16 @@ class LessonController extends Controller
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
             if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid instructor_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Invalid chapter_id.',
-                ], 403);
+                throw new AuthorizationException('Invalid chapter_id.');
             }
 
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'This lesson has attendance.',
-                ], 403);
+                throw new AuthorizationException('This lesson has attendance.');
             }
 
             // 削除対象レッスンのorderカラムを0に設定する
@@ -154,10 +136,7 @@ class LessonController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 

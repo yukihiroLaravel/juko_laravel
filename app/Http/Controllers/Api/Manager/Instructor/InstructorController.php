@@ -136,6 +136,7 @@ class InstructorController extends Controller
             ]);
         } catch (RuntimeException $e) {
             Log::error($e);
+
             return response()->json([
                 'result' => false,
             ], 500);

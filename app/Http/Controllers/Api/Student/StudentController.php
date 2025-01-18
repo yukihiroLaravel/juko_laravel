@@ -247,9 +247,10 @@ class StudentController extends Controller
                 'message' => 'Authorization success.',
             ]);
         } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
+            return response()->json([
+                'result' => false,
+                'message' => 'Not Found data to match token.',
+            ], 404);
         }        
         } catch (ExpiredAuthorizationCodeException $e) {
             $studentAuth->delete();
@@ -266,12 +267,10 @@ class StudentController extends Controller
                 'message' => 'Not match authorization code three times.',
             ], 400);
         } catch (Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             Log::error($e);
-
             return response()->json([
                 'result' => false,
             ], 500);
         }
-    }
 }

@@ -37,11 +37,9 @@ class StudentController extends Controller
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
         if ($loginId !== $instructorId) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+            throw new AuthorizationException('エラーメッセージ');
         }
+        
 
         $results = DB::table('attendances')
             ->select(
@@ -103,12 +101,10 @@ class StudentController extends Controller
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
-        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+        if ($loginId !== $instructorId) {
+            throw new AuthorizationException('エラーメッセージ');
         }
+        
 
         return new StudentShowResource($student);
     }

@@ -329,7 +329,6 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            // 認証ユーザー情報取得
             $instructorId = Auth::guard('instructor')->user()->id;
 
             $courseId = $request->input('course_id');
@@ -340,23 +339,23 @@ class LessonController extends Controller
             $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
 
             // 認可
-            $lessons->each(function ($lesson) use ($instructorId, $courseId, $chapterId) {
+            $lessons->each(function (Lesson $lesson) use ($instructorId, $courseId, $chapterId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor.');
                 }
                 // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course.');
+                    throw new AuthorizationException('Forbidden, invalid course.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
-                    throw new ValidationErrorException('Invalid chapter.');
+                    throw new AuthorizationException('Forbidden, invalid chapter.');
                 }
             });
 
             // orderカラムを更新（並び替え実施）
-            $lessons->each(function ($lesson) use ($inputLessons) {
+            $lessons->each(function (Lesson $lesson) use ($inputLessons) {
                 $collectionLessons = new Collection($inputLessons);
                 $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
                 $lesson->update([
@@ -369,11 +368,6 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 422);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

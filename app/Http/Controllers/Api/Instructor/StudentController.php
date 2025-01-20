@@ -37,7 +37,7 @@ class StudentController extends Controller
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
         if ($loginId !== $instructorId) {
-            throw new AuthorizationException('エラーメッセージ');
+            throw new AuthorizationException('Not authorized.');
         }
         
 
@@ -101,8 +101,8 @@ class StudentController extends Controller
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
-        if ($loginId !== $instructorId) {
-            throw new AuthorizationException('エラーメッセージ');
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            throw new AuthorizationException('Not authorized.');
         }
         
 

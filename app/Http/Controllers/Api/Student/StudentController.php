@@ -250,8 +250,7 @@ class StudentController extends Controller
             return response()->json([
                 'result' => false,
                 'message' => 'Not Found data to match token.',
-            ], 404);
-        }        
+            ], 404);        
         } catch (ExpiredAuthorizationCodeException $e) {
             $studentAuth->delete();
 
@@ -273,4 +272,5 @@ class StudentController extends Controller
                 'result' => false,
             ], 500);
         }
+    }
 }

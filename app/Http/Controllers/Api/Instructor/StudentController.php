@@ -39,7 +39,6 @@ class StudentController extends Controller
         if ($loginId !== $instructorId) {
             throw new AuthorizationException('Not authorized.');
         }
-        
 
         $results = DB::table('attendances')
             ->select(
@@ -102,9 +101,8 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Not authorized.');
+            throw new AuthorizationException('Not authorized to access this student.');
         }
-        
 
         return new StudentShowResource($student);
     }

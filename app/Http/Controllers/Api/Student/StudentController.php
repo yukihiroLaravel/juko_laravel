@@ -19,6 +19,7 @@ use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -28,7 +29,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {

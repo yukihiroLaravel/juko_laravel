@@ -12,9 +12,9 @@ use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class NotificationController extends Controller
 {
@@ -98,9 +98,9 @@ class NotificationController extends Controller
         /** @var Notification $notification */
         $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
-        if (!in_array($notification->course_id, $courseIds, true)) {
+        if (! in_array($notification->course_id, $courseIds, true)) {
             throw new AuthorizationException('Forbidden. You are not authorized to view this notification.');
-        }        
+        }
 
         return new NotificationShowResource($notification);
     }

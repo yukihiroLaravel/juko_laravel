@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
                                 Route::delete('all', 'Api\Instructor\LessonController@deleteAll');
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::put('/', 'Api\Instructor\LessonController@update');
+                                    Route::put('/', 'Api\Instructor\LessonController@put');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
                                     Route::patch('status', 'Api\Instructor\LessonController@updateStatus');
                                     Route::patch('title', 'Api\Instructor\LessonController@updateTitle');

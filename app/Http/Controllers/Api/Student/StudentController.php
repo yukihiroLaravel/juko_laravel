@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {
@@ -128,10 +129,7 @@ class StudentController extends Controller
             $student = Student::findOrFail($request->user()->id);
 
             if ($request->user()->id !== $student->id) {
-                return response()->json([
-                    'result' => 'false',
-                    'message' => 'Not authorized.',
-                ], 403);
+                throw new AuthorizationException('Not authorized.');
             }
 
             $imagePath = $student->profile_image;
@@ -167,11 +165,9 @@ class StudentController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -260,6 +256,7 @@ class StudentController extends Controller
                 'message' => 'Authorization success.',
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             throw $e;
         }

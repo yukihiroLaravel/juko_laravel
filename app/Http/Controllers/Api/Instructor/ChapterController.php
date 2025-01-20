@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\ChapterBulkDeleteRequest;
 use App\Http\Requests\Instructor\ChapterDeleteAllRequest;
@@ -124,6 +123,7 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API
+     * TODO このメソッドは削除予定
      */
     public function updateStatus(ChapterUpdateStatusRequest $request): JsonResponse
     {
@@ -150,7 +150,7 @@ class ChapterController extends Controller
     }
 
     /**
-     * 複数チャプターの公開/非公開API
+     * チャプターの公開/非公開API
      */
     public function patchStatus(ChapterPatchStatusRequest $request): JsonResponse
     {
@@ -168,11 +168,11 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
                 // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course_id.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 
@@ -184,14 +184,8 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ]);
         } catch (Exception $e) {
             Log::error($e);
-
             throw $e;
         }
     }
@@ -213,48 +207,36 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
                 // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
                 // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course_id.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 
-            /*
-                「紐づくlessonsが0件」、または、
-                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
-                の場合に削除可能($canDelete=true)となる。
-            */
-            $canDelete = true;
             $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (! $lessonIds->isEmpty()) {
-                $canDelete = ! LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
-            }
-            if (! $canDelete) {
-                throw new ValidationErrorException('Some chapters contain lessons with attendance records.');
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
             // チャプターを一括で削除
             Chapter::whereIn('id', $chapters->pluck('id'))->delete();
 
+            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ]);
         } catch (Exception $e) {
             Log::error($e);
-
             throw $e;
         }
     }
 
     /**
      * チャプター削除API
+     * TODO このメソッドは削除予定
      */
     public function delete(ChapterDeleteRequest $request): JsonResponse
     {
@@ -300,7 +282,6 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
             throw $e;
         }
     }
@@ -385,7 +366,6 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
             throw $e;
         }
     }

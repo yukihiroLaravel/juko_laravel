@@ -29,10 +29,7 @@ class CourseController extends Controller
 
         // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Forbidden.');
         }
 
         $courses = $queryService->getPaginatedCoursesByInstructorId($request->instructor_id, 5);

@@ -46,6 +46,8 @@ class StudentController extends Controller
         $results = DB::table('attendances')
             ->select(
                 'attendances.student_id',
+                'attendances.course_id',
+                'courses.instructor_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
@@ -54,7 +56,10 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
+            ->join('courses', 'attendances.course_id', '=', 'courses.id')
             ->where('attendances.course_id', $request->course_id)
+            // ログインしている講師IDを検索
+            ->where('courses.instructor_id', $request->instructor_id)
             ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {

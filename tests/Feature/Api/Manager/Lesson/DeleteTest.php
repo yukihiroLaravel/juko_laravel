@@ -39,7 +39,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_配下の講師のレッスン登録_成功(): void
+    public function test_配下の講師のレッスン削除_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
@@ -76,7 +76,7 @@ class DeleteTest extends TestCase
 
     }
 
-    public function test_配下でない講師のレッスン登録_失敗(): void
+    public function test_配下でない講師のレッスン削除_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(4);
@@ -92,7 +92,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_マネージャーではない講師のレッスン登録_失敗(): void
+    public function test_マネージャーではない講師のレッスン削除_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(2);

@@ -195,22 +195,21 @@ class ChapterController extends Controller
      */
     public function bulkDelete(ChapterBulkDeleteRequest $request): JsonResponse
     {
+        // 認証ユーザー情報取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $chapterIds = $request->input('chapters', []);
+        $courseId = $request->input('course_id');
+
         try {
-            $courseId = $request->course_id;
-
-            // 認証ユーザー情報取得
-            $instructorId = Auth::guard('instructor')->user()->id;
-
-            $chapters = Chapter::whereIn('id', $request->chapters)->with(['course', 'lessons'])->get();
-
-            // バリデーション
+            $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
-                // チャプターに紐づく講師でない場合は許可しない
                 if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    // チャプターに紐づく講師でない場合は許可しない
                     throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
-                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course_id) {
+                    // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });

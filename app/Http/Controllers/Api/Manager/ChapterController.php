@@ -123,7 +123,7 @@ class ChapterController extends Controller
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Invalid course_id.');
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
         // チャプターを更新する
@@ -164,7 +164,7 @@ class ChapterController extends Controller
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座に属するチャプターでなければエラー応答
-            throw new AuthorizationException('Invalid course_id.');
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
         if (
@@ -200,48 +200,33 @@ class ChapterController extends Controller
         $chapterIds = $request->input('chapters', []);
         $courseId = $request->input('course_id');
 
-        DB::beginTransaction();
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
                 if ((int) $courseId !== $chapter->course_id) {
                     // 指定した講座に属するチャプターでなければエラー応答
-                    throw new ValidationErrorException('Invalid course.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 
-            /*
-                「紐づくlessonsが0件」、または、
-                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
-                の場合に削除可能($canDelete=true)となる。
-            */
-            $canDelete = true;
             $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (! $lessonIds->isEmpty()) {
-                $canDelete = ! LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
-            }
-            if (! $canDelete) {
-                throw new ValidationErrorException('Some chapters contain lessons with attendance records.');
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
             Chapter::whereIn('id', $chapterIds)->delete();
-            DB::commit();
 
+            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            DB::rollBack();
-
-            throw $e;
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
-
             throw $e;
         }
     }
@@ -380,7 +365,7 @@ class ChapterController extends Controller
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座に属するチャプターでなければエラー応答
-            throw new ValidationErrorException('Invalid course_id.');
+            throw new ValidationErrorException('Forbidden, invalid course_id.');
         }
 
         // チャプターのステータスを更新
@@ -454,12 +439,12 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
 
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course->id) {
-                    throw new AuthorizationException('Invalid course_id.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 

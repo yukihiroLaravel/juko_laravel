@@ -182,15 +182,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', 'Api\Manager\ChapterController@sort');
-                            Route::post('/', 'Api\Manager\ChapterController@store');
+                            Route::post('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'store']);
                             Route::put('status', 'Api\Manager\ChapterController@putStatus');
                             Route::delete('/', 'Api\Manager\ChapterController@bulkDelete');
                             Route::delete('all', 'Api\Manager\ChapterController@deleteAll');
                             Route::patch('status', 'Api\Manager\ChapterController@patchStatus');
                             Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', 'Api\Manager\ChapterController@show');
-                                Route::patch('/', 'Api\Manager\ChapterController@update');
-                                Route::delete('/', 'Api\Manager\ChapterController@delete');
+                                Route::get('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'show']);
+                                Route::put('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'put']);
+                                Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'delete']);
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {

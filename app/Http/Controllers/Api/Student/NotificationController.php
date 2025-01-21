@@ -99,7 +99,7 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
         if (!in_array($notification->course_id, $courseIds, true)) {
-            throw new AuthorizationException('Forbidden. You are not authorized to view this notification.');
+            throw new AuthorizationException('Forbidden, not allowed to this notification.');
         }        
 
         return new NotificationShowResource($notification);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Manager\Lesson;
+namespace Tests\Feature\Api\Manager\Chapter;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,19 +17,18 @@ class SortTest extends TestCase
         $this->seed();
     }
 
-    public function test_マネージャーのレッスン並び替え_成功(): void
+    public function test_チャプター並び替え_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
-            'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/sort', [
+            'chapters' => [
+                ['chapter_id' => 1, 'order' => 3],
+                ['chapter_id' => 2, 'order' => 2],
+                ['chapter_id' => 3, 'order' => 1],
             ],
         ]);
 
@@ -38,10 +37,10 @@ class SortTest extends TestCase
         $response->assertJsonStructure([
             'result',
         ]);
-        collect([5, 4, 3, 2])->each(function ($id, $index) {
-            $this->assertDatabaseHas('lessons', [
+        collect([3, 2, 1])->each(function ($id, $index) {
+            $this->assertDatabaseHas('chapters', [
                 'id' => $id,
-                'chapter_id' => 2,
+                'course_id' => 1,
                 'order' => $index + 1,
             ]);
         });
@@ -54,19 +53,18 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
-            'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/sort', [
+            'chapters' => [
+                ['chapter_id' => 1, 'order' => 3],
+                ['chapter_id' => 2, 'order' => 2],
+                ['chapter_id' => 3, 'order' => 1],
             ],
         ]);
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to delete this lesson. Invalid instructor.',
+            'message' => 'Forbidden, invalid instructor_id.',
         ]);
     }
 
@@ -77,12 +75,11 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
-            'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/sort', [
+            'chapters' => [
+                ['chapter_id' => 1, 'order' => 3],
+                ['chapter_id' => 2, 'order' => 2],
+                ['chapter_id' => 3, 'order' => 1],
             ],
         ]);
 
@@ -100,14 +97,12 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/aaa/chapter/bbb/lesson/sort');
-
+        $response = $this->postJson('/api/v1/manager/course/aaa/chapter/sort', []);
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',
-            'chapter_id',
-            'lessons',
+            'chapters',
         ]);
     }
 }

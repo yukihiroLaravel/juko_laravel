@@ -314,7 +314,7 @@ class ChapterController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            throw new ValidationErrorException('Forbidden, not allowed to this course.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         DB::beginTransaction();

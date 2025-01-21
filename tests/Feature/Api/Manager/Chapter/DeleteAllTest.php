@@ -6,7 +6,7 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DeleteTest extends TestCase
+class DeleteAllTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -17,14 +17,14 @@ class DeleteTest extends TestCase
         $this->seed();
     }
 
-    public function test_チャプター削除_成功(): void
+    public function test_チャプター全削除_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/5/chapter/6');
+        $response = $this->deleteJson('/api/v1/manager/course/5/chapter/all');
 
         // assert
         $response->assertStatus(200);
@@ -34,18 +34,18 @@ class DeleteTest extends TestCase
 
         // 論理削除されているか確認
         $this->assertSoftDeleted('chapters', [
-            'id' => 6,
+            'course_id' => 5,
         ]);
     }
 
-    public function test_配下の講師チャプター削除_成功(): void
+    public function test_配下の講師チャプター全削除_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/4');
+        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/all');
 
         // assert
         $response->assertStatus(200);
@@ -53,18 +53,18 @@ class DeleteTest extends TestCase
             'result',
         ]);
         $this->assertSoftDeleted('chapters', [
-            'id' => 4,
+            'course_id' => 2,
         ]);
     }
 
-    public function test_マネージャーの受講済みレッスン削除_失敗(): void
+    public function test_受講済みレッスン削除_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/1/chapter/1');
+        $response = $this->deleteJson('/api/v1/manager/course/1/chapter/all');
 
         // assert
         $response->assertStatus(403);
@@ -80,12 +80,12 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/4');
+        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/all');
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to delete this chapter.',
+            'message' => 'Forbidden, invalid instructor_id.',
         ]);
     }
 
@@ -96,7 +96,7 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/4');
+        $response = $this->deleteJson('/api/v1/manager/course/2/chapter/all');
 
         // assert
         $response->assertStatus(403);
@@ -112,13 +112,12 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/manager/course/aaa/chapter/bbb');
+        $response = $this->deleteJson('/api/v1/manager/course/aaa/chapter/all');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',
-            'chapter_id',
         ]);
     }
 }

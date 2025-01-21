@@ -177,7 +177,7 @@ class ChapterController extends Controller
                 ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
-            throw new AuthorizationException('This lesson has attendance.');
+            throw new AuthorizationException('Forbidden, this lesson has attendance.');
         }
 
         $chapter->delete();
@@ -262,7 +262,7 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
             });
 
@@ -270,7 +270,7 @@ class ChapterController extends Controller
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
-                throw new ValidationErrorException('This lesson has attendance.');
+                throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
@@ -280,11 +280,8 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            // バリデーションエラーが発生した場合の処理
+        } catch (AuthorizationException $e) {
             DB::rollBack();
-            Log::error($e);
-
             throw $e;
         } catch (Exception $e) {
             DB::rollBack();

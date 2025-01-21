@@ -470,7 +470,7 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (AuthorizationException $e) {
-            
+
             throw $e;
         }
     }

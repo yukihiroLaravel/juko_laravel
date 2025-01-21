@@ -26,8 +26,8 @@ class StudentPostRequest extends FormRequest
     {
         return [
             'nick_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:30'],
-            'first_name' => ['required', 'string', 'max:30'],
+            'last_name' => ['required', 'string', 'max:50'],
+            'first_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:students'],
             'occupation' => ['required', 'string', 'max:50'],
             'purpose' => ['required', 'string', 'max:255'],

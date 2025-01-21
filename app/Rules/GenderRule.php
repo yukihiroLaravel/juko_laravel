@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Model\Student;
+use App\Enums\Student\Gender;
 use Illuminate\Contracts\Validation\Rule;
 
 class GenderRule implements Rule
@@ -16,7 +16,10 @@ class GenderRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value === Student::GENDER_MAN || $value === Student::GENDER_WOMAN;
+        // 入力値が 'man' または 'woman' であることを検証
+        return collect(Gender::cases())
+            ->filter(fn (Gender $gender) => $gender !== Gender::UNKNOWN)
+            ->contains(fn (Gender $gender) => $gender->label() === $value);
     }
 
     /**
@@ -26,6 +29,6 @@ class GenderRule implements Rule
      */
     public function message()
     {
-        return 'The :attribute must be either '.Student::GENDER_MAN.' or '.Student::GENDER_WOMAN.'.';
+        return 'The :attribute must be either '.Gender::MAN->label().' or '.Gender::WOMAN->label().'.';
     }
 }

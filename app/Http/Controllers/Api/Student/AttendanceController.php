@@ -103,10 +103,8 @@ class AttendanceController extends Controller
             ->findOrFail($request->attendance_id);
 
         if ($authId !== $attendance->student_id) {
-            return response()->json([
-                'result' => false,
-                'error_message' => 'Not authorized.',
-            ], 403);
+            // ログインしている生徒が受講しているコースではない
+            throw new AuthorizationException('Not authorized.');
         }
 
         $progressData = [

@@ -19,7 +19,6 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
-use App\Services\Chapter\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,7 +34,7 @@ class ChapterController extends Controller
      *
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request, QueryService $queryService)
+    public function show(ChapterShowRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -45,14 +44,16 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $chapter = $queryService->getChapter($request->chapter_id);
+        $chapter = Chapter::with(['lessons', 'course'])->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合はエラー応答
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
 
         if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自身もしくは配下の講師が作成した講座でない場合、権限エラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this course.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new ChapterShowResource($chapter);
@@ -78,16 +79,13 @@ class ChapterController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to create new chapter.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to create new chapter.');
         }
 
         try {
             $order = $course->chapters->count();
             $newOrder = $order + 1;
-            Chapter::create([
+            $chapter = Chapter::create([
                 'course_id' => $request->course_id,
                 'title' => $request->input('title'),
                 'order' => $newOrder,
@@ -96,13 +94,12 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
+                'chapter_id' => $chapter->id,
             ]);
         } catch (Exception $e) {
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -111,7 +108,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(ChapterPatchRequest $request)
+    public function put(ChapterPatchRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -126,18 +123,12 @@ class ChapterController extends Controller
 
         if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this chapter.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
         // チャプターを更新する
@@ -173,18 +164,12 @@ class ChapterController extends Controller
 
         if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to delete this chapter.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to delete this chapter.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座に属するチャプターでなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
         if (
@@ -192,10 +177,7 @@ class ChapterController extends Controller
                 ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'This lesson has attendance.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, this lesson has attendance.');
         }
 
         $chapter->delete();
@@ -223,55 +205,34 @@ class ChapterController extends Controller
         $chapterIds = $request->input('chapters', []);
         $courseId = $request->input('course_id');
 
-        DB::beginTransaction();
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
                 if ((int) $courseId !== $chapter->course_id) {
                     // 指定した講座に属するチャプターでなければエラー応答
-                    throw new ValidationErrorException('Invalid course.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 
-            /*
-                「紐づくlessonsが0件」、または、
-                「全ての紐づくlessonが配下のlessonAttendancesが0件である ( ! ～ ->exists()で判定 ) 」
-                の場合に削除可能($canDelete=true)となる。
-            */
-            $canDelete = true;
             $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (! $lessonIds->isEmpty()) {
-                $canDelete = ! LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
-            }
-            if (! $canDelete) {
-                throw new ValidationErrorException('Some chapters contain lessons with attendance records.');
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
             Chapter::whereIn('id', $chapterIds)->delete();
-            DB::commit();
 
+            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete chapters.',
-            ], 500);
+            throw $e;
         }
     }
 
@@ -301,7 +262,7 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorIds) {
                 // 自分、または配下の講師の講座のチャプターでなければエラー応答
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
             });
 
@@ -309,7 +270,7 @@ class ChapterController extends Controller
             $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
-                throw new ValidationErrorException('This lesson has attendance.');
+                throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
@@ -319,23 +280,14 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            // バリデーションエラーが発生した場合の処理
+        } catch (AuthorizationException $e) {
             DB::rollBack();
-            Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to delete chapters.',
-            ], 500);
+            throw $e;
         }
     }
 
@@ -359,10 +311,7 @@ class ChapterController extends Controller
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this course.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         DB::beginTransaction();
@@ -384,17 +333,12 @@ class ChapterController extends Controller
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
 
-            return response()->json([
-                'result' => false,
-                'message' => 'Not found.',
-            ], 404);
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
 
-            return response()->json([
-                'result' => false,
-            ], 500);
+            throw $e;
         }
     }
 
@@ -418,18 +362,12 @@ class ChapterController extends Controller
 
         if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Unauthorized access to update chapter status.',
-            ], 403);
+            throw new ValidationErrorException('Unauthorized access to update chapter status.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座に属するチャプターでなければエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Invalid course_id.',
-            ], 403);
+            throw new ValidationErrorException('Forbidden, invalid course_id.');
         }
 
         // チャプターのステータスを更新
@@ -462,19 +400,13 @@ class ChapterController extends Controller
 
         if (! in_array($request->course_id, $courseIds)) {
             // 講座IDがマネージャーが管理する講座IDのリストに含まれていない場合はエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+            throw new ValidationErrorException('Not authorized.');
         }
 
         $course = Course::findOrFail($request->course_id);
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             // ログイン中の講師IDが講座の講師IDと一致しない場合はエラー応答
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+            throw new ValidationErrorException('Not authorized.');
         }
         Chapter::chapterUpdateAll($request->course_id, $request->status);
 
@@ -509,12 +441,12 @@ class ChapterController extends Controller
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 // 講座に紐づく講師でない場合は許可しない
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Invalid instructor_id.');
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
                 }
 
                 // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $chapter->course->id) {
-                    throw new AuthorizationException('Invalid course_id.');
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             });
 
@@ -525,10 +457,8 @@ class ChapterController extends Controller
                 'result' => true,
             ]);
         } catch (AuthorizationException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
+
+            throw $e;
         }
     }
 }

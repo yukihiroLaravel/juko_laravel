@@ -5,7 +5,7 @@ namespace App\Http\Requests\Instructor;
 use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonUpdateRequest extends FormRequest
+class LessonPutRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

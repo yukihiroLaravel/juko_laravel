@@ -3,34 +3,37 @@
 namespace App\Model;
 
 use App\Enums\Student\Gender;
-use Carbon\CarbonImmutable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
-class Student extends Authenticatable
+/**
+ * @property-read string $full_name
+ */
+class TemporaryStudent extends Model
 {
     /**
      * モデルと関連しているテーブル
      *
      * @var string
      */
-    protected $table = 'students';
+    protected $table = 'temporary_students';
 
     /**
      * @var array<int, string>
      */
     protected $fillable = [
-        'given_name_by_instructor',
+        'trial_count',
+        'code',
+        'token',
+        'expire_at',
         'nick_name',
         'last_name',
         'first_name',
-        'occupation',
         'email',
-        'password',
+        'occupation',
         'purpose',
         'birth_date',
         'gender',
         'address',
-        'profile_image',
     ];
 
     /**
@@ -40,41 +43,11 @@ class Student extends Authenticatable
      */
     protected $casts = [
         'birth_date' => 'date',
-        'last_login_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'gender' => Gender::class,
+        'expire_at' => 'immutable_datetime',
     ];
-
-    /**
-     * 講座を取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function courses()
-    {
-        return $this->hasMany(Course::class);
-    }
-
-    /**
-     * お知らせを取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function notifications()
-    {
-        return $this->belongsToMany(Notification::class, 'viewed_once_notifications', 'student_id', 'notification_id')->withTimestamps();
-    }
-
-    /**
-     * 受講履歴を取得
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function attendances()
-    {
-        return $this->hasMany(Attendance::class);
-    }
 
     public function getGenderAttribute($value)
     {
@@ -101,24 +74,5 @@ class Student extends Authenticatable
     public function getFullNameAttribute()
     {
         return $this->last_name.' '.$this->first_name;
-    }
-
-    /**
-     * 画像保存パスに変換
-     *
-     * @return string
-     */
-    public static function convertImagePath(string $filePath)
-    {
-        // public/を削除
-        return str_replace('public/', '', $filePath);
-    }
-
-    /**
-     * 年齢計算
-     */
-    public function calcAge(CarbonImmutable $today): int
-    {
-        return (int) $this->birth_date->diffInYears($today);
     }
 }

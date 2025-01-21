@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
 
         // 受講生-レッスン受講
-        Route::patch('lesson_attendance', 'Api\Student\LessonAttendanceController@update');
+        Route::patch('lesson_attendance/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus']);
 
         // 受講生-お知らせ
         Route::prefix('notification')->group(function () {
@@ -93,7 +93,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
                                 Route::delete('all', 'Api\Instructor\LessonController@deleteAll');
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::put('/', 'Api\Instructor\LessonController@update');
+                                    Route::put('/', 'Api\Instructor\LessonController@put');
                                     Route::delete('/', 'Api\Instructor\LessonController@delete');
                                     Route::patch('status', 'Api\Instructor\LessonController@updateStatus');
                                     Route::patch('title', 'Api\Instructor\LessonController@updateTitle');
@@ -200,7 +200,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                     Route::delete('/', 'Api\Manager\LessonController@bulkDelete');
                                     Route::delete('all', 'Api\Manager\LessonController@deleteAll');
                                     Route::prefix('{lesson_id}')->group(function () {
-                                        Route::put('/', 'Api\Manager\LessonController@update');
+                                        Route::put('/', 'Api\Manager\LessonController@put');
                                         Route::delete('/', 'Api\Manager\LessonController@delete');
                                         Route::patch('status', 'Api\Manager\LessonController@updateStatus');
                                         Route::patch('title', 'Api\Manager\LessonController@updateTitle');

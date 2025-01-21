@@ -14,9 +14,10 @@ use App\Http\Resources\Manager\InstructorShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
-use App\Services\Instructor\CredentialGeneratorService;
+use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\QueryService;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -46,10 +47,7 @@ class InstructorController extends Controller
 
         //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden, not allowed to this instructor.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
         }
 
         /** @var Instructor $instructor */
@@ -106,10 +104,7 @@ class InstructorController extends Controller
 
             //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
             if (! in_array($instructor->id, $instructorIds, true)) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Forbidden, not allowed to this instructor.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, not allowed to this instructor.');
             }
 
             // 更新前の画像情報を取得
@@ -155,41 +150,34 @@ class InstructorController extends Controller
         InstructorPostRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
+        $email = $request->email;
         DB::beginTransaction();
         try {
-            $email = $request->email;
-            $credentialGeneratorService->setEmail($email);
-
-            // 「講師の仮登録の操作」をマネージャが行った場合に相当する。
-            $managerId = Auth::guard('instructor')->user()->id;
-
-            $trialCount = 0;
 
             // 認証コードを生成する。
-            $code = $credentialGeneratorService->createCode();
+            $code = $credentialGeneratorService->createCode(
+                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
+            );
+
             // トークンを生成する。
-            $token = $credentialGeneratorService->createToken();
+            $token = $credentialGeneratorService->createToken(
+                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
+            );
 
-            $expireAt = Carbon::now()->addMinutes(60);
-            $nickName = $request->nick_name;
-            $lastName = $request->last_name;
-            $firstName = $request->first_name;
-
-            $type = Instructor::TYPE_INSTRUCTOR;
-
-            /** @var TemporaryInstructor $temporaryInstructor */
             $temporaryInstructor = TemporaryInstructor::create([
-                'manager_id' => $managerId,
-                'trial_count' => $trialCount,
+                'manager_id' => Auth::guard('instructor')->user()->id,
+                'trial_count' => 0,
                 'code' => $code,
                 'token' => $token,
-                'expire_at' => $expireAt,
-                'nick_name' => $nickName,
-                'last_name' => $lastName,
-                'first_name' => $firstName,
+                'expire_at' => Carbon::now()->addMinutes(60),
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
                 'email' => $email,
-                'type' => $type,
+                'type' => Instructor::TYPE_INSTRUCTOR,
             ]);
+
+            assert($temporaryInstructor instanceof TemporaryInstructor);
 
             DB::commit();
 
@@ -200,7 +188,7 @@ class InstructorController extends Controller
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,
@@ -208,7 +196,7 @@ class InstructorController extends Controller
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,

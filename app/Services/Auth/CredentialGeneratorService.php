@@ -4,7 +4,6 @@ namespace App\Services\Auth;
 
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Model\TemporaryInstructor;
 use Illuminate\Support\Str;
 
 /**
@@ -14,8 +13,10 @@ class CredentialGeneratorService
 {
     /**
      * 認証コードを生成する。
+     *
+     * @param  callable(string): bool  $existsChecker  重複チェック関数
      */
-    public function createCode(?callable $randomGenerator = null): string
+    public function createCode(callable $existsChecker, ?callable $randomGenerator = null): string
     {
         $randomGenerator = $randomGenerator ?: function () {
             return Str::random(4);
@@ -25,7 +26,7 @@ class CredentialGeneratorService
         $code = $randomGenerator(4);
 
         for ($i = 1; $i <= 5; $i++) {
-            $isExists = TemporaryInstructor::where('code', $code)->exists();
+            $isExists = $existsChecker($code);
             if (! $isExists) {
                 break;
             }
@@ -41,16 +42,19 @@ class CredentialGeneratorService
 
     /**
      * トークンを生成する。
+     *
+     * @param  callable  $existsChecker  重複チェック関数
      */
-    public function createToken(?callable $randomGenerator = null): string
+    public function createToken(callable $existsChecker, ?callable $randomGenerator = null): string
     {
         //トークンの生成
         $randomGenerator = $randomGenerator ?: function () {
             return Str::random(10);
         };
+
         $token = $randomGenerator();
         for ($i = 1; $i <= 5; $i++) {
-            $isExists = TemporaryInstructor::where('token', $token)->exists();
+            $isExists = $existsChecker($token);
             if (! $isExists) {
                 break;
             }

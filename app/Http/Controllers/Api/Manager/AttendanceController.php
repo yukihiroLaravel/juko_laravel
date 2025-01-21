@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
+use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\LoginRateRequest;

@@ -10,8 +10,8 @@ use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
-use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,11 +33,9 @@ class StudentController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $loginId = Auth::guard('instructor')->user()->id;
         $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-
-        if ($loginId !== $instructorId) {
-            throw new AuthorizationException('Not authorized.');
+        if (Auth::guard('instructor')->user()->id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         $results = DB::table('attendances')
@@ -86,7 +84,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(StudentShowRequest $request)
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -95,13 +93,13 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // リクエストされた受講生を取得
-        /** @var Student $student */
-        $student = $queryService->getStudent($request->student_id);
+        $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Not authorized to access this student.');
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);

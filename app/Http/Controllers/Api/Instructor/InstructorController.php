@@ -2,34 +2,33 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use Exception;
-use RuntimeException;
-use App\Model\Instructor;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
-use App\Model\ManageInstructor;
-use Illuminate\Http\JsonResponse;
-use App\Model\TemporaryInstructor;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
+use App\Exceptions\ExpiredAuthorizationCodeException;
+use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\InstructorPatchRequest;
+use App\Http\Requests\Instructor\InstructorPostRequest;
+use App\Http\Requests\Instructor\UserAuthenticationRequest;
+use App\Http\Resources\Instructor\InstructorShowResource;
+use App\Mail\AuthenticationConfirmationMail;
+use App\Model\Instructor;
+use App\Model\ManageInstructor;
+use App\Model\TemporaryInstructor;
+use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Instructor\QueryService;
+use App\Services\Instructor\VerifyCodeService;
+use Carbon\CarbonImmutable;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Services\Instructor\QueryService;
-use App\Mail\AuthenticationConfirmationMail;
-use App\Services\Instructor\VerifyCodeService;
-use App\Services\Auth\CredentialGeneratorService;
-use App\Exceptions\ExpiredAuthorizationCodeException;
-use App\Exceptions\DuplicateAuthorizationCodeException;
-use App\Http\Requests\Instructor\InstructorPostRequest;
-use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Http\Requests\Instructor\InstructorPatchRequest;
-use App\Http\Resources\Instructor\InstructorShowResource;
-use App\Exceptions\TryCountOverAuthorizationCodeException;
-use App\Http\Requests\Instructor\UserAuthenticationRequest;
+use Illuminate\Support\Str;
 
 class InstructorController extends Controller
 {
@@ -92,6 +91,7 @@ class InstructorController extends Controller
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
             Log::error($e->getMessage().' email: '.$request->email);
+
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to generate unique authorization code.',
@@ -99,6 +99,7 @@ class InstructorController extends Controller
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
             Log::error($e->getMessage().' email: '.$request->email);
+
             return response()->json([
                 'result' => false,
                 'message' => 'Failed to generate unique authorization token.',
@@ -171,15 +172,16 @@ class InstructorController extends Controller
                     code: $request->code
                 );
                 if (! $result) {
-                   // 認証コード不一致
-                   return response()->json([
-                    'result' => false,
-                    'message' => 'Not match authentication code.',
+                    // 認証コード不一致
+                    return response()->json([
+                        'result' => false,
+                        'message' => 'Not match authentication code.',
                     ], 400);
                 }
             } catch (ExpiredAuthorizationCodeException $e) {
                 // 仮登録情報を物理削除
                 $temporaryInstructor->delete();
+
                 return response()->json([
                     'result' => false,
                     'message' => 'Expired authorization period.',
@@ -187,6 +189,7 @@ class InstructorController extends Controller
             } catch (TryCountOverAuthorizationCodeException $e) {
                 // 仮登録情報を物理削除
                 $temporaryInstructor->delete();
+
                 return response()->json([
                     'result' => false,
                     'message' => 'Not match authorization code three times.',

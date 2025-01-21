@@ -19,7 +19,6 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
-use App\Services\Chapter\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,7 +34,7 @@ class ChapterController extends Controller
      *
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request, QueryService $queryService)
+    public function show(ChapterShowRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -45,11 +44,16 @@ class ChapterController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $chapter = $queryService->getChapter($request->chapter_id);
+        $chapter = Chapter::with(['lessons', 'course'])->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合はエラー応答
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
 
         if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
             // 自身もしくは配下の講師が作成した講座でない場合、権限エラーを返す
-            throw new AuthorizationException('Forbidden, not allowed to this course.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new ChapterShowResource($chapter);
@@ -81,7 +85,7 @@ class ChapterController extends Controller
         try {
             $order = $course->chapters->count();
             $newOrder = $order + 1;
-            Chapter::create([
+            $chapter = Chapter::create([
                 'course_id' => $request->course_id,
                 'title' => $request->input('title'),
                 'order' => $newOrder,
@@ -90,6 +94,7 @@ class ChapterController extends Controller
 
             return response()->json([
                 'result' => true,
+                'chapter_id' => $chapter->id,
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -103,7 +108,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(ChapterPatchRequest $request)
+    public function put(ChapterPatchRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

@@ -9,6 +9,7 @@ use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class CourseController extends Controller
 {

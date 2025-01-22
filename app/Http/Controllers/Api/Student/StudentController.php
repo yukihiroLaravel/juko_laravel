@@ -165,7 +165,6 @@ class StudentController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
             throw $e;
         }
@@ -256,7 +255,6 @@ class StudentController extends Controller
                 'message' => 'Authorization success.',
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
             throw $e;
         }

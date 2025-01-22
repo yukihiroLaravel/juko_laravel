@@ -3,20 +3,10 @@
 namespace App\Rules;
 
 use App\Model\Attendance;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Validation\Rule;
 
 class AttendancePeriodRule implements Rule
 {
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
     /**
      * Determine if the validation rule passes.
      *
@@ -26,21 +16,15 @@ class AttendancePeriodRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (
-            in_array(
-                $value,
-                [
-                    Attendance::PERIOD_WEEK,
-                    Attendance::PERIOD_MONTH,
-                    Attendance::PERIOD_YEAR,
-                ],
-                true
-            )
-        ) {
-            return true;
-        }
-
-        return false;
+        return in_array(
+            $value,
+            [
+                Attendance::PERIOD_WEEK,
+                Attendance::PERIOD_MONTH,
+                Attendance::PERIOD_YEAR,
+            ],
+            true
+        );
     }
 
     /**

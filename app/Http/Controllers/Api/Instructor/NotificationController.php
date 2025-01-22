@@ -12,8 +12,8 @@ use App\Http\Requests\Instructor\NotificationStoreRequest;
 use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationShowResource;
-use App\Model\Notification;
 use App\Model\Course;
+use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -84,7 +84,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;
@@ -117,7 +117,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;

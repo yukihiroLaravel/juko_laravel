@@ -259,8 +259,8 @@ class StudentController extends Controller
                 'result' => true,
                 'message' => 'Authorization success.',
             ]);
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'result' => false,
@@ -286,16 +286,7 @@ class StudentController extends Controller
             return response()->json([
                 'result' => false,
             ], 500);
-=======
-        } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
->>>>>>> develop
-=======
-        } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
->>>>>>> f21d26327b80967ac9a6b28fc190355067065a78
+
         }
     }
 }

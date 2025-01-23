@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Instructor\NotificationPutRequest;
 use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
-use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Model\Course;
@@ -65,7 +65,7 @@ class NotificationController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         if ($course->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         DB::beginTransaction();
@@ -94,12 +94,12 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function update(NotificationUpdateRequest $request): JsonResponse
+    public function put(NotificationPutRequest $request): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
 
         if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         DB::beginTransaction();

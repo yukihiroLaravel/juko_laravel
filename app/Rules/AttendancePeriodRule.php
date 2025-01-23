@@ -3,20 +3,21 @@
 namespace App\Rules;
 
 use App\Model\Attendance;
-use Illuminate\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class AttendancePeriodRule implements Rule
+class AttendancePeriodRule implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
+     * バリデーションの実行。
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
+     * @param  \Closure  $fail
+     * @return void
      */
-    public function passes($attribute, $value)
+    public function validate($attribute, $value, $fail): void
     {
-        return in_array(
+        if (!in_array(
             $value,
             [
                 Attendance::PERIOD_WEEK,
@@ -24,16 +25,9 @@ class AttendancePeriodRule implements Rule
                 Attendance::PERIOD_YEAR,
             ],
             true
-        );
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Period.';
+        )) {
+            // エラーを返す
+            $fail('The :attribute must be a valid attendance period.');
+        }
     }
 }

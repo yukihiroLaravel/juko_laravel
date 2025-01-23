@@ -144,7 +144,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
                 Route::prefix('{notification_id}')->group(function () {
                     Route::get('/', 'Api\Instructor\NotificationController@show');
-                    Route::patch('/', 'Api\Instructor\NotificationController@update');
+                    Route::put('/', 'Api\Instructor\NotificationController@put');
                     Route::delete('/', 'Api\Instructor\NotificationController@delete');
                 });
             });

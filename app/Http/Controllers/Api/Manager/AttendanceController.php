@@ -250,7 +250,7 @@ class AttendanceController extends Controller
                     LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
                     default => throw new Exception('Invalid period'),
                 };
- 
+
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
 

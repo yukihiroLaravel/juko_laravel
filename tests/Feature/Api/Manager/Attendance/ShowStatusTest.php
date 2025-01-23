@@ -42,4 +42,17 @@ class ShowStatusTest extends TestCase
         // assert
         $response->assertStatus(200);
     }
+
+    public function test_無効のパラメータ(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/course/1/attendance/status/invalid');
+
+        // assert
+        $response->assertStatus(500);
+    }
 }

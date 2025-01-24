@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
-use App\Http\Requests\Manager\AttendanceShowStatusRequest;
 use App\Http\Requests\Manager\AttendanceShowRequest;
+use App\Http\Requests\Manager\AttendanceShowStatusRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\LoginRateRequest;
@@ -20,7 +20,6 @@ use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

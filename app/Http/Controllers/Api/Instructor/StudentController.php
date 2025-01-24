@@ -32,15 +32,18 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $courseId = $request->input('course_id');
 
         $loginId = Auth::guard('instructor')->user()->id;
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
-        if ($loginId !== $instructorId) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+        if($courseId !== null){
+            $instructorId = Course::findOrFail($request->course_id)->instructor_id;
+            if ($loginId !== $instructorId) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Not authorized.',
+                ], 403);
+            }
         }
 
         $results = DB::table('attendances')
@@ -57,9 +60,12 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
-            ->where('attendances.course_id', $request->course_id)
+            // course_idのクエリパラメータがある時のみ、条件にcourse_idを含める
+            ->when($courseId, function ($query) use ($courseId) {
+                $query->where('attendances.course_id', $courseId);
+            })
             // ログインしている講師IDを検索
-            ->where('courses.instructor_id', $request->instructor_id)
+            ->where('courses.instructor_id', $loginId)
             ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {

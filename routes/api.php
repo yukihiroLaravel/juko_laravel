@@ -102,11 +102,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                     });
 
-                    // 講師-講座-生徒
-                    Route::prefix('student')->group(function () {
-                        Route::get('index', 'Api\Instructor\StudentController@index');
-                    });
-
                     // 講師-講座-お知らせ
                     Route::prefix('notification')->group(function () {
                         Route::post('/', 'Api\Instructor\NotificationController@store');
@@ -133,6 +128,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
             // 講師-生徒
             Route::prefix('student')->group(function () {
+                // 講師-講座-生徒
+                Route::get('index', 'Api\Instructor\StudentController@index');
                 Route::get('{student_id}', 'Api\Instructor\StudentController@show');
                 Route::post('/', 'Api\Instructor\StudentController@store');
             });

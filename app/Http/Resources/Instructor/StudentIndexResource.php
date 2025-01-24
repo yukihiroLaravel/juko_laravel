@@ -23,11 +23,6 @@ class StudentIndexResource extends JsonResource
         $data = $this->resource['data'];
 
         return [
-            'course' => [
-                'course_id' => $course->id,
-                'image' => $course->image,
-                'title' => $course->title,
-            ],
             'pagination' => [
                 'page' => $data->currentPage(),
                 'total' => $data->total(),
@@ -36,14 +31,13 @@ class StudentIndexResource extends JsonResource
         ];
     }
 
-    private function mapStudents(Collection $results, Course $course)
+    private function mapStudents(Collection $results)
     {
-        return $results->map(function ($result) use ($course) {
+        return $results->map(function ($result) {
             return [
                 'student_id' => $result->student_id,
                 'nick_name' => $result->nick_name,
                 'email' => $result->email,
-                'course_title' => $course->title,
                 'last_login_at' => $result->last_login_at,
                 'attendance' => [
                     'attendance_id' => $result->attendance_id,

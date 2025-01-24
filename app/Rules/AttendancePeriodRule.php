@@ -27,7 +27,8 @@ class AttendancePeriodRule implements ValidationRule
                 Attendance::PERIOD_YEAR,
             ],
             true
-        )) {
+            )
+        ) {
             // エラーを返す
             $fail('The :attribute must be a valid attendance period.');
         }

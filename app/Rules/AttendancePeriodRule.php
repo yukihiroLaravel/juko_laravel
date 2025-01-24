@@ -15,9 +15,10 @@ class AttendancePeriodRule implements ValidationRule
      * @param  \Closure  $fail
      * @return void
      */
-    public function validate($attribute, $value, $fail): void
+    public function validate(string $attribute, mixed $value, \Closure $fail): void
     {
-        if (!in_array(
+        if (
+            !in_array(
             $value,
             [
                 Attendance::PERIOD_WEEK,

@@ -14,14 +14,14 @@ class AttendancePeriodRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            !in_array(
-            $value,
-            [
-                Attendance::PERIOD_WEEK,
-                Attendance::PERIOD_MONTH,
-                Attendance::PERIOD_YEAR,
-            ],
-            true
+            ! in_array(
+                $value,
+                [
+                    Attendance::PERIOD_WEEK,
+                    Attendance::PERIOD_MONTH,
+                    Attendance::PERIOD_YEAR,
+                ],
+                true
             )
         ) {
             // エラーを返す

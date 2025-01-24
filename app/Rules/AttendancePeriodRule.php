@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Model\Attendance;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class AttendancePeriodRule implements ValidationRule
@@ -12,10 +13,10 @@ class AttendancePeriodRule implements ValidationRule
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     * @param  \Closure  $fail
+     * @param  Closure  $fail
      * @return void
      */
-    public function validate(string $attribute, mixed $value, \Closure $fail): void
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
             !in_array(

@@ -47,14 +47,23 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
 
-        $course = Course::find($request->course_id);
+        // クエリパラメータからcourse_idを取得
+        $courseId = (int)$request->query('course_id');
 
-        if (! in_array($course->id, $courseIds, true)) {
-            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+        \Log::info('Instructor ID:', ['instructor_id' => $instructorId]);
+        \Log::info('Instructor IDs (including managings):', ['instructor_ids' => $instructorIds]);
+        \Log::info('Course IDs:', ['course_ids' => $courseIds]);
+        \Log::info('Requested Course ID:', ['course_id' => $courseId]);
+
+        // クエリパラメータにcourse_idが存在する場合の処理
+        if ($courseId) {
+            if (! in_array($courseId, $courseIds, true)) {
+                // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Not authorized.',
+                ], 403);
+            }
         }
 
         $results = DB::table('attendances')
@@ -68,7 +77,9 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->where('attendances.course_id', $request->course_id)
+            ->when($courseId, function ($query) use ($courseId) {
+                $query->where('attendances.course_id', $courseId);
+            })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
@@ -89,10 +100,7 @@ class StudentController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $course = Course::find($request->course_id);
-
         return new StudentIndexResource([
-            'course' => $course,
             'data' => $results,
         ]);
     }

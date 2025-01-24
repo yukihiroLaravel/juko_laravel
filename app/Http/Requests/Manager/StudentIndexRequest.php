@@ -10,7 +10,7 @@ class StudentIndexRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
+            'course_id' => $this->query('course_id'),
         ]);
     }
 
@@ -32,7 +32,7 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'course_id' => ['nullable', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],

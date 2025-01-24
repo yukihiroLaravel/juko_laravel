@@ -16,35 +16,26 @@ class StudentIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        /** @var \App\Model\Course $course */
-        $course = $this->resource['course'];
-
         /** @var \Illuminate\Pagination\LengthAwarePaginator $data */
         $data = $this->resource['data'];
 
         return [
-            'course' => [
-                'course_id' => $course->id,
-                'image' => $course->image,
-                'title' => $course->title,
-            ],
             'pagination' => [
                 'page' => $data->currentPage(),
                 'total' => $data->total(),
             ],
-            'students' => $this->mapStudents($data->getCollection(), $course),
+            'students' => $this->mapStudents($data->getCollection()),
         ];
     }
 
-    private function mapStudents(Collection $results, Course $course)
+    private function mapStudents(Collection $results)
     {
-        return $results->map(function ($result) use ($course) {
+        return $results->map(function ($result) {
             return [
                 'student_id' => $result->student_id,
                 'nick_name' => $result->nick_name,
                 'email' => $result->email,
                 'profile_image' => $result->profile_image,
-                'course_title' => $course->title,
                 'last_login_at' => $result->last_login_at,
                 'attendance' => [
                     'attendance_id' => $result->attendance_id,

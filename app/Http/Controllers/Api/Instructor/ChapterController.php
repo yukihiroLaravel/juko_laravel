@@ -38,6 +38,7 @@ class ChapterController extends Controller
     {
         // チャプターを取得
         $chapter = Chapter::with(['lessons', 'course'])->findOrFail($request->chapter_id);
+        assert($chapter instanceof Chapter);
 
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             // ログインしている講師が作成していないチャプターの更新を許可しない

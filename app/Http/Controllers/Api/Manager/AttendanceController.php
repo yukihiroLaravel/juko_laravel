@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
 use App\Http\Requests\Manager\AttendanceShowStatusRequest;
+use App\Http\Requests\Manager\AttendanceShowRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\LoginRateRequest;
@@ -246,13 +247,11 @@ class AttendanceController extends Controller
         // 完了したレッスンの数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
             $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-                if ($period === LessonAttendance::PERIOD_TODAY) {
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
-                } else {
-                    throw new Exception('Invalid period');
-                }
+                $updatedAtRequestPeriod = match ($period) {
+                    LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
+                    LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
+                    default => throw new Exception('Invalid period'),
+                };
 
                 return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
             });
@@ -276,14 +275,11 @@ class AttendanceController extends Controller
                     ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                     ->count();
 
-                if ($period === LessonAttendance::PERIOD_TODAY) {
-                    // 本日の日付であるか確認し、
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
-                } else {
-                    throw new Exception('Invalid period');
-                }
+                $updatedAtRequestPeriod = match ($period) {
+                    LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
+                    LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
+                    default => throw new Exception('Invalid period'),
+                };
 
                 // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
                 return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);

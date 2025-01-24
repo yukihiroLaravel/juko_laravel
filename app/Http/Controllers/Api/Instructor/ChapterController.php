@@ -19,7 +19,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Chapter\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,10 +34,10 @@ class ChapterController extends Controller
      *
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request, QueryService $queryService)
+    public function show(ChapterShowRequest $request)
     {
         // チャプターを取得
-        $chapter = $queryService->getChapter($request->chapter_id);
+        $chapter = Chapter::with(['lessons', 'course'])->findOrFail($request->chapter_id);
 
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
             // ログインしている講師が作成していないチャプターの更新を許可しない

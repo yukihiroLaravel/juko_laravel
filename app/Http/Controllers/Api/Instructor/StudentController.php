@@ -36,7 +36,7 @@ class StudentController extends Controller
 
         $loginId = Auth::guard('instructor')->user()->id;
 
-        if($courseId !== null){
+        if ($courseId !== null) {
             $instructorId = Course::findOrFail($request->course_id)->instructor_id;
             if ($loginId !== $instructorId) {
                 return response()->json([

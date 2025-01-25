@@ -99,6 +99,7 @@ class StudentController extends Controller
         // リクエストされた受講生を取得
         /** @var Student $student */
         $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

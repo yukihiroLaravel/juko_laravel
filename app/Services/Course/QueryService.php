@@ -17,16 +17,6 @@ class QueryService
     }
 
     /**
-     * 講師IDから講座情報を取得
-     *
-     * @return Collection<Course>
-     */
-    public function getCoursesByInstructorId(int $instructorId): Collection
-    {
-        return Course::where('instructor_id', $instructorId)->get();
-    }
-
-    /**
      * 講師IDのリストから講座情報を取得
      *
      * @param  array<int>  $instructorIds

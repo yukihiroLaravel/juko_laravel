@@ -27,7 +27,7 @@ class StudentIndexResource extends JsonResource
                 'page' => $data->currentPage(),
                 'total' => $data->total(),
             ],
-            'students' => $this->mapStudents($data->getCollection(), $course),
+            'students' => $this->mapStudents($data->getCollection()),
         ];
     }
 

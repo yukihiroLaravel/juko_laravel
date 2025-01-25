@@ -48,7 +48,7 @@ class StudentController extends Controller
             ->toArray();
 
         // クエリパラメータからcourse_idを取得
-        $courseId = (int)$request->query('course_id');
+        $courseId = (int) $request->query('course_id');
 
         \Log::info('Instructor ID:', ['instructor_id' => $instructorId]);
         \Log::info('Instructor IDs (including managings):', ['instructor_ids' => $instructorIds]);

@@ -12,6 +12,8 @@ use App\Model\Course;
 use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +22,8 @@ class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
-     *
-     * @return StudentIndexResource|JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(StudentIndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -39,10 +39,7 @@ class StudentController extends Controller
         if ($courseId !== null) {
             $instructorId = Course::findOrFail($request->course_id)->instructor_id;
             if ($loginId !== $instructorId) {
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Not authorized.',
-                ], 403);
+                throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         }
 
@@ -61,38 +58,33 @@ class StudentController extends Controller
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
             // course_idのクエリパラメータがある時のみ、条件にcourse_idを含める
-            ->when($courseId, function ($query) use ($courseId) {
+            ->when($courseId, function (Builder $query) use ($courseId) {
                 $query->where('attendances.course_id', $courseId);
             })
             // ログインしている講師IDを検索
             ->where('courses.instructor_id', $loginId)
             ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
-                $query->where(function ($query) use ($inputText) {
+                $query->where(function (Builder $query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
                         ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
+            ->when($startDate, function (Builder $query) use ($startDate) {
                 $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
+            ->when($endDate, function (Builder $query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $course = Course::find($request->course_id);
-
-        return new StudentIndexResource([
-            'course' => $course,
-            'data' => $results,
-        ]);
+        return new StudentIndexResource($results);
     }
 
     /**

@@ -37,6 +37,25 @@ class CourseController extends Controller
 
         $courses = $queryService->getPaginatedCoursesByInstructorId($request->instructor_id, 5);
 
+        // 指定した講師の講座一覧を取得
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+        
+        // 各講座に受講中の受講生がいるかを判定
+        $courses->each(function ($course) {
+            $lessonIds = $course->chapters->flatMap(function (Chapter $chapter) {
+                return $chapter->lessons->pluck('id');
+            });
+            // 受講中の受講生がいるかを判定
+            $hasActiveStudents = LessonAttendance::whereIn('lesson_id', $lessonIds)
+                 ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
+                 ->exists();
+
+            // フィールドを追加
+            $course->has_active_students = $hasActiveStudents;
+        });
+
+        $lessonIds = Lesson::where('course_id', $courseId)->pluck('id')->toArray();
+
         return new InstructorCourseIndexResource($courses);
     }
 }

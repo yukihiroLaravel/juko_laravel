@@ -17,32 +17,45 @@ class IndexTest extends TestCase
         $this->seed();
     }
 
-    public function test_生徒一覧取得_成功(): void
+    public function test_受講生一覧取得_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/1/student/index');
+        $response = $this->getJson('/api/v1/instructor/student/index');
 
         // assert
         $response->assertStatus(200);
     }
 
-    public function test_許可がない講師_失敗(): void
+    public function test_講座id指定_受講生一覧取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/1/student/index');
+        $response = $this->getJson('/api/v1/instructor/student/index?course_id=1');
+
+        // assert
+        $response->assertStatus(200);
+    }
+
+    public function test_講座id指定_講師が一致しない_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/instructor/student/index?course_id=2');
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
+            'message' => 'Forbidden, invalid course_id.',
         ]);
     }
 
@@ -53,7 +66,7 @@ class IndexTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/aaa/student/index');
+        $response = $this->getJson('/api/v1/instructor/student/index?course_id=aaa');
 
         // assert
         $response->assertStatus(422);

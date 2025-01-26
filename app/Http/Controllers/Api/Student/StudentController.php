@@ -259,7 +259,6 @@ class StudentController extends Controller
                 'result' => true,
                 'message' => 'Authorization success.',
             ]);
-
         } catch (Exception $e) {
             Log::error($e);
         }

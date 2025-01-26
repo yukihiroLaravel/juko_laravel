@@ -3,31 +3,23 @@
 namespace App\Rules;
 
 use App\Model\LessonAttendance;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class LessonAttendancePeriodRule implements Rule
+class LessonAttendancePeriodRule implements ValidationRule
 {
     /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Determine if the validation rule passes.
+     * Run the validation rule.
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
+     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @return void
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            in_array(
+            !in_array(
                 $value,
                 [
                     LessonAttendance::PERIOD_TODAY,
@@ -36,19 +28,7 @@ class LessonAttendancePeriodRule implements Rule
                 true
             )
         ) {
-            return true;
+            $fail('Invalid Period.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Period.';
     }
 }

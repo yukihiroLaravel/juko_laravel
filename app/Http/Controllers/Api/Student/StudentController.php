@@ -260,38 +260,8 @@ class StudentController extends Controller
                 'message' => 'Authorization success.',
             ]);
 
-<<<<<<< HEAD
-=======
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not Found data to match token.',
-            ], 404);
-        } catch (ExpiredAuthorizationCodeException $e) {
-            $studentAuth->delete();
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Expired authorization period.',
-            ], 406);
-        } catch (TryCountOverAuthorizationCodeException $e) {
-            $studentAuth->delete();
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Not match authorization code three times.',
-            ], 400);
->>>>>>> 68a59ac7b07dad344635d77e5b19aa51ecc0226a
         } catch (Exception $e) {
             Log::error($e);
-<<<<<<< HEAD
-=======
-
-            return response()->json([
-                'result' => false,
-            ], 500);
-
->>>>>>> 68a59ac7b07dad344635d77e5b19aa51ecc0226a
         }
     }
 }

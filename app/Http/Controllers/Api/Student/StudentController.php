@@ -261,6 +261,7 @@ class StudentController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error($e);
+            throw $e;
         }
     }
 }

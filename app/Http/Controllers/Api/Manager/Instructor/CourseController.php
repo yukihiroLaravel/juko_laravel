@@ -39,7 +39,7 @@ class CourseController extends Controller
 
         // 指定した講師の講座一覧を取得
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
-        
+
         // 各講座に受講中の受講生がいるかを判定
         $courses->each(function ($course) {
             $lessonIds = $course->chapters->flatMap(function (Chapter $chapter) {
@@ -47,8 +47,8 @@ class CourseController extends Controller
             });
             // 受講中の受講生がいるかを判定
             $hasActiveStudents = LessonAttendance::whereIn('lesson_id', $lessonIds)
-                 ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
-                 ->exists();
+                ->where('status', LessonAttendance::STATUS_IN_ATTENDANCE)
+                ->exists();
 
             // フィールドを追加
             $course->has_active_students = $hasActiveStudents;

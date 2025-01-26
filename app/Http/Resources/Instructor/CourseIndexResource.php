@@ -20,7 +20,7 @@ class CourseIndexResource extends JsonResource
                 'image' => $course->image,
                 'title' => $course->title,
                 'status' => $course->status,
-                'has_active_students' => (bool)$course->has_active_students
+                'has_active_students' => (bool) $course->has_active_students,
             ];
         });
     }

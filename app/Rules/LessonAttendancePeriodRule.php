@@ -11,15 +11,12 @@ class LessonAttendancePeriodRule implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
      * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     * @return void
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            !in_array(
+            ! in_array(
                 $value,
                 [
                     LessonAttendance::PERIOD_TODAY,

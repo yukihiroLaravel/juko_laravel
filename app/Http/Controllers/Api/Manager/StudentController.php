@@ -15,6 +15,7 @@ use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {
@@ -50,19 +51,11 @@ class StudentController extends Controller
         // クエリパラメータからcourse_idを取得
         $courseId = (int) $request->query('course_id');
 
-        \Log::info('Instructor ID:', ['instructor_id' => $instructorId]);
-        \Log::info('Instructor IDs (including managings):', ['instructor_ids' => $instructorIds]);
-        \Log::info('Course IDs:', ['course_ids' => $courseIds]);
-        \Log::info('Requested Course ID:', ['course_id' => $courseId]);
-
         // クエリパラメータにcourse_idが存在する場合の処理
         if ($courseId) {
             if (! in_array($courseId, $courseIds, true)) {
                 // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
-                return response()->json([
-                    'result' => false,
-                    'message' => 'Not authorized.',
-                ], 403);
+                throw new AuthorizationException('Not authorized.');
             }
         }
 

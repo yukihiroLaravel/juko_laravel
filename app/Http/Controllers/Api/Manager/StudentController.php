@@ -13,9 +13,9 @@ use App\Model\Instructor;
 use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {

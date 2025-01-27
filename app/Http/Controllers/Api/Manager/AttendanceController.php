@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\AttendanceDeleteRequest;
 use App\Http\Requests\Manager\AttendanceShowRequest;
+use App\Http\Requests\Manager\AttendanceShowStatusRequest;
 use App\Http\Requests\Manager\AttendanceStatusRequest;
 use App\Http\Requests\Manager\AttendanceStoreRequest;
 use App\Http\Requests\Manager\LoginRateRequest;
@@ -19,7 +20,6 @@ use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -221,7 +221,7 @@ class AttendanceController extends Controller
     /**
      * 完了済みレッスン数と完了済みチャプター数取得API
      */
-    public function showStatus(Request $request, int $course_id, string $period)
+    public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
     {
         // 現在ログインしているinstructorのidを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -231,7 +231,7 @@ class AttendanceController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        $course = Course::findOrFail($course_id);
+        $course = Course::findOrFail($request->course_id);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分と配下の講師の講座でない場合はエラーを返す
             throw new AuthorizationException(
@@ -240,7 +240,8 @@ class AttendanceController extends Controller
         }
 
         // 出席情報（関連する情報を含む）を取得
-        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $course_id)->get();
+        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        $period = $request->period;
 
         // 完了したレッスンの数を取得
         $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {

@@ -50,9 +50,39 @@ class ShowStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/1/attendance/status/invalid');
+        $response = $this->getJson('/api/v1/manager/course/1000/attendance/status/invalid');
 
         // assert
-        $response->assertStatus(500);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'course_id',
+            'period',
+        ]);
+    }
+
+    public function test_配下ではない講師の講座_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/course/4/attendance/status/today');
+
+        // assert
+        $response->assertStatus(403);
+    }
+
+    public function test_マネージャーではない講師_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/course/2/attendance/status/today');
+
+        // assert
+        $response->assertStatus(403);
     }
 }

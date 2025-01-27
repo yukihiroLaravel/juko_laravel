@@ -103,7 +103,7 @@ class AttendanceController extends Controller
 
             if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
                 throw new AuthorizationException(
-                    'Unauthorized: The authenticated instructor does not have permission to delete this attendance record.'
+                    'Forbidden, invalid instructor_id.'
                 );
             }
 

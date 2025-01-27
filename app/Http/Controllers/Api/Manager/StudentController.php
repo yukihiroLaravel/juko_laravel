@@ -57,7 +57,7 @@ class StudentController extends Controller
             $courseId = (int) $courseId;
             if (! in_array($courseId, $courseIds, true)) {
                 // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
-                throw new AuthorizationException('Not authorized.');
+                throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         }
 

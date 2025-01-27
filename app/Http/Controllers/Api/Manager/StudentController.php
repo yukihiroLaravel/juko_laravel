@@ -13,6 +13,8 @@ use App\Model\Instructor;
 use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -47,14 +49,16 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
 
-        $course = Course::find($request->course_id);
+        // クエリパラメータからcourse_idを取得
+        $courseId = $request->query('course_id');
 
-        if (! in_array($course->id, $courseIds, true)) {
-            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+        // クエリパラメータにcourse_idが存在する場合の処理
+        if ($courseId !== null) {
+            $courseId = (int) $courseId;
+            if (! in_array($courseId, $courseIds, true)) {
+                // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
+                throw new AuthorizationException('Forbidden, invalid course_id.');
+            }
         }
 
         $results = DB::table('attendances')
@@ -68,9 +72,11 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->where('attendances.course_id', $request->course_id)
+            ->when($courseId, function (Builder $query) use ($courseId) {
+                $query->where('attendances.course_id', $courseId);
+            })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
@@ -79,22 +85,17 @@ class StudentController extends Controller
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
+            ->when($startDate, function (Builder $query) use ($startDate) {
                 $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
+            ->when($endDate, function (Builder $query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $course = Course::find($request->course_id);
-
-        return new StudentIndexResource([
-            'course' => $course,
-            'data' => $results,
-        ]);
+        return new StudentIndexResource($results);
     }
 
     /**

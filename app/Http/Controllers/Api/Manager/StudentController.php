@@ -49,10 +49,11 @@ class StudentController extends Controller
             ->toArray();
 
         // クエリパラメータからcourse_idを取得
-        $courseId = (int) $request->query('course_id');
+        $courseId = $request->query('course_id');
 
         // クエリパラメータにcourse_idが存在する場合の処理
-        if ($courseId) {
+        if ($courseId !== null) {
+            $courseId = (int) $courseId;
             if (! in_array($courseId, $courseIds, true)) {
                 // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
                 throw new AuthorizationException('Not authorized.');
@@ -93,9 +94,7 @@ class StudentController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return new StudentIndexResource([
-            'data' => $results,
-        ]);
+        return new StudentIndexResource($results);
     }
 
     /**

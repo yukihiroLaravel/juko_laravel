@@ -16,7 +16,7 @@ class StudentIndexResource extends JsonResource
     public function toArray($request)
     {
         /** @var \Illuminate\Pagination\LengthAwarePaginator $data */
-        $data = $this->resource['data'];
+        $data = $this->resource;
 
         return [
             'pagination' => [

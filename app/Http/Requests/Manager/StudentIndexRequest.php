@@ -7,13 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StudentIndexRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->query('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *

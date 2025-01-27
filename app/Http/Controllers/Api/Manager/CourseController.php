@@ -66,7 +66,7 @@ class CourseController extends Controller
 
         // 自身 もしくは 配下の講師でない場合はエラー応答
         if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new CourseShowResource($course);

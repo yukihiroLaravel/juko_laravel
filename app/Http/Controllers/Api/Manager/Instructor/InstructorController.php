@@ -30,39 +30,9 @@ use RuntimeException;
 class InstructorController extends Controller
 {
     /**
-     * 講師情報取得API
-     *
-     * @return InstructorShowResource|\Illuminate\Http\JsonResponse
-     */
-    public function show(InstructorShowRequest $request)
-    {
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
-        //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-        if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
-        }
-
-        /** @var Instructor $instructor */
-        $instructor = Instructor::findOrFail($request->instructor_id);
-        assert($instructor instanceof Instructor);
-
-        return new InstructorShowResource($instructor);
-    }
-
-    /**
      * 講師一覧取得API
-     *
-     * @return InstructorIndexResource
      */
-    public function index(InstructorIndexRequest $request)
+    public function index(InstructorIndexRequest $request): InstructorIndexResource
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);
@@ -72,8 +42,8 @@ class InstructorController extends Controller
 
         $managerId = Auth::guard('instructor')->user()->id;
 
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
+        assert($manager instanceof Instructor);
 
         // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -84,6 +54,30 @@ class InstructorController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new InstructorIndexResource($instructors);
+    }
+
+    /**
+     * 講師情報取得API
+     */
+    public function show(InstructorShowRequest $request): InstructorShowResource
+    {
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        $manager = Instructor::with('managings')->findOrFail($managerId);
+        assert($manager instanceof Instructor);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
+        if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        $instructor = Instructor::findOrFail($request->instructor_id);
+        assert($instructor instanceof Instructor);
+
+        return new InstructorShowResource($instructor);
     }
 
     /**

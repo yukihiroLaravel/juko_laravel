@@ -21,10 +21,8 @@ class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
-     *
-     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(StudentIndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -99,10 +97,8 @@ class StudentController extends Controller
 
     /**
      * 受講生詳細取得API
-     *
-     * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request)
+    public function show(StudentShowRequest $request): StudentShowResource
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -122,10 +118,7 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid student_id.');
         }
 
         return new StudentShowResource($student);

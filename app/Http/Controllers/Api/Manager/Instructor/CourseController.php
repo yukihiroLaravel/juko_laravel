@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Manager\Instructor;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\InstructorCourseIndexRequest;
+use App\Http\Resources\Manager\InstructorCourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\Manager\InstructorCourseIndexRequest;
-use App\Http\Resources\Manager\InstructorCourseIndexResource;
 
 class CourseController extends Controller
 {

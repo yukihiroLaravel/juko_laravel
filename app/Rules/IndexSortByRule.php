@@ -14,7 +14,7 @@ class IndexSortByRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            !in_array(
+            ! in_array(
                 $value,
                 [
                     Attendance::SORT_BY_NICK_NAME,

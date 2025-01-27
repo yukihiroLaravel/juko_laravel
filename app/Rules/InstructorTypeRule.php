@@ -13,7 +13,7 @@ class InstructorTypeRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!in_array($value, [
+        if (! in_array($value, [
             Instructor::TYPE_MANAGER,
             Instructor::TYPE_INSTRUCTOR,
         ], true)) {

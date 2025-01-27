@@ -13,7 +13,6 @@ use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -29,7 +28,7 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -40,7 +39,9 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = $queryService->getCoursesByInstructorIds($instructorIds);
+        $courses = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
+            ->get();
 
         return new CourseIndexResource($courses);
     }
@@ -50,7 +51,7 @@ class CourseController extends Controller
      *
      * @return CourseShowResource|JsonResponse
      */
-    public function show(CourseShowRequest $request, QueryService $queryService)
+    public function show(CourseShowRequest $request)
     {
         // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -60,11 +61,12 @@ class CourseController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $userId;
 
-        $course = $queryService->getCourse($request->course_id);
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        assert($course instanceof Course);
 
         // 自身 もしくは 配下の講師でない場合はエラー応答
         if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new CourseShowResource($course);

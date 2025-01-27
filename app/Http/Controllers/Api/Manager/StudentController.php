@@ -11,8 +11,9 @@ use App\Http\Resources\Manager\StudentShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
-use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -20,10 +21,8 @@ class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
-     *
-     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(StudentIndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -47,14 +46,16 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
 
-        $course = Course::find($request->course_id);
+        // クエリパラメータからcourse_idを取得
+        $courseId = $request->query('course_id');
 
-        if (! in_array($course->id, $courseIds, true)) {
-            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+        // クエリパラメータにcourse_idが存在する場合の処理
+        if ($courseId !== null) {
+            $courseId = (int) $courseId;
+            if (! in_array($courseId, $courseIds, true)) {
+                // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
+                throw new AuthorizationException('Forbidden, invalid course_id.');
+            }
         }
 
         $results = DB::table('attendances')
@@ -68,9 +69,11 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->where('attendances.course_id', $request->course_id)
+            ->when($courseId, function (Builder $query) use ($courseId) {
+                $query->where('attendances.course_id', $courseId);
+            })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
@@ -79,30 +82,23 @@ class StudentController extends Controller
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
+            ->when($startDate, function (Builder $query) use ($startDate) {
                 $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
+            ->when($endDate, function (Builder $query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $course = Course::find($request->course_id);
-
-        return new StudentIndexResource([
-            'course' => $course,
-            'data' => $results,
-        ]);
+        return new StudentIndexResource($results);
     }
 
     /**
      * 受講生詳細取得API
-     *
-     * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(StudentShowRequest $request): StudentShowResource
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -116,15 +112,13 @@ class StudentController extends Controller
         $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = $queryService->getStudent($request->student_id);
+        $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid student_id.');
         }
 
         return new StudentShowResource($student);

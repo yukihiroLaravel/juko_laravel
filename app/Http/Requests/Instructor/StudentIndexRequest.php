@@ -7,13 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StudentIndexRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -32,7 +25,7 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'course_id' => ['integer', 'exists:courses,id'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],

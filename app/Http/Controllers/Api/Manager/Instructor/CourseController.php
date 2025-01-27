@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Manager\Instructor;
 
+use App\Model\Course;
+use App\Model\Instructor;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Manager\InstructorCourseIndexRequest;
 use App\Http\Resources\Manager\InstructorCourseIndexResource;
-use App\Model\Instructor;
-use App\Services\Course\QueryService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -17,7 +17,7 @@ class CourseController extends Controller
      *
      * @return InstructorCourseIndexResource|JsonResponse
      */
-    public function index(InstructorCourseIndexRequest $request, QueryService $queryService)
+    public function index(InstructorCourseIndexRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -35,7 +35,7 @@ class CourseController extends Controller
             ], 403);
         }
 
-        $courses = $queryService->getPaginatedCoursesByInstructorId($request->instructor_id, 5);
+        $courses = Course::where('instructor_id', $request->instructor_id)->paginate(5);
 
         return new InstructorCourseIndexResource($courses);
     }

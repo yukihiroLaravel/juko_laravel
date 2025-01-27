@@ -11,7 +11,6 @@ use App\Http\Resources\Manager\StudentShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
-use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -102,7 +101,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(StudentShowRequest $request)
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -116,7 +115,8 @@ class StudentController extends Controller
         $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         // リクエストされた受講生を取得
-        $student = $queryService->getStudent($request->student_id);
+        $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();

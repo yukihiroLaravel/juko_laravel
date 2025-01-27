@@ -15,7 +15,6 @@ use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
-use App\Services\Instructor\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -35,13 +34,14 @@ class InstructorController extends Controller
      *
      * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(InstructorShowRequest $request, QueryService $queryService)
+    public function show(InstructorShowRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         /** @var Instructor $manager */
-        $manager = $queryService->getManagerWithManagings($managerId);
+        $manager = Instructor::with('managings')->findOrFail($managerId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
@@ -51,7 +51,8 @@ class InstructorController extends Controller
         }
 
         /** @var Instructor $instructor */
-        $instructor = $queryService->getInstructor($request->instructor_id);
+        $instructor = Instructor::findOrFail($request->instructor_id);
+        assert($instructor instanceof Instructor);
 
         return new InstructorShowResource($instructor);
     }
@@ -61,7 +62,7 @@ class InstructorController extends Controller
      *
      * @return InstructorIndexResource
      */
-    public function index(InstructorIndexRequest $request, QueryService $queryService)
+    public function index(InstructorIndexRequest $request)
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);
@@ -72,13 +73,15 @@ class InstructorController extends Controller
         $managerId = Auth::guard('instructor')->user()->id;
 
         /** @var Instructor $manager */
-        $manager = $queryService->getManagerWithManagings($managerId);
+        $manager = Instructor::with('managings')->findOrFail($managerId);
 
         // 管理する講師のIDを取得
         $instructorIds = $manager->managings->pluck('id')->toArray();
 
         // 講師情報を取得
-        $instructors = $queryService->getPaginatedInstructors($instructorIds, $sortBy, $order, $perPage, $page);
+        $instructors = Instructor::whereIn('id', $instructorIds)
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return new InstructorIndexResource($instructors);
     }

@@ -7,6 +7,9 @@ use Illuminate\Support\Collection;
 
 class StudentIndexResource extends JsonResource
 {
+    /** @var \Illuminate\Pagination\LengthAwarePaginator */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,15 +18,12 @@ class StudentIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        /** @var \Illuminate\Pagination\LengthAwarePaginator $data */
-        $data = $this->resource;
-
         return [
             'pagination' => [
-                'page' => $data->currentPage(),
-                'total' => $data->total(),
+                'page' => $this->resource->currentPage(),
+                'total' => $this->resource->total(),
             ],
-            'students' => $this->mapStudents($data->getCollection()),
+            'students' => $this->mapStudents($this->resource->getCollection()),
         ];
     }
 

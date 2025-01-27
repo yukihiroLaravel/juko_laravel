@@ -14,6 +14,7 @@ use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -71,11 +72,11 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($courseId, function ($query) use ($courseId) {
+            ->when($courseId, function (Builder $query) use ($courseId) {
                 $query->where('attendances.course_id', $courseId);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
@@ -84,10 +85,10 @@ class StudentController extends Controller
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
+            ->when($startDate, function (Builder $query) use ($startDate) {
                 $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
+            ->when($endDate, function (Builder $query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート

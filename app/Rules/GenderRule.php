@@ -3,32 +3,23 @@
 namespace App\Rules;
 
 use App\Enums\Student\Gender;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class GenderRule implements Rule
+class GenderRule implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * バリデーションの実行。
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // 入力値が 'man' または 'woman' であることを検証
-        return collect(Gender::cases())
-            ->filter(fn (Gender $gender) => $gender !== Gender::UNKNOWN)
-            ->contains(fn (Gender $gender) => $gender->label() === $value);
-    }
+        $isValid = collect(Gender::cases())
+            ->filter(fn(Gender $gender) => $gender !== Gender::UNKNOWN)
+            ->contains(fn(Gender $gender) => $gender->label() === $value);
 
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'The :attribute must be either '.Gender::MAN->label().' or '.Gender::WOMAN->label().'.';
+        if (! $isValid) {
+            $fail('The :attribute must be either ' . Gender::MAN->label() . ' or ' . Gender::WOMAN->label() . '.');
+        }
     }
 }

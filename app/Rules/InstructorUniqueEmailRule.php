@@ -3,9 +3,10 @@
 namespace App\Rules;
 
 use App\Model\Instructor;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class InstructorUniqueEmailRule implements Rule
+class InstructorUniqueEmailRule implements ValidationRule
 {
     private string $email;
 
@@ -20,28 +21,17 @@ class InstructorUniqueEmailRule implements Rule
     }
 
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * バリデーションの実行。
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->email && $value === $this->email) {
-            return true;
+            return;
         }
 
-        return Instructor::where('email', $value)->count() === 0;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'The :attribute has already been taken.';
+        if (Instructor::where('email', $value)->count() === 0) {
+        } else {
+            $fail('The :attribute has already been taken.');
+        }
     }
 }

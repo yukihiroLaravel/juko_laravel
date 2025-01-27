@@ -3,42 +3,21 @@
 namespace App\Rules;
 
 use App\Model\Instructor;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class InstructorTypeRule implements Rule
+class InstructorTypeRule implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * バリデーションの実行。
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (
-            in_array(
-                $value,
-                [
-                    Instructor::TYPE_MANAGER,
-                    Instructor::TYPE_INSTRUCTOR,
-                ],
-                true
-            )
-        ) {
-            return true;
+        if (!in_array($value, [
+            Instructor::TYPE_MANAGER,
+            Instructor::TYPE_INSTRUCTOR,
+        ], true)) {
+            $fail('Invalid Type.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Type.';
     }
 }

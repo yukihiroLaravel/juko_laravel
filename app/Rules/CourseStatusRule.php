@@ -3,21 +3,18 @@
 namespace App\Rules;
 
 use App\Model\Course;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class CourseStatusRule implements Rule
+class CourseStatusRule implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * バリデーションの実行。
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            in_array(
+            !in_array(
                 $value,
                 [
                     Course::STATUS_PRIVATE,
@@ -26,19 +23,8 @@ class CourseStatusRule implements Rule
                 true
             )
         ) {
-            return true;
+            // エラーを返す
+            $fail('Invalid Status.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Status.';
     }
 }

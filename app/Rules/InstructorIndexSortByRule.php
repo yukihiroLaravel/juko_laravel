@@ -3,43 +3,22 @@
 namespace App\Rules;
 
 use App\Model\Instructor;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class InstructorIndexSortByRule implements Rule
+class InstructorIndexSortByRule implements ValidationRule
 {
     /**
-     * Create a new rule instance.
-     *
-     * @return void
+     * バリデーションの実行。
      */
-    public function __construct()
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        //
-    }
-
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
-    {
-        return in_array($value, [
+        if (!in_array($value, [
             Instructor::SORT_BY_EMAIL,
             Instructor::SORT_BY_NICK_NAME,
             Instructor::SORT_BY_CREATED_AT,
-        ], true);
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'The :attribute is invalid.';
+        ], true)) {
+            $fail('The :attribute is invalid.');
+        }
     }
 }

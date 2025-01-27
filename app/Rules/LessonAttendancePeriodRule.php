@@ -25,7 +25,7 @@ class LessonAttendancePeriodRule implements ValidationRule
                 true
             )
         ) {
-            $fail('Invalid Period.');
+            $fail('The :attribute must be a valid attendance period.');
         }
     }
 }

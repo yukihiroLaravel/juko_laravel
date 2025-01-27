@@ -14,11 +14,11 @@ class UpdateTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(); 
+        $this->seed();
     }
 
     public function test_お知らせ更新_成功(): void
-    {   
+    {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
@@ -28,7 +28,7 @@ class UpdateTest extends TestCase
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/' . $notification->id, [
+        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => 'update',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
@@ -59,7 +59,7 @@ class UpdateTest extends TestCase
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/' . $notification->id, [
+        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => '', // 空
             'type' => '',  // 空
         ]);
@@ -80,20 +80,20 @@ class UpdateTest extends TestCase
         // arrange
         $unauthorizedInstructor = Instructor::find(2);
         $this->actingAs($unauthorizedInstructor, 'instructor');
-    
+
         $notification = Notification::factory()->create([
             'instructor_id' => 1,
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/' . $notification->id, [
+        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => '権限なしテスト',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
             'end_date' => '2025-01-10 18:00:00',
             'content' => 'これはテストの内容です。',
         ]);
-    
+
         // assert
         $response->assertStatus(403);
         $response->assertJson([

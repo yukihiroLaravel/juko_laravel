@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\AttendanceDeleteRequest;
+use App\Http\Requests\Instructor\Attendance\DeleteRequest;
 use App\Http\Requests\Instructor\AttendanceShowRequest;
 use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
 use App\Http\Requests\Instructor\AttendanceStatusRequest;
@@ -93,7 +93,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況削除API
      */
-    public function delete(AttendanceDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 

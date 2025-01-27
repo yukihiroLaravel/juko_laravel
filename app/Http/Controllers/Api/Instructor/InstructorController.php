@@ -16,7 +16,6 @@ use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
-use App\Services\Instructor\QueryService;
 use App\Services\Instructor\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -37,10 +36,11 @@ class InstructorController extends Controller
      *
      * @return InstructorShowResource
      */
-    public function show(QueryService $queryService)
+    public function show()
     {
         /** @var Instructor $instructor */
-        $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);
+        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
+        assert($instructor instanceof Instructor);
 
         return new InstructorShowResource($instructor);
     }

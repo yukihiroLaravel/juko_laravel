@@ -99,20 +99,28 @@ class NotificationController extends Controller
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
+        
+        DB::beginTransaction();
+        try {
+            Notification::create([
+                'course_id' => $request->course_id,
+                'instructor_id' => Auth::guard('instructor')->user()->id,
+                'title' => $request->title,
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'content' => $request->content,
+            ]);
+            DB::commit();
 
-        Notification::create([
-            'course_id' => $request->course_id,
-            'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title' => $request->title,
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'content' => $request->content,
-        ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch(Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
@@ -133,14 +141,15 @@ class NotificationController extends Controller
 
         // 指定されたお知らせIDでお知らせを取得
         /** @var Notification $notification */
-        $notification = Notification::with(['course'])
-            ->findOrFail($request->notification_id);
+        $notification = Notification::with('course')->findOrFail($request->notification_id);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
+        DB::beginTransaction();
+        try {
         $notification->fill([
             'type' => $request->type,
             'start_date' => $request->start_date,
@@ -149,10 +158,16 @@ class NotificationController extends Controller
             'content' => $request->content,
         ])
             ->save();
+        DB::commit();
 
         return response()->json([
             'result' => true,
         ]);
+        }catch(Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

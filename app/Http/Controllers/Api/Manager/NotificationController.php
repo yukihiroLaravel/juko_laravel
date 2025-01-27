@@ -99,7 +99,7 @@ class NotificationController extends Controller
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
-        
+
         DB::beginTransaction();
         try {
             Notification::create([
@@ -116,7 +116,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;
@@ -150,20 +150,20 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-        $notification->fill([
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'title' => $request->title,
-            'content' => $request->content,
-        ])
-            ->save();
-        DB::commit();
+            $notification->fill([
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'title' => $request->title,
+                'content' => $request->content,
+            ])
+                ->save();
+            DB::commit();
 
-        return response()->json([
-            'result' => true,
-        ]);
-        }catch(Exception $e) {
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;

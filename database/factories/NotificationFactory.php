@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class NotificationFactory extends Factory
 {
     protected $model = Notification::class;
+
     /**
      * Define the model's default state.
      *

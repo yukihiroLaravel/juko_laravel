@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\NotificationBulkDeleteRequest;
 use App\Http\Requests\Instructor\NotificationDeleteRequest;
 use App\Http\Requests\Instructor\NotificationIndexRequest;
+use App\Http\Requests\Instructor\NotificationPutRequest;
 use App\Http\Requests\Instructor\NotificationPutTypeRequest;
 use App\Http\Requests\Instructor\NotificationShowRequest;
 use App\Http\Requests\Instructor\NotificationStoreRequest;
-use App\Http\Requests\Instructor\NotificationUpdateRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
 use Exception;
@@ -61,39 +62,66 @@ class NotificationController extends Controller
      */
     public function store(NotificationStoreRequest $request): JsonResponse
     {
-        Notification::create([
-            'course_id' => $request->course_id,
-            'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title' => $request->title,
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'content' => $request->content,
-        ]);
+        $course = Course::findOrFail($request->course_id);
 
-        return response()->json([
-            'result' => true,
-        ]);
+        if ($course->instructor_id !== Auth::guard('instructor')->user()->id) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            Notification::create([
+                'course_id' => $request->course_id,
+                'instructor_id' => Auth::guard('instructor')->user()->id,
+                'title' => $request->title,
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'content' => $request->content,
+            ]);
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
      * お知らせ更新API
      */
-    public function update(NotificationUpdateRequest $request): JsonResponse
+    public function put(NotificationPutRequest $request): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
-        $notification->fill([
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'title' => $request->title,
-            'content' => $request->content,
-        ])
-            ->save();
 
-        return response()->json([
-            'result' => true,
-        ]);
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $notification->fill([
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'title' => $request->title,
+                'content' => $request->content,
+            ])
+                ->save();
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

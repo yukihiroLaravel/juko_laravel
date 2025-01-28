@@ -109,20 +109,20 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
-                        Route::get('status', 'Api\Instructor\AttendanceController@show');
-                        Route::get('{period}', 'Api\Instructor\AttendanceController@loginRate');
-                        Route::get('status/{period}', 'Api\Instructor\AttendanceController@showStatus');
+                        Route::get('status', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
+                        Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate']);
+                        Route::get('status/{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
                     });
                 });
             });
 
             // 講師-受講
             Route::prefix('attendance')->group(function () {
-                Route::post('/', 'Api\Instructor\AttendanceController@store');
+                Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);
                 // 講師-生徒学習状況
                 Route::prefix('{attendance_id}')->group(function () {
-                    Route::get('status', 'Api\Instructor\AttendanceController@status');
-                    Route::delete('/', 'Api\Instructor\AttendanceController@delete');
+                    Route::get('status', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'status']);
+                    Route::delete('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'delete']);
                 });
             });
 

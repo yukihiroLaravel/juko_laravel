@@ -14,7 +14,7 @@ class LessonAttendanceStatusRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            !in_array(
+            ! in_array(
                 $value,
                 [
                     LessonAttendance::STATUS_IN_ATTENDANCE,

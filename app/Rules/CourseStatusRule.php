@@ -24,7 +24,7 @@ class CourseStatusRule implements ValidationRule
             )
         ) {
             // エラーを返す
-            $fail('Invalid Status.');
+            $fail('The :attribute must be a valid attendance period.');
         }
     }
 }

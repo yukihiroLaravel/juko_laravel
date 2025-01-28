@@ -13,12 +13,18 @@ class InstructorIndexSortByRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!in_array($value, [
-            Instructor::SORT_BY_EMAIL,
-            Instructor::SORT_BY_NICK_NAME,
-            Instructor::SORT_BY_CREATED_AT,
-        ], true)) {
-            $fail('The :attribute is invalid.');
+        if (
+            !in_array(
+                $value,
+                [
+                    Instructor::SORT_BY_EMAIL,
+                    Instructor::SORT_BY_NICK_NAME,
+                    Instructor::SORT_BY_CREATED_AT,
+                ],
+                true
+            )
+        ) {
+            $fail('The :attribute must be a valid attendance period.');
         }
     }
 }

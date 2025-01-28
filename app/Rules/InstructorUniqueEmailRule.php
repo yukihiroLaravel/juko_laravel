@@ -29,8 +29,7 @@ class InstructorUniqueEmailRule implements ValidationRule
             return;
         }
 
-        if (Instructor::where('email', $value)->count() === 0) {
-        } else {
+        if (Instructor::where('email', $value)->exists()) {
             $fail('The :attribute has already been taken.');
         }
     }

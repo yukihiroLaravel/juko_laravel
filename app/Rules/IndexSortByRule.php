@@ -25,7 +25,7 @@ class IndexSortByRule implements ValidationRule
                 true
             )
         ) {
-            $fail('Invalid Sort By Name.');
+            $fail('The :attribute must be a valid attendance period.');
         }
     }
 }

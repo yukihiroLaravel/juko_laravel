@@ -10,7 +10,6 @@ use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
-use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Query\Builder;
@@ -92,7 +91,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(StudentShowRequest $request)
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -101,16 +100,13 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // リクエストされた受講生を取得
-        /** @var Student $student */
-        $student = $queryService->getStudent($request->student_id);
+        $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);

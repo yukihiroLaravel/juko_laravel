@@ -3,9 +3,10 @@
 namespace App\Rules;
 
 use App\Model\Student;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class StudentUniqueEmailRule implements Rule
+class StudentUniqueEmailRule implements ValidationRule
 {
     protected $email;
 
@@ -14,19 +15,20 @@ class StudentUniqueEmailRule implements Rule
         $this->email = $email;
     }
 
-    public function passes($attribute, $value)
+    /**
+     * バリデーションの実行。
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // 自分自身のメールアドレスの場合は無視
         if ($this->email && $value === $this->email) {
-            return true;
+            return;
         }
 
         // メールアドレスが一意かどうかを確認
-        return Student::where('email', $value)->count() === 0;
-    }
-
-    public function message()
-    {
-        return 'The :attribute has already been taken.';
+        if (Student::where('email', $value)->exists()) {
+            // エラーを返す
+            $fail('The :attribute has already been taken.');
+        }
     }
 }

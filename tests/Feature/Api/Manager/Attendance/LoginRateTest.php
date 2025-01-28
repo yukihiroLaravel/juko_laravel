@@ -52,8 +52,6 @@ class LoginRateTest extends TestCase
         // act
         $response = $this->getJson('/api/v1/manager/course/aaa/attendance/bbb');
 
-        $response->dump();
-
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([

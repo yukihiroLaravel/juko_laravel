@@ -24,7 +24,8 @@ class InstructorIndexSortByRule implements ValidationRule
                 true
             )
         ) {
-            $fail('The :attribute must be a valid attendance period.');
+            // エラーを返す
+            $fail('The :attribute must be a valid sort by name.');
         }
     }
 }

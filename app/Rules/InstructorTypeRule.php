@@ -23,7 +23,7 @@ class InstructorTypeRule implements ValidationRule
                 true
             )
         ) {
-            $fail('The :attribute must be a valid attendance period.');
+            $fail('The :attribute must be a valid instructor type.');
         }
     }
 }

@@ -3,31 +3,18 @@
 namespace App\Rules;
 
 use App\Model\LessonAttendance;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class LessonAttendanceStatusRule implements Rule
+class LessonAttendanceStatusRule implements ValidationRule
 {
     /**
-     * Create a new rule instance.
-     *
-     * @return void
+     * バリデーションの実行。
      */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            in_array(
+            !in_array(
                 $value,
                 [
                     LessonAttendance::STATUS_IN_ATTENDANCE,
@@ -37,19 +24,8 @@ class LessonAttendanceStatusRule implements Rule
                 true
             )
         ) {
-            return true;
+            // エラーを返す
+            $fail('The :attribute must be a valid status.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Status.';
     }
 }

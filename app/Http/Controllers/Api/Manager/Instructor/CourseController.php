@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\InstructorCourseIndexRequest;
 use App\Http\Resources\Manager\InstructorCourseIndexResource;
+use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,28 +15,24 @@ class CourseController extends Controller
 {
     /**
      * 講師-講座情報一覧取得API
-     *
-     * @return InstructorCourseIndexResource|JsonResponse
      */
-    public function index(InstructorCourseIndexRequest $request, QueryService $queryService)
+    public function index(InstructorCourseIndexRequest $request): InstructorCourseIndexResource|JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
+        assert($manager instanceof Instructor);
+
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Forbidden.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $courses = $queryService->getPaginatedCoursesByInstructorId($request->instructor_id, 5);
+        $courses = Course::where('instructor_id', $request->instructor_id)->paginate(5);
 
         return new InstructorCourseIndexResource($courses);
     }

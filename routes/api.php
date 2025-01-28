@@ -209,8 +209,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::get('{period}', 'Api\Manager\AttendanceController@loginRate');
                             Route::prefix('status')->group(function () {
                                 Route::get('/', 'Api\Manager\AttendanceController@show');
-                                Route::get('this-month', 'Api\Manager\AttendanceController@showStatusThisMonth');
-                                Route::get('today', 'Api\Manager\AttendanceController@showStatusToday');
+                                Route::get('{period}', 'Api\Manager\AttendanceController@showStatus');
                             });
                         });
                     });

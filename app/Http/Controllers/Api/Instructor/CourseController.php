@@ -28,12 +28,14 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(QueryService $queryService)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // 講座情報を取得（受講中の生徒の有無を含む）
+        $paginatedCourses = $queryService->getPaginatedCoursesWithActiveStudents($instructorId, 5);
 
-        return new CourseIndexResource($courses);
+        return CourseIndexResource::collection($paginatedCourses);
     }
 
     /**

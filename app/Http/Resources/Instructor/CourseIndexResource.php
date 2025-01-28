@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Model\Attendance;
 
 class CourseIndexResource extends JsonResource
 {
@@ -14,14 +15,12 @@ class CourseIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($course) {
             return [
-                'course_id' => $course->id,
-                'image' => $course->image,
-                'title' => $course->title,
-                'status' => $course->status,
-                'has_active_students' => (bool)$course->has_active_students
+                'course_id' => $this->id,
+                'image' => $this->image,
+                'title' => $this->title,
+                'status' => $this->status,
+                'has_active_students' => (bool) $this->has_active_students,
             ];
-        });
     }
 }

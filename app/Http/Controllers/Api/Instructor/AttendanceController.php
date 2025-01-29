@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
-use App\Http\Requests\Instructor\AttendanceShowRequest;
-use App\Http\Requests\Instructor\AttendanceShowStatusRequest;
-use App\Http\Requests\Instructor\AttendanceStatusRequest;
-use App\Http\Requests\Instructor\AttendanceStoreRequest;
+use App\Http\Requests\Instructor\Attendance\ShowRequest;
+use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
+use App\Http\Requests\Instructor\Attendance\StatusRequest;
+use App\Http\Requests\Instructor\Attendance\StoreRequest;
 use App\Http\Requests\Instructor\LoginRateRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Instructor\AttendanceStatusResource;
@@ -30,7 +30,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(AttendanceStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $attendance = Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)
@@ -74,7 +74,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況取得API
      */
-    public function show(AttendanceShowRequest $request): AttendanceShowResource
+    public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
 
@@ -165,7 +165,7 @@ class AttendanceController extends Controller
     /**
      * 完了済みレッスン数と完了済みチャプター数取得API
      */
-    public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
+    public function showStatus(ShowStatusRequest $request): JsonResponse
     {
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
         $period = $request->period;
@@ -227,15 +227,13 @@ class AttendanceController extends Controller
 
     /**
      * 受講状況API
-     *
-     * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(AttendanceStatusRequest $request)
+    public function status(StatusRequest $request): AttendanceStatusResource
     {
         $attendanceId = $request->attendance_id;
 
-        /** @var Attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+        assert($attendance instanceof Attendance);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             throw new AuthorizationException(

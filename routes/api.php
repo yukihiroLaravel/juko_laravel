@@ -109,9 +109,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
-                        Route::get('status', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
+                        Route::prefix('status')->group(function () {
+                            Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
+                            Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
+                        });
                         Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate']);
-                        Route::get('status/{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
                     });
                 });
             });
@@ -206,11 +208,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         });
                         //マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
-                            Route::get('{period}', 'Api\Manager\AttendanceController@loginRate');
                             Route::prefix('status')->group(function () {
                                 Route::get('/', 'Api\Manager\AttendanceController@show');
                                 Route::get('{period}', 'Api\Manager\AttendanceController@showStatus');
                             });
+                            Route::get('{period}', 'Api\Manager\AttendanceController@loginRate');
                         });
                     });
                 });

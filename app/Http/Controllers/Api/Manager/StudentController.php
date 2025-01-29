@@ -14,7 +14,6 @@ use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -53,9 +52,9 @@ class StudentController extends Controller
         $requestedCourseIds = $request->input('courses', []);
 
         // 指定された講座IDが有効かどうかチェック
-        if (!empty($requestedCourseIds)) {
+        if (! empty($requestedCourseIds)) {
             foreach ($requestedCourseIds as $courseId) {
-                if (!in_array($courseId, $courseIds, true)) {
+                if (! in_array($courseId, $courseIds, true)) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             }
@@ -73,12 +72,13 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             // 複数の講座IDで絞り込み
-            ->when(!empty($requestedCourseIds), function ($query) use ($requestedCourseIds) {
+            ->when(! empty($requestedCourseIds), function ($query) use ($requestedCourseIds) {
                 return $query->whereIn('attendances.course_id', $requestedCourseIds);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function ($query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
+
                 return $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")

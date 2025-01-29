@@ -25,14 +25,15 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['nullable', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
+            'per_page' => ['nullable', 'integer', 'min:1'],
+            'page' => ['nullable', 'integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
-            'input_text' => ['string'],
-            'start_date' => ['date_format:Y-m-d H:i:s'],
-            'end_date' => ['date_format:Y-m-d H:i:s'],
+            'input_text' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date_format:Y-m-d H:i:s'],
+            'end_date' => ['nullable', 'date_format:Y-m-d H:i:s'],
+            'courses' => ['nullable', 'array'], // 配列であることを指定
+            'courses.*' => ['integer', 'distinct', 'exists:courses,id'], // 配列の各要素が整数で重複しないこと
         ];
     }
 }

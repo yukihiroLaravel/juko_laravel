@@ -35,12 +35,12 @@ class StudentController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $instructorId = $request->user()->id; //Instracter側との違い確認
+        $instructorId = $request->user()->id;
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
 
-        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds = $manager->managings->pluck('id');
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座IDのリストを取得
@@ -49,15 +49,15 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
 
-        // クエリパラメータからcourse_idを取得
-        $courseId = $request->query('course_id');
+        // クエリパラメータからcourses（配列）を取得
+        $requestedCourseIds = $request->input('courses', []);
 
-        // クエリパラメータにcourse_idが存在する場合の処理
-        if ($courseId !== null) {
-            $courseId = (int) $courseId;
-            if (! in_array($courseId, $courseIds, true)) {
-                // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
-                throw new AuthorizationException('Forbidden, invalid course_id.');
+        // 指定された講座IDが有効かどうかチェック
+        if (!empty($requestedCourseIds)) {
+            foreach ($requestedCourseIds as $courseId) {
+                if (!in_array($courseId, $courseIds, true)) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
             }
         }
 
@@ -72,24 +72,25 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($courseId, function (Builder $query) use ($courseId) {
-                $query->where('attendances.course_id', $courseId);
+            // 複数の講座IDで絞り込み
+            ->when(!empty($requestedCourseIds), function ($query) use ($requestedCourseIds) {
+                return $query->whereIn('attendances.course_id', $requestedCourseIds);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function (Builder $query) use ($inputText) {
+            ->when($inputText, function ($query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
-                $query->where(function ($query) use ($inputText) {
+                return $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
                         ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
-            ->when($startDate, function (Builder $query) use ($startDate) {
-                $query->where('attendances.created_at', '>=', $startDate);
+            ->when($startDate, function ($query) use ($startDate) {
+                return $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function (Builder $query) use ($endDate) {
-                $query->where('attendances.created_at', '<=', $endDate);
+            ->when($endDate, function ($query) use ($endDate) {
+                return $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)

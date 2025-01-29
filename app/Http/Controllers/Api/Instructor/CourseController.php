@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
 use App\Http\Requests\Instructor\CoursePutStatusRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
+use App\Http\Requests\Instructor\CourseIndexRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
@@ -28,14 +29,23 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService)
+    public function index(CourseIndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // $courses = $queryService->getCoursesByInstructorId($instructorId);
-        // 講座情報を取得（受講中の生徒の有無を含む）
-        $paginatedCourses = $queryService->getPaginatedCoursesWithActiveStudents($instructorId, 5);
+        // 講座情報を取得
+        $perPage = $request->validated()['per_page'];
+        $courses = Course::where('instructor_id', $instructorId)->paginate($perPage);
 
-        return CourseIndexResource::collection($paginatedCourses);
+        // 各講座に受講中の生徒がいるかを判定
+        $courses->getCollection()->transform(function (Course $course) {
+            $course->has_active_students = Attendance::where('course_id', $course->id)
+                ->where('progress', '>', 0)
+                ->exists();
+            return $course;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services\Course;
+
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -49,10 +50,6 @@ class QueryService
 
     /**
      * 講師IDから講座情報を取得（受講中の生徒の有無を含む）
-     *
-     * @param int $instructorId
-     * @param int $perPage
-     * @return LengthAwarePaginator
      */
     public function getPaginatedCoursesWithActiveStudents(int $instructorId, int $perPage): LengthAwarePaginator
     {
@@ -64,6 +61,7 @@ class QueryService
             $course->has_active_students = Attendance::where('course_id', $course->id)
                 ->where('progress', '>', 0) // 進捗がある場合
                 ->exists();
+
             return $course;
         });
 

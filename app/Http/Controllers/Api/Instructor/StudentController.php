@@ -31,14 +31,16 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $courseId = $request->input('course_id');
+        $courseIds = $request->input('course_ids', []); //複数のコースIDを取得
 
         $loginId = Auth::guard('instructor')->user()->id;
 
-        if ($courseId !== null) {
-            $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-            if ($loginId !== $instructorId) {
-                throw new AuthorizationException('Forbidden, invalid course_id.');
+        if (! empty($courseIds)) { //配列が空でない場合
+            foreach ($courseIds as $courseId) {
+                $instructorId = Course::findOrFail($courseId)->instructor_id;
+                if ($loginId !== $instructorId) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
             }
         }
 
@@ -56,9 +58,9 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
-            // course_idのクエリパラメータがある時のみ、条件にcourse_idを含める
-            ->when($courseId, function (Builder $query) use ($courseId) {
-                $query->where('attendances.course_id', $courseId);
+            // コース指定が空でないときに一致するレコードを取得
+            ->when(!empty($courseIds), function (Builder $query) use ($courseIds) {
+                $query->whereIn('attendances.course_id', $courseIds);
             })
             // ログインしている講師IDを検索
             ->where('courses.instructor_id', $loginId)

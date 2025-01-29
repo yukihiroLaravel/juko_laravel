@@ -25,7 +25,8 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['integer', 'exists:courses,id'],
+            'course_ids' => ['array'],
+            'course_ids.*' => ['integer', 'exists:courses,id'], // 配列内の全ての要素に対して
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],

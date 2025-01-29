@@ -15,6 +15,7 @@ use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {
@@ -50,11 +51,7 @@ class StudentController extends Controller
         $course = Course::find($request->course_id);
 
         if (! in_array($course->id, $courseIds, true)) {
-            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+            throw new AuthorizationException('Not authorized.');
         }
 
         $results = DB::table('attendances')
@@ -121,10 +118,7 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Not authorized.');
         }
 
         return new StudentShowResource($student);

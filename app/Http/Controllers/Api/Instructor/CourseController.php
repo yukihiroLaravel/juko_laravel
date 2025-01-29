@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\CourseDeleteRequest;
+use App\Http\Requests\Instructor\CourseIndexRequest;
 use App\Http\Requests\Instructor\CoursePutStatusRequest;
 use App\Http\Requests\Instructor\CourseShowRequest;
-use App\Http\Requests\Instructor\CourseIndexRequest;
 use App\Http\Requests\Instructor\CourseStoreRequest;
 use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
@@ -42,6 +42,7 @@ class CourseController extends Controller
             $course->has_active_students = Attendance::where('course_id', $course->id)
                 ->where('progress', '>', 0)
                 ->exists();
+
             return $course;
         });
 

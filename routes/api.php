@@ -74,17 +74,17 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::delete('/', 'Api\Instructor\CourseController@delete');
                     // 講師-講座-チャプター
                     Route::prefix('chapter')->group(function () {
-                        Route::post('/', 'Api\Instructor\ChapterController@store');
-                        Route::post('sort', 'Api\Instructor\ChapterController@sort');
-                        Route::put('status', 'Api\Instructor\ChapterController@putStatus');
-                        Route::patch('status', 'Api\Instructor\ChapterController@patchStatus');
-                        Route::delete('/', 'Api\Instructor\ChapterController@bulkDelete');
-                        Route::delete('all', 'Api\Instructor\ChapterController@deleteAll');
+                        Route::post('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'store']);
+                        Route::post('sort', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'sort']);
+                        Route::put('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'putStatus']);
+                        Route::patch('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'patchStatus']);
+                        Route::delete('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'bulkDelete']);
+                        Route::delete('all', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'deleteAll']);
                         Route::prefix('{chapter_id}')->group(function () {
-                            Route::get('/', 'Api\Instructor\ChapterController@show');
-                            Route::patch('/', 'Api\Instructor\ChapterController@update');
-                            Route::patch('status', 'Api\Instructor\ChapterController@updateStatus');
-                            Route::delete('/', 'Api\Instructor\ChapterController@delete');
+                            Route::get('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'show']);
+                            Route::patch('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'update']);
+                            Route::patch('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'updateStatus']);
+                            Route::delete('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'delete']);
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', 'Api\Instructor\LessonController@store');

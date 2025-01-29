@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Attendance;
 
 use App\Rules\LessonAttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceShowStatusRequest extends FormRequest
+class ShowStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

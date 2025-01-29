@@ -9,9 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class LessonAttendancePeriodRule implements ValidationRule
 {
     /**
-     * Run the validation rule.
-     *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * バリデーションの実行。
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -25,6 +23,7 @@ class LessonAttendancePeriodRule implements ValidationRule
                 true
             )
         ) {
+            // エラーを返す
             $fail('The :attribute must be a valid attendance period.');
         }
     }

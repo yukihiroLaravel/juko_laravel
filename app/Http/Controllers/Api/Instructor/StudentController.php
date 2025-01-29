@@ -59,7 +59,7 @@ class StudentController extends Controller
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
             // コース指定が空でないときに一致するレコードを取得
-            ->when(!empty($courseIds), function (Builder $query) use ($courseIds) {
+            ->when(! empty($courseIds), function (Builder $query) use ($courseIds) {
                 $query->whereIn('attendances.course_id', $courseIds);
             })
             // ログインしている講師IDを検索

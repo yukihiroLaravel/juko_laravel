@@ -227,15 +227,13 @@ class AttendanceController extends Controller
 
     /**
      * 受講状況API
-     *
-     * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(StatusRequest $request)
+    public function status(StatusRequest $request): AttendanceStatusResource
     {
         $attendanceId = $request->attendance_id;
 
-        /** @var Attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+        assert($attendance instanceof Attendance);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             throw new AuthorizationException(

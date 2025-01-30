@@ -60,18 +60,18 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
         Route::prefix('instructor')->group(function () {
-            Route::get('/', 'Api\Instructor\InstructorController@show');
-            Route::post('update', 'Api\Instructor\InstructorController@update');
+            Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
+            Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
             // 講師-講座
             Route::prefix('course')->group(function () {
-                Route::get('index', 'Api\Instructor\CourseController@index');
-                Route::post('/', 'Api\Instructor\CourseController@store');
-                Route::put('status', 'Api\Instructor\CourseController@putStatus');
+                Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
+                Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);
+                Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
                 Route::prefix('{course_id}')->group(function () {
-                    Route::get('/', 'Api\Instructor\CourseController@show');
-                    Route::post('/', 'Api\Instructor\CourseController@update');
-                    Route::delete('/', 'Api\Instructor\CourseController@delete');
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
+                    Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'update']);
+                    Route::delete('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'delete']);
                     // 講師-講座-チャプター
                     Route::prefix('chapter')->group(function () {
                         Route::post('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'store']);
@@ -252,7 +252,7 @@ Route::prefix('v1')->group(function () {
         Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
     });
     Route::prefix('instructor')->group(function () {
-        Route::post('/', 'Api\Instructor\InstructorController@store');
-        Route::post('verification/{token}', 'Api\Instructor\InstructorController@verifyCode');
+        Route::post('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'store']);
+        Route::post('verification/{token}', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'verifyCode']);
     });
 });

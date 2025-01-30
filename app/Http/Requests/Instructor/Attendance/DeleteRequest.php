@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Attendance;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceStatusRequest extends FormRequest
+class DeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

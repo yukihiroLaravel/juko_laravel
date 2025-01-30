@@ -17,6 +17,13 @@ class LessonAttendancePatchRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'lesson_attendance_id' => $this->route('lesson_attendance_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,7 +32,7 @@ class LessonAttendancePatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id'],
+            'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id,deleted_at,NULL'],
             'status' => ['required', new LessonAttendanceStatusRule],
         ];
     }

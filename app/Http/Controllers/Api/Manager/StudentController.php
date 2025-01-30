@@ -13,9 +13,9 @@ use App\Model\Instructor;
 use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class StudentController extends Controller
 {
@@ -38,7 +38,7 @@ class StudentController extends Controller
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
-
+        
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
@@ -51,7 +51,11 @@ class StudentController extends Controller
         $course = Course::find($request->course_id);
 
         if (! in_array($course->id, $courseIds, true)) {
-            throw new AuthorizationException('Not authorized.');
+            // リクエストされた講座が自身または配下の講師の講座に所属しているか確認
+            return response()->json([
+                'result' => false,
+                'message' => 'Not authorized.',
+            ], 403);
         }
 
         $results = DB::table('attendances')
@@ -118,11 +122,11 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Not authorized.');
-        }
-
-        return new StudentShowResource($student);
+            throw new AuthorizationException('Forbidden, not allowed to access this course.');
     }
+
+    return new StudentShowResource($student);
+}
 
     /**
      * 受講生登録API

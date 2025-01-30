@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Manager;
 
 use App\Rules\LessonAttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;

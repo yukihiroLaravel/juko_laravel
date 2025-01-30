@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Instructor\Attendance;
 
+use App\Rules\LessonAttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceShowThisMonthRequest extends FormRequest
+class ShowStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,6 +26,7 @@ class AttendanceShowThisMonthRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'period' => ['required', 'string', new LessonAttendancePeriodRule],
         ];
     }
 
@@ -32,6 +34,7 @@ class AttendanceShowThisMonthRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
+            'period' => $this->route('period'),
         ]);
     }
 }

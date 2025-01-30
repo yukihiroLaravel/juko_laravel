@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Chapter;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterSortRequest extends FormRequest
+class PatchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,6 +20,7 @@ class ChapterSortRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -32,9 +33,8 @@ class ChapterSortRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapters' => ['required', 'array'],
-            'chapters.*.chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'chapters.*.order' => ['required', 'integer'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'title' => ['required', 'string'],
         ];
     }
 }

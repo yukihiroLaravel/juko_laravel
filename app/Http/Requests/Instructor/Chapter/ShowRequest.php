@@ -1,12 +1,19 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Chapter;
 
-use App\Rules\ChapterStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterUpdateStatusRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -17,14 +24,6 @@ class ChapterUpdateStatusRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -33,9 +32,8 @@ class ChapterUpdateStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

@@ -25,8 +25,8 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'per_page' => ['nullable', 'integer', 'min:1'],
-            'page' => ['nullable', 'integer', 'min:1'],
+            'per_page' => ['integer', 'min:1'],
+            'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
             'input_text' => ['string'],

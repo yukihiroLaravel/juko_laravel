@@ -29,11 +29,11 @@ class StudentIndexRequest extends FormRequest
             'page' => ['nullable', 'integer', 'min:1'],
             'sort_by' => ['string', new IndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
-            'input_text' => ['nullable', 'string'],
-            'start_date' => ['nullable', 'date_format:Y-m-d H:i:s'],
-            'end_date' => ['nullable', 'date_format:Y-m-d H:i:s'],
-            'courses' => ['nullable', 'array'], // 配列であることを指定
-            'courses.*' => ['integer', 'distinct', 'exists:courses,id'], // 配列の各要素が整数で重複しないこと
+            'input_text' => ['string'],
+            'start_date' => ['date_format:Y-m-d H:i:s'],
+            'end_date' => ['date_format:Y-m-d H:i:s'],
+            'courses' => ['array'], // 配列であることを指定
+            'courses.*' => ['integer', 'distinct', 'exists:courses,id,deleted_at,NULL'], // 配列の各要素が整数で重複しないこと
         ];
     }
 }

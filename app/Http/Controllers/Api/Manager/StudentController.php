@@ -14,7 +14,7 @@ use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +40,7 @@ class StudentController extends Controller
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
 
-        $instructorIds = $manager->managings->pluck('id');
+        $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座IDのリストを取得
@@ -73,24 +73,24 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             // 複数の講座IDで絞り込み
-            ->when(!empty($requestedCourseIds), function ($query) use ($requestedCourseIds) {
+            ->when(!empty($requestedCourseIds), function (Builder $query) use ($requestedCourseIds) {
                 return $query->whereIn('attendances.course_id', $requestedCourseIds);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
-                return $query->where(function ($query) use ($inputText) {
+                $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
                         ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
-                return $query->where('attendances.created_at', '>=', $startDate);
+            ->when($startDate, function (Builder $query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
-                return $query->where('attendances.created_at', '<=', $endDate);
+            ->when($endDate, function (Builder $query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)

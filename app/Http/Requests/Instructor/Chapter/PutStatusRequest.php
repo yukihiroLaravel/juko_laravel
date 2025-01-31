@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Chapter;
 
+use App\Rules\ChapterStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterDeleteAllRequest extends FormRequest
+class PutStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,6 +17,13 @@ class ChapterDeleteAllRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,13 +33,7 @@ class ChapterDeleteAllRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'status' => ['required', 'string', new ChapterStatusRule],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
     }
 }

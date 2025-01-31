@@ -53,9 +53,9 @@ class StudentController extends Controller
         $requestedCourseIds = $request->input('courses', []);
 
         // 指定された講座IDが有効かどうかチェック
-        if (!empty($requestedCourseIds)) {
+        if (! empty($requestedCourseIds)) {
             foreach ($requestedCourseIds as $courseId) {
-                if (!in_array($courseId, $courseIds, true)) {
+                if (! in_array($courseId, $courseIds, true)) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             }

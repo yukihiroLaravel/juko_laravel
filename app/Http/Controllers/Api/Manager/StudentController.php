@@ -73,7 +73,7 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             // 複数の講座IDで絞り込み
-            ->when(!empty($requestedCourseIds), function (Builder $query) use ($requestedCourseIds) {
+            ->when(! empty($requestedCourseIds), function (Builder $query) use ($requestedCourseIds) {
                 return $query->whereIn('attendances.course_id', $requestedCourseIds);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）

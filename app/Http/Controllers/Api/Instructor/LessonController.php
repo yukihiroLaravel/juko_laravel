@@ -397,11 +397,11 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course_id) {
+                if ($courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ((int) $chapterId !== $lesson->chapter_id) {
+                if ($chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });

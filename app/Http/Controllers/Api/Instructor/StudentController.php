@@ -31,17 +31,19 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $courseIds = $request->input('course_ids', []); //複数のコースIDを取得
+        $courseIds = $request->input('courses', []); //複数のコースIDを取得
 
         $loginId = Auth::guard('instructor')->user()->id;
 
-        if (! empty($courseIds)) { //配列が空でない場合
-            foreach ($courseIds as $courseId) {
-                $instructorId = Course::findOrFail($courseId)->instructor_id;
-                if ($loginId !== $instructorId) {
+        if (! empty($courseIds)) {
+            // コースtable内の指定されたコースIDの行（レコード）から、コースIDとｲﾝｽﾄﾗｸﾀｰIDを一括で取得
+            $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
+        
+            foreach ($courses as $course) {
+                if ($loginId !== $course->instructor_id) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
-            }
+            }        
         }
 
         $results = DB::table('attendances')

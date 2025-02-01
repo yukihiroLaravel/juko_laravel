@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
-use App\Http\Requests\Instructor\Lesson\DeleteRequest;
-use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
-use App\Http\Requests\Instructor\Lesson\PutRequest;
-use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
+use App\Http\Requests\Instructor\Lesson\DeleteRequest;
+use App\Http\Requests\Instructor\Lesson\PutRequest;
+use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
 use App\Http\Requests\Instructor\Lesson\StoreRequest;
+use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -219,7 +219,7 @@ class LessonController extends Controller
             throw $e;
         }
     }
-    
+
     /**
      * レッスンステータス更新API
      */

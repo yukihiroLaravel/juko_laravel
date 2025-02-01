@@ -38,12 +38,12 @@ class StudentController extends Controller
         if (! empty($courseIds)) {
             // コースtable内の指定されたコースIDの行（レコード）から、コースIDとｲﾝｽﾄﾗｸﾀｰIDを一括で取得
             $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
-        
+
             foreach ($courses as $course) {
                 if ($loginId !== $course->instructor_id) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
-            }        
+            }
         }
 
         $results = DB::table('attendances')

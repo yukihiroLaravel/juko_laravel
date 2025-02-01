@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Notification;
 
-use App\Rules\NotificationUpdateStatusRule;
+use App\Rules\NotificationStoreStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationPutRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,7 +20,7 @@ class NotificationPutRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'notification_id' => $this->route('notification_id'),
+            'course_id' => $this->route('course_id'),
         ]);
     }
 
@@ -32,11 +32,11 @@ class NotificationPutRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
-            'type' => ['required', new NotificationUpdateStatusRule],
+            'course_id' => ['required', 'exists:courses,id', 'integer'],
+            'title' => ['required', 'string', 'max:50'],
+            'type' => ['required', new NotificationStoreStatusRule],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
-            'title' => ['required', 'string', 'max:50'],
             'content' => ['required', 'string', 'max:500'],
         ];
     }

@@ -87,16 +87,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::delete('/', 'Api\Instructor\ChapterController@delete');
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
-                                Route::post('/', 'Api\Instructor\LessonController@store');
-                                Route::post('sort', 'Api\Instructor\LessonController@sort');
-                                Route::put('status', 'Api\Instructor\LessonController@putStatus');
-                                Route::delete('/', 'Api\Instructor\LessonController@bulkDelete');
-                                Route::delete('all', 'Api\Instructor\LessonController@deleteAll');
+                                Route::post('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'store']);
+                                Route::post('sort', [App\Http\Controllers\Api\Instructor\LessonController::class, 'sort']);
+                                Route::put('status', [App\Http\Controllers\Api\Instructor\LessonController::class, 'putStatus']);
+                                Route::delete('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'bulkDelete']);
+                                Route::delete('all', [App\Http\Controllers\Api\Instructor\LessonController::class, 'deleteAll']);
                                 Route::prefix('{lesson_id}')->group(function () {
-                                    Route::put('/', 'Api\Instructor\LessonController@put');
-                                    Route::delete('/', 'Api\Instructor\LessonController@delete');
-                                    Route::patch('status', 'Api\Instructor\LessonController@updateStatus');
-                                    Route::patch('title', 'Api\Instructor\LessonController@updateTitle');
+                                    Route::put('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'put']);
+                                    Route::delete('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'delete']);
+                                    Route::patch('status', [App\Http\Controllers\Api\Instructor\LessonController::class, 'updateStatus']);
+                                    Route::patch('title', [App\Http\Controllers\Api\Instructor\LessonController::class, 'updateTitle']);
                                 });
                             });
                         });

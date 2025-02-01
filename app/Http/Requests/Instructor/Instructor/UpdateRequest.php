@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Instructor;
 
+use App\Rules\InstructorUniqueEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
-class InstructorPostRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +29,8 @@ class InstructorPostRequest extends FormRequest
             'nick_name' => ['required', 'string', 'max:50'],
             'last_name' => ['required', 'string', 'max:50'],
             'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255', 'unique:instructors'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email), 'max:255'],
+            'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];
     }
 }

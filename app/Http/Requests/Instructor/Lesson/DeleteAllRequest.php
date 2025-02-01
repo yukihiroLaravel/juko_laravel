@@ -1,22 +1,20 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Lesson;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonBulkDeleteRequest extends FormRequest
+class DeleteAllRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
@@ -26,16 +24,12 @@ class LessonBulkDeleteRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lessons' => ['required', 'array'],
-            'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
         ];
     }
 }

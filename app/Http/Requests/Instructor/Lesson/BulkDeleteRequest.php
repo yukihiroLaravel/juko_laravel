@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Lesson;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonStoreRequest extends FormRequest
+class BulkDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,8 +19,8 @@ class LessonStoreRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'chapter_id' => $this->route('chapter_id'),
             'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -32,9 +32,10 @@ class LessonStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'title' => ['required', 'string', 'max:50'],
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'lessons' => ['required', 'array'],
+            'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
         ];
     }
 }

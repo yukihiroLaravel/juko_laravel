@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\LessonBulkDeleteRequest;
-use App\Http\Requests\Instructor\LessonDeleteRequest;
-use App\Http\Requests\Instructor\LessonPatchStatusRequest;
-use App\Http\Requests\Instructor\LessonPutRequest;
-use App\Http\Requests\Instructor\LessonPutStatusRequest;
-use App\Http\Requests\Instructor\LessonsAllDeleteRequest;
-use App\Http\Requests\Instructor\LessonSortRequest;
-use App\Http\Requests\Instructor\LessonStoreRequest;
-use App\Http\Requests\Instructor\LessonUpdateTitleRequest;
+use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Lesson\DeleteRequest;
+use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
+use App\Http\Requests\Instructor\Lesson\PutRequest;
+use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
+use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
+use App\Http\Requests\Instructor\Lesson\SortRequest;
+use App\Http\Requests\Instructor\Lesson\StoreRequest;
+use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -32,7 +32,7 @@ class LessonController extends Controller
     /**
      * レッスン新規作成API
      */
-    public function store(LessonStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
         $course = Course::findOrFail($request->course_id);
@@ -75,7 +75,7 @@ class LessonController extends Controller
     /**
      * レッスン更新API
      */
-    public function put(LessonPutRequest $request): JsonResponse
+    public function put(PutRequest $request): JsonResponse
     {
         $user = Instructor::find($request->user()->id);
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
@@ -108,7 +108,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      */
-    public function delete(LessonDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -156,7 +156,7 @@ class LessonController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(LessonBulkDeleteRequest $request)
+    public function bulkDelete(BulkDeleteRequest $request)
     {
         // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -219,11 +219,11 @@ class LessonController extends Controller
             throw $e;
         }
     }
-
+    
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
@@ -248,7 +248,7 @@ class LessonController extends Controller
     /**
      * レッスンタイトル変更API
      */
-    public function updateTitle(LessonUpdateTitleRequest $request): JsonResponse
+    public function updateTitle(UpdateTitleRequest $request): JsonResponse
     {
         $user = Auth::guard('instructor')->user();
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
@@ -277,7 +277,7 @@ class LessonController extends Controller
     /**
      * チャプターに紐づく全レッスンを削除するAPI
      */
-    public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request): JsonResponse
     {
 
         // チャプターを取得
@@ -324,7 +324,7 @@ class LessonController extends Controller
     /**
      * レッスン並び替えAPI
      */
-    public function sort(LessonSortRequest $request): JsonResponse
+    public function sort(SortRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
@@ -378,7 +378,7 @@ class LessonController extends Controller
     /**
      * 選択済みのレッスンステータス一括更新API
      */
-    public function putStatus(LessonPutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         // リクエストから必要なデータを取得
         $courseId = $request->input('course_id');
@@ -397,11 +397,11 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ($courseId !== $lesson->chapter->course_id) {
+                if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ($chapterId !== $lesson->chapter_id) {
+                if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });

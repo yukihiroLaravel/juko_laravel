@@ -7,8 +7,8 @@ use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\InstructorPostRequest;
-use App\Http\Requests\Instructor\InstructorUpdateRequest;
+use App\Http\Requests\Instructor\Instructor\StoreRequest;
+use App\Http\Requests\Instructor\Instructor\UpdateRequest;
 use App\Http\Requests\Instructor\UserAuthenticationRequest;
 use App\Http\Resources\Instructor\InstructorShowResource;
 use App\Mail\AuthenticationConfirmationMail;
@@ -49,7 +49,7 @@ class InstructorController extends Controller
      * 仮講師登録API
      */
     public function store(
-        InstructorPostRequest $request,
+        StoreRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
         $email = $request->email;
@@ -114,7 +114,7 @@ class InstructorController extends Controller
     /**
      * 講師更新API
      */
-    public function update(InstructorUpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request): JsonResponse
     {
         try {
             $instructor = Auth::user();

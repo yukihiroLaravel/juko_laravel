@@ -40,7 +40,7 @@ class AttendanceController extends Controller
 
         if (! in_array($request->course_id, $courseIds, true)) {
             // 講師の所有する講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         if (Attendance::where('course_id', $request->course_id)
@@ -90,7 +90,7 @@ class AttendanceController extends Controller
 
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         /** @var Collection<int, Chapter> */
@@ -188,7 +188,7 @@ class AttendanceController extends Controller
 
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $courseId)->get();

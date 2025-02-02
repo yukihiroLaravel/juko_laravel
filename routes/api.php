@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
-            // 講師-講x
+            // 講師-講座
             Route::prefix('course')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
                 Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);

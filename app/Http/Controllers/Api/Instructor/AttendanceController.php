@@ -46,8 +46,8 @@ class AttendanceController extends Controller
         if (Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)
             ->exists()) {
-                // 受講状況が存在する場合はエラーを返す
-                throw new AuthorizationException('Attendance record already exists.');
+            // 受講状況が存在する場合はエラーを返す
+            throw new AuthorizationException('Attendance record already exists.');
         }
 
         DB::beginTransaction();

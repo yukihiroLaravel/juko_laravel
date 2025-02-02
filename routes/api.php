@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', 'Api\Instructor\InstructorController@show');
             Route::post('update', 'Api\Instructor\InstructorController@update');
 
-            // 講師-講座
+            // 講師-講x
             Route::prefix('course')->group(function () {
                 Route::get('index', 'Api\Instructor\CourseController@index');
                 Route::post('/', 'Api\Instructor\CourseController@store');
@@ -155,11 +155,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('manager')->group(function () {
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
-                    Route::post('/', 'Api\Manager\Instructor\InstructorController@store');
-                    Route::get('index', 'Api\Manager\Instructor\InstructorController@index');
+                    Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'store']);
+                    Route::get('index', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'index']);
                     Route::prefix('{instructor_id}')->group(function () {
-                        Route::get('/', 'Api\Manager\Instructor\InstructorController@show');
-                        Route::post('/', 'Api\Manager\Instructor\InstructorController@update');
+                        Route::get('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'show']);
+                        Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'update']);
                         Route::prefix('course')->group(function () {
                             Route::get('index', 'Api\Manager\Instructor\CourseController@index');
                         });
@@ -167,7 +167,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {
-                    Route::get('index', 'Api\Manager\CourseController@index');
+                    Route::get('index', [App\Http\Controllers\Api\Manager\CourseController::class, 'index']);
                     Route::put('status', 'Api\Manager\CourseController@status');
                     Route::post('/', 'Api\Manager\CourseController@store');
                     Route::prefix('{course_id}')->group(function () {

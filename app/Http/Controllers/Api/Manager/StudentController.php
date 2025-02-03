@@ -122,10 +122,7 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);

@@ -102,7 +102,7 @@ class InstructorController extends Controller
             /** @var Instructor $instructor */
             $instructor = Instructor::FindOrFail($request->instructor_id);
 
-            //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
+            // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
             if (! in_array($instructor->id, $instructorIds, true)) {
                 throw new AuthorizationException('Forbidden, not allowed to this instructor.');
             }

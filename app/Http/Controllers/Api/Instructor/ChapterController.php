@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\ChapterBulkDeleteRequest;
-use App\Http\Requests\Instructor\ChapterDeleteAllRequest;
-use App\Http\Requests\Instructor\ChapterDeleteRequest;
-use App\Http\Requests\Instructor\ChapterPatchRequest;
-use App\Http\Requests\Instructor\ChapterPatchStatusRequest;
-use App\Http\Requests\Instructor\ChapterPutStatusRequest;
-use App\Http\Requests\Instructor\ChapterShowRequest;
-use App\Http\Requests\Instructor\ChapterSortRequest;
-use App\Http\Requests\Instructor\ChapterStoreRequest;
-use App\Http\Requests\Instructor\ChapterUpdateStatusRequest;
+use App\Http\Requests\Instructor\Chapter\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Chapter\DeleteAllRequest;
+use App\Http\Requests\Instructor\Chapter\DeleteRequest;
+use App\Http\Requests\Instructor\Chapter\PatchRequest;
+use App\Http\Requests\Instructor\Chapter\PatchStatusRequest;
+use App\Http\Requests\Instructor\Chapter\PutStatusRequest;
+use App\Http\Requests\Instructor\Chapter\ShowRequest;
+use App\Http\Requests\Instructor\Chapter\SortRequest;
+use App\Http\Requests\Instructor\Chapter\StoreRequest;
+use App\Http\Requests\Instructor\Chapter\UpdateStatusRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -35,7 +35,7 @@ class ChapterController extends Controller
      *
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService)
     {
         // チャプターを取得
         $chapter = $queryService->getChapter($request->chapter_id);
@@ -56,7 +56,7 @@ class ChapterController extends Controller
     /**
      * チャプター新規作成API
      */
-    public function store(ChapterStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         try {
             // 講師の情報を取得
@@ -94,7 +94,7 @@ class ChapterController extends Controller
     /**
      * チャプター更新API
      */
-    public function update(ChapterPatchRequest $request): JsonResponse
+    public function update(PatchRequest $request): JsonResponse
     {
         /** @var Instructor $user */
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -125,7 +125,7 @@ class ChapterController extends Controller
      * チャプター更新API
      * TODO このメソッドは削除予定
      */
-    public function updateStatus(ChapterUpdateStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
         /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
@@ -152,7 +152,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開/非公開API
      */
-    public function patchStatus(ChapterPatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -193,7 +193,7 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      */
-    public function bulkDelete(ChapterBulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -237,7 +237,7 @@ class ChapterController extends Controller
      * チャプター削除API
      * TODO このメソッドは削除予定
      */
-    public function delete(ChapterDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
@@ -288,7 +288,7 @@ class ChapterController extends Controller
     /**
      * 全チャプター削除API
      */
-    public function deleteAll(ChapterDeleteAllRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request): JsonResponse
     {
         $courseId = $request->input('course_id');
 
@@ -330,7 +330,7 @@ class ChapterController extends Controller
     /**
      * チャプター並び替えAPI
      */
-    public function sort(ChapterSortRequest $request): JsonResponse
+    public function sort(SortRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -372,7 +372,7 @@ class ChapterController extends Controller
     /**
      * チャプター一括更新API
      */
-    public function putStatus(ChapterPutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);

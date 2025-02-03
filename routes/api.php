@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Manager\LessonController;
 use App\Http\Controllers\Api\Manager\NotificationController;
 use App\Http\Controllers\Api\Manager\StudentController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

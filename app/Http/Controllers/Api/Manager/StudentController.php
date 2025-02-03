@@ -57,7 +57,7 @@ class StudentController extends Controller
             $courseId = (int) $courseId;
             if (! in_array($courseId, $courseIds, true)) {
                 // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
-                throw new AuthorizationException('Forbidden, not allowed to access this course.');
+                throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         }
 
@@ -122,7 +122,7 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Forbidden, not allowed to access this course.');
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);

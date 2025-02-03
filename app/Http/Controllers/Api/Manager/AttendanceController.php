@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\AttendanceDeleteRequest;
-use App\Http\Requests\Manager\AttendanceShowRequest;
-use App\Http\Requests\Manager\AttendanceShowStatusRequest;
-use App\Http\Requests\Manager\AttendanceStatusRequest;
-use App\Http\Requests\Manager\AttendanceStoreRequest;
+use App\Http\Requests\Manager\Attendance\DeleteRequest;
+use App\Http\Requests\Manager\Attendance\ShowRequest;
+use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
+use App\Http\Requests\Manager\Attendance\StatusRequest;
+use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Requests\Manager\LoginRateRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
@@ -30,7 +30,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(AttendanceStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $managerId = $request->user()->id;
 
@@ -99,7 +99,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況取得API
      */
-    public function show(AttendanceShowRequest $request): AttendanceShowResource
+    public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
 
@@ -133,7 +133,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況削除API
      */
-    public function delete(AttendanceDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
 
@@ -221,7 +221,7 @@ class AttendanceController extends Controller
     /**
      * 完了済みレッスン数と完了済みチャプター数取得API
      */
-    public function showStatus(AttendanceShowStatusRequest $request): JsonResponse
+    public function showStatus(ShowStatusRequest $request): JsonResponse
     {
         // 現在ログインしているinstructorのidを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -304,7 +304,7 @@ class AttendanceController extends Controller
      *
      * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(AttendanceStatusRequest $request)
+    public function status(StatusRequest $request)
     {
         $attendanceId = $request->attendance_id;
         $instructorId = Auth::guard('instructor')->user()->id;

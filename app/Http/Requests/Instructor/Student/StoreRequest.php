@@ -1,18 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Instructor\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseShowRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,7 +24,8 @@ class CourseShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'given_name_by_instructor' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', 'max:255', 'unique:students'],
         ];
     }
 }

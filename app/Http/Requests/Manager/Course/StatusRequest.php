@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Course;
 
+use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceStoreRequest extends FormRequest
+class StatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +25,7 @@ class AttendanceStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'exists:courses,id,deleted_at,NULL', 'integer'],
-            'student_id' => ['required', 'exists:students,id,deleted_at,NULL', 'integer'],
+            'status' => ['required', 'string', new CourseStatusRule],
         ];
     }
 }

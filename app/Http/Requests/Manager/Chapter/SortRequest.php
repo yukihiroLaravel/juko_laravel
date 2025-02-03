@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Chapter;
 
-use App\Rules\LessonAttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceShowStatusRequest extends FormRequest
+class SortRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,6 +16,13 @@ class AttendanceShowStatusRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,15 +32,9 @@ class AttendanceShowStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'period' => ['required', 'string', new LessonAttendancePeriodRule],
+            'chapters' => ['required', 'array'],
+            'chapters.*.chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'chapters.*.order' => ['required', 'integer'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-            'period' => $this->route('period'),
-        ]);
     }
 }

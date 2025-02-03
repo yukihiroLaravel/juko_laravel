@@ -3,21 +3,18 @@
 namespace App\Rules;
 
 use App\Model\Notification;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class NotificationStoreStatusRule implements Rule
+class NotificationStoreStatusRule implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
+     * バリデーションの実行。
      */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            in_array(
+            ! in_array(
                 $value,
                 [
                     Notification::TYPE_ALWAYS,
@@ -26,19 +23,8 @@ class NotificationStoreStatusRule implements Rule
                 true
             )
         ) {
-            return true;
+            // エラーを返す
+            $fail('The :attribute must be a valid notification type.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Type.';
     }
 }

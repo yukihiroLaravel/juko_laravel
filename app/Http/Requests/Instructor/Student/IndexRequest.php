@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Student;
 
 use App\Rules\IndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentIndexRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\StudentIndexRequest;
-use App\Http\Requests\Instructor\StudentShowRequest;
-use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Requests\Instructor\Student\IndexRequest;
+use App\Http\Requests\Instructor\Student\ShowRequest;
+use App\Http\Requests\Instructor\Student\StoreRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
@@ -22,7 +22,7 @@ class StudentController extends Controller
     /**
      * 受講生一覧取得API
      */
-    public function index(StudentIndexRequest $request): StudentIndexResource
+    public function index(IndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -91,7 +91,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request)
+    public function show(ShowRequest $request)
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -115,7 +115,7 @@ class StudentController extends Controller
     /**
      * 受講生登録API
      */
-    public function store(StudentStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,

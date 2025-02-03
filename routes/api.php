@@ -28,16 +28,16 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
-            Route::get('index', 'Api\Student\AttendanceController@index');
+            Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index']); // ここを変更済み
             Route::prefix('{attendance_id}')->group(function () {
-                Route::get('/', 'Api\Student\AttendanceController@show');
-                Route::get('progress', 'Api\Student\AttendanceController@progress');
+                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show']); // ここを変更済み
+                Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']); // ここを変更済み
                 Route::prefix('course')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::prefix('chapter')->group(function () {
                             // 受講生-受講-講座-チャプター
                             Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', 'Api\Student\AttendanceController@showChapter');
+                                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'showChapter']); // ここを変更済み
                             });
                         });
                     });

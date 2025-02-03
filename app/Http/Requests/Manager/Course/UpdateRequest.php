@@ -1,18 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Course;
 
+use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CourseShowRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -21,6 +15,13 @@ class CourseShowRequest extends FormRequest
     public function authorize()
     {
         return true;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
     }
 
     /**
@@ -32,6 +33,9 @@ class CourseShowRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'title' => ['required', 'string'],
+            'image' => ['mimes:jpg,png'],
+            'status' => ['required', 'string', new CourseStatusRule],
         ];
     }
 }

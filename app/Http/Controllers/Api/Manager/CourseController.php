@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\CourseDeleteRequest;
-use App\Http\Requests\Manager\CoursePutStatusRequest;
-use App\Http\Requests\Manager\CourseShowRequest;
-use App\Http\Requests\Manager\CourseStoreRequest;
-use App\Http\Requests\Manager\CourseUpdateRequest;
+use App\Http\Requests\Manager\Course\DeleteRequest;
+use App\Http\Requests\Manager\Course\StatusRequest;
+use App\Http\Requests\Manager\Course\ShowRequest;
+use App\Http\Requests\Manager\Course\StoreRequest;
+use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
@@ -50,7 +50,7 @@ class CourseController extends Controller
      *
      * @return CourseShowResource|JsonResponse
      */
-    public function show(CourseShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService)
     {
         // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -75,7 +75,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(CourseStoreRequest $request)
+    public function store(StoreRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -104,7 +104,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function update(CourseUpdateRequest $request)
+    public function update(UpdateRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);
@@ -157,7 +157,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function delete(CourseDeleteRequest $request)
+    public function delete(DeleteRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);
@@ -199,7 +199,7 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function status(CoursePutStatusRequest $request)
+    public function status(StatusRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

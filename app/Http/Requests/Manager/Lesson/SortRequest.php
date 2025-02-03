@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Lesson;
 
-use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonPatchStatusRequest extends FormRequest
+class SortRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,15 +14,6 @@ class LessonPatchStatusRequest extends FormRequest
     public function authorize()
     {
         return true;
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
-            'lesson_id' => $this->route('lesson_id'),
-        ]);
     }
 
     /**
@@ -36,8 +26,17 @@ class LessonPatchStatusRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new LessonStatusRule],
+            'lessons' => ['required', 'array'],
+            'lessons.*.lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'lessons.*.order' => ['required', 'integer'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+            'chapter_id' => $this->route('chapter_id'),
+        ]);
     }
 }

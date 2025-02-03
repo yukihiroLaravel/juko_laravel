@@ -15,7 +15,6 @@ use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
 use App\Model\TemporaryStudent;
 use App\Services\Auth\CredentialGeneratorService;
-use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -36,10 +35,11 @@ class StudentController extends Controller
      *
      * @return StudentShowResource
      */
-    public function show(Request $request, QueryService $queryService)
+    public function show(Request $request)
     {
         // 生徒情報を取得
-        $student = $queryService->getStudent($request->user()->id);
+        $student = Student::find($request->user()->id);
+        assert($student instanceof Student);
 
         // 生徒の詳細情報をリソース形式で返す
         return new StudentShowResource($student);

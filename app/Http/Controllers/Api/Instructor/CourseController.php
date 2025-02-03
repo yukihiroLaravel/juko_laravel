@@ -34,11 +34,8 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', 5);
-        
         $courses = Course::where('instructor_id', $instructorId)
-            ->withCount(['attendances' => function ($query) {
-                $query->where('progress', '>', 0);
-            }])
+            ->withCount('attendances')
             ->paginate($perPage);
 
         $courses->getCollection()->map(function ($course) {

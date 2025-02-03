@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Chapter;
 
 use App\Rules\ChapterStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChaptersPatchStatusRequest extends FormRequest
+class PutStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -33,8 +33,6 @@ class ChaptersPatchStatusRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapters' => ['required', 'array'],
-            'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'status' => ['required', 'string', new ChapterStatusRule],
         ];
     }

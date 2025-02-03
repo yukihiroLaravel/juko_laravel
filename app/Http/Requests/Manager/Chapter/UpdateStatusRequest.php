@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Chapter;
 
 use App\Rules\ChapterStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChapterPatchStatusRequest extends FormRequest
+class UpdateStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

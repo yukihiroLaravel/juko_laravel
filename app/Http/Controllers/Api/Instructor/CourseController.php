@@ -32,16 +32,17 @@ class CourseController extends Controller
     public function index(CourseIndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        // $courses = $queryService->getCoursesByInstructorId($instructorId);
         // 講座情報を取得
-        $perPage = $request->validated()['per_page'];
-        $courses = Course::where('instructor_id', $instructorId)->paginate($perPage);
+        $perPage = $request->query('per_page', 5);
+        
+        $courses = Course::where('instructor_id', $instructorId)
+            ->withCount(['attendances' => function ($query) {
+                $query->where('progress', '>', 0);
+            }])
+            ->paginate($perPage);
 
-        // 各講座に受講中の生徒がいるかを判定
-        $courses->getCollection()->transform(function (Course $course) {
-            $course->has_active_students = Attendance::where('course_id', $course->id)
-                ->where('progress', '>', 0)
-                ->exists();
+        $courses->getCollection()->map(function ($course) {
+            $course->has_active_students = $course->attendances_count > 0;
             return $course;
         });
 

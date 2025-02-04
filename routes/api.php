@@ -131,9 +131,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-生徒
             Route::prefix('student')->group(function () {
                 // 講師-講座-生徒
-                Route::get('index', 'Api\Instructor\StudentController@index');
-                Route::get('{student_id}', 'Api\Instructor\StudentController@show');
-                Route::post('/', 'Api\Instructor\StudentController@store');
+                Route::get('index', [App\Http\Controllers\Api\Instructor\StudentController::class, 'index']);
+                Route::get('{student_id}', [App\Http\Controllers\Api\Instructor\StudentController::class, 'show']);
+                Route::post('/', [App\Http\Controllers\Api\Instructor\StudentController::class, 'store']);
             });
 
             // 講師-お知らせ

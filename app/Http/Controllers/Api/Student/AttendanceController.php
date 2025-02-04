@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api\Student;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\AttendanceCourseProgressRequest;
-use App\Http\Requests\Student\AttendanceIndexRequest;
-use App\Http\Requests\Student\AttendanceShowChapterRequest;
-use App\Http\Requests\Student\AttendanceShowRequest;
+use App\Http\Requests\Student\Attendance\IndexRequest;
+use App\Http\Requests\Student\Attendance\ProgressRequest;
+use App\Http\Requests\Student\Attendance\ShowChapterRequest;
+use App\Http\Requests\Student\Attendance\ShowRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowChapterResource;
@@ -28,7 +28,7 @@ class AttendanceController extends Controller
      * 受講一覧取得API
      */
     public function index(
-        AttendanceIndexRequest $request,
+        IndexRequest $request,
         IndexService $service
     ): AttendanceIndexResource {
         $studentId = Auth::id();
@@ -42,7 +42,7 @@ class AttendanceController extends Controller
      * 受講詳細取得API
      */
     public function show(
-        AttendanceShowRequest $request,
+        ShowRequest $request,
         ShowService $service
     ): AttendanceShowResource {
         try {
@@ -63,7 +63,7 @@ class AttendanceController extends Controller
      *
      * @return AttendanceShowChapterResource
      */
-    public function showChapter(AttendanceShowChapterRequest $request)
+    public function showChapter(ShowChapterRequest $request)
     {
         $attendance = Attendance::with([
             'course.chapters.lessons',
@@ -93,7 +93,7 @@ class AttendanceController extends Controller
      *
      * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
      */
-    public function progress(AttendanceCourseProgressRequest $request)
+    public function progress(ProgressRequest $request)
     {
         $authId = Auth::id();
         $attendance = Attendance::with([

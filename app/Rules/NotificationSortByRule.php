@@ -3,31 +3,18 @@
 namespace App\Rules;
 
 use App\Model\Notification;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class NotificationSortByRule implements Rule
+class NotificationSortByRule implements ValidationRule
 {
     /**
-     * Create a new rule instance.
-     *
-     * @return void
+     * バリデーションの実行。
      */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @return bool
-     */
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            in_array(
+            ! in_array(
                 $value,
                 [
                     Notification::SORT_BY_TITLE,
@@ -37,19 +24,8 @@ class NotificationSortByRule implements Rule
                 true
             )
         ) {
-            return true;
+            // エラーを返す
+            $fail('The :attribute must be a valid sort by name.');
         }
-
-        return false;
-    }
-
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
-    public function message()
-    {
-        return 'Invalid Sort By Name.';
     }
 }

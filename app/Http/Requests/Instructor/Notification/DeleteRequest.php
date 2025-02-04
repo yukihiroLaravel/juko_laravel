@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationIndexRequest extends FormRequest
+class DeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,6 +16,13 @@ class NotificationIndexRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'notification_id' => $this->route('notification_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,8 +31,7 @@ class NotificationIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
+            'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

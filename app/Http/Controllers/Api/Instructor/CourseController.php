@@ -8,7 +8,7 @@ use App\Http\Requests\Instructor\Course\PutStatusRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
-use App\Http\Requests\Instructor\CourseIndexRequest;
+use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
@@ -29,7 +29,7 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(CourseIndexRequest $request)
+    public function index(IndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得

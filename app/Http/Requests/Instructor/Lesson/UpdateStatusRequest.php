@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\Lesson;
 
 use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LessonPutStatusRequest extends FormRequest
+class UpdateStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,6 +22,7 @@ class LessonPutStatusRequest extends FormRequest
         $this->merge([
             'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'lesson_id' => $this->route('lesson_id'),
         ]);
     }
 
@@ -33,11 +34,10 @@ class LessonPutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'lessons' => ['required', 'array'],
-            'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new LessonStatusRule],
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'status' => ['required', 'string', new LessonStatusRule],
         ];
     }
 }

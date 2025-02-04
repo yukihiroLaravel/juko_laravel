@@ -1,18 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor;
 
+use App\Rules\InstructorIndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorShowRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'instructor_id' => $this->route('instructor_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,7 +25,10 @@ class InstructorShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
+            'per_page' => ['integer', 'min:1', 'max:100'],
+            'page' => ['integer', 'min:1'],
+            'sort_by' => ['string', new InstructorIndexSortByRule],
+            'order' => ['string', 'in:asc,desc'],
         ];
     }
 }

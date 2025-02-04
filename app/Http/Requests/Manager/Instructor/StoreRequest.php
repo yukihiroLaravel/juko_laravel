@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor;
 
-use App\Rules\InstructorUniqueEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorPatchRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,13 +14,6 @@ class InstructorPatchRequest extends FormRequest
     public function authorize()
     {
         return true;
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'instructor_id' => $this->route('instructor_id'),
-        ]);
     }
 
     /**
@@ -35,9 +27,7 @@ class InstructorPatchRequest extends FormRequest
             'nick_name' => ['required', 'string', 'max:50'],
             'last_name' => ['required', 'string', 'max:50'],
             'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', new InstructorUniqueEmailRule($this->email), 'max:255'],
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
-            'profile_image' => ['mimes:jpg,png', 'max:2048'],
+            'email' => ['required', 'email', 'max:255', 'unique:instructors'],
         ];
     }
 }

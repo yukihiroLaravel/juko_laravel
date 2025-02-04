@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Notification;
 
 use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationPutTypeRequest extends FormRequest
+class UpdateTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -54,6 +54,7 @@ class StudentController extends Controller
 
         // 指定された講座IDが有効かどうかチェック
         if (! empty($requestedCourseIds)) {
+            $requestedCourseIds = array_map('intval', $requestedCourseIds); // 明示的に整数型に変換
             foreach ($requestedCourseIds as $courseId) {
                 if (! in_array($courseId, $courseIds, true)) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');

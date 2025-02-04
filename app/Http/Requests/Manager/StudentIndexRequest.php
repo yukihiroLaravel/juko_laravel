@@ -32,8 +32,8 @@ class StudentIndexRequest extends FormRequest
             'input_text' => ['string'],
             'start_date' => ['date_format:Y-m-d H:i:s'],
             'end_date' => ['date_format:Y-m-d H:i:s'],
-            'courses' => ['array'], // 配列であることを指定
-            'courses.*' => ['integer', 'distinct', 'exists:courses,id,deleted_at,NULL'], // 配列の各要素が整数で重複しないこと
+            'courses' => ['array'],
+            'courses.*' => ['integer', 'distinct', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

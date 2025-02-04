@@ -51,12 +51,10 @@ class StudentController extends Controller
 
         // クエリパラメータからcourses（配列）を取得
         $requestedCourseIds = $request->input('courses', []);
-
         // 指定された講座IDが有効かどうかチェック
         if (! empty($requestedCourseIds)) {
-            $requestedCourseIds = array_map('intval', $requestedCourseIds); // 明示的に整数型に変換
             foreach ($requestedCourseIds as $courseId) {
-                if (! in_array($courseId, $courseIds, true)) {
+                if (! in_array((int) $courseId, $courseIds, true)) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
                 }
             }

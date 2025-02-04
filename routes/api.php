@@ -104,7 +104,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                     // 講師-講座-お知らせ
                     Route::prefix('notification')->group(function () {
-                        Route::post('/', 'Api\Instructor\NotificationController@store');
+                        Route::post('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'store']);
                     });
 
                     // 講師-講座-受講
@@ -138,13 +138,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
             // 講師-お知らせ
             Route::prefix('notification')->group(function () {
-                Route::get('index', 'Api\Instructor\NotificationController@index');
-                Route::put('type/{notification_type}', 'Api\Instructor\NotificationController@updateType');
-                Route::delete('/', 'Api\Instructor\NotificationController@bulkDelete');
+                Route::get('index', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'index']);
+                Route::put('type/{notification_type}', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateType']);
+                Route::delete('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'bulkDelete']);
                 Route::prefix('{notification_id}')->group(function () {
-                    Route::get('/', 'Api\Instructor\NotificationController@show');
-                    Route::put('/', 'Api\Instructor\NotificationController@put');
-                    Route::delete('/', 'Api\Instructor\NotificationController@delete');
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'show']);
+                    Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'put']);
+                    Route::delete('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'delete']);
                 });
             });
         });

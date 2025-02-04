@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationShowRequest extends FormRequest
+class DeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,11 +31,7 @@ class NotificationShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => [
-                'required',
-                'integer',
-                'exists:notifications,id,deleted_at,NULL',
-            ],
+            'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

@@ -7,8 +7,8 @@ use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\StudentPatchRequest;
-use App\Http\Requests\Student\StudentPostRequest;
+use App\Http\Requests\Student\UpdateRequest;
+use App\Http\Requests\Student\StoreRequest;
 use App\Http\Requests\Student\UserAuthenticationRequest;
 use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
@@ -50,7 +50,7 @@ class StudentController extends Controller
      * ユーザー新規仮登録API
      */
     public function store(
-        StudentPostRequest $request,
+        StoreRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
         $email = $request->email;
@@ -120,7 +120,7 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(StudentPatchRequest $request)
+    public function update(UpdateRequest $request)
     {
 
         $file = $request->file('profile_image');

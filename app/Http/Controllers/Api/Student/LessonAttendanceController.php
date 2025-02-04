@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\LessonAttendancePatchRequest;
+use App\Http\Requests\Student\Lesson\PatchStatusRequest;
 use App\Model\LessonAttendance;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +16,7 @@ class LessonAttendanceController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function patchStatus(LessonAttendancePatchRequest $request)
+    public function patchStatus(PatchStatusRequest $request)
     {
         try {
             $lessonAttendance = LessonAttendance::with('attendance')

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\StudentIndexRequest;
-use App\Http\Requests\Manager\StudentShowRequest;
-use App\Http\Requests\Manager\StudentStoreRequest;
+use App\Http\Requests\Manager\Student\IndexRequest;
+use App\Http\Requests\Manager\Student\ShowRequest;
+use App\Http\Requests\Manager\Student\StoreRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Model\Course;
@@ -25,7 +25,7 @@ class StudentController extends Controller
      *
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(IndexRequest $request)
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -103,7 +103,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService)
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -133,7 +133,7 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StudentStoreRequest $request)
+    public function store(StoreRequest $request)
     {
         /** @var Student $student */
         $student = Student::create([

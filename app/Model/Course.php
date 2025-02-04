@@ -79,7 +79,7 @@ class Course extends Model
      */
     public function attendances(): HasMany
     {
-        return $this->hasMany(Attendance::class, 'course_id', 'id');
+        return $this->hasMany(Attendance::class);
     }
 
     /**

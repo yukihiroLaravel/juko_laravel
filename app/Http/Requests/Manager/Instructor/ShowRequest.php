@@ -1,11 +1,18 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorPostRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'instructor_id' => $this->route('instructor_id'),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -24,10 +31,7 @@ class InstructorPostRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:50'],
-            'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255', 'unique:instructors'],
+            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
         ];
     }
 }

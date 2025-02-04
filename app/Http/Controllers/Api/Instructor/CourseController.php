@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\CourseDeleteRequest;
+use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\PutStatusRequest;
+use App\Http\Requests\Instructor\Course\ShowRequest;
+use App\Http\Requests\Instructor\Course\StoreRequest;
+use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Requests\Instructor\CourseIndexRequest;
-use App\Http\Requests\Instructor\CoursePutStatusRequest;
-use App\Http\Requests\Instructor\CourseShowRequest;
-use App\Http\Requests\Instructor\CourseStoreRequest;
-use App\Http\Requests\Instructor\CourseUpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
@@ -50,7 +50,7 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
         $course = $queryService->getCourse($request->course_id);
 
@@ -60,13 +60,13 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(CourseStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::putFileAs('puiblic/course', $file, $filename);
+        $filePath = Storage::putFileAs('public/course', $file, $filename);
         $filePath = Course::convertImagePath($filePath);
 
         Course::create([
@@ -86,7 +86,7 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(CourseUpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request): JsonResponse
     {
         $file = $request->file('image');
 
@@ -130,7 +130,7 @@ class CourseController extends Controller
     /**
      * 講座削除API
      */
-    public function delete(CourseDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         try {
             $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -163,7 +163,7 @@ class CourseController extends Controller
     /**
      * 講座ステータス一括更新API
      */
-    public function putStatus(coursePutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         Course::where('instructor_id', $instructorId)

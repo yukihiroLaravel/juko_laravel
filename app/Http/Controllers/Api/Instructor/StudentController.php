@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\StudentIndexRequest;
-use App\Http\Requests\Instructor\StudentShowRequest;
-use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Requests\Instructor\Student\IndexRequest;
+use App\Http\Requests\Instructor\Student\ShowRequest;
+use App\Http\Requests\Instructor\Student\StoreRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
-use App\Services\Student\QueryService;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +21,8 @@ class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
-     *
-     * @return StudentIndexResource|JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(IndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -32,20 +31,26 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $courseIds = $request->input('courses', []); //複数のコースIDを取得
 
         $loginId = Auth::guard('instructor')->user()->id;
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
 
-        if ($loginId !== $instructorId) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized.',
-            ], 403);
+        if (! empty($courseIds)) {
+            // コースtable内の指定されたコースIDの行（レコード）から、コースIDとｲﾝｽﾄﾗｸﾀｰIDを一括で取得
+            $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
+
+            foreach ($courses as $course) {
+                if ($loginId !== $course->instructor_id) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
+            }
         }
 
         $results = DB::table('attendances')
             ->select(
                 'attendances.student_id',
+                'attendances.course_id',
+                'courses.instructor_id',
                 'students.nick_name',
                 'students.email',
                 'students.profile_image',
@@ -54,34 +59,35 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->where('attendances.course_id', $request->course_id)
+            ->join('courses', 'attendances.course_id', '=', 'courses.id')
+            // コース指定が空でないときに一致するレコードを取得
+            ->when(! empty($courseIds), function (Builder $query) use ($courseIds) {
+                $query->whereIn('attendances.course_id', $courseIds);
+            })
+            // ログインしている講師IDを検索
+            ->where('courses.instructor_id', $loginId)
             ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
-            ->when($inputText, function ($query) use ($inputText) {
+            ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', $inputText);
-                $query->where(function ($query) use ($inputText) {
+                $query->where(function (Builder $query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
                         ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
                 });
             })
             // 日付検索
-            ->when($startDate, function ($query) use ($startDate) {
+            ->when($startDate, function (Builder $query) use ($startDate) {
                 $query->where('attendances.created_at', '>=', $startDate);
             })
-            ->when($endDate, function ($query) use ($endDate) {
+            ->when($endDate, function (Builder $query) use ($endDate) {
                 $query->where('attendances.created_at', '<=', $endDate);
             })
             // ソート
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        $course = Course::find($request->course_id);
-
-        return new StudentIndexResource([
-            'course' => $course,
-            'data' => $results,
-        ]);
+        return new StudentIndexResource($results);
     }
 
     /**
@@ -89,7 +95,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request)
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -98,16 +104,13 @@ class StudentController extends Controller
         $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // リクエストされた受講生を取得
-        /** @var Student $student */
-        $student = $queryService->getStudent($request->student_id);
+        $student = Student::find($request->student_id);
+        assert($student instanceof Student);
 
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            return response()->json([
-                'result' => false,
-                'message' => 'Not authorized to access this student.',
-            ], 403);
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);
@@ -116,7 +119,7 @@ class StudentController extends Controller
     /**
      * 受講生登録API
      */
-    public function store(StudentStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,

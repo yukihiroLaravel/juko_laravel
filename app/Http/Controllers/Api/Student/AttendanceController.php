@@ -122,6 +122,14 @@ class AttendanceController extends Controller
     }
 
     /**
+     * 全チャプター完了API
+     */
+    public function completeAllChapters()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * 完了済みのチャプター数を取得する
      *
      * @param  Attendance  $attendance

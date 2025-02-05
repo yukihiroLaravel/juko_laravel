@@ -134,11 +134,11 @@ class AttendanceController extends Controller
             // 全てのレッスンが完了済みかどうかをチェック
             $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $isCompleted = false;
+                // if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                //     $isCompleted = false;
 
-                    return false;
-                }
+                //     return false;
+                // }
                 $isCompleted = true;
             });
 
@@ -207,16 +207,16 @@ class AttendanceController extends Controller
 
             $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    if ($youngestUnCompletedLesson['lesson_id'] === null) {
-                        $youngestUnCompletedLesson = [
-                            'chapter_id' => $chapter->id,
-                            'lesson_id' => $lesson->id,
-                        ];
+                // if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
+                //     if ($youngestUnCompletedLesson['lesson_id'] === null) {
+                //         $youngestUnCompletedLesson = [
+                //             'chapter_id' => $chapter->id,
+                //             'lesson_id' => $lesson->id,
+                //         ];
 
-                        return;
-                    }
-                }
+                //         return;
+                //     }
+                // }
             });
         });
         if ($youngestUnCompletedLesson['lesson_id'] === null) {

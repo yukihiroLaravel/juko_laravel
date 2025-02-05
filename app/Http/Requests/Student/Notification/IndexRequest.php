@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Student\Notification;
 
 use App\Rules\NotificationSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationIndexRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

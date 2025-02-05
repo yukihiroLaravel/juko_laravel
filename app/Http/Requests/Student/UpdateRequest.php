@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Student;
 
 use App\Rules\GenderRule;
+use App\Rules\StudentUniqueEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentPostRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,16 +25,19 @@ class StudentPostRequest extends FormRequest
      */
     public function rules()
     {
+        $user = $this->user();
+
         return [
-            'nick_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:50'],
-            'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255', 'unique:students'],
-            'occupation' => ['required', 'string', 'max:50'],
-            'purpose' => ['required', 'string', 'max:255'],
+            'nick_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'first_name' => ['required', 'string'],
+            'email' => ['required', 'email', new StudentUniqueEmailRule($user->email)],
+            'occupation' => ['required', 'string'],
+            'purpose' => ['required', 'string'],
             'birth_date' => ['required', 'date_format:Y-m-d'],
             'gender' => ['required', 'string', new GenderRule],
-            'address' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string'],
+            'profile_image' => ['sometimes', 'mimes:jpg,png', 'max:2048'],
         ];
     }
 }

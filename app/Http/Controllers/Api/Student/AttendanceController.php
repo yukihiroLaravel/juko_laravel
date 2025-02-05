@@ -205,7 +205,7 @@ class AttendanceController extends Controller
                 return;
             }
 
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson) {
+            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
                 $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
                 if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
                     if ($youngestUnCompletedLesson['lesson_id'] === null) {

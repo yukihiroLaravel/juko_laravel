@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Instructor\Student;
+namespace App\Http\Requests\Manager\Notification;
 
-use App\Rules\IndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class IndexRequest extends FormRequest
@@ -25,15 +24,8 @@ class IndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'courses' => ['array'],
-            'courses.*' => ['integer', 'exists:courses,id,deleted_at,NULL'], // 配列内の全ての要素に対して
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
-            'sort_by' => ['string', new IndexSortByRule],
-            'order' => ['string', 'in:asc,desc'],
-            'input_text' => ['string'],
-            'start_date' => ['date_format:Y-m-d H:i:s'],
-            'end_date' => ['date_format:Y-m-d H:i:s'],
         ];
     }
 }

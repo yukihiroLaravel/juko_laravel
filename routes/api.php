@@ -190,22 +190,22 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
-                                    Route::post('/', 'Api\Manager\LessonController@store');
-                                    Route::post('sort', 'Api\Manager\LessonController@sort');
-                                    Route::put('status', 'Api\Manager\LessonController@putStatus');
-                                    Route::delete('/', 'Api\Manager\LessonController@bulkDelete');
-                                    Route::delete('all', 'Api\Manager\LessonController@deleteAll');
+                                    Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
+                                    Route::post('sort', [App\Http\Controllers\Api\Manager\LessonController::class, 'sort']);
+                                    Route::put('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'putStatus']);
+                                    Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);
+                                    Route::delete('all', [App\Http\Controllers\Api\Manager\LessonController::class, 'deleteAll']);
                                     Route::prefix('{lesson_id}')->group(function () {
-                                        Route::put('/', 'Api\Manager\LessonController@put');
-                                        Route::delete('/', 'Api\Manager\LessonController@delete');
-                                        Route::patch('status', 'Api\Manager\LessonController@updateStatus');
-                                        Route::patch('title', 'Api\Manager\LessonController@updateTitle');
+                                        Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put']);
+                                        Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'delete']);
+                                        Route::patch('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateStatus']);
+                                        Route::patch('title', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateTitle']);
                                     });
                                 });
                             });
                         });
                         Route::prefix('notification')->group(function () {
-                            Route::post('/', 'Api\Manager\NotificationController@store');
+                            Route::post('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'store']);
                         });
                         //マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
@@ -229,19 +229,20 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     // マネージャー-講座-生徒
-                    Route::get('index', 'Api\Manager\StudentController@index');
-                    Route::get('{student_id}', 'Api\Manager\StudentController@show');
-                    Route::post('/', 'Api\Manager\StudentController@store');
+                    Route::get('index', [App\Http\Controllers\Api\Manager\StudentController::class, 'index']);
+                    Route::get('{student_id}', [App\Http\Controllers\Api\Manager\StudentController::class, 'show']);
+                    Route::post('/', [App\Http\Controllers\Api\Manager\StudentController::class, 'store']);
                 });
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {
-                    Route::get('index', 'Api\Manager\NotificationController@index');
-                    Route::put('type/{notification_type}', 'Api\Manager\NotificationController@updateType');
-                    Route::delete('/', 'Api\Manager\NotificationController@bulkDelete');
+                    Route::get('index', [App\Http\Controllers\Api\Manager\NotificationController::class, 'index']);
+                    Route::put('type/{notification_type}', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
+                    Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkDelete']);
+
                     Route::prefix('{notification_id}')->group(function () {
-                        Route::get('/', 'Api\Manager\NotificationController@show');
-                        Route::patch('/', 'Api\Manager\NotificationController@update');
-                        Route::delete('/', 'Api\Manager\NotificationController@delete');
+                        Route::get('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'show']);
+                        Route::patch('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'update']);
+                        Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'delete']);
                     });
                 });
             });

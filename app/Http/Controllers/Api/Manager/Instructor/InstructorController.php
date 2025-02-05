@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\InstructorIndexRequest;
-use App\Http\Requests\Manager\InstructorPatchRequest;
-use App\Http\Requests\Manager\InstructorPostRequest;
-use App\Http\Requests\Manager\InstructorShowRequest;
+use App\Http\Requests\Manager\Instructor\IndexRequest;
+use App\Http\Requests\Manager\Instructor\ShowRequest;
+use App\Http\Requests\Manager\Instructor\StoreRequest;
+use App\Http\Requests\Manager\Instructor\UpdateRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
 use App\Mail\AuthenticationConfirmationMail;
@@ -35,7 +35,7 @@ class InstructorController extends Controller
      *
      * @return InstructorShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(InstructorShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -61,7 +61,7 @@ class InstructorController extends Controller
      *
      * @return InstructorIndexResource
      */
-    public function index(InstructorIndexRequest $request, QueryService $queryService)
+    public function index(IndexRequest $request, QueryService $queryService)
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);
@@ -88,7 +88,7 @@ class InstructorController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(InstructorPatchRequest $request)
+    public function update(UpdateRequest $request)
     {
         // マネージャーと配下の講師情報を取得
         $managerId = $request->user()->id;
@@ -147,7 +147,7 @@ class InstructorController extends Controller
      * 講師新規仮登録API
      */
     public function store(
-        InstructorPostRequest $request,
+        StoreRequest $request,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
         $email = $request->email;

@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Attendance\DeleteRequest;
+use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
-use App\Http\Requests\Manager\LoginRateRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Model\Attendance;

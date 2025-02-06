@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Student\Notification;
 
+use App\Rules\NotificationSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorPostRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +25,10 @@ class InstructorPostRequest extends FormRequest
     public function rules()
     {
         return [
-            'nick_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:50'],
-            'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255', 'unique:instructors'],
+            'per_page' => ['integer', 'min:1'],
+            'page' => ['integer', 'min:1'],
+            'sortBy' => ['string', new NotificationSortByRule],
+            'order' => ['string', 'in:asc,desc'],
         ];
     }
 }

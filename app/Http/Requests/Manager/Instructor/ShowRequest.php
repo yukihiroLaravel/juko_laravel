@@ -1,11 +1,18 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationIndexRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'instructor_id' => $this->route('instructor_id'),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -24,8 +31,7 @@ class NotificationIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
+            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
         ];
     }
 }

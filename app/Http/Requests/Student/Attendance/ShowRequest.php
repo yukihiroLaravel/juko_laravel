@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Student\Attendance;
 
-use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationPutTypeRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,7 +19,7 @@ class NotificationPutTypeRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'notification_type' => $this->route('notification_type'),
+            'attendance_id' => $this->route('attendance_id'),
         ]);
     }
 
@@ -32,8 +31,7 @@ class NotificationPutTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_type' => ['required',  new NotificationUpdateStatusRule],
-            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
         ];
     }
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Manager\Student;
 
-use App\Rules\NotificationSortByRule;
+use App\Rules\IndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationIndexRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,8 +27,13 @@ class NotificationIndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new NotificationSortByRule],
+            'sort_by' => ['string', new IndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
+            'input_text' => ['string'],
+            'start_date' => ['date_format:Y-m-d H:i:s'],
+            'end_date' => ['date_format:Y-m-d H:i:s'],
+            'courses' => ['array'],
+            'courses.*' => ['integer', 'distinct', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

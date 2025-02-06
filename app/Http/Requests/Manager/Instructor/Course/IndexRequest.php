@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor\Course;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorCourseIndexRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     protected function prepareForValidation()
     {

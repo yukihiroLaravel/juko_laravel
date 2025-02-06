@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Notification;
 
+use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationDeleteRequest extends FormRequest
+class UpdateTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,7 +20,7 @@ class NotificationDeleteRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'notification_id' => $this->route('notification_id'),
+            'notification_type' => $this->route('notification_type'),
         ]);
     }
 
@@ -31,7 +32,8 @@ class NotificationDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
+            'notification_type' => ['required',  new NotificationUpdateStatusRule],
+            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

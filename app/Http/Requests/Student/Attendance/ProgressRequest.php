@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Student\Attendance;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentShowRequest extends FormRequest
+class ProgressRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,6 +16,13 @@ class StudentShowRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'attendance_id' => $this->route('attendance_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,14 +31,7 @@ class StudentShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'student_id' => ['required', 'integer', 'exists:students,id,deleted_at,NULL'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'student_id' => $this->route('student_id'),
-        ]);
     }
 }

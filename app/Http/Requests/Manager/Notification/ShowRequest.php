@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Manager\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttendanceShowChapterRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,9 +19,7 @@ class AttendanceShowChapterRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
-            'attendance_id' => $this->route('attendance_id'),
-            'chapter_id' => $this->route('chapter_id'),
+            'notification_id' => $this->route('notification_id'),
         ]);
     }
 
@@ -33,9 +31,11 @@ class AttendanceShowChapterRequest extends FormRequest
     public function rules()
     {
         return [
-            'attendance_id' => ['required', 'integer', 'exists:attendances,id'],
-            'course_id' => ['required', 'integer', 'exists:courses,id'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id'],
+            'notification_id' => [
+                'required',
+                'integer',
+                'exists:notifications,id,deleted_at,NULL',
+            ],
         ];
     }
 }

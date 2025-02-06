@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Instructor;
 
-use App\Rules\IndexSortByRule;
+use App\Rules\InstructorIndexSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StudentIndexRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,14 +25,10 @@ class StudentIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['nullable', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'per_page' => ['integer', 'min:1'],
+            'per_page' => ['integer', 'min:1', 'max:100'],
             'page' => ['integer', 'min:1'],
-            'sort_by' => ['string', new IndexSortByRule],
+            'sort_by' => ['string', new InstructorIndexSortByRule],
             'order' => ['string', 'in:asc,desc'],
-            'input_text' => ['string'],
-            'start_date' => ['date_format:Y-m-d H:i:s'],
-            'end_date' => ['date_format:Y-m-d H:i:s'],
         ];
     }
 }

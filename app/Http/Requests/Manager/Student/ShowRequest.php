@@ -1,18 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class InstructorShowRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'instructor_id' => $this->route('instructor_id'),
-        ]);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,7 +24,14 @@ class InstructorShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
+            'student_id' => ['required', 'integer', 'exists:students,id,deleted_at,NULL'],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'student_id' => $this->route('student_id'),
+        ]);
     }
 }

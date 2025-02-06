@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Student\Attendance;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationBulkDeleteRequest extends FormRequest
+class IndexRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +24,7 @@ class NotificationBulkDeleteRequest extends FormRequest
     public function rules()
     {
         return [
-            'notifications' => ['required', 'array', 'min:1'],
-            'notifications.*' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
+            'search_word' => 'string',
         ];
     }
 }

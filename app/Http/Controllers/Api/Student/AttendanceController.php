@@ -226,7 +226,13 @@ class AttendanceController extends Controller
         return $youngestUnCompletedLesson;
     }
 
-    public function putStatus()
+    /**
+     * 講座一覧画面の全講座を完了にする
+     *
+     * @param  \Illuminate\Http\Request  $request  リクエストオブジェクト（attendance_idが含まれる）
+     * @return \Illuminate\Http\JsonResponse 完了メッセージまたはエラーメッセージを含むJSONレスポンス
+     */
+    public function completeAllCourses()
     {
         return response()->json([]);
     }

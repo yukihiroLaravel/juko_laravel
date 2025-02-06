@@ -22,8 +22,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('student')->group(function () {
         // 受講生
         Route::prefix('student')->group(function () {
-            Route::get('/', 'Api\Student\StudentController@show');
-            Route::post('update', 'Api\Student\StudentController@update');
+            Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show']); // ここを変更済み
+            Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update']);
         });
 
         // 受講生-受講
@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::prefix('notification')->group(function () {
             Route::get('index', [App\Http\Controllers\Api\Student\NotificationController::class, 'index']); // ここを変更済み
             Route::get('read', [App\Http\Controllers\Api\Student\NotificationController::class, 'read']); // ここを変更済み
-            Route::get('{notification_id}', [App\Http\Controllers\Api\Student\NotificationController::class, 'show']);
+            Route::get('{notification_id}', [App\Http\Controllers\Api\Student\NotificationController::class, 'show']); // ここを変更済み
         });
     });
 
@@ -250,8 +250,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {
-        Route::post('/', 'Api\Student\StudentController@store');
-        Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+        Route::post('/', [App\Http\Controllers\Api\Student\StudentController::class, 'store']); // ここを変更済み
+        Route::post('verification/{token}', [App\Http\Controllers\Api\Student\StudentController::class, 'verifyCode']); // ここを変更済み
     });
     Route::prefix('instructor')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'store']);

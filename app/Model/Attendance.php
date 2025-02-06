@@ -91,6 +91,12 @@ class Attendance extends Model
         return floor($percent);
     }
 
+    public static function hasActiveStudents(int $courseId): bool
+    {
+        // 指定されたコースに受講生がいるかを確認
+        return self::where('course_id', $courseId)->exists();
+    }
+
     //ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
 

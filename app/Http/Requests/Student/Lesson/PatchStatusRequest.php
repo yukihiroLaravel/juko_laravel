@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Student\Lesson;
 
+use App\Rules\LessonAttendanceStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class NotificationShowRequest extends FormRequest
+class PatchStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,7 +20,7 @@ class NotificationShowRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'notification_id' => $this->route('notification_id'),
+            'lesson_attendance_id' => $this->route('lesson_attendance_id'),
         ]);
     }
 
@@ -31,11 +32,8 @@ class NotificationShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_id' => [
-                'required',
-                'integer',
-                'exists:notifications,id,deleted_at,NULL',
-            ],
+            'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id,deleted_at,NULL'],
+            'status' => ['required', new LessonAttendanceStatusRule],
         ];
     }
 }

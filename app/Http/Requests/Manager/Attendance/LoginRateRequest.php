@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Manager;
+namespace App\Http\Requests\Manager\Attendance;
 
 use App\Rules\AttendancePeriodRule;
 use Illuminate\Foundation\Http\FormRequest;

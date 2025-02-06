@@ -53,7 +53,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
+            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
             throw $e;
         }
     }
@@ -224,5 +224,10 @@ class AttendanceController extends Controller
         }
 
         return $youngestUnCompletedLesson;
+    }
+
+    public function putStatus()
+    {
+        return response()->json([]);
     }
 }

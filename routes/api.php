@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     });
                 });
             });
+            Route::put('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'putStatus']);
         });
 
         // 受講生-レッスン受講

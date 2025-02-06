@@ -53,7 +53,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
+            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
             throw $e;
         }
     }
@@ -228,9 +228,6 @@ class AttendanceController extends Controller
 
     /**
      * 講座一覧画面の全講座を完了にする
-     *
-     * @param  \Illuminate\Http\Request  $request  リクエストオブジェクト（attendance_idが含まれる）
-     * @return \Illuminate\Http\JsonResponse 完了メッセージまたはエラーメッセージを含むJSONレスポンス
      */
     public function completeAllCourses()
     {

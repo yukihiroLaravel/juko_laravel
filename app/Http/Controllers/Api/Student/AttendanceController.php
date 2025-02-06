@@ -21,6 +21,8 @@ use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -124,9 +126,27 @@ class AttendanceController extends Controller
     /**
      * 全チャプター完了API
      */
-    public function completeAllChapters()
+    public function completeAllChapters(Request $request): JsonResponse
     {
-        return response()->json([]);
+        $studentId = Auth::id();
+
+        $attendance = Attendance::findOrFail($request->attendance_id);
+
+        if ($studentId !== $attendance->student_id) {
+            // ログインしている生徒が受講している講座ではない場合エラー応答
+            throw new AuthorizationException('Not authorized.');
+        }
+
+        $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
+            ->pluck('id')
+            ->toArray();
+
+        LessonAttendance::whereIn('id', $lessonAttendanceIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

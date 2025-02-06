@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
-use App\Http\Requests\Instructor\Course\PutStatusRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
@@ -137,7 +136,7 @@ class CourseController extends Controller
             $course = Course::findOrFail($request->course_id);
 
             if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
 
             if (Attendance::where('course_id', $request->course_id)->exists()) {
@@ -158,21 +157,5 @@ class CourseController extends Controller
             Log::error($e);
             throw $e;
         }
-    }
-
-    /**
-     * 講座ステータス一括更新API
-     */
-    public function putStatus(PutStatusRequest $request): JsonResponse
-    {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        Course::where('instructor_id', $instructorId)
-            ->update([
-                'status' => $request->status,
-            ]);
-
-        return response()->json([
-            'result' => 'true',
-        ]);
     }
 }

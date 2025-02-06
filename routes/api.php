@@ -22,22 +22,22 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('student')->group(function () {
         // 受講生
         Route::prefix('student')->group(function () {
-            Route::get('/', 'Api\Student\StudentController@show');
-            Route::post('update', 'Api\Student\StudentController@update');
+            Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show']); 
+            Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update']);
         });
 
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
-            Route::get('index', 'Api\Student\AttendanceController@index');
+            Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index']); 
             Route::prefix('{attendance_id}')->group(function () {
-                Route::get('/', 'Api\Student\AttendanceController@show');
-                Route::get('progress', 'Api\Student\AttendanceController@progress');
+                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show']);
+                Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']);
                 Route::prefix('course')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::prefix('chapter')->group(function () {
                             // 受講生-受講-講座-チャプター
                             Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', 'Api\Student\AttendanceController@showChapter');
+                                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'showChapter']);
                             });
                         });
                     });
@@ -50,9 +50,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-お知らせ
         Route::prefix('notification')->group(function () {
-            Route::get('index', 'Api\Student\NotificationController@index');
-            Route::get('read', 'Api\Student\NotificationController@read');
-            Route::get('{notification_id}', 'Api\Student\NotificationController@show');
+            Route::get('index', [App\Http\Controllers\Api\Student\NotificationController::class, 'index']);
+            Route::get('read', [App\Http\Controllers\Api\Student\NotificationController::class, 'read']);
+            Route::get('{notification_id}', [App\Http\Controllers\Api\Student\NotificationController::class, 'show']);
         });
     });
 
@@ -251,8 +251,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->group(function () {
-        Route::post('/', 'Api\Student\StudentController@store');
-        Route::post('verification/{token}', 'Api\Student\StudentController@verifyCode');
+        Route::post('/', [App\Http\Controllers\Api\Student\StudentController::class, 'store']);
+        Route::post('verification/{token}', [App\Http\Controllers\Api\Student\StudentController::class, 'verifyCode']);
     });
     Route::prefix('instructor')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'store']);

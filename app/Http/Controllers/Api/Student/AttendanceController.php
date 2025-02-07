@@ -18,11 +18,11 @@ use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
@@ -125,7 +125,7 @@ class AttendanceController extends Controller
 
     /**
      * チャプター&レッスン一覧画面 全Lesson完了機能
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function completeAllLessons(Request $request, int $attendance_id, int $chapter_id)
@@ -136,26 +136,26 @@ class AttendanceController extends Controller
         // 受講レコードと関連データ（コース、チャプター、レッスン、受講状況）を取得
         $attendance = Attendance::with([
             'course.chapters.lessons',
-            'lessonAttendances'
+            'lessonAttendances',
         ])->findOrFail($attendance_id);
-    
+
         // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
         if ($attendance->student_id !== $studentId) {
             throw new AuthorizationException('Forbidden, invalid student.');
         }
-    
+
         // 該当チャプターを取得
         $chapter = $attendance->course->chapters->firstWhere('id', $chapter_id);
-        if (!$chapter) {
+        if (! $chapter) {
             throw new Exception('Forbidden, invalid chapter.');
         }
-    
+
         try {
             // 該当チャプターに含まれる全レッスンの受講状況を更新
             LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
                 ->where('attendance_id', $attendance_id)
                 ->update([
-                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE
+                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
                 ]);
 
             return response()->json([

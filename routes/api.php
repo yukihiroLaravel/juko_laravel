@@ -22,13 +22,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('student')->group(function () {
         // 受講生
         Route::prefix('student')->group(function () {
-            Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show']); 
+            Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update']);
         });
 
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
-            Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index']); 
+            Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index']);
             Route::prefix('{attendance_id}')->group(function () {
                 Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show']);
                 Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']);

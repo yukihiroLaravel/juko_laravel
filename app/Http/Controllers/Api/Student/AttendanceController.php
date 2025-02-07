@@ -19,10 +19,10 @@ use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -55,7 +55,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
     }
@@ -233,12 +233,12 @@ class AttendanceController extends Controller
      */
     public function completeAllCourses(Request $request): JsonResponse
     {
-        Log::info('Requested attendance_id: ' . $request->attendance_id);
+        Log::info('Requested attendance_id: '.$request->attendance_id);
 
         $authId = Auth::id();
         $attendance = Attendance::with(['lessonAttendances'])->find($request->attendance_id);
 
-        if (!$attendance) {
+        if (! $attendance) {
             return response()->json(['error' => 'Attendance not found.'], 404);
         }
 
@@ -248,7 +248,7 @@ class AttendanceController extends Controller
 
         // 全ての講座を完了に更新
         $attendance->lessonAttendances()->update([
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
         ]);
 
         return response()->json([

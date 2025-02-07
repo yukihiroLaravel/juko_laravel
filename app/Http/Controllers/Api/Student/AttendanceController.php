@@ -225,4 +225,12 @@ class AttendanceController extends Controller
 
         return $youngestUnCompletedLesson;
     }
+
+    /**
+     * 講座一覧画面の全講座を完了にする
+     */
+    public function completeAllCourses()
+    {
+        return response()->json([]);
+    }
 }

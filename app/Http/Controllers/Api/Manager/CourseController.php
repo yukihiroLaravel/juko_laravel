@@ -41,7 +41,7 @@ class CourseController extends Controller
 
         // 自分、または配下の講師の講座情報を取得
         $courses = $queryService->getCoursesByInstructorIds($instructorIds);
-        
+
         // 各コースに受講中の学生がいるかを判定
         foreach ($courses as $course) {
             $course->has_active_student = Attendance::where('course_id', $course->id)->exists();

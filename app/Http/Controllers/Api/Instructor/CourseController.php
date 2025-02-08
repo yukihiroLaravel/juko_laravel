@@ -30,10 +30,19 @@ class CourseController extends Controller
      */
     public function index(QueryService $queryService): CourseIndexResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // 講座情報を取得
+        $perPage = $request->query('per_page', '5');
+        $courses = Course::where('instructor_id', $instructorId)
+            ->withCount('attendances')
+            ->paginate((int) $perPage);
 
-        return new CourseIndexResource($courses);
+            $courses->getCollection()->map(function (Course $course) {
+                $course->has_active_students = $course->attendances_count > 0;
+    
+                return $course;
+            });
+    
+            return CourseIndexResource::collection($courses);
     }
 
     /**
@@ -41,10 +50,10 @@ class CourseController extends Controller
      */
     public function show(CourseShowRequest $request): CourseShowResource    
 {        
-    $instructorId = Auth::id(); 
+    $instructorId = Auth::guard('instructor')->user()->id; 
     $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
     if ($course->instructor_id !== $instructorId) {
-        abort(403, 'You are not authorized to access this course.');
+        throw new AuthorizationException('Invalid instructor_id.');
     }
 
     return new CourseShowResource($course);    

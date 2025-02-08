@@ -133,20 +133,19 @@ class AttendanceController extends Controller
         // ログイン中の生徒ID
         $studentId = Auth::id();
 
-        // 受講レコードと関連データ（コース、チャプター、レッスン、受講状況）を取得
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances',
-        ])->findOrFail($attendance_id);
+        // 受講レコードと関連データを取得
+        $attendance = Attendance::findOrFail($attendance_id);
 
         // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
         if ($attendance->student_id !== $studentId) {
             throw new AuthorizationException('Forbidden, invalid student.');
         }
-
+        
         // 該当チャプターを取得
-        $chapter = $attendance->course->chapters->firstWhere('id', $chapter_id);
-        if (! $chapter) {
+        $chapter = Chapter::with('lessons')->findOrFail($chapter_id);
+
+        // $chapter が $attendance に紐づくか確認
+        if ($chapter->course_id !== $attendance->course_id) {
             throw new Exception('Forbidden, invalid chapter.');
         }
 

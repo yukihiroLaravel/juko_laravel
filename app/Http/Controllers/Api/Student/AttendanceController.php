@@ -140,7 +140,7 @@ class AttendanceController extends Controller
         if ($attendance->student_id !== $studentId) {
             throw new AuthorizationException('Forbidden, invalid student.');
         }
-        
+
         // 該当チャプターを取得
         $chapter = Chapter::with('lessons')->findOrFail($chapter_id);
 

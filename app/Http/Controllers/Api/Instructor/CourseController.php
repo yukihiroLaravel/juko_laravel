@@ -35,29 +35,29 @@ class CourseController extends Controller
             ->withCount('attendances')
             ->paginate((int) $perPage);
 
-            $courses->getCollection()->map(function (Course $course) {
-                $course->has_active_students = $course->attendances_count > 0;
-    
-                return $course;
-            });
-    
-            return CourseIndexResource::collection($courses);
+        $courses->getCollection()->map(function (Course $course) {
+            $course->has_active_students = $course->attendances_count > 0;
+
+            return $course;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**
      * 講座取得API
      */
-    public function show(CourseShowRequest $request): CourseShowResource    
-{        
-    $instructorId = Auth::guard('instructor')->user()->id; 
-    $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
-    if ($course->instructor_id !== $instructorId) {
-        throw new AuthorizationException('Invalid instructor_id.');
-    }    
-        
-    return new CourseShowResource($course);
+    public function show(CourseShowRequest $request): CourseShowResource
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        if ($course->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
 
-}
+        return new CourseShowResource($course);
+
+    }
 
     /**
      * 講座登録API

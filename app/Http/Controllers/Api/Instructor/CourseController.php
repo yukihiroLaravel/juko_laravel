@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
-use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
@@ -54,11 +53,11 @@ class CourseController extends Controller
     $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
     if ($course->instructor_id !== $instructorId) {
         throw new AuthorizationException('Invalid instructor_id.');
-    }
+    }    
+        
+    return new CourseShowResource($course);
 
-    return new CourseShowResource($course);    
 }
-
 
     /**
      * 講座登録API

@@ -20,7 +20,6 @@ class AttendanceShowChapterResource extends JsonResource
 
         return [
             'attendance_id' => $attendance->id,
-            'progress' => $attendance->progress,
             'course' => [
                 'course_id' => $attendance->course->id,
                 'title' => $attendance->course->title,

@@ -41,9 +41,6 @@ class ShowServiceTest extends TestCase
         // $attendance->idが$attendanceIdであること
         $this->assertEquals($attendanceId, $attendance->id);
 
-        // $attendance->progressがintの値であること
-        $this->assertIsInt($attendance->progress);
-
         // $attendance->courseに値があり、Course::classであること
         $this->assertNotNull($attendance->course);
         $this->assertInstanceOf(Course::class, $attendance->course);

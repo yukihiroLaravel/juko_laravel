@@ -9,6 +9,7 @@ use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowChapterRequest;
 use App\Http\Requests\Student\Attendance\ShowRequest;
+use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowChapterResource;
@@ -126,7 +127,7 @@ class AttendanceController extends Controller
     /**
      * 全チャプター完了API
      */
-    public function completeAllChapters(Request $request): JsonResponse
+    public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
         $studentId = Auth::id();
 

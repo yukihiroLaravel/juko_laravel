@@ -3,9 +3,13 @@
 namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class CourseIndexResource extends JsonResource
 {
+    /** @var LengthAwarePaginator */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -14,7 +18,22 @@ class CourseIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($course) {
+        return [
+            'pagination' => [
+                'current_page' => $this->resource->currentPage(),
+                'total' => $this->resource->total(),
+                'per_page' => $this->resource->perPage(),
+                'last_page' => $this->resource->lastPage(),
+                'next_page_url' => $this->resource->nextPageUrl(),
+                'prev_page_url' => $this->resource->previousPageUrl(),
+            ],
+            'courses' => $this->mapCourses($this->resource->getCollection()),
+        ];
+    }
+
+    private function mapCourses(Collection $courses)
+    {
+        return $courses->map(function ($course) {
             return [
                 'course_id' => $course->id,
                 'title' => $course->title,

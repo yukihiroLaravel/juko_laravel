@@ -32,11 +32,10 @@ class QueryService
      * @param  array<int>  $instructorIds
      * @return Collection<Course>
      */
-    public function getCoursesByInstructorIds(array $instructorIds): Collection
+    public function getCoursesByInstructorIds(array $instructorIds)
     {
         return Course::with('instructor')
-            ->whereIn('instructor_id', $instructorIds)
-            ->get();
+            ->whereIn('instructor_id', $instructorIds);
     }
 
     /**

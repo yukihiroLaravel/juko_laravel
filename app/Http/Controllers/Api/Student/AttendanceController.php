@@ -124,7 +124,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * チャプター&レッスン一覧画面 全Lesson完了機能
+     * 全レッスン完了
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -146,7 +146,7 @@ class AttendanceController extends Controller
 
         // $chapter が $attendance に紐づくか確認
         if ($chapter->course_id !== $attendance->course_id) {
-            throw new Exception('Forbidden, invalid chapter.');
+            throw new AuthorizationException('Forbidden, invalid chapter.');
         }
 
         try {

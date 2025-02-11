@@ -50,16 +50,19 @@ class CompleteAllChaptersTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $student = Student::find(1);
-    //     $this->actingAs($student);
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
 
-    //     // act
-    //     $response = $this->getJson('/api/v1/attendance/abc/progress');
+        // act
+        $response = $this->putJson('/api/v1/attendance/aaa/complete');
 
-    //     // assert
-    //     $response->assertStatus(422);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'attendance_id',
+        ]);
+    }
 }

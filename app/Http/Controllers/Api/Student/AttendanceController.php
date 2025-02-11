@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowChapterRequest;
@@ -20,7 +21,6 @@ use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -126,7 +126,7 @@ class AttendanceController extends Controller
     /**
      * 全チャプター完了API
      */
-    public function completeAllChapters(Request $request): JsonResponse
+    public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
         $studentId = Auth::id();
 

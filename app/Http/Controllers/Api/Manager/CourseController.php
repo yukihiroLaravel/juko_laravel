@@ -49,6 +49,7 @@ class CourseController extends Controller
         $courses->each(function ($course) use ($activeCourseIds) {
             $course->has_active_student = $activeCourseIds->contains($course->id);
         });
+
         return new CourseIndexResource($courses);
     }
 

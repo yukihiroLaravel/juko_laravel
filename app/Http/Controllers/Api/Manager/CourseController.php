@@ -29,7 +29,7 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -40,13 +40,15 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = $queryService->getCoursesByInstructorIds($instructorIds);
-        
-        // 各コースに受講中の学生がいるかを判定
-        foreach ($courses as $course) {
-            $course->has_active_student = Attendance::where('course_id', $course->id)->exists();
-        }
+        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->get();
 
+        $courseIds = $courses->pluck('id')->toArray();
+        // 受講中の学生がいる講座IDを取得
+        $activeCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id');
+        // 各講座に受講中の学生がいるかを設定
+        $courses->each(function ($course) use ($activeCourseIds) {
+            $course->has_active_student = $activeCourseIds->contains($course->id);
+        });
         return new CourseIndexResource($courses);
     }
 

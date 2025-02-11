@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('{attendance_id}')->group(function () {
                 Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show']);
                 Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']);
+                Route::PUT('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters']);
                 Route::prefix('course')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::prefix('chapter')->group(function () {

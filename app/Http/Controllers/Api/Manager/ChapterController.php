@@ -207,8 +207,6 @@ class ChapterController extends Controller
 
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
-            dd($chapters);
-            // dd($chapters);
             $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
                 if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
                     // 自分、または配下の講師の講座のチャプターでなければエラー応答
@@ -221,8 +219,6 @@ class ChapterController extends Controller
             });
 
             $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            $aaa = LessonAttendance::whereIn('lesson_id', $lessonIds)->exists();
-            dd($aaa);
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');

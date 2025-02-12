@@ -18,6 +18,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @tags Manager-Student
+ */
 class StudentController extends Controller
 {
     /**

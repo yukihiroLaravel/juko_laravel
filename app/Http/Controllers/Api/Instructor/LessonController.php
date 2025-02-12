@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Instructor-Lesson
+ */
 class LessonController extends Controller
 {
     /**

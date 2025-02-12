@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Student;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
+use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowChapterRequest;
@@ -168,7 +168,7 @@ class AttendanceController extends Controller
         }
     }
 
-    /** 
+    /**
      * 全チャプター完了API
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse

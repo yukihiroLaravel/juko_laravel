@@ -166,6 +166,7 @@ class AttendanceController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
 
     /** 
      * 全チャプター完了API

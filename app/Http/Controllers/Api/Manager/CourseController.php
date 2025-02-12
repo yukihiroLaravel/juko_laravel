@@ -9,7 +9,7 @@ use App\Http\Requests\Manager\Course\ShowRequest;
 use App\Http\Requests\Manager\Course\StatusRequest;
 use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
-use App\Http\Resources\Manager\CourseIndexResource;
+use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -20,6 +20,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -30,7 +31,7 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(IndexRequest $request): CourseIndexResource
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
@@ -48,7 +49,7 @@ class CourseController extends Controller
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return new CourseIndexResource($courses);
+        return CourseResource::collection($courses);
     }
 
     /**

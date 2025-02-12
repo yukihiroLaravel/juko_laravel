@@ -24,12 +24,15 @@ class CourseShowResource extends JsonResource
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
                     'order' => $chapter->order,
-                    'lessons' => $chapter->lessons->map(function ($lesson) {
+                    'status' => $chapter->status,
+                    'lessons' => $chapter->lessons->sortBy('order')->map(function ($lesson) {
                         return [
                             'lesson_id' => $lesson->id,
                             'title' => $lesson->title,
                             'url' => $lesson->url,
                             'remarks' => $lesson->remarks,
+                            'status' => $lesson->status,
+                            'order' => $lesson->order, 
                         ];
                     }),
                 ];

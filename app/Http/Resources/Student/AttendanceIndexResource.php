@@ -17,7 +17,6 @@ class AttendanceIndexResource extends JsonResource
         return $this->resource->map(function ($value) {
             return [
                 'attendance_id' => $value->id,
-                'progress' => $value->progress,
                 'course' => [
                     'course_id' => $value->course->id,
                     'title' => $value->course->title,

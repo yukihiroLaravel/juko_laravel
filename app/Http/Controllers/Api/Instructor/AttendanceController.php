@@ -55,7 +55,6 @@ class AttendanceController extends Controller
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
-                'progress' => Attendance::PROGRESS_DEFAULT_VALUE,
             ]);
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);

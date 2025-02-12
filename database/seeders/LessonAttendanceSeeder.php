@@ -19,7 +19,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 1,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
@@ -28,12 +29,22 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // 講座情報を取得
+        $perPage = $request->query('per_page', '5');
+        $courses = Course::where('instructor_id', $instructorId)
+            ->withCount('attendances')
+            ->paginate((int) $perPage);
 
-        return new CourseIndexResource($courses);
+        $courses->getCollection()->map(function (Course $course) {
+            $course->has_active_students = $course->attendances_count > 0;
+
+            return $course;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**

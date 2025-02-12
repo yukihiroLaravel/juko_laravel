@@ -45,6 +45,7 @@ class NotificationIndexResource extends JsonResource
                 'title' => $notification->title,
                 'content' => $notification->content,
                 'type' => $notification->type,
+                'nick_name' => $notification->instructor->nick_name,
                 'start_date' => $notification->start_date,
                 'end_date' => $notification->end_date,
             ];

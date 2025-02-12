@@ -27,8 +27,6 @@ class IndexTest extends TestCase
         // act
         $response = $this->getJson('/api/v1/manager/course/index');
 
-        $response->dump();
-
         // assert
         $response->assertStatus(200);
     }

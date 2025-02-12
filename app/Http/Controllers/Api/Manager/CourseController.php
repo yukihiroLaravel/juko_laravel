@@ -30,9 +30,9 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(IndexRequest $request, QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request): CourseIndexResource
     {
-        $perPage = $request->input('per_page', 7);
+        $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
 
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -44,7 +44,8 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = $queryService->getCoursesByInstructorIds($instructorIds)
+        $courses = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new CourseIndexResource($courses);

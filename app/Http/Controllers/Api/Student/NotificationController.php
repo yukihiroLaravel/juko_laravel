@@ -16,6 +16,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Student-Notification
+ */
 class NotificationController extends Controller
 {
     /**

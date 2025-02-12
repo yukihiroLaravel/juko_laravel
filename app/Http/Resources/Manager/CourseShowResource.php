@@ -32,7 +32,7 @@ class CourseShowResource extends JsonResource
                             'url' => $lesson->url,
                             'remarks' => $lesson->remarks,
                             'status' => $lesson->status,
-                            'order' => $lesson->order, 
+                            'order' => $lesson->order,
                         ];
                     }),
                 ];

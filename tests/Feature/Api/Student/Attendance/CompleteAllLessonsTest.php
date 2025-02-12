@@ -67,20 +67,20 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $student = Student::find(1);
-    //     $this->actingAs($student);
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
 
-    //     // act
-    //     $response = $this->putJson('/api/v1/attendance/aaa/chapter/bbb/complete');
+        // act
+        $response = $this->putJson('/api/v1/attendance/aaa/chapter/bbb/complete');
 
-    //     // assert
-    //     $response->assertStatus(422);
-    //     $response->assertJsonValidationErrors([
-    //         'attendance_id',
-    //         'chapter_id',
-    //     ]);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'attendance_id',
+            'chapter_id',
+        ]);
+    }
 }

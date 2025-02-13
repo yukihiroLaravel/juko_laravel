@@ -2,11 +2,11 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Http\Resources\Instructor\InstructorResource;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Http\Resources\Instructor\InstructorResource;
 
 class NotificationIndexResource extends JsonResource
 {

@@ -6,6 +6,7 @@ use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
+use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowChapterRequest;
@@ -19,6 +20,7 @@ use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -124,6 +126,47 @@ class AttendanceController extends Controller
             'attendance' => $attendance,
             'progressData' => $progressData,
         ]);
+    }
+
+    /**
+     * 全レッスン完了
+     */
+    public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
+    {
+        // ログイン中の生徒ID
+        $studentId = Auth::id();
+
+        // 受講レコードを取得
+        $attendance = Attendance::findOrFail($request->attendance_id);
+
+        // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
+        if ($attendance->student_id !== $studentId) {
+            throw new AuthorizationException('Forbidden, invalid student.');
+        }
+
+        // 該当チャプターを取得
+        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+
+        // $chapter が $attendance に紐づくか確認
+        if ($chapter->course_id !== $attendance->course_id) {
+            throw new AuthorizationException('Forbidden, invalid chapter.');
+        }
+
+        try {
+            // 該当チャプターに含まれる全レッスンの受講状況を更新
+            LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
+                ->where('attendance_id', $attendance->id)
+                ->update([
+                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                ]);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

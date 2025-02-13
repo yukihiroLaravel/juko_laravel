@@ -20,7 +20,6 @@ use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -55,7 +54,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
     }
@@ -245,7 +244,7 @@ class AttendanceController extends Controller
         // 全ての講座を完了に更新
         foreach ($attendances as $attendance) {
             $attendance->lessonAttendances()->update([
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE
+                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
             ]);
         }
 

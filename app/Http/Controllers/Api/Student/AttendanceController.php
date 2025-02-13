@@ -24,6 +24,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Student-Attendance
+ */
 class AttendanceController extends Controller
 {
     /**

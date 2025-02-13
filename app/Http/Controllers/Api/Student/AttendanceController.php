@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowChapterRequest;
@@ -19,9 +20,13 @@ use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Student-Attendance
+ */
 class AttendanceController extends Controller
 {
     /**
@@ -118,6 +123,32 @@ class AttendanceController extends Controller
         return new AttendanceCourseProgressResource([
             'attendance' => $attendance,
             'progressData' => $progressData,
+        ]);
+    }
+
+    /**
+     * 全チャプター完了API
+     */
+    public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
+    {
+        $studentId = Auth::id();
+
+        $attendance = Attendance::findOrFail($request->attendance_id);
+
+        if ($studentId !== $attendance->student_id) {
+            // ログインしている生徒が受講している講座ではない場合エラー応答
+            throw new AuthorizationException('Not authorized.');
+        }
+
+        $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
+            ->pluck('id')
+            ->toArray();
+
+        LessonAttendance::whereIn('id', $lessonAttendanceIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+
+        return response()->json([
+            'result' => true,
         ]);
     }
 

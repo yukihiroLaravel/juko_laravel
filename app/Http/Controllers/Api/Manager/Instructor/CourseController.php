@@ -11,6 +11,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @tags Manager-Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**

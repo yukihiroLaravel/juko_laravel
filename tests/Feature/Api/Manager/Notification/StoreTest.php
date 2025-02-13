@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Model\Course;
 use App\Model\Instructor;

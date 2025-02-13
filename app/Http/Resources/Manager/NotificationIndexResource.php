@@ -6,6 +6,7 @@ use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Resources\Instructor\InstructorResource;
 
 class NotificationIndexResource extends JsonResource
 {
@@ -45,7 +46,7 @@ class NotificationIndexResource extends JsonResource
                 'title' => $notification->title,
                 'content' => $notification->content,
                 'type' => $notification->type,
-                'nick_name' => $notification->instructor->nick_name,
+                'instructor' => new InstructorResource($notification->instructor),
                 'start_date' => $notification->start_date,
                 'end_date' => $notification->end_date,
             ];

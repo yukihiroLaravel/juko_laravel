@@ -127,10 +127,8 @@ class AttendanceController extends Controller
 
     /**
      * 全レッスン完了
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function completeAllLessons(CompleteAllLessonsRequest $request)
+    public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
     {
         // ログイン中の生徒ID
         $studentId = Auth::id();

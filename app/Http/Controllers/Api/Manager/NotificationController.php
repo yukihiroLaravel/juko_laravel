@@ -67,6 +67,9 @@ class NotificationController extends Controller
         /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
 
+        // 指定されたお知らせIDでinstructor_idを取得し、nick_nameを取得
+        $notification->nick_name = Instructor::where('id', $notification->instructor_id)->value('nick_name');
+
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');

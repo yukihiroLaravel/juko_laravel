@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Notification
+ */
 class NotificationController extends Controller
 {
     /**
@@ -42,7 +45,7 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $notifications = Notification::with(['course'])
+        $notifications = Notification::with(['course', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 

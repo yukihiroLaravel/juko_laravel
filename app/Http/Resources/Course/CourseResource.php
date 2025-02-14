@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Course;
 
+use App\Http\Resources\Instructor\InstructorResource;
 use App\Model\Course;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseIndexResource extends JsonResource
+class CourseResource extends JsonResource
 {
     /** @var Course */
     public $resource;
@@ -13,17 +15,16 @@ class CourseIndexResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray(Request $request): array
     {
         return [
             'course_id' => $this->resource->id,
-            'image' => $this->resource->image,
             'title' => $this->resource->title,
+            'image' => $this->resource->image,
             'status' => $this->resource->status,
-            'has_active_students' => (bool) $this->resource->has_active_students,
+            'instructor' => new InstructorResource($this->resource->instructor),
         ];
     }
 }

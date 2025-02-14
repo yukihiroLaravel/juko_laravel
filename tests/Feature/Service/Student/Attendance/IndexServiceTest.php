@@ -79,21 +79,18 @@ class IndexServiceTest extends TestCase
             [
                 'course_id' => 3,
                 'student_id' => 1,
-                'progress' => 12,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 5,
                 'student_id' => 1,
-                'progress' => 15,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 7,
                 'student_id' => 1,
-                'progress' => 3,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

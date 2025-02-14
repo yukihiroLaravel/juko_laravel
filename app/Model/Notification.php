@@ -97,4 +97,14 @@ class Notification extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+    /**
+     * 講師を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function instructor()
+    {
+        return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
 }

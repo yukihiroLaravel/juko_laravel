@@ -55,7 +55,7 @@ class CourseController extends Controller
         $activeCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id');
         // 各講座に受講中の学生がいるかを設定
         $courses->each(function (Course $course) use ($activeCourseIds) {
-            $course->has_active_student = $activeCourseIds->contains($course->id);
+            $course->has_active_students = $activeCourseIds->contains($course->id);
         });
         $courses = Course::with('instructor')
             ->whereIn('instructor_id', $instructorIds)

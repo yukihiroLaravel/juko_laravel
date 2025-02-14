@@ -54,7 +54,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
     }
@@ -246,7 +246,7 @@ class AttendanceController extends Controller
             ->pluck('id')
             ->toArray();
 
-        if (!empty($lessonAttendanceIds)) {
+        if (! empty($lessonAttendanceIds)) {
             // 取得した ID のレコードを一括更新
             LessonAttendance::whereIn('id', $lessonAttendanceIds)
                 ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);

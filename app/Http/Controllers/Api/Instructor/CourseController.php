@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
+use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
@@ -27,37 +29,40 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request)
     {
+        $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', '5');
         $courses = Course::where('instructor_id', $instructorId)
             ->withCount('attendances')
             ->paginate((int) $perPage);
 
-            $courses->getCollection()->map(function (Course $course) {
-                $course->has_active_students = $course->attendances_count > 0;
-    
-                return $course;
-            });
-    
-            return CourseIndexResource::collection($courses);
+        $courses->getCollection()->map(function (Course $course) {
+            $course->has_active_students = $course->attendances_count > 0;
+
+            return $course;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**
      * 講座取得API
      */
-    public function show(CourseShowRequest $request): CourseShowResource    
-{        
-    $instructorId = Auth::guard('instructor')->user()->id; 
-    $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
-    if ($course->instructor_id !== $instructorId) {
-        throw new AuthorizationException('Invalid instructor_id.');
-    }    
-        
-    return new CourseShowResource($course);
+    public function show(ShowRequest $request): CourseShowResource    
+    {        
+        $instructorId = Auth::guard('instructor')->user()->id; 
 
-}
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+
+        if ($course->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        return new CourseShowResource($course);    
+    }
+
 
     /**
      * 講座登録API

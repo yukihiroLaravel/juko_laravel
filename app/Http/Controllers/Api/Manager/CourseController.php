@@ -48,6 +48,15 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
+        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->withCount('attendances')->get();
+
+        $courseIds = $courses->pluck('id')->toArray();
+        // 受講中の学生がいる講座IDを取得
+        $activeCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id');
+        // 各講座に受講中の学生がいるかを設定
+        $courses->each(function (Course $course) use ($activeCourseIds) {
+            $course->has_active_students = $activeCourseIds->contains($course->id);
+        });
         $courses = Course::with('instructor')
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);

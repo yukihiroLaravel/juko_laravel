@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Manager;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Instructor\InstructorResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationShowResource extends JsonResource
 {

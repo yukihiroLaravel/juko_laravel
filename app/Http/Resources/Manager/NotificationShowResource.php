@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Instructor\InstructorResource;
 
 class NotificationShowResource extends JsonResource
 {
@@ -19,7 +20,7 @@ class NotificationShowResource extends JsonResource
     {
         return [
             'notification_id' => $this->resource->id,
-            'nick_name' => $this->resource->nick_name,
+            'instructor' => new InstructorResource($this->resource->instructor),
             'course_id' => $this->resource->course_id,
             'course_title' => $this->resource->course->title,
             'title' => $this->resource->title,

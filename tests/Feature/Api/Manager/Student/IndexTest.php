@@ -37,7 +37,7 @@ class IndexTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/student/index?course_id=1');
+        $response = $this->getJson('/api/v1/manager/student/index?courses[]=1');
 
         // assert
         $response->assertStatus(200);
@@ -50,7 +50,7 @@ class IndexTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/student/index?course_id=4');
+        $response = $this->getJson('/api/v1/manager/student/index?courses[]=4');
 
         // assert
         $response->assertStatus(403);
@@ -66,12 +66,12 @@ class IndexTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/student/index?course_id=aaa');
+        $response = $this->getJson('/api/v1/manager/student/index?courses[]=aaa');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
+            'courses.0',
         ]);
     }
 }

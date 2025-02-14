@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\LessonBulkDeleteRequest;
-use App\Http\Requests\Manager\LessonDeleteRequest;
-use App\Http\Requests\Manager\LessonPatchStatusRequest;
-use App\Http\Requests\Manager\LessonPutRequest;
-use App\Http\Requests\Manager\LessonPutStatusRequest;
-use App\Http\Requests\Manager\LessonsAllDeleteRequest;
-use App\Http\Requests\Manager\LessonSortRequest;
-use App\Http\Requests\Manager\LessonStoreRequest;
-use App\Http\Requests\Manager\LessonUpdateTitleRequest;
+use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
+use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
+use App\Http\Requests\Manager\Lesson\DeleteRequest;
+use App\Http\Requests\Manager\Lesson\PutRequest;
+use App\Http\Requests\Manager\Lesson\PutStatusRequest;
+use App\Http\Requests\Manager\Lesson\SortRequest;
+use App\Http\Requests\Manager\Lesson\StoreRequest;
+use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
+use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Lesson
+ */
 class LessonController extends Controller
 {
     /**
@@ -34,7 +37,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(LessonStoreRequest $request)
+    public function store(StoreRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -91,7 +94,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function put(LessonPutRequest $request)
+    public function put(PutRequest $request)
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -137,7 +140,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function delete(LessonDeleteRequest $request)
+    public function delete(DeleteRequest $request)
     {
         DB::beginTransaction();
         try {
@@ -201,7 +204,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(LessonSortRequest $request)
+    public function sort(SortRequest $request)
     {
         DB::beginTransaction();
 
@@ -261,7 +264,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(LessonPatchStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -302,7 +305,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function updateTitle(LessonUpdateTitleRequest $request)
+    public function updateTitle(UpdateTitleRequest $request)
     {
         // 現在のユーザーを取得（講師の場合）
         $managerId = Auth::guard('instructor')->user()->id;
@@ -342,7 +345,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      */
-    public function putStatus(LessonPutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -395,7 +398,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスン削除API
      */
-    public function bulkDelete(LessonBulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -464,7 +467,7 @@ class LessonController extends Controller
     /**
      * チャプターに紐づく全レッスンを削除するAPI
      */
-    public function deleteAll(LessonsAllDeleteRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

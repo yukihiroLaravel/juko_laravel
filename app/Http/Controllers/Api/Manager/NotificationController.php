@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
-use App\Http\Requests\Manager\NotificationDeleteRequest;
-use App\Http\Requests\Manager\NotificationIndexRequest;
-use App\Http\Requests\Manager\NotificationPutTypeRequest;
-use App\Http\Requests\Manager\NotificationShowRequest;
-use App\Http\Requests\Manager\NotificationStoreRequest;
-use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
+use App\Http\Requests\Manager\Notification\DeleteRequest;
+use App\Http\Requests\Manager\Notification\IndexRequest;
+use App\Http\Requests\Manager\Notification\ShowRequest;
+use App\Http\Requests\Manager\Notification\StoreRequest;
+use App\Http\Requests\Manager\Notification\UpdateRequest;
+use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
@@ -23,12 +23,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Notification
+ */
 class NotificationController extends Controller
 {
     /**
      * お知らせ一覧取得API
      */
-    public function index(NotificationIndexRequest $request): NotificationIndexResource
+    public function index(IndexRequest $request): NotificationIndexResource
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -42,7 +45,7 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $notifications = Notification::with(['course'])
+        $notifications = Notification::with(['course', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -52,7 +55,7 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      */
-    public function show(NotificationShowRequest $request): NotificationShowResource
+    public function show(ShowRequest $request): NotificationShowResource
     {
         // ユーザーID取得
         $instructorId = $request->user()->id;
@@ -78,7 +81,7 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      */
-    public function store(NotificationStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -120,7 +123,7 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function update(NotificationUpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -165,7 +168,7 @@ class NotificationController extends Controller
     /**
      * お知らせ削除
      */
-    public function delete(NotificationDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -204,7 +207,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(NotificationPutTypeRequest $request): JsonResponse
+    public function updateType(UpdateTypeRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -248,7 +251,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括削除API
      */
-    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

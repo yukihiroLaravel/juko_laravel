@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources\Instructor;
 
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use App\Model\Course;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseIndexResource extends ResourceCollection
+class CourseIndexResource extends JsonResource
 {
+    /** @var Course */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -15,22 +19,11 @@ class CourseIndexResource extends ResourceCollection
     public function toArray($request)
     {
         return [
-            'data' => $this->collection->map(function ($course) {
-                return [
-                    'course_id' => $course->id,
-                    'image' => $course->image,
-                    'title' => $course->title,
-                    'status' => $course->status,
-                ];
-            }),
-            'pagination' => [
-                'current_page' => $this->currentPage(),
-                'last_page' => $this->lastPage(),
-                'per_page' => $this->perPage(),
-                'total' => $this->total(),
-                'next_page_url' => $this->nextPageUrl(),
-                'prev_page_url' => $this->previousPageUrl(),
-            ],
+            'course_id' => $this->resource->id,
+            'image' => $this->resource->image,
+            'title' => $this->resource->title,
+            'status' => $this->resource->status,
+            'has_active_students' => (bool) $this->resource->has_active_students,
         ];
     }
 }

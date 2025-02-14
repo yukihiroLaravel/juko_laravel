@@ -54,7 +54,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
     }
@@ -246,7 +246,7 @@ class AttendanceController extends Controller
             ->pluck('id')
             ->toArray();
 
-        if (!empty($lessonAttendanceIds)) {
+        if (! empty($lessonAttendanceIds)) {
             throw new AuthorizationException('There is no lesson attendance.');
         }
 

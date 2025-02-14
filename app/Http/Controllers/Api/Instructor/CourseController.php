@@ -36,7 +36,9 @@ class CourseController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
-        $perPage = $request->query('per_page', '5');
+        $perPage = $request->query('per_page', '6');
+
+        // ページネーションで講座を取得
         $courses = Course::where('instructor_id', $instructorId)
             ->withCount('attendances')
             ->paginate((int) $perPage);
@@ -47,7 +49,7 @@ class CourseController extends Controller
             return $course;
         });
 
-        return CourseIndexResource::collection($courses);
+        return response()->json(CourseIndexResource::collection($courses)->response()->getData(true));
     }
 
     /**

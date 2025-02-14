@@ -247,10 +247,12 @@ class AttendanceController extends Controller
             ->toArray();
 
         if (!empty($lessonAttendanceIds)) {
-            // 取得した ID のレコードを一括更新
-            LessonAttendance::whereIn('id', $lessonAttendanceIds)
-                ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+            throw new AuthorizationException('There is no lesson attendance.');
         }
+
+        // 取得した ID のレコードを一括更新
+        LessonAttendance::whereIn('id', $lessonAttendanceIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
 
         return response()->json([
             'result' => true,

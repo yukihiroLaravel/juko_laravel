@@ -54,7 +54,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
+            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
             throw $e;
         }
     }
@@ -235,22 +235,25 @@ class AttendanceController extends Controller
         $studentId = Auth::id();
 
         // 受講生が受講している全てのAttendanceを取得
-        $attendances = Attendance::where('student_id', $studentId)->with('lessonAttendances')->get();
+        $attendances = Attendance::where('student_id', $studentId)->get();
 
         if ($attendances->isEmpty()) {
-            throw new AuthorizationException('Not authorized.');
+            throw new AuthorizationException('There is no attendance.');
         }
 
-        // 全ての講座を完了に更新
-        foreach ($attendances as $attendance) {
-            $attendance->lessonAttendances()->update([
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-            ]);
+        // attendance_id に一致する lesson_attendance の ID をまとめて取得
+        $lessonAttendanceIds = LessonAttendance::whereIn('attendance_id', $attendances->pluck('id'))
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($lessonAttendanceIds)) {
+            // 取得した ID のレコードを一括更新
+            LessonAttendance::whereIn('id', $lessonAttendanceIds)
+                ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
         }
 
         return response()->json([
             'result' => true,
-            'message' => 'All lessons have been marked as completed.',
         ]);
     }
 }

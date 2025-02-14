@@ -9,6 +9,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
+/**
+ * @tags Student-LessonAttendance
+ */
 class LessonAttendanceController extends Controller
 {
     /**

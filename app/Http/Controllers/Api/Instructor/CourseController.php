@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @tags Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**

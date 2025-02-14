@@ -6,7 +6,7 @@ use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ProgressTest extends TestCase
+class CompleteAllChaptersTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -17,30 +17,37 @@ class ProgressTest extends TestCase
         $this->seed();
     }
 
-    public function test_受講進捗を取得_成功(): void
+    public function test_全チャプター完了_成功(): void
     {
         // arrange
         $student = Student::find(1);
         $this->actingAs($student);
 
         // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        $response = $this->putJson('/api/v1/attendance/1/complete');
 
         // assert
         $response->assertStatus(200);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => 1,
+            'status' => 'completed_attendance',
+        ]);
     }
 
-    public function test_受講進捗を取得_他の生徒の進捗を取得_失敗(): void
+    public function test_権限がない生徒_失敗(): void
     {
         // arrange
         $student = Student::find(2);
         $this->actingAs($student);
 
         // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        $response = $this->putJson('/api/v1/attendance/1/complete');
 
         // assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Not authorized.',
+        ]);
     }
 
     public function test_バリデーションエラー(): void
@@ -50,9 +57,12 @@ class ProgressTest extends TestCase
         $this->actingAs($student);
 
         // act
-        $response = $this->getJson('/api/v1/attendance/abc/progress');
+        $response = $this->putJson('/api/v1/attendance/aaa/complete');
 
         // assert
         $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'attendance_id',
+        ]);
     }
 }

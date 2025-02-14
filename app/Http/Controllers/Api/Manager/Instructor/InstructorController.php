@@ -28,6 +28,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
+/**
+ * @tags Manager-Instructor
+ */
 class InstructorController extends Controller
 {
     /**

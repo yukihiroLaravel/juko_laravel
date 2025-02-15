@@ -28,7 +28,6 @@ class CourseIndexResource extends JsonResource
                     'email' => $course->instructor->email,
                     'profile_image' => $course->instructor->profile_image,
                 ],
-                'has_active_student' => $course->has_active_student,
             ];
         });
     }

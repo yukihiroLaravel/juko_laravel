@@ -29,6 +29,7 @@ class AttendanceIndexResource extends JsonResource
                         'email' => $value->course->instructor->email,
                         'profile_image' => $value->course->instructor->profile_image,
                     ],
+                    'progress_percentage' => $value->course->progress_percentage,
                 ],
             ];
         });

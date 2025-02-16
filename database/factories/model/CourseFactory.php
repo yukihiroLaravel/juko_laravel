@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Model;
 
-use App\Model\Instructor;
 use App\Model\Course;
+use App\Model\Instructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class CourseFactory extends Factory
 {
     protected $model = Course::class;
+
     /**
      * Define the model's default state.
      *
@@ -21,7 +22,7 @@ class CourseFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(3),
-            'status' => Course::STATUS_PUBLIC, 
+            'status' => Course::STATUS_PUBLIC,
             'instructor_id' => Instructor::factory(),
             'image' => 'course/default.png',
         ];

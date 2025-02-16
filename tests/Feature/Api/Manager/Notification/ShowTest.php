@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -51,8 +50,6 @@ class ShowTest extends TestCase
         // arrange
         $unauthorizedInstructor = Instructor::find(2);
         $this->actingAs($unauthorizedInstructor, 'instructor');
-
-        $course = Course::find(1);
 
         // act
         $response = $this->getJson('/api/v1/manager/notification/aaa');

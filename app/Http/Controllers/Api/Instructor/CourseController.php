@@ -59,7 +59,7 @@ class CourseController extends Controller
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
         if ($course->instructor_id !== $instructorId) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new CourseShowResource($course);

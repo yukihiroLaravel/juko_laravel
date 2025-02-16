@@ -18,10 +18,10 @@ class IndexService
     {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
-                'course.instructor',
-                'course.chapters.lessons',
-                'lessonAttendances',
-            ])
+            'course.instructor',
+            'course.chapters.lessons',
+            'lessonAttendances',
+        ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
                 $query->when(! $indexDto->getSearchWord(), function ($query) {
@@ -33,7 +33,7 @@ class IndexService
             })->get();
 
         // 各受講情報ごとにチャプター単位の進捗率を計算
-        foreach ($attendances as $attendance){
+        foreach ($attendances as $attendance) {
             $completedChaptersCount = $this->getCompletedChaptersCount($attendance);
             $totalChaptersCount = $this->getTotalChaptersCount($attendance);
             $progressPercentage = ($totalChaptersCount > 0) ? round(($completedChaptersCount / $totalChaptersCount) * 100) : 0;

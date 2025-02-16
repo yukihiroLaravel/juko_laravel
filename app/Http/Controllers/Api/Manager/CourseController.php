@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Course\DeleteRequest;
+use App\Http\Requests\Manager\Course\IndexRequest;
 use App\Http\Requests\Manager\Course\ShowRequest;
 use App\Http\Requests\Manager\Course\StatusRequest;
 use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
-use App\Http\Resources\Manager\CourseIndexResource;
+use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -19,18 +20,25 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @tags Manager-Course
+ */
 class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
+        $perPage = $request->input('per_page', 6);
+        $page = $request->input('page', 1);
+
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
@@ -40,9 +48,20 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = $queryService->getCoursesByInstructorIds($instructorIds);
+        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->withCount('attendances')->get();
 
-        return new CourseIndexResource($courses);
+        $courseIds = $courses->pluck('id')->toArray();
+        // 受講中の学生がいる講座IDを取得
+        $activeCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id');
+        // 各講座に受講中の学生がいるかを設定
+        $courses->each(function (Course $course) use ($activeCourseIds) {
+            $course->has_active_students = $activeCourseIds->contains($course->id);
+        });
+        $courses = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return CourseResource::collection($courses);
     }
 
     /**

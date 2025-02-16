@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
@@ -13,7 +14,6 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -23,25 +23,44 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @tags Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // 講座情報を取得
+        $perPage = $request->query('per_page', '5');
+        $courses = Course::where('instructor_id', $instructorId)
+            ->withCount('attendances')
+            ->paginate((int) $perPage);
 
-        return new CourseIndexResource($courses);
+        $courses->getCollection()->map(function (Course $course) {
+            $course->has_active_students = $course->attendances_count > 0;
+
+            return $course;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        $course = $queryService->getCourse($request->course_id);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+
+        if ($course->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
 
         return new CourseShowResource($course);
     }

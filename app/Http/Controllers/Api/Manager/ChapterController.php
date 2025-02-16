@@ -27,6 +27,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Chapter
+ */
 class ChapterController extends Controller
 {
     /**
@@ -108,7 +111,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function put(putRequest $request)
+    public function put(PutRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

@@ -25,6 +25,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Instructor-Attendance
+ */
 class AttendanceController extends Controller
 {
     /**
@@ -55,7 +58,6 @@ class AttendanceController extends Controller
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
-                'progress' => Attendance::PROGRESS_DEFAULT_VALUE,
             ]);
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);

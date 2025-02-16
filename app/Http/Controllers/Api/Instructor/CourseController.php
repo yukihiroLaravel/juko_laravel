@@ -14,7 +14,6 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -53,9 +52,15 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        $course = $queryService->getCourse($request->course_id);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+
+        if ($course->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
 
         return new CourseShowResource($course);
     }

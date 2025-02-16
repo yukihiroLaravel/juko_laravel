@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Notification
+ */
 class NotificationController extends Controller
 {
     /**
@@ -42,7 +45,7 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $notifications = Notification::with(['course'])
+        $notifications = Notification::with(['course', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -58,18 +61,18 @@ class NotificationController extends Controller
         $instructorId = $request->user()->id;
 
         // 配下のインストラクター情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
-        /** @var Notification $notification */
-        $notification = Notification::findOrFail($request->notification_id);
+        $notification = Notification::with('instructor')->findOrFail($request->notification_id);
+        assert($notification instanceof Notification);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new NotificationShowResource($notification);

@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @tags Instructor
+ */
 class InstructorController extends Controller
 {
     /**

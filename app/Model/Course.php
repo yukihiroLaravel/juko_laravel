@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property bool $has_active_students
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Course extends Model
 {
     use SoftDeletes;
+    use HasFactory;
 
     /**
      * モデルと関連しているテーブル

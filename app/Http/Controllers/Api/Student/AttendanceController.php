@@ -31,9 +31,11 @@ class AttendanceController extends Controller
         IndexRequest $request,
         IndexService $service
     ): AttendanceIndexResource {
+        $perPage = $request->input('per_page', 6);
+        $page = $request->input('page', 1);
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
-        $attendances = $service($indexDto);
+        $attendances = $service($indexDto)->paginate($perPage, ['*'], 'page', $page);
 
         return new AttendanceIndexResource($attendances);
     }

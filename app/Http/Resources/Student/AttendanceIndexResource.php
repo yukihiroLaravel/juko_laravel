@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Student;
 
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class AttendanceIndexResource extends JsonResource
+class AttendanceIndexResource extends ResourceCollection
 {
     /**
      * Transform the resource into an array.
@@ -14,7 +14,7 @@ class AttendanceIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($value) {
+        return $this->collection->map(function ($value) {
             return [
                 'attendance_id' => $value->id,
                 'course' => [

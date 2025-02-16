@@ -6,7 +6,6 @@ use App\Dto\Student\Attendance\IndexDto;
 use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class IndexService
 {
@@ -15,7 +14,7 @@ class IndexService
      */
     public function __invoke(
         IndexDto $indexDto
-    ): Collection {
+    ): Builder {
         return Attendance::with('course.instructor')
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
@@ -25,6 +24,6 @@ class IndexService
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->where('status', Course::STATUS_PUBLIC);
                 });
-            })->get();
+            });
     }
 }

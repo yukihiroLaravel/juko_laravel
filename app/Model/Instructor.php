@@ -5,9 +5,12 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Instructor extends Authenticatable
 {
+    use HasFactory;
+
     /**
      * モデルと関連しているテーブル
      *

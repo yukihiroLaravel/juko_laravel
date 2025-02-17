@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Instructor;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Chapter\ChapterResource;
 use App\Http\Resources\Lesson\LessonResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource
 {

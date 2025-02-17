@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Instructor;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\Chapter\ChapterResource;
 use App\Http\Resources\Lesson\LessonResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource
 {
@@ -17,7 +17,7 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-        'chapters' => $this->resource->chapters->sortBy('order')->map(function ($chapter) {
+            'chapters' => $this->resource->chapters->sortBy('order')->map(function ($chapter) {
                 return [
                     new ChapterResource($chapter),
                     'lessons' => LessonResource::collection($chapter->lessons),

@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
             Route::get('index', 'Api\Student\AttendanceController@index');
+            Route::put('course/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllCourses']);
             Route::prefix('{attendance_id}')->group(function () {
                 Route::get('/', 'Api\Student\AttendanceController@show');
                 Route::get('progress', 'Api\Student\AttendanceController@progress');
@@ -43,7 +44,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     });
                 });
             });
-            Route::put('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllCourses']);
         });
 
         // 受講生-レッスン受講

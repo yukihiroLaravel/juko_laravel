@@ -34,7 +34,7 @@ class CourseController extends Controller
      */
     public function index(IndexRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $instructorId = Auth::guard('instructor')->id();
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
 
@@ -45,11 +45,9 @@ class CourseController extends Controller
 
         $courses->getCollection()->map(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;
-
-            return $course;
         });
 
-        return response()->json(CourseIndexResource::collection($courses)->response()->getData(true));
+        return CourseIndexResource::collection($courses);
     }
 
     /**

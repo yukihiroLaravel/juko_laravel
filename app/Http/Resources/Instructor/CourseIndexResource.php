@@ -23,7 +23,9 @@ class CourseIndexResource extends JsonResource
             'image' => $this->resource->image,
             'title' => $this->resource->title,
             'status' => $this->resource->status,
-            'has_active_students' => (bool) $this->resource->has_active_students,
+            'has_active_students' => isset($this->resource->has_active_students)
+                ? (bool) $this->resource->has_active_students
+                : false,
         ];
     }
 }

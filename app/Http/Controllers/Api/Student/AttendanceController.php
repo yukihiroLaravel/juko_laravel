@@ -234,24 +234,11 @@ class AttendanceController extends Controller
     {
         $studentId = Auth::id();
 
-        // 受講生が受講している全てのAttendanceを取得
-        $attendances = Attendance::where('student_id', $studentId)->get();
+        // 受講生が受講している全てのAttendanceのIDを取得
+        $attendanceIds = Attendance::where('student_id', $studentId)->pluck('id');
 
-        if ($attendances->isEmpty()) {
-            throw new AuthorizationException('There is no attendance.');
-        }
-
-        // attendance_id に一致する lesson_attendance の ID をまとめて取得
-        $lessonAttendanceIds = LessonAttendance::whereIn('attendance_id', $attendances->pluck('id'))
-            ->pluck('id')
-            ->toArray();
-
-        if (!empty($lessonAttendanceIds)) {
-            throw new AuthorizationException('There is no lesson attendance.');
-        }
-
-        // 取得した ID のレコードを一括更新
-        LessonAttendance::whereIn('id', $lessonAttendanceIds)
+        // lesson_attendances を attendance_id で一括更新
+        LessonAttendance::whereIn('attendance_id', $attendanceIds)
             ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
 
         return response()->json([

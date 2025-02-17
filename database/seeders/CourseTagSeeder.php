@@ -2,45 +2,57 @@
 
 namespace Database\Seeders;
 
-use App\Model\Tag;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
-class TagSeeder extends Seeder
+class CourseTagSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Tag::insert([
+        DB::table('course_tag')->insert([
             [
-                'instructor_id' => 1,
-                'content' => 'バックエンド入門編',
+                'course_id' => 1,
+                'tag_id' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'instructor_id' => 2,
-                'content' => 'バックエンド講座',
+                'course_id' => 2,
+                'tag_id' => 2,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'instructor_id' => 3,
-                'content' => 'フロントエンドマスター講座',
+                'course_id' => 3,
+                'tag_id' => 3,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'instructor_id' => 4,
-                'content' => 'フロントエンド関連講座',
+                'course_id' => 4,
+                'tag_id' => 4,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [
-                'instructor_id' => 2,
-                'content' => 'フロントエンド講座',
+                'course_id' => 5,
+                'tag_id' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'course_id' => 6,
+                'tag_id' => 5,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'course_id' => 7,
+                'tag_id' => 3,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

@@ -19,6 +19,7 @@ use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -227,10 +228,21 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 講座一覧画面の全講座を完了にする
+     * 全講座を完了にする
      */
-    public function completeAllCourses()
+    public function completeAllCourses(): JsonResponse
     {
-        return response()->json([]);
+        $studentId = Auth::id();
+
+        // 受講生が受講している全てのAttendanceのIDを取得
+        $attendanceIds = Attendance::where('student_id', $studentId)->pluck('id');
+
+        // lesson_attendances を attendance_id で一括更新
+        LessonAttendance::whereIn('attendance_id', $attendanceIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

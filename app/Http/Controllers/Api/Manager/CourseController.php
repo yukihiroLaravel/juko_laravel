@@ -54,7 +54,7 @@ class CourseController extends Controller
         $courses->each(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;
         });
-        
+
         $courses = Course::with('instructor')
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);

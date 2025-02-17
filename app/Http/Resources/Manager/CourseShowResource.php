@@ -17,7 +17,7 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'chapters' => $this->resource->chapters->sortBy('order')->map(function ($chapter) {
+            'chapters' => $this->resource->chapters->map(function ($chapter) {
                 return [
                     new ChapterResource($chapter),
                     'lessons' => LessonResource::collection($chapter->lessons),

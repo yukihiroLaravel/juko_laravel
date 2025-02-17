@@ -18,6 +18,7 @@ use App\Http\Resources\Manager\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -226,10 +227,11 @@ class ChapterController extends Controller
                 // 受講中のレッスンがあれば、エラー応答
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
-
+            // チャプターに紐づくレッスンを削除
+            Lesson::whereIn('chapter_id', $chapterIds)->delete();
+            // チャプター削除
             Chapter::whereIn('id', $chapterIds)->delete();
 
-            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);

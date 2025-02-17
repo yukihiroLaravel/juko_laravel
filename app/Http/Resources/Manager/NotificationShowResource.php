@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Http\Resources\Instructor\InstructorResource;
+use App\Http\Resources\Notification\NotificationResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationShowResource extends JsonResource
@@ -18,14 +20,8 @@ class NotificationShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'notification_id' => $this->resource->id,
-            'course_id' => $this->resource->course_id,
-            'course_title' => $this->resource->course->title,
-            'title' => $this->resource->title,
-            'content' => $this->resource->content,
-            'start_date' => $this->resource->start_date,
-            'end_date' => $this->resource->end_date,
-            'type' => $this->resource->type,
+            new NotificationResource($this->resource),
+            'instructor' => new InstructorResource($this->resource->instructor),
         ];
     }
 }

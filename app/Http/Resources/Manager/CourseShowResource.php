@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Manager;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Chapter\ChapterResource;
+use App\Http\Resources\Lesson\LessonResource;
 
 class CourseShowResource extends JsonResource
 {
@@ -15,26 +17,10 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'course_id' => $this->resource->id,
-            'title' => $this->resource->title,
-            'image' => $this->resource->image,
-            'status' => $this->resource->status,
-            'chapters' => $this->resource->chapters->map(function ($chapter) {
+            'chapters' => $this->resource->chapters->sortBy('order')->map(function ($chapter) {
                 return [
-                    'chapter_id' => $chapter->id,
-                    'title' => $chapter->title,
-                    'order' => $chapter->order,
-                    'status' => $chapter->status,
-                    'lessons' => $chapter->lessons->sortBy('order')->map(function ($lesson) {
-                        return [
-                            'lesson_id' => $lesson->id,
-                            'title' => $lesson->title,
-                            'url' => $lesson->url,
-                            'remarks' => $lesson->remarks,
-                            'status' => $lesson->status,
-                            'order' => $lesson->order,
-                        ];
-                    }),
+                    new ChapterResource($chapter),
+                    'lessons' => LessonResource::collection($chapter->lessons),
                 ];
             }),
         ];

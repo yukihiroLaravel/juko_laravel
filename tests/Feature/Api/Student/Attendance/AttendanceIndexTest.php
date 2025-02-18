@@ -18,10 +18,10 @@ class AttendanceIndexTest extends TestCase
         $student = Student::factory()->create();
         $courses = Course::factory()->count(7)->create();
 
-        $courses->each(function($course) use ($student) {
+        $courses->each(function ($course) use ($student) {
             Attendance::factory()->create([
                 'student_id' => $student->id,
-                'course_id' =>$course->id,
+                'course_id' => $course->id,
             ]);
         });
 

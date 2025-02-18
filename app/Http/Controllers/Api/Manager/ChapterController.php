@@ -7,7 +7,6 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\Chapter;
 use App\Model\Instructor;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;

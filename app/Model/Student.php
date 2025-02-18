@@ -4,12 +4,13 @@ namespace App\Model;
 
 use App\Enums\Student\Gender;
 use Carbon\CarbonImmutable;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Student extends Authenticatable
 {
     use HasFactory;
+
     /**
      * モデルと関連しているテーブル
      *

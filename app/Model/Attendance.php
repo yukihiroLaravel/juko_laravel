@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
 {
-    use SoftDeletes;
     use HasFactory;
+    use SoftDeletes;
 
     /**
      * モデルと関連しているテーブル

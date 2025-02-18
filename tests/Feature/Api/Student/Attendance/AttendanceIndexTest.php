@@ -2,12 +2,11 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Model\Attendance;
-use App\Model\Student;
 use App\Model\Course;
+use App\Model\Student;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AttendanceIndexTest extends TestCase
 {
@@ -34,15 +33,15 @@ class AttendanceIndexTest extends TestCase
         $response->assertJsonStructure([
             'data',
             'links' => [
-                'first', 'last', 'prev', 'next'
+                'first', 'last', 'prev', 'next',
             ],
             'meta' => [
-                'current_page', 
+                'current_page',
                 'from',
                 'last_page',
                 'per_page',
                 'to',
-                'total'
+                'total',
             ],
         ]);
 

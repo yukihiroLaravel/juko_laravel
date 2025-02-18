@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class StudentFactory extends Factory
 {
     protected $model = Student::class;
+
     /**
      * Define the model's default state.
      *
@@ -23,10 +24,10 @@ class StudentFactory extends Factory
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),
             'password' => bcrypt('password'),
-            'nick_name' => $this->faker->userName(), 
+            'nick_name' => $this->faker->userName(),
             'occupation' => $this->faker->jobTitle(),
             'birth_date' => $this->faker->date(),
-            'gender' => $this->faker->randomElement([0, 1]), 
+            'gender' => $this->faker->randomElement([0, 1]),
             'address' => $this->faker->address(),
         ];
     }

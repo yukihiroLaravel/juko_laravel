@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class AttendanceFactory extends Factory
 {
     protected $model = Attendance::class;
+
     /**
      * Define the model's default state.
      *

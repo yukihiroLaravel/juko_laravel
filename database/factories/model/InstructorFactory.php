@@ -17,7 +17,7 @@ class InstructorFactory extends Factory
         return [
             'nick_name' => $this->faker->firstName,
             'last_name' => $this->faker->lastName,
-            'first_name' => $this->faker->firstName, 
+            'first_name' => $this->faker->firstName,
             'email' => $this->faker->unique()->safeEmail,
             'password' => bcrypt('password'),
             'type' => 'manager',

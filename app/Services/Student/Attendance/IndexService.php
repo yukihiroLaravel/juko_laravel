@@ -33,12 +33,12 @@ class IndexService
             })->get();
 
         // 各受講情報ごとにチャプター単位の進捗率を計算
-        foreach ($attendances as $attendance) {
+        $attendances->each(function ($attendance) {
             $completedChaptersCount = $this->getCompletedChaptersCount($attendance);
             $totalChaptersCount = $this->getTotalChaptersCount($attendance);
             $progressPercentage = ($totalChaptersCount > 0) ? round(($completedChaptersCount / $totalChaptersCount) * 100) : 0;
             $attendance->course->progress_percentage = $progressPercentage;
-        }
+        });
 
         return $attendances;
     }

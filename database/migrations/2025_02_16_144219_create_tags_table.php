@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Model\Instructor;
 
 return new class extends Migration
 {
@@ -13,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('instructor_id')->constrained();
+            $table->foreignIdFor(Instructor::class)->constrained();
             $table->string('content', 255);
             $table->datetimes();
         });

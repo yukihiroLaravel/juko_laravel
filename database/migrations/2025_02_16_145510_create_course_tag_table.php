@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Model\Course;
+use App\Model\Tag;
 
 return new class extends Migration
 {
@@ -13,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('course_tag', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('course_id')->constrained();
-            $table->foreignId('tag_id')->constrained();
+            $table->foreignIdFor(Course::class)->constrained();
+            $table->foreignIdFor(Tag::class)->constrained();
             $table->dateTime('created_at')->nullable();
             $table->unique(['course_id', 'tag_id']);
         });

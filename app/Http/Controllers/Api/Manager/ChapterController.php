@@ -2,31 +2,31 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use Exception;
-use App\Model\Course;
-use App\Model\Lesson;
-use App\Model\Chapter;
-use App\Model\Instructor;
-use App\Model\LessonAttendance;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Exceptions\ValidationErrorException;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Chapter\BulkDeleteRequest;
+use App\Http\Requests\Manager\Chapter\DeleteAllRequest;
+use App\Http\Requests\Manager\Chapter\DeleteRequest;
+use App\Http\Requests\Manager\Chapter\PatchStatusRequest;
 use App\Http\Requests\Manager\Chapter\PutRequest;
+use App\Http\Requests\Manager\Chapter\PutStatusRequest;
 use App\Http\Requests\Manager\Chapter\ShowRequest;
 use App\Http\Requests\Manager\Chapter\SortRequest;
-use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Manager\Chapter\StoreRequest;
-use App\Http\Resources\Manager\ChapterShowResource;
-use App\Http\Requests\Manager\Chapter\DeleteRequest;
-use App\Http\Requests\Manager\Chapter\DeleteAllRequest;
-use App\Http\Requests\Manager\Chapter\PutStatusRequest;
-use App\Http\Requests\Manager\Chapter\BulkDeleteRequest;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\Manager\Chapter\PatchStatusRequest;
 use App\Http\Requests\Manager\Chapter\UpdateStatusRequest;
+use App\Http\Resources\Manager\ChapterShowResource;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Manager-Chapter

@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('course_tag', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('course_id')->unsigned();
-            $table->bigInteger('tag_id')->unsigned();
-            $table->timestamps();
-            $table->foreign('course_id')->references('id')->on('courses');
-            $table->foreign('tag_id')->references('id')->on('tags');
+            $table->foreignId('course_id')->constrained();
+            $table->foreignId('tag_id')->constrained();
+            $table->dateTime('created_at')->nullable();
             $table->unique(['course_id', 'tag_id']);
         });
     }

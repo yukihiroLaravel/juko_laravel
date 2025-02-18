@@ -18,43 +18,36 @@ class CourseTagSeeder extends Seeder
                 'course_id' => 1,
                 'tag_id' => 1,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 2,
                 'tag_id' => 2,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 3,
                 'tag_id' => 3,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 4,
                 'tag_id' => 4,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 5,
                 'tag_id' => 1,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 6,
                 'tag_id' => 5,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
             [
                 'course_id' => 7,
                 'tag_id' => 3,
                 'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ],
         ]);
     }

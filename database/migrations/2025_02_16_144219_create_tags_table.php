@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('instructor_id')->unsigned();
+            $table->foreignId('instructor_id')->constrained();
             $table->string('content', 255);
-            $table->timestamps();
-            $table->softDeletes();
-            $table->foreign('instructor_id')->references('id')->on('instructors');
+            $table->datetimes();
         });
     }
 

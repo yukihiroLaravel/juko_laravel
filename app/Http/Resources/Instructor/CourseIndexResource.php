@@ -24,8 +24,6 @@ class CourseIndexResource extends JsonResource
             'title' => $this->resource->title,
             'status' => $this->resource->status,
             'has_active_students' => (bool) $this->resource->has_active_students,
-            'per_page' => ['integer', 'min:1', 'max:100'],
-            'page' => ['integer', 'min:1'],
         ];
     }
 }

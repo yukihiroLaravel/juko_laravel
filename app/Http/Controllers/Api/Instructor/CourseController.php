@@ -34,7 +34,7 @@ class CourseController extends Controller
      */
     public function index(IndexRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->id();
+        $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
 
@@ -68,7 +68,7 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::putFileAs('public/course', $file, $filename);
         $filePath = Course::convertImagePath($filePath);
 
@@ -110,7 +110,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -148,8 +148,8 @@ class CourseController extends Controller
             }
 
             // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::exists('public/'.$course->image)) {
-                Storage::delete('public/'.$course->image);
+            if (Storage::exists('public/' . $course->image)) {
+                Storage::delete('public/' . $course->image);
             }
 
             $course->delete();

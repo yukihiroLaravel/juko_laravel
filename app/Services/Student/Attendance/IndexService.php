@@ -14,7 +14,7 @@ class IndexService
     /**
      * @return Collection<Attendance>
      */
-    public function __invoke(IndexDto $indexDto)
+    public function __invoke(IndexDto $indexDto) : Collection
     {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
@@ -33,7 +33,7 @@ class IndexService
             })->get();
 
         // 各受講情報ごとにチャプター単位の進捗率を計算
-        $attendances->each(function ($attendance) {
+        $attendances->each(function (Attendance $attendance) {
             $completedChaptersCount = $this->getCompletedChaptersCount($attendance);
             $totalChaptersCount = $this->getTotalChaptersCount($attendance);
             $progressPercentage = ($totalChaptersCount > 0) ? round(($completedChaptersCount / $totalChaptersCount) * 100) : 0;
@@ -43,38 +43,19 @@ class IndexService
         return $attendances;
     }
 
-    /**
-     * 完了済みのチャプター数を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getCompletedChaptersCount($attendance)
+    // 完了済みのチャプター数を取得する
+    private function getCompletedChaptersCount(Attendance $attendance) : int
     {
         return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
-            $isCompleted = false;
-            // 全てのレッスンが完了済みかどうかをチェック
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $isCompleted = false;
-
-                    return false;
-                }
-                $isCompleted = true;
+            return $chapter->lessons->every(function ($lesson) use ($attendance) {
+                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+                return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
             });
-
-            return $isCompleted;
         })->count();
     }
 
-    /**
-     * チャプター合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalChaptersCount($attendance)
+    // チャプター合計を取得する
+    private function getTotalChaptersCount(Attendance $attendance) : int
     {
         return $attendance->course->chapters->count();
     }

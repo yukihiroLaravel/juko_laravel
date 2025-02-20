@@ -14,7 +14,7 @@ class IndexService
     /**
      * @return Collection<Attendance>
      */
-    public function __invoke(IndexDto $indexDto) : Collection
+    public function __invoke(IndexDto $indexDto): Collection
     {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
@@ -44,18 +44,19 @@ class IndexService
     }
 
     // 完了済みのチャプター数を取得する
-    private function getCompletedChaptersCount(Attendance $attendance) : int
+    private function getCompletedChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
             return $chapter->lessons->every(function ($lesson) use ($attendance) {
                 $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
                 return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
             });
         })->count();
     }
 
     // チャプター合計を取得する
-    private function getTotalChaptersCount(Attendance $attendance) : int
+    private function getTotalChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters->count();
     }

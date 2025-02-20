@@ -32,7 +32,8 @@ class CourseController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $courses = Course::where('instructor_id', $request->instructor_id)->paginate(6);
+        $perPage = $request->input('per_page', 6);
+        $courses = Course::where('instructor_id', $request->instructor_id)->paginate($perPage);
 
         return new InstructorCourseIndexResource($courses);
     }

@@ -25,7 +25,7 @@ class CourseResource extends JsonResource
             'image' => $this->resource->image,
             'status' => $this->resource->status,
             'instructor' => new InstructorResource($this->resource->instructor),
-            'has_active_students' => $this->resource->attendances()->exists(),
+            'has_active_students' => $this->resource->has_active_students,
         ];
     }
 }

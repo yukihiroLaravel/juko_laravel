@@ -4,7 +4,9 @@ namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Model\Attendance;
+use App\Model\Chapter;
 use App\Model\Course;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -43,11 +45,13 @@ class IndexService
         return $attendances;
     }
 
-    // 完了済みのチャプター数を取得する
+    /**
+     * 完了済みのチャプター数を取得する
+     */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
-            return $chapter->lessons->every(function ($lesson) use ($attendance) {
+        return $attendance->course->chapters->filter(function (Chapter $chapter) use ($attendance) {
+            return $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
                 $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
                 return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
@@ -55,7 +59,9 @@ class IndexService
         })->count();
     }
 
-    // チャプター合計を取得する
+    /**
+     * チャプター合計を取得する
+     */
     private function getTotalChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters->count();

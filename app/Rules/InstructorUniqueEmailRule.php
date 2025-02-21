@@ -8,17 +8,16 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class InstructorUniqueEmailRule implements ValidationRule
 {
-    private string $email;
+    // private string $email;
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct($email)
-    {
-        $this->email = $email;
-    }
+    public function __construct(
+        private ?string $email
+    ){}
 
     /**
      * バリデーションの実行。

@@ -21,6 +21,8 @@ class CreateLessonAttendancesTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
+            $table->foreign('lesson_id')->references('id')->on('lessons');
+            $table->foreign('attendance_id')->references('id')->on('attendances');
         });
     }
 

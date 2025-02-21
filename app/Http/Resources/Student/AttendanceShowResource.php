@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Model\Attendance;
-use App\Model\Chapter;
+use App\Model\Tag;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Lesson;
+use App\Model\Chapter;
+use App\Model\Attendance;
+use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -36,6 +37,7 @@ class AttendanceShowResource extends JsonResource
             'course_id' => $course->id,
             'title' => $course->title,
             'image' => $course->image,
+            'tags' => $this->tags($course->tags),
             'instructor' => $this->instructor($course->instructor),
             'chapters' => $this->chapters($course->publicChapters),
         ];
@@ -87,6 +89,16 @@ class AttendanceShowResource extends JsonResource
                     'lesson_attendance_id' => $lessonAttendance->id,
                     'status' => $lessonAttendance->status,
                 ],
+            ];
+        });
+    }
+
+    private function tags(Collection $tags)
+    {
+        return $tags->map(function (Tag $tag) {
+            return [
+                'tag_id' => $tag->id,
+                'content' => $tag->content,
             ];
         });
     }

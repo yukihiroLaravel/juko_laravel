@@ -17,7 +17,7 @@ class InstructorUniqueEmailRule implements ValidationRule
      */
     public function __construct(
         private ?string $email
-    ){}
+    ) {}
 
     /**
      * バリデーションの実行。

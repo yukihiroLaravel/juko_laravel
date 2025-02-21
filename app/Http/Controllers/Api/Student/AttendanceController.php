@@ -60,7 +60,7 @@ class AttendanceController extends Controller
 
             return new AttendanceShowResource($attendance);
         } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
+            Log::error($e->getMessage() . "\n" . $e->getTraceAsString());
             throw $e;
         }
     }
@@ -75,6 +75,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('id', $request->attendance_id)
             ->firstOrFail();

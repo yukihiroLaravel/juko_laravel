@@ -21,7 +21,7 @@ class TagController extends Controller
     public function put(Request $request): JsonResponse
     {
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
-        $tag = Tag::FindOrFail($request->tag_id);
+        $tag = Tag::findOrFail($request->tag_id);
 
         if ($user->id !== $tag->instructor_id) {
             throw new AuthorizationException('Forbidden, invalid instructor.');

@@ -2,13 +2,13 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Model\Tag;
-use App\Model\Course;
-use App\Model\Lesson;
-use App\Model\Chapter;
 use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Model\Tag;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 

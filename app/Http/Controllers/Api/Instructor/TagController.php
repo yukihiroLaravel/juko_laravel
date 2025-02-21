@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -22,7 +22,7 @@ class TagController extends Controller
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
         $tag = Tag::FindOrFail($request->tag_id);
 
-        if ($user->id !== $tag->instructor_id){
+        if ($user->id !== $tag->instructor_id) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
 

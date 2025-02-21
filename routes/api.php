@@ -120,6 +120,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
             });
 
+            // 講師-タグ
+            Route::post('tag', [App\Http\Controllers\Api\Instructor\TagController::class, 'store']);
+
             // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);

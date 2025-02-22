@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Resources\Tag;
+
+use App\Model\Tag;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class TagResource extends JsonResource
+{
+    /** @var Tag */
+    public $resource;
+
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        return [
+            'tag_id' => $this->resource->id,
+            'content' => $this->resource->content,
+        ];
+    }
+}

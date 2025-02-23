@@ -22,7 +22,7 @@ class TagController extends Controller
 
         return response()->json([
             'tags' => $tags,
-            'courses' => $courses
+            'courses' => $courses,
         ]);
     }
 }

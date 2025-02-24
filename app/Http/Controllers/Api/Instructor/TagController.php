@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Model\Course;
 use App\Model\Tag;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,7 +19,7 @@ class TagController extends Controller
         $tags = Tag::where('instructor_id', $instructorId)->with('courses')->get();
 
         return response()->json([
-            'tags' => $tags
+            'tags' => $tags,
         ]);
     }
 }

@@ -10,13 +10,14 @@ use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CourseController extends Controller
 {
     /**
      * 講師-講座情報一覧取得API
      */
-    public function index(IndexRequest $request): InstructorCourseIndexResource|JsonResponse
+    public function index(IndexRequest $request): AnonymousResourceCollection|JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -35,6 +36,6 @@ class CourseController extends Controller
         $perPage = $request->input('per_page', 6);
         $courses = Course::where('instructor_id', $request->instructor_id)->paginate($perPage);
 
-        return new InstructorCourseIndexResource($courses);
+        return InstructorCourseIndexResource::collection($courses);
     }
 }

@@ -22,16 +22,10 @@ class InstructorCourseIndexResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'courses' => $this->resource->items(), 
-            'pagination' => [ 
-                'current_page' => $this->resource->currentPage(),
-                'last_page' => $this->resource->lastPage(),
-                'per_page' => $this->resource->perPage(),
-                'total' => $this->resource->total(),
-                'last_page_url' => $this->resource->url($this->resource->lastPage()),
-                'next_page_url' => $this->resource->nextPageUrl(),
-                'prev_page_url' => $this->resource->previousPageUrl(),
-            ],
+            'course_id' => $this->id,
+            'title'     => $this->title,
+            'status'    => $this->status,
+            'updated_at'=> $this->updated_at->format('Y/m/d H:i:s'),
         ];
     }
 }

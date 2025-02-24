@@ -12,6 +12,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * @tags Manager-Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**

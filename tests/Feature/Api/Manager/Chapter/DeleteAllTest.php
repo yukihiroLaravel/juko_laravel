@@ -36,6 +36,9 @@ class DeleteAllTest extends TestCase
         $this->assertSoftDeleted('chapters', [
             'course_id' => 5,
         ]);
+        $this->assertSoftDeleted('lessons', [
+            'chapter_id' => 6,
+        ]);
     }
 
     public function test_配下の講師チャプター全削除_成功(): void
@@ -54,6 +57,9 @@ class DeleteAllTest extends TestCase
         ]);
         $this->assertSoftDeleted('chapters', [
             'course_id' => 2,
+        ]);
+        $this->assertSoftDeleted('lessons', [
+            'chapter_id' => 4,
         ]);
     }
 

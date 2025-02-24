@@ -36,6 +36,9 @@ class BulkDeleteTest extends TestCase
         $this->assertSoftDeleted('chapters', [
             'id' => 6,
         ]);
+        $this->assertSoftDeleted('lessons', [
+            'chapter_id' => 6,
+        ]);
     }
 
     public function test_講師が一致しない_失敗(): void

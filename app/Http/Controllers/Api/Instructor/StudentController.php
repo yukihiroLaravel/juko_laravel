@@ -17,6 +17,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @tags Instructor-Student
+ */
 class StudentController extends Controller
 {
     /**

@@ -54,16 +54,16 @@ class PutTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->putJson('/api/v1/instructor/tag/aaa', []);
+        // act
+        $response = $this->putJson('/api/v1/instructor/tag/aaa', []);
 
-    //     // assert
-    //     $response->assertStatus(422);
-    // }
+        // assert
+        $response->assertStatus(422);
+    }
 }

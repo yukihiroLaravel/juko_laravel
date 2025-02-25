@@ -20,10 +20,13 @@ class AttendanceIndexResource extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->resource->getCollection()->map(function (Attendance $value) {
+        return $this->resource->getCollection()->map(function (Attendance $value) use ($request) {
             return [
                 'attendance_id' => $value->id,
-                'course' => new CourseResource($value->course),
+                'course' => [
+                    ...(new CourseResource($value->course))->toArray($request),
+                    'progress_percentage' => $value->course->progress_percentage,
+                ],
             ];
         })
             ->toArray();

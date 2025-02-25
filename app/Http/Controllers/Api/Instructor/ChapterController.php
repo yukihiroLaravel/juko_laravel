@@ -5,14 +5,12 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Chapter\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Chapter\DeleteAllRequest;
-use App\Http\Requests\Instructor\Chapter\DeleteRequest;
 use App\Http\Requests\Instructor\Chapter\PatchRequest;
 use App\Http\Requests\Instructor\Chapter\PatchStatusRequest;
 use App\Http\Requests\Instructor\Chapter\PutStatusRequest;
 use App\Http\Requests\Instructor\Chapter\ShowRequest;
 use App\Http\Requests\Instructor\Chapter\SortRequest;
 use App\Http\Requests\Instructor\Chapter\StoreRequest;
-use App\Http\Requests\Instructor\Chapter\UpdateStatusRequest;
 use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -125,34 +123,6 @@ class ChapterController extends Controller
     }
 
     /**
-     * チャプター更新API
-     * TODO このメソッドは削除予定
-     */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
-    {
-        /** @var Chapter $chapter */
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
-
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('invalid instructor_id.');
-        }
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        $chapter->update([
-            'status' => $request->status,
-        ]);
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
-    /**
      * チャプターの公開/非公開API
      */
     public function patchStatus(PatchStatusRequest $request): JsonResponse
@@ -223,66 +193,16 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
+            // チャプターに紐づくレッスンを削除
+            Lesson::whereIn('chapter_id', $chapters->pluck('id'))->delete();
+
             // チャプターを一括で削除
             Chapter::whereIn('id', $chapters->pluck('id'))->delete();
 
-            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);
         } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * チャプター削除API
-     * TODO このメソッドは削除予定
-     */
-    public function delete(DeleteRequest $request): JsonResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            /** @var Chapter $chapter */
-            $chapter = Chapter::with('course', 'lessons')->findOrFail($request->chapter_id);
-
-            if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-                // ログインしている講師が作成していないチャプターの更新を許可しない
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
-
-            if ((int) $request->course_id !== $chapter->course->id) {
-                // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-                throw new AuthorizationException('Invalid course_id.');
-            }
-
-            //受講中のチャプターは削除できないようにする
-            $lessonIds = $chapter->lessons->pluck('id')->toArray();
-            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-                throw new AuthorizationException('This chapter contains attendance.');
-            }
-
-            // 削除対象チャプターのorderカラムを0に設定する
-            $chapter->update(['order' => 0]);
-
-            $chapter->delete();
-
-            Chapter::where('course_id', $chapter->course_id)
-                ->orderBy('order')
-                ->get()
-                ->each(function ($chapter, $index) {
-                    $chapter->update(['order' => $index + 1]);
-                });
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
             Log::error($e);
             throw $e;
         }

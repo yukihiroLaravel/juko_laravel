@@ -153,6 +153,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::middleware('manager')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
+                // 新規に講座分類更新APIを追加
+                Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'update']);
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
                     Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'store']);

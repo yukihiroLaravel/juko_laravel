@@ -42,9 +42,12 @@ class AttendanceController extends Controller
         $page = $request->input('page', 1);
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
-        $attendances = $service->getPaginatedAttendance($indexDto, $perPage, $page);
 
-        return new AttendanceIndexResource($attendances);
+        return new AttendanceIndexResource($service(
+            indexDto: $indexDto,
+            perPage: $perPage,
+            page: $page
+        ));
     }
 
     /**

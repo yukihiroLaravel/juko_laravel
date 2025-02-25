@@ -10,11 +10,6 @@ class Notification extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected static function newFactory()
-    {
-        return \Database\Factories\NotificationFactory::new();
-    }
-
     /**
      * モデルと関連しているテーブル
      *

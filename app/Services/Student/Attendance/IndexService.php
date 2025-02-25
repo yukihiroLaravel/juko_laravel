@@ -11,9 +11,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class IndexService
 {
     /**
-     * @return Collection<Attendance>
+     * @return LengthAwarePaginator<Attendance>
      */
-    public function getPaginatedAttendance(
+    public function __invoke(
         IndexDto $indexDto, int $perPage, int $page
     ): LengthAwarePaginator {
         return Attendance::with('course.instructor')

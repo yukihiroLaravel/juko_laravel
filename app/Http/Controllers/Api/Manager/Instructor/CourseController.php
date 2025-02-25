@@ -9,8 +9,8 @@ use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Manager-Instructor-Course

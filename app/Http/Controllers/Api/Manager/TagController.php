@@ -9,11 +9,11 @@ use App\Http\Controllers\Controller;
  */
 class TagController extends Controller
 {
-  /**
-   * 講座分類更新API
-   */
-  public function update()
-  {
-    return response()->json([]);
-  }
+    /**
+     * 講座分類更新API
+     */
+    public function update()
+    {
+        return response()->json([]);
+    }
 }

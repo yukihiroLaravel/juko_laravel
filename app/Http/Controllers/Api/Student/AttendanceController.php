@@ -75,6 +75,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('id', $request->attendance_id)
             ->firstOrFail();

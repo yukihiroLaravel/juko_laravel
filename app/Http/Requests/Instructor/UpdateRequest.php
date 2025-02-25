@@ -29,7 +29,7 @@ class UpdateRequest extends FormRequest
             'nick_name' => ['required', 'string', 'max:50'],
             'last_name' => ['required', 'string', 'max:50'],
             'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()->email), 'max:255'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()?->email), 'max:255'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];
     }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Instructor;
 
-use App\Model\Tag;
 use App\Model\Course;
+use App\Model\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TagIndexResource extends JsonResource
@@ -27,7 +27,7 @@ class TagIndexResource extends JsonResource
                     'course_id' => $course->id,
                     'title' => $course->title,
                     'image' => $course->image,
-                    'status' => $course->status, 
+                    'status' => $course->status,
                 ];
             }),
         ];

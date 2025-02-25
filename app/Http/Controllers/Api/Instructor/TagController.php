@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Tag;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\Instructor\TagIndexResource;
 
 class TagController extends Controller
 {

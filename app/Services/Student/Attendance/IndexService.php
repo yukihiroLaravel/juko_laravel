@@ -9,15 +9,16 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService
 {
     /**
-     * @return Collection<Attendance>
+     * @return LengthAwarePaginator<Attendance>
      */
-    public function __invoke(IndexDto $indexDto): Collection
-    {
+    public function __invoke(
+        IndexDto $indexDto, int $perPage, int $page
+    ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
@@ -32,7 +33,8 @@ class IndexService
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->where('status', Course::STATUS_PUBLIC);
                 });
-            })->get();
+            })
+            ->paginate($perPage, ['*'], 'page', $page);
 
         // 各受講情報ごとにチャプター単位の進捗率を計算
         $attendances->each(function (Attendance $attendance) {

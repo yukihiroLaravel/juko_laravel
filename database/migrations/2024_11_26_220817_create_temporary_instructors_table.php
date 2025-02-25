@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('email', 255)->comment('メールアドレス');
             $table->string('type', 30)->comment('講師タイプ');
             $table->timestamps();
+            $table->foreign('manager_id')->references('id')->on('instructors');
         });
     }
 

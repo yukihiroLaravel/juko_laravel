@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,9 +14,6 @@ class Tag extends Model
      * @var string
      */
     protected $table = 'tags';
-
-    // Laravelの自動タイムスタンプ機能（created_at, updated_at が自動管理(now)される）
-    public $timestamps = true;
 
     /**
      * @var array<int, string>
@@ -30,6 +28,8 @@ class Tag extends Model
      */
     protected $casts = [
         'instructor_id' => 'int',
+        'created_at' => 'immutable_datetime',
+        'updated_at' => 'immutable_datetime',
     ];
 
     /**
@@ -40,5 +40,19 @@ class Tag extends Model
     public function courses(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'course_tag', 'tag_id', 'course_id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (Tag $tag) {
+            $tag->created_at = CarbonImmutable::now();
+            $tag->updated_at = CarbonImmutable::now();
+        });
+
+        static::updating(function (Tag $tag) {
+            $tag->updated_at = CarbonImmutable::now();
+        });
     }
 }

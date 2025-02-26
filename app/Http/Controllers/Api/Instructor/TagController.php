@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class TagController extends Controller
 {
     /**
-     * 講座分類（タグ）登録API
+     * タグ登録API
      */
     public function store(Request $request): JsonResponse
     {

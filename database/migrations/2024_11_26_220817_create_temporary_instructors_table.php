@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('temporary_instructors', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('manager_id')->nullable();
+            $table->foreignIdFor(\App\Model\Instructor::class, 'manager_id')->nullable()->constrained()->comment('管理者ID');
             $table->tinyInteger('trial_count')->unsigned()->comment('試行回数');
             $table->string('code', 4)->unique()->comment('認証コード');
             $table->string('token', 10)->unique()->comment('トークン');
@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('email', 255)->comment('メールアドレス');
             $table->string('type', 30)->comment('講師タイプ');
             $table->timestamps();
-            $table->foreign('manager_id')->references('id')->on('instructors');
         });
     }
 

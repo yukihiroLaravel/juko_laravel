@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Model\Tag;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Instructor-Tag
@@ -10,10 +14,19 @@ use App\Http\Controllers\Controller;
 class TagController extends Controller
 {
     /**
-     * 講座分類（タグ）登録API
+     * タグ登録API
      */
-    public function store()
+    public function store(Request $request): JsonResponse
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        Tag::create([
+            'instructor_id' => $instructorId,
+            'content' => $request->content,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

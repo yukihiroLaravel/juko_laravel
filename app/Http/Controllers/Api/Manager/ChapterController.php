@@ -4,20 +4,21 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\ChapterBulkDeleteRequest;
-use App\Http\Requests\Manager\ChapterDeleteAllRequest;
-use App\Http\Requests\Manager\ChapterDeleteRequest;
-use App\Http\Requests\Manager\ChapterPatchRequest;
-use App\Http\Requests\Manager\ChapterPatchStatusRequest;
-use App\Http\Requests\Manager\ChapterPutStatusRequest;
-use App\Http\Requests\Manager\ChapterShowRequest;
-use App\Http\Requests\Manager\ChapterSortRequest;
-use App\Http\Requests\Manager\ChaptersPatchStatusRequest;
-use App\Http\Requests\Manager\ChapterStoreRequest;
+use App\Http\Requests\Manager\Chapter\BulkDeleteRequest;
+use App\Http\Requests\Manager\Chapter\DeleteAllRequest;
+use App\Http\Requests\Manager\Chapter\DeleteRequest;
+use App\Http\Requests\Manager\Chapter\PatchStatusRequest;
+use App\Http\Requests\Manager\Chapter\PutRequest;
+use App\Http\Requests\Manager\Chapter\PutStatusRequest;
+use App\Http\Requests\Manager\Chapter\ShowRequest;
+use App\Http\Requests\Manager\Chapter\SortRequest;
+use App\Http\Requests\Manager\Chapter\StoreRequest;
+use App\Http\Requests\Manager\Chapter\UpdateStatusRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -27,6 +28,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Chapter
+ */
 class ChapterController extends Controller
 {
     /**
@@ -34,7 +38,7 @@ class ChapterController extends Controller
      *
      * @return ChapterShowResource|JsonResponse
      */
-    public function show(ChapterShowRequest $request)
+    public function show(ShowRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -64,7 +68,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(ChapterStoreRequest $request)
+    public function store(StoreRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -108,7 +112,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function put(ChapterPatchRequest $request)
+    public function put(PutRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -146,7 +150,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function delete(ChapterDeleteRequest $request)
+    public function delete(DeleteRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -192,7 +196,7 @@ class ChapterController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(ChapterBulkDeleteRequest $request)
+    public function bulkDelete(BulkDeleteRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -223,10 +227,11 @@ class ChapterController extends Controller
                 // 受講中のレッスンがあれば、エラー応答
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
-
+            // チャプターに紐づくレッスンを削除
+            Lesson::whereIn('chapter_id', $chapterIds)->delete();
+            // チャプター削除
             Chapter::whereIn('id', $chapterIds)->delete();
 
-            // TODO レッスンも削除する必要がある。
             return response()->json([
                 'result' => true,
             ]);
@@ -241,7 +246,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function deleteAll(ChapterDeleteAllRequest $request)
+    public function deleteAll(DeleteAllRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -272,6 +277,9 @@ class ChapterController extends Controller
                 // 受講中のレッスンがあれば、エラー応答
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
+
+            // 削除するチャプターに紐づくレッスンを削除する
+            Lesson::whereIn('id', $lessonIds)->delete();
             // チャプターを削除
             Chapter::where('course_id', $courseId)->delete();
 
@@ -296,7 +304,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(ChapterSortRequest $request)
+    public function sort(SortRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -347,7 +355,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function updateStatus(ChapterPatchStatusRequest $request)
+    public function updateStatus(UpdateStatusRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -385,7 +393,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function putStatus(ChapterPutStatusRequest $request)
+    public function putStatus(PutStatusRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -418,7 +426,7 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      */
-    public function patchStatus(ChaptersPatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

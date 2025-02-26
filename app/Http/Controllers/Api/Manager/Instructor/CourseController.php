@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Manager\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\InstructorCourseIndexRequest;
+use App\Http\Requests\Manager\Instructor\Course\IndexRequest;
 use App\Http\Resources\Manager\InstructorCourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -11,12 +11,15 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @tags Manager-Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**
      * 講師-講座情報一覧取得API
      */
-    public function index(InstructorCourseIndexRequest $request): InstructorCourseIndexResource|JsonResponse
+    public function index(IndexRequest $request): InstructorCourseIndexResource|JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 

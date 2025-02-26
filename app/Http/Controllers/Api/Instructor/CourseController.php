@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\CourseDeleteRequest;
-use App\Http\Requests\Instructor\CoursePutStatusRequest;
-use App\Http\Requests\Instructor\CourseShowRequest;
-use App\Http\Requests\Instructor\CourseStoreRequest;
-use App\Http\Requests\Instructor\CourseUpdateRequest;
+use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\IndexRequest;
+use App\Http\Requests\Instructor\Course\PutStatusRequest;
+use App\Http\Requests\Instructor\Course\ShowRequest;
+use App\Http\Requests\Instructor\Course\StoreRequest;
+use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -23,25 +23,44 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * @tags Instructor-Course
+ */
 class CourseController extends Controller
 {
     /**
      * 講座一覧取得API
      */
-    public function index(QueryService $queryService): CourseIndexResource
+    public function index(IndexRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courses = $queryService->getCoursesByInstructorId($instructorId);
+        // 講座情報を取得
+        $perPage = $request->query('per_page', '6');
 
-        return new CourseIndexResource($courses);
+        // ページネーションで講座を取得
+        $courses = Course::where('instructor_id', $instructorId)
+            ->withCount('attendances')
+            ->paginate((int) $perPage);
+
+        $courses->getCollection()->map(function (Course $course) {
+            $course->has_active_students = $course->attendances_count > 0;
+        });
+
+        return CourseIndexResource::collection($courses);
     }
 
     /**
      * 講座取得API
      */
-    public function show(CourseShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        $course = $queryService->getCourse($request->course_id);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+
+        if ($course->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
 
         return new CourseShowResource($course);
     }
@@ -49,7 +68,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(CourseStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $file = $request->file('image');
@@ -75,7 +94,7 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(CourseUpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request): JsonResponse
     {
         $file = $request->file('image');
 
@@ -119,7 +138,7 @@ class CourseController extends Controller
     /**
      * 講座削除API
      */
-    public function delete(CourseDeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         try {
             $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -152,7 +171,7 @@ class CourseController extends Controller
     /**
      * 講座ステータス一括更新API
      */
-    public function putStatus(coursePutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         Course::where('instructor_id', $instructorId)

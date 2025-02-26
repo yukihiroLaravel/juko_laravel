@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\StudentIndexRequest;
-use App\Http\Requests\Manager\StudentShowRequest;
-use App\Http\Requests\Manager\StudentStoreRequest;
+use App\Http\Requests\Manager\Student\IndexRequest;
+use App\Http\Requests\Manager\Student\ShowRequest;
+use App\Http\Requests\Manager\Student\StoreRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
 use App\Http\Resources\Manager\StudentShowResource;
 use App\Model\Course;
@@ -14,10 +14,13 @@ use App\Model\Student;
 use App\Services\Student\QueryService;
 use Carbon\Carbon;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @tags Manager-Student
+ */
 class StudentController extends Controller
 {
     /**
@@ -25,7 +28,7 @@ class StudentController extends Controller
      *
      * @return StudentIndexResource|\Illuminate\Http\JsonResponse
      */
-    public function index(StudentIndexRequest $request)
+    public function index(IndexRequest $request)
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -35,7 +38,7 @@ class StudentController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $instructorId = $request->user()->id; //Instracter側との違い確認
+        $instructorId = $request->user()->id;
 
         // 配下のinstructor情報を取得
         $manager = Instructor::with('managings')->findOrFail($instructorId);
@@ -49,15 +52,14 @@ class StudentController extends Controller
             ->pluck('id')
             ->toArray();
 
-        // クエリパラメータからcourse_idを取得
-        $courseId = $request->query('course_id');
-
-        // クエリパラメータにcourse_idが存在する場合の処理
-        if ($courseId !== null) {
-            $courseId = (int) $courseId;
-            if (! in_array($courseId, $courseIds, true)) {
-                // 指定されたcourse_idが自分または配下の講師の講座に所属しているか確認
-                throw new AuthorizationException('Forbidden, not allowed to access this course.');
+        // クエリパラメータからcourses（配列）を取得
+        $requestedCourseIds = $request->input('courses', []);
+        // 指定された講座IDが有効かどうかチェック
+        if (! empty($requestedCourseIds)) {
+            foreach ($requestedCourseIds as $courseId) {
+                if (! in_array((int) $courseId, $courseIds, true)) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
             }
         }
 
@@ -72,8 +74,9 @@ class StudentController extends Controller
                 'attendances.created_at as attendanced_at'
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
-            ->when($courseId, function (Builder $query) use ($courseId) {
-                $query->where('attendances.course_id', $courseId);
+            // 複数の講座IDで絞り込み
+            ->when(! empty($requestedCourseIds), function (Builder $query) use ($requestedCourseIds) {
+                return $query->whereIn('attendances.course_id', $requestedCourseIds);
             })
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function (Builder $query) use ($inputText) {
@@ -103,7 +106,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(StudentShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService)
     {
         // 認証されたマネージャーが管理する講師のIDのリストを取得
         $authManagerId = Auth::guard('instructor')->user()->id;
@@ -122,7 +125,7 @@ class StudentController extends Controller
         // 受講生が講師の講座に所属しているか確認
         $studentCourseIds = $student->attendances->pluck('course_id')->unique();
         if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Forbidden, not allowed to access this course.');
+            throw new AuthorizationException('Forbidden, invalid instructor.');
         }
 
         return new StudentShowResource($student);
@@ -133,7 +136,7 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StudentStoreRequest $request)
+    public function store(StoreRequest $request)
     {
         /** @var Student $student */
         $student = Student::create([

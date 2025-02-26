@@ -2,10 +2,16 @@
 
 namespace App\Http\Resources\Student;
 
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Course\CourseResource;
+use App\Model\Attendance;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
-class AttendanceIndexResource extends JsonResource
+class AttendanceIndexResource extends ResourceCollection
 {
+    /** @var LengthAwarePaginator<Attendance> */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -14,24 +20,15 @@ class AttendanceIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($value) {
+        return $this->resource->getCollection()->map(function (Attendance $value) use ($request) {
             return [
                 'attendance_id' => $value->id,
-                'progress' => $value->progress,
                 'course' => [
-                    'course_id' => $value->course->id,
-                    'title' => $value->course->title,
-                    'image' => $value->course->image,
-                    'instructor' => [
-                        'instructor_id' => $value->course->instructor->id,
-                        'nick_name' => $value->course->instructor->nick_name,
-                        'last_name' => $value->course->instructor->last_name,
-                        'first_name' => $value->course->instructor->first_name,
-                        'email' => $value->course->instructor->email,
-                        'profile_image' => $value->course->instructor->profile_image,
-                    ],
+                    ...(new CourseResource($value->course))->toArray($request),
+                    'progress_percentage' => $value->course->progress_percentage,
                 ],
             ];
-        });
+        })
+            ->toArray();
     }
 }

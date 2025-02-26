@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Student\NotificationIndexRequest;
-use App\Http\Requests\Student\NotificationShowRequest;
+use App\Http\Requests\Student\Notification\IndexRequest;
+use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Student\NotificationIndexResource;
 use App\Http\Resources\Student\NotificationReadResource;
 use App\Http\Resources\Student\NotificationShowResource;
@@ -16,12 +16,15 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * @tags Student-Notification
+ */
 class NotificationController extends Controller
 {
     /**
      * お知らせ取得API
      */
-    public function index(NotificationIndexRequest $request): NotificationIndexResource
+    public function index(IndexRequest $request): NotificationIndexResource
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -87,7 +90,7 @@ class NotificationController extends Controller
      *
      * @return NotificationShowResource|JsonResponse
      */
-    public function show(NotificationShowRequest $request)
+    public function show(ShowRequest $request)
     {
         /** @var Student $student */
         $student = Student::findOrFail($request->user()->id);

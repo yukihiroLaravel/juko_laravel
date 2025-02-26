@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\StudentIndexRequest;
-use App\Http\Requests\Instructor\StudentShowRequest;
-use App\Http\Requests\Instructor\StudentStoreRequest;
+use App\Http\Requests\Instructor\Student\IndexRequest;
+use App\Http\Requests\Instructor\Student\ShowRequest;
+use App\Http\Requests\Instructor\Student\StoreRequest;
 use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
@@ -17,12 +17,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @tags Instructor-Student
+ */
 class StudentController extends Controller
 {
     /**
      * 受講生一覧取得API
      */
-    public function index(StudentIndexRequest $request): StudentIndexResource
+    public function index(IndexRequest $request): StudentIndexResource
     {
         $perPage = $request->input('per_page', 10);
         $page = $request->input('page', 1);
@@ -31,14 +34,18 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $courseId = $request->input('course_id');
+        $courseIds = $request->input('courses', []); //複数のコースIDを取得
 
         $loginId = Auth::guard('instructor')->user()->id;
 
-        if ($courseId !== null) {
-            $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-            if ($loginId !== $instructorId) {
-                throw new AuthorizationException('Forbidden, invalid course_id.');
+        if (! empty($courseIds)) {
+            // コースtable内の指定されたコースIDの行（レコード）から、コースIDとｲﾝｽﾄﾗｸﾀｰIDを一括で取得
+            $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
+
+            foreach ($courses as $course) {
+                if ($loginId !== $course->instructor_id) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
             }
         }
 
@@ -56,9 +63,9 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
-            // course_idのクエリパラメータがある時のみ、条件にcourse_idを含める
-            ->when($courseId, function (Builder $query) use ($courseId) {
-                $query->where('attendances.course_id', $courseId);
+            // コース指定が空でないときに一致するレコードを取得
+            ->when(! empty($courseIds), function (Builder $query) use ($courseIds) {
+                $query->whereIn('attendances.course_id', $courseIds);
             })
             // ログインしている講師IDを検索
             ->where('courses.instructor_id', $loginId)
@@ -91,7 +98,7 @@ class StudentController extends Controller
      *
      * @return StudentShowResource|JsonResponse
      */
-    public function show(StudentShowRequest $request)
+    public function show(ShowRequest $request)
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -115,7 +122,7 @@ class StudentController extends Controller
     /**
      * 受講生登録API
      */
-    public function store(StudentStoreRequest $request): JsonResponse
+    public function store(StoreRequest $request): JsonResponse
     {
         Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,

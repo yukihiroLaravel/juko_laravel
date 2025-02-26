@@ -2,11 +2,13 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     /**
@@ -89,6 +91,12 @@ class Attendance extends Model
         $percent = ($number / $total) * 100;
 
         return floor($percent);
+    }
+
+    public static function hasActiveStudents(int $courseId): bool
+    {
+        // 指定されたコースに受講生がいるかを確認
+        return self::where('course_id', $courseId)->exists();
     }
 
     //ソート項目

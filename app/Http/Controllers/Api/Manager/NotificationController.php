@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\NotificationBulkDeleteRequest;
-use App\Http\Requests\Manager\NotificationDeleteRequest;
-use App\Http\Requests\Manager\NotificationIndexRequest;
-use App\Http\Requests\Manager\NotificationPutTypeRequest;
-use App\Http\Requests\Manager\NotificationShowRequest;
-use App\Http\Requests\Manager\NotificationStoreRequest;
-use App\Http\Requests\Manager\NotificationUpdateRequest;
+use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
+use App\Http\Requests\Manager\Notification\DeleteRequest;
+use App\Http\Requests\Manager\Notification\IndexRequest;
+use App\Http\Requests\Manager\Notification\ShowRequest;
+use App\Http\Requests\Manager\Notification\StoreRequest;
+use App\Http\Requests\Manager\Notification\UpdateRequest;
+use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
@@ -23,14 +23,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @tags Manager-Notification
+ */
 class NotificationController extends Controller
 {
     /**
      * お知らせ一覧取得API
-     *
-     * @return NotificationIndexResource
      */
-    public function index(NotificationIndexRequest $request)
+    public function index(IndexRequest $request): NotificationIndexResource
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
@@ -44,7 +45,7 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $notifications = Notification::with(['course'])
+        $notifications = Notification::with(['course', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -53,27 +54,25 @@ class NotificationController extends Controller
 
     /**
      * お知らせ詳細
-     *
-     * @return NotificationShowResource|\Illuminate\Http\JsonResponse
      */
-    public function show(NotificationShowRequest $request)
+    public function show(ShowRequest $request): NotificationShowResource
     {
         // ユーザーID取得
         $instructorId = $request->user()->id;
 
         // 配下のインストラクター情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
-        /** @var Notification $notification */
-        $notification = Notification::findOrFail($request->notification_id);
+        $notification = Notification::with('instructor')->findOrFail($request->notification_id);
+        assert($notification instanceof Notification);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new NotificationShowResource($notification);
@@ -81,99 +80,108 @@ class NotificationController extends Controller
 
     /**
      * お知らせ登録API
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(NotificationStoreRequest $request)
+    public function store(StoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下のインストラクター情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
+        assert($course instanceof Course);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        Notification::create([
-            'course_id' => $request->course_id,
-            'instructor_id' => Auth::guard('instructor')->user()->id,
-            'title' => $request->title,
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'content' => $request->content,
-        ]);
+        DB::beginTransaction();
+        try {
+            Notification::create([
+                'course_id' => $request->course_id,
+                'instructor_id' => Auth::guard('instructor')->user()->id,
+                'title' => $request->title,
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'content' => $request->content,
+            ]);
+            DB::commit();
 
-        return response()->json([
-            'result' => true,
-        ]);
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
      * お知らせ更新API
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(NotificationUpdateRequest $request)
+    public function update(UpdateRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
-        /** @var Notification $notification */
-        $notification = Notification::with(['course'])
-            ->findOrFail($request->notification_id);
+        $notification = Notification::with('course')->findOrFail($request->notification_id);
+        assert($notification instanceof Notification);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        $notification->fill([
-            'type' => $request->type,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'title' => $request->title,
-            'content' => $request->content,
-        ])
-            ->save();
+        DB::beginTransaction();
+        try {
+            $notification->fill([
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'title' => $request->title,
+                'content' => $request->content,
+            ])
+                ->save();
+            DB::commit();
 
-        return response()->json([
-            'result' => true,
-        ]);
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
      * お知らせ削除
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function delete(NotificationDeleteRequest $request)
+    public function delete(DeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
-        /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
+        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたお知らせを取得
-        /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
+        assert($notification instanceof Notification);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
@@ -199,7 +207,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(NotificationPutTypeRequest $request): JsonResponse
+    public function updateType(UpdateTypeRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -243,7 +251,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括削除API
      */
-    public function bulkDelete(NotificationBulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

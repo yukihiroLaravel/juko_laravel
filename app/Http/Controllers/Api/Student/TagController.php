@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 
 class TagController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         return response()->json([]);
     }
 }

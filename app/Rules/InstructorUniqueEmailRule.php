@@ -8,8 +8,6 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class InstructorUniqueEmailRule implements ValidationRule
 {
-    // private string $email;
-
     /**
      * Create a new rule instance.
      *

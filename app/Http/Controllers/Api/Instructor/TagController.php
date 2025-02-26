@@ -24,8 +24,6 @@ class TagController extends Controller
         Tag::create([
             'instructor_id' => $instructorId,
             'content' => $request->content,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
         ]);
         
         return response()->json([

@@ -14,14 +14,15 @@ class Tag extends Model
      */
     protected $table = 'tags';
 
+    // Laravelの自動タイムスタンプ機能（created_at, updated_at が自動管理(now)される）
+    public $timestamps = true;
+
     /**
      * @var array<int, string>
      */
     protected $fillable = [
         'instructor_id',
         'content',
-        'created_at',
-        'updated_at',
     ];
 
     /**

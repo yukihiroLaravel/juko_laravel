@@ -9,12 +9,21 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 /**
  * @tags Instructor-Tag
  */
 class TagController extends Controller
 {
+    /**
+     * 講座分類詳細API
+     */
+    public function show(Request $request): JsonResponse
+    {
+        return response()->json([]);
+    }
+
     /**
      * 講座分類更新API
      */

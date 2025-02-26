@@ -53,47 +53,4 @@ class StoreTest extends TestCase
     //     // assert
     //     $response->assertStatus(422);
     // }
-
-    // public function test_認証コード重複エラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
-    //     $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
-    //         $mock->shouldReceive('createCode')->andThrow(new \App\Exceptions\DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'));
-    //     });
-
-    //     // act
-    //     $response = $this->postJson('/api/v1/instructor', [
-    //         'nick_name' => 'test',
-    //         'last_name' => 'test',
-    //         'first_name' => 'test',
-    //         'email' => 'testtest@exmaple.com',
-    //     ]);
-
-    //     // assert
-    //     $response->assertStatus(400);
-    // }
-
-    // public function test_トークン重複エラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
-    //     $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
-    //         $mock->shouldReceive('createCode')->andReturn('1234');
-    //         $mock->shouldReceive('createToken')->andThrow(new \App\Exceptions\DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'));
-    //     });
-
-    //     // act
-    //     $response = $this->postJson('/api/v1/instructor', [
-    //         'nick_name' => 'test',
-    //         'last_name' => 'test',
-    //         'first_name' => 'test',
-    //         'email' => 'testtest@exmaple.com',
-    //     ]);
-
-    //     // assert
-    //     $response->assertStatus(400);
-    // }
 }

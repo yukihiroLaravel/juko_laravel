@@ -38,11 +38,16 @@ class AttendanceController extends Controller
         IndexRequest $request,
         IndexService $service
     ): AttendanceIndexResource {
+        $perPage = $request->input('per_page', 6);
+        $page = $request->input('page', 1);
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
-        $attendances = $service($indexDto);
 
-        return new AttendanceIndexResource($attendances);
+        return new AttendanceIndexResource($service(
+            indexDto: $indexDto,
+            perPage: $perPage,
+            page: $page
+        ));
     }
 
     /**
@@ -75,6 +80,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('id', $request->attendance_id)
             ->firstOrFail();

@@ -66,7 +66,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
             // 講師-講座分類
-            Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
+            Route::prefix('tag/{tag_id}')->group(function () {
+                Route::get('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'show']);
+                Route::put('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
+            });
 
             // 講師-講座
             Route::prefix('course')->group(function () {

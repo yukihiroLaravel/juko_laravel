@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
         // 受講生-受講
         Route::prefix('attendance')->group(function () {
+            Route::get('tag/index', [App\Http\Controllers\Api\Student\TagController::class, 'index']);
             Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index']);
             Route::prefix('{attendance_id}')->group(function () {
                 Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show']);

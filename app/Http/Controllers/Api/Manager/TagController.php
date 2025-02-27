@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -26,7 +26,7 @@ class TagController extends Controller
 
         // マネージャー本人または配下の講師が作成したタグのみ更新可能
         $subordinateIds = $user->getSubordinateIds();
-        if ($user->id !== $tag->manager_id && !in_array($tag->manager_id, $subordinateIds)) {
+        if ($user->id !== $tag->manager_id && ! in_array($tag->manager_id, $subordinateIds)) {
             throw new AuthorizationException('Invalid manager.');
         }
 

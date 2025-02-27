@@ -4,6 +4,7 @@ namespace App\Http\Resources\Instructor;
 
 use App\Model\Course;
 use App\Model\Tag;
+use App\Http\Resources\Course\CourseResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TagIndexResource extends JsonResource
@@ -22,14 +23,7 @@ class TagIndexResource extends JsonResource
         return [
             'tag_id' => $this->resource->id,
             'content' => $this->resource->content,
-            'course' => $this->resource->courses->map(function (Course $course) {
-                return [
-                    'course_id' => $course->id,
-                    'title' => $course->title,
-                    'image' => $course->image,
-                    'status' => $course->status,
-                ];
-            }),
+            'course' => CourseResource::collection($this->resource->courses),
         ];
     }
 }

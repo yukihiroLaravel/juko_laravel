@@ -7,10 +7,13 @@ use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Tag;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @tags Instructor-Tag
+ */
 class TagController extends Controller
 {
     /**
-     * 講座一覧取得API
+     * タグ一覧取得API
      */
     public function index()
     {

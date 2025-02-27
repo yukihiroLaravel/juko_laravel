@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Tag;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @tags Instructor-Tag
+ */
 class TagController extends Controller
 {
     /**
-     * 講座一覧取得API
+     * タグ一覧取得API
      */
     public function index()
     {
@@ -18,8 +22,6 @@ class TagController extends Controller
 
         $tags = Tag::where('instructor_id', $instructorId)->with('courses')->get();
 
-        return response()->json([
-            'tags' => $tags,
-        ]);
+        return TagIndexResource::collection($tags);
     }
 }

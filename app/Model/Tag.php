@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -20,8 +21,6 @@ class Tag extends Model
     protected $fillable = [
         'instructor_id',
         'content',
-        'created_at',
-        'updated_at',
     ];
 
     /**
@@ -29,6 +28,8 @@ class Tag extends Model
      */
     protected $casts = [
         'instructor_id' => 'int',
+        'created_at' => 'immutable_datetime',
+        'updated_at' => 'immutable_datetime',
     ];
 
     /**
@@ -39,5 +40,19 @@ class Tag extends Model
     public function courses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_tag', 'tag_id', 'course_id');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function (Tag $tag) {
+            $tag->created_at = CarbonImmutable::now();
+            $tag->updated_at = CarbonImmutable::now();
+        });
+
+        static::updating(function (Tag $tag) {
+            $tag->updated_at = CarbonImmutable::now();
+        });
     }
 }

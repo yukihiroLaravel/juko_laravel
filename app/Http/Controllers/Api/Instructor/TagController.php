@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Tag\PutRequest;
+use App\Http\Requests\Instructor\Tag\StoreRequest;
 use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Instructor;
 use App\Model\Tag;
@@ -30,7 +31,24 @@ class TagController extends Controller
     }
 
     /**
-     * 講座分類更新API
+     * タグ登録API
+     */
+    public function store(StoreRequest $request): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        Tag::create([
+            'instructor_id' => $instructorId,
+            'content' => $request->content,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * タグ更新API
      */
     public function put(PutRequest $request): JsonResponse
     {

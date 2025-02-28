@@ -36,21 +36,19 @@ class StoreTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->postJson('/api/v1/instructor', [
-    //         'nick_name' => '',
-    //         'last_name' => '',
-    //         'first_name' => '',
-    //         'email' => '',
-    //     ]);
+        // act
+        $response = $this->postJson('/api/v1/instructor/tag');
 
-    //     // assert
-    //     $response->assertStatus(422);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'content',
+        ]);
+    }
 }

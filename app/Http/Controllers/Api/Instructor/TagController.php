@@ -34,7 +34,7 @@ class TagController extends Controller
     }
 
     /**
-     * 講座分類更新API
+     * タグ更新API
      */
     public function put(PutRequest $request): JsonResponse
     {

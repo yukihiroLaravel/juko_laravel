@@ -38,7 +38,7 @@ class TagController extends Controller
         $tag = Tag::findOrFail($validated['tag_id']);
 
         // 配下のインストラクターまたは本人が作成したタグのみ更新可能
-        if (!in_array($tag->instructor_id, $instructorIds, true)) {
+        if (! in_array($tag->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Unauthorized');
         }
 

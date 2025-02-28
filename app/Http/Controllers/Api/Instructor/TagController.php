@@ -21,7 +21,20 @@ class TagController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $tag = Tag::findOrFail($request->tag_id);
+
+        if ($tag->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        return response()->json([
+            'data' => [
+                'tag_id' => $tag->id,
+                'content' => $tag->content,
+            ],
+        ]);
     }
 
     /**

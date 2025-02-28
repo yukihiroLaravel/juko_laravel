@@ -20,18 +20,31 @@ class TagController extends Controller
      */
     public function put(Request $request): JsonResponse
     {
+        // バリデーション
+        $validated = $request->validate([
+            'tag_id' => 'required|integer|exists:tags,id',
+            'content' => 'required|string',
+        ]);
 
-        $user = Instructor::find(Auth::guard('manager')->user()->id);
-        $tag = Tag::findOrFail($request->tag_id);
+        // マネージャーが管理する講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
 
-        // マネージャー本人または配下の講師が作成したタグのみ更新可能
-        $subordinateIds = $user->getSubordinateIds();
-        if ($user->id !== $tag->manager_id && !in_array($tag->manager_id, $subordinateIds)) {
-            throw new AuthorizationException('Invalid manager.');
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id; // 自身のIDも追加
+
+        // タグの取得
+        $tag = Tag::findOrFail($validated['tag_id']);
+
+        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
+        if (!in_array($tag->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Unauthorized');
         }
 
+        // タグの更新
         $tag->update([
-            'content' => $request->content,
+            'content' => $validated['content'],
         ]);
 
         return response()->json([

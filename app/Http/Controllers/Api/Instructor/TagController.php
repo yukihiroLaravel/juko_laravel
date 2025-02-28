@@ -32,8 +32,8 @@ class TagController extends Controller
         return response()->json([
             'data' => [
                 'tag_id' => $tag->id,
-                'content' => $tag->content
-            ]
+                'content' => $tag->content,
+            ],
         ]);
     }
 

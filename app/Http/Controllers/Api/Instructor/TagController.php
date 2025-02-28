@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Tag\PutRequest;
 use App\Http\Requests\Instructor\Tag\StoreRequest;
+use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,6 +17,19 @@ use Illuminate\Support\Facades\Auth;
  */
 class TagController extends Controller
 {
+    /**
+     * タグ一覧取得API
+     */
+    public function index()
+    {
+        // ログインしている講師
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $tags = Tag::where('instructor_id', $instructorId)->with('courses')->get();
+
+        return TagIndexResource::collection($tags);
+    }
+
     /**
      * タグ登録API
      */

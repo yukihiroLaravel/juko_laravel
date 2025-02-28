@@ -4,7 +4,7 @@ namespace App\Model;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tag extends Model
 {
@@ -34,12 +34,10 @@ class Tag extends Model
 
     /**
      * 講座を取得
-     *
-     * @return BelongsTo<Course, $this>
      */
-    public function courses(): BelongsTo
+    public function courses(): BelongsToMany
     {
-        return $this->belongsTo(Course::class, 'course_tag', 'tag_id', 'course_id');
+        return $this->belongsToMany(Course::class, 'course_tag', 'tag_id', 'course_id');
     }
 
     protected static function boot()

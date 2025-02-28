@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,9 +11,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property bool $has_active_students
+ * @property int $progress_percentage
  */
 class Course extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     /**

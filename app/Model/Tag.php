@@ -33,6 +33,8 @@ class Tag extends Model
 
     /**
      * 講座を取得
+     *
+     * @return BelongsToMany<Course, $this>
      */
     public function courses(): BelongsToMany
     {

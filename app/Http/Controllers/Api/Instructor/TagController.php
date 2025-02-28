@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Tag\PutRequest;
+use App\Http\Requests\Instructor\Tag\StoreRequest;
+use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -17,7 +19,37 @@ use Illuminate\Support\Facades\Auth;
 class TagController extends Controller
 {
     /**
-     * 講座分類詳細API
+     * タグ一覧取得API
+     */
+    public function index()
+    {
+        // ログインしている講師
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $tags = Tag::where('instructor_id', $instructorId)->with('courses')->get();
+
+        return TagIndexResource::collection($tags);
+    }
+
+    /**
+     * タグ登録API
+     */
+    public function store(StoreRequest $request): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        Tag::create([
+            'instructor_id' => $instructorId,
+            'content' => $request->content,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * タグ詳細API
      */
     public function show(Request $request): JsonResponse
     {
@@ -38,7 +70,7 @@ class TagController extends Controller
     }
 
     /**
-     * 講座分類更新API
+     * タグ更新API
      */
     public function put(PutRequest $request): JsonResponse
     {

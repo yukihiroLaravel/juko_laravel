@@ -251,6 +251,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'delete']);
                     });
                 });
+
+                // マネージャー-講座分類
+                Route::prefix('tag/{tag_id}')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show']);
+                });
             });
         });
     });

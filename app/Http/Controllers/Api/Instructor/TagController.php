@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Tag\PutRequest;
+use App\Http\Requests\Instructor\Tag\ShowRequest;
 use App\Http\Requests\Instructor\Tag\StoreRequest;
 use App\Http\Resources\Instructor\TagIndexResource;
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -51,7 +52,7 @@ class TagController extends Controller
     /**
      * タグ詳細API
      */
-    public function show(Request $request): JsonResponse
+    public function show(ShowRequest $request)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -61,12 +62,7 @@ class TagController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        return response()->json([
-            'data' => [
-                'tag_id' => $tag->id,
-                'content' => $tag->content,
-            ],
-        ]);
+        return new TagResource($tag);
     }
 
     /**

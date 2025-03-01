@@ -52,11 +52,11 @@ class CourseController extends Controller
 
             $query->whereHas('tags', function ($query) use ($tagId) {
             $query->where('tags.id', $tagId);
-        });
-    }
+            });
+        }
 
-    // ページネーションで講座を取得
-    $courses = $query->paginate((int) $perPage);
+        // ページネーションで講座を取得
+        $courses = $query->paginate((int) $perPage);
 
         $courses->getCollection()->map(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;

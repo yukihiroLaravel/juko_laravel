@@ -155,7 +155,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('manager')->group(function () {
 
                 // マネージャー-講座分類
-                Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'update']);
+                Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
 
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {

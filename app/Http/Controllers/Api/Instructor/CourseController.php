@@ -51,9 +51,9 @@ class CourseController extends Controller
             if ($instructorId !== $tag->instructor_id) {
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
-            
-            $query->whereHas('tags', fn($query) => $query->where('tags.id', $tagId));
-        };
+
+            $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+        }
 
         // ページネーションで講座を取得
         $courses = $query->paginate((int) $perPage);

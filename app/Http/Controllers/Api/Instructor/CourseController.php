@@ -43,6 +43,7 @@ class CourseController extends Controller
         ->when($tagId, function ($query, $tagId) use ($instructorId) {
             $tag = Tag::findOrFail($tagId);
 
+            // ログインしている講師とtag_idの講師が一致しない
             if ($instructorId !== $tag->instructor_id) {
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }

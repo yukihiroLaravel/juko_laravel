@@ -40,8 +40,8 @@ class CourseController extends Controller
         $tagId = $request->query('tag_id');
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-        ->when($tagId, function ($query, $tagId) use ($instructorId) {
-            $tag = Tag::findOrFail($tagId);
+            ->when($tagId, function ($query, $tagId) use ($instructorId) {
+                $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない
             if ($instructorId !== $tag->instructor_id) {

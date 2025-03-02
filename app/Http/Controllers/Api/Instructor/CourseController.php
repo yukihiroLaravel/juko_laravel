@@ -40,8 +40,12 @@ class CourseController extends Controller
         $tagId = $request->query('tag_id');
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-            ->when($tagId, function ($query, $tagId) use ($instructorId) {
-                $tag = Tag::findOrFail($tagId);
+            ->when($tagId, function ($query, $tagId) {
+                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+            });
+
+        if ($tagId) {
+            $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない
             if ($instructorId !== $tag->instructor_id) {
@@ -49,7 +53,7 @@ class CourseController extends Controller
             }
             
             $query->whereHas('tags', fn($query) => $query->where('tags.id', $tagId));
-        });
+        };
 
         // ページネーションで講座を取得
         $courses = $query->paginate((int) $perPage);

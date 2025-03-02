@@ -65,9 +65,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
-            // 講師-講座分類
-            Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
-
             // 講師-講座
             Route::prefix('course')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
@@ -123,7 +120,13 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
 
             // 講師-タグ
-            Route::post('tag', [App\Http\Controllers\Api\Instructor\TagController::class, 'store']);
+            Route::prefix('tag')->group(function () {
+                Route::post('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'store']);
+                Route::prefix('{tag_id}')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'show']);
+                    Route::put('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
+                });
+            });
 
             // 講師-受講
             Route::prefix('attendance')->group(function () {

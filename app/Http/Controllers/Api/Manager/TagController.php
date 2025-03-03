@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Model\Tag;
-use App\Model\Instructor;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Manager-Tag

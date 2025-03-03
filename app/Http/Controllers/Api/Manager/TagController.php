@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Model\Tag;
+use App\Model\Instructor;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Container\Attributes\Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 
 /**
@@ -21,9 +22,16 @@ class TagController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
+        // 配下の講師情報を取得
+        $manager = Instructor::with('managings')->find($instructorId);
+
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
         $tag = Tag::findOrFail($request->tag_id);
 
-        if ($tag->instructor_id !== $instructorId) {
+        if (! in_array($tag->instructor_id, $instructorIds, true)) {
+            // 自身もしくは配下の講師が作成した講座分類でない場合、権限エラーを返す
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 

@@ -34,7 +34,6 @@ class VerifyCodeTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         // act
@@ -65,7 +64,6 @@ class VerifyCodeTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         // act
@@ -96,7 +94,6 @@ class VerifyCodeTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         // act
@@ -127,7 +124,6 @@ class VerifyCodeTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         // act

@@ -56,21 +56,22 @@ class PutTest extends TestCase
         $response->assertStatus(403);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->putJson('/api/v1/manager/tag/1', [
-    //         'content' => '',
-    //     ]);
+        // act
+        $response = $this->putJson('/api/v1/manager/tag/aaa', [
+            'content' => '',
+        ]);
 
-    //     // assert
-    //     $response->assertStatus(422);
-    //     $response->assertJsonValidationErrors([
-    //         'content' => 'The content field is required.',
-    //     ]);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'tag_id',
+            'content',
+        ]);
+    }
 }

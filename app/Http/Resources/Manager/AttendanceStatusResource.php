@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Http\Resources\Tag\TagResource;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 

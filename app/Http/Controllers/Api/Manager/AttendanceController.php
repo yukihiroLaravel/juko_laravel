@@ -317,7 +317,7 @@ class AttendanceController extends Controller
         $instructorIds[] = $instructorId;
 
         /** @var Attendance */
-        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances', 'course.tags'])->findOrFail($attendanceId);
 
         if (! in_array($attendance->course->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException(

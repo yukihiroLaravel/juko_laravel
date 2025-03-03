@@ -4,6 +4,7 @@ namespace App\Http\Resources\Manager;
 
 use App\Model\Attendance;
 use App\Model\Chapter;
+use App\Http\Resources\Tag\TagResource;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,6 +23,7 @@ class AttendanceStatusResource extends JsonResource
     {
         return [
             'attendance_id' => $this->resource->id,
+            'tag' => TagResource::collection($this->resource->course->tags),
             'course' => [
                 'course_id' => $this->resource->course->id,
                 'status' => $this->resource->course->status,

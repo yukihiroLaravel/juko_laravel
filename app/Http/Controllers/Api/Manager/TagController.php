@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Auth;
 class TagController extends Controller
 {
     /**
-     * タグ更新API
+     * 講座分類更新API
      */
-    public function put(Request $request): JsonResponse
+    public function put(PutRequest $request): JsonResponse
     {
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -32,7 +32,7 @@ class TagController extends Controller
         $tag = Tag::findOrFail($request->tag_id);
 
         // 配下のインストラクターまたは本人が作成したタグのみ更新可能
-        if (! in_array($tag->instructor_id, $instructorIds, true)) {
+        if (!in_array($tag->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 

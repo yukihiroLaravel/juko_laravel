@@ -193,7 +193,10 @@ class AttendanceController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $courseId)->get();
+        $attendances = Attendance::with([
+            'lessonAttendances.lesson.chapter.course',
+            'lessonAttendances.lesson.chapter.lessons',
+        ])->where('course_id', $courseId)->get();
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得

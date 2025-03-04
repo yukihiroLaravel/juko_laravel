@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use App\Model\Notification;
+use App\Http\Resources\Tag\TagResource;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -42,6 +43,7 @@ class NotificationIndexResource extends JsonResource
                 'notification_id' => $notification->id,
                 'course_id' => $notification->course_id,
                 'course_title' => $notification->course->title,
+                'tags' => TagResource::collection($notification->course->tags),
                 'title' => $notification->title,
                 'content' => $notification->content,
                 'type' => $notification->type,

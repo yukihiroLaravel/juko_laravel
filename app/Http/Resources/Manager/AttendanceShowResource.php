@@ -25,13 +25,7 @@ class AttendanceShowResource extends JsonResource
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
                     'completed_count' => $chapter->completed_count,
-                    'tags' => $chapter->course->tags->map(function ($tag) {
-                        return [
-                            'id' => $tag->id,
-                            'instructor_id' => $tag->instructor_id,
-                            'content' => $tag->content,
-                        ];
-                    }) ?? [],
+                    'tags' => $chapter->course->tags,
                 ];
             }),
             'students_count' => $this->resource['studentsCount'],

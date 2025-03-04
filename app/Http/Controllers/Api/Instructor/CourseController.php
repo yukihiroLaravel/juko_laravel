@@ -39,11 +39,6 @@ class CourseController extends Controller
         $perPage = $request->query('per_page', '6');
         $tagId = $request->query('tag_id');
 
-        $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-            ->when($tagId, function ($query, $tagId) {
-                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
-            });
-
         if ($tagId) {
             $tag = Tag::findOrFail($tagId);
 
@@ -51,9 +46,12 @@ class CourseController extends Controller
             if ($instructorId !== $tag->instructor_id) {
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
-
-            $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
         }
+
+        $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+        ->when($tagId, function ($query, $tagId) {
+            $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+        });
 
         // ページネーションで講座を取得
         $courses = $query->paginate((int) $perPage);

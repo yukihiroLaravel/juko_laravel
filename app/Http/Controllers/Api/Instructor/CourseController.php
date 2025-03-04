@@ -49,9 +49,9 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-        ->when($tagId, function ($query, $tagId) {
-            $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
-        });
+            ->when($tagId, function ($query, $tagId) {
+                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+            });
 
         // ページネーションで講座を取得
         $courses = $query->paginate((int) $perPage);

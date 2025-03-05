@@ -17,13 +17,14 @@ class IndexService
      * @return LengthAwarePaginator<Attendance>
      */
     public function __invoke(
-        IndexDto $indexDto, int $perPage, int $page
+        IndexDto $indexDto, int $perPage, int $page, int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
@@ -32,6 +33,11 @@ class IndexService
                 })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->where('status', Course::STATUS_PUBLIC);
+                });
+            })
+            ->when($tagId, function ($query) use ($tagId) {
+                $query->whereHas('course.tags', function ($query) use ($tagId) {
+                    $query->where('tags.id', $tagId);
                 });
             })
             ->paginate($perPage, ['*'], 'page', $page);

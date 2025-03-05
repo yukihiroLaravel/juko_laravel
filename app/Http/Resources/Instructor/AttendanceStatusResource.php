@@ -2,10 +2,10 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
-use App\Http\Resources\Tag\TagResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceStatusResource extends JsonResource

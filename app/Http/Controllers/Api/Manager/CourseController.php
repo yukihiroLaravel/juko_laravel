@@ -15,6 +15,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
+use App\Model\Tag;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -36,22 +37,40 @@ class CourseController extends Controller
      */
     public function index(IndexRequest $request): AnonymousResourceCollection
     {
-        $perPage = $request->input('per_page', 6);
-        $page = $request->input('page', 1);
-
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
-
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->withCount('attendances')->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
+        // クエリパラメータ取得
+        $perPage = $request->query('per_page', '6');
+        $tagId = $request->query('tag_id');
+
+        // タグIDが指定されている場合の検証
+        if ($tagId) {
+            $tag = Tag::findOrFail($tagId);
+
+            // タグの所有者が自分、または配下の講師でない場合はエラー
+            if (!in_array($tag->instructor_id, $instructorIds, true)) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+        }
+
+        // 講座のクエリ構築
+        $query = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
+            ->withCount('attendances')
+            ->when($tagId, function ($query, $tagId) {
+                $query->whereHas('tags', fn($query) => $query->where('tags.id', $tagId));
+            });
+
+        // ページネーションで講座を取得
+        $courses = $query->paginate((int) $perPage);
 
         // 各講座に受講中の学生がいるかを設定
-        $courses->each(function (Course $course) {
+        $courses->getCollection()->map(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;
         });
 
@@ -94,7 +113,7 @@ class CourseController extends Controller
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -142,7 +161,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -156,7 +175,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (ModelNotFoundException $e) {
             throw $e;
         } catch (Exception $e) {

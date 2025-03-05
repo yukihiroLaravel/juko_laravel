@@ -24,6 +24,7 @@ class IndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
+            'tag_id' => ['sometimes', 'integer', 'exists:tags,id'],
         ];
     }
 }

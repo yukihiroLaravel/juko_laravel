@@ -15,7 +15,6 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -88,8 +87,6 @@ class CourseController extends Controller
                 'title' => $request->title,
                 'image' => $filePath,
                 'status' => Course::STATUS_PRIVATE,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
             ]);
 
             // ログイン中の講師が作成したタグかどうか確認

@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,8 +39,6 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'created_at',
-        'updated_at',
     ];
 
     /**
@@ -47,6 +46,8 @@ class Course extends Model
      */
     protected $casts = [
         'instructor_id' => 'int',
+        'created_at' => 'immutable_datetime',
+        'updated_at' => 'immutable_datetime',
     ];
 
     /**
@@ -57,6 +58,15 @@ class Course extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::creating(function (Course $course) {
+            $course->created_at = CarbonImmutable::now();
+            $course->updated_at = CarbonImmutable::now();
+        });
+
+        static::updating(function (Course $course) {
+            $course->updated_at = CarbonImmutable::now();
+        });
 
         // 削除時に関連するチャプターを削除
         static::deleting(function ($course) {

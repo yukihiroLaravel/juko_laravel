@@ -8,7 +8,7 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Tag\TagResource;
-use App\Http\Requests\Instructor\Tag\ShowRequest;
+use App\Http\Requests\Manager\Tag\ShowRequest;
 
 /**
  * @tags Manager-Tag
@@ -35,12 +35,6 @@ class TagController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        // return response()->json([
-        //     'data' => [
-        //         'tag_id' => $tag->id,
-        //         'content' => $tag->content,
-        //     ],
-        // ]);
         return new TagResource($tag);
     }
 }

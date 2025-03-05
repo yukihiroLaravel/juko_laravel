@@ -94,10 +94,10 @@ class CourseController extends Controller
 
             // ログイン中の講師が作成したタグかどうか確認
             $tag = Tag::where('id', $request->tag_id)
-                    ->where('instructor_id', $instructorId)
-                    ->first();
-        
-            if (!$tag) {
+                ->where('instructor_id', $instructorId)
+                ->first();
+
+            if (! $tag) {
                 DB::rollback();
                 throw new AuthorizationException('Forbidden, invalid tag.');
             }

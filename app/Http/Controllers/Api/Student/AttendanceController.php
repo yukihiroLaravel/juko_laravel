@@ -41,7 +41,6 @@ class AttendanceController extends Controller
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
         $tagId = $request->input('tag_id');
-        // dd($tagId);
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
 

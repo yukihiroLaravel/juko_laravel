@@ -17,7 +17,7 @@ class IndexService
      * @return LengthAwarePaginator<Attendance>
      */
     public function __invoke(
-        IndexDto $indexDto, int $perPage, int $page, int $tagId
+        IndexDto $indexDto, int $perPage, int $page, ?int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
@@ -35,7 +35,7 @@ class IndexService
                         ->where('status', Course::STATUS_PUBLIC);
                 });
             })
-            ->when($tagId, function ($query) use ($tagId) {
+            ->when($tagId, function (Builder $query) use ($tagId) {
                 $query->whereHas('course.tags', function ($query) use ($tagId) {
                     $query->where('tags.id', $tagId);
                 });

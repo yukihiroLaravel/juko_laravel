@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use App\Http\Resources\Tag\TagResource;
+use App\Http\Resources\Notification\NotificationResource;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,15 +41,8 @@ class NotificationIndexResource extends JsonResource
     {
         return $notifications->map(function (Notification $notification) {
             return [
-                'notification_id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
+                'notification' => new NotificationResource($notification),
                 'tags' => TagResource::collection($notification->course->tags),
-                'title' => $notification->title,
-                'content' => $notification->content,
-                'type' => $notification->type,
-                'start_date' => $notification->start_date,
-                'end_date' => $notification->end_date,
             ];
         })
             ->toArray();

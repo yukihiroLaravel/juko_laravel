@@ -19,11 +19,11 @@ use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -54,7 +54,7 @@ class CourseController extends Controller
             $tag = Tag::findOrFail($tagId);
 
             // タグの所有者が自分、または配下の講師でない場合はエラー
-            if (!in_array($tag->instructor_id, $instructorIds, true)) {
+            if (! in_array($tag->instructor_id, $instructorIds, true)) {
                 throw new AuthorizationException('Forbidden, invalid tag_id.');
             }
         }
@@ -64,7 +64,7 @@ class CourseController extends Controller
             ->whereIn('instructor_id', $instructorIds)
             ->withCount('attendances')
             ->when($tagId, function (Builder $query, $tagId) {
-                $query->whereHas('tags', fn(Builder $query) => $query->where('tags.id', $tagId));
+                $query->whereHas('tags', fn (Builder $query) => $query->where('tags.id', $tagId));
             });
 
         // ページネーションで講座を取得

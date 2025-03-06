@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Manager\Course;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -36,10 +35,9 @@ class IndexTest extends TestCase
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/index?per_page=5');
+        $response = $this->getJson('/api/v1/manager/course/index?per_page=5&tag_id=1');
 
         // assert
         $response->assertStatus(200);

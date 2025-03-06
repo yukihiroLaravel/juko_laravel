@@ -45,4 +45,20 @@ class ShowTest extends TestCase
             'message' => 'Forbidden, invalid instructor_id.',
         ]);
     }
+
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/tag/aaa');
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'tag_id',
+        ]);
+    }
 }

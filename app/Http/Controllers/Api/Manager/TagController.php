@@ -18,7 +18,7 @@ class TagController extends Controller
     /**
      * 講座分類詳細API
      */
-    public function show(ShowRequest $request)
+    public function show(ShowRequest $request): TagResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

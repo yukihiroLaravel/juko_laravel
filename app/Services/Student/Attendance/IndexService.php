@@ -30,8 +30,12 @@ class IndexService
                 $query->when(! $indexDto->getSearchWord(), function ($query) {
                     $query->where('status', Course::STATUS_PUBLIC);
                 })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
-                    $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
-                        ->where('status', Course::STATUS_PUBLIC);
+                    $query->where(function ($subQuery) use ($indexDto) {
+                        $subQuery->where('title', 'like', "%{$indexDto->getSearchWord()}%")
+                            ->orWhereHas('tags', function ($tagQuery) use ($indexDto) {
+                                $tagQuery->where('content', 'like', "%{$indexDto->getSearchWord()}%");
+                            });
+                    })->where('status', Course::STATUS_PUBLIC);
                 });
             })
             ->paginate($perPage, ['*'], 'page', $page);

@@ -28,15 +28,15 @@ class IndexService
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
-                $query->when(! $indexDto->getSearchWord(), function ($query) {
+                $query->when(! $indexDto->getSearchWord(), function (Builder $query) {
                     $query->where('status', Course::STATUS_PUBLIC);
-                })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
+                })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->where('status', Course::STATUS_PUBLIC);
                 });
             })
             ->when($tagId, function (Builder $query) use ($tagId) {
-                $query->whereHas('course.tags', function ($query) use ($tagId) {
+                $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
                     $query->where('tags.id', $tagId);
                 });
             })

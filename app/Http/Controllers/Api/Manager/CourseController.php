@@ -38,6 +38,7 @@ class CourseController extends Controller
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
+        $searchWord = $request->input('search_word');
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -48,7 +49,16 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->withCount('attendances')->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
+        $query = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
+            ->withCount('attendances');
+
+        // 検索ワードが指定されている場合はタイトルでフィルタリング
+        if (!empty($searchWord)) {
+            $query->where('title', 'LIKE', "%{$searchWord}%");
+        }
+
+        $courses = $query->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
 
         // 各講座に受講中の学生がいるかを設定
         $courses->each(function (Course $course) {
@@ -94,7 +104,7 @@ class CourseController extends Controller
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -142,7 +152,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -156,7 +166,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (ModelNotFoundException $e) {
             throw $e;
         } catch (Exception $e) {

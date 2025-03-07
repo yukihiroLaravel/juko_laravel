@@ -25,26 +25,16 @@ class NotificationIndexResource extends JsonResource
         $notifications = $this->resource;
 
         return [
-            'notifications' => $this->mapNotifications($notifications->getCollection()),
+            'notifications' => $notifications->map(function (Notification $notification) use ($request) {
+                return [
+                    ...(new NotificationResource($notification))->toArray($request),
+                    'tags' => TagResource::collection($notification->course->tags),
+                ];
+            }),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),
             ],
         ];
-    }
-
-    /**
-     * @param  Collection<int, Notification>  $notifications
-     * @return array
-     */
-    private function mapNotifications($notifications)
-    {
-        return $notifications->map(function (Notification $notification) {
-            return [
-                'notification' => new NotificationResource($notification),
-                'tags' => TagResource::collection($notification->course->tags),
-            ];
-        })
-            ->toArray();
     }
 }

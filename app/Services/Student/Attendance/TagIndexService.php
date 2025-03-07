@@ -10,10 +10,10 @@ class TagIndexService
 {
     public function __invoke(
         IndexDto $indexDto
-    ): Collection{
+    ): Collection {
         return Tag::with([
-            'courses'
+            'courses',
         ])
-        ->get();
+            ->get();
     }
 }

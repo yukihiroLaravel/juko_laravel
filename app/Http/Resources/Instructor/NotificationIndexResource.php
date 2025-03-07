@@ -5,7 +5,6 @@ namespace App\Http\Resources\Instructor;
 use App\Http\Resources\Notification\NotificationResource;
 use App\Http\Resources\Tag\TagResource;
 use App\Model\Notification;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 

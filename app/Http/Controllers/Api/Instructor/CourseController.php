@@ -92,12 +92,7 @@ class CourseController extends Controller
             // ログイン中の講師が作成したタグかどうか確認
             $tag = Tag::where('id', $request->tag_id)
                 ->where('instructor_id', $instructorId)
-                ->first();
-
-            if (! $tag) {
-                DB::rollback();
-                throw new AuthorizationException('Forbidden, invalid tag.');
-            }
+                ->firstOrFail();
 
             // タグを中間テーブルに紐づける
             $course->tags()->attach($tag->id);
@@ -108,6 +103,7 @@ class CourseController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            DB::rollback();
             Log::error($e);
             throw $e;
         }

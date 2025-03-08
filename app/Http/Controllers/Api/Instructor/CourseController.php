@@ -38,6 +38,7 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
+        $searchWord = $request->query('search_word');
         $tagId = $request->query('tag_id');
 
         if ($tagId) {
@@ -50,6 +51,9 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+            ->when($searchWord, function (Builder $query) use ($searchWord) {
+                $query->where('title', 'LIKE', "%{$searchWord}%");
+            })
             ->when($tagId, function (Builder $query, string $tagId) {
                 $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
             });

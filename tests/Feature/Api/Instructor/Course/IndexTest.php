@@ -46,4 +46,19 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
     }
+
+    public function test_タイトル検索_成功(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+        Course::find(5)->delete();
+
+        // act
+        $response = $this->getJson('/api/v1/instructor/course/index?search_word=PHP');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+    }
 }

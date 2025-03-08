@@ -40,9 +40,12 @@ class TagController extends Controller
             }
         }
 
-        $query = Tag::where('instructor_id', $instructorId)->when($tagId, function (Builder $query, string $tagId) {
-            $query->whereHas('courses', fn ($query) => $query->where('tags.id', $tagId));
-        })->with('courses')->get();
+        $query = Tag::where('instructor_id', $instructorId)
+            ->when($tagId, function (Builder $query, string $tagId) {
+                $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
+            })
+            ->with('courses')
+            ->get();
 
         return TagIndexResource::collection($query);
     }

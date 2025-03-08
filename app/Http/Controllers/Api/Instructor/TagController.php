@@ -12,9 +12,9 @@ use App\Http\Resources\Tag\TagResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /**
  * @tags Instructor-Tag
@@ -39,7 +39,7 @@ class TagController extends Controller
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
         }
-        
+
         $query = Tag::where('instructor_id', $instructorId)->when($tagId, function (Builder $query, string $tagId) {
             $query->whereHas('courses', fn ($query) => $query->where('tags.id', $tagId));
         })->with('courses')->get();

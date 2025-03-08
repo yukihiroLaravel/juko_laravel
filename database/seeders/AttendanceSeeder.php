@@ -24,6 +24,13 @@ class AttendanceSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ],
             [
+                'course_id' => 6,
+                'student_id' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            // 受講生2
+            [
                 'course_id' => 1,
                 'student_id' => 2,
                 'created_at' => Carbon::now(),

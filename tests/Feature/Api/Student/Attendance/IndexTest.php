@@ -28,5 +28,34 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data');
+    }
+
+    public function test_講座名検索_パラメータ指定_成功(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
+
+        // act
+        $response = $this->getJson('/api/v1/attendance/index?search_word=PHP');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+    }
+
+    public function test_タグ名検索_パラメータ指定_成功(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
+
+        // act
+        $response = $this->getJson('/api/v1/attendance/index?search_word=フロントエンド講座');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
     }
 }

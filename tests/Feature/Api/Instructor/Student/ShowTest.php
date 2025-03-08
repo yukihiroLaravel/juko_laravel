@@ -33,7 +33,7 @@ class ShowTest extends TestCase
     public function test_許可がない講師_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(3);
         $this->actingAs($instructor, 'instructor');
 
         // act

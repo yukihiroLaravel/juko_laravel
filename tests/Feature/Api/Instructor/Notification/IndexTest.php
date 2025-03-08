@@ -25,8 +25,6 @@ class IndexTest extends TestCase
         // act
         $response = $this->getJson('/api/v1/instructor/notification/index');
 
-        $response->dump();
-
         // assert
         $response->assertStatus(200);
     }

@@ -104,7 +104,7 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
-            'course_tags' => $course->tags->pluck('content'),
+            'tags' => $course->tags,
         ]);
     }
 

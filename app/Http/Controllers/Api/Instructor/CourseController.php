@@ -18,6 +18,7 @@ use App\Model\Tag;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -49,7 +50,7 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-            ->when($tagId, function ($query, $tagId) {
+            ->when($tagId, function (Builder $query, string $tagId) {
                 $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
             });
 

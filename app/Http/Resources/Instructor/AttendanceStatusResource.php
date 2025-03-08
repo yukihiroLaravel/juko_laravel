@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,6 +29,7 @@ class AttendanceStatusResource extends JsonResource
                 'image' => $this->resource->course->image,
                 'chapters' => $this->mapChapters($this->resource->course->chapters),
                 'title' => $this->resource->course->title,
+                'tags' => TagResource::collection($this->resource->course->tags),
             ],
         ];
     }

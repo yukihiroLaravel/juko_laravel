@@ -1,13 +1,12 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Course;
+namespace Tests\Feature\Api\Instructor\Tag;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class IndexTest extends TestCase
+class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -18,32 +17,30 @@ class IndexTest extends TestCase
         $this->seed();
     }
 
-    public function test_講座一覧取得_成功(): void
+    public function test_タグ取得_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/index');
+        $response = $this->getJson('/api/v1/instructor/tag/1');
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data');
     }
 
-    public function test_パラメータ指定_成功(): void
+    public function test_バリデーションエラー(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/index?per_page=5&tag_id=1');
+        $response = $this->getJson('/api/v1/instructor/tag/aaa');
 
         // assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(1, 'data');
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['tag_id']);
     }
 }

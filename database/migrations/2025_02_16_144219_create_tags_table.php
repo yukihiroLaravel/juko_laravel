@@ -16,7 +16,9 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->foreignIdFor(Instructor::class)->constrained();
             $table->string('content', 255);
-            $table->datetimes();
+
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

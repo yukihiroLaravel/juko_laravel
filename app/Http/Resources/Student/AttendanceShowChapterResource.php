@@ -24,6 +24,7 @@ class AttendanceShowChapterResource extends JsonResource
                 'course_id' => $attendance->course->id,
                 'title' => $attendance->course->title,
                 'image' => $attendance->course->image,
+                'tags' => $attendance->course->tags,
                 'chapter' => [
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,

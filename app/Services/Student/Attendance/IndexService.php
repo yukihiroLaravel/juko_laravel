@@ -9,30 +9,38 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService
 {
     /**
-     * @return Collection<Attendance>
+     * @return LengthAwarePaginator<Attendance>
      */
-    public function __invoke(IndexDto $indexDto): Collection
-    {
+    public function __invoke(
+        IndexDto $indexDto, int $perPage, int $page, ?int $tagId
+    ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
-                $query->when(! $indexDto->getSearchWord(), function ($query) {
+                $query->when(! $indexDto->getSearchWord(), function (Builder $query) {
                     $query->where('status', Course::STATUS_PUBLIC);
-                })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
+                })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->where('status', Course::STATUS_PUBLIC);
                 });
-            })->get();
+            })
+            ->when($tagId, function (Builder $query) use ($tagId) {
+                $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
+                    $query->where('tags.id', $tagId);
+                });
+            })
+            ->paginate($perPage, ['*'], 'page', $page);
 
         // 各受講情報ごとにチャプター単位の進捗率を計算
         $attendances->each(function (Attendance $attendance) {

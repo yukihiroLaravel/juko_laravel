@@ -29,6 +29,6 @@ class AttendanceShowResource extends JsonResource
             }),
             'students_count' => $this->resource['studentsCount'],
             'tag' => TagResource::collection($this->resource->course->tags),
-        ];    
+        ];
     }
 }

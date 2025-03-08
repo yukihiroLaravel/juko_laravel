@@ -118,7 +118,7 @@ class Course extends Model
     }
 
     /**
-     * 講座分類（タグ）を取得
+     * タグを取得
      *
      * @return BelongsToMany<Tag, $this>
      */

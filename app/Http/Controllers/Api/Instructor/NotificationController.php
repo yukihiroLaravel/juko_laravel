@@ -33,11 +33,12 @@ class NotificationController extends Controller
      */
     public function index(IndexRequest $request): NotificationIndexResource
     {
+        $instructorId = Auth::guard('instructor')->user()->id;
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
 
-        $notifications = Notification::with(['course'])
-            ->where('instructor_id', Auth::guard('instructor')->user()->id)
+        $notifications = Notification::with(['course.tags'])
+            ->where('instructor_id', $instructorId)
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);

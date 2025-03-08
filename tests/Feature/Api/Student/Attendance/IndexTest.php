@@ -29,4 +29,17 @@ class IndexTest extends TestCase
         // assert
         $response->assertStatus(200);
     }
+
+    public function test_受講一覧を取得_タグ指定_成功(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
+
+        // act
+        $response = $this->getJson('/api/v1/attendance/index?tag_id=1');
+
+        // assert
+        $response->assertStatus(200);
+    }
 }

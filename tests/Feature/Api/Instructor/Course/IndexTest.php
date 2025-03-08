@@ -40,10 +40,11 @@ class IndexTest extends TestCase
         Course::find(5)->delete();
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/index?per_page=5');
+        $response = $this->getJson('/api/v1/instructor/course/index?per_page=5&tag_id=1');
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
     }
 
     public function test_タイトル検索_成功(): void

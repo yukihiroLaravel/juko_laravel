@@ -88,7 +88,7 @@ class AttendanceController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
-        $course = Course::findOrFail($courseId);
+        $course = Course::with('tags')->findOrFail($courseId);
 
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
@@ -104,6 +104,7 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
+            'course_tags' => $course->tags->pluck('content'),
         ]);
     }
 

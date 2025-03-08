@@ -28,6 +28,7 @@ class AttendanceShowResource extends JsonResource
                 ];
             }),
             'students_count' => $this->resource['studentsCount'],
+            'course_tags' => $this->resource['course_tags'],
         ];
     }
 }

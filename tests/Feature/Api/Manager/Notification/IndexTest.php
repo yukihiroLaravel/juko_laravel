@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,7 +16,7 @@ class IndexTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせ登録_成功(): void
+    public function test_お知らせ一覧取得_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
@@ -29,7 +29,7 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_お知らせ登録_権限エラー(): void
+    public function test_権限エラー_失敗(): void
     {
         // arrange
         $unauthorizedInstructor = Instructor::find(2);

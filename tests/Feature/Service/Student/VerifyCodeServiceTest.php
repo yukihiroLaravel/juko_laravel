@@ -37,7 +37,6 @@ class VerifyCodeServiceTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         $result = $service($temporaryStudent, CarbonImmutable::now(), '1234');
@@ -62,7 +61,6 @@ class VerifyCodeServiceTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         $service($temporaryStudent, CarbonImmutable::now(), '1234');
@@ -86,7 +84,6 @@ class VerifyCodeServiceTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         $service($temporaryStudent, CarbonImmutable::now(), '0000');
@@ -108,7 +105,6 @@ class VerifyCodeServiceTest extends TestCase
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
             'gender' => 'man',
-            'type' => 'instructor',
         ]);
 
         $result = $service($temporaryStudent, CarbonImmutable::now(), '0000');

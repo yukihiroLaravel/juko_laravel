@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -25,6 +26,7 @@ class AttendanceShowResource extends JsonResource
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
                     'completed_count' => $chapter->completed_count,
+                    'tags' => TagResource::collection($chapter->course->tags),
                 ];
             }),
             'students_count' => $this->resource['studentsCount'],

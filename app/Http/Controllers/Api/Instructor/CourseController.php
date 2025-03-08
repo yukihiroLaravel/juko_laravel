@@ -17,6 +17,7 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,11 +38,24 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
+        $tagId = $request->query('tag_id');
+
+        if ($tagId) {
+            $tag = Tag::findOrFail($tagId);
+
+            // ログインしている講師とtag_idの講師が一致しない
+            if ($instructorId !== $tag->instructor_id) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+        }
+
+        $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+            ->when($tagId, function (Builder $query, string $tagId) {
+                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+            });
 
         // ページネーションで講座を取得
-        $courses = Course::where('instructor_id', $instructorId)
-            ->withCount('attendances')
-            ->paginate((int) $perPage);
+        $courses = $query->paginate((int) $perPage);
 
         $courses->getCollection()->map(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;

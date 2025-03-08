@@ -28,5 +28,20 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data');
+    }
+
+    public function test_パラメータ指定_成功(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/instructor/course/tag/index?tag_id=1');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
     }
 }

@@ -17,6 +17,7 @@ use App\Model\Instructor;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +41,7 @@ class CourseController extends Controller
 
         $query = Course::where('instructor_id', $instructorId)
             ->withCount('attendances')
-            ->when($searchWord, function ($query) use ($searchWord) {
+            ->when($searchWord, function (Builder $query) use ($searchWord) {
                 $query->where('title', 'LIKE', "%{$searchWord}%");
             });
 

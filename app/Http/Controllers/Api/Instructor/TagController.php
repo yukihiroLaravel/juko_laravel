@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Tag\IndexRequest;
 use App\Http\Requests\Instructor\Tag\PutRequest;
 use App\Http\Requests\Instructor\Tag\ShowRequest;
 use App\Http\Requests\Instructor\Tag\StoreRequest;
@@ -13,6 +14,7 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 /**
  * @tags Instructor-Tag
@@ -22,14 +24,27 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index()
+    public function index(IndexRequest $request)
     {
+        $tagId = $request->query('tag_id');
+
         // ログインしている講師
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        $tags = Tag::where('instructor_id', $instructorId)->with('courses')->get();
+        if ($tagId) {
+            $tag = Tag::findOrFail($tagId);
 
-        return TagIndexResource::collection($tags);
+            // ログインしている講師とtag_idの講師が一致しない
+            if ($instructorId !== $tag->instructor_id) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+        }
+        
+        $query = Tag::where('instructor_id', $instructorId)->when($tagId, function (Builder $query, string $tagId) {
+            $query->whereHas('courses', fn ($query) => $query->where('tags.id', $tagId));
+        })->with('courses')->get();
+
+        return TagIndexResource::collection($query);
     }
 
     /**

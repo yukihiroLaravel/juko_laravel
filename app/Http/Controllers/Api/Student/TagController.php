@@ -16,9 +16,8 @@ class TagController extends Controller
         IndexRequest $request
     ) {
         $studentId = Auth::id();
-        $indexDto = new IndexDto($studentId, $request->search_word ?? null);
+        $indexDto = new IndexDto($studentId, $request->search_word);
 
-        // dd($service($indexDto));
-        return new TagIndexResource($service($indexDto));
+        return TagIndexResource::collection($service($indexDto));
     }
 }

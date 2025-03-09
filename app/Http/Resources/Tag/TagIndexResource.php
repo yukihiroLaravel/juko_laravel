@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources\Tag;
 
-use App\Http\Resources\Course\CourseResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use App\Http\Resources\Course\CourseResource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class TagIndexResource extends ResourceCollection
+class TagIndexResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,12 +16,10 @@ class TagIndexResource extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($value) {
-            return [
-                'tag_id' => $value->id,
-                'content' => $value->content,
-                'courses' => CourseResource::collection($value->courses),
-            ];
-        });
+        return  [
+            'tag_id' => $this->id,
+            'content' => $this->content,
+            'courses' => CourseResource::collection($this->courses),
+        ];
     }
 }

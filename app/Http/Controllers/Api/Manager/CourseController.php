@@ -51,12 +51,11 @@ class CourseController extends Controller
         // 自分、または配下の講師の講座情報を取得
         $query = Course::with('instructor')
             ->whereIn('instructor_id', $instructorIds)
-            ->withCount('attendances');
-
-        // 検索ワードが指定されている場合はタイトルでフィルタリング
-        if (!empty($searchWord)) {
-            $query->where('title', 'LIKE', "%{$searchWord}%");
-        }
+            ->withCount('attendances')
+            // 検索ワードが指定されている場合はタイトルでフィルタリング
+            ->when($searchWord, function ($query, $searchWord) {
+                $query->where('title', 'LIKE', "%{$searchWord}%");
+            });
 
         $courses = $query->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Tag;
 
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use App\Http\Resources\Course\CourseResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +15,7 @@ class TagIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return  [
+        return [
             'tag_id' => $this->id,
             'content' => $this->content,
             'courses' => CourseResource::collection($this->courses),

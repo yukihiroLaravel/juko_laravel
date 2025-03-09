@@ -3,8 +3,8 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
-use App\Model\Tag;
 use App\Model\Course;
+use App\Model\Tag;
 use Illuminate\Support\Collection;
 
 class TagIndexService
@@ -19,11 +19,11 @@ class TagIndexService
                 $query->where('student_id', $indexDto->getStudentId());
             })
             ->whereHas('courses', function ($query) use ($indexDto) {
-                    $query->when(! $indexDto->getSearchWord(), function ($query) {
-                        $query->where('status', Course::STATUS_PUBLIC);
-                    })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
-                        $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
-                            ->where('status', Course::STATUS_PUBLIC);
+                $query->when(! $indexDto->getSearchWord(), function ($query) {
+                    $query->where('status', Course::STATUS_PUBLIC);
+                })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
+                    $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
+                        ->where('status', Course::STATUS_PUBLIC);
                 });
             })
             ->get();

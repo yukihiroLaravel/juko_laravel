@@ -184,6 +184,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
                         Route::delete('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'delete']);
+                        // マネージャー講師-タグ
+                        Route::prefix('tag')->group(function () {
+                            Route::get('index', [App\Http\Controllers\Api\Manager\ManagerCourseTagController::class, 'index']);
+                        });
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);
@@ -224,10 +228,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             });
                             Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'loginRate']);
                         });
-                    });
-                    // マネージャー講師-タグ
-                    Route::prefix('tag')->group(function () {
-                        Route::get('index', [App\Http\Controllers\Api\Manager\ManagerCourseTagController::class, 'index']);
                     });
                 });
                 // マネージャー-受講

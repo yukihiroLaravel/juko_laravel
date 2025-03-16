@@ -174,6 +174,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::get('index', 'Api\Manager\Instructor\CourseController@index');
                         });
                     });
+                    // マネージャー講師-タグ
+                    Route::prefix('course')->group(function () {
+                        Route::prefix('tag')->group(function () {
+                            Route::get('index', [App\Http\Controllers\Api\Manager\ManagerCourseTagController::class, 'index']);
+                        });
+                    });
                 });
                 // マネージャー-講座
                 Route::prefix('course')->group(function () {
@@ -184,10 +190,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
                         Route::delete('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'delete']);
-                        // マネージャー講師-タグ
-                        Route::prefix('tag')->group(function () {
-                            Route::get('index', [App\Http\Controllers\Api\Manager\ManagerCourseTagController::class, 'index']);
-                        });
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);

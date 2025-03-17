@@ -18,7 +18,8 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index() {
+    public function index()
+    {
         return response()->json([]);
     }
 

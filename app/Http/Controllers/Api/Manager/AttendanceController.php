@@ -121,7 +121,10 @@ class AttendanceController extends Controller
             );
         }
 
-        $chapters = Chapter::where('course_id', $courseId)->get();
+        $chapters = Chapter::with([
+            'course.tags',
+            'lessons.lessonAttendances',
+        ])->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();

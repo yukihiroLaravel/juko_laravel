@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @tags Manager-Course
@@ -38,7 +39,7 @@ class CourseController extends Controller
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
-
+        $searchWord = $request->query('search_word');
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
@@ -48,7 +49,11 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')->whereIn('instructor_id', $instructorIds)->withCount('attendances')->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
+        $courses = Course::with('instructor')
+        ->whereIn('instructor_id', $instructorIds)
+        ->when($searchWord, function (Builder $query) use ($searchWord){
+            $query->where('title','LIKE',"%{$searchWord}%");})
+        ->withCount('attendances')->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
 
         // 各講座に受講中の学生がいるかを設定
         $courses->each(function (Course $course) {

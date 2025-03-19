@@ -54,7 +54,9 @@ class CourseController extends Controller
             ->when($searchWord, function (Builder $query) use ($searchWord) {
                 $query->where('title', 'LIKE', "%{$searchWord}%");
             })
-            ->withCount('attendances')->orderBy('id')->paginate($perPage, ['*'], 'page', $page);
+            ->withCount('attendances')
+            ->orderBy('id')
+            ->paginate($perPage, ['*'], 'page', $page);
 
         // 各講座に受講中の学生がいるかを設定
         $courses->each(function (Course $course) {

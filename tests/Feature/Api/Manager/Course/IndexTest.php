@@ -29,6 +29,7 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(6, 'data');
     }
 
     public function test_パラメータ指定_成功(): void
@@ -43,5 +44,20 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(5, 'data');
+    }
+
+    public function test_検索ワード指定_成功(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/course/index?search_word=php');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
     }
 }

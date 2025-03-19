@@ -229,6 +229,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'loginRate']);
                         });
                     });
+                    // マネージャー講師-タグ
+                    Route::prefix('tag')->group(function () {
+                        Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
+                    });
                 });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {

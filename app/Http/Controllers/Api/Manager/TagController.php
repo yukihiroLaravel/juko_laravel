@@ -16,6 +16,14 @@ use Illuminate\Support\Facades\Auth;
 class TagController extends Controller
 {
     /**
+     * タグ一覧取得API
+     */
+    public function index()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * タグ更新API
      */
     public function put(PutRequest $request): JsonResponse

@@ -53,10 +53,8 @@ class Instructor extends Authenticatable
 
     /**
      * Get the remember token value.
-     *
-     * @return string|null
      */
-    public function getRememberToken(): string|null
+    public function getRememberToken(): ?string
     {
         return null;
     }
@@ -65,7 +63,6 @@ class Instructor extends Authenticatable
      * Set the remember token value.
      *
      * @param  string  $value
-     * @return void
      */
     public function setRememberToken($value): void
     {
@@ -74,8 +71,6 @@ class Instructor extends Authenticatable
 
     /**
      * Get the name of the remember token.
-     *
-     * @return string
      */
     public function getRememberTokenName(): string
     {

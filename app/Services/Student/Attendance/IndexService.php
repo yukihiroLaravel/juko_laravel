@@ -32,6 +32,9 @@ class IndexService
                     $query->where('status', Course::STATUS_PUBLIC);
                 })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
+                        ->orWhereHas('tags', function (Builder $query) use ($indexDto) {
+                            $query->where('content', 'like', "%{$indexDto->getSearchWord()}%");
+                        })
                         ->where('status', Course::STATUS_PUBLIC);
                 });
             })

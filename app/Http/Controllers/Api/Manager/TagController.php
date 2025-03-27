@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,7 +44,7 @@ class TagController extends Controller
             }
         }
 
-        $query = Tag::where('instructor_id', $instructorIds)
+        $query = Tag::whereIn('instructor_id', $instructorIds)
             ->when($tagId, function (Builder $query, string $tagId) {
                 $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
             })

@@ -18,6 +18,11 @@ class CourseResource extends JsonResource
             'title' => $this->resource->title,
             'image' => $this->resource->image,
             'status' => $this->resource->status,
+            'tags' => $this->resource->tags->map(fn($tag) => 
+            [
+                'tag_id' => $tag->id,
+                'tag_name' => $tag->content,
+            ]),
         ];
     }
 }

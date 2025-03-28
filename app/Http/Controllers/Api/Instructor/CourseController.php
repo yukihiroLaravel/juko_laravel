@@ -163,7 +163,7 @@ class CourseController extends Controller
             ]);
 
             return response()->json([
-                'result' => true,
+                'result' => trueff,
             ]);
         } catch (Exception $e) {
             Log::error($e);

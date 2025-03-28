@@ -2,11 +2,10 @@
 
 namespace App\Http\Resources\Course;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Tag\TagResource;
-
 
 class CourseResource extends JsonResource
 {

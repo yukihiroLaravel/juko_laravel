@@ -5,6 +5,8 @@ namespace App\Http\Resources\Course;
 use App\Model\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Tag\TagResource;
+
 
 class CourseResource extends JsonResource
 {
@@ -18,10 +20,7 @@ class CourseResource extends JsonResource
             'title' => $this->resource->title,
             'image' => $this->resource->image,
             'status' => $this->resource->status,
-            'tags' => $this->resource->tags->map(fn ($tag) => [
-                'tag_id' => $tag->id,
-                'tag_name' => $tag->content,
-            ]),
+            'tags' => TagResource::collection($this->tags),
         ];
     }
 }

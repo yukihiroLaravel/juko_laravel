@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\LessonAttendance;
+namespace App\Http\Resources\Base\Student;
 
 use App\Model\LessonAttendance;
 use Illuminate\Http\Resources\Json\JsonResource;

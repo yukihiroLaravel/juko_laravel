@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Chapter;
+namespace App\Http\Resources\Base\Student;
 
 use App\Model\Chapter;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -22,7 +22,6 @@ class ChapterResource extends JsonResource
             'chapter_id' => $this->resource->id,
             'title' => $this->resource->title,
             'order' => $this->resource->order,
-            'status' => $this->resource->status,
         ];
     }
 }

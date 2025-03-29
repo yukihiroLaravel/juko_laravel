@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Notification;
+namespace App\Http\Resources\Base\Instructor;
 
 use App\Model\Notification;
 use Illuminate\Http\Resources\Json\JsonResource;

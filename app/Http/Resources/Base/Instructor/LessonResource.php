@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Resources\Chapter;
+namespace App\Http\Resources\Base\Instructor;
 
-use App\Model\Chapter;
+use App\Model\Lesson;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ChapterResource extends JsonResource
+class LessonResource extends JsonResource
 {
-    /** @var Chapter */
+    /** @var Lesson */
     public $resource;
 
     /**
@@ -19,10 +19,12 @@ class ChapterResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'chapter_id' => $this->resource->id,
+            'lesson_id' => $this->resource->id,
+            'url' => $this->resource->url,
             'title' => $this->resource->title,
-            'order' => $this->resource->order,
+            'remarks' => $this->resource->remarks,
             'status' => $this->resource->status,
+            'order' => $this->resource->order,
         ];
     }
 }

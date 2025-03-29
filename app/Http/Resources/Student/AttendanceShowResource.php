@@ -4,8 +4,8 @@ namespace App\Http\Resources\Student;
 
 use App\Http\Resources\Base\Student\ChapterResource;
 use App\Http\Resources\Base\Student\CourseResource;
+use App\Http\Resources\Base\Student\LessonResource;
 use App\Http\Resources\Instructor\InstructorResource;
-use App\Http\Resources\Lesson\LessonResource;
 use App\Http\Resources\LessonAttendance\LessonAttendanceResource;
 use App\Http\Resources\Tag\TagResource;
 use App\Model\Attendance;

@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use App\Http\Resources\Base\Instructor\ChapterResource;
-use App\Http\Resources\Lesson\LessonResource;
+use App\Http\Resources\Base\Instructor\LessonResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource

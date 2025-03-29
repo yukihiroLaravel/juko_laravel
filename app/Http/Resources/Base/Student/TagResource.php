@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Base\Student;
 
-use App\Http\Resources\Base\Instructor\CourseResource;
-use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TagIndexResource extends JsonResource
+class TagResource extends JsonResource
 {
     /** @var Tag */
     public $resource;
@@ -21,8 +19,8 @@ class TagIndexResource extends JsonResource
     public function toArray($request)
     {
         return [
-            ...(new TagResource($this->resource))->toArray($request),
-            'courses' => CourseResource::collection($this->resource->courses),
+            'tag_id' => $this->resource->id,
+            'content' => $this->resource->content,
         ];
     }
 }

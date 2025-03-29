@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Http\Resources\Course\CourseResource;
+use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Tag\TagResource;
 use App\Model\Attendance;
 use App\Model\Chapter;

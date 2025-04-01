@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Instructor;
 
-use App\Http\Resources\Tag\TagResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;

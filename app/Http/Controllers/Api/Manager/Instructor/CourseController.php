@@ -8,7 +8,6 @@ use App\Http\Resources\Manager\InstructorCourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 /**

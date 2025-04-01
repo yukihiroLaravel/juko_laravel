@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Instructor\Course\IndexRequest;
 use App\Http\Resources\Manager\InstructorCourseIndexResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -19,8 +20,11 @@ class CourseController extends Controller
     /**
      * 講師-講座情報一覧取得API
      */
-    public function index(IndexRequest $request): InstructorCourseIndexResource|JsonResponse
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
+        $perPage = $request->input('per_page', 6);
+        $page = $request->input('page', 1);
+
         $managerId = Auth::guard('instructor')->user()->id;
 
         // 配下の講師情報を取得
@@ -35,8 +39,8 @@ class CourseController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $courses = Course::where('instructor_id', $request->instructor_id)->paginate(5);
+        $courses = Course::where('instructor_id', $request->instructor_id)->paginate($perPage, ['*'], 'page', $page);
 
-        return new InstructorCourseIndexResource($courses);
+        return InstructorCourseIndexResource::collection($courses);
     }
 }

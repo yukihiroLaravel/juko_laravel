@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -20,7 +20,7 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index(Request $request)
+    public function index(IndexRequest $request)
     {
         $tagId = $request->query('tag_id');
 

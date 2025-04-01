@@ -2,10 +2,10 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Tag\TagResource;
 
 class AttendanceShowResource extends JsonResource
 {
@@ -29,7 +29,7 @@ class AttendanceShowResource extends JsonResource
                 ];
             }),
             'students_count' => $this->resource['studentsCount'],
-            'tags' => TagResource::collection($this->resource['tags']), 
+            'tags' => TagResource::collection($this->resource['tags']),
         ];
     }
 }

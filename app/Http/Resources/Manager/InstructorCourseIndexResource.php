@@ -2,11 +2,9 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Model\Course;
-use Illuminate\Database\Eloquent\Collection;
+use App\Http\Resources\Course\CourseResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Http\Resources\Course\CourseResource;
 
 class InstructorCourseIndexResource extends JsonResource
 {

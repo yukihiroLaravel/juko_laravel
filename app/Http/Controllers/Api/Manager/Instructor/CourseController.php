@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Api\Manager\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Instructor\Course\IndexRequest;
 use App\Http\Resources\Manager\InstructorCourseIndexResource;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
 /**

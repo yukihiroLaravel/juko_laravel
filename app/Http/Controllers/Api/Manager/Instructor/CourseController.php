@@ -19,7 +19,7 @@ class CourseController extends Controller
     /**
      * 講師-講座情報一覧取得API
      */
-    public function index(IndexRequest $request): InstructorCourseIndexResource|JsonResponse
+    public function index(IndexRequest $request): InstructorCourseIndexResource
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -35,7 +35,7 @@ class CourseController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $courses = Course::where('instructor_id', $request->instructor_id)->paginate(5);
+        $courses = Course::with('tags')->where('instructor_id', $request->instructor_id)->paginate(5);
 
         return new InstructorCourseIndexResource($courses);
     }

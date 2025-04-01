@@ -6,6 +6,7 @@ use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Resources\Tag\TagResource;
 
 class InstructorCourseIndexResource extends JsonResource
 {
@@ -43,6 +44,7 @@ class InstructorCourseIndexResource extends JsonResource
                 'title' => $course->title,
                 'status' => $course->status,
                 'updated_at' => $course->updated_at->format('Y/m/d H:i:s'),
+                'tags' => TagResource::collection($course->tags),
             ];
         })
             ->toArray();

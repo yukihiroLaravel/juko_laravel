@@ -3,12 +3,12 @@
 namespace App\Http\Resources\Manager;
 
 use App\Http\Resources\Course\CourseResource;
+use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class InstructorCourseIndexResource extends JsonResource
 {
-    /** @var LengthAwarePaginator */
+    /** @var Course */
     public $resource;
 
     /**

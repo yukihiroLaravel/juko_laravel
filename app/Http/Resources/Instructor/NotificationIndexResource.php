@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Instructor;
 
-use App\Http\Resources\Notification\NotificationResource;
-use App\Http\Resources\Tag\TagResource;
+use App\Http\Resources\Base\Instructor\NotificationResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Notification;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;

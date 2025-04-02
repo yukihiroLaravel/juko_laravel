@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Tag;
+namespace App\Http\Resources\Base\Instructor;
 
 use App\Model\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;

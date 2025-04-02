@@ -1,49 +1,59 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Student;
+namespace Tests\Feature\Api\Manager\Tag;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ShowTest extends TestCase
+class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed();
     }
 
-    public function test_生徒取得_成功(): void
+    public function test_タグ更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
+        $course = Course::find(1);
+
         // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
+        $response = $this->putJson('/api/v1/manager/tag/1', [
+            'content' => 'test',
+        ]);
 
         // assert
         $response->assertStatus(200);
+        $response->assertJson([
+            'result' => true,
+        ]);
+        $this->assertDatabaseHas('tags', [
+            'id' => 1,
+            'content' => 'test',
+        ]);
     }
 
-    public function test_許可がない講師_失敗(): void
+    public function test_権限エラー(): void
     {
         // arrange
-        $instructor = Instructor::find(3);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
+        $response = $this->putJson('/api/v1/manager/tag/1', [
+            'content' => 'test',
+        ]);
 
         // assert
         $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
-        ]);
     }
 
     public function test_バリデーションエラー(): void
@@ -53,12 +63,15 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/bbb');
+        $response = $this->putJson('/api/v1/manager/tag/aaa', [
+            'content' => '',
+        ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'student_id',
+            'tag_id',
+            'content',
         ]);
     }
 }

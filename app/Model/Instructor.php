@@ -52,6 +52,32 @@ class Instructor extends Authenticatable
     ];
 
     /**
+     * Get the remember token value.
+     */
+    public function getRememberToken(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Set the remember token value.
+     *
+     * @param  string  $value
+     */
+    public function setRememberToken($value): void
+    {
+        // Do nothing.
+    }
+
+    /**
+     * Get the name of the remember token.
+     */
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
+
+    /**
      * 講座を取得
      *
      * @return HasMany<Course, $this>

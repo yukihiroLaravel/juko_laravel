@@ -2,14 +2,15 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Http\Resources\Course\CourseResource;
+use App\Http\Resources\Base\Student\AttendanceResource;
+use App\Http\Resources\Base\Student\CourseResource;
+use App\Http\Resources\Base\Student\TagResource;
 use App\Model\Attendance;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class AttendanceIndexResource extends ResourceCollection
+class AttendanceIndexResource extends JsonResource
 {
-    /** @var LengthAwarePaginator<Attendance> */
+    /** @var Attendance */
     public $resource;
 
     /**
@@ -18,17 +19,14 @@ class AttendanceIndexResource extends ResourceCollection
      * @param  \Illuminate\Http\Request  $request
      * @return array $array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
-        return $this->resource->getCollection()->map(function (Attendance $value) use ($request) {
-            return [
-                'attendance_id' => $value->id,
-                'course' => [
-                    ...(new CourseResource($value->course))->toArray($request),
-                    'progress_percentage' => $value->course->progress_percentage,
-                ],
-            ];
-        })
-            ->toArray();
+        return [
+            ...(new AttendanceResource($this->resource))->toArray($request),
+            'course' => [
+                ...(new CourseResource($this->resource->course))->toArray($request),
+                'tags' => TagResource::collection($this->resource->course->tags),
+            ],
+        ];
     }
 }

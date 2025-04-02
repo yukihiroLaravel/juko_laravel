@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Resources\Course;
+namespace App\Http\Resources\Base\Student;
 
-use App\Http\Resources\Instructor\InstructorResource;
 use App\Model\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,8 +17,6 @@ class CourseResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
-            'status' => $this->resource->status,
-            'instructor' => new InstructorResource($this->resource->instructor),
         ];
     }
 }

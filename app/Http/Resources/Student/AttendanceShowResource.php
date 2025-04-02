@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Http\Resources\Chapter\ChapterResource;
-use App\Http\Resources\Course\CourseResource;
-use App\Http\Resources\Lesson\LessonResource;
-use App\Http\Resources\LessonAttendance\LessonAttendanceResource;
-use App\Http\Resources\Tag\TagResource;
+use App\Http\Resources\Base\Student\ChapterResource;
+use App\Http\Resources\Base\Student\CourseResource;
+use App\Http\Resources\Base\Student\InstructorResource;
+use App\Http\Resources\Base\Student\LessonAttendanceResource;
+use App\Http\Resources\Base\Student\LessonResource;
+use App\Http\Resources\Base\Student\TagResource;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -29,6 +30,7 @@ class AttendanceShowResource extends JsonResource
             'attendance_id' => $this->resource->id,
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
+                'instructor' => new InstructorResource($this->resource->course->instructor),
                 'tags' => TagResource::collection($this->resource->course->tags),
                 'chapters' => ChapterResource::collection($this->resource->course->publicChapters)->collection->map(function (ChapterResource $chapterResource) use ($request) {
                     return [

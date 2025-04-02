@@ -14,11 +14,13 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use Carbon\Carbon;
+use App\Model\Tag;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,11 +38,28 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
+        $searchWord = $request->query('search_word');
+        $tagId = $request->query('tag_id');
+
+        if ($tagId) {
+            $tag = Tag::findOrFail($tagId);
+
+            // ログインしている講師とtag_idの講師が一致しない
+            if ($instructorId !== $tag->instructor_id) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+        }
+
+        $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+            ->when($searchWord, function (Builder $query) use ($searchWord) {
+                $query->where('title', 'LIKE', "%{$searchWord}%");
+            })
+            ->when($tagId, function (Builder $query, string $tagId) {
+                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+            });
 
         // ページネーションで講座を取得
-        $courses = Course::where('instructor_id', $instructorId)
-            ->withCount('attendances')
-            ->paginate((int) $perPage);
+        $courses = $query->paginate((int) $perPage);
 
         $courses->getCollection()->map(function (Course $course) {
             $course->has_active_students = $course->attendances_count > 0;
@@ -71,24 +90,41 @@ class CourseController extends Controller
     public function store(StoreRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::putFileAs('public/course', $file, $filename);
-        $filePath = Course::convertImagePath($filePath);
 
-        Course::create([
-            'instructor_id' => $instructorId,
-            'title' => $request->title,
-            'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        DB::beginTransaction();
 
-        return response()->json([
-            'result' => true,
-        ]);
+        try {
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension();
+            $filename = Str::uuid()->toString().'.'.$extension;
+            $filePath = Storage::putFileAs('public/course', $file, $filename);
+            $filePath = Course::convertImagePath($filePath);
+
+            $course = Course::create([
+                'instructor_id' => $instructorId,
+                'title' => $request->title,
+                'image' => $filePath,
+                'status' => Course::STATUS_PRIVATE,
+            ]);
+
+            // ログイン中の講師が作成したタグかどうか確認
+            $tag = Tag::where('id', $request->tag_id)
+                ->where('instructor_id', $instructorId)
+                ->firstOrFail();
+
+            // タグを中間テーブルに紐づける
+            $course->tags()->attach($tag->id);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

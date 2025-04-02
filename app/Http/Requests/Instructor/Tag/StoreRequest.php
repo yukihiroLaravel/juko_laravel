@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Student\Attendance;
+namespace App\Http\Requests\Instructor\Tag;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class IndexRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,8 +24,7 @@ class IndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'search_word' => 'string',
-            'tag_id' => ['sometimes', 'integer', 'exists:tags,id'],
+            'content' => ['required', 'string', 'max:50'],
         ];
     }
 }

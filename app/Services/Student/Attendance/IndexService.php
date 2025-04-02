@@ -17,21 +17,30 @@ class IndexService
      * @return LengthAwarePaginator<Attendance>
      */
     public function __invoke(
-        IndexDto $indexDto, int $perPage, int $page
+        IndexDto $indexDto, int $perPage, int $page, ?int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
             'course.chapters.lessons',
             'lessonAttendances',
+            'course.tags',
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
-                $query->when(! $indexDto->getSearchWord(), function ($query) {
+                $query->when(! $indexDto->getSearchWord(), function (Builder $query) {
                     $query->where('status', Course::STATUS_PUBLIC);
-                })->when($indexDto->getSearchWord(), function ($query) use ($indexDto) {
+                })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
+                        ->orWhereHas('tags', function (Builder $query) use ($indexDto) {
+                            $query->where('content', 'like', "%{$indexDto->getSearchWord()}%");
+                        })
                         ->where('status', Course::STATUS_PUBLIC);
+                });
+            })
+            ->when($tagId, function (Builder $query) use ($tagId) {
+                $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
+                    $query->where('tags.id', $tagId);
                 });
             })
             ->paginate($perPage, ['*'], 'page', $page);

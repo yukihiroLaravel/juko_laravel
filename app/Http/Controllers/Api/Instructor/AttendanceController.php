@@ -88,7 +88,7 @@ class AttendanceController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
-        $course = Course::findOrFail($courseId);
+        $course = Course::with('tags')->findOrFail($courseId);
 
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
@@ -104,6 +104,7 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
+            'tags' => $course->tags,
         ]);
     }
 
@@ -193,7 +194,10 @@ class AttendanceController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $courseId)->get();
+        $attendances = Attendance::with([
+            'lessonAttendances.lesson.chapter.course',
+            'lessonAttendances.lesson.chapter.lessons',
+        ])->where('course_id', $courseId)->get();
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得

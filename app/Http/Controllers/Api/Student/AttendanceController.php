@@ -23,6 +23,7 @@ use App\Services\Student\Attendance\ShowService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -37,17 +38,21 @@ class AttendanceController extends Controller
     public function index(
         IndexRequest $request,
         IndexService $service
-    ): AttendanceIndexResource {
+    ): AnonymousResourceCollection {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
+        $tagId = $request->input('tag_id');
         $studentId = Auth::id();
         $indexDto = new IndexDto($studentId, $request->search_word);
 
-        return new AttendanceIndexResource($service(
-            indexDto: $indexDto,
-            perPage: $perPage,
-            page: $page
-        ));
+        return AttendanceIndexResource::collection(
+            $service(
+                indexDto: $indexDto,
+                perPage: $perPage,
+                page: $page,
+                tagId: $tagId
+            )
+        );
     }
 
     /**

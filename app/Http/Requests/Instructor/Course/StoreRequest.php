@@ -26,6 +26,7 @@ class StoreRequest extends FormRequest
         return [
             'title' => ['required'],
             'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'tag_id' => ['required', 'exists:tags,id'],
         ];
     }
 }

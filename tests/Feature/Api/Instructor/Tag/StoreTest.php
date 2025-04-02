@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Student;
+namespace Tests\Feature\Api\Instructor\Tag;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class ShowTest extends TestCase
+class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -17,32 +17,22 @@ class ShowTest extends TestCase
         $this->seed();
     }
 
-    public function test_生徒取得_成功(): void
+    public function test_タグ登録_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
+        $response = $this->postJson('/api/v1/instructor/tag', [
+            'content' => 'test',
+        ]);
 
         // assert
         $response->assertStatus(200);
-    }
-
-    public function test_許可がない講師_失敗(): void
-    {
-        // arrange
-        $instructor = Instructor::find(3);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
-
-        // assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
+        $this->assertDatabaseHas('tags', [
+            'instructor_id' => $instructor->id,
+            'content' => 'test',
         ]);
     }
 
@@ -53,12 +43,12 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/bbb');
+        $response = $this->postJson('/api/v1/instructor/tag');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'student_id',
+            'content',
         ]);
     }
 }

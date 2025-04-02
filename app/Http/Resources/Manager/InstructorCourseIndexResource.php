@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Manager;
 
 use App\Http\Resources\Base\Instructor\CourseResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,6 +23,7 @@ class InstructorCourseIndexResource extends JsonResource
         return [
             ...(new CourseResource($this->resource))->toArray($request),
             'updated_at' => $this->resource->updated_at->format('Y/m/d H:i:s'),
+            'tags' => TagResource::collection($this->resource->tags),
         ];
     }
 }

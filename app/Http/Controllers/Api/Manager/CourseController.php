@@ -9,7 +9,7 @@ use App\Http\Requests\Manager\Course\ShowRequest;
 use App\Http\Requests\Manager\Course\StatusRequest;
 use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
-use App\Http\Resources\Instructor\InstructorCourseResource;
+use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -59,7 +59,7 @@ class CourseController extends Controller
             $course->has_active_students = $course->attendances_count > 0;
         });
 
-        return InstructorCourseResource::collection($courses);
+        return CourseIndexResource::collection($courses);
     }
 
     /**

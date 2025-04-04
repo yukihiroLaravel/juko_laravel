@@ -24,7 +24,12 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index(IndexRequest $request)
+    public function index()
+    {
+        return response()->json([]);
+    }
+
+    public function courseIndex (IndexRequest $request)
     {
         $tagId = $request->query('tag_id');
 

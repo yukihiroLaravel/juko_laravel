@@ -29,7 +29,7 @@ class TagController extends Controller
         return response()->json([]);
     }
 
-    public function courseIndex (IndexRequest $request)
+    public function courseIndex(IndexRequest $request)
     {
         $tagId = $request->query('tag_id');
 

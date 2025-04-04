@@ -3,10 +3,10 @@
 namespace App\Http\Resources\Manager;
 
 use App\Http\Resources\Base\Instructor\CourseResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Http\Resources\Base\Student\InstructorResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Base\Instructor\TagResource;
 
 class CourseIndexResource extends JsonResource
 {

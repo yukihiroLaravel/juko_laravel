@@ -51,7 +51,7 @@ class CourseController extends Controller
         // 自分、または配下の講師の講座情報を取得
         $courses = Course::with('instructor', 'tags')
             ->whereIn('instructor_id', $instructorIds)
-            ->when($tagId, fn($q) => $q->whereHas('tags', fn($q) => $q->where('tags.id', $tagId)))
+            ->when($tagId, fn ($q) => $q->whereHas('tags', fn ($q) => $q->where('tags.id', $tagId)))
             ->withCount('attendances')
             ->orderBy('id')
             ->paginate($perPage, ['*'], 'page', $page);
@@ -100,7 +100,7 @@ class CourseController extends Controller
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString() . '.' . $extension;
+        $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -148,7 +148,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }

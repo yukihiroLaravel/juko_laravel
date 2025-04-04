@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
+use App\Http\Resources\Manager\TagIndexResource;
+use App\Http\Resources\Tag\TagResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -51,7 +53,7 @@ class TagController extends Controller
             ->with('courses')
             ->get();
 
-        return response()->json([]);
+        return TagIndexResource::collection($query);
     }
 
     /**

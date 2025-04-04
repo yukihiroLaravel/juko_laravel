@@ -14,22 +14,20 @@ class CourseIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($course) {
-            return [
-                'course_id' => $course->id,
-                'title' => $course->title,
-                'image' => $course->image,
-                'status' => $course->status,
-                'instructor' => [
-                    'instructor_id' => $course->instructor_id,
-                    'nick_name' => $course->instructor->nick_name,
-                    'last_name' => $course->instructor->last_name,
-                    'first_name' => $course->instructor->first_name,
-                    'email' => $course->instructor->email,
-                    'profile_image' => $course->instructor->profile_image,
-                ],
-                'has_active_students' => $course->has_active_students,
-            ];
-        });
+        return [
+            'course_id' => $this->id,
+            'title' => $this->title,
+            'image' => $this->image,
+            'status' => $this->status,
+            'instructor' => [
+                'instructor_id' => $this->instructor_id,
+                'nick_name' => $this->instructor->nick_name,
+                'last_name' => $this->instructor->last_name,
+                'first_name' => $this->instructor->first_name,
+                'email' => $this->instructor->email,
+                'profile_image' => $this->instructor->profile_image,
+            ],
+            'has_active_students' => $this->attendances()->exists(),
+        ];
     }
 }

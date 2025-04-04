@@ -38,6 +38,7 @@ class CourseController extends Controller
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
+        $tagId = $request->input('tag_id', '');
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -48,8 +49,9 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')
+        $courses = Course::with('instructor', 'tags')
             ->whereIn('instructor_id', $instructorIds)
+            ->when($tagId, fn($q) => $q->whereHas('tags', fn($q) => $q->where('tags.id', $tagId)))
             ->withCount('attendances')
             ->orderBy('id')
             ->paginate($perPage, ['*'], 'page', $page);
@@ -98,7 +100,7 @@ class CourseController extends Controller
 
         $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
+        $filename = Str::uuid()->toString() . '.' . $extension;
         $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
 
         $course = Course::create([
@@ -146,7 +148,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -160,7 +162,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (ModelNotFoundException $e) {
             throw $e;
         } catch (Exception $e) {

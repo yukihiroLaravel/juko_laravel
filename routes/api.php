@@ -166,6 +166,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                 // マネージャー-タグ
                 Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
+                Route::get('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'get']);
 
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {

@@ -46,7 +46,7 @@ class TagController extends Controller
             'result' => true,
         ]);
     }
-    public function get(): JsonResponse
+    public function show(): JsonResponse
     {
         // get メソッドの処理内容
         return response()->json([

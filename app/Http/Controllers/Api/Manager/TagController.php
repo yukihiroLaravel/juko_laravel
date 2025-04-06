@@ -9,6 +9,7 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Http\Resources\Tag\TagResource;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Model\Course;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -53,6 +54,13 @@ class TagController extends Controller
             ->with('courses')
             ->get();
 
+        // 各タグの中の各講座に受講中の学生がいるかを設定
+        $query->each(function (Tag $tag) {
+            $tag->courses->each(function (Course $course) {
+                $course->has_active_students = $course->attendances()->exists();
+            });
+        });
+        
         return TagIndexResource::collection($query);
     }
 

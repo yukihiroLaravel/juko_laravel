@@ -27,7 +27,7 @@ class CourseIndexResource extends JsonResource
                 'email' => $this->instructor->email,
                 'profile_image' => $this->instructor->profile_image,
             ],
-            'has_active_students' => $this->attendances()->exists(),
+            'has_active_students' => $this->has_active_students,
         ];
     }
 }

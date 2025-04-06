@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Tag\PutRequest;
-use App\Http\Requests\Manager\Tag\GetRequest;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -46,6 +45,7 @@ class TagController extends Controller
             'result' => true,
         ]);
     }
+
     public function show(): JsonResponse
     {
         // get メソッドの処理内容

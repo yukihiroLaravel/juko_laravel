@@ -18,6 +18,7 @@ use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -38,6 +39,7 @@ class CourseController extends Controller
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
+        $tagId = $request->input('tag_id', '');
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -48,8 +50,9 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor')
+        $courses = Course::with('instructor', 'tags')
             ->whereIn('instructor_id', $instructorIds)
+            ->when($tagId, fn (Builder $q) => $q->whereHas('tags', fn (Builder $q) => $q->where('tags.id', $tagId)))
             ->withCount('attendances')
             ->orderBy('id')
             ->paginate($perPage, ['*'], 'page', $page);
@@ -160,7 +163,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-
         } catch (ModelNotFoundException $e) {
             throw $e;
         } catch (Exception $e) {

@@ -98,7 +98,7 @@ class Instructor extends Authenticatable
     }
 
     /**
-     * 所有している講座分類を取得
+     * タグを取得
      *
      * @return HasMany<Tag, $this>
      */

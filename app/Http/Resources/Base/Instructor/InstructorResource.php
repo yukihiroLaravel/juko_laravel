@@ -25,6 +25,7 @@ class InstructorResource extends JsonResource
             'first_name' => $this->resource->first_name,
             'email' => $this->resource->email,
             'profile_image' => $this->resource->profile_image,
+            'instructor_type' => $this->resource->type,
         ];
     }
 }

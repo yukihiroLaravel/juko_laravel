@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\StoreRequest;
 use App\Http\Requests\Instructor\UpdateRequest;
 use App\Http\Requests\Instructor\UserAuthenticationRequest;
-use App\Http\Resources\Instructor\InstructorShowResource;
+use App\Http\Resources\Base\Instructor\InstructorResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
@@ -45,7 +45,7 @@ class InstructorController extends Controller
         /** @var Instructor $instructor */
         $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);
 
-        return new InstructorShowResource($instructor);
+        return new InstructorResource($instructor);
     }
 
     /**

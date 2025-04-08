@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Tag\TagResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 

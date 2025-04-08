@@ -26,7 +26,10 @@ class TagController extends Controller
      */
     public function index()
     {
-        return response()->json([]);
+        $instructor = Auth::guard('instructor')->user();
+        $tags = $instructor->tags()->select('id', 'content')->get();
+
+        return TagResource::collection($tags);
     }
 
     public function courseIndex(IndexRequest $request)

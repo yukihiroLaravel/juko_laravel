@@ -24,7 +24,15 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index(IndexRequest $request)
+    public function index()
+    {
+        $instructor = Auth::guard('instructor')->user();
+        $tags = $instructor->tags()->select('id', 'content')->get();
+
+        return TagResource::collection($tags);
+    }
+
+    public function courseIndex(IndexRequest $request)
     {
         $tagId = $request->query('tag_id');
 

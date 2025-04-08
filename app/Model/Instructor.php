@@ -96,4 +96,14 @@ class Instructor extends Authenticatable
     {
         return $this->belongsToMany(Instructor::class, 'manage_instructors', 'manager_id', 'instructor_id');
     }
+
+    /**
+     * タグを取得
+     *
+     * @return HasMany<Tag, $this>
+     */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
 }

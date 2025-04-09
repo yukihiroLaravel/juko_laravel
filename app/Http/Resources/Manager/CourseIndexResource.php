@@ -2,10 +2,14 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseIndexResource extends JsonResource
 {
+    /** @var Course */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
@@ -14,22 +18,20 @@ class CourseIndexResource extends JsonResource
      */
     public function toArray($request)
     {
-        return $this->resource->map(function ($course) {
-            return [
-                'course_id' => $course->id,
-                'title' => $course->title,
-                'image' => $course->image,
-                'status' => $course->status,
-                'instructor' => [
-                    'instructor_id' => $course->instructor_id,
-                    'nick_name' => $course->instructor->nick_name,
-                    'last_name' => $course->instructor->last_name,
-                    'first_name' => $course->instructor->first_name,
-                    'email' => $course->instructor->email,
-                    'profile_image' => $course->instructor->profile_image,
-                ],
-                'has_active_students' => $course->has_active_students,
-            ];
-        });
+        return [
+            'course_id' => $this->resource->id,
+            'title' => $this->resource->title,
+            'image' => $this->resource->image,
+            'status' => $this->resource->status,
+            'instructor' => [
+                'instructor_id' => $this->resource->instructor_id,
+                'nick_name' => $this->resource->instructor->nick_name,
+                'last_name' => $this->resource->instructor->last_name,
+                'first_name' => $this->resource->instructor->first_name,
+                'email' => $this->resource->instructor->email,
+                'profile_image' => $this->resource->instructor->profile_image,
+            ],
+            'has_active_students' => $this->resource->has_active_students,
+        ];
     }
 }

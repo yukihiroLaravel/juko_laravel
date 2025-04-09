@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
+use App\Http\Resources\Manager\TagIndexResource;
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -48,10 +50,17 @@ class TagController extends Controller
             ->when($tagId, function (Builder $query, string $tagId) {
                 $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
             })
-            ->with('courses')
+            ->with(['courses.instructor'])
             ->get();
 
-        return response()->json([]);
+        // 各タグの中の各講座に受講中の学生がいるかを設定
+        $query->each(function (Tag $tag) {
+            $tag->courses->each(function (Course $course) {
+                $course->has_active_students = $course->attendances()->exists();
+            });
+        });
+
+        return TagIndexResource::collection($query);
     }
 
     /**

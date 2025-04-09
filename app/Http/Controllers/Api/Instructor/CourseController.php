@@ -53,9 +53,9 @@ class CourseController extends Controller
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
             ->with(['tags'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {
-                $query->where(function ($query) use ($searchWord) {
+                $query->where(function (Builder $query) use ($searchWord) {
                     $query->where('title', 'LIKE', "%{$searchWord}%")
-                        ->orWhereHas('tags', function ($tagQuery) use ($searchWord) {
+                        ->orWhereHas('tags', function (Builder $tagQuery) use ($searchWord) {
                             $tagQuery->where('content', 'LIKE', "%{$searchWord}%");
                         });
                 });

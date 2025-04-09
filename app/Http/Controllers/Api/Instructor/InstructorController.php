@@ -37,10 +37,8 @@ class InstructorController extends Controller
 {
     /**
      * 講師取得API
-     *
-     * @return InstructorShowResource
      */
-    public function show(QueryService $queryService)
+    public function show(QueryService $queryService): InstructorResource
     {
         /** @var Instructor $instructor */
         $instructor = $queryService->getInstructor(Auth::guard('instructor')->user()->id);

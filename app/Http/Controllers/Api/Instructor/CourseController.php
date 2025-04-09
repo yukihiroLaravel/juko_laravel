@@ -51,11 +51,17 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+            ->with(['tags'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {
-                $query->where('title', 'LIKE', "%{$searchWord}%");
+                $query->where(function ($query) use ($searchWord) {
+                    $query->where('title', 'LIKE', "%{$searchWord}%")
+                        ->orWhereHas('tags', function ($tagQuery) use ($searchWord) {
+                            $tagQuery->where('content', 'LIKE', "%{$searchWord}%");
+                        });
+                });
             })
             ->when($tagId, function (Builder $query, string $tagId) {
-                $query->whereHas('tags', fn ($query) => $query->where('tags.id', $tagId));
+                $query->whereHas('tags', fn($query) => $query->where('tags.id', $tagId));
             });
 
         // ページネーションで講座を取得
@@ -96,7 +102,7 @@ class CourseController extends Controller
         try {
             $file = $request->file('image');
             $extension = $file->getClientOriginalExtension();
-            $filename = Str::uuid()->toString().'.'.$extension;
+            $filename = Str::uuid()->toString() . '.' . $extension;
             $filePath = Storage::putFileAs('public/course', $file, $filename);
             $filePath = Course::convertImagePath($filePath);
 
@@ -151,7 +157,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -189,8 +195,8 @@ class CourseController extends Controller
             }
 
             // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::exists('public/'.$course->image)) {
-                Storage::delete('public/'.$course->image);
+            if (Storage::exists('public/' . $course->image)) {
+                Storage::delete('public/' . $course->image);
             }
 
             $course->delete();

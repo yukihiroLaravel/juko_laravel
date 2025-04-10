@@ -9,6 +9,7 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 /**
  * @tags Manager-Tag
@@ -43,6 +44,27 @@ class TagController extends Controller
 
         return response()->json([
             'result' => true,
+        ]);
+    }
+        /**
+     * タグ詳細API
+     */
+    public function show(Request $request, $id)
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $tag = Tag::findOrFail($id);
+
+        if ($tag->instructor_id !== $instructorId) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        return response()->json([
+            'id' => $tag->id,
+            'instructor_id' => $tag->instructor_id,
+            'content' => $tag->content,
+            'created_at' => $tag->created_at,
+            'updated_at' => $tag->updated_at,
         ]);
     }
 }

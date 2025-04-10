@@ -33,7 +33,7 @@ class CourseController extends Controller
     /**
      * 講座一覧取得API
      */
-    public function index(IndexRequest $request)
+    public function index(IndexRequest $request): CourseIndexResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         // 講座情報を取得

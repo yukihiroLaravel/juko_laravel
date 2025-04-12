@@ -8,8 +8,8 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Manager-Tag
@@ -46,11 +46,12 @@ class TagController extends Controller
             'result' => true,
         ]);
     }
+
     //タグ詳細API
-    public function show(Request $request,$id)
+    public function show(Request $request, $id)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $manager= Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 

@@ -40,6 +40,7 @@ class CourseController extends Controller
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
         $tagId = $request->input('tag_id', null);
+        $searchWord = $request->input('search_word');
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -53,6 +54,11 @@ class CourseController extends Controller
         $courses = Course::with('instructor', 'tags')
             ->whereIn('instructor_id', $instructorIds)
             ->when($tagId, fn (Builder $q) => $q->whereHas('tags', fn (Builder $q) => $q->where('tags.id', $tagId)))
+            ->when($searchWord, function (Builder $query) use ($searchWord) {
+                $query->WhereHas('tags', function (Builder $tagQuery) use ($searchWord) {
+                    $tagQuery->where('content', 'like', "%{$searchWord}%");
+                });
+            })
             ->withCount('attendances')
             ->orderBy('id')
             ->paginate($perPage, ['*'], 'page', $page);

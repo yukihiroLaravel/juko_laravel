@@ -171,7 +171,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show']);
                     });
                 });
-
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
                     Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'store']);

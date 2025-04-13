@@ -8,6 +8,7 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -46,10 +47,27 @@ class TagController extends Controller
         ]);
     }
 
-    public function show(): JsonResponse
+    //タグ詳細API
+    public function show(Request $request, $id)
     {
-        // get メソッドの処理内容
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        $tag = Tag::findOrFail($id);
+
+        if (! in_array($tag->instructor_id, $instructorIds, true)) {
+            // 自分、または配下の講師の講座でなければエラー応答
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
         return response()->json([
+            'id' => $tag->id,
+            'instructor_id' => $tag->instructor_id,
+            'content' => $tag->content,
+            'created_at' => $tag->created_at,
+            'updated_at' => $tag->updated_at,
         ]);
     }
 }

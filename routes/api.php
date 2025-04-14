@@ -65,14 +65,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
-            // 講師-講座分類
-            Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
+            //講師-講座タグ一覧
+            Route::get('tag/index', [App\Http\Controllers\Api\Instructor\TagController::class, 'index']);
 
             // 講師-講座
             Route::prefix('course')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
                 Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);
                 Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
+                Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index']);
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'update']);
@@ -121,6 +122,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
             });
 
+            // 講師-タグ
+            Route::prefix('tag')->group(function () {
+                Route::post('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'store']);
+                Route::prefix('{tag_id}')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'show']);
+                    Route::put('/', [App\Http\Controllers\Api\Instructor\TagController::class, 'put']);
+                });
+            });
+
             // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);
@@ -156,6 +166,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::middleware('manager')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
+
+                // マネージャー-タグ
+                Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
+
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
                     Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'store']);

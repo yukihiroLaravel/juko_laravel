@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Base\Instructor\NotificationResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Notification;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -23,32 +24,16 @@ class NotificationIndexResource extends JsonResource
         $notifications = $this->resource;
 
         return [
-            'notifications' => $this->mapNotifications($notifications->getCollection()),
+            'notifications' => $notifications->map(function (Notification $notification) use ($request) {
+                return [
+                    ...(new NotificationResource($notification))->toArray($request),
+                    'tags' => TagResource::collection($notification->course->tags),
+                ];
+            }),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),
             ],
         ];
-    }
-
-    /**
-     * @param  Collection<int, Notification>  $notifications
-     * @return array
-     */
-    private function mapNotifications($notifications)
-    {
-        return $notifications->map(function (Notification $notification) {
-            return [
-                'notification_id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'content' => $notification->content,
-                'type' => $notification->type,
-                'start_date' => $notification->start_date,
-                'end_date' => $notification->end_date,
-            ];
-        })
-            ->toArray();
     }
 }

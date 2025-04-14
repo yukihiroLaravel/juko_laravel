@@ -25,6 +25,7 @@ class IndexRequest extends FormRequest
     {
         return [
             'search_word' => 'string',
+            'tag_id' => ['sometimes', 'integer', 'exists:tags,id'],
         ];
     }
 }

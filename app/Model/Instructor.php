@@ -52,6 +52,32 @@ class Instructor extends Authenticatable
     ];
 
     /**
+     * Get the remember token value.
+     */
+    public function getRememberToken(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Set the remember token value.
+     *
+     * @param  string  $value
+     */
+    public function setRememberToken($value): void
+    {
+        // Do nothing.
+    }
+
+    /**
+     * Get the name of the remember token.
+     */
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
+
+    /**
      * 講座を取得
      *
      * @return HasMany<Course, $this>
@@ -69,5 +95,15 @@ class Instructor extends Authenticatable
     public function managings(): BelongsToMany
     {
         return $this->belongsToMany(Instructor::class, 'manage_instructors', 'manager_id', 'instructor_id');
+    }
+
+    /**
+     * タグを取得
+     *
+     * @return HasMany<Tag, $this>
+     */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
     }
 }

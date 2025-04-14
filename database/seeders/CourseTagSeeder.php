@@ -36,7 +36,7 @@ class CourseTagSeeder extends Seeder
             ],
             [
                 'course_id' => 5,
-                'tag_id' => 1,
+                'tag_id' => 6,
                 'created_at' => Carbon::now(),
             ],
             [

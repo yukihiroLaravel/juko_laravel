@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Instructor;
 
-use App\Http\Resources\Course\CourseResource;
+use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Model\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;

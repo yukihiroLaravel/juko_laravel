@@ -121,7 +121,10 @@ class AttendanceController extends Controller
             );
         }
 
-        $chapters = Chapter::where('course_id', $courseId)->get();
+        $chapters = Chapter::with([
+            'course.tags',
+            'lessons.lessonAttendances',
+        ])->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -242,7 +245,10 @@ class AttendanceController extends Controller
         }
 
         // 出席情報（関連する情報を含む）を取得
-        $attendances = Attendance::with('lessonAttendances.lesson.chapter.course')->where('course_id', $request->course_id)->get();
+        $attendances = Attendance::with([
+            'lessonAttendances.lesson.chapter.course',
+            'lessonAttendances.lesson.chapter.lessons',
+        ])->where('course_id', $request->course_id)->get();
         $period = $request->period;
 
         // 完了したレッスンの数を取得
@@ -316,8 +322,11 @@ class AttendanceController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        /** @var Attendance */
-        $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
+        $attendance = Attendance::with([
+            'course.chapters.lessons.lessonAttendances',
+            'course.tags',
+        ])
+            ->findOrFail($attendanceId);
 
         if (! in_array($attendance->course->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException(

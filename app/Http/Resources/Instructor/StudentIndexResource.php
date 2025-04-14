@@ -34,6 +34,7 @@ class StudentIndexResource extends JsonResource
                 'student_id' => $result->student_id,
                 'nick_name' => $result->nick_name,
                 'email' => $result->email,
+                'profile_image' => $result->profile_image,
                 'last_login_at' => $result->last_login_at,
                 'attendance' => [
                     'attendance_id' => $result->attendance_id,

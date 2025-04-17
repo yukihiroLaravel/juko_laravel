@@ -20,6 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -112,33 +113,21 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function put(PutRequest $request)
+    public function put(PutRequest $request, UpdateChapterService $service)
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
+        $managerId = Auth::guard('instructor')->id();
 
-        // マネージャーが管理する講師を取得
         $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        $allowedInstructorIds = $manager->managings->pluck('id')->toArray();
+        $allowedInstructorIds[] = $managerId;
 
-        // チャプターを取得
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
-
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
-        }
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
-
-        // チャプターを更新する
-        $chapter->update([
-            'title' => $request->title,
-        ]);
+        $service->__invoke(
+            chapterId: $request->chapter_id,
+            courseId: (int) $request->course_id,
+            requestingInstructorId: $managerId,
+            allowedInstructorIds: $allowedInstructorIds,
+            newTitle: $request->title
+        );
 
         return response()->json([
             'result' => true,

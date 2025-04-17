@@ -18,6 +18,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\QueryService;
+use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -95,27 +96,17 @@ class ChapterController extends Controller
     /**
      * チャプター更新API
      */
-    public function update(PatchRequest $request): JsonResponse
+    public function update(PatchRequest $request, UpdateChapterService $service): JsonResponse
     {
-        /** @var Instructor $user */
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
+        $instructorId = Auth::guard('instructor')->id();
 
-        /** @var Chapter $chapter */
-        $chapter = Chapter::findOrFail($request->chapter_id);
-
-        if ($chapter->course->instructor_id !== $user->id) {
-            // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        $chapter->update([
-            'title' => $request->title,
-        ]);
+        $service->__invoke(
+            chapterId: $request->chapter_id,
+            courseId: (int) $request->course_id,
+            requestingInstructorId: $instructorId,
+            allowedInstructorIds: [$instructorId],
+            newTitle: $request->title
+        );
 
         return response()->json([
             'result' => true,

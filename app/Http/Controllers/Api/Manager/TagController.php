@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Http\Requests\ShowTagRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ class TagController extends Controller
     }
 
     //タグ詳細API
-    public function show(Request $request, $id)
+    public function show(ShowTagRequest $request, $id)
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);

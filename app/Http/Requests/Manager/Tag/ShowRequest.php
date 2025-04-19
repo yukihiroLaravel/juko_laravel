@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Manager\Tag;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Access\AuthorizationException;
-use App\Model\Tag;
 
-class ShowTagRequest extends FormRequest
+class ShowRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,12 +14,13 @@ class ShowTagRequest extends FormRequest
         return true;
     }
 
-     protected function prepareForValidation()
+    protected function prepareForValidation()
     {
         $this->merge([
             'tag_id' => $this->route('tag_id'),
         ]);
     }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,7 +29,7 @@ class ShowTagRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'tag_id' => ['required', 'integer', 'exists:tags,id'],
+            'tag_id' => ['required', 'integer', 'exists:tags,id'],
         ];
     }
 }

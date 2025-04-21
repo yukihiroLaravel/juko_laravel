@@ -120,7 +120,7 @@ class ChapterController extends Controller
         $this->updateChapterService = $updateChapterService;
     }
 
-    public function put(PutRequest $request)
+    public function put(PutRequest $request,UpdateChapterService $updateChapterService)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -143,10 +143,9 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        // チャプターを更新する
-        ($this->updateChapterService)(
-            $request->chapter_id,
-            $request->title
+        $updateChapterService(
+            chapterId: $request->chapter_id,
+            newTitle: $request->title
         );
 
         return response()->json([

@@ -102,7 +102,7 @@ class ChapterController extends Controller
     {
         $this->updateChapterService = $updateChapterService;
     }
-    public function update(PatchRequest $request): JsonResponse
+    public function update(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
         /** @var Instructor $user */
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -120,9 +120,9 @@ class ChapterController extends Controller
             throw new AuthorizationException('Invalid course_id.');
         }
 
-        ($this->updateChapterService)(
-            $request->chapter_id,
-            $request->title
+        $updateChapterService(
+            chapterId: $request->chapter_id,
+            newTitle: $request->title
         );
 
         return response()->json([

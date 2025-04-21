@@ -108,18 +108,11 @@ class ChapterController extends Controller
         }
     }
 
-/**
+    /**
      * チャプター更新API
      *
      * @return JsonResponse
      */
-    private UpdateChapterService $updateChapterService;
-
-    public function __construct(UpdateChapterService $updateChapterService)
-    {
-        $this->updateChapterService = $updateChapterService;
-    }
-
     public function put(PutRequest $request,UpdateChapterService $updateChapterService)
     {
         // ログイン中の講師IDを取得
@@ -152,6 +145,7 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
+
     /**
      * チャプター削除API
      *

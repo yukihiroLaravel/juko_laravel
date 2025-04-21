@@ -93,15 +93,9 @@ class ChapterController extends Controller
         }
     }
 
-/**
+    /**
      * チャプター更新API
      */
-    private UpdateChapterService $updateChapterService;
-
-    public function __construct(UpdateChapterService $updateChapterService)
-    {
-        $this->updateChapterService = $updateChapterService;
-    }
     public function update(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
         /** @var Instructor $user */
@@ -129,6 +123,7 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
+
     /**
      * チャプターの公開/非公開API
      */

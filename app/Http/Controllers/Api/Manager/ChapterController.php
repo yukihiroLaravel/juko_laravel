@@ -108,7 +108,7 @@ class ChapterController extends Controller
         }
     }
 
-/**
+    /**
      * チャプター更新API
      *
      * @return JsonResponse
@@ -153,6 +153,7 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
+
     /**
      * チャプター削除API
      *

@@ -108,32 +108,51 @@ class ChapterController extends Controller
         }
     }
 
-    /**
+/**
      * チャプター更新API
      *
      * @return JsonResponse
      */
-    public function put(PutRequest $request, UpdateChapterService $service)
+    private UpdateChapterService $updateChapterService;
+
+    public function __construct(UpdateChapterService $updateChapterService)
     {
-        $managerId = Auth::guard('instructor')->id();
+        $this->updateChapterService = $updateChapterService;
+    }
 
+    public function put(PutRequest $request)
+    {
+        // ログイン中の講師IDを取得
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        // マネージャーが管理する講師を取得
         $manager = Instructor::with('managings')->find($managerId);
-        $allowedInstructorIds = $manager->managings->pluck('id')->toArray();
-        $allowedInstructorIds[] = $managerId;
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
-        $service->__invoke(
-            chapterId: $request->chapter_id,
-            courseId: (int) $request->course_id,
-            requestingInstructorId: $managerId,
-            allowedInstructorIds: $allowedInstructorIds,
-            newTitle: $request->title
+        // チャプターを取得
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
+            // 自分、または配下の講師の講座のチャプターでなければエラー応答
+            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
+
+        // チャプターを更新する
+        ($this->updateChapterService)(
+            $request->chapter_id,
+            $request->title
         );
 
         return response()->json([
             'result' => true,
         ]);
     }
-
     /**
      * チャプター削除API
      *

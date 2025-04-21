@@ -93,26 +93,42 @@ class ChapterController extends Controller
         }
     }
 
-    /**
+/**
      * チャプター更新API
      */
-    public function update(PatchRequest $request, UpdateChapterService $service): JsonResponse
-    {
-        $instructorId = Auth::guard('instructor')->id();
+    private UpdateChapterService $updateChapterService;
 
-        $service->__invoke(
-            chapterId: $request->chapter_id,
-            courseId: (int) $request->course_id,
-            requestingInstructorId: $instructorId,
-            allowedInstructorIds: [$instructorId],
-            newTitle: $request->title
+    public function __construct(UpdateChapterService $updateChapterService)
+    {
+        $this->updateChapterService = $updateChapterService;
+    }
+    public function update(PatchRequest $request): JsonResponse
+    {
+        /** @var Instructor $user */
+        $user = Instructor::find(Auth::guard('instructor')->user()->id);
+
+        /** @var Chapter $chapter */
+        $chapter = Chapter::findOrFail($request->chapter_id);
+
+        if ($chapter->course->instructor_id !== $user->id) {
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Invalid course_id.');
+        }
+
+        ($this->updateChapterService)(
+            $request->chapter_id,
+            $request->title
         );
 
         return response()->json([
             'result' => true,
         ]);
     }
-
     /**
      * チャプターの公開/非公開API
      */

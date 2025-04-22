@@ -88,7 +88,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('all', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'deleteAll']);
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'show']);
-                            Route::patch('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'update']);
+                            Route::put('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'put']);
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'store']);

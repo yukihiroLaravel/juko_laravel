@@ -96,7 +96,7 @@ class ChapterController extends Controller
     /**
      * チャプター更新API
      */
-    public function update(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
+    public function put(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
         /** @var Instructor $user */
         $user = Instructor::find(Auth::guard('instructor')->user()->id);
@@ -106,7 +106,7 @@ class ChapterController extends Controller
 
         if ($chapter->course->instructor_id !== $user->id) {
             // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
         }
 
         if ((int) $request->course_id !== $chapter->course->id) {

@@ -110,10 +110,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API
-     *
-     * @return JsonResponse
      */
-    public function put(PutRequest $request, UpdateChapterService $updateChapterService)
+    public function put(PutRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;

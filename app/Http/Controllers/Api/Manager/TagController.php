@@ -49,14 +49,14 @@ class TagController extends Controller
     }
 
     //タグ詳細API
-    public function show(ShowRequest $request, $id)
+    public function show(ShowRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        $tag = Tag::findOrFail($id);
+        $tag = Tag::findOrFail($request->tag_id);
 
         if (! in_array($tag->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答

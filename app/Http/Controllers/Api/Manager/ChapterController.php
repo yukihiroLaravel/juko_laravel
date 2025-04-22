@@ -20,6 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -109,10 +110,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター更新API
-     *
-     * @return JsonResponse
      */
-    public function put(PutRequest $request)
+    public function put(PutRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -135,10 +134,10 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        // チャプターを更新する
-        $chapter->update([
-            'title' => $request->title,
-        ]);
+        $updateChapterService(
+            chapterId: $request->chapter_id,
+            newTitle: $request->title
+        );
 
         return response()->json([
             'result' => true,

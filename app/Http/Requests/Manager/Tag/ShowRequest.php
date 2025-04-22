@@ -14,7 +14,7 @@ class ShowRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
             'tag_id' => $this->route('tag_id'),

@@ -47,7 +47,9 @@ class TagController extends Controller
         ]);
     }
 
-    //タグ詳細API
+    /**
+     * タグ詳細取得API
+     */
     public function show(ShowRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;

@@ -60,7 +60,7 @@ class ShowTest extends TestCase
         $response = $this->getJson('/api/v1/manager/tag/9999');
 
         // assert
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 
     public function test_不正なタグ_id形式(): void
@@ -73,6 +73,6 @@ class ShowTest extends TestCase
         $response = $this->getJson('/api/v1/manager/tag/abc');
 
         // assert
-        $response->assertStatus(404);
+        $response->assertStatus(422);
     }
 }

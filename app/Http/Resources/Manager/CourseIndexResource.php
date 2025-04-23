@@ -10,6 +10,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseIndexResource extends JsonResource
 {
+    /** @var Course */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *

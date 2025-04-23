@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Http\Resources\Tag\TagResource;
+use App\Http\Resources\Base\Instructor\TagResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TagIndexResource extends JsonResource

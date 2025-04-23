@@ -7,8 +7,8 @@ use App\Http\Requests\Instructor\Tag\IndexRequest;
 use App\Http\Requests\Instructor\Tag\PutRequest;
 use App\Http\Requests\Instructor\Tag\ShowRequest;
 use App\Http\Requests\Instructor\Tag\StoreRequest;
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Http\Resources\Instructor\TagIndexResource;
-use App\Http\Resources\Tag\TagResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -24,7 +24,15 @@ class TagController extends Controller
     /**
      * タグ一覧取得API
      */
-    public function index(IndexRequest $request)
+    public function index()
+    {
+        $instructor = Auth::guard('instructor')->user();
+        $tags = $instructor->tags()->select('id', 'content')->get();
+
+        return TagResource::collection($tags);
+    }
+
+    public function courseIndex(IndexRequest $request)
     {
         $tagId = $request->query('tag_id');
 

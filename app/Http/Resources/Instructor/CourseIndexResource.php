@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,6 +25,7 @@ class CourseIndexResource extends JsonResource
             'title' => $this->resource->title,
             'status' => $this->resource->status,
             'has_active_students' => (bool) $this->resource->has_active_students,
+            'tags' => TagResource::collection($this->resource->tags),
         ];
     }
 }

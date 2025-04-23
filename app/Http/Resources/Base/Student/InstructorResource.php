@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Base\Student;
 
 use App\Model\Instructor;
 use Illuminate\Http\Request;

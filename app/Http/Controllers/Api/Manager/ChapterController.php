@@ -174,7 +174,7 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-            ->exists()
+                ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             throw new AuthorizationException('Forbidden, this lesson has attendance.');

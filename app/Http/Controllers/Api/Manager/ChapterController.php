@@ -20,6 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\CreateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -68,7 +69,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, CreateChapterService $createChapterService)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -87,14 +88,10 @@ class ChapterController extends Controller
         }
 
         try {
-            $order = $course->chapters->count();
-            $newOrder = $order + 1;
-            $chapter = Chapter::create([
-                'course_id' => $request->course_id,
-                'title' => $request->input('title'),
-                'order' => $newOrder,
-                'status' => Chapter::STATUS_PUBLIC,
-            ]);
+            $chapter = $createChapterService(
+                $course,
+                $request->title
+            );
 
             return response()->json([
                 'result' => true,
@@ -178,7 +175,7 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-                ->exists()
+            ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             throw new AuthorizationException('Forbidden, this lesson has attendance.');

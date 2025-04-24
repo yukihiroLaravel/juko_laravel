@@ -20,6 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -69,7 +70,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, CreateChapterService $createChapterService)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -88,14 +89,10 @@ class ChapterController extends Controller
         }
 
         try {
-            $order = $course->chapters->count();
-            $newOrder = $order + 1;
-            $chapter = Chapter::create([
-                'course_id' => $request->course_id,
-                'title' => $request->input('title'),
-                'order' => $newOrder,
-                'status' => Chapter::STATUS_PUBLIC,
-            ]);
+            $chapter = $createChapterService(
+                course: $course,
+                title: $request->title
+            );
 
             return response()->json([
                 'result' => true,

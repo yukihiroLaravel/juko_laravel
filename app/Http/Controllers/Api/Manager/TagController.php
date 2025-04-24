@@ -10,6 +10,7 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\Tag\TagShowResource;
 
 /**
  * @tags Manager-Tag
@@ -64,12 +65,6 @@ class TagController extends Controller
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        return response()->json([
-            'id' => $tag->id,
-            'instructor_id' => $tag->instructor_id,
-            'content' => $tag->content,
-            'created_at' => $tag->created_at,
-            'updated_at' => $tag->updated_at,
-        ]);
+        return response()->json(new TagShowResource($tag));
     }
 }

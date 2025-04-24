@@ -76,8 +76,8 @@ class ChapterController extends Controller
             }
 
             $createChapterService(
-                $course,
-                $request->title
+                course: $course,
+                title: $request->title
             );
 
             return response()->json([

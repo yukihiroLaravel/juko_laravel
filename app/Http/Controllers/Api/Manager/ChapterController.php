@@ -90,8 +90,8 @@ class ChapterController extends Controller
 
         try {
             $chapter = $createChapterService(
-                $course,
-                $request->title
+                course: $course,
+                title: $request->title
             );
 
             return response()->json([

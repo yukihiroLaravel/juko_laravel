@@ -75,13 +75,14 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Invalid instructor_id for this course.');
             }
 
-            $createChapterService(
+            $chapter = $createChapterService(
                 course: $course,
                 title: $request->title
             );
 
             return response()->json([
                 'result' => true,
+                'chapter_id' => $chapter->id,
             ]);
         } catch (Exception $e) {
             Log::error($e);

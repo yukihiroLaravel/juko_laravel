@@ -10,7 +10,7 @@ use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\Tag\TagShowResource;
+use App\Http\Resources\Tag\TagResource;
 
 /**
  * @tags Manager-Tag
@@ -51,7 +51,7 @@ class TagController extends Controller
     /**
      * タグ詳細取得API
      */
-    public function show(ShowRequest $request): JsonResponse
+    public function show(ShowRequest $request): TagResource
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $manager = Instructor::with('managings')->find($instructorId);
@@ -65,6 +65,6 @@ class TagController extends Controller
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        return response()->json(new TagShowResource($tag));
+        return new TagResource($tag);
     }
 }

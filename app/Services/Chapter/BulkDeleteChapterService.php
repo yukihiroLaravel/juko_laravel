@@ -7,10 +7,6 @@ use App\Model\Lesson;
 
 class BulkDeleteChapterService
 {
-    /**
-     * @param array $chapterIds
-     * @return void
-     */
     public function __invoke(array $chapterIds): void
     {
         // チャプターに紐づくレッスンを削除

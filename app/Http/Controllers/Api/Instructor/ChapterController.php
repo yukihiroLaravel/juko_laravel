@@ -19,6 +19,7 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\UpdateChapterService;
+use App\Services\Chapter\BulkDeleteChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -168,7 +169,7 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -195,11 +196,7 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            // チャプターに紐づくレッスンを削除
-            Lesson::whereIn('chapter_id', $chapters->pluck('id'))->delete();
-
-            // チャプターを一括で削除
-            Chapter::whereIn('id', $chapters->pluck('id'))->delete();
+            $bulkDeleteChapterService($chapterIds);
 
             return response()->json([
                 'result' => true,

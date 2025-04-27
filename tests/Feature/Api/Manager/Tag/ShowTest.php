@@ -31,9 +31,10 @@ class ShowTest extends TestCase
         // assert
         $response->assertStatus(200);
         $response->assertJson([
-            'id' => $tag->id,
-            'instructor_id' => $tag->instructor_id,
-            'content' => $tag->content,
+            'data' => [
+                'tag_id' => 1,
+                'content' => 'バックエンド入門編',
+            ],
         ]);
     }
 

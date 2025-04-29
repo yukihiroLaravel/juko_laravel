@@ -219,12 +219,6 @@ class ChapterController extends Controller
                 }
             });
 
-            $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-                // 受講中のレッスンがあれば、エラー応答
-                throw new AuthorizationException('Forbidden, this lesson has attendance.');
-            }
-
             $bulkDeleteChapterService($chapterIds);
 
             return response()->json([

@@ -65,12 +65,15 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
+            //講師-講座タグ一覧
+            Route::get('tag/index', [App\Http\Controllers\Api\Instructor\TagController::class, 'index']);
+
             // 講師-講座
             Route::prefix('course')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
                 Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);
                 Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
-                Route::get('tag/index', [App\Http\Controllers\Api\Instructor\TagController::class, 'index']);
+                Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index']);
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'update']);
@@ -85,7 +88,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::delete('all', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'deleteAll']);
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'show']);
-                            Route::patch('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'update']);
+                            Route::put('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'put']);
                             // 講師-講座-チャプター-レッスン
                             Route::prefix('lesson')->group(function () {
                                 Route::post('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'store']);
@@ -232,6 +235,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             });
                             Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'loginRate']);
                         });
+                    });
+                    // マネージャー講師-タグ
+                    Route::prefix('tag')->group(function () {
+                        Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
                     });
                 });
                 // マネージャー-受講

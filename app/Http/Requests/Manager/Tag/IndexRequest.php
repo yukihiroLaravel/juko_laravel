@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Manager\Course;
+namespace App\Http\Requests\Manager\Tag;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,10 +22,7 @@ class IndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'per_page' => ['integer', 'min:1'],
-            'page' => ['integer', 'min:1'],
-            'tag_id' => ['nullable', 'integer', 'exists:tags,id'],
-            'search_word' => ['sometimes', 'string'],
+            'tag_id' => ['sometimes', 'integer', 'exists:tags,id'],
         ];
     }
 }

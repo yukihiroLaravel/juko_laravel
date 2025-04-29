@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Manager;
 
-use App\Http\Resources\Chapter\ChapterResource;
-use App\Http\Resources\Lesson\LessonResource;
+use App\Http\Resources\Base\Instructor\ChapterResource;
+use App\Http\Resources\Base\Instructor\LessonResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource
@@ -17,9 +17,9 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'chapters' => $this->resource->chapters->map(function ($chapter) {
+            'chapters' => $this->resource->chapters->map(function ($chapter) use ($request) {
                 return [
-                    new ChapterResource($chapter),
+                    ...(new ChapterResource($chapter))->toArray($request),
                     'lessons' => LessonResource::collection($chapter->lessons),
                 ];
             }),

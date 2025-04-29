@@ -1,17 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Instructor;
+namespace App\Http\Resources\Manager;
 
-use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\TagResource;
-use App\Model\Tag;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TagIndexResource extends JsonResource
 {
-    /** @var Tag */
-    public $resource;
-
     /**
      * Transform the resource into an array.
      *
@@ -22,7 +17,7 @@ class TagIndexResource extends JsonResource
     {
         return [
             ...(new TagResource($this->resource))->toArray($request),
-            'courses' => CourseResource::collection($this->resource->courses),
+            'courses' => CourseIndexResource::collection($this->resource->courses),
         ];
     }
 }

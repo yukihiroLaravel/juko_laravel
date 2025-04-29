@@ -18,6 +18,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
+use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
@@ -59,7 +60,7 @@ class ChapterController extends Controller
     /**
      * チャプター新規作成API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
     {
         try {
             // 講師の情報を取得
@@ -75,17 +76,14 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Invalid instructor_id for this course.');
             }
 
-            $order = $course->chapters->count();
-            $newOrder = $order + 1;
-            Chapter::create([
-                'course_id' => $course->id,
-                'title' => $request->input('title'),
-                'order' => $newOrder,
-                'status' => Chapter::STATUS_PUBLIC,
-            ]);
+            $chapter = $createChapterService(
+                course: $course,
+                title: $request->title
+            );
 
             return response()->json([
                 'result' => true,
+                'chapter_id' => $chapter->id,
             ]);
         } catch (Exception $e) {
             Log::error($e);

@@ -99,8 +99,6 @@ class TagController extends Controller
      */
     public function delete(): JsonResponse
     {
-        return response()->json([
-            
-        ]);
+        return response()->json([]);
     }
 }

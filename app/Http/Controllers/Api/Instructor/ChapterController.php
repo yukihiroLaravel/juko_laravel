@@ -188,7 +188,7 @@ class ChapterController extends Controller
                 }
             });
 
-            $bulkDeleteChapterService($chapterIds);
+            $bulkDeleteChapterService($chapterIds, $chapters);
 
             return response()->json([
                 'result' => true,

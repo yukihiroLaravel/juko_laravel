@@ -220,7 +220,7 @@ class ChapterController extends Controller
             });
 
             $bulkDeleteChapterService($chapterIds, $chapters);
-            
+
             return response()->json([
                 'result' => true,
             ]);

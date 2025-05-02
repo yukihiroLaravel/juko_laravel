@@ -6,14 +6,19 @@ use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 
 class BulkDeleteChapterService
 {
     /**
+     * @param  array<int>  $chapterIds
+     * @param  Collection<int, Chapter>  $chapters
+     *
      * @throws AuthorizationException
      */
-    public function __invoke(array $chapterIds, $chapters): void
+    public function __invoke(array $chapterIds, Collection $chapters): void
     {
+
         $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
         if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
             throw new AuthorizationException('Forbidden, this lesson has attendance.');

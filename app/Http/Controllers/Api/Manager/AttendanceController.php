@@ -267,10 +267,9 @@ class AttendanceController extends Controller
         })->count();
 
         // 完了したチャプターの数を取得
-        $completedChaptersCount = $attendances->flatMap(function (Attendance $attendance) {
+        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) =>
             // 各出席情報に関連するレッスン出席情報をフィルタリング
-            return $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
-        })
+            $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 // チャプターに含まれているすべてのレッスンIDを取得
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
@@ -291,13 +290,12 @@ class AttendanceController extends Controller
                 // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
                 return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);
             })
-            ->map(function (LessonAttendance $lessonAttendance) {
+            ->map(fn (LessonAttendance $lessonAttendance) =>
                 // chapter_idとattendance_idをキーにもつ新しい配列を作成
-                return [
+                [
                     'chapter_id' => $lessonAttendance->lesson->chapter_id,
                     'attendance_id' => $lessonAttendance->attendance_id,
-                ];
-            })
+                ])
             ->unique() // 重複するチャプターと出席情報の組み合わせを削除
             ->count();
 

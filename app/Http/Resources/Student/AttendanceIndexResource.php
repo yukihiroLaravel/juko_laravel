@@ -19,6 +19,7 @@ class AttendanceIndexResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array $array
      */
+    #[\Override]
     public function toArray($request): array
     {
         return [

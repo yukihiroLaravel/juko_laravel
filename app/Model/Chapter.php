@@ -37,6 +37,7 @@ class Chapter extends Model
      *
      * @return void
      */
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
@@ -82,9 +83,7 @@ class Chapter extends Model
      */
     public static function extractPublicChapter($chapters)
     {
-        return $chapters->filter(function ($chapter) {
-            return $chapter->status === Chapter::STATUS_PUBLIC;
-        });
+        return $chapters->filter(fn ($chapter) => $chapter->status === Chapter::STATUS_PUBLIC);
     }
 
     /**
@@ -126,8 +125,6 @@ class Chapter extends Model
 
     public function getCompletedCountAttribute(): int
     {
-        return $this->lessons->flatMap(function (Lesson $lesson) {
-            return $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE);
-        })->count();
+        return $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count();
     }
 }

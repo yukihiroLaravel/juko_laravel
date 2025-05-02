@@ -16,6 +16,7 @@ class StudentIndexResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         return [
@@ -29,18 +30,16 @@ class StudentIndexResource extends JsonResource
 
     private function mapStudents(Collection $results)
     {
-        return $results->map(function ($result) {
-            return [
-                'student_id' => $result->student_id,
-                'nick_name' => $result->nick_name,
-                'email' => $result->email,
-                'profile_image' => $result->profile_image,
-                'last_login_at' => $result->last_login_at,
-                'attendance' => [
-                    'attendance_id' => $result->attendance_id,
-                    'attendanced_at' => $result->attendanced_at,
-                ],
-            ];
-        });
+        return $results->map(fn ($result) => [
+            'student_id' => $result->student_id,
+            'nick_name' => $result->nick_name,
+            'email' => $result->email,
+            'profile_image' => $result->profile_image,
+            'last_login_at' => $result->last_login_at,
+            'attendance' => [
+                'attendance_id' => $result->attendance_id,
+                'attendanced_at' => $result->attendanced_at,
+            ],
+        ]);
     }
 }

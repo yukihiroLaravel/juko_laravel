@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class IndexRequest extends FormRequest
 {
+    #[\Override]
     protected function prepareForValidation()
     {
         $this->merge([

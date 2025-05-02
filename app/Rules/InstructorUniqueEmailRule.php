@@ -14,12 +14,13 @@ class InstructorUniqueEmailRule implements ValidationRule
      * @return void
      */
     public function __construct(
-        private ?string $email
+        private readonly ?string $email
     ) {}
 
     /**
      * バリデーションの実行。
      */
+    #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->email && $value === $this->email) {

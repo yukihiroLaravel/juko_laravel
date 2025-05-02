@@ -61,13 +61,11 @@ class IndexService
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(function (Chapter $chapter) use ($attendance) {
-            return $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
-                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
+            $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
-                return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            });
-        })->count();
+            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        }))->count();
     }
 
     /**

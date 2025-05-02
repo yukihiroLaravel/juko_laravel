@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn () => view('welcome'));
 
 Route::prefix('login')->group(function () {
     Route::post('/', 'Auth\LoginController')->name('login');

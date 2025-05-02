@@ -15,20 +15,19 @@ class AttendanceShowResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         /** @var Collection<int, Chapter> */
         $chapters = $this->resource['chapters'];
 
         return [
-            'chapters' => $chapters->map(function (Chapter $chapter) {
-                return [
-                    'chapter_id' => $chapter->id,
-                    'title' => $chapter->title,
-                    'completed_count' => $chapter->completed_count,
-                    'tags' => TagResource::collection($chapter->course->tags),
-                ];
-            }),
+            'chapters' => $chapters->map(fn (Chapter $chapter) => [
+                'chapter_id' => $chapter->id,
+                'title' => $chapter->title,
+                'completed_count' => $chapter->completed_count,
+                'tags' => TagResource::collection($chapter->course->tags),
+            ]),
             'students_count' => $this->resource['studentsCount'],
         ];
     }

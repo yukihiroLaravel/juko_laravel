@@ -14,22 +14,21 @@ class InstructorIndexResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         /** @var LengthAwarePaginator $data */
         $data = $this->resource;
 
         return [
-            'instructors' => $data->getCollection()->map(function (Instructor $instructor) {
-                return [
-                    'instructor_id' => $instructor->id,
-                    'nick_name' => $instructor->nick_name,
-                    'email' => $instructor->email,
-                    'profile_image' => $instructor->profile_image,
-                    'created_at' => $instructor->created_at,
-                    'course_count' => $instructor->courses()->count(),
-                ];
-            }),
+            'instructors' => $data->getCollection()->map(fn (Instructor $instructor) => [
+                'instructor_id' => $instructor->id,
+                'nick_name' => $instructor->nick_name,
+                'email' => $instructor->email,
+                'profile_image' => $instructor->profile_image,
+                'created_at' => $instructor->created_at,
+                'course_count' => $instructor->courses()->count(),
+            ]),
             'pagination' => [
                 'page' => $data->currentPage(),
                 'total' => $data->total(),

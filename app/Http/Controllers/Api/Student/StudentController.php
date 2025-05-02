@@ -199,7 +199,7 @@ class StudentController extends Controller
                         'message' => 'Not match authentication code.',
                     ], 400);
                 }
-            } catch (ExpiredAuthorizationCodeException $e) {
+            } catch (ExpiredAuthorizationCodeException) {
                 // 仮登録情報を物理削除
                 $temporaryStudent->delete();
 
@@ -207,7 +207,7 @@ class StudentController extends Controller
                     'result' => false,
                     'message' => 'Expired authorization period.',
                 ], 400);
-            } catch (TryCountOverAuthorizationCodeException $e) {
+            } catch (TryCountOverAuthorizationCodeException) {
                 // 仮登録情報を物理削除
                 $temporaryStudent->delete();
 

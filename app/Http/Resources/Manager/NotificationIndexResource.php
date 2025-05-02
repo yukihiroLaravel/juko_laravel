@@ -19,6 +19,7 @@ class NotificationIndexResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         $notifications = $this->resource;
@@ -38,19 +39,17 @@ class NotificationIndexResource extends JsonResource
      */
     private function mapNotifications($notifications)
     {
-        return $notifications->map(function (Notification $notification) {
-            return [
-                'notification_id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'content' => $notification->content,
-                'type' => $notification->type,
-                'instructor' => new InstructorResource($notification->instructor),
-                'start_date' => $notification->start_date,
-                'end_date' => $notification->end_date,
-            ];
-        })
+        return $notifications->map(fn (Notification $notification) => [
+            'notification_id' => $notification->id,
+            'course_id' => $notification->course_id,
+            'course_title' => $notification->course->title,
+            'title' => $notification->title,
+            'content' => $notification->content,
+            'type' => $notification->type,
+            'instructor' => new InstructorResource($notification->instructor),
+            'start_date' => $notification->start_date,
+            'end_date' => $notification->end_date,
+        ])
             ->toArray();
     }
 }

@@ -37,19 +37,6 @@ class Student extends Authenticatable
     ];
 
     /**
-     * キャスト
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'birth_date' => 'date',
-        'last_login_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'gender' => Gender::class,
-    ];
-
-    /**
      * 講座を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -123,5 +110,26 @@ class Student extends Authenticatable
     public function calcAge(CarbonImmutable $today): int
     {
         return (int) $this->birth_date->diffInYears($today);
+    }
+
+    /**
+     * @return array{
+     *  birth_date: 'immutable_date',
+     *  last_login_at: 'immutable_datetime',
+     *  created_at: 'immutable_datetime',
+     *  updated_at: 'immutable_datetime',
+     *  gender: 'App\Enums\Student\Gender'
+     * }
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'birth_date' => 'immutable_date',
+            'last_login_at' => 'immutable_datetime',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+            'gender' => Gender::class,
+        ];
     }
 }

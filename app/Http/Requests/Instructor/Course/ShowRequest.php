@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ShowRequest extends FormRequest
 {
+    #[\Override]
     protected function prepareForValidation()
     {
         $this->merge([

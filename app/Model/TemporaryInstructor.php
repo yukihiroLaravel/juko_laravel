@@ -33,10 +33,6 @@ class TemporaryInstructor extends Model
         'type',
     ];
 
-    protected $casts = [
-        'expire_at' => 'immutable_datetime',
-    ];
-
     /**
      * フルネームアクセサー
      */
@@ -45,5 +41,18 @@ class TemporaryInstructor extends Model
         return Attribute::make(
             get: fn () => $this->last_name.' '.$this->first_name,
         );
+    }
+
+    /**
+     * @return array{
+     *  expire_at: 'immutable_datetime'
+     * }
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'expire_at' => 'immutable_datetime',
+        ];
     }
 }

@@ -19,17 +19,16 @@ class NotificationIndexResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         $notifications = $this->resource;
 
         return [
-            'notifications' => $notifications->map(function (Notification $notification) use ($request) {
-                return [
-                    ...(new NotificationResource($notification))->toArray($request),
-                    'tags' => TagResource::collection($notification->course->tags),
-                ];
-            }),
+            'notifications' => $notifications->map(fn (Notification $notification) => [
+                ...(new NotificationResource($notification))->toArray($request),
+                'tags' => TagResource::collection($notification->course->tags),
+            ]),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),

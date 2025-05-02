@@ -17,6 +17,7 @@ class UpdateStatusRequest extends FormRequest
         return true;
     }
 
+    #[\Override]
     protected function prepareForValidation()
     {
         $this->merge([

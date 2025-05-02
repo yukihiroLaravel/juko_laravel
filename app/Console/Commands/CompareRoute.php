@@ -321,9 +321,7 @@ class CompareRoute extends Command
     public function sortRouteListByKey(&$routeList)
     {
         // keyで昇順ソート
-        usort($routeList, function ($a, $b) {
-            return $a['key'] <=> $b['key'];
-        });
+        usort($routeList, fn ($a, $b) => $a['key'] <=> $b['key']);
     }
 
     /**
@@ -412,7 +410,7 @@ class CompareRoute extends Command
 
     public function echoOneRoute($route)
     {
-        echo 'Method: '.strtoupper($route['method']).', URI: '.$route['uri']."\n";
+        echo 'Method: '.strtoupper((string) $route['method']).', URI: '.$route['uri']."\n";
     }
 
     /**

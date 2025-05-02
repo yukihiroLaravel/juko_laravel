@@ -11,6 +11,7 @@ class InstructorIndexSortByRule implements ValidationRule
     /**
      * バリデーションの実行。
      */
+    #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (

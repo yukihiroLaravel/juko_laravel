@@ -42,19 +42,11 @@ class Course extends Model
     ];
 
     /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'instructor_id' => 'int',
-        'created_at' => 'immutable_datetime',
-        'updated_at' => 'immutable_datetime',
-    ];
-
-    /**
      * モデルのブート処理
      *
      * @return void
      */
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
@@ -135,5 +127,18 @@ class Course extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'course_tag', 'course_id', 'tag_id');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'instructor_id' => 'int',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+        ];
     }
 }

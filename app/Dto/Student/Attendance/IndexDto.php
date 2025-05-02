@@ -4,17 +4,10 @@ namespace App\Dto\Student\Attendance;
 
 class IndexDto
 {
-    /** @var int */
-    private $studentId;
-
-    /** @var string|null */
-    private $searchWord;
-
-    public function __construct(int $studentId, $searchWord)
-    {
-        $this->studentId = $studentId;
-        $this->searchWord = $searchWord;
-    }
+    /**
+     * @param  string|null  $searchWord
+     */
+    public function __construct(private readonly int $studentId, private $searchWord) {}
 
     public function getStudentId()
     {

@@ -8,16 +8,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class StudentUniqueEmailRule implements ValidationRule
 {
-    protected $email;
-
-    public function __construct($email)
-    {
-        $this->email = $email;
-    }
+    public function __construct(protected $email) {}
 
     /**
      * バリデーションの実行。
      */
+    #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // 自分自身のメールアドレスの場合は無視

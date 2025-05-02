@@ -72,7 +72,7 @@ class StudentController extends Controller
             ->whereNull('attendances.deleted_at')
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function (Builder $query) use ($inputText) {
-                $inputText = preg_replace('/[　\s]/u', '', $inputText);
+                $inputText = preg_replace('/[　\s]/u', '', (string) $inputText);
                 $query->where(function (Builder $query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")

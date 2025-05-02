@@ -70,8 +70,6 @@ class Lesson extends Model
      */
     public function getCompletedLessonsCountAttribute()
     {
-        return $this->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) {
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
+        return $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
     }
 }

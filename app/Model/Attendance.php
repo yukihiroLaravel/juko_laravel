@@ -27,17 +27,6 @@ class Attendance extends Model
         'progress',
     ];
 
-    /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'student_id' => 'int',
-        'course_id' => 'int',
-        'progress' => 'int',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
     // 受講状態初期値
     const PROGRESS_DEFAULT_VALUE = 0;
 
@@ -71,6 +60,7 @@ class Attendance extends Model
         return $this->hasMany(LessonAttendance::class);
     }
 
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
@@ -114,4 +104,19 @@ class Attendance extends Model
     const PERIOD_MONTH = 'month';
 
     const PERIOD_YEAR = 'year';
+
+    /**
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'student_id' => 'int',
+            'course_id' => 'int',
+            'progress' => 'int',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 }

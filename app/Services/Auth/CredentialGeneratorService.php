@@ -18,9 +18,7 @@ class CredentialGeneratorService
      */
     public function createCode(callable $existsChecker, ?callable $randomGenerator = null): string
     {
-        $randomGenerator = $randomGenerator ?: function () {
-            return Str::random(4);
-        };
+        $randomGenerator = $randomGenerator ?: fn () => Str::random(4);
 
         //認証コードの生成
         $code = $randomGenerator(4);
@@ -48,9 +46,7 @@ class CredentialGeneratorService
     public function createToken(callable $existsChecker, ?callable $randomGenerator = null): string
     {
         //トークンの生成
-        $randomGenerator = $randomGenerator ?: function () {
-            return Str::random(10);
-        };
+        $randomGenerator = $randomGenerator ?: fn () => Str::random(10);
 
         $token = $randomGenerator();
         for ($i = 1; $i <= 5; $i++) {

@@ -97,8 +97,35 @@ class TagController extends Controller
     /**
      * タグ削除API
      */
-    public function delete(): JsonResponse
+    public function delete(int $tag_id): JsonResponse
     {
-        return response()->json([]);
+
+        /** @var Instructor $manager */
+        $manager = Auth::guard('instructor')->user();
+        $manager->load('managings');
+
+        // 自身のIDとその配下にいる講師のIDを取得
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id; // 自身のIDを追加
+
+        // タグの取得
+        $tag = Tag::findOrFail($tag_id);
+
+        // 自身または配下のインストラクターが作成したタグ以外は削除不可
+        if (! in_array($tag->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        // タグに関連付けられた講座がある場合は削除不可
+        if ($tag->courses()->exists()) {
+            throw new AuthorizationException('Invalid tag_id.');
+        }
+
+        // タグの削除
+        $tag->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

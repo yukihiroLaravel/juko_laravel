@@ -99,14 +99,13 @@ class TagController extends Controller
      */
     public function delete(int $tag_id): JsonResponse
     {
+        // マネージャーが管理する講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         /** @var Instructor $manager */
-        $manager = Auth::guard('instructor')->user();
-        $manager->load('managings');
-
-        // 自身のIDとその配下にいる講師のIDを取得
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id; // 自身のIDを追加
+        $instructorIds[] = $manager->id; // 自身のIDも追加
 
         // タグの取得
         $tag = Tag::findOrFail($tag_id);
@@ -118,7 +117,7 @@ class TagController extends Controller
 
         // タグに関連付けられた講座がある場合は削除不可
         if ($tag->courses()->exists()) {
-            throw new AuthorizationException('Invalid tag_id.');
+            throw new AuthorizationException('There is a course linked to the tag.');
         }
 
         // タグの削除

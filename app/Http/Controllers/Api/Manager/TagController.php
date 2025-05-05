@@ -117,7 +117,7 @@ class TagController extends Controller
 
         // タグに関連付けられた講座がある場合は削除不可
         if ($tag->courses()->exists()) {
-            throw new AuthorizationException('There is a course linked to the tag.');
+            throw new AuthorizationException('Forbidden, this tag is linked to courses.');
         }
 
         // タグの削除

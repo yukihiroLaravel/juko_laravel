@@ -2,8 +2,8 @@
 
 namespace App\Services\Lesson;
 
-use Illuminate\Support\Collection;
 use App\Model\Lesson;
+use Illuminate\Support\Collection;
 
 class SortLessonsService
 {

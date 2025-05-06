@@ -252,19 +252,15 @@ class AttendanceController extends Controller
         $period = $request->period;
 
         // 完了したレッスンの数を取得
-        $completedLessonsCount = $attendances->flatMap(function (Attendance $attendance) use ($period) {
-            $completedLessonAttendances = $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-                $updatedAtRequestPeriod = match ($period) {
-                    LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
-                    LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
-                    default => throw new Exception('Invalid period'),
-                };
+        $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+            $updatedAtRequestPeriod = match ($period) {
+                LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
+                LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
+                default => throw new Exception('Invalid period'),
+            };
 
-                return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
-            });
-
-            return $completedLessonAttendances;
-        })->count();
+            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
+        }))->count();
 
         // 完了したチャプターの数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) =>

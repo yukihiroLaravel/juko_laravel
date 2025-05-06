@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Manager\Tag;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -23,8 +22,6 @@ class PutTest extends TestCase
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
-
-        $course = Course::find(1);
 
         // act
         $response = $this->putJson('/api/v1/manager/tag/1', [

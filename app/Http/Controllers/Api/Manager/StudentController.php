@@ -136,8 +136,7 @@ class StudentController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        /** @var Student $student */
-        $student = Student::create([
+        Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),

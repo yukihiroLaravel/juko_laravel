@@ -7,11 +7,6 @@ use Illuminate\Support\Collection;
 
 class SortLessonsService
 {
-    /**
-     * @param Collection $lessons
-     * @param array $inputLessons
-     * @return void
-     */
     public function __invoke(Collection $lessons, array $inputLessons): void
     {
         $inputLessonCollection = collect($inputLessons);

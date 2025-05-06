@@ -6,9 +6,6 @@ use App\Model\Chapter;
 
 class SortLessonsService
 {
-    /**
-     * Create a new class instance.
-     */
     public function __invoke(int $courseId, array $chapters): void
     {
         foreach ($chapters as $chapter) {

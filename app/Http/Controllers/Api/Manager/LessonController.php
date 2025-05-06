@@ -223,7 +223,9 @@ class LessonController extends Controller
             $inputLessons = $request->input('lessons');
 
             // レッスンを一括取得
-            $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
+            $lessons = Lesson::with('chapter.course')
+                ->whereIn('id', array_column($inputLessons, 'lesson_id'))
+                ->get();
 
             /// 認可
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $courseId, $chapterId) {

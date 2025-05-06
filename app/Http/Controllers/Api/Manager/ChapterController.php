@@ -23,6 +23,7 @@ use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\UpdateChapterService;
+use App\Services\Chapter\SortLessonsService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -293,7 +294,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(SortRequest $request)
+    public function sort(SortRequest $request, SortLessonsService $sortLessonsService)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -313,14 +314,7 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($chapters as $chapter) {
-                Chapter::where('id', $chapter['chapter_id'])
-                    ->where('course_id', $courseId)
-                    ->firstOrFail()
-                    ->update([
-                        'order' => $chapter['order'],
-                    ]);
-            }
+            $sortLessonsService($courseId, $chapters);
 
             DB::commit();
 

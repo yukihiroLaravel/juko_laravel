@@ -22,7 +22,6 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
-use App\Services\Chapter\SortLessonsService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -294,7 +293,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(SortRequest $request, SortLessonsService $sortLessonsService)
+    public function sort(SortRequest $request)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -314,7 +313,14 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            $sortLessonsService($courseId, $chapters);
+            foreach ($chapters as $chapter) {
+                Chapter::where('id', $chapter['chapter_id'])
+                    ->where('course_id', $courseId)
+                    ->firstOrFail()
+                    ->update([
+                        'order' => $chapter['order'],
+                    ]);
+            }
 
             DB::commit();
 

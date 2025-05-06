@@ -20,7 +20,6 @@ use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
-use App\Services\Chapter\SortLessonsService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -245,7 +244,7 @@ class ChapterController extends Controller
     /**
      * チャプター並び替えAPI
      */
-    public function sort(SortRequest $request, SortLessonsService $sortLessonsService): JsonResponse
+    public function sort(SortRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -256,10 +255,17 @@ class ChapterController extends Controller
 
             if ($user->id !== $course->instructor_id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+                throw new AuthorizationException('Invalid instructor_id.');
             }
 
-            $sortLessonsService($courseId, $chapters);
+            foreach ($chapters as $chapter) {
+                Chapter::where('id', $chapter['chapter_id'])
+                    ->where('course_id', $courseId)
+                    ->firstOrFail()
+                    ->update([
+                        'order' => $chapter['order'],
+                    ]);
+            }
 
             DB::commit();
 

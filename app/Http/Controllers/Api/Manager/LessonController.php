@@ -26,6 +26,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Lesson\SortLessonsService;
+
 
 /**
  * @tags Manager-Lesson
@@ -204,7 +206,7 @@ class LessonController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(SortRequest $request)
+    public function sort(SortRequest $request, SortLessonsService $sortLessonsService)
     {
         DB::beginTransaction();
 
@@ -241,13 +243,7 @@ class LessonController extends Controller
                 }
             });
 
-            $lessons->each(function (Lesson $lesson) use ($inputLessons) {
-                $collectionLessons = new Collection($inputLessons);
-                $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
-                $lesson->update([
-                    'order' => $inputLesson['order'],
-                ]);
-            });
+            $sortLessonsService($lessons, $inputLessons);
 
             DB::commit();
 

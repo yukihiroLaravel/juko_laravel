@@ -33,8 +33,8 @@ class QueryService
             ->withCount([
                 'courses as student_count' => function ($query) {
                     $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
-                    ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
-                }
+                        ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
+                },
             ])
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);

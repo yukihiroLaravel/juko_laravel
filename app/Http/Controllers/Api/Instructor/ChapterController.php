@@ -17,6 +17,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\UpdateChapterService;
@@ -166,7 +167,7 @@ class ChapterController extends Controller
     /**
      * 選択済チャプターの削除API
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
         // 認証ユーザー情報取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -187,17 +188,7 @@ class ChapterController extends Controller
                 }
             });
 
-            $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
-            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-                // 受講中のレッスンがあれば、エラー応答
-                throw new AuthorizationException('Forbidden, this lesson has attendance.');
-            }
-
-            // チャプターに紐づくレッスンを削除
-            Lesson::whereIn('chapter_id', $chapters->pluck('id'))->delete();
-
-            // チャプターを一括で削除
-            Chapter::whereIn('id', $chapters->pluck('id'))->delete();
+            $bulkDeleteChapterService($chapterIds, $chapters);
 
             return response()->json([
                 'result' => true,
@@ -264,7 +255,7 @@ class ChapterController extends Controller
 
             if ($user->id !== $course->instructor_id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Invalid instructor_id.');
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
 
             foreach ($chapters as $chapter) {

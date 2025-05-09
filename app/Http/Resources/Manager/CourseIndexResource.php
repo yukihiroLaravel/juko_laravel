@@ -5,6 +5,7 @@ namespace App\Http\Resources\Manager;
 use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Http\Resources\Base\Student\InstructorResource;
+use App\Model\Course;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

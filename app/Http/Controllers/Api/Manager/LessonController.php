@@ -20,10 +20,10 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\services\Lesson\UpdateLessonStatusService;
 use App\Model\LessonAttendance;
+use App\Services\Lesson\SortLessonsService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,10 +35,8 @@ class LessonController extends Controller
 {
     /**
      * レッスン新規作成API
-     *
-     * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -92,10 +90,8 @@ class LessonController extends Controller
 
     /**
      * レッスン更新API
-     *
-     * @return JsonResponse
      */
-    public function put(PutRequest $request)
+    public function put(PutRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -138,10 +134,8 @@ class LessonController extends Controller
 
     /**
      * レッスン削除API
-     *
-     * @return JsonResponse
      */
-    public function delete(DeleteRequest $request)
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -202,10 +196,8 @@ class LessonController extends Controller
 
     /**
      * レッスン並び替えAPI
-     *
-     * @return JsonResponse
      */
-    public function sort(SortRequest $request)
+    public function sort(SortRequest $request, SortLessonsService $sortLessonsService): JsonResponse
     {
         DB::beginTransaction();
 
@@ -224,7 +216,9 @@ class LessonController extends Controller
             $inputLessons = $request->input('lessons');
 
             // レッスンを一括取得
-            $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
+            $lessons = Lesson::with('chapter.course')
+                ->whereIn('id', array_column($inputLessons, 'lesson_id'))
+                ->get();
 
             /// 認可
             $lessons->each(function (Lesson $lesson) use ($instructorIds, $courseId, $chapterId) {
@@ -242,13 +236,7 @@ class LessonController extends Controller
                 }
             });
 
-            $lessons->each(function (Lesson $lesson) use ($inputLessons) {
-                $collectionLessons = new Collection($inputLessons);
-                $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
-                $lesson->update([
-                    'order' => $inputLesson['order'],
-                ]);
-            });
+            $sortLessonsService($lessons, $inputLessons);
 
             DB::commit();
 
@@ -303,10 +291,8 @@ class LessonController extends Controller
 
     /**
      * レッスンタイトル変更API
-     *
-     * @return JsonResponse
      */
-    public function updateTitle(UpdateTitleRequest $request)
+    public function updateTitle(UpdateTitleRequest $request): JsonResponse
     {
         // 現在のユーザーを取得（講師の場合）
         $managerId = Auth::guard('instructor')->user()->id;

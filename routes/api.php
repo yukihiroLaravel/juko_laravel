@@ -169,8 +169,12 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::patch('/lessons/status', [LessonController::class, 'updateLessonStatus']);
 
                 // マネージャー-タグ
-                Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
-
+                Route::prefix('tag')->group(function () {
+                    Route::prefix('{tag_id}')->group(function () {
+                        Route::put('/', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
+                        Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show']);
+                    });
+                });
                 // マネージャー-講師
                 Route::prefix('instructor')->group(function () {
                     Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'store']);

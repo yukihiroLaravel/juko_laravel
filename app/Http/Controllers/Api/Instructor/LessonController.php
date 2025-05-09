@@ -11,8 +11,10 @@ use App\Http\Requests\Instructor\Lesson\PutRequest;
 use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
 use App\Http\Requests\Instructor\Lesson\StoreRequest;
+use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
+use App\services\Lesson\UpdateLessonStatusService;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -226,7 +228,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(Request $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
@@ -239,9 +241,8 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid chapter_id.');
         }
 
-        $lesson->update([
-            'status' => $request->status,
-        ]);
+        // サービスの呼び出し（関数のように使える）
+        $updateLessonStatusService($lesson, $request->status);
 
         return response()->json([
             'result' => true,

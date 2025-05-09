@@ -18,6 +18,7 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
+use App\services\Lesson\UpdateLessonStatusService;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -264,7 +265,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(lesson $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -291,9 +292,9 @@ class LessonController extends Controller
             throw new ValidationErrorException('Invalid chapter_id.');
         }
 
-        $lesson->update([
-            'status' => $request->status,
-        ]);
+        $lesson = Lesson::findOrFail($request->lesson_id);
+        // サービスの呼び出し（関数のように使える）
+        $updateLessonStatusService($lesson, $request->status);
 
         return response()->json([
             'result' => true,

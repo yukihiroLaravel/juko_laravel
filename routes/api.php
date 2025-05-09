@@ -166,6 +166,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::middleware('manager')->group(function () {
             // マネージャーAPIはここに記述
             Route::prefix('manager')->group(function () {
+                Route::patch('/lessons/status', [LessonController::class, 'updateLessonStatus']);
 
                 // マネージャー-タグ
                 Route::put('tag/{tag_id}', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);

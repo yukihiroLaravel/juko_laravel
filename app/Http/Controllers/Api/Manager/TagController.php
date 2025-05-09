@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
-use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;

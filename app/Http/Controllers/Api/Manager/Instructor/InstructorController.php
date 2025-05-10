@@ -81,14 +81,14 @@ class InstructorController extends Controller
 
         // 講師情報を取得
         $instructors = Instructor::whereIn('id', $instructorIds)
-        ->withCount([
-            'courses as student_count' => function ($query) {
-                $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
-                    ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
-            }
-        ])
-        ->orderBy($sortBy, $order)
-        ->paginate($perPage, ['*'], 'page', $page);
+            ->withCount([
+                'courses as student_count' => function ($query) {
+                    $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
+                        ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
+                },
+            ])
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return new InstructorIndexResource($instructors);
     }

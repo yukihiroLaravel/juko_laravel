@@ -83,19 +83,19 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->deleteJson('/api/v1/manager/tag/aaa');
+        // act
+        $response = $this->deleteJson('/api/v1/manager/tag/aaa');
 
-    //     // assert
-    //     $response->assertStatus(422);
-    //     $response->assertJsonValidationErrors([
-    //         'tag_id',
-    //     ]);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'tag_id',
+        ]);
+    }
 }

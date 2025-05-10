@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Http\Resources\Manager\TagIndexResource;
@@ -97,7 +98,7 @@ class TagController extends Controller
     /**
      * タグ削除API
      */
-    public function delete(int $tag_id): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -108,7 +109,7 @@ class TagController extends Controller
         $instructorIds[] = $manager->id; // 自身のIDも追加
 
         // タグの取得
-        $tag = Tag::findOrFail($tag_id);
+        $tag = Tag::findOrFail($request->tag_id);
 
         // 自身または配下のインストラクターが作成したタグ以外は削除不可
         if (! in_array($tag->instructor_id, $instructorIds, true)) {

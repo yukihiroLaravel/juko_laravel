@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Http\Requests\Manager\Tag\ShowRequest;
@@ -90,6 +91,40 @@ class TagController extends Controller
         $tag->update([
             'content' => $request->content,
         ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * タグ削除API
+     */
+    public function delete(DeleteRequest $request): JsonResponse
+    {
+        // マネージャーが管理する講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id; // 自身のIDも追加
+
+        // タグの取得
+        $tag = Tag::findOrFail($request->tag_id);
+
+        // 自身または配下のインストラクターが作成したタグ以外は削除不可
+        if (! in_array($tag->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        // タグに関連付けられた講座がある場合は削除不可
+        if ($tag->courses()->exists()) {
+            throw new AuthorizationException('Forbidden, this tag is linked to courses.');
+        }
+
+        // タグの削除
+        $tag->delete();
 
         return response()->json([
             'result' => true,

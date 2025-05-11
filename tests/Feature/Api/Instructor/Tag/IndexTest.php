@@ -28,6 +28,6 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data');
+        $response->assertJsonCount(3, 'data');
     }
 }

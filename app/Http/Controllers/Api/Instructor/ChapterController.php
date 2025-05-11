@@ -255,7 +255,7 @@ class ChapterController extends Controller
 
             if ($user->id !== $course->instructor_id) {
                 // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Invalid instructor_id.');
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
 
             foreach ($chapters as $chapter) {

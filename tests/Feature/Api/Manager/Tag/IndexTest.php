@@ -28,7 +28,7 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        // $response->assertJsonCount(3, 'data');
+        $response->assertJsonCount(6, 'data');
     }
 
     public function test_パラメータ指定_成功(): void
@@ -42,40 +42,19 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        // $response->assertJsonCount(2, 'data');
+        $response->assertJsonCount(1, 'data');
     }
 
-    // public function test_権限エラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(2);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_権限エラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->getJson('/api/v1/manager/tag/1', [
-    //         'content' => 'test',
-    //     ]);
+        // act
+        $response = $this->getJson('/api/v1/manager/course/tag/index');
 
-    //     // assert
-    //     $response->assertStatus(403);
-    // }
-
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
-
-    //     // act
-    //     $response = $this->getJson('/api/v1/manager/tag/aaa', [
-    //         'content' => '',
-    //     ]);
-
-    //     // assert
-    //     $response->assertStatus(422);
-    //     $response->assertJsonValidationErrors([
-    //         'tag_id',
-    //         'content',
-    //     ]);
-    // }
+        // assert
+        $response->assertStatus(403);
+    }
 }

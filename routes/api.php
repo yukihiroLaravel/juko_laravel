@@ -169,6 +169,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('tag')->group(function () {
                     Route::prefix('{tag_id}')->group(function () {
                         Route::put('/', [App\Http\Controllers\Api\Manager\TagController::class, 'put']);
+                        Route::delete('/', [App\Http\Controllers\Api\Manager\TagController::class, 'delete']);
                         Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show']);
                     });
                 });

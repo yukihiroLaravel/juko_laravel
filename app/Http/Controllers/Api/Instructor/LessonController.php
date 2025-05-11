@@ -11,10 +11,8 @@ use App\Http\Requests\Instructor\Lesson\PutRequest;
 use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
 use App\Http\Requests\Instructor\Lesson\StoreRequest;
-use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
-use App\Services\Lesson\UpdateLessonStatusService;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -22,6 +20,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\UpdateLessonStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -228,7 +227,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request,UpdateLessonStatusService $updateLessonStatusService): JsonResponse 
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 

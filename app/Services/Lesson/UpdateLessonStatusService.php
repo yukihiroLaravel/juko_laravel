@@ -8,9 +8,6 @@ class UpdateLessonStatusService
 {
     /**
      * レッスンのステータスを更新する
-     *
-     * @param  Lesson  $lesson
-     * @param  string  $status
      */
     public function __invoke(Lesson $lesson, string $status): void
     {

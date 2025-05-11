@@ -18,9 +18,9 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
-use App\Services\Lesson\UpdateLessonStatusService;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\UpdateLessonStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -253,7 +253,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request,UpdateLessonStatusService $updateLessonStatusService): JsonResponse 
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 

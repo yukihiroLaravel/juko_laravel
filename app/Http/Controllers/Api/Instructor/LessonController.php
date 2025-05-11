@@ -228,7 +228,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(Request $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request,UpdateLessonStatusService $updateLessonStatusService): JsonResponse 
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 

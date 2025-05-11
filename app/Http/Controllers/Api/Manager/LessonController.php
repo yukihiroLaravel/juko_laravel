@@ -253,7 +253,7 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(lesson $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request,UpdateLessonStatusService $updateLessonStatusService): JsonResponse 
     {
         $managerId = Auth::guard('instructor')->user()->id;
 

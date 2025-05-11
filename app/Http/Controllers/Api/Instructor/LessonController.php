@@ -14,7 +14,7 @@ use App\Http\Requests\Instructor\Lesson\StoreRequest;
 use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
-use App\services\Lesson\UpdateLessonStatusService;
+use App\Services\Lesson\UpdateLessonStatusService;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;

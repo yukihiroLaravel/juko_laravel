@@ -18,7 +18,7 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
-use App\services\Lesson\UpdateLessonStatusService;
+use App\Services\Lesson\UpdateLessonStatusService;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\SortLessonsService;
 use Exception;

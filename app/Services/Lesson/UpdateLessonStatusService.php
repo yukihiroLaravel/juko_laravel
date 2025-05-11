@@ -11,7 +11,6 @@ class UpdateLessonStatusService
      *
      * @param  Lesson  $lesson
      * @param  string  $status
-     * @return Lesson
      */
     public function __invoke(Lesson $lesson, string $status): void
     {

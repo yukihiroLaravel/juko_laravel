@@ -19,10 +19,10 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Lesson\SortLessonsService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -327,7 +327,7 @@ class LessonController extends Controller
     /**
      * レッスン並び替えAPI
      */
-    public function sort(SortRequest $request): JsonResponse
+    public function sort(SortRequest $request, SortLessonsService $sortLessonsService): JsonResponse
     {
         DB::beginTransaction();
 
@@ -357,14 +357,7 @@ class LessonController extends Controller
                 }
             });
 
-            // orderカラムを更新（並び替え実施）
-            $lessons->each(function (Lesson $lesson) use ($inputLessons) {
-                $collectionLessons = new Collection($inputLessons);
-                $inputLesson = $collectionLessons->firstWhere('lesson_id', $lesson->id);
-                $lesson->update([
-                    'order' => $inputLesson['order'],
-                ]);
-            });
+            $sortLessonsService($lessons, $inputLessons);
 
             DB::commit();
 

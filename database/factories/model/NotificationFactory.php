@@ -2,15 +2,14 @@
 
 namespace Database\Factories\Model;
 
-use App\Model\Notification;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Notification>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\Notification>
  */
 class NotificationFactory extends Factory
 {
-    protected $model = Notification::class;
+    protected $model = \App\Model\Notification::class;
 
     /**
      * Define the model's default state.

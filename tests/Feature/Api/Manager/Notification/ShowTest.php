@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;

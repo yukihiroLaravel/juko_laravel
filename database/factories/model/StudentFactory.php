@@ -2,15 +2,14 @@
 
 namespace Database\Factories\Model;
 
-use App\Model\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Student>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\Student>
  */
 class StudentFactory extends Factory
 {
-    protected $model = Student::class;
+    protected $model = \App\Model\Student::class;
 
     /**
      * Define the model's default state.

@@ -272,7 +272,7 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException) {
             DB::rollBack();
 
             throw new AuthorizationException('Not found.');

@@ -17,18 +17,17 @@ class NotificationReadResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
-        return $this->resource->map(function (Notification $notification, $key) {
-            return [
-                'notification_id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'content' => $notification->content,
-                'type' => $notification->type,
-            ];
-        })
+        return $this->resource->map(fn (Notification $notification, $key) => [
+            'notification_id' => $notification->id,
+            'course_id' => $notification->course_id,
+            'course_title' => $notification->course->title,
+            'title' => $notification->title,
+            'content' => $notification->content,
+            'type' => $notification->type,
+        ])
             ->toArray();
     }
 }

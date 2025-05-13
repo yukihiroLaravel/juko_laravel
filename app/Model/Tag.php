@@ -24,15 +24,6 @@ class Tag extends Model
     ];
 
     /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'instructor_id' => 'int',
-        'created_at' => 'immutable_datetime',
-        'updated_at' => 'immutable_datetime',
-    ];
-
-    /**
      * 講座を取得
      *
      * @return BelongsToMany<Course, $this>
@@ -42,6 +33,7 @@ class Tag extends Model
         return $this->belongsToMany(Course::class, 'course_tag', 'tag_id', 'course_id');
     }
 
+    #[\Override]
     protected static function boot()
     {
         parent::boot();
@@ -54,5 +46,18 @@ class Tag extends Model
         static::updating(function (Tag $tag) {
             $tag->updated_at = CarbonImmutable::now();
         });
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'instructor_id' => 'int',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+        ];
     }
 }

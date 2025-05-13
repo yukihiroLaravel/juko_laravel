@@ -14,15 +14,14 @@ class CourseShowResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         return [
-            'chapters' => $this->resource->chapters->map(function ($chapter) use ($request) {
-                return [
-                    ...(new ChapterResource($chapter))->toArray($request),
-                    'lessons' => LessonResource::collection($chapter->lessons),
-                ];
-            }),
+            'chapters' => $this->resource->chapters->map(fn ($chapter) => [
+                ...(new ChapterResource($chapter))->toArray($request),
+                'lessons' => LessonResource::collection($chapter->lessons),
+            ]),
         ];
     }
 }

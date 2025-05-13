@@ -6,12 +6,9 @@ use Exception;
 
 class ValidationErrorException extends Exception
 {
-    protected $statusCode;
-
-    public function __construct($message = '', $statusCode = 403)
+    public function __construct($message = '', protected $statusCode = 403)
     {
-        $this->statusCode = $statusCode;
-        parent::__construct($message, $statusCode);
+        parent::__construct($message, $this->statusCode);
     }
 
     public function getStatusCode()

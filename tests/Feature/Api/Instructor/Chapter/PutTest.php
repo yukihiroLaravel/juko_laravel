@@ -11,6 +11,7 @@ class PutTest extends TestCase
     use RefreshDatabase;
 
     // setup
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

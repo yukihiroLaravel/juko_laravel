@@ -25,15 +25,6 @@ class LessonAttendance extends Model
         'status',
     ];
 
-    /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
-
     // ステータス定数
     const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
 
@@ -64,5 +55,18 @@ class LessonAttendance extends Model
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'deleted_at' => 'datetime',
+        ];
     }
 }

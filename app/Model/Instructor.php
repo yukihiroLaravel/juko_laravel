@@ -44,16 +44,9 @@ class Instructor extends Authenticatable
     ];
 
     /**
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'created_at' => 'immutable_datetime',
-        'updated_at' => 'immutable_datetime',
-    ];
-
-    /**
      * Get the remember token value.
      */
+    #[\Override]
     public function getRememberToken(): ?string
     {
         return null;
@@ -64,6 +57,7 @@ class Instructor extends Authenticatable
      *
      * @param  string  $value
      */
+    #[\Override]
     public function setRememberToken($value): void
     {
         // Do nothing.
@@ -72,6 +66,7 @@ class Instructor extends Authenticatable
     /**
      * Get the name of the remember token.
      */
+    #[\Override]
     public function getRememberTokenName(): string
     {
         return '';
@@ -105,5 +100,17 @@ class Instructor extends Authenticatable
     public function tags(): HasMany
     {
         return $this->hasMany(Tag::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+        ];
     }
 }

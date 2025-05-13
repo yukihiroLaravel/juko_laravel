@@ -75,12 +75,10 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             // 複数の講座IDで絞り込み
-            ->when(! empty($requestedCourseIds), function (Builder $query) use ($requestedCourseIds) {
-                return $query->whereIn('attendances.course_id', $requestedCourseIds);
-            })
+            ->when(! empty($requestedCourseIds), fn (Builder $query) => $query->whereIn('attendances.course_id', $requestedCourseIds))
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function (Builder $query) use ($inputText) {
-                $inputText = preg_replace('/[　\s]/u', '', $inputText);
+                $inputText = preg_replace('/[　\s]/u', '', (string) $inputText);
                 $query->where(function ($query) use ($inputText) {
                     $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
                         ->orWhere('students.email', 'LIKE', "%{$inputText}%")
@@ -138,8 +136,7 @@ class StudentController extends Controller
      */
     public function store(StoreRequest $request)
     {
-        /** @var Student $student */
-        $student = Student::create([
+        Student::create([
             'given_name_by_instructor' => $request->given_name_by_instructor,
             'email' => $request->email,
             'created_at' => Carbon::now(),

@@ -16,21 +16,20 @@ class ChapterShowResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         return [
             'chapter_id' => $this->resource->id,
             'title' => $this->resource->title,
             'status' => $this->resource->status,
-            'lessons' => $this->resource->lessons->sortBy('order')->map(function ($lesson) {
-                return [
-                    'lesson_id' => $lesson->id,
-                    'title' => $lesson->title,
-                    'url' => $lesson->url,
-                    'remarks' => $lesson->remarks,
-                    'status' => $lesson->status,
-                ];
-            })
+            'lessons' => $this->resource->lessons->sortBy('order')->map(fn ($lesson) => [
+                'lesson_id' => $lesson->id,
+                'title' => $lesson->title,
+                'url' => $lesson->url,
+                'remarks' => $lesson->remarks,
+                'status' => $lesson->status,
+            ])
                 ->values(),
         ];
     }

@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowChapterResource extends JsonResource
 {
+    #[\Override]
     public function toArray($request)
     {
         /** @var Attendance $attendance */
@@ -29,15 +30,11 @@ class AttendanceShowChapterResource extends JsonResource
                     'chapter_id' => $chapter->id,
                     'title' => $chapter->title,
                     'lessons' => $chapter->lessons->map(function (Lesson $lesson) {
-                        $lessonAttendance = $lesson->lessonAttendances->filter(function ($lessonAttendance) use ($lesson) {
-                            return $lessonAttendance->lesson_id === $lesson->id;
-                        })
-                            ->map(function (LessonAttendance $lessonAttendance) {
-                                return [
-                                    'lesson_attendance_id' => $lessonAttendance->id,
-                                    'status' => $lessonAttendance->status,
-                                ];
-                            })
+                        $lessonAttendance = $lesson->lessonAttendances->filter(fn ($lessonAttendance) => $lessonAttendance->lesson_id === $lesson->id)
+                            ->map(fn (LessonAttendance $lessonAttendance) => [
+                                'lesson_attendance_id' => $lessonAttendance->id,
+                                'status' => $lessonAttendance->status,
+                            ])
                             ->first();
 
                         return [

@@ -433,29 +433,22 @@ class ChapterController extends Controller
 
         // チャプターデータの取得
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+        $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
+            // 講座に紐づく講師でない場合は許可しない
+            if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
 
-        try {
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
-                // 講座に紐づく講師でない場合は許可しない
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
+            if ((int) $courseId !== $chapter->course->id) {
+                throw new AuthorizationException('Forbidden, invalid course_id.');
+            }
+        });
+        // チャプターのステータスを一括更新
+        Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
 
-                // 指定した講座IDがチャプターの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $chapter->course->id) {
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
-            });
-
-            // チャプターのステータスを一括更新
-            Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (AuthorizationException $e) {
-
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

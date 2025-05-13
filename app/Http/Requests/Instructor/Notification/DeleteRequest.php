@@ -16,6 +16,7 @@ class DeleteRequest extends FormRequest
         return true;
     }
 
+    #[\Override]
     protected function prepareForValidation()
     {
         $this->merge([

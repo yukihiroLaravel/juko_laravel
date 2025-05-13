@@ -24,6 +24,7 @@ class AttendanceShowResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
+    #[\Override]
     public function toArray($request)
     {
         return [
@@ -32,22 +33,18 @@ class AttendanceShowResource extends JsonResource
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'instructor' => new InstructorResource($this->resource->course->instructor),
                 'tags' => TagResource::collection($this->resource->course->tags),
-                'chapters' => ChapterResource::collection($this->resource->course->publicChapters)->collection->map(function (ChapterResource $chapterResource) use ($request) {
-                    return [
-                        ...$chapterResource->toArray($request),
-                        'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
-                            $lessonAttendance = $this->resource->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($lesson) {
-                                return $lesson->id === $lessonAttendance->lesson_id;
-                            })->first();
-                            assert($lessonAttendance instanceof LessonAttendance);
+                'chapters' => ChapterResource::collection($this->resource->course->publicChapters)->collection->map(fn (ChapterResource $chapterResource) => [
+                    ...$chapterResource->toArray($request),
+                    'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
+                        $lessonAttendance = $this->resource->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lesson->id === $lessonAttendance->lesson_id)->first();
+                        assert($lessonAttendance instanceof LessonAttendance);
 
-                            return [
-                                ...(new LessonResource($lesson))->toArray($request),
-                                'lessonAttendance' => new LessonAttendanceResource($lessonAttendance),
-                            ];
-                        }),
-                    ];
-                }),
+                        return [
+                            ...(new LessonResource($lesson))->toArray($request),
+                            'lessonAttendance' => new LessonAttendanceResource($lessonAttendance),
+                        ];
+                    }),
+                ]),
             ],
         ];
     }

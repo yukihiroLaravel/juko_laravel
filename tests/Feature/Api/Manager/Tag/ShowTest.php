@@ -3,7 +3,6 @@
 namespace Tests\Feature\Api\Manager\Tag;
 
 use App\Model\Instructor;
-use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,6 +10,7 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -22,8 +22,6 @@ class ShowTest extends TestCase
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
-
-        $tag = Tag::find(1);
 
         // act
         $response = $this->getJson('/api/v1/manager/tag/1');

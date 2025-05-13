@@ -6,8 +6,8 @@ use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\LevelSetList;
 use RectorLaravel\Set\LaravelLevelSetList;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
+return RectorConfig::configure()
+    ->withPaths([
         __DIR__.'/app',
         __DIR__.'/bootstrap',
         __DIR__.'/config',
@@ -17,10 +17,11 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__.'/resources',
         __DIR__.'/routes',
         __DIR__.'/tests',
-    ]);
-
-    $rectorConfig->sets([
+    ])
+    ->withSets([
         LevelSetList::UP_TO_PHP_83,
         LaravelLevelSetList::UP_TO_LARAVEL_110,
-    ]);
-};
+    ])
+    ->withPreparedSets(
+        deadCode: true
+    );

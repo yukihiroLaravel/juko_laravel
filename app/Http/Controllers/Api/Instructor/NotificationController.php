@@ -171,9 +171,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(function (Notification $notification) use ($instructorId) {
-                return $notification->instructor_id !== $instructorId;
-            })
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -213,9 +211,7 @@ class NotificationController extends Controller
 
         // 講師と一致しないお知らせが含まれている場合はエラー
         if (
-            $notifications->contains(function (Notification $notification) use ($instructor) {
-                return $notification->instructor_id !== $instructor->id;
-            })
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
         ) {
             // 講師と一致しないお知らせが含まれている場合はエラー
             throw new AuthorizationException('Invalid instructor_id.');

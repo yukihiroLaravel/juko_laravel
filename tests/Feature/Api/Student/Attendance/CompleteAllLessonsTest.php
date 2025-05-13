@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Student;
+namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,6 +11,7 @@ class CompleteAllLessonsTest extends TestCase
     use RefreshDatabase;
 
     // setup
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();

@@ -11,6 +11,7 @@ class GenderRule implements ValidationRule
     /**
      * バリデーションの実行。
      */
+    #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // 入力値が 'man' または 'woman' であることを検証

@@ -11,6 +11,7 @@ class CourseResource extends JsonResource
     /** @var Course */
     public $resource;
 
+    #[\Override]
     public function toArray(Request $request): array
     {
         return [

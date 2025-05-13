@@ -95,9 +95,7 @@ class AttendanceController extends Controller
         $attendance->course->chapters = $publicChapters;
 
         // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(function ($chapter) use ($request) {
-            return $chapter->id === (int) $request->chapter_id;
-        })
+        $chapter = $attendance->course->chapters->filter(fn ($chapter) => $chapter->id === (int) $request->chapter_id)
             ->first();
 
         return new AttendanceShowChapterResource([
@@ -250,9 +248,7 @@ class AttendanceController extends Controller
      */
     private function getCompletedLessonsCount($attendance)
     {
-        return $attendance->lessonAttendances->filter(function ($lessonAttendance) {
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })->count();
+        return $attendance->lessonAttendances->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
     }
 
     /**

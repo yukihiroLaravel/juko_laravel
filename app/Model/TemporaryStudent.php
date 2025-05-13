@@ -36,19 +36,6 @@ class TemporaryStudent extends Model
         'address',
     ];
 
-    /**
-     * キャスト
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'birth_date' => 'date',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'gender' => Gender::class,
-        'expire_at' => 'immutable_datetime',
-    ];
-
     public function getGenderAttribute($value)
     {
         // データベースのgenderカラムの数値を Gender enumに変換し、対応するラベル（文字列）を返す
@@ -74,5 +61,26 @@ class TemporaryStudent extends Model
     public function getFullNameAttribute()
     {
         return $this->last_name.' '.$this->first_name;
+    }
+
+    /**
+     * @return array{
+     *  birth_date: 'immutable_date',
+     *  created_at: 'immutable_datetime',
+     *  updated_at: 'immutable_datetime',
+     *  gender: 'App\Enums\Student\Gender',
+     *  expire_at: 'immutable_datetime'
+     * }
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'birth_date' => 'immutable_date',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+            'gender' => Gender::class,
+            'expire_at' => 'immutable_datetime',
+        ];
     }
 }

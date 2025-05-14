@@ -16,7 +16,7 @@ class UpdateLessonService
          *     title: string,
          *     url: string,
          *     remarks: string|null,
-         *     status: int
+         *     status: string
          * } $data 更新するデータ
          * @return void
          */

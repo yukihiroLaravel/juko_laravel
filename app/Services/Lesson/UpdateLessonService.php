@@ -11,7 +11,7 @@ class UpdateLessonService
         /**
          * レッスン内容を更新する
          *
-         * @param Lesson $lesson
+         * @param  Lesson  $lesson
          * @param array{
          *     title: string,
          *     url: string,

@@ -5,6 +5,7 @@ namespace App\Services\Lesson;
 use App\Model\Lesson;
 
 class UpdateLessonService
+{
     /**
     * レッスン内容を更新する
      *
@@ -17,7 +18,6 @@ class UpdateLessonService
      * } $data 更新するデータ
      * @return void
      */
-{
     public function __invoke(Lesson $lesson, string $title, string $url, ?string $remarks, string $status): void
     {
         $lesson->update([

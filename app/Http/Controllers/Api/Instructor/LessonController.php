@@ -99,7 +99,7 @@ class LessonController extends Controller
         }
 
         // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->only(['title', 'url', 'remarks', 'status']));
+        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
 
         return response()->json([
             'result' => true,

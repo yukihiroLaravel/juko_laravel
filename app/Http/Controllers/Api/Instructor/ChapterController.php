@@ -21,6 +21,7 @@ use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\UpdateChapterService;
+use App\Services\Chapter\SortChaptersService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -244,7 +245,7 @@ class ChapterController extends Controller
     /**
      * チャプター並び替えAPI
      */
-    public function sort(SortRequest $request): JsonResponse
+    public function sort(SortRequest $request, SortChaptersService $service): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -258,14 +259,7 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
 
-            foreach ($chapters as $chapter) {
-                Chapter::where('id', $chapter['chapter_id'])
-                    ->where('course_id', $courseId)
-                    ->firstOrFail()
-                    ->update([
-                        'order' => $chapter['order'],
-                    ]);
-            }
+            $service($chapters, $courseId);
 
             DB::commit();
 

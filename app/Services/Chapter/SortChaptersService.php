@@ -9,8 +9,7 @@ class SortChaptersService
     /**
      * チャプターの並び順を更新する
      *
-     * @param  array  $chapters  チャプターIDと並び順を含む配列
-     * @param  int  $courseId  講座ID
+     * @param  array<int, array{chapter_id: int, order: int}>  $chapters
      */
     public function __invoke(array $chapters, int $courseId): void
     {

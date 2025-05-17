@@ -2,12 +2,12 @@
 
 namespace App\Services\Chapter;
 
-use App\Model\Lesson;
+use Illuminate\Support\Collection;
+use App\Models\Chapter;
 
-class UpdateLessonService{
-    public function __invoke(Lesson $lesson): void
-    {
-        /**
+class UpdateChapterStatusService
+{
+    /**
      * @param  Collection<int>  $chapterIds
      * @param  int  $status
      * @return void
@@ -17,6 +17,5 @@ class UpdateLessonService{
         Chapter::whereIn('id', $chapterIds)->update([
             'status' => $status,
         ]);
-    }
     }
 }

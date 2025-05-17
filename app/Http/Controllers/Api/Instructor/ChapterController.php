@@ -17,6 +17,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\UpdateChapterStatusService;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
@@ -151,7 +152,7 @@ class ChapterController extends Controller
                 }
             });
 
-            // チャプターの状態を一括で更新
+            // UpdateChapterStatusServiceを呼び出し、選択されたチャプターのステータスを更新
             $chapterIds = $chapters->pluck('id');
             $updateChapterStatusService($chapterIds, $request->status);
 

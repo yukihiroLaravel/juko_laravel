@@ -20,6 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Chapter\UpdateChapterStatusService;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\SortChaptersService;
@@ -438,7 +439,8 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         });
-        // チャプターのステータスを一括更新
+
+        // UpdateChapterStatusServiceを呼び出し、選択されたチャプターのステータスを更新
         $chapterIds = collect($request->input('chapters'));
         $updateChapterStatusService($chapterIds, $status);
 

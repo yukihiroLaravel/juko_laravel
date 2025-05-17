@@ -20,6 +20,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -91,7 +92,7 @@ class LessonController extends Controller
     /**
      * レッスン更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -120,12 +121,8 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid chapter_id.');
         }
 
-        $lesson->update([
-            'title' => $request->title,
-            'url' => $request->url,
-            'remarks' => $request->remarks,
-            'status' => $request->status,
-        ]);
+        // UpdateLessonServiceを呼び出し更新処理
+        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
 
         return response()->json([
             'result' => true,

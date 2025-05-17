@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
-use App\Http\Requests\Instructor\Lesson\DeleteLessonService;
+use App\Services\Lesson\DeleteLessonService;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\PutStatusRequest;
 use App\Http\Requests\Manager\Lesson\SortRequest;

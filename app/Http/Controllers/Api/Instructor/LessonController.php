@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteRequest;
-use App\Http\Requests\Instructor\Lesson\DeleteLessonService;
+use App\Services\Lesson\DeleteLessonService;
 use App\Http\Requests\Instructor\Lesson\PutRequest;
 use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
@@ -134,7 +134,7 @@ class LessonController extends Controller
 
             // 削除コードは、DeleteLessonService.phpへ分離。ここで呼び出して使う。
             $deleteLessonService($lesson);
-            
+
             DB::commit();
 
             return response()->json([

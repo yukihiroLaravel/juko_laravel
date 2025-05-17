@@ -7,11 +7,7 @@ use App\Model\Lesson;
 class DeleteLessonService 
 {
     /**
-     * @param  Collection<int, Lesson>  $lessons
-     * @param array<int, array{
-     *    lesson_id: int,
-     *    order: int
-     * }> $inputLessons
+     * @param Lesson> $lesson
      */
     public function __invoke(Lesson $lesson): void
     {

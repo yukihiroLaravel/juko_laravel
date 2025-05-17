@@ -127,7 +127,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開/非公開API
      */
-    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusServices $updateChapterStatusService): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納

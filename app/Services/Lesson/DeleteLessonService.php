@@ -4,7 +4,7 @@ namespace App\Services\Lesson;
 
 use App\Model\Lesson;
 
-class DeleteLessonService 
+class DeleteLessonService
 {
     /**
      * @param Lesson> $lesson

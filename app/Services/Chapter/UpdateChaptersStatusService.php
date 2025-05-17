@@ -2,15 +2,13 @@
 
 namespace App\Services\Chapter;
 
-use Illuminate\Support\Collection;
 use App\Models\Chapter;
+use Illuminate\Support\Collection;
 
 class UpdateChapterStatusService
 {
     /**
      * @param  Collection<int>  $chapterIds
-     * @param  int  $status
-     * @return void
      */
     public function __invoke(Collection $chapterIds, int $status): void
     {

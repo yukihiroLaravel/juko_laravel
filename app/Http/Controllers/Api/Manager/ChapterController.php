@@ -409,7 +409,7 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      */
-    public function patchStatus(PatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -439,7 +439,8 @@ class ChapterController extends Controller
             }
         });
         // チャプターのステータスを一括更新
-        Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
+        $chapterIds = collect($request->input('chapters'));
+        $updateChapterStatusService($chapterIds, $status);
 
         return response()->json([
             'result' => true,

@@ -127,7 +127,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開/非公開API
      */
-    public function patchStatus(PatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusServices $updateChapterStatusService): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -152,9 +152,8 @@ class ChapterController extends Controller
             });
 
             // チャプターの状態を一括で更新
-            Chapter::whereIn('id', $chapters->pluck('id'))->update([
-                'status' => $request->status,
-            ]);
+            $chapterIds = $chapters->pluck('id');
+            $updateChapterStatusService($chapterIds, $request->status);
 
             return response()->json([
                 'result' => true,

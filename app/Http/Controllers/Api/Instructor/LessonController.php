@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteRequest;
+use App\Http\Requests\Instructor\Lesson\DeleteLessonService;
 use App\Http\Requests\Instructor\Lesson\PutRequest;
 use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
@@ -112,7 +113,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -131,23 +132,15 @@ class LessonController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            // 削除対象レッスンのorderカラムを0に設定する
-            $lesson->update(['order' => 0]);
-
-            $lesson->delete();
-
-            Lesson::where('chapter_id', $lesson->chapter_id)
-                ->orderBy('order')
-                ->get()
-                ->each(function ($lesson, $index) {
-                    $lesson->update(['order' => $index + 1]);
-                });
-
+            // 削除コードは、DeleteLessonService.phpへ分離。ここで呼び出して使う。
+            $deleteLessonService($lesson);
+            
             DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
+
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -23,6 +23,7 @@ use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -376,7 +377,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function putStatus(PutStatusRequest $request)
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -399,7 +400,7 @@ class ChapterController extends Controller
             // ログイン中の講師IDが講座の講師IDと一致しない場合はエラー応答
             throw new ValidationErrorException('Not authorized.');
         }
-        Chapter::chapterUpdateAll($request->course_id, $request->status);
+        $service($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

@@ -87,19 +87,6 @@ class Chapter extends Model
     }
 
     /**
-     * チャプターのステータスを一括更新
-     *
-     * @param  'public'|'private'  $status
-     */
-    public static function chapterUpdateAll(int $courseId, string $status): void
-    {
-        Chapter::where('course_id', $courseId)
-            ->update([
-                'status' => $status,
-            ]);
-    }
-
-    /**
      * チャプターの進捗計算
      */
     public function calculateChapterProgress(Attendance $attendance): int

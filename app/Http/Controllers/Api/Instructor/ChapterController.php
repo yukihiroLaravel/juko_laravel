@@ -288,7 +288,7 @@ class ChapterController extends Controller
 
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             // ログインしていない講師の更新を許可しない
-            throw new AuthorizationException('Not authorized.');
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
         $service($request->course_id, $request->status);

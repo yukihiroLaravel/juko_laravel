@@ -8,6 +8,8 @@ class UpdateAllChaptersStatusService
 {
     /**
      * 対象の講義の全チャプターのステータスを一括更新
+     *
+     * @param  'public'|'private'  $status
      */
     public function __invoke(int $courseId, string $status): void
     {

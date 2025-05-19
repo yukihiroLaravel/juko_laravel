@@ -21,6 +21,7 @@ use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\UpdateChapterService;
+use App\Services\Chapter\DeleteAllChaptersService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -202,7 +203,7 @@ class ChapterController extends Controller
     /**
      * 全チャプター削除API
      */
-    public function deleteAll(DeleteAllRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service)
     {
         $courseId = $request->input('course_id');
 
@@ -230,6 +231,8 @@ class ChapterController extends Controller
             Lesson::whereIn('chapter_id', $chapterIds)->delete();
 
             DB::commit();
+
+            $service($courseId);
 
             return response()->json([
                 'result' => true,

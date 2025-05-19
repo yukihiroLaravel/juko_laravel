@@ -300,17 +300,20 @@ class LessonController extends Controller
         // チャプターに紐づく全レッスンIDを取得
         $lessonIds = $chapter->lessons->pluck('id');
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-        if ($attendedLessonIds->isNotEmpty()) {
-            // 出席のあるレッスンがあれば削除を許可しない
-            throw new AuthorizationException('This lessons contains attendance.');
-        }
 
-        // 認可チェックをパスした後にトランザクションを開始
         DB::beginTransaction();
 
         try {
-            // チャプターに紐づく全レッスンを削除
+                // 出席データを削除（force 指定時）
+                if ($attendedLessonIds->isNotEmpty()) {
+                    LessonAttendance::whereIn('lesson_id', $attendedLessonIds)->delete();
+                }   
+            }
+        // レッスン削除
             $chapter->lessons()->delete();
+
+        // 🔥 チャプター自体も削除
+            $chapter->delete();
 
             DB::commit();
 

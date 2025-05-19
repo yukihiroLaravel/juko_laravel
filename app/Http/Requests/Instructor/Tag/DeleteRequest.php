@@ -14,8 +14,18 @@ class DeleteRequest extends FormRequest
         return true;
     }
 
+        /**
+     * バリデーション前にルートパラメータをマージ
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'tag_id' => $this->route('tag_id'),
+        ]);
+    }
+
     /**
-     * Get the validation rules that apply to the request.
+     * バリデーションルール
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
@@ -26,6 +36,9 @@ class DeleteRequest extends FormRequest
         ];
     }
 
+            /**
+     * バリデーションエラーメッセージ
+     */
     public function messages(): array
     {
         return [

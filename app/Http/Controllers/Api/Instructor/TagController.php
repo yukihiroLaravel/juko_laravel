@@ -119,5 +119,4 @@ class TagController extends Controller
     {
         return response()->json([]);
     }
-
 }

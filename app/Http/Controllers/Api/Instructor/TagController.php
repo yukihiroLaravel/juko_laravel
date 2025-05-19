@@ -112,7 +112,7 @@ class TagController extends Controller
         ]);
     }
 
-        /**
+    /**
      * タグ削除API
      */
     public function delete()

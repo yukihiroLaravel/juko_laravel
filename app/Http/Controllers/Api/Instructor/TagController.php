@@ -111,4 +111,13 @@ class TagController extends Controller
             'result' => true,
         ]);
     }
+
+        /**
+     * タグ更新API
+     */
+    public function delete()
+    {
+        return response()->json([]);
+    }
+
 }

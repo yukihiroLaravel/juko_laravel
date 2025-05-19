@@ -15,6 +15,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 /**
  * @tags Instructor-Tag
@@ -50,7 +51,7 @@ class TagController extends Controller
 
         $query = Tag::where('instructor_id', $instructorId)
             ->when($tagId, function (Builder $query, string $tagId) {
-                $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
+                $query->whereHas('courses', fn(Builder $query) => $query->where('tags.id', $tagId));
             })
             ->with('courses')
             ->get();
@@ -112,12 +113,22 @@ class TagController extends Controller
         ]);
     }
 
-        /**
+    /**
      * タグ更新API
      */
-    public function delete()
+    public function delete(Request $request): JsonResponse
     {
-        return response()->json([]);
-    }
+        $user = Auth::guard('instructor')->user();
+        $tag = Tag::findOrFail($request->tag_id);
 
+        if ($user->id !== $tag->instructor_id) {
+            throw new AuthorizationException('Forbidden, invalid instructor.');
+        }
+
+        $tag->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Tag\DeleteRequest;
 use App\Http\Requests\Instructor\Tag\IndexRequest;
 use App\Http\Requests\Instructor\Tag\PutRequest;
 use App\Http\Requests\Instructor\Tag\ShowRequest;
@@ -114,9 +115,9 @@ class TagController extends Controller
     }
 
     /**
-     * タグ更新API
+     * タグ削除API
      */
-    public function delete(Request $request): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         $user = Auth::guard('instructor')->user();
         $tag = Tag::findOrFail($request->tag_id);

@@ -21,6 +21,7 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\SortLessonsService;
 use App\Services\Lesson\UpdateLessonStatusService;
+use App\Services\Lesson\DeleteAllLessonsService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -454,7 +455,7 @@ class LessonController extends Controller
     /**
      * チャプターに紐づく全レッスンを削除するAPI
      */
-    public function deleteAll(DeleteAllRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -479,30 +480,9 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid course_id.');
         }
 
-        // チャプターに紐づく全レッスンIDを取得
-        $lessonIds = $chapter->lessons->pluck('id');
-        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+        // サービス呼び出し
+        $service($chapter);
 
-        if ($attendedLessonIds->isNotEmpty()) {
-            // 出席のあるレッスンがあれば削除を許可しない
-            throw new AuthorizationException('This lessons contains attendance.');
-        }
-
-        DB::beginTransaction();
-
-        try {
-            // チャプターに紐づく全レッスンを削除
-            $chapter->lessons()->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
-            throw $e;
-        }
+        return response()->json(['result' => true]);
     }
 }

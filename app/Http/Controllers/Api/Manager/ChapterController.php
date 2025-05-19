@@ -26,6 +26,7 @@ use App\Services\Chapter\SortChaptersService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
+use App\Services\Chapter\DeleteAllChaptersService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -238,7 +239,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function deleteAll(DeleteAllRequest $request)
+    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -276,6 +277,8 @@ class ChapterController extends Controller
             Chapter::where('course_id', $courseId)->delete();
 
             DB::commit();
+
+            $service($courseId); // ← サービス呼び出し（インスタンスを関数のように）
 
             return response()->json([
                 'result' => true,

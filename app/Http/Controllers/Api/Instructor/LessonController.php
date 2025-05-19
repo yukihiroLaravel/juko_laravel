@@ -289,6 +289,23 @@ class LessonController extends Controller
         try {
             // サービスクラスで削除処理を実行
             $service($chapter->lessons);
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id');
+        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
+
+        DB::beginTransaction();
+
+        try {
+                // 出席データを削除（force 指定時）
+                if ($attendedLessonIds->isNotEmpty()) {
+                    LessonAttendance::whereIn('lesson_id', $attendedLessonIds)->delete();
+                }   
+            }
+        // レッスン削除
+            $chapter->lessons()->delete();
+
+        // 🔥 チャプター自体も削除
+            $chapter->delete();
 
             DB::commit();
 

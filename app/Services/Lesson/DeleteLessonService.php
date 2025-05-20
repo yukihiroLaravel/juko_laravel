@@ -15,8 +15,7 @@ class DeleteLessonService
         Lesson::where('chapter_id', $lesson->chapter_id)
             ->orderBy('order')
             ->get()
-            ->each(fn(Lesson $lesson, int $index): bool =>
-                (bool) $lesson->update(['order' => $index + 1])
+            ->each(fn (Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1])
             );
     }
 }

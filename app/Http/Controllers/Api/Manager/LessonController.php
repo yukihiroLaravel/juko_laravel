@@ -173,7 +173,6 @@ class LessonController extends Controller
                 throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
-            // 削除コードは、DeleteLessonService.phpへ分離。ここで呼び出して使う。
             $deleteLessonService($lesson);
 
             DB::commit();

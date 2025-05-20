@@ -6,9 +6,6 @@ use App\Model\Lesson;
 
 class DeleteLessonService
 {
-    /**
-     * @param Lesson> $lesson
-     */
     public function __invoke(Lesson $lesson): void
     {
         $lesson->update(['order' => 0]);

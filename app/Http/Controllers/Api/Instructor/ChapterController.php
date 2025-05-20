@@ -151,9 +151,7 @@ class ChapterController extends Controller
                 }
             });
 
-            // UpdateChapterStatusServiceを呼び出し、選択されたチャプターのステータスを更新
-            $chapterIds = $chapters->pluck('id');
-            $updateChapterStatusService($chapterIds, $request->status);
+            $updateChapterStatusService($chapters->pluck('id'), $request->status);
 
             return response()->json([
                 'result' => true,

@@ -2,7 +2,7 @@
 
 namespace App\Services\Chapter;
 
-use App\Models\Chapter;
+use App\Model\Chapter;
 use Illuminate\Support\Collection;
 
 class UpdateChapterStatusService

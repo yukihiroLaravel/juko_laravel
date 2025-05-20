@@ -3,12 +3,11 @@
 namespace App\Services\Lesson;
 
 use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Auth\Access\AuthorizationException;
-use Exception;
 
 class DeleteAllLessonsService
 {

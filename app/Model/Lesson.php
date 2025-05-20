@@ -72,4 +72,9 @@ class Lesson extends Model
     {
         return $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
     }
+    // リレーションを定義する
+    public function attendances()
+    {
+        return $this->hasMany(LessonAttendance::class);
+    }
 }

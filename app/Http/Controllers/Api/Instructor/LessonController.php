@@ -300,11 +300,6 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-                // 出席データを削除（force 指定時）
-                if ($attendedLessonIds->isNotEmpty()) {
-                    LessonAttendance::whereIn('lesson_id', $attendedLessonIds)->delete();
-                }   
-            }
         // レッスン削除
             $chapter->lessons()->delete();
 

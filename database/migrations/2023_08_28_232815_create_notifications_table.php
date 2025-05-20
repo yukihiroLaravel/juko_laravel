@@ -21,7 +21,7 @@ class CreateNotificationsTable extends Migration
             $table->tinyInteger('type')->comment('表示パターン区分');
             $table->dateTime('start_date')->comment('開始日時');
             $table->dateTime('end_date')->comment('終了日時');
-            $table->tinyInteger('status')->default('private')->comment('公開状態');
+            $table->enum('status', ['public', 'private'])->default('private')->comment('公開状態');
             $table->text('content')->comment('本文');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');

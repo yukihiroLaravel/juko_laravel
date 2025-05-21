@@ -20,7 +20,9 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\DeleteAllLessonsService;
+use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -92,7 +94,7 @@ class LessonController extends Controller
     /**
      * レッスン更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -121,12 +123,8 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid chapter_id.');
         }
 
-        $lesson->update([
-            'title' => $request->title,
-            'url' => $request->url,
-            'remarks' => $request->remarks,
-            'status' => $request->status,
-        ]);
+        // UpdateLessonServiceを呼び出し更新処理
+        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
 
         return response()->json([
             'result' => true,
@@ -136,7 +134,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -173,15 +171,7 @@ class LessonController extends Controller
                 throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
             }
 
-            // 対象レッスンの削除処理
-            $lesson->update(['order' => 0]);
-            $lesson->delete();
-            Lesson::where('chapter_id', $lesson->chapter_id)
-                ->orderBy('order')
-                ->get()
-                ->each(function ($lesson, $index) {
-                    $lesson->update(['order' => $index + 1]);
-                });
+            $deleteLessonService($lesson);
 
             DB::commit();
 

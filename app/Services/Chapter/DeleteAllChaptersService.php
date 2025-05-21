@@ -3,6 +3,8 @@
 namespace App\Services\Chapter;
 
 use App\Model\Course;
+use App\Model\Lesson;
+use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use Illuminate\Support\Facades\DB;
 
@@ -21,18 +23,20 @@ class DeleteAllChaptersService
         DB::beginTransaction();
 
         try {
-            foreach ($course->chapters as $chapter) {
-                foreach ($chapter->lessons as $lesson) {
-                    // 出席データを削除
-                    LessonAttendance::where('lesson_id', $lesson->id)->delete();
-                }
+            // すべての lesson ID を取得
+            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
 
-                // レッスンを削除
-                $chapter->lessons()->delete();
+            // すべての chapter ID を取得
+            $chapterIds = $course->chapters->pluck('id')->toArray();
 
-                // チャプターを削除
-                $chapter->delete();
-            }
+            // 出席データを一括削除
+            LessonAttendance::whereIn('lesson_id', $lessonIds)->delete();
+
+            // レッスンを一括削除
+            Lesson::whereIn('id', $lessonIds)->delete();
+
+            // チャプターを一括削除
+            Chapter::whereIn('id', $chapterIds)->delete();
 
             DB::commit();
         } catch (\Throwable $e) {

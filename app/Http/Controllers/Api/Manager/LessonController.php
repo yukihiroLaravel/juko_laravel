@@ -473,9 +473,10 @@ class LessonController extends Controller
         DB::beginTransaction();
         try {
             // サービスクラスで削除処理を実行
-            $service($chapter); 
+            $service($chapter);
 
             DB::commit();
+
             return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();

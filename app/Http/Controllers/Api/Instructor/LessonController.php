@@ -290,6 +290,7 @@ class LessonController extends Controller
             $service($chapter);
 
             DB::commit();
+
             return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();

@@ -296,10 +296,18 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid course_id.');
         }
 
-        // サービス呼び出し
-        $service($chapter);
+        DB::beginTransaction();
+        try {
+            // サービスクラスで削除処理を実行
+            $service($chapter);
 
-        return response()->json(['result' => true]);
+            DB::commit();
+            return response()->json(['result' => true]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**

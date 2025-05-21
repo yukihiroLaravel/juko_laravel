@@ -21,17 +21,7 @@ class DeleteAllLessonsService
             throw new AuthorizationException('This lessons contains attendance.');
         }
 
-        DB::beginTransaction();
-
-        try {
-            // レッスン削除
-            $chapter->lessons()->delete();
-
-            DB::commit();
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        // レッスン削除
+        $chapter->lessons()->delete();
     }
 }

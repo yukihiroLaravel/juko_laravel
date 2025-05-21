@@ -300,11 +300,6 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-        // レッスン削除
-            $chapter->lessons()->delete();
-
-        // 🔥 チャプター自体も削除
-            $chapter->delete();
 
             DB::commit();
 

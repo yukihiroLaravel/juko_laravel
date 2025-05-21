@@ -21,6 +21,7 @@ use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -280,17 +281,17 @@ class ChapterController extends Controller
     /**
      * チャプター一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
     {
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
 
         if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
             // ログインしていない講師の更新を許可しない
-            throw new AuthorizationException('Not authorized.');
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        Chapter::chapterUpdateAll($request->course_id, $request->status);
+        $service($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,

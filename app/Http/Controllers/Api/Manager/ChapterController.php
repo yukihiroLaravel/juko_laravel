@@ -399,7 +399,11 @@ class ChapterController extends Controller
             // ログイン中の講師IDが講座の講師IDと一致しない場合はエラー応答
             throw new ValidationErrorException('Not authorized.');
         }
+<<<<<<< HEAD
         Chapter::chapterUpdateAll($request->course_id, $request->status);
+=======
+        $service($request->course_id, $request->status);
+>>>>>>> parent of ba6df447 (Fix: 認証エラー時のメッセージを改善し、テストケースを追加)
 
         return response()->json([
             'result' => true,

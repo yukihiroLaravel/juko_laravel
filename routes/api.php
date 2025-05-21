@@ -116,7 +116,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
                         });
                         Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate']);
-
                     });
                 });
             });

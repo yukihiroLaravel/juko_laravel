@@ -440,7 +440,6 @@ class ChapterController extends Controller
             }
         });
 
-        // UpdateChapterStatusServiceを呼び出し、選択されたチャプターのステータスを更新
         $chapterIds = collect($request->input('chapters'));
         $updateChapterStatusService($chapterIds, $status);
 

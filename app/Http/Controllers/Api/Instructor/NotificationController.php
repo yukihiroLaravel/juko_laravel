@@ -81,7 +81,7 @@ class NotificationController extends Controller
                 'type' => $request->type,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
-                'status' => $request->status, // ←250519：お知らせ登録時、公開/非公開設定を登録できるようにした（JKA-1280）。
+                'status' => $request->status,
                 'content' => $request->content,
             ]);
             DB::commit();

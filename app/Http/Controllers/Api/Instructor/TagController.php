@@ -16,7 +16,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 /**
  * @tags Instructor-Tag

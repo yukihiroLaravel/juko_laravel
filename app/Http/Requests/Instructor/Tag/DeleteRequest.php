@@ -14,7 +14,7 @@ class DeleteRequest extends FormRequest
         return true;
     }
 
-        /**
+    /**
      * バリデーション前にルートパラメータをマージ
      */
     protected function prepareForValidation()
@@ -36,7 +36,7 @@ class DeleteRequest extends FormRequest
         ];
     }
 
-            /**
+    /**
      * バリデーションエラーメッセージ
      */
     public function messages(): array

@@ -107,6 +107,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-お知らせ
                     Route::prefix('notification')->group(function () {
                         Route::post('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'store']);
+                        Route::put('status', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatus']);
                     });
 
                     // 講師-講座-受講

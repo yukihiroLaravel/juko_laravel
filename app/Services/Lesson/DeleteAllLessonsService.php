@@ -2,15 +2,19 @@
 
 namespace App\Services\Lesson;
 
-use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 
 class DeleteAllLessonsService
 {
-    public function __invoke(Chapter $chapter): void
+    /**
+     * @param  Collection<int, Lesson>  $lessons
+     */
+    public function __invoke(Collection $lessons): void
     {
-        $lessonIds = $chapter->lessons->pluck('id');
+        $lessonIds = $lessons->pluck('id');
 
         // 出席済みのレッスンがあれば削除不可
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
@@ -19,6 +23,6 @@ class DeleteAllLessonsService
         }
 
         // レッスン削除
-        $chapter->lessons()->delete();
+        Lesson::whereIn('id', $lessonIds)->delete();
     }
 }

@@ -19,7 +19,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
@@ -110,7 +109,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      */
-    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -129,7 +128,17 @@ class LessonController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            $deleteLessonService($lesson);
+            // 削除対象レッスンのorderカラムを0に設定する
+            $lesson->update(['order' => 0]);
+
+            $lesson->delete();
+
+            Lesson::where('chapter_id', $lesson->chapter_id)
+                ->orderBy('order')
+                ->get()
+                ->each(function ($lesson, $index) {
+                    $lesson->update(['order' => $index + 1]);
+                });
 
             DB::commit();
 

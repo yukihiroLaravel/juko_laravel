@@ -24,7 +24,6 @@ class Notification extends Model
         'course_id',
         'instructor_id',
         'title',
-        'status',
         'type',
         'start_date',
         'end_date',

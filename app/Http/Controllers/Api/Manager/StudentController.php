@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers\Api\Manager;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Student\IndexRequest;
+use App\Http\Requests\Manager\Student\ShowRequest;
+use App\Http\Requests\Manager\Student\StoreRequest;
+use App\Http\Resources\Manager\StudentIndexResource;
+use App\Http\Resources\Manager\StudentShowResource;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\Student;
+use App\Services\Student\QueryService;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * @tags Manager-Student
+ */
+class StudentController extends Controller
+{
+    /**
+     * 受講生一覧取得API
+     *
+     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
+     */
+    public function index(IndexRequest $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+        $sortBy = $request->input('sort_by', 'nick_name');
+        $order = $request->input('order', 'asc');
+        $inputText = $request->input('input_text');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $instructorId = $request->user()->id;
+
+        // 配下のinstructor情報を取得
+        $manager = Instructor::with('managings')->findOrFail($instructorId);
+
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $instructorId;
+
+        // 自分、または配下の講師の講座IDのリストを取得
+        $courseIds = Course::with('instructor')
+            ->whereIn('instructor_id', $instructorIds)
+            ->pluck('id')
+            ->toArray();
+
+        // クエリパラメータからcourses（配列）を取得
+        $requestedCourseIds = $request->input('courses', []);
+        // 指定された講座IDが有効かどうかチェック
+        if (! empty($requestedCourseIds)) {
+            foreach ($requestedCourseIds as $courseId) {
+                if (! in_array((int) $courseId, $courseIds, true)) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
+            }
+        }
+
+        $results = DB::table('attendances')
+            ->select(
+                'attendances.student_id',
+                'students.nick_name',
+                'students.email',
+                'students.profile_image',
+                'students.last_login_at',
+                'attendances.id as attendance_id',
+                'attendances.created_at as attendanced_at'
+            )
+            ->join('students', 'attendances.student_id', '=', 'students.id')
+            // 複数の講座IDで絞り込み
+            ->when(! empty($requestedCourseIds), fn (Builder $query) => $query->whereIn('attendances.course_id', $requestedCourseIds))
+            // 受講生名検索（ニックネーム/メールアドレス/姓名）
+            ->when($inputText, function (Builder $query) use ($inputText) {
+                $inputText = preg_replace('/[　\s]/u', '', (string) $inputText);
+                $query->where(function ($query) use ($inputText) {
+                    $query->orWhere('students.nick_name', 'LIKE', "%{$inputText}%")
+                        ->orWhere('students.email', 'LIKE', "%{$inputText}%")
+                        ->orWhere(DB::raw('CONCAT(students.last_name, students.first_name)'), 'LIKE', "%{$inputText}%");
+                });
+            })
+            // 日付検索
+            ->when($startDate, function (Builder $query) use ($startDate) {
+                $query->where('attendances.created_at', '>=', $startDate);
+            })
+            ->when($endDate, function (Builder $query) use ($endDate) {
+                $query->where('attendances.created_at', '<=', $endDate);
+            })
+            // ソート
+            ->orderBy($sortBy, $order)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return new StudentIndexResource($results);
+    }
+
+    /**
+     * 受講生詳細取得API
+     *
+     * @return StudentShowResource|\Illuminate\Http\JsonResponse
+     */
+    public function show(ShowRequest $request, QueryService $queryService)
+    {
+        // 認証されたマネージャーが管理する講師のIDのリストを取得
+        $authManagerId = Auth::guard('instructor')->user()->id;
+        $manager = Instructor::with('managings')->find($authManagerId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+
+        // 自身のIDを追加
+        $instructorIds[] = $authManagerId;
+
+        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
+
+        // リクエストされた受講生を取得
+        $student = $queryService->getStudent($request->student_id);
+
+        // 受講生が講師の講座に所属しているか確認
+        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
+        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
+            throw new AuthorizationException('Forbidden, invalid instructor.');
+        }
+
+        return new StudentShowResource($student);
+    }
+
+    /**
+     * 受講生登録API
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreRequest $request)
+    {
+        Student::create([
+            'given_name_by_instructor' => $request->given_name_by_instructor,
+            'email' => $request->email,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+}

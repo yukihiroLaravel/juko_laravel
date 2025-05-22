@@ -1,0 +1,242 @@
+<?php
+
+namespace App\Http\Controllers\Api\Instructor;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Notification\DeleteRequest;
+use App\Http\Requests\Instructor\Notification\IndexRequest;
+use App\Http\Requests\Instructor\Notification\PutRequest;
+use App\Http\Requests\Instructor\Notification\ShowRequest;
+use App\Http\Requests\Instructor\Notification\StoreRequest;
+use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
+use App\Http\Resources\Instructor\NotificationIndexResource;
+use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Model\Course;
+use App\Model\Notification;
+use App\Model\ViewedOnceNotification;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * @tags Instructor-Notification
+ */
+class NotificationController extends Controller
+{
+    /**
+     * お知らせ一覧取得API
+     */
+    public function index(IndexRequest $request): NotificationIndexResource
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $perPage = $request->input('per_page', 20);
+        $page = $request->input('page', 1);
+
+        $notifications = Notification::with(['course.tags'])
+            ->where('instructor_id', $instructorId)
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return new NotificationIndexResource($notifications);
+    }
+
+    /**
+     * お知らせ詳細
+     *
+     * @return NotificationShowResource|JsonResponse
+     */
+    public function show(ShowRequest $request)
+    {
+        $notification = Notification::with(['course'])
+            ->findOrFail($request->notification_id);
+
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        return new NotificationShowResource($notification);
+    }
+
+    /**
+     * お知らせ登録
+     */
+    public function store(StoreRequest $request): JsonResponse
+    {
+        $course = Course::findOrFail($request->course_id);
+
+        if ($course->instructor_id !== Auth::guard('instructor')->user()->id) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            Notification::create([
+                'course_id' => $request->course_id,
+                'instructor_id' => Auth::guard('instructor')->user()->id,
+                'title' => $request->title,
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'content' => $request->content,
+            ]);
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせ更新API
+     */
+    public function put(PutRequest $request): JsonResponse
+    {
+        $notification = Notification::findOrFail($request->notification_id);
+
+        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $notification->fill([
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'title' => $request->title,
+                'content' => $request->content,
+            ])
+                ->save();
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせ削除
+     */
+    public function delete(DeleteRequest $request): JsonResponse
+    {
+        // 認証している講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 指定されたお知らせを取得
+        /** @var Notification $notification */
+        $notification = Notification::findOrFail($request->notification_id);
+
+        // お知らせが、現在ログインしている講師のものでなければエラー
+        if ($instructorId !== $notification->instructor_id) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // 中間テーブルにお知らせと生徒の関係があれば行を削除
+            $notification->students()->detach();
+            $notification->delete();
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせ一覧-タイプ変更API
+     */
+    public function updateType(UpdateTypeRequest $request): JsonResponse
+    {
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        if (
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+        ) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+        DB::beginTransaction();
+        try {
+            $notificationType = $request->notification_type;
+            $notifications->each(function ($notification) use ($notificationType) {
+                // 指定されたお知らせIDでお知らせを取得
+                $notification->fill([
+                    'type' => $notificationType,
+                ])
+                    ->save();
+            });
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせ一括削除
+     */
+    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    {
+        $notificationIds = $request->input('notifications', []);
+
+        $instructor = Auth::guard('instructor')->user();
+
+        /** @var Collection<int, Notification> $notifications */
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        if (
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
+        ) {
+            // 講師と一致しないお知らせが含まれている場合はエラー
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        // トランザクション開始
+        DB::beginTransaction();
+
+        try {
+            // viewed_once_notificationsテーブルのレコードを一括削除
+            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
+
+            // notificationsテーブルのレコードを一括削除
+            Notification::whereIn('id', $notificationIds)->delete();
+
+            // コミット
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+}

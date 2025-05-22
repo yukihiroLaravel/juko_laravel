@@ -1,0 +1,74 @@
+{
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The Laravel Framework.",
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.3",
+        "dedoc/scramble": "^0.12.7",
+        "laravel/framework": "^11.0",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.10"
+    },
+    "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.2",
+        "driftingly/rector-laravel": "^1.2.4",
+        "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^2.9",
+        "laravel/pint": "^1.18",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.5",
+        "phpunit/phpunit": "^10.3",
+        "rector/rector": "^1.2.10",
+        "spatie/laravel-ignition": "^2.8"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "pint": [
+            "./vendor/bin/pint -v"
+        ],
+        "analyze": [
+            "./vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
+        ],
+        "rector-dry-run": [
+            "vendor/bin/rector process --dry-run"
+        ],
+        "rector": [
+            "vendor/bin/rector process"
+        ]
+    }
+}

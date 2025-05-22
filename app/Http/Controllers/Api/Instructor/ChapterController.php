@@ -1,0 +1,300 @@
+<?php
+
+namespace App\Http\Controllers\Api\Instructor;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Chapter\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Chapter\DeleteAllRequest;
+use App\Http\Requests\Instructor\Chapter\PatchRequest;
+use App\Http\Requests\Instructor\Chapter\PatchStatusRequest;
+use App\Http\Requests\Instructor\Chapter\PutStatusRequest;
+use App\Http\Requests\Instructor\Chapter\ShowRequest;
+use App\Http\Requests\Instructor\Chapter\SortRequest;
+use App\Http\Requests\Instructor\Chapter\StoreRequest;
+use App\Http\Resources\Instructor\ChapterShowResource;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use App\Services\Chapter\BulkDeleteChapterService;
+use App\Services\Chapter\CreateChapterService;
+use App\Services\Chapter\QueryService;
+use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\UpdateAllChaptersStatusService;
+use App\Services\Chapter\UpdateChapterService;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * @tags Instructor-Chapter
+ */
+class ChapterController extends Controller
+{
+    /**
+     * チャプター詳細情報を取得
+     *
+     * @return ChapterShowResource|JsonResponse
+     */
+    public function show(ShowRequest $request, QueryService $queryService)
+    {
+        // チャプターを取得
+        $chapter = $queryService->getChapter($request->chapter_id);
+
+        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Invalid course_id.');
+        }
+
+        return new ChapterShowResource($chapter);
+    }
+
+    /**
+     * チャプター新規作成API
+     */
+    public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
+    {
+        try {
+            // 講師の情報を取得
+            /** @var Instructor $user */
+            $user = Auth::guard('instructor')->user();
+
+            // 講座を取得
+            /** @var Course $course */
+            $course = Course::with('chapters')->findOrFail($request->input('course_id'));
+
+            if ($course->instructor_id !== $user->id) {
+                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
+                throw new AuthorizationException('Invalid instructor_id for this course.');
+            }
+
+            $chapter = $createChapterService(
+                course: $course,
+                title: $request->title
+            );
+
+            return response()->json([
+                'result' => true,
+                'chapter_id' => $chapter->id,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * チャプター更新API
+     */
+    public function put(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
+    {
+        /** @var Instructor $user */
+        $user = Instructor::find(Auth::guard('instructor')->user()->id);
+
+        /** @var Chapter $chapter */
+        $chapter = Chapter::findOrFail($request->chapter_id);
+
+        if ($chapter->course->instructor_id !== $user->id) {
+            // ログインしている講師が作成していないチャプターの更新を許可しない
+            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
+        }
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Invalid course_id.');
+        }
+
+        $updateChapterService(
+            chapterId: $request->chapter_id,
+            newTitle: $request->title
+        );
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
+     * チャプターの公開/非公開API
+     */
+    public function patchStatus(PatchStatusRequest $request): JsonResponse
+    {
+        try {
+            // リクエストで送られたcourseとchapterのidを変数に格納
+            $courseId = $request->course_id;
+
+            // 認証ユーザー情報取得
+            $instructorId = Auth::guard('instructor')->user()->id;
+
+            // 選択されたチャプターを取得
+            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+
+            // バリデーション
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
+                // チャプターに紐づく講師でない場合は許可しない
+                if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
+                }
+                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
+                if ((int) $courseId !== $chapter->course_id) {
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
+            });
+
+            // チャプターの状態を一括で更新
+            Chapter::whereIn('id', $chapters->pluck('id'))->update([
+                'status' => $request->status,
+            ]);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * 選択済チャプターの削除API
+     */
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
+    {
+        // 認証ユーザー情報取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        $chapterIds = $request->input('chapters', []);
+        $courseId = $request->input('course_id');
+
+        try {
+            $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
+            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
+                if ((int) $instructorId !== $chapter->course->instructor_id) {
+                    // チャプターに紐づく講師でない場合は許可しない
+                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
+                }
+                if ((int) $courseId !== $chapter->course_id) {
+                    // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
+            });
+
+            $bulkDeleteChapterService($chapterIds, $chapters);
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * 全チャプター削除API
+     */
+    public function deleteAll(DeleteAllRequest $request): JsonResponse
+    {
+        $courseId = $request->input('course_id');
+
+        DB::beginTransaction();
+        try {
+
+            //コースに紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with('chapters.lessons')->find($courseId);
+            $chapterIds = $course->chapters->pluck('id')->toArray();
+
+            // ログイン中の講師の講座のチャプターでなければエラー応答
+            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+                throw new AuthorizationException('Invalid instructor_id.');
+            }
+
+            // チャプターに紐づく全レッスンIDを取得
+            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+                // 受講中のレッスンがあれば、エラー応答
+                throw new AuthorizationException('This lesson has attendance.');
+            }
+
+            // チャプターを削除
+            Chapter::where('course_id', $courseId)->delete();
+            Lesson::whereIn('chapter_id', $chapterIds)->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * チャプター並び替えAPI
+     */
+    public function sort(SortRequest $request, SortChaptersService $service): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $user = Instructor::find(Auth::guard('instructor')->user()->id);
+            $courseId = $request->input('course_id');
+            $chapters = $request->input('chapters');
+            $course = Course::findOrFail($courseId);
+
+            if ($user->id !== $course->instructor_id) {
+                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+
+            $service($chapters, $courseId);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (ModelNotFoundException) {
+            DB::rollBack();
+
+            throw new AuthorizationException('Not found.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * チャプター一括更新API
+     */
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
+    {
+        /** @var Course $course */
+        $course = Course::findOrFail($request->course_id);
+
+        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
+            // ログインしていない講師の更新を許可しない
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
+
+        $service($request->course_id, $request->status);
+
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+}

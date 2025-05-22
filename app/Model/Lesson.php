@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Model;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Lesson extends Model
+{
+    use SoftDeletes;
+
+    /**
+     * モデルと関連しているテーブル
+     *
+     * @var string
+     */
+    protected $table = 'lessons';
+
+    // ステータス定数
+    const STATUS_PUBLIC = 'public';
+
+    const STATUS_PRIVATE = 'private';
+
+    /**
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'chapter_id',
+        'title',
+        'url',
+        'remarks',
+        'status',
+        'order',
+    ];
+
+    /**
+     * チャプターを取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function chapter()
+    {
+        return $this->belongsTo(Chapter::class);
+    }
+
+    /**
+     * レッスン受講状態を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function lessonAttendances()
+    {
+        return $this->hasMany(LessonAttendance::class);
+    }
+
+    /**
+     * レッスンの総数を取得する
+     *
+     * @return int
+     */
+    public function getTotalLessonsCountAttribute()
+    {
+        return $this->chapter->lessons->count();
+    }
+
+    /**
+     * レッスンの完了数を取得する
+     *
+     * @return int
+     */
+    public function getCompletedLessonsCountAttribute()
+    {
+        return $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
+    }
+}

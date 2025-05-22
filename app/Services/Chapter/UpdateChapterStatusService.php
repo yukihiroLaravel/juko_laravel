@@ -9,6 +9,7 @@ class UpdateChapterStatusService
 {
     /**
      * @param  Collection<int>  $chapterIds
+     * @param  'private'|'public'  $status
      */
     public function __invoke(Collection $chapterIds, string $status): void
     {

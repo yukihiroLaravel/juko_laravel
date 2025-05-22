@@ -21,6 +21,7 @@ use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;

@@ -440,8 +440,7 @@ class ChapterController extends Controller
             }
         });
 
-        $chapterIds = collect($request->input('chapters'));
-        $updateChapterStatusService($chapterIds, $status);
+        $updateChapterStatusService($chapters->pluck('id'), $request->status);
 
         return response()->json([
             'result' => true,

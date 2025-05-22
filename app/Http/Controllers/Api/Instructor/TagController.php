@@ -118,7 +118,6 @@ class TagController extends Controller
      */
     public function delete(DeleteRequest $request)
     {
-        return response()->json([]);
         $user = Auth::guard('instructor')->user();
         $tag = Tag::findOrFail($request->tag_id);
 

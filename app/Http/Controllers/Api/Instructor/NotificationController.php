@@ -239,4 +239,12 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 選択されたお知らせ 一括公開・非公開API
+     */
+    public function putStatus()
+    {
+        return response()->json([]);
+    }
 }

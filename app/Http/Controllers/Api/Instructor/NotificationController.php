@@ -239,4 +239,41 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 選択されたお知らせ 一括公開・非公開API
+     */
+    public function putStatus(PutRequest $request): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $notificationIds = $request->input('notifications', []);
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+        if (
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+        ) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        // トランザクション開始
+        DB::beginTransaction();
+
+        try {
+            // お知らせのステータスを更新
+            Notification::whereIn('id', $notificationIds)
+                ->update(['status' => $request->status]);
+
+            // コミット
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
 }

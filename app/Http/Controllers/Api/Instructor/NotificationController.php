@@ -239,4 +239,12 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 選択したお知らせの公開状態を更新
+     */
+    public function putStatus(UpdateTypeRequest $request): JsonResponse
+    {
+        
+    }
 }

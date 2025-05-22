@@ -268,10 +268,6 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            // 削除するチャプターに紐づくレッスンを削除する
-            Lesson::whereIn('id', $lessonIds)->delete();
-            // チャプターを削除
-            Chapter::where('course_id', $courseId)->delete();
 
             DB::commit();
 

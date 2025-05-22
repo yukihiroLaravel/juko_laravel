@@ -20,17 +20,12 @@ class DeleteAllChaptersService
     {
         $course = Course::with('chapters.lessons')->findOrFail($courseId);
 
-        DB::beginTransaction();
 
-        try {
             // すべての lesson ID を取得
             $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
 
             // すべての chapter ID を取得
             $chapterIds = $course->chapters->pluck('id')->toArray();
-
-            // 出席データを一括削除
-            LessonAttendance::whereIn('lesson_id', $lessonIds)->delete();
 
             // レッスンを一括削除
             Lesson::whereIn('id', $lessonIds)->delete();
@@ -39,9 +34,5 @@ class DeleteAllChaptersService
             Chapter::whereIn('id', $chapterIds)->delete();
 
             DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
-        }
     }
 }

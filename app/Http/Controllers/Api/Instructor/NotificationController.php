@@ -81,6 +81,7 @@ class NotificationController extends Controller
                 'type' => $request->type,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
+                'status' => $request->status,
                 'content' => $request->content,
             ]);
             DB::commit();
@@ -238,13 +239,5 @@ class NotificationController extends Controller
             Log::error($e);
             throw $e;
         }
-    }
-
-    /**
-     * 選択したお知らせの公開状態を更新
-     */
-    public function putStatus(UpdateTypeRequest $request): JsonResponse
-    {
-        
     }
 }

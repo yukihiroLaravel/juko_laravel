@@ -10,7 +10,7 @@ class UpdateChapterStatusService
     /**
      * @param  Collection<int>  $chapterIds
      */
-    public function __invoke(Collection $chapterIds, int $status): void
+    public function __invoke(Collection $chapterIds, string $status): void
     {
         Chapter::whereIn('id', $chapterIds)->update([
             'status' => $status,

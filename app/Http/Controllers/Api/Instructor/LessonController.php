@@ -19,7 +19,10 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Lesson\DeleteAllLessonsService;
+use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -79,7 +82,7 @@ class LessonController extends Controller
     /**
      * レッスン更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
         $user = Instructor::find($request->user()->id);
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
@@ -97,12 +100,8 @@ class LessonController extends Controller
             throw new AuthorizationException('Forbidden, invalid chapter_id.');
         }
 
-        $lesson->update([
-            'title' => $request->title,
-            'url' => $request->url,
-            'remarks' => $request->remarks,
-            'status' => $request->status,
-        ]);
+        // UpdateLessonServiceを呼び出し更新処理
+        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
 
         return response()->json([
             'result' => true,
@@ -112,7 +111,7 @@ class LessonController extends Controller
     /**
      * レッスン削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -131,17 +130,7 @@ class LessonController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            // 削除対象レッスンのorderカラムを0に設定する
-            $lesson->update(['order' => 0]);
-
-            $lesson->delete();
-
-            Lesson::where('chapter_id', $lesson->chapter_id)
-                ->orderBy('order')
-                ->get()
-                ->each(function ($lesson, $index) {
-                    $lesson->update(['order' => $index + 1]);
-                });
+            $deleteLessonService($lesson);
 
             DB::commit();
 
@@ -280,12 +269,10 @@ class LessonController extends Controller
     /**
      * チャプターに紐づく全レッスンを削除するAPI
      */
-    public function deleteAll(DeleteAllRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
     {
-
-        // チャプターを取得
         /** @var Chapter $chapter */
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
 
         // 現在の講師がチャプターの講座の作成者であるか確認
         if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
@@ -297,23 +284,13 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid course_id.');
         }
 
-        // チャプターに紐づく全レッスンIDを取得
-        $lessonIds = $chapter->lessons->pluck('id');
-        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-        if ($attendedLessonIds->isNotEmpty()) {
-            // 出席のあるレッスンがあれば削除を許可しない
-            throw new AuthorizationException('This lessons contains attendance.');
-        }
-
-        DB::beginTransaction();
-
         try {
+            // サービスクラスで削除処理を実行
+            $service($chapter->lessons);
 
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -22,8 +22,11 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
+use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\DeleteAllChaptersService;
+use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -292,7 +295,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function sort(SortRequest $request)
+    public function sort(SortRequest $request, SortChaptersService $service)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -312,14 +315,7 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($chapters as $chapter) {
-                Chapter::where('id', $chapter['chapter_id'])
-                    ->where('course_id', $courseId)
-                    ->firstOrFail()
-                    ->update([
-                        'order' => $chapter['order'],
-                    ]);
-            }
+            $service($chapters, $courseId);
 
             DB::commit();
 
@@ -381,7 +377,7 @@ class ChapterController extends Controller
      *
      * @return JsonResponse
      */
-    public function putStatus(PutStatusRequest $request)
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service)
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -394,17 +390,12 @@ class ChapterController extends Controller
         // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
         $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id')->toArray();
 
-        if (! in_array($request->course_id, $courseIds)) {
+        if (! in_array((int) $request->course_id, $courseIds, true)) {
             // 講座IDがマネージャーが管理する講座IDのリストに含まれていない場合はエラー応答
-            throw new ValidationErrorException('Not authorized.');
+            throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        $course = Course::findOrFail($request->course_id);
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            // ログイン中の講師IDが講座の講師IDと一致しない場合はエラー応答
-            throw new ValidationErrorException('Not authorized.');
-        }
-        Chapter::chapterUpdateAll($request->course_id, $request->status);
+        $service($request->course_id, $request->status);
 
         return response()->json([
             'result' => true,
@@ -414,7 +405,7 @@ class ChapterController extends Controller
     /**
      * 選択済みチャプターを公開/非公開にするAPI
      */
-    public function patchStatus(PatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -443,8 +434,8 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         });
-        // チャプターのステータスを一括更新
-        Chapter::whereIn('id', $chapterIds)->update(['status' => $status]);
+
+        $updateChapterStatusService($chapters->pluck('id'), $request->status);
 
         return response()->json([
             'result' => true,

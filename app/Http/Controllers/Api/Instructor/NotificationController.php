@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\Notification\StoreRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationShowResource;
+use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
@@ -243,25 +244,31 @@ class NotificationController extends Controller
     /**
      * 選択されたお知らせ 一括公開・非公開API
      */
-    public function putStatus(PutRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $notificationIds = $request->input('notifications', []);
 
+        // ログイン講師のお知らせのみを抽出
+        $notifications = Notification::where('instructor_id', $instructorId)->get();
+
+        // 選択されたお知らせを取得
+        $notificationIds = $request->input('notifications', []);
+        // そもそも、ログインユーザが持ってるお知らせ一覧を取得してれば、講師と一致しないお知らせが含まれてることはない。よってそのthrowは必要ない。
         // 講師と一致しないお知らせが含まれている場合はエラー
-        $notifications = Notification::whereIn('id', $notificationIds)->get();
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        //$notifications = Notification::whereIn('id', $notificationIds)->get();
+        //if (
+        //    $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+        //) {
+        //    throw new AuthorizationException('Invalid instructor_id.');
+        //}
 
         // トランザクション開始
         DB::beginTransaction();
 
         try {
-            // お知らせのステータスを更新
-            Notification::whereIn('id', $notificationIds)
+            // 選択されたお知らせを抽出
+            $notifidations->whereIn('id', $notificationIds)
+                // ステータスを更新
                 ->update(['status' => $request->status]);
 
             // コミット

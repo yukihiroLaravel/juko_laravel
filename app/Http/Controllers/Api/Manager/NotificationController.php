@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
+use App\Http\Requests\Manager\Notification\BulkUpdateStatusRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
@@ -22,6 +23,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Psy\VersionUpdater\Installer;
 
 /**
  * @tags Manager-Notification
@@ -296,9 +298,11 @@ class NotificationController extends Controller
         /**
      * お知らせ一覧-一括更新API
      */
-    public function bulkUpdateStatus(): JsonResponse
+    public function bulkUpdateStatus(BulkUpdateStatusRequest $request): JsonResponse
     {
-        return response()->json([]);
+        // ログインしている講師データを取得
+        /** @var Instructor $manager */
+        $manager = Auth::guard('instructor')->user();
     }
 
 }

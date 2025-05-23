@@ -31,6 +31,11 @@ class Notification extends Model
         'content',
     ];
 
+    // カラムのキャスト
+    protected $casts = [
+        'status' => Status::class,
+    ]
+
     // 表示区分 定数
     const TYPE_ALWAYS_INT = 1;
 

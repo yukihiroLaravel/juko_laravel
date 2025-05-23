@@ -15,15 +15,14 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
+use App\Services\Chapter\DeleteAllChaptersService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
-use App\Services\Chapter\DeleteAllChaptersService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -225,7 +224,6 @@ class ChapterController extends Controller
                 // 受講中のレッスンがあれば、エラー応答
                 throw new AuthorizationException('This lesson has attendance.');
             }
-
 
             DB::commit();
 

@@ -293,11 +293,12 @@ class NotificationController extends Controller
         }
     }
 
-    /**
+        /**
      * お知らせ一覧-一括更新API
      */
-    public function bulkUpdate(): JsonResponse
+    public function bulkUpdateStatus(): JsonResponse
     {
         return response()->json([]);
     }
+
 }

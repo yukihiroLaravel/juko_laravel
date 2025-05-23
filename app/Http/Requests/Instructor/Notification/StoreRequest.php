@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Instructor\Notification;
 
+use App\Enums\Instructor\Status;
 use App\Rules\NotificationStoreStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Instructor\Status;
 
 class StoreRequest extends FormRequest
 {

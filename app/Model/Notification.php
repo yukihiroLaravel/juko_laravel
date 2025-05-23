@@ -2,10 +2,10 @@
 
 namespace App\Model;
 
+use App\Enums\Instructor\Status;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Enums\Instructor\Status;
 
 class Notification extends Model
 {
@@ -34,7 +34,7 @@ class Notification extends Model
 
     // カラムのキャスト
     protected $casts = [
-        'status' => Status::class
+        'status' => Status::class,
     ];
 
     // 表示区分 定数

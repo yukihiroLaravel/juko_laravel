@@ -19,6 +19,7 @@ use App\Model\ViewedOnceNotification;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
+use lluminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -246,29 +247,16 @@ class NotificationController extends Controller
      */
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // ログイン講師のお知らせのみを抽出
-        $notifications = Notification::where('instructor_id', $instructorId)->get();
-
-        // 選択されたお知らせを取得
+        // 選択されたお知らせidを取得
         $notificationIds = $request->input('notifications', []);
-        // そもそも、ログインユーザが持ってるお知らせ一覧を取得してれば、講師と一致しないお知らせが含まれてることはない。よってそのthrowは必要ない。
-        // 講師と一致しないお知らせが含まれている場合はエラー
-        //$notifications = Notification::whereIn('id', $notificationIds)->get();
-        //if (
-        //    $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
-        //) {
-        //    throw new AuthorizationException('Invalid instructor_id.');
-        //}
 
         // トランザクション開始
         DB::beginTransaction();
 
         try {
-            // 選択されたお知らせを抽出
-            $notifidations->whereIn('id', $notificationIds)
-                // ステータスを更新
+            // 選択されたお知らせidを取得
+            Notification::whereIn('id', $notificationIds)
+                // ステータスを更新（「公開」ボタンの時：status="public", 「非公開」ボタンの時：status="private"）
                 ->update(['status' => $request->status]);
 
             // コミット

@@ -284,6 +284,8 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid course_id.');
         }
 
+        DB::beginTransaction();
+
         try {
             // サービスクラスで削除処理を実行
             $service($chapter->lessons);

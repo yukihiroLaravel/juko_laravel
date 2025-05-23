@@ -19,7 +19,6 @@ use App\Model\ViewedOnceNotification;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
-use lluminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -247,6 +246,9 @@ class NotificationController extends Controller
      */
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
+        // ログインしている講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
         // 選択されたお知らせidを取得
         $notificationIds = $request->input('notifications', []);
 
@@ -254,8 +256,10 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            // 選択されたお知らせidを取得
-            Notification::whereIn('id', $notificationIds)
+            // ログイン講師のお知らせを取得
+            Notification::where('instructor_id', $instructorId)
+                // 選択されたお知らせidを取得
+                ->whereIn('id', $notificationIds)
                 // ステータスを更新（「公開」ボタンの時：status="public", 「非公開」ボタンの時：status="private"）
                 ->update(['status' => $request->status]);
 

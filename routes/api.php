@@ -260,6 +260,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\NotificationController::class, 'index']);
                     Route::put('type/{notification_type}', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
                     Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkDelete']);
+                    Route::put('/status', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkUpdateStatus']);
 
                     Route::prefix('{notification_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'show']);

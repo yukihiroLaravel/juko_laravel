@@ -17,6 +17,7 @@ class DeleteRequest extends FormRequest
     /**
      * バリデーション前にルートパラメータをマージ
      */
+    #[\Override]
     protected function prepareForValidation()
     {
         $this->merge([
@@ -39,6 +40,7 @@ class DeleteRequest extends FormRequest
     /**
      * バリデーションエラーメッセージ
      */
+    #[\Override]
     public function messages(): array
     {
         return [

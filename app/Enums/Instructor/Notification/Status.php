@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Enums\Instructor;
+namespace App\Enums\Instructor\Notification;
 
-enum Status: string
+enum NotificationStatus: string
 {
     case PUBLIC = 'public';
     case PRIVATE = 'private';

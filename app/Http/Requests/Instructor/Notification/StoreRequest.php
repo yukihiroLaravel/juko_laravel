@@ -4,6 +4,7 @@ namespace App\Http\Requests\Instructor\Notification;
 
 use App\Enums\Instructor\Status;
 use App\Rules\NotificationStoreStatusRule;
+use App\Enums\Instructor\Notification\Status;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -40,7 +41,7 @@ class StoreRequest extends FormRequest
             'type' => ['required', new NotificationStoreStatusRule],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
-            'status' => ['required', Rule::in(Status::values())],
+            'status' => ['required', Rule::in(NotificationStatus::values())],
             'content' => ['required', 'string', 'max:500'],
         ];
     }

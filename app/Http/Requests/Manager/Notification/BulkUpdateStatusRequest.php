@@ -27,7 +27,7 @@ class BulkUpdateStatusRequest extends FormRequest
         return [
             'notifications' => ['required', 'array', 'min:1'],
             'notifications.*' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new NotificationUpdateStatusRule],
+            'status' => ['required', 'string'],
         ];
     }
 

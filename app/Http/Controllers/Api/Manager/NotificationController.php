@@ -303,6 +303,30 @@ class NotificationController extends Controller
         // ログインしている講師データを取得
         /** @var Instructor $manager */
         $manager = Auth::guard('instructor')->user();
+
+        // 管理している講師のIDを取得
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 対象のお知らせを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+
+        // お知らせのinstructor_idが管理対象か確認
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
+
+        // 管理対象外の講師IDが含まれていた場合、権限エラー
+        if(array_diff($notificationsInstructorIds, $instructorIds) !== []){
+            throw new AuthorizationException('Forbidden, invalid notifications_id.');
+        }
+
+        // ステータス更新
+        Notification::whereIn('id', $request->notifications)->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
 }

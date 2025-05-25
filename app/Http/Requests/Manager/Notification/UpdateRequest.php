@@ -39,6 +39,7 @@ class UpdateRequest extends FormRequest
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['required', 'string', 'max:500'],
+            'status' => ['required', 'boolean'],
         ];
     }
 }

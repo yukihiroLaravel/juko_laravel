@@ -253,11 +253,11 @@ class NotificationController extends Controller
         $notificationIds = $request->input('notifications', []);
 
         // 選択されたお知らせを取得
-        $chosenNotifications = Notification::whereIn('id', $notificationIds)->get();
+        $chosenNotifications = Notification::whereIn('id', $notificationIds)->pluck('instructor_id');
 
-        // 選択されたお知らせの中に、講師と一致しないお知らせが含まれている場合はエラー
+        // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+            $chosenNotifications->contains(fn ($notificationInstructorId) => $notificationInstructorId !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

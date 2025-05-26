@@ -7,12 +7,12 @@ use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
 use App\Http\Requests\Instructor\Notification\IndexRequest;
 use App\Http\Requests\Instructor\Notification\PutRequest;
+use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Http\Resources\Instructor\NotificationShowResource;
-use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
@@ -266,11 +266,8 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            // ログイン講師のお知らせを取得
             Notification::where('instructor_id', $instructorId)
-                // 選択されたお知らせidを取得
                 ->whereIn('id', $notificationIds)
-                // ステータスを更新（「公開」ボタンの時：status="public", 「非公開」ボタンの時：status="private"）
                 ->update(['status' => $request->status]);
 
             // コミット

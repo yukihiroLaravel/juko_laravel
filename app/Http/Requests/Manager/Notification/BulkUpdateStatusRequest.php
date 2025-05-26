@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Manager\Notification;
 
-use App\Rules\NotificationUpdateStatusRule;
+use App\Enums\NotificationStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+
 
 class BulkUpdateStatusRequest extends FormRequest
 {
@@ -27,7 +29,7 @@ class BulkUpdateStatusRequest extends FormRequest
         return [
             'notifications' => ['required', 'array', 'min:1'],
             'notifications.*' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
-            'status' => ['required', 'string'],
+            'status' => ['required', 'string', new Enum(NotificationStatus::class)],
         ];
     }
 

@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Services\Chapter;
+
+use App\Model\Chapter;
+use Illuminate\Support\Collection;
+
+class UpdateChapterStatusService
+{
+    /**
+     * @param  Collection<int>  $chapterIds
+     * @param  'private'|'public'  $status
+     */
+    public function __invoke(Collection $chapterIds, string $status): void
+    {
+        Chapter::whereIn('id', $chapterIds)->update([
+            'status' => $status,
+        ]);
+    }
+}

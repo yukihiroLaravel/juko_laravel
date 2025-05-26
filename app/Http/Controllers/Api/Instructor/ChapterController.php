@@ -23,6 +23,7 @@ use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
+use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -128,7 +129,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開/非公開API
      */
-    public function patchStatus(PatchStatusRequest $request): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         try {
             // リクエストで送られたcourseとchapterのidを変数に格納
@@ -152,10 +153,7 @@ class ChapterController extends Controller
                 }
             });
 
-            // チャプターの状態を一括で更新
-            Chapter::whereIn('id', $chapters->pluck('id'))->update([
-                'status' => $request->status,
-            ]);
+            $updateChapterStatusService($chapters->pluck('id'), $request->status);
 
             return response()->json([
                 'result' => true,

@@ -23,7 +23,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Psy\VersionUpdater\Installer;
 
 /**
  * @tags Manager-Notification
@@ -295,7 +294,7 @@ class NotificationController extends Controller
         }
     }
 
-        /**
+    /**
      * お知らせ一覧-一括更新API
      */
     public function bulkUpdateStatus(BulkUpdateStatusRequest $request): JsonResponse
@@ -315,7 +314,7 @@ class NotificationController extends Controller
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
 
         // 管理対象外の講師IDが含まれていた場合、権限エラー
-        if(array_diff($notificationsInstructorIds, $instructorIds) !== []){
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
             throw new AuthorizationException('Forbidden, invalid notifications_id.');
         }
 
@@ -328,5 +327,4 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
-
 }

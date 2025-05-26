@@ -6,7 +6,6 @@ use App\Enums\NotificationStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
-
 class BulkUpdateStatusRequest extends FormRequest
 {
     /**
@@ -38,10 +37,10 @@ class BulkUpdateStatusRequest extends FormRequest
      */
     public function messages(): array
     {
-        return[
-            'notifications.required'   => '対象のお知らせを1件以上選択してください。',
-            'notifications.*.exists'   => '存在しないお知らせIDが含まれています。',
-            'status.required'          => 'ステータスは必須です。',
+        return [
+            'notifications.required' => '対象のお知らせを1件以上選択してください。',
+            'notifications.*.exists' => '存在しないお知らせIDが含まれています。',
+            'status.required' => 'ステータスは必須です。',
         ];
     }
 }

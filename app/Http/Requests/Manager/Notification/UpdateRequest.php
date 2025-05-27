@@ -4,6 +4,7 @@ namespace App\Http\Requests\Manager\Notification;
 
 use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -39,7 +40,7 @@ class UpdateRequest extends FormRequest
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['required', 'string', 'max:500'],
-            'status' => ['required', 'boolean'],
+            'status' => ['required', 'string', Rule::in(['public', 'private'])],
         ];
     }
 }

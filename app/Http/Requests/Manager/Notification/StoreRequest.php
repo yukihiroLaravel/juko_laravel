@@ -39,7 +39,6 @@ class StoreRequest extends FormRequest
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'content' => ['required', 'string', 'max:500'],
-            'status' => ['required', 'boolean'],
         ];
     }
 }

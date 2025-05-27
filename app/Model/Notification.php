@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Instructor\Notification\NotificationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,6 +30,11 @@ class Notification extends Model
         'start_date',
         'end_date',
         'content',
+    ];
+
+    // カラムのキャスト
+    protected $casts = [
+        'status' => NotificationStatus::class,
     ];
 
     // 表示区分 定数

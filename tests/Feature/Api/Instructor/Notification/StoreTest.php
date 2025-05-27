@@ -31,6 +31,7 @@ class StoreTest extends TestCase
             'start_date' => '2022-01-01 00:00:00',
             'end_date' => '2022-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'private',
         ]);
 
         // assert
@@ -42,6 +43,7 @@ class StoreTest extends TestCase
             'start_date' => '2022-01-01 00:00:00',
             'end_date' => '2022-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'private',
         ]);
     }
 
@@ -58,6 +60,7 @@ class StoreTest extends TestCase
             'start_date' => '2022-01-01 00:00:00',
             'end_date' => '2022-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'private',
         ]);
 
         // assert
@@ -80,6 +83,7 @@ class StoreTest extends TestCase
             'start_date' => '',
             'end_date' => '',
             'content' => '',
+            'status' => '',
         ]);
 
         // assert
@@ -91,6 +95,7 @@ class StoreTest extends TestCase
             'start_date',
             'end_date',
             'content',
+            'status',
         ]);
     }
 }

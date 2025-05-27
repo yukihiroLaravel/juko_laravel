@@ -15,10 +15,10 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
+use App\Services\Chapter\DeleteAllChaptersService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
@@ -202,7 +202,7 @@ class ChapterController extends Controller
     /**
      * 全チャプター削除API
      */
-    public function deleteAll(DeleteAllRequest $request): JsonResponse
+    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service)
     {
         $courseId = $request->input('course_id');
 
@@ -225,11 +225,9 @@ class ChapterController extends Controller
                 throw new AuthorizationException('This lesson has attendance.');
             }
 
-            // チャプターを削除
-            Chapter::where('course_id', $courseId)->delete();
-            Lesson::whereIn('chapter_id', $chapterIds)->delete();
-
             DB::commit();
+
+            $service($courseId);
 
             return response()->json([
                 'result' => true,

@@ -20,8 +20,8 @@ class PutStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', Rule::enum(NotificationStatus::class)],
-            'notifications' => ['required', 'array'],
-            
+            'notifications' => ['required', 'array', 'min:1'],
+            'notifications.*' => ['integer', 'exists:notifications,id']
         ];
     }
 }

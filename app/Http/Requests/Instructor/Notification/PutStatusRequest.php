@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Requests\Instructor\Notification;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class PutStatusRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'status' => ['required', Rule::enum(NotificationStatus::class)],
+            'notifications' => ['required', 'array'],
+            
+        ];
+    }
+}

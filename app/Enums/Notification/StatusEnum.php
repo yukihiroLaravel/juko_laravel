@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\Notification;
 
-enum NotificationStatus: string
+enum StatusEnum: string
 {
     case PRIVATE = 'private';
+
     case PUBLIC = 'public';
+
 }

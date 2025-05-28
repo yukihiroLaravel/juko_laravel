@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\Notification;
 
-enum NotificationType: string
+enum TypeEnum: string
 {
     case ALWAYS = 'always';
     case ONCE = 'once';

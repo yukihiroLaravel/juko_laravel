@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Instructor\Notification\NotificationStatus;
+use App\Enums\Notification\TypeEnum;
 use App\Enums\NotificationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,7 @@ class Notification extends Model
     // カラムのキャスト
     protected $casts = [
         'status' => NotificationStatus::class,
-        'type' => NotificationType::class,
+        'type' => TypeEnum::class,
     ];
 
     // 表示区分 定数

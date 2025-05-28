@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Instructor\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Enums\NotificationStatus;
 
 class PutStatusRequest extends FormRequest
 {

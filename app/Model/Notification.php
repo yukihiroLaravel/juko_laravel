@@ -4,7 +4,6 @@ namespace App\Model;
 
 use App\Enums\Instructor\Notification\NotificationStatus;
 use App\Enums\Notification\TypeEnum;
-use App\Enums\NotificationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

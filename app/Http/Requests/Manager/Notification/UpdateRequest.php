@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Manager\Notification;
 
 use App\Enums\Notification\TypeEnum;
-use App\Enums\NotificationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

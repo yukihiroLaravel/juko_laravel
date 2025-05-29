@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
+use App\Http\Requests\Manager\Notification\BulkUpdateStatusRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
@@ -296,8 +297,34 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括更新API
      */
-    public function bulkUpdateStatus(): JsonResponse
+    public function bulkUpdateStatus(BulkUpdateStatusRequest $request): JsonResponse
     {
-        return response()->json([]);
+        // ログインしている講師データを取得
+        /** @var Instructor $manager */
+        $manager = Auth::guard('instructor')->user();
+
+        // 管理している講師のIDを取得
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 対象のお知らせを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+
+        // お知らせのinstructor_idが管理対象か確認
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
+
+        // 管理対象外の講師IDが含まれていた場合、権限エラー
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
+            throw new AuthorizationException('Forbidden, invalid notifications_id.');
+        }
+
+        // ステータス更新
+        Notification::whereIn('id', $request->notifications)->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

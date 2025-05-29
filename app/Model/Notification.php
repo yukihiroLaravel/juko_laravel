@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Notification\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -102,5 +103,13 @@ class Notification extends Model
     public function instructor()
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
+
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
     }
 }

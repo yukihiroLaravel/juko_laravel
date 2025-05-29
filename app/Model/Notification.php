@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use App\Enums\Instructor\Notification\NotificationStatus;
+use App\Enums\Notification\StatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,11 +30,6 @@ class Notification extends Model
         'start_date',
         'end_date',
         'content',
-    ];
-
-    // カラムのキャスト
-    protected $casts = [
-        'status' => NotificationStatus::class,
     ];
 
     // 表示区分 定数
@@ -108,5 +103,16 @@ class Notification extends Model
     public function instructor()
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
+
+    #[\Override]
+    /**
+     * @return array{status:'App\Enums\Notification\StatusEnum'}
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
     }
 }

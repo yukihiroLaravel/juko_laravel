@@ -49,6 +49,7 @@ class NotificationIndexResource extends JsonResource
             'instructor' => new InstructorResource($notification->instructor),
             'start_date' => $notification->start_date,
             'end_date' => $notification->end_date,
+            'status' => $notification->status,
         ])
             ->toArray();
     }

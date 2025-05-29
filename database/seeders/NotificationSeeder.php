@@ -49,6 +49,17 @@ class NotificationSeeder extends Seeder
                 'created_at' => CarbonImmutable::now(),
                 'updated_at' => CarbonImmutable::now(),
             ],
+            [
+                'course_id' => 1,
+                'instructor_id' => 1,
+                'title' => 'PHP入門講座のメンテナンス',
+                'type' => Notification::TYPE_ONCE_INT,
+                'start_date' => '2023-08-01 00:00:00',
+                'end_date' => CarbonImmutable::now()->addMonth(),
+                'content' => 'PHP入門講座の一部機能がメンテナンスのため、8月10日から8月15日の間利用できません。ご迷惑をおかけしますが、よろしくお願いいたします。',
+                'created_at' => CarbonImmutable::now(),
+                'updated_at' => CarbonImmutable::now(),
+            ],
         ]);
     }
 }

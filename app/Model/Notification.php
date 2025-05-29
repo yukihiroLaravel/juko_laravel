@@ -32,10 +32,6 @@ class Notification extends Model
         'content',
     ];
 
-    protected $casts = [
-        'status' => StatusEnum::class,
-    ];
-
     // 表示区分 定数
     const TYPE_ALWAYS_INT = 1;
 
@@ -107,5 +103,12 @@ class Notification extends Model
     public function instructor()
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
+    #[\Override]
+    protected function casts() : array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
     }
 }

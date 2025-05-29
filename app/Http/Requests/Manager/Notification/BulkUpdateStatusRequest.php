@@ -35,6 +35,7 @@ class BulkUpdateStatusRequest extends FormRequest
     /**
      * バリデーションエラーメッセージ
      */
+    #[\Override]
     public function messages(): array
     {
         return [

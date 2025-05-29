@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Manager\Notification;
 
-use App\Enums\NotificationType;
+use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -36,7 +36,7 @@ class StoreRequest extends FormRequest
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'title' => ['required', 'string', 'max:50'],
-            'type' => ['required', new Enum(NotificationType::class)],
+            'type' => ['required', new Enum(TypeEnum::class)],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'content' => ['required', 'string', 'max:500'],

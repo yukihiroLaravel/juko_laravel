@@ -104,8 +104,9 @@ class Notification extends Model
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
     }
+
     #[\Override]
-    protected function casts() : array
+    protected function casts(): array
     {
         return [
             'status' => StatusEnum::class,

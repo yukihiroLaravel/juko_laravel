@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Instructor\Notification;
 
 use App\Enums\Notification\StatusEnum;
+use App\Enums\Notification\TypeEnum;
 use App\Rules\NotificationStoreStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -37,7 +38,7 @@ class StoreRequest extends FormRequest
         return [
             'course_id' => ['required', 'exists:courses,id', 'integer'],
             'title' => ['required', 'string', 'max:50'],
-            'type' => ['required', new NotificationStoreStatusRule],
+            'type' => ['required', Rule::enum(TypeEnum::class)],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'status' => ['required', Rule::enum(StatusEnum::class)],

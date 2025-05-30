@@ -169,17 +169,17 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-    } catch (AuthorizationException $e) {
-        return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
-        ], 403);
-    } catch (Exception $e) {
-        Log::error($e);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 403);
+        } catch (Exception $e) {
+            Log::error($e);
             Log::error($e);
             throw $e;
+        }
     }
-}
 
     /**
      * 講座削除API

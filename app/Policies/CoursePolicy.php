@@ -14,7 +14,7 @@ class CoursePolicy
     {
         $manager = Instructor::with('managings')->find($instructor->id);
 
-        if(!$manager){
+        if (! $manager) {
             return false;
         }
 

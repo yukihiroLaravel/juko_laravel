@@ -8,9 +8,8 @@ class BulkDeleteLessonsService
 {
     /**
      * 複数レッスンの削除
-     * 
-     * @param array<int> $lessonIds
-     * @param int $chapterId
+     *
+     * @param  array<int>  $lessonIds
      */
     public function __invoke(array $lessonIds, int $chapterId): void
     {

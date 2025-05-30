@@ -198,7 +198,6 @@ class LessonController extends Controller
 
             // マネージャーが管理する講師を取得
             $manager = Instructor::with('managings')->find($managerId);
-            assert($manager instanceof Instructor);
 
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $manager->id;
@@ -395,41 +394,39 @@ class LessonController extends Controller
         // レッスン情報を取得
         /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
-        try {
-            DB::beginTransaction();
+        DB::beginTransaction();
 
+        try {
             $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
                 // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
-                    throw new ValidationErrorException('Invalid course_id.');
+                    throw new AuthorizationException('Invalid course_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter->id) {
-                    throw new ValidationErrorException('Invalid chapter_id.');
+                    throw new AuthorizationException('Invalid chapter_id.');
                 }
                 // 受講情報が登録されている場合は許可しない
                 if ($lesson->lessonAttendances->isNotEmpty()) {
-                    throw new ValidationErrorException('This lesson has attendance.');
+                    throw new AuthorizationException('This lesson has attendance.');
                 }
             });
 
             // サービスクラスで対象レッスンの削除処理を実行
-            $service($lessonIds, $chapterId);
+            $service(
+                lessonIds: $lesson->pluck('id')->toArray(),
+                chapterId: $chapterId
+            );
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
@@ -147,10 +146,8 @@ class LessonController extends Controller
 
     /**
      * 複数のレッスン削除API
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service)
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -159,6 +156,7 @@ class LessonController extends Controller
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
 
+        DB::beginTransaction();
         try {
             // レッスン情報を取得
             $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
@@ -166,37 +164,33 @@ class LessonController extends Controller
             $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
                 // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
                 if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                    throw new ValidationErrorException('Invalid instructor_id.');
+                    throw new AuthorizationException('Invalid instructor_id.');
                 }
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
-                    throw new ValidationErrorException('Invalid chapter.');
+                    throw new AuthorizationException('Invalid chapter.');
                 }
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
-                    throw new ValidationErrorException('Invalid course.');
+                    throw new AuthorizationException('Invalid course.');
                 }
                 // 受講情報が登録されている場合は許可しない
                 if ($lesson->lessonAttendances->isNotEmpty()) {
-                    throw new ValidationErrorException('This lesson has attendance.');
+                    throw new AuthorizationException('This lesson has attendance.');
                 }
             });
 
-            DB::beginTransaction();
-
             // サービスクラスで対象レッスンの削除処理を実行
-            $service($lessonIds, $chapterId);
+            $service(
+                lessonIds: $lessons->pluck('id')->toArray(),
+                chapterId: $chapterId
+            );
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ValidationErrorException $e) {
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -141,13 +141,11 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 認可チェック(policy 利用)
+            $this->authorize('instructorPolicy', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -171,11 +169,17 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
+    } catch (AuthorizationException $e) {
+        return response()->json([
+            'result' => false,
+            'message' => $e->getMessage(),
+        ], 403);
+    } catch (Exception $e) {
+        Log::error($e);
             Log::error($e);
             throw $e;
-        }
     }
+}
 
     /**
      * 講座削除API

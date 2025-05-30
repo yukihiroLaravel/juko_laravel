@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Model\Instructor;
 use App\Model\Course;
-use App\Model\Attendance;
-use Illuminate\Auth\Access\Response;
+use App\Model\Instructor;
 
 class CoursePolicy
 {

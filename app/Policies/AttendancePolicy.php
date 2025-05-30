@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Model\Attendance;
 use App\Model\Course;
-use Illuminate\Auth\Access\Response;
 
 class AttendancePolicy
 {
@@ -15,5 +14,4 @@ class AttendancePolicy
     {
         return Attendance::where('course_id', $course->course_id)->exists();
     }
-        
 }

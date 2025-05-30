@@ -19,6 +19,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -376,7 +377,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスン削除API
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -416,15 +417,9 @@ class LessonController extends Controller
                 }
             });
 
-            Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
-            Lesson::whereIn('id', $lessonIds)->delete();
-            //レッスン順序の更新
-            Lesson::where('chapter_id', $chapterId)
-                ->orderBy('order')
-                ->get()
-                ->each(function (Lesson $lesson, int $index) {
-                    $lesson->update(['order' => $index + 1]);
-                });
+            // サービスクラスで対象レッスンの削除処理を実行
+            $service($lessonIds, $chapterId);
+
             DB::commit();
 
             return response()->json([

@@ -2,17 +2,17 @@
 
 namespace App\Policies;
 
-use App\Model\Attendance;
+use App\Model\Instructor;
 use App\Model\Course;
-use Illuminate\Auth\Access\Response;
+use App\Model\Attendance;
 
 class AttendancePolicy
 {
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(Course $course): bool
+    public function deletable(Instructor $instructor, Course $course): bool
     {
-        return Attendance::where('course_id', $course->course_id)->exists();
+        return !Attendance::where('course_id', $course->course_id)->exists();
     }
 }

@@ -180,14 +180,17 @@ class CourseController extends Controller
     /**
      * 講座削除API
      */
-    public function delete(DeleteRequest $request, Course $course, Attendance $attendance): JsonResponse
+    public function delete(DeleteRequest $request): JsonResponse
     {
         try {
-            // $user = Instructor::find(Auth::guard('instructor')->user()->id);
-            // $course = Course::findOrFail($request->course_id);
+            $course = Course::findOrFail($request->course_id);
+            // $attendance = Attendance::where('course_id', $request->course_id);
 
+            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
             $this->authorize('delete', $course);
-            $this->authorize('delete', $attendance);
+
+            // 受講者がいる場合は削除できない
+            $this->authorize('deletable', $course);
 
             // publicディレクトリ配下の画像ファイルを削除
             if (Storage::exists('public/'.$course->image)) {

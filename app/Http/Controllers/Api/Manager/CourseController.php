@@ -184,22 +184,15 @@ class CourseController extends Controller
      */
     public function delete(DeleteRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $instructor = Instructor::with('managings')->find($instructorId);
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
-
         try {
             $course = Course::findOrFail($request->course_id);
+            // $attendance = Attendance::where('course_id', $request->course_id)->id;
 
-            if (! in_array($course->instructor_id, $managingIds, true)) {
-                // 自分、または配下の講師の講座でなければエラー応答
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 自分、または配下の講師の講座でないと削除できない
+            $this->authorize('delete', $course);
 
-            if (Attendance::where('course_id', $request->course_id)->exists()) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
+            // 受講者がいる場合は削除できない
+            $this->authorize('deletable', $course);
 
             // publicディレクトリ配下の画像ファイルを削除
             if (Storage::disk('public')->exists($course->image)) {

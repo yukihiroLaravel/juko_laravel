@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use App\Model\Course;
 use App\Model\Attendance;
-use App\Policies\CoursePolicy;
+use App\Model\Course;
 use App\Policies\AttendancePolicy;
+use App\Policies\CoursePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

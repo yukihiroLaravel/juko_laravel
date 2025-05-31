@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
-use App\Model\Instructor;
-use App\Model\Course;
 use App\Model\Attendance;
+use App\Model\Course;
+use App\Model\Instructor;
 
 class AttendancePolicy
 {
@@ -13,6 +13,6 @@ class AttendancePolicy
      */
     public function deletable(Instructor $instructor, Course $course): bool
     {
-        return !Attendance::where('course_id', $course->course_id)->exists();
+        return ! Attendance::where('course_id', $course->course_id)->exists();
     }
 }

@@ -36,8 +36,8 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'status' => ['required', new Enum(StatusEnum::class)],
             'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
+            'status' => ['required', new Enum(StatusEnum::class)],
             'type' => ['required', new NotificationUpdateStatusRule],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],

@@ -15,5 +15,4 @@ class AttendancePolicy
     {
         return Attendance::where('course_id', $course->course_id)->exists();
     }
-        
 }

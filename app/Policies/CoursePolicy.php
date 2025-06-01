@@ -20,7 +20,7 @@ class CoursePolicy
         // 管理している講師の中に対象講座の講師が含まれているかチェック
         $manager = Instructor::with('managings')->find($instructor->id);
 
-        if (!$manager) {
+        if (! $manager) {
             return false;
         }
 

@@ -11,7 +11,6 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;

@@ -2,11 +2,10 @@
 
 namespace App\Policies;
 
+use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Attendance;
 use App\Model\ManageInstructor;
-
 
 class CoursePolicy
 {
@@ -20,9 +19,10 @@ class CoursePolicy
             $manager = Instructor::with('managings')->find($instructor->id);
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
+
             return in_array($course->instructor_id, $instructorIds);
 
-        // マネージャー権限のない講師
+            // マネージャー権限のない講師
         } else {
             return $instructor->id === $course->instructor_id;
         }
@@ -30,6 +30,6 @@ class CoursePolicy
 
     public function deletable(Instructor $instructor, Course $course): bool
     {
-        return !Attendance::where('course_id', $course->id)->exists();
+        return ! Attendance::where('course_id', $course->id)->exists();
     }
 }

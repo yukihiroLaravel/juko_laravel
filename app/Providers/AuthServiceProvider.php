@@ -3,9 +3,7 @@
 namespace App\Providers;
 
 use App\Model\Course;
-use App\Model\Attendance;
 use App\Policies\CoursePolicy;
-use App\Policies\AttendancePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

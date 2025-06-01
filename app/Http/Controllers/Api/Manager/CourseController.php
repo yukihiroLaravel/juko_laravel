@@ -139,7 +139,7 @@ class CourseController extends Controller
             $imagePath = $course->image;
 
             // 認可チェック(Policy 利用)
-            $this->authorize('managerPolicy', $course);
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -163,17 +163,13 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-    } catch (AuthorizationException $e) {
-        return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
-        ], 403);
-    } catch (Exception $e) {
-        Log::error($e);
-            Log::error($e);
+        } catch (AuthorizationException $e) {
             throw $e;
+        } catch (Exception $e) {
+            log::error($e);
+            throw $e;
+        }
     }
-}
 
     /**
      * 講座削除API

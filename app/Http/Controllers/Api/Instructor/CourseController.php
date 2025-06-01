@@ -145,7 +145,7 @@ class CourseController extends Controller
             $imagePath = $course->image;
 
             // 認可チェック(policy 利用)
-            $this->authorize('instructorPolicy', $course);
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -155,7 +155,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }
@@ -169,17 +169,14 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-    } catch (AuthorizationException $e) {
-        return response()->json([
-            'result' => false,
-            'message' => $e->getMessage(),
-        ], 403);
-    } catch (Exception $e) {
-        Log::error($e);
+        } catch (AuthorizationException $e) {
+            throw $e;
+        } catch (Exception $e) {
             Log::error($e);
             throw $e;
+        }
     }
-}
+
 
     /**
      * 講座削除API

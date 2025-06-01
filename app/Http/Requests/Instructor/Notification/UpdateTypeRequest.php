@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Instructor\Notification;
 
-use App\Rules\NotificationUpdateStatusRule;
+use App\Enums\Notification\TypeEnum;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTypeRequest extends FormRequest
@@ -33,7 +34,7 @@ class UpdateTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'notification_type' => ['required', new NotificationUpdateStatusRule],
+            'notification_type' => ['required', Rule::enum(TypeEnum::class)],
             'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }

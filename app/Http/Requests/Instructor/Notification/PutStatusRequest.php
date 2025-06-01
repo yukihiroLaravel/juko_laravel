@@ -25,5 +25,5 @@ class PutStatusRequest extends FormRequest
             'notifications' => ['required', 'array', 'min:1'],
             'notifications.*' => ['integer', 'exists:notifications,id']
         ];
-    
+    }
 }

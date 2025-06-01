@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\NotificationStatus;
+use App\Enums\StatusEnum;
 
 class PutStatusRequest extends FormRequest
 {
@@ -21,7 +21,7 @@ class PutStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::enum(NotificationStatus::class)],
+            'status' => ['required', Rule::enum(StatusEnum::class)],
             'notifications' => ['required', 'array', 'min:1'],
             'notifications.*' => ['integer', 'exists:notifications,id']
         ];

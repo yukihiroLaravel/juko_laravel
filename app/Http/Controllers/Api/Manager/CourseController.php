@@ -164,21 +164,10 @@ class CourseController extends Controller
                 'result' => true,
             ]);
         } catch (AuthorizationException $e) {
-<<<<<<< HEAD
             throw $e;
         } catch (Exception $e) {
             log::error($e);
             throw $e;
-=======
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
-        } catch (Exception $e) {
-            Log::error($e);
-            Log::error($e);
-            throw $e;
->>>>>>> 739deea8370c4049427a58286a9ef4ff51833823
         }
     }
 

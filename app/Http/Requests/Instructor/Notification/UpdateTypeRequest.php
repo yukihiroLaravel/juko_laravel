@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Instructor\Notification;
 
 use App\Enums\Notification\TypeEnum;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTypeRequest extends FormRequest
 {

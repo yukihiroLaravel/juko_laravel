@@ -18,15 +18,12 @@ class CoursePolicy
         if (ManageInstructor::where('manager_id', $instructor->id)->exists()) {
             // マネージャー権限のある講師
             $manager = Instructor::with('managings')->find($instructor->id);
-            if (! $manager) {
-                return false;
-            }
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
             return in_array($course->instructor_id, $instructorIds);
 
+        // マネージャー権限のない講師
         } else {
-            // マネージャー権限のない講師
             return $instructor->id === $course->instructor_id;
         }
     }

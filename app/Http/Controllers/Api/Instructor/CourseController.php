@@ -184,7 +184,6 @@ class CourseController extends Controller
     {
         try {
             $course = Course::findOrFail($request->course_id);
-            // $attendance = Attendance::where('course_id', $request->course_id);
 
             // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
             $this->authorize('delete', $course);

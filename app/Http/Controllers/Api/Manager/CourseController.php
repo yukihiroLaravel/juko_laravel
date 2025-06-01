@@ -186,7 +186,6 @@ class CourseController extends Controller
     {
         try {
             $course = Course::findOrFail($request->course_id);
-            // $attendance = Attendance::where('course_id', $request->course_id)->id;
 
             // 自分、または配下の講師の講座でないと削除できない
             $this->authorize('delete', $course);

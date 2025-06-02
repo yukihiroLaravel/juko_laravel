@@ -166,7 +166,7 @@ class CourseController extends Controller
         } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
-            log::error($e);
+            Log::error($e);
             throw $e;
         }
     }

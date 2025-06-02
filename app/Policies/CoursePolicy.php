@@ -14,18 +14,11 @@ class CoursePolicy
      */
     public function delete(Instructor $instructor, Course $course): bool
     {
-        if (ManageInstructor::where('manager_id', $instructor->id)->exists()) {
-            // マネージャー権限のある講師
-            $manager = Instructor::with('managings')->find($instructor->id);
-            $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructor->id;
+        // マネージャー権限のある講師か判定
+        isManager($instructor);
 
-            return in_array($course->instructor_id, $instructorIds);
-
-            // マネージャー権限のない講師
-        } else {
-            return $instructor->id === $course->instructor_id;
-        }
+        // マネージャー権限のない講師
+        return $instructor->id === $course->instructor_id;
     }
 
     public function deletable(Instructor $instructor, Course $course): bool

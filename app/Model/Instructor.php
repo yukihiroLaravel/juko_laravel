@@ -43,15 +43,9 @@ class Instructor extends Authenticatable
         'type',
     ];
 
-    public function isManager($INSTRUCTOR): bool
+    public function isManager(): bool
     {
-        if (ManageInstructor::where('manager_id', $INSTRUCTOR->id)->exists()) {
-            // マネージャー権限のある講師
-            $manager = Instructor::with('managings')->find($INSTRUCTOR->id);
-            $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructor->id;
-            return in_array($course->instructor_id, $instructorIds, true);
-        }
+        return $this->type === 'manager';
     }
 
     /**

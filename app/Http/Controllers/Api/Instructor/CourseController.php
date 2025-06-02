@@ -188,7 +188,9 @@ class CourseController extends Controller
             $this->authorize('delete', $course);
 
             // 受講者がいる場合は削除できない
-            $this->authorize('deletable', $course);
+            if (Attendance::where('course_id', $request->course_id)->exists()) {
+                throw new AuthorizationException('This course has already been taken by students.');
+            }
 
             // publicディレクトリ配下の画像ファイルを削除
             if (Storage::exists('public/'.$course->image)) {

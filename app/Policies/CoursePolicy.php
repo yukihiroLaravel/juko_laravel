@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 
@@ -18,6 +17,7 @@ class CoursePolicy
             $manager = Instructor::with('managings')->find($instructor->id);
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
+
             return in_array($course->instructor_id, $instructorIds, true);
         }
 

@@ -13,6 +13,7 @@ use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Attendance;
 use App\Model\Tag;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;

@@ -13,6 +13,7 @@ use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Attendance;
 use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;

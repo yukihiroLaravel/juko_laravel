@@ -146,7 +146,7 @@ class CourseController extends Controller
 
             // 管理者の場合、自分の講座以外処理を出来なくする処理
             $instructor = Auth::guard('instructor')->user();
-            if($instructor->isManager() && $instructor->id !== $course->instructor_id){
+            if ($instructor->isManager() && $instructor->id !== $course->instructor_id) {
                 throw new AuthorizationException('Invalid instructor_id.');
             }
 
@@ -161,7 +161,7 @@ class CourseController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . ' . ' . $extension;
+                $filename = Str::uuid()->toString().' . '.$extension;
                 $imagePath = Storage::putFileAs('public/course', $file, $filename);
                 $imagePath = Course::convertImagePath($imagePath);
             }

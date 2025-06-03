@@ -45,7 +45,7 @@ class Instructor extends Authenticatable
 
     public function isManager(): bool
     {
-        return $this->type === 'manager';
+        return $this->type === self::TYPE_MANAGER;
     }
 
     /**

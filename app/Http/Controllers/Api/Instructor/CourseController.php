@@ -183,13 +183,12 @@ class CourseController extends Controller
     public function delete(DeleteRequest $request): JsonResponse
     {
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::findOrFail($request->course_id);
 
-            if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
+            $this->authorize('delete', $course);
 
+            // 受講者がいる場合は削除できない
             if (Attendance::where('course_id', $request->course_id)->exists()) {
                 throw new AuthorizationException('This course has already been taken by students.');
             }

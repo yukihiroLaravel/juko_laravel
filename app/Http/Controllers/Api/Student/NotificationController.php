@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Student;
 
+use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
@@ -74,7 +75,7 @@ class NotificationController extends Controller
     private function filterAndMarkAsRead(Student $student, $notifications)
     {
         return $notifications->filter(function ($notification) use ($student) {
-            if ($notification->type === Notification::TYPE_ONCE) {
+            if ($notification->type === TypeEnum::ONCE) {
                 if ($notification->students->contains($student->id)) {
                     return false;
                 }

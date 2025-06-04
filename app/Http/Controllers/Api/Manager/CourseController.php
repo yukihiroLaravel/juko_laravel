@@ -15,6 +15,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
+use App\Services\Course\CreateCourseService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -101,23 +102,11 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
-
-        $course = Course::create([
-            'instructor_id' => $managerId,
-            'title' => $request->title,
-            'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        $createCourseService($request, $managerId);
 
         return response()->json([
             'result' => true,

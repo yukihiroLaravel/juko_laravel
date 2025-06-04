@@ -340,13 +340,13 @@ class LessonController extends Controller
     {
         // ログイン中の講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
-        
+
         // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
-        
+
         // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         try {

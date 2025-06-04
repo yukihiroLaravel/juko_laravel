@@ -19,6 +19,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -335,16 +336,18 @@ class LessonController extends Controller
     /**
      * 選択済みのレッスンステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
-        // リクエストから必要なデータを取得
+        // ログイン中の講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+        
+        // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
-        // ログイン中の講師IDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // クエリ実行
+        
+        // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         try {
             // 認可
@@ -362,8 +365,8 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
-            // ステータスを一括更新
-            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
+            //サービス呼び出し
+            $service($lessons, $status);
 
             return response()->json([
                 'result' => true,

@@ -36,6 +36,7 @@ class NotificationController extends Controller
 
         $notifications = Notification::with('course')
             ->whereIn('course_id', $courseIds)
+            ->where('status', 'public')
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime)
             ->orderBy($sortBy, $order)

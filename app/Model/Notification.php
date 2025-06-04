@@ -33,12 +33,6 @@ class Notification extends Model
         'content',
     ];
 
-    // カラムのキャスト
-    protected $casts = [
-        'status' => StatusEnum::class,
-        'type' => TypeEnum::class,
-    ];
-
     // ソート項目 定数
     const SORT_BY_TITLE = 'title';
 
@@ -74,5 +68,14 @@ class Notification extends Model
     public function instructor()
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
+
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+            'type' => TypeEnum::class,
+        ];
     }
 }

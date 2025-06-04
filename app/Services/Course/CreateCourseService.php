@@ -12,8 +12,9 @@ class CreateCourseService
 {
     /**
      * 講座登録サービス
-     */
-    public function __invoke(Request $request, int $id): void
+     */ 
+
+    public function __invoke(Request $request, int $id):Course
     {
         // ファイルパスを作成
         $file = $request->file('image');
@@ -37,5 +38,7 @@ class CreateCourseService
 
         // タグを中間テーブルに紐づける
         $course->tags()->attach($tag->id);
+
+        return $course;
     }
 }

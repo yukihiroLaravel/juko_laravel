@@ -103,7 +103,7 @@ class CourseController extends Controller
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $createCourseService($request, $managerId);
+        $course = $createCourseService($request, $managerId);
 
         return response()->json([
             'result' => true,

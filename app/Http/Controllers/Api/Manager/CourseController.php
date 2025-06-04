@@ -14,9 +14,8 @@ use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use App\Services\Course\CreateCourseService;
-use Carbon\Carbon;
+use App\Services\Course\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -99,8 +98,6 @@ class CourseController extends Controller
 
     /**
      * 講座登録API
-     *
-     * @return JsonResponse
      */
     public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
     {

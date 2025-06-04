@@ -15,6 +15,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Services\Course\CreateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -24,7 +25,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Course\CreateCourseService;
 
 /**
  * @tags Instructor-Course

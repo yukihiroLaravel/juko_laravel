@@ -12,9 +12,8 @@ class CreateCourseService
 {
     /**
      * 講座登録サービス
-     */ 
-
-    public function __invoke(Request $request, int $id):Course
+     */
+    public function __invoke(Request $request, int $id): Course
     {
         // ファイルパスを作成
         $file = $request->file('image');

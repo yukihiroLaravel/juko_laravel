@@ -20,6 +20,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -323,7 +324,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -358,8 +359,10 @@ class LessonController extends Controller
                 }
             });
 
-            // レッスンのステータスを一括更新
-            Lesson::whereIn('id', $lessons->pluck('id')->toArray())->update(['status' => $status]);
+            $service(
+                lessons: $lessons,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

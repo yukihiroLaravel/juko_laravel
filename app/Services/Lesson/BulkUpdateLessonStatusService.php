@@ -9,6 +9,9 @@ class BulkUpdateLessonStatusService
 {
     /**
      * レッスンのステータスを一括更新する
+     * 
+     * @param Collection<int, Lesson> $lessons
+     * @param 'public'|'private' $status
      */
     public function __invoke(Collection $lessons, string $status): void
     {

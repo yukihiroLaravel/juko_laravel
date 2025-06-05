@@ -359,8 +359,10 @@ class LessonController extends Controller
                 }
             });
 
-            //サービス呼び出し
-            $service($lessons, $status);
+            $service(
+                lessons: $lessons,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

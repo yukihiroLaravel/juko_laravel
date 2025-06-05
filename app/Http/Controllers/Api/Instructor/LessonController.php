@@ -365,8 +365,11 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
-            //サービス呼び出し
-            $service($lessons, $status);
+
+            $service(
+                lessons: $lessons,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

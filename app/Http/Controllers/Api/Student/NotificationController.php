@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Student;
 
+use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
@@ -37,6 +38,7 @@ class NotificationController extends Controller
 
         $notifications = Notification::with('course')
             ->whereIn('course_id', $courseIds)
+            ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime)
             ->orderBy($sortBy, $order)

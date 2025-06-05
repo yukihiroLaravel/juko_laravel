@@ -27,6 +27,5 @@ class DeleteAllChaptersService
 
         // チャプターを一括削除
         Chapter::whereIn('id', $chapterIds)->delete();
-
     }
 }

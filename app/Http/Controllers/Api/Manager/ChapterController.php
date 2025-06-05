@@ -270,9 +270,9 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            DB::commit();
-
             $service($courseId); // ← サービス呼び出し（インスタンスを関数のように）
+
+            DB::commit();
 
             return response()->json([
                 'result' => true,

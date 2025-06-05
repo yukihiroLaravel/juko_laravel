@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Notification\StatusEnum;
+use App\Enums\Notification\TypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,48 +33,12 @@ class Notification extends Model
         'content',
     ];
 
-    // 表示区分 定数
-    const TYPE_ALWAYS_INT = 1;
-
-    const TYPE_ONCE_INT = 2;
-
-    const TYPE_ALWAYS = 'always';
-
-    const TYPE_ONCE = 'once';
-
     // ソート項目 定数
     const SORT_BY_TITLE = 'title';
 
     const SORT_BY_COURSE_ID = 'course_id';
 
     const SORT_BY_START_DATE = 'start_date';
-
-    /**
-     * 表示区分
-     *
-     * @return string|null
-     */
-    public function getTypeAttribute($value)
-    {
-        if ($value === self::TYPE_ALWAYS_INT) {
-            return self::TYPE_ALWAYS;
-        } elseif ($value === self::TYPE_ONCE_INT) {
-            return self::TYPE_ONCE;
-        }
-
-        return null;
-    }
-
-    public function setTypeAttribute($value)
-    {
-        $this->attributes['type'] = null;
-
-        if ($value === self::TYPE_ALWAYS) {
-            $this->attributes['type'] = self::TYPE_ALWAYS_INT;
-        } elseif ($value === self::TYPE_ONCE) {
-            $this->attributes['type'] = self::TYPE_ONCE_INT;
-        }
-    }
 
     /**
      * 受講生を取得
@@ -106,13 +71,11 @@ class Notification extends Model
     }
 
     #[\Override]
-    /**
-     * @return array{status:'App\Enums\Notification\StatusEnum'}
-     */
     protected function casts(): array
     {
         return [
             'status' => StatusEnum::class,
+            'type' => TypeEnum::class,
         ];
     }
 }

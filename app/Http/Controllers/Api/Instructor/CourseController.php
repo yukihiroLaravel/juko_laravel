@@ -144,12 +144,6 @@ class CourseController extends Controller
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            // 管理者の場合、自分の講座以外処理を出来なくする処理
-            $instructor = Auth::guard('instructor')->user();
-            if($instructor->isManager() && $instructor->id !== $course->instructor_id){
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
-
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 

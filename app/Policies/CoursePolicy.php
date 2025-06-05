@@ -7,25 +7,21 @@ use App\Model\Instructor;
 
 class CoursePolicy
 {
-    public function update(Instructor $instructor, Course $course): bool
+    /**
+     * Determine whether the instructor can delete the course.
+     */
+    public function delete(Instructor $instructor, Course $course): bool
     {
-        // 管理者以外の場合
-        if($instructor->id === $course->instructor_id){
-            return true;
-        }
-
-        // 管理者の場合
-        if($instructor->isManager()){
+        // マネージャー権限のある講師か判定
+        if ($instructor->isManager()) {
             $manager = Instructor::with('managings')->find($instructor->id);
+            $instructorIds = $manager->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
 
-            if(!$manager){
-                return false;
-            }
-
-            $managerIds = $manager->managings->pluck('id')->toArray();
-            return in_array($course->instructor_id, $managerIds);
+            return in_array($course->instructor_id, $instructorIds, true);
         }
 
-        return false;
+        // マネージャー権限のない講師
+        return $instructor->id === $course->instructor_id;
     }
 }

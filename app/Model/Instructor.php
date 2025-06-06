@@ -43,6 +43,11 @@ class Instructor extends Authenticatable
         'type',
     ];
 
+    public function isManager(): bool
+    {
+        return $this->type === self::TYPE_MANAGER;
+    }
+
     /**
      * Get the remember token value.
      */

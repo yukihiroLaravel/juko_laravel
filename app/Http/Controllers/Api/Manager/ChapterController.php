@@ -417,7 +417,6 @@ class ChapterController extends Controller
         // リクエストから必要なデータを取得
         $chapterIds = $request->input('chapters');
         $courseId = $request->input('course_id');
-        $status = $request->input('status');
 
         // チャプターデータの取得
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();

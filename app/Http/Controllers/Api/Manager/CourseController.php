@@ -195,7 +195,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
             Log::error($e);

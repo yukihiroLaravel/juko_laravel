@@ -2,8 +2,8 @@
 
 namespace App\Services\Course;
 
-use App\Model\Course;
 use App\Model\Attendance;
+use App\Model\Course;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Storage;
 

@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\Course\CreateCourseService;
+use InvalidArgumentException;
+use DomainException;
+use Throwable;
 
 /**
  * @tags Instructor-Course
@@ -96,9 +100,9 @@ class CourseController extends Controller
      */
     public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         DB::beginTransaction();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
             $storeCourseService(
@@ -113,10 +117,22 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
-            DB::rollback();
-            Log::error($e);
-            throw $e;
+
+        } catch (\DomainException | \InvalidArgumentException $e) {
+        DB::rollBack();
+        // ビジネスルール違反（タグが存在しないなど）
+        return response()->json([
+            'result' => false,
+            'message' => $e->getMessage(),
+        ], 400);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error($e); // 重大エラーとしてログに残す
+            return response()->json([
+                'result' => false,
+                'message' => 'システムエラーが発生しました',
+            ], 500);
         }
     }
 

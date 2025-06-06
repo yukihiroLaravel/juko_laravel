@@ -5,7 +5,6 @@ namespace App\Services\Chapter;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
-use Illuminate\Support\Facades\DB;
 
 class DeleteAllChaptersService
 {

@@ -25,10 +25,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Course\CreateCourseService;
-use \InvalidArgumentException;
-use \DomainException;
-use \Throwable;
 
 /**
  * @tags Instructor-Course
@@ -118,8 +114,9 @@ class CourseController extends Controller
                 'result' => true,
             ]);
 
-        } catch (\DomainException | \InvalidArgumentException $e) {
+        } catch (\DomainException|\InvalidArgumentException $e) {
             DB::rollBack();
+
             // ビジネスルール違反（無効な画像、タグが存在しないなど）
             return response()->json([
                 'result' => false,
@@ -127,13 +124,15 @@ class CourseController extends Controller
             ], 400);
         } catch (RuntimeException $e) {
             DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500); 
+            ], 500);
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error($e); // 重大エラーとしてログに残す
+
             return response()->json([
                 'result' => false,
                 'message' => 'システムエラーが発生しました',

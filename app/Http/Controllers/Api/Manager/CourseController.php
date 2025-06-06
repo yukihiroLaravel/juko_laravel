@@ -117,25 +117,15 @@ class CourseController extends Controller
                 'data' => $course,
             ]);
 
-        } catch (\DomainException|\InvalidArgumentException $e) {
+        } catch (\RuntimeException $e) {
             DB::rollBack();
-
-            // ビジネスルール違反（無効な画像、タグが存在しないなど）
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 400);
-        } catch (RuntimeException $e) {
-            DB::rollBack();
-
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500);
-        } catch (\Throwable $e) {
+            ], 500); 
+        } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e); // 重大エラーとしてログに残す
-
+            Log::error($e); // ログに残す
             return response()->json([
                 'result' => false,
                 'message' => 'システムエラーが発生しました',

@@ -153,7 +153,10 @@ class ChapterController extends Controller
                 }
             });
 
-            $updateChapterStatusService($chapters->pluck('id'), $request->status);
+            $updateChapterStatusService(
+                chapterIds: $chapters->pluck('id'),
+                status: $request->status
+            );
 
             return response()->json([
                 'result' => true,
@@ -188,7 +191,10 @@ class ChapterController extends Controller
                 }
             });
 
-            $bulkDeleteChapterService($chapterIds, $chapters);
+            $bulkDeleteChapterService(
+                chapterIds: $chapterIds,
+                chapters: $chapters
+            );
 
             return response()->json([
                 'result' => true,
@@ -202,7 +208,7 @@ class ChapterController extends Controller
     /**
      * 全チャプター削除API
      */
-    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service)
+    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service): JsonResponse
     {
         $courseId = $request->input('course_id');
 
@@ -211,7 +217,6 @@ class ChapterController extends Controller
 
             //コースに紐づくチャプター情報とレッスン情報を取得
             $course = Course::with('chapters.lessons')->find($courseId);
-            $chapterIds = $course->chapters->pluck('id')->toArray();
 
             // ログイン中の講師の講座のチャプターでなければエラー応答
             if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
@@ -227,7 +232,9 @@ class ChapterController extends Controller
 
             DB::commit();
 
-            $service($courseId);
+            $service(
+                courseId: $courseId
+            );
 
             return response()->json([
                 'result' => true,
@@ -256,7 +263,10 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, invalid instructor_id.');
             }
 
-            $service($chapters, $courseId);
+            $service(
+                chapters: $chapters,
+                courseId: $courseId
+            );
 
             DB::commit();
 
@@ -287,7 +297,10 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        $service($request->course_id, $request->status);
+        $service(
+            courseId: $request->course_id,
+            status: $request->status
+        );
 
         return response()->json([
             'result' => true,

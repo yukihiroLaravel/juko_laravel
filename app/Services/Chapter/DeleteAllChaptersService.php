@@ -5,7 +5,6 @@ namespace App\Services\Chapter;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
-use Illuminate\Support\Facades\DB;
 
 class DeleteAllChaptersService
 {
@@ -27,7 +26,5 @@ class DeleteAllChaptersService
 
         // チャプターを一括削除
         Chapter::whereIn('id', $chapterIds)->delete();
-
-        DB::commit();
     }
 }

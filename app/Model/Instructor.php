@@ -118,5 +118,4 @@ class Instructor extends Authenticatable
             'updated_at' => 'immutable_datetime',
         ];
     }
-
 }

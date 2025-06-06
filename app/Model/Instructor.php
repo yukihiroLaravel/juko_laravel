@@ -114,12 +114,11 @@ class Instructor extends Authenticatable
         ];
     }
 
-        /**
+    /**
      * 講師か管理者か判定(管理者)
-     *
-     * @return bool
      */
-    public function isManager(): bool{
+    public function isManager(): bool
+    {
         return $this->type === self::TYPE_MANAGER;
     }
 }

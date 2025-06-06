@@ -11,10 +11,10 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Services\Course\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -180,7 +180,7 @@ class CourseController extends Controller
     /**
      * 講座削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
         try {
             $course = Course::findOrFail($request->course_id);
@@ -188,17 +188,7 @@ class CourseController extends Controller
             // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
             $this->authorize('delete', $course);
 
-            // 受講者がいる場合は削除できない
-            if (Attendance::where('course_id', $request->course_id)->exists()) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
-
-            // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::exists('public/'.$course->image)) {
-                Storage::delete('public/'.$course->image);
-            }
-
-            $course->delete();
+            $service($course);
 
             return response()->json([
                 'result' => true,

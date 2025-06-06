@@ -17,17 +17,12 @@ class CreateCourseService
     {
         // ファイルパスを作成
         $file = $image;
-        if (! $file || ! $file->isValid()) {
-            throw new \InvalidArgumentException('画像ファイルが無効です。');
-        }
-
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::putFileAs('public/course', $file, $filename);
         if (! $filePath) {
             throw new \RuntimeException('ファイル保存に失敗しました。');
         }
-
         $filePath = Course::convertImagePath($filePath);
 
         // 講座を作成
@@ -42,9 +37,6 @@ class CreateCourseService
         $tag = Tag::where('id', $tagId)
             ->where('instructor_id', $instructorOrManagerId)
             ->firstOrFail();
-        if (! $tag) {
-            throw new \DomainException('指定されたタグが存在しません。');
-        }
 
         // タグを中間テーブルに紐づける
         $course->tags()->attach($tagId);

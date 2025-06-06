@@ -11,6 +11,10 @@ class DeleteService
 {
     /**
      * 講座情報を削除
+     *
+     * @param Course $course
+     * @throws AuthorizationException
+     * @return void
      */
     public function __invoke(Course $course): void
     {

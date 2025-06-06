@@ -101,28 +101,46 @@ class CourseController extends Controller
      *
      * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
+        try{
+            $course = $createCourseService(
+                title: $request->title,
+                image: $request->file('image'),
+                tagId: $request->tag_id,
+                instructorOrManagerId: $managerId
+            );
 
-        $course = Course::create([
-            'instructor_id' => $managerId,
-            'title' => $request->title,
-            'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+            DB::commit();
 
-        return response()->json([
-            'result' => true,
-            'data' => $course,
-        ]);
+            return response()->json([
+                'result' => true,
+                'data' => $course,
+            ]);
+
+        } catch (\DomainException | \InvalidArgumentException $e) {
+            DB::rollBack();
+            // ビジネスルール違反（無効な画像、タグが存在しないなど）
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        } catch (RuntimeException $e) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => '実行時エラー: '.$e->getMessage(),
+            ], 500); 
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error($e); // 重大エラーとしてログに残す
+            return response()->json([
+                'result' => false,
+                'message' => 'システムエラーが発生しました',
+            ], 500);
+        }
     }
 
     /**

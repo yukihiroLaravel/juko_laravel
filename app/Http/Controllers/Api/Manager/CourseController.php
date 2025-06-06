@@ -97,23 +97,16 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $file = $request->file('image');
-        $extension = $file->getClientOriginalExtension();
-        $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::disk('public')->putFileAs('course', $file, $filename);
-
-        $course = Course::create([
-            'instructor_id' => $managerId,
-            'title' => $request->title,
-            'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        $course = $createCourseService(
+            title: $request->title,
+            image: $request->file('image'),
+            tagId: $request->tag_id,
+            instructorOrManagerId: $managerId
+        );
 
         return response()->json([
             'result' => true,

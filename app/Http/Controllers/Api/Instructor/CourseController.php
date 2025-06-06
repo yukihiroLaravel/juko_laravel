@@ -24,6 +24,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\Course\CreateCourseService;
+use InvalidArgumentException;
+use DomainException;
+use Throwable;
 
 /**
  * @tags Instructor-Course
@@ -93,43 +97,41 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         DB::beginTransaction();
 
+        $instructorId = Auth::guard('instructor')->user()->id;
+
         try {
-            $file = $request->file('image');
-            $extension = $file->getClientOriginalExtension();
-            $filename = Str::uuid()->toString().'.'.$extension;
-            $filePath = Storage::putFileAs('public/course', $file, $filename);
-            $filePath = Course::convertImagePath($filePath);
-
-            $course = Course::create([
-                'instructor_id' => $instructorId,
-                'title' => $request->title,
-                'image' => $filePath,
-                'status' => Course::STATUS_PRIVATE,
-            ]);
-
-            // ログイン中の講師が作成したタグかどうか確認
-            $tag = Tag::where('id', $request->tag_id)
-                ->where('instructor_id', $instructorId)
-                ->firstOrFail();
-
-            // タグを中間テーブルに紐づける
-            $course->tags()->attach($tag->id);
+            $createCourseService(
+                title: $request->title,
+                image: $request->file('image'),
+                tagId: $request->tag_id,
+                instructorOrManagerId: $instructorId
+            );
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
-            DB::rollback();
-            Log::error($e);
-            throw $e;
+
+        } catch (\DomainException | \InvalidArgumentException $e) {
+        DB::rollBack();
+        // ビジネスルール違反（タグが存在しないなど）
+        return response()->json([
+            'result' => false,
+            'message' => $e->getMessage(),
+        ], 400);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error($e); // 重大エラーとしてログに残す
+            return response()->json([
+                'result' => false,
+                'message' => 'システムエラーが発生しました',
+            ], 500);
         }
     }
 

@@ -7,6 +7,10 @@ use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use RuntimeException;
+use DomainException;
+
 
 class CreateCourseService
 {

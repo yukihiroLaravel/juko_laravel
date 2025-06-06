@@ -179,6 +179,8 @@ class CourseController extends Controller
 
     /**
      * 講座削除API
+     *      *
+     * @return JsonResponse
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {

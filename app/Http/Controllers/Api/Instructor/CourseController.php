@@ -116,13 +116,15 @@ class CourseController extends Controller
 
         } catch (\RuntimeException $e) {
             DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500); 
+            ], 500);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e); // ログに残す
+
             return response()->json([
                 'result' => false,
                 'message' => 'システムエラーが発生しました',

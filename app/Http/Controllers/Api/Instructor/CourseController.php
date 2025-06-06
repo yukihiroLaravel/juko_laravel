@@ -141,13 +141,11 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 認可チェック(policy 利用)
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -171,6 +169,8 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

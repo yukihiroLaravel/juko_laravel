@@ -132,20 +132,14 @@ class CourseController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $instructor = Instructor::with('managings')->find($instructorId);
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
         $file = $request->file('image');
 
         try {
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if (! in_array($course->instructor_id, $managingIds, true)) {
-                // 自分、または配下の講師の講座でなければエラー応答
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 認可チェック(Policy 利用)
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -169,7 +163,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
             Log::error($e);

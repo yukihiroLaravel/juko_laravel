@@ -24,8 +24,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Manager-Course
@@ -103,7 +101,12 @@ class CourseController extends Controller
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $course = $createCourseService($request, $managerId);
+        $course = $createCourseService(
+            title: $request->title,
+            image: $request->file('image'),
+            tagId: $request->tag_id,
+            instructorOrManagerId: $managerId
+        );
 
         return response()->json([
             'result' => true,

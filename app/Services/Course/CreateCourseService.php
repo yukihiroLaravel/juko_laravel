@@ -4,7 +4,7 @@ namespace app\Services\Course;
 
 use App\Model\Course;
 use App\Model\Tag;
-use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -13,10 +13,10 @@ class CreateCourseService
     /**
      * 講座登録サービス
      */
-    public function __invoke(Request $variable, int $id): Course
+    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorOrManagerId): Course
     {
         // ファイルパスを作成
-        $file = $variable->file('image');
+        $file = $image;
         $extension = $file->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::putFileAs('public/course', $file, $filename);
@@ -24,19 +24,19 @@ class CreateCourseService
 
         // 講座を作成
         $course = Course::create([
-            'instructor_id' => $id,
-            'title' => $variable->title,
+            'instructor_id' => $instructorOrManagerId,
+            'title' => $title,
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
         ]);
 
         // ログイン中の講師が作成したタグかどうか確認
-        $tag = Tag::where('id', $variable->tag_id)
-            ->where('instructor_id', $id)
+        $tag = Tag::where('id', $tagId)
+            ->where('instructor_id', $instructorOrManagerId)
             ->firstOrFail();
 
         // タグを中間テーブルに紐づける
-        $course->tags()->attach($tag->id);
+        $course->tags()->attach($tagId);
 
         return $course;
     }

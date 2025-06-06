@@ -23,8 +23,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Instructor-Course
@@ -101,7 +99,12 @@ class CourseController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
-            $createCourseService($request, $instructorId);
+            $createCourseService(
+                title: $request->title,
+                image: $request->file('image'),
+                tagId: $request->tag_id,
+                instructorOrManagerId: $instructorId
+            );
 
             DB::commit();
 

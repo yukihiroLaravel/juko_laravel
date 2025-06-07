@@ -17,6 +17,7 @@ use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
 use Exception;
+use RuntimeException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

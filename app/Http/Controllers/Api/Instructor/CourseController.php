@@ -114,6 +114,7 @@ class CourseController extends Controller
         } catch (AuthorizationException $e) {
             DB::rollback();
             Log::error($e);
+
             return response()->json([
                 'result' => false,
                 'message' => '認証エラー: '.$e->getMessage(),

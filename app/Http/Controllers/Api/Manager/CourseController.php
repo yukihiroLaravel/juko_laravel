@@ -129,6 +129,7 @@ class CourseController extends Controller
             throw $e;
         }
     }
+
     /**
      * 講座情報更新API
      *

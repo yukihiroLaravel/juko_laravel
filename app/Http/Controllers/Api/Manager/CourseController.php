@@ -11,9 +11,9 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Services\Course\DeleteService;
 use App\Services\Course\QueryService;
 use Carbon\Carbon;
 use Exception;
@@ -73,10 +73,8 @@ class CourseController extends Controller
 
     /**
      * 講座情報取得API
-     *
-     * @return CourseShowResource|JsonResponse
      */
-    public function show(ShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
         // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -98,10 +96,8 @@ class CourseController extends Controller
 
     /**
      * 講座登録API
-     *
-     * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -127,10 +123,8 @@ class CourseController extends Controller
 
     /**
      * 講座情報更新API
-     *
-     * @return JsonResponse
      */
-    public function update(UpdateRequest $request)
+    public function update(UpdateRequest $request): JsonResponse
     {
         $file = $request->file('image');
 
@@ -173,10 +167,8 @@ class CourseController extends Controller
 
     /**
      * 講座削除API
-     *
-     * @return JsonResponse
      */
-    public function delete(DeleteRequest $request)
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
         try {
             $course = Course::findOrFail($request->course_id);
@@ -184,22 +176,12 @@ class CourseController extends Controller
             // 自分、または配下の講師の講座でないと削除できない
             $this->authorize('delete', $course);
 
-            // 受講者がいる場合は削除できない
-            if (Attendance::where('course_id', $request->course_id)->exists()) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
-
-            // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::disk('public')->exists($course->image)) {
-                Storage::disk('public')->delete($course->image);
-            }
-
-            $course->delete();
+            $service(course: $course);
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
             Log::error($e);
@@ -209,10 +191,8 @@ class CourseController extends Controller
 
     /**
      * 講座ステータス更新API
-     *
-     * @return JsonResponse
      */
-    public function status(StatusRequest $request)
+    public function status(StatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

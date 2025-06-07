@@ -109,7 +109,7 @@ class CourseController extends Controller
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
-                instructorOrManagerId: $managerId
+                instructorId: $managerId
             );
 
             DB::commit();
@@ -118,22 +118,22 @@ class CourseController extends Controller
                 'result' => true,
                 'data' => $course,
             ]);
-
+        } catch (AuthorizationException $e) {
+            DB::rollback();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => '認証エラー: '.$e->getMessage(),
+            ], 500);
         } catch (\RuntimeException $e) {
             DB::rollBack();
-
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),
             ], 500);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e); // ログに残す
-
-            return response()->json([
-                'result' => false,
-                'message' => 'システムエラーが発生しました',
-            ], 500);
+            Log::error($e);
         }
     }
 

@@ -16,7 +16,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use Exception;
-use RuntimeException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -103,7 +102,7 @@ class CourseController extends Controller
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        DB::beginTransaction(); 
+        DB::beginTransaction();
 
         try {
             $course = $createCourseService(

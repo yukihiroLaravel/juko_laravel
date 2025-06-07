@@ -188,13 +188,11 @@ class CourseController extends Controller
             // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
             $this->authorize('delete', $course);
 
-            $service($course);
+            $service(course: $course);
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

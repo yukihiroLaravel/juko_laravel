@@ -73,10 +73,8 @@ class CourseController extends Controller
 
     /**
      * 講座情報取得API
-     *
-     * @return CourseShowResource|JsonResponse
      */
-    public function show(ShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
         // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -98,10 +96,8 @@ class CourseController extends Controller
 
     /**
      * 講座登録API
-     *
-     * @return JsonResponse
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -127,10 +123,8 @@ class CourseController extends Controller
 
     /**
      * 講座情報更新API
-     *
-     * @return JsonResponse
      */
-    public function update(UpdateRequest $request)
+    public function update(UpdateRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $instructor = Instructor::with('managings')->find($instructorId);
@@ -179,7 +173,6 @@ class CourseController extends Controller
 
     /**
      * 講座削除API
-     *      *
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
@@ -189,7 +182,7 @@ class CourseController extends Controller
             // 自分、または配下の講師の講座でないと削除できない
             $this->authorize('delete', $course);
 
-            $service($course);
+            $service(course: $course);
 
             return response()->json([
                 'result' => true,
@@ -204,10 +197,8 @@ class CourseController extends Controller
 
     /**
      * 講座ステータス更新API
-     *
-     * @return JsonResponse
      */
-    public function status(StatusRequest $request)
+    public function status(StatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

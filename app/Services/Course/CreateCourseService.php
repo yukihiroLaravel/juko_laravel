@@ -7,6 +7,7 @@ use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class CreateCourseService
 {
@@ -33,7 +34,10 @@ class CreateCourseService
         // ログイン中の講師が作成したタグかどうか確認
         $tag = Tag::where('id', $tagId)
             ->where('instructor_id', $instructorId)
-            ->firstOrFail();
+            ->first();
+        if ($tag === null) {
+            throw new AuthorizationException('Invalid tag_id.');
+        }
 
         // タグを中間テーブルに紐づける
         $course->tags()->attach($tagId);

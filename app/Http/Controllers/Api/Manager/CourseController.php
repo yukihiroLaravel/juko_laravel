@@ -96,7 +96,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request)
+    public function store(StoreRequest $request): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 

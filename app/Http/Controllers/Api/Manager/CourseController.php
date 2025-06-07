@@ -102,7 +102,7 @@ class CourseController extends Controller
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        DB::beginTransaction(); // ← ★これが必要！
+        DB::beginTransaction();
 
         try {
             $course = $createCourseService(

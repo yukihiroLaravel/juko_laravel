@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -101,19 +102,39 @@ class CourseController extends Controller
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
-        $course = $createCourseService(
-            title: $request->title,
-            image: $request->file('image'),
-            tagId: $request->tag_id,
-            instructorOrManagerId: $managerId
-        );
+        DB::beginTransaction(); // ← ★これが必要！
 
-        return response()->json([
-            'result' => true,
-            'data' => $course,
-        ]);
+        try {
+            $course = $createCourseService(
+                title: $request->title,
+                image: $request->file('image'),
+                tagId: $request->tag_id,
+                instructorId: $managerId
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'data' => $course,
+            ]);
+
+        } catch (AuthorizationException $e) {
+            DB::rollback();
+            Log::error($e);
+            return response()->json([
+            'result' => false,
+            'message' => '認証エラー: '.$e->getMessage(),
+            ], 500); 
+        } catch (Exception $e) { 
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'システムエラーが発生しました',
+            ], 500);
+        }
     }
-
     /**
      * 講座情報更新API
      *

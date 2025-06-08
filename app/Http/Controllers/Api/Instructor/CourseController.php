@@ -149,10 +149,12 @@ class CourseController extends Controller
 
             // 講座更新（Service 利用）
             $updateCourseService(
-                instructorId: $course->instructor_id,
+                course: $course,
+                // instructorId: $course->instructor_id,
                 title: $request->title,
                 imageFile: $request->file('image'),
-                courseImage: $course->image,
+                // courseImage: $course->image,
+                status: $request->status,
             );
 
             DB::commit();

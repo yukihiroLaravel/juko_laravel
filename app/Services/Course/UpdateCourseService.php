@@ -13,14 +13,21 @@ class UpdateCourseService
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $imageFile, string $courseImage, int $instructorId): void
+    public function __invoke(
+        Course $course,
+        // int $instructorId,
+        string $title,
+        UploadedFile $imageFile,
+        // string $courseImage,
+        string $status,
+    ): void
     {
         // ファイルパスを作成
         $file = $imageFile;
         if (isset($file)) {
             // 更新前の画像ファイルを削除
-            if (Storage::disk('public')->exists($courseImage)) {
-                Storage::disk('public')->delete($courseImage);
+            if (Storage::disk('public')->exists($course->image)) {
+                Storage::disk('public')->delete($course->image);
             }
 
             // 画像ファイル保存処理
@@ -35,10 +42,9 @@ class UpdateCourseService
 
         // 講座を作成
         $course->Update([
-            'instructor_id' => $instructorId,
             'title' => $title,
             'image' => $imagePath,
-            'status' => Course::STATUS_PRIVATE,
+            'status' => $status,
         ]);
     }
 }

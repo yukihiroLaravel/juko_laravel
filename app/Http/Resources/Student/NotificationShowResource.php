@@ -26,6 +26,7 @@ class NotificationShowResource extends JsonResource
             'content' => $this->resource->content,
             'start_date' => $this->resource->start_date,
             'end_date' => $this->resource->end_date,
+            'status' => $this->resource->status,
             'type' => $this->resource->type,
         ];
     }

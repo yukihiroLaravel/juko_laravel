@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\Course\UpdateCourseService;
 
 /**
  * @tags Manager-Course
@@ -126,39 +127,33 @@ class CourseController extends Controller
      */
     public function update(UpdateRequest $request): JsonResponse
     {
-        $file = $request->file('image');
+        DB::beginTransaction();
 
         try {
             $course = Course::FindOrFail($request->course_id);
-            $imagePath = $course->image;
 
-            // 認可チェック(Policy 利用)
+            // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
-            if (isset($file)) {
-                // 更新前の画像ファイルを削除
-                if (Storage::disk('public')->exists($course->image)) {
-                    Storage::disk('public')->delete($course->image);
-                }
+            // 講座更新（Service 利用）
+            $updateCourseService(
+                title: $request->title,
+                image: $request->file('image')
+            );
 
-                // 画像ファイル保存処理
-                $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
-                $imagePath = Storage::putFileAs('public/course', $file, $filename);
-                $imagePath = Course::convertImagePath($imagePath);
-            }
-
-            $course->update([
-                'title' => $request->title,
-                'image' => $imagePath,
-                'status' => $request->status,
-            ]);
+            DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
         } catch (AuthorizationException $e) {
             throw $e;
+        } catch (\RuntimeException $e) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => '実行時エラー: '.$e->getMessage(),
+            ], 500);
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

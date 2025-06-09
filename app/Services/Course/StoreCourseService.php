@@ -22,7 +22,7 @@ class StoreCourseService
         $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::putFileAs('public/course', $file, $filename);
         if (! $filePath) {
-            throw new \RuntimeException('ファイル保存に失敗しました。');
+            throw new Exception('ファイル保存に失敗しました。');
         }
         $filePath = Course::convertImagePath($filePath);
 

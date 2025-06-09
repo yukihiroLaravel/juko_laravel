@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Model\Course;
+use App\Model\Chapter;
 use App\Policies\CoursePolicy;
+use App\Policies\ChapterPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -15,6 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Course::class => CoursePolicy::class,
+        Chapter::class => ChapterPolicy::class,
     ];
 
     /**

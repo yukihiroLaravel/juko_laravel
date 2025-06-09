@@ -121,10 +121,8 @@ class ChapterController extends Controller
         // チャプターを取得
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
-        }
+        // Policy による認可処理に置き換え
+        $this->authorize('update', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
@@ -172,7 +170,7 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-                ->exists()
+            ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             throw new AuthorizationException('Forbidden, this lesson has attendance.');

@@ -106,10 +106,8 @@ class ChapterController extends Controller
         /** @var Chapter $chapter */
         $chapter = Chapter::findOrFail($request->chapter_id);
 
-        if ($chapter->course->instructor_id !== $user->id) {
-            // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
-        }
+        // Policy による認可処理に置き換え
+        $this->authorize('update', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない

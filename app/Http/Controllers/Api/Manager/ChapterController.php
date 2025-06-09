@@ -172,7 +172,7 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-                ->exists()
+            ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             throw new AuthorizationException('Forbidden, this lesson has attendance.');
@@ -219,34 +219,22 @@ class ChapterController extends Controller
      */
     public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        // リクエストから講座IDを取得
+        $courseId = $request->input('course_id');
 
         DB::beginTransaction();
 
         try {
-            // リクエストから講座IDを取得
-            $courseId = $request->input('course_id');
+            //コースに紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with('chapters.lessons')->find($courseId);
 
-            // チャプターを取得
-            $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
-            $chapters->each(function (Chapter $chapter) use ($instructorIds) {
-                // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
-            });
+            $this->authorize('deleteAll', [Chapter::class,$course]);
 
             // チャプターに紐づく全レッスンIDを取得
-            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
-                throw new AuthorizationException('Forbidden, this lesson has attendance.');
+                throw new AuthorizationException('This lesson has attendance.');
             }
 
             $service(

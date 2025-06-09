@@ -205,14 +205,10 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-
             //コースに紐づくチャプター情報とレッスン情報を取得
             $course = Course::with('chapters.lessons')->find($courseId);
 
-            // ログイン中の講師の講座のチャプターでなければエラー応答
-            if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            $this->authorize('deleteAll', [Chapter::class,$course]);
 
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
@@ -230,6 +226,9 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (AuthorizationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

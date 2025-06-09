@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Manager\Notification;
 
-use App\Rules\NotificationUpdateStatusRule;
+use App\Enums\Notification\StatusEnum;
+use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRequest extends FormRequest
 {
@@ -34,7 +36,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
-            'type' => ['required', new NotificationUpdateStatusRule],
+            'status' => ['required', Rule::enum(StatusEnum::class)],
+            'type' => ['required', Rule::enum(TypeEnum::class)],
             'start_date' => ['required', 'date_format:Y-m-d H:i:s'],
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'title' => ['required', 'string', 'max:50'],

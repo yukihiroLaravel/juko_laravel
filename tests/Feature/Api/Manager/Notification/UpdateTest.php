@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,6 +36,7 @@ class UpdateTest extends TestCase
             'start_date' => '2025-01-01 10:00:00',
             'end_date' => '2025-01-01 18:00:00',
             'content' => 'updateテスト',
+            'status' => 'public',
         ]);
 
         // assert
@@ -44,7 +46,7 @@ class UpdateTest extends TestCase
         ]);
         $this->assertDatabaseHas('notifications', [
             'title' => 'update',
-            'type' => Notification::TYPE_ONCE_INT,
+            'type' => TypeEnum::ONCE,
             'content' => 'updateテスト',
         ]);
     }
@@ -63,6 +65,10 @@ class UpdateTest extends TestCase
         $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => '', // 空
             'type' => '',  // 空
+            'start_date' => 'invalid-date', // 無効な日付
+            'end_date' => '2025-01-01 18:00:00', // 有効な日付
+            'content' => '', // 空
+            'status' => 'aaaa', // 有効なステータス
         ]);
 
         // assert
@@ -73,6 +79,7 @@ class UpdateTest extends TestCase
             'start_date',
             'end_date',
             'content',
+            'status',
         ]);
     }
 
@@ -93,6 +100,7 @@ class UpdateTest extends TestCase
             'start_date' => '2025-01-01 10:00:00',
             'end_date' => '2025-01-10 18:00:00',
             'content' => 'これはテストの内容です。',
+            'status' => 'public',
         ]);
 
         // assert

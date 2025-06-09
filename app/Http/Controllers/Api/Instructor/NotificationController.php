@@ -7,6 +7,7 @@ use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
 use App\Http\Requests\Instructor\Notification\IndexRequest;
 use App\Http\Requests\Instructor\Notification\PutRequest;
+use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
@@ -244,8 +245,42 @@ class NotificationController extends Controller
     /**
      * 選択されたお知らせ 一括公開・非公開API
      */
-    public function putStatus()
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
-        return response()->json([]);
+        // ログインしている講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 選択されたお知らせidを取得
+        $notificationIds = $request->input('notifications', []);
+
+        // 選択されたお知らせを取得
+        $chosenNotifications = Notification::whereIn('id', $notificationIds)->pluck('instructor_id');
+
+        // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
+        if (
+            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+        ) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        // トランザクション開始
+        DB::beginTransaction();
+
+        try {
+            Notification::where('instructor_id', $instructorId)
+                ->whereIn('id', $notificationIds)
+                ->update(['status' => $request->status]);
+
+            // コミット
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 }

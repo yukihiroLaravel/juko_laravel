@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -39,7 +40,7 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('notifications', [
             'course_id' => 1,
             'title' => 'title',
-            'type' => 1,
+            'type' => TypeEnum::ALWAYS,
             'start_date' => '2022-01-01 00:00:00',
             'end_date' => '2022-01-02 00:00:00',
             'content' => 'content',

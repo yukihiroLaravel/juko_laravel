@@ -25,6 +25,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\Course\UpdateCourseService;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Manager-Course
@@ -123,7 +125,7 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
     {
         DB::beginTransaction();
 
@@ -135,8 +137,10 @@ class CourseController extends Controller
 
             // 講座更新（Service 利用）
             $updateCourseService(
+                course: $course,
                 title: $request->title,
-                image: $request->file('image')
+                imageFile: $request->file('image'),
+                status: $request->status,
             );
 
             DB::commit();

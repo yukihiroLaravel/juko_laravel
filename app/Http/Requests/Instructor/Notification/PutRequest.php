@@ -2,9 +2,16 @@
 
 namespace App\Http\Requests\Instructor\Notification;
 
+<<<<<<< Updated upstream
 use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+=======
+use App\Enums\Notification\StatusEnum;
+use App\Rules\NotificationUpdateStatusRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+>>>>>>> Stashed changes
 
 class PutRequest extends FormRequest
 {
@@ -40,7 +47,7 @@ class PutRequest extends FormRequest
             'end_date' => ['required', 'date_format:Y-m-d H:i:s', 'after:start_date'],
             'title' => ['required', 'string', 'max:50'],
             'content' => ['required', 'string', 'max:500'],
-            'status' => 'required|in:public,private',// ← （公開・非公開の値）
+            'status' => ['required', new Enum(StatusEnum::class)],// ← （公開・非公開の値）
         ];
     }
 }

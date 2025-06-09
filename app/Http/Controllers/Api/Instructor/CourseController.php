@@ -114,7 +114,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (DomainExcenption) {
+        } catch (DomainException $e) {
             DB::rollback();
             Log::error('Invalid tag_id.');
             throw $e;

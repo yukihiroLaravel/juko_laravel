@@ -14,8 +14,8 @@ use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
+use App\Services\Course\QueryService;
 use DomainException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -26,6 +26,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @tags Manager-Course
@@ -119,10 +121,6 @@ class CourseController extends Controller
                 'result' => true,
                 'data' => $course,
             ]);
-        } catch (DomainException $e) {
-            DB::rollback();
-            Log::error('Invalid tag_id.');
-            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

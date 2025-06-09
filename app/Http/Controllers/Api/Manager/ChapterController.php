@@ -190,38 +190,24 @@ class ChapterController extends Controller
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $chapterIds = $request->input('chapters', []);
         $courseId = $request->input('course_id');
 
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
-                if ((int) $courseId !== $chapter->course_id) {
-                    // 指定した講座に属するチャプターでなければエラー応答
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
-            });
+
+            $this->authorize('bulkDelete', [Chapter::class, $chapters, $courseId]);
 
             $bulkDeleteChapterService(
                 chapterIds: $chapterIds,
-                chapters: $chapters
+                chapters: $chapters->load('lessons'),
             );
 
             return response()->json([
                 'result' => true,
             ]);
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

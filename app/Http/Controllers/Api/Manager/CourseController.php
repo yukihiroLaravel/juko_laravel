@@ -11,12 +11,13 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
+use App\Services\Course\StoreCourseService;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
-use App\Services\Course\StoreCourseService;
 use Exception;
+use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -107,7 +108,7 @@ class CourseController extends Controller
         DB::beginTransaction();
 
         try {
-            $storeCourseService(
+            $course = $storeCourseService(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,

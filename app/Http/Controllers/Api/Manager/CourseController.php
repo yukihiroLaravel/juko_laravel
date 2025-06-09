@@ -11,23 +11,23 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
-use App\Services\Course\StoreCourseService;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
-use Exception;
+use App\Services\Course\StoreCourseService;
 use DomainException;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Manager-Course

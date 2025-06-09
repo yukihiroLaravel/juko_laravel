@@ -4,10 +4,10 @@ namespace app\Services\Course;
 
 use App\Model\Course;
 use App\Model\Tag;
+use DomainException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use DomainException;
 
 class StoreCourseService
 {

@@ -11,11 +11,13 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
+use App\Services\Course\StoreCourseService;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use Exception;
+use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -25,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Manager-Course
@@ -98,14 +101,14 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
 
         try {
-            $course = $createCourseService(
+            $course = $storeCourseService(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
@@ -118,24 +121,14 @@ class CourseController extends Controller
                 'result' => true,
                 'data' => $course,
             ]);
-        } catch (AuthorizationException $e) {
+        } catch (DomainExcenption) {
             DB::rollback();
-            Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => '認証エラー: '.$e->getMessage(),
-            ], 500);
-        } catch (\RuntimeException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'result' => false,
-                'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500);
+            Log::error('Invalid tag_id.');
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
+            throw $e;
         }
     }
 

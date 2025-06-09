@@ -7,8 +7,9 @@ use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use DomainException;
 
-class CreateCourseService
+class StoreCourseService
 {
     /**
      * 講座登録サービス
@@ -38,7 +39,7 @@ class CreateCourseService
             ->where('instructor_id', $instructorId)
             ->first();
         if ($tag === null) {
-            throw new AuthorizationException('Invalid tag_id.');
+            throw new DomainException('Invalid tag_id.');
         }
 
         // タグを中間テーブルに紐づける

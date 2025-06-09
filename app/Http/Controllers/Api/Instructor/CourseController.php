@@ -15,8 +15,9 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
-use App\Services\Course\CreateCourseService;
+use App\Services\Course\StoreCourseService;
 use Exception;
+use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -94,14 +95,14 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
-            $createCourseService(
+            $storeCourseService(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
@@ -113,21 +114,10 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
+        } catch (DomainExcenption) {
             DB::rollback();
-            Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => '認証エラー: '.$e->getMessage(),
-            ], 500);
-        } catch (\RuntimeException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'result' => false,
-                'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500);
+            Log::error('Invalid tag_id.');
+            throw $e;
         } catch (Exception $e) {
             DB::rollback();
             Log::error($e);

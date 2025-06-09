@@ -3,7 +3,6 @@
 namespace app\Services\Course;
 
 use App\Model\Course;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,8 +19,7 @@ class UpdateCourseService
         UploadedFile $imageFile,
         // string $courseImage,
         string $status,
-    ): void
-    {
+    ): void {
         // ファイルパスを作成
         $file = $imageFile;
         if (isset($file)) {

@@ -15,6 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
+use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -24,7 +25,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Course\UpdateCourseService;
 
 /**
  * @tags Instructor-Course
@@ -166,6 +166,7 @@ class CourseController extends Controller
             throw $e;
         } catch (\RuntimeException $e) {
             DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),

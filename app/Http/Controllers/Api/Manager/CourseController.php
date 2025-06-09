@@ -19,14 +19,12 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Course\UpdateCourseService;
 
 /**
  * @tags Manager-Course
@@ -150,6 +148,7 @@ class CourseController extends Controller
             throw $e;
         } catch (\RuntimeException $e) {
             DB::rollBack();
+
             return response()->json([
                 'result' => false,
                 'message' => '実行時エラー: '.$e->getMessage(),

@@ -208,7 +208,7 @@ class ChapterController extends Controller
             //コースに紐づくチャプター情報とレッスン情報を取得
             $course = Course::with('chapters.lessons')->find($courseId);
 
-            $this->authorize('deleteAll', [Chapter::class,$course]);
+            $this->authorize('deleteAll', [Chapter::class, $course]);
 
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();

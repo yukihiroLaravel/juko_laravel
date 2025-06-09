@@ -2,10 +2,9 @@
 
 namespace App\Policies;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Database\Eloquent\Collection;
-use App\Model\Course;
-use Illuminate\Support\Facades\Log;
 
 class ChapterPolicy
 {
@@ -26,7 +25,7 @@ class ChapterPolicy
             }
 
             // 認可確認
-            if (!in_array($chapter->course->instructor_id, $deletableInstructorIds, true)) {
+            if (! in_array($chapter->course->instructor_id, $deletableInstructorIds, true)) {
                 return false;
             }
         }

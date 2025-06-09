@@ -14,8 +14,7 @@ class UpdateCourseService
      */
     public function __invoke(
         Course $course, string $title, UploadedFile $imageFile, string $status
-    ): void
-    {
+    ): void {
         // ファイルパスを作成
         $file = $imageFile;
         if (isset($file)) {

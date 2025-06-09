@@ -15,6 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\QueryService;
+use App\Services\Course\UpdateCourseService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -22,11 +23,10 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\Course\UpdateCourseService;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Manager-Course

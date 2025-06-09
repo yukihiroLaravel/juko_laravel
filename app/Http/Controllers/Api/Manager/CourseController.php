@@ -14,7 +14,7 @@ use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\CreateCourseService;
+use App\Services\Course\StoreCourseService;
 use App\Services\Course\QueryService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -25,6 +25,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @tags Manager-Course
@@ -98,14 +100,14 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, CreateCourseService $createCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
 
         try {
-            $course = $createCourseService(
+            $course = $storeCourseService(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
@@ -118,23 +120,10 @@ class CourseController extends Controller
                 'result' => true,
                 'data' => $course,
             ]);
-
-        } catch (AuthorizationException $e) {
-            DB::rollback();
-            Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => '認証エラー: '.$e->getMessage(),
-            ], 500);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
-            return response()->json([
-                'result' => false,
-                'message' => 'システムエラーが発生しました',
-            ], 500);
+            throw $e;
         }
     }
 

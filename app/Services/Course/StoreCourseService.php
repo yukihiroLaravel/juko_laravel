@@ -9,7 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class CreateCourseService
+class StoreCourseService
 {
     /**
      * 講座登録サービス

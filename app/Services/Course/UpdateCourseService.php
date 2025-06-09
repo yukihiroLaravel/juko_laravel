@@ -27,9 +27,6 @@ class UpdateCourseService
             $extension = $file->getClientOriginalExtension();
             $filename = Str::uuid()->toString().'.'.$extension;
             $imagePath = Storage::putFileAs('public/course', $file, $filename);
-            if (! $imagePath) {
-                throw new Exception('Unable to write file.');
-            }
             $imagePath = Course::convertImagePath($imagePath);
         }
 

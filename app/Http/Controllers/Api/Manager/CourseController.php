@@ -121,7 +121,7 @@ class CourseController extends Controller
                 'result' => true,
                 'data' => $course,
             ]);
-        } catch (DomainExcenption) {
+        } catch (DomainException $e) {
             DB::rollback();
             Log::error('Invalid tag_id.');
             throw $e;

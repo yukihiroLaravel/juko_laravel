@@ -2,16 +2,12 @@
 
 namespace App\Http\Requests\Instructor\Notification;
 
-<<<<<<< Updated upstream
 use App\Enums\Notification\TypeEnum;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-=======
 use App\Enums\Notification\StatusEnum;
 use App\Rules\NotificationUpdateStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
->>>>>>> Stashed changes
+use Illuminate\Validation\Rule;
 
 class PutRequest extends FormRequest
 {

@@ -2,12 +2,9 @@
 
 namespace App\Http\Requests\Instructor\Notification;
 
-<<<<<<< HEAD
 use App\Rules\NotificationUpdateStatusRule;
 use App\Enums\Notification\StatusEnum;
-=======
 use App\Enums\Notification\TypeEnum;
->>>>>>> develop
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

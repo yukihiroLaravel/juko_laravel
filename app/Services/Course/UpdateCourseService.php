@@ -13,13 +13,9 @@ class UpdateCourseService
      * 講座登録サービス
      */
     public function __invoke(
-        Course $course,
-        // int $instructorId,
-        string $title,
-        UploadedFile $imageFile,
-        // string $courseImage,
-        string $status,
-    ): void {
+        Course $course, string $title, UploadedFile $imageFile, string $status
+    ): void
+    {
         // ファイルパスを作成
         $file = $imageFile;
         if (isset($file)) {
@@ -33,7 +29,7 @@ class UpdateCourseService
             $filename = Str::uuid()->toString().'.'.$extension;
             $imagePath = Storage::putFileAs('public/course', $file, $filename);
             if (! $imagePath) {
-                throw new \RuntimeException('ファイル保存に失敗しました。');
+                throw new Exception('Unable to write file.');
             }
             $imagePath = Course::convertImagePath($imagePath);
         }

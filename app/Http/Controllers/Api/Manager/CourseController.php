@@ -144,15 +144,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
-        } catch (\RuntimeException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'result' => false,
-                'message' => '実行時エラー: '.$e->getMessage(),
-            ], 500);
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

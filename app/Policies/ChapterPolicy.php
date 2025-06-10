@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Model\Chapter;
-use App\Model\Instructor;
 use App\Model\Course;
+use App\Model\Instructor;
 
 class ChapterPolicy
 {

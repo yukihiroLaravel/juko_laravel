@@ -107,7 +107,7 @@ class CourseController extends Controller
         DB::beginTransaction();
 
         try {
-            $course = $storeCourseService(
+            $storeCourseService(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
@@ -118,7 +118,6 @@ class CourseController extends Controller
 
             return response()->json([
                 'result' => true,
-                'data' => $course,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

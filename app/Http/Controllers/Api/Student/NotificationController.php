@@ -105,7 +105,12 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])->findOrFail($request->notification_id);
 
         if (! in_array($notification->course_id, $courseIds, true)) {
-            throw new AuthorizationException('Forbidden, not allowed to this notification.');
+            throw new AuthorizationException('Forbidden, not allowed to this notification(user).');
+        }
+
+        // privateのお知らせは表示させない
+        if ($notification->status === StatusEnum::PRIVATE) {
+            throw new AuthorizationException('Forbidden, not allowed to this notification(status).');
         }
 
         return new NotificationShowResource($notification);

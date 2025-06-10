@@ -168,7 +168,7 @@ class ChapterController extends Controller
         }
     }
 
-        /**
+    /**
      * チャプター削除API
      */
     public function delete(DeleteRequest $request): JsonResponse

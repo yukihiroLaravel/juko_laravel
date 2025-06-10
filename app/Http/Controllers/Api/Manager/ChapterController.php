@@ -146,13 +146,13 @@ class ChapterController extends Controller
      */
     public function delete(DeleteRequest $request): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
+        // // ログイン中の講師IDを取得
+        // $managerId = Auth::guard('instructor')->user()->id;
 
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        // // マネージャーが管理する講師を取得
+        // $manager = Instructor::with('managings')->find($managerId);
+        // $instructorIds = $manager->managings->pluck('id')->toArray();
+        // $instructorIds[] = $manager->id;
 
         // チャプターを取得
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
@@ -160,10 +160,12 @@ class ChapterController extends Controller
         // チャプターに紐づく全レッスンIDを取得
         $lessonIds = $chapter->lessons->pluck('id')->toArray();
 
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to delete this chapter.');
-        }
+        // if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
+        //     // 自分、または配下の講師の講座のチャプターでなければエラー応答
+        //     throw new AuthorizationException('Forbidden, not allowed to delete this chapter.');
+        // }
+
+        $this->authorize('delete', [Chapter::class, $chapter]);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座に属するチャプターでなければエラー応答

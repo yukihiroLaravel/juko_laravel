@@ -1,13 +1,13 @@
 <?php
 
-namespace app\Services\Course;
+namespace App\Services\Course;
 
 use App\Model\Course;
 use App\Model\Tag;
-use DomainException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class StoreCourseService
 {
@@ -39,7 +39,7 @@ class StoreCourseService
             ->where('instructor_id', $instructorId)
             ->first();
         if ($tag === null) {
-            throw new DomainException('Invalid tag_id.');
+            throw new NotFoundHttpException('Not Found Tag.');
         }
 
         // タグを中間テーブルに紐づける

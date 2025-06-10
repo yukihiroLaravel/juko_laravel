@@ -177,19 +177,25 @@ class ChapterController extends Controller
 
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
+            $chapters->each(function (Chapter $chapter) use ($courseId) {
 
-            $this->authorize('bulkDelete', [Chapter::class, $chapters, $courseId]);
+                // 認可処理 policy使用
+                $this->authorizeResource('bulkDelete', [Chapter::class, $chapter]);
+
+                if ((int) $courseId !== $chapter->course_id) {
+                    // 指定した講座に属するチャプターでなければエラー応答
+                    throw new AuthorizationException('Forbidden, invalid course_id.');
+                }
+            });
 
             $bulkDeleteChapterService(
                 chapterIds: $chapterIds,
-                chapters: $chapters->load('lessons'),
+                chapters: $chapters
             );
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

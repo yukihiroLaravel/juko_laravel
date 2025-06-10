@@ -196,6 +196,8 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;

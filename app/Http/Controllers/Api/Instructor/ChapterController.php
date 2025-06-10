@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Chapter\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Chapter\DeleteAllRequest;
+use App\Http\Requests\Instructor\Chapter\DeleteRequest;
 use App\Http\Requests\Instructor\Chapter\PatchRequest;
 use App\Http\Requests\Instructor\Chapter\PatchStatusRequest;
 use App\Http\Requests\Instructor\Chapter\PutStatusRequest;
@@ -165,6 +166,40 @@ class ChapterController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+
+        /**
+     * チャプター削除API
+     */
+    public function delete(DeleteRequest $request): JsonResponse
+    {
+        // チャプターを取得
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+
+        // チャプターに紐づく全レッスンIDを取得
+        $lessonIds = $chapter->lessons->pluck('id')->toArray();
+
+        // 認可処理 policy使用
+        $this->authorize('delete', [Chapter::class, $chapter]);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座に属するチャプターでなければエラー応答
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
+
+        if (
+            LessonAttendance::whereIn('lesson_id', $lessonIds)
+                ->exists()
+        ) {
+            // 指定したチャプター内に受講中のレッスンがあればエラー応答
+            throw new AuthorizationException('Forbidden, this lesson has attendance.');
+        }
+
+        $chapter->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

@@ -140,23 +140,12 @@ class LessonController extends Controller
     {
         DB::beginTransaction();
         try {
-            // 自身と配下のinstructor情報を取得
-            $managerId = Auth::guard('instructor')->user()->id;
-
-            $manager = Instructor::with('managings')->find($managerId);
-            assert($manager instanceof Instructor);
-
-            $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $manager->id;
-
             // レッスン情報を取得
             /** @var Lesson $lesson */
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
-            if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
-            }
+            // 自分、または配下の講師の講座でないと削除できない
+            $this->authorize('delete', $lesson);
 
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
             if ((int) $request->chapter_id !== $lesson->chapter->id) {

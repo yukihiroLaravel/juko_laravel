@@ -21,9 +21,6 @@ class CoursePolicy
         return $instructor->id === $course->instructor_id;
     }
 
-    /**
-     * Determine whether the instructor can delete the course.
-     */
     public function delete(Instructor $instructor, Course $course): bool
     {
         // マネージャー権限のある講師か判定

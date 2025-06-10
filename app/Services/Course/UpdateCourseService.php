@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Services\Course;
+namespace App\Services\Course;
 
 use App\Model\Course;
 use Illuminate\Http\UploadedFile;

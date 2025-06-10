@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Policies\CoursePolicy;
-use App\Policies\Policies\ChapterPolicy;
+use App\Policies\ChapterPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

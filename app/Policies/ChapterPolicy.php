@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Policies\Policies;
+namespace App\Policies;
 
 use App\Model\Chapter;
 use App\Model\Instructor;

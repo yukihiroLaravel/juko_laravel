@@ -15,6 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\QueryService;
+use App\Services\Course\StatusService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -191,7 +192,7 @@ class CourseController extends Controller
     /**
      * 講座ステータス更新API
      */
-    public function status(StatusRequest $request): JsonResponse
+    public function status(StatusRequest $request, StatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -201,8 +202,8 @@ class CourseController extends Controller
         $managingIds = $instructor->managings->pluck('id')->toArray();
         $managingIds[] = $instructorId;
 
-        // 自分、または配下の講師の講座のステータスを一括更新
-        Course::whereIn('instructor_id', $managingIds)->update(['status' => $request->status]);
+        // 更新処理 serviceクラス呼び出し
+        $service($managingIds, $request->status);
 
         return response()->json([
             'result' => 'true',

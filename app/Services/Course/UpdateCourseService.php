@@ -13,25 +13,28 @@ class UpdateCourseService
      * 講座登録サービス
      */
     public function __invoke(
-        Course $course, string $title, UploadedFile $imageFile, string $status
+        Course $course, string $title, ?UploadedFile $imageFile, string $status
     ): void {
-        // ファイルパスを作成
-        $file = $imageFile;
-        if (isset($file)) {
+
+        if (isset($imageFile)) {
             // 更新前の画像ファイルを削除
-            if (Storage::disk('public')->exists($course->image)) {
-                Storage::disk('public')->delete($course->image);
-            }
+            Storage::disk('public')->exists($course->image);
+            Storage::disk('public')->delete($course->image);
 
             // 画像ファイル保存処理
-            $extension = $file->getClientOriginalExtension();
+            $extension = $imageFile->getClientOriginalExtension();
             $filename = Str::uuid()->toString().'.'.$extension;
-            $imagePath = Storage::putFileAs('public/course', $file, $filename);
+            $imagePath = Storage::putFileAs('public/course', $imageFile, $filename);
             $imagePath = Course::convertImagePath($imagePath);
         }
 
-        // 講座を作成
-        $course->Update([
+        // 画像ファイルがnullの場合は、既存の画像パスを使用
+        if (!isset($imageFile)) {
+            $imagePath = $course->image;
+        }
+
+        // 講座を更新
+        $course->update([
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,

@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Policies\CoursePolicy;

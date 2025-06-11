@@ -219,7 +219,8 @@ class ChapterController extends Controller
         } catch (Exception $e) {
             Log::error($e);
             throw $e;
-        }    }
+        }
+    }
 
     /**
      * 全チャプター削除API

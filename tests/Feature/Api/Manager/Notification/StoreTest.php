@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\Manager\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -34,6 +34,7 @@ class StoreTest extends TestCase
             'start_date' => '2025-01-01 10:00:00',
             'end_date' => '2025-01-01 18:00:00',
             'content' => 'これはテストの内容です',
+            'status' => 'public',
         ]);
 
         // assert
@@ -43,7 +44,7 @@ class StoreTest extends TestCase
         ]);
         $this->assertDatabaseHas('notifications', [
             'title' => 'test',
-            'type' => Notification::TYPE_ONCE_INT,
+            'type' => TypeEnum::ONCE,
             'course_id' => $course->id,
         ]);
     }
@@ -60,6 +61,10 @@ class StoreTest extends TestCase
         $response = $this->postJson('/api/v1/manager/course/'.$course->id.'/notification', [
             'title' => '', // 空
             'type' => '',  // 空
+            'start_date' => '',  // 空
+            'end_date' => '',  // 空
+            'content' => '',  // 空
+            'status' => '',  // 空
         ]);
 
         // assert
@@ -70,6 +75,7 @@ class StoreTest extends TestCase
             'start_date',
             'end_date',
             'content',
+            'status',
         ]);
     }
 
@@ -88,6 +94,7 @@ class StoreTest extends TestCase
             'start_date' => '2025-01-01 10:00:00',
             'end_date' => '2025-01-10 18:00:00',
             'content' => 'これはテストの内容です。',
+            'status' => 'public',
         ]);
 
         // assert

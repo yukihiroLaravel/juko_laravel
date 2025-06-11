@@ -41,10 +41,8 @@ class ChapterController extends Controller
 {
     /**
      * チャプターを取得
-     *
-     * @return ChapterShowResource|JsonResponse
      */
-    public function show(ShowRequest $request)
+    public function show(ShowRequest $request): ChapterShowResource
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -71,10 +69,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター新規作成API
-     *
-     * @return JsonResponse
      */
-    public function store(StoreRequest $request, CreateChapterService $createChapterService)
+    public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -147,10 +143,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター削除API
-     *
-     * @return JsonResponse
      */
-    public function delete(DeleteRequest $request)
+    public function delete(DeleteRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -193,10 +187,8 @@ class ChapterController extends Controller
 
     /**
      * 複数のチャプター削除API
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService)
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -222,7 +214,10 @@ class ChapterController extends Controller
                 }
             });
 
-            $bulkDeleteChapterService($chapterIds, $chapters);
+            $bulkDeleteChapterService(
+                chapterIds: $chapterIds,
+                chapters: $chapters
+            );
 
             return response()->json([
                 'result' => true,
@@ -235,10 +230,8 @@ class ChapterController extends Controller
 
     /**
      * 全チャプター削除API
-     *
-     * @return JsonResponse
      */
-    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service)
+    public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -270,9 +263,11 @@ class ChapterController extends Controller
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
 
-            DB::commit();
+            $service(
+                courseId: $courseId
+            );
 
-            $service($courseId); // ← サービス呼び出し（インスタンスを関数のように）
+            DB::commit();
 
             return response()->json([
                 'result' => true,
@@ -290,10 +285,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター並び替えAPI
-     *
-     * @return JsonResponse
      */
-    public function sort(SortRequest $request, SortChaptersService $service)
+    public function sort(SortRequest $request, SortChaptersService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -334,10 +327,8 @@ class ChapterController extends Controller
 
     /**
      * チャプターの公開状態を更新するAPI
-     *
-     * @return JsonResponse
      */
-    public function updateStatus(UpdateStatusRequest $request)
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -372,10 +363,8 @@ class ChapterController extends Controller
 
     /**
      * チャプター一括更新API(公開・非公開切り替え)
-     *
-     * @return JsonResponse
      */
-    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service)
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -393,7 +382,10 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        $service($request->course_id, $request->status);
+        $service(
+            courseId: $request->course_id,
+            status: $request->status
+        );
 
         return response()->json([
             'result' => true,
@@ -432,7 +424,10 @@ class ChapterController extends Controller
             }
         });
 
-        $updateChapterStatusService($chapters->pluck('id'), $request->status);
+        $updateChapterStatusService(
+            chapterIds: $chapters->pluck('id'),
+            status: $request->status
+        );
 
         return response()->json([
             'result' => true,

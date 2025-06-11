@@ -19,6 +19,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -117,15 +118,15 @@ class LessonController extends Controller
         try {
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
+            $this->authorize('delete', $lesson);
 
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
                 throw new AuthorizationException('Invalid chapter_id.');
             }
 
+            // 受講情報が登録されている場合は削除を許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }
@@ -335,16 +336,18 @@ class LessonController extends Controller
     /**
      * 選択済みのレッスンステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
-        // リクエストから必要なデータを取得
+        // ログイン中の講師IDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
-        // ログイン中の講師IDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // クエリ実行
+
+        // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
         try {
             // 認可
@@ -362,8 +365,11 @@ class LessonController extends Controller
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });
-            // ステータスを一括更新
-            Lesson::whereIn('id', $lessonIds)->update(['status' => $status]);
+
+            $service(
+                lessons: $lessons,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

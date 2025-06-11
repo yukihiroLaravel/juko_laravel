@@ -11,15 +11,14 @@ use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Http\Resources\Manager\CourseShowResource;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Services\Course\DeleteService;
 use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -74,10 +73,8 @@ class CourseController extends Controller
 
     /**
      * 講座情報取得API
-     *
-     * @return CourseShowResource|JsonResponse
      */
-    public function show(ShowRequest $request, QueryService $queryService)
+    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
         // ログイン中の講師IDを取得
         $userId = Auth::guard('instructor')->user()->id;
@@ -128,25 +125,17 @@ class CourseController extends Controller
 
     /**
      * 講座情報更新API
-     *
-     * @return JsonResponse
      */
-    public function update(UpdateRequest $request)
+    public function update(UpdateRequest $request): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $instructor = Instructor::with('managings')->find($instructorId);
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
         $file = $request->file('image');
 
         try {
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if (! in_array($course->instructor_id, $managingIds, true)) {
-                // 自分、または配下の講師の講座でなければエラー応答
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 認可チェック(Policy 利用)
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -170,7 +159,7 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
             Log::error($e);
@@ -180,39 +169,21 @@ class CourseController extends Controller
 
     /**
      * 講座削除API
-     *
-     * @return JsonResponse
      */
-    public function delete(DeleteRequest $request)
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $instructor = Instructor::with('managings')->find($instructorId);
-        $managingIds = $instructor->managings->pluck('id')->toArray();
-        $managingIds[] = $instructorId;
-
         try {
             $course = Course::findOrFail($request->course_id);
 
-            if (! in_array($course->instructor_id, $managingIds, true)) {
-                // 自分、または配下の講師の講座でなければエラー応答
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 自分、または配下の講師の講座でないと削除できない
+            $this->authorize('delete', $course);
 
-            if (Attendance::where('course_id', $request->course_id)->exists()) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
-
-            // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::disk('public')->exists($course->image)) {
-                Storage::disk('public')->delete($course->image);
-            }
-
-            $course->delete();
+            $service(course: $course);
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
+        } catch (AuthorizationException $e) {
             throw $e;
         } catch (Exception $e) {
             Log::error($e);
@@ -222,10 +193,8 @@ class CourseController extends Controller
 
     /**
      * 講座ステータス更新API
-     *
-     * @return JsonResponse
      */
-    public function status(StatusRequest $request)
+    public function status(StatusRequest $request): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

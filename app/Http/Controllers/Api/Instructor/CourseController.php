@@ -11,11 +11,11 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\StoreCourseService;
+use App\Services\Course\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -128,13 +128,11 @@ class CourseController extends Controller
         $file = $request->file('image');
 
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::FindOrFail($request->course_id);
             $imagePath = $course->image;
 
-            if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // 認可チェック(policy 利用)
+            $this->authorize('update', $course);
 
             if (isset($file)) {
                 // 更新前の画像ファイルを削除
@@ -158,6 +156,8 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (Exception $e) {
             Log::error($e);
             throw $e;
@@ -167,26 +167,15 @@ class CourseController extends Controller
     /**
      * 講座削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $course = Course::findOrFail($request->course_id);
 
-            if ($user->id !== $course->instructor_id) {
-                throw new AuthorizationException('Invalid instructor_id.');
-            }
+            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
+            $this->authorize('delete', $course);
 
-            if (Attendance::where('course_id', $request->course_id)->exists()) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
-
-            // publicディレクトリ配下の画像ファイルを削除
-            if (Storage::exists('public/'.$course->image)) {
-                Storage::delete('public/'.$course->image);
-            }
-
-            $course->delete();
+            $service(course: $course);
 
             return response()->json([
                 'result' => true,

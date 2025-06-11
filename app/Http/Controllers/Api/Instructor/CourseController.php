@@ -16,7 +16,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\StoreCourseService;
-use DomainException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -114,10 +113,6 @@ class CourseController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (DomainException $e) {
-            DB::rollback();
-            Log::error('Invalid tag_id.');
-            throw $e;
         } catch (Exception $e) {
             DB::rollback();
             Log::error($e);

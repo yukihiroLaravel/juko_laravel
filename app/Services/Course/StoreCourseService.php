@@ -4,7 +4,6 @@ namespace App\Services\Course;
 
 use App\Model\Course;
 use App\Model\Tag;
-use DomainException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,12 +17,11 @@ class StoreCourseService
     public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId): Course
     {
         // ファイルパスを作成
-        $file = $image;
-        $extension = $file->getClientOriginalExtension();
+        $extension = $image->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::putFileAs('public/course', $file, $filename);
+        $filePath = Storage::putFileAs('public/course', $image, $filename);
         if (! $filePath) {
-            throw new Exception('Unable to write file');
+            throw new Exception('Unable to write image');
         }
         $filePath = Course::convertImagePath($filePath);
 

@@ -16,7 +16,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
-use DomainException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -119,6 +118,7 @@ class CourseController extends Controller
 
             return response()->json([
                 'result' => true,
+                'data' => $course,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

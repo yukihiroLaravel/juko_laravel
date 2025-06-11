@@ -29,7 +29,7 @@ class UpdateCourseService
         }
 
         // 画像ファイルがnullの場合は、既存の画像パスを使用
-        if (!isset($imageFile)) {
+        if (! isset($imageFile)) {
             $imagePath = $course->image;
         }
 

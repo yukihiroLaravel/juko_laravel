@@ -15,7 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\QueryService;
-use App\Services\Course\StatusService;
+use App\Services\Course\PutStatusService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -192,7 +192,7 @@ class CourseController extends Controller
     /**
      * 講座ステータス更新API
      */
-    public function status(StatusRequest $request, StatusService $service): JsonResponse
+    public function status(StatusRequest $request, PutStatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 

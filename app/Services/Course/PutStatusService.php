@@ -4,7 +4,7 @@ namespace App\Services\Course;
 
 use App\Model\Course;
 
-class StatusService
+class PutStatusService
 {
     /**
      * 講座のstatusを更新

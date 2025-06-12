@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,7 +46,7 @@ class UpdateTest extends TestCase
         ]);
         $this->assertDatabaseHas('notifications', [
             'title' => 'update',
-            'type' => Notification::TYPE_ONCE_INT,
+            'type' => TypeEnum::ONCE,
             'content' => 'updateテスト',
         ]);
     }

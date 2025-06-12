@@ -20,6 +20,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -139,23 +140,12 @@ class LessonController extends Controller
     {
         DB::beginTransaction();
         try {
-            // 自身と配下のinstructor情報を取得
-            $managerId = Auth::guard('instructor')->user()->id;
-
-            $manager = Instructor::with('managings')->find($managerId);
-            assert($manager instanceof Instructor);
-
-            $instructorIds = $manager->managings->pluck('id')->toArray();
-            $instructorIds[] = $manager->id;
-
             // レッスン情報を取得
             /** @var Lesson $lesson */
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            // 自身もしくは配下のinstructorの講座・チャプターに紐づくレッスンでない場合は許可しない
-            if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
-            }
+            // 自分、または配下の講師の講座でないと削除できない
+            $this->authorize('delete', $lesson);
 
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
@@ -323,7 +313,7 @@ class LessonController extends Controller
     /**
      * 選択済みレッスンステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -358,8 +348,10 @@ class LessonController extends Controller
                 }
             });
 
-            // レッスンのステータスを一括更新
-            Lesson::whereIn('id', $lessons->pluck('id')->toArray())->update(['status' => $status]);
+            $service(
+                lessons: $lessons,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

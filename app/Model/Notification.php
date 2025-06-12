@@ -4,10 +4,10 @@ namespace App\Model;
 
 use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 class Notification extends Model
 {

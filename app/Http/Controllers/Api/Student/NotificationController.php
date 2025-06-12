@@ -108,11 +108,8 @@ class NotificationController extends Controller
             throw new AuthorizationException('Forbidden, not allowed to this notification.');
         }
 
-        // privateのお知らせは表示させない
-        if ($notification->status === StatusEnum::PRIVATE) {
-            throw new AuthorizationException('Forbidden, not allowed to this notification.');
-        }
+        $requestedNotification = Notification::public()->findOrFail($notification->id);
 
-        return new NotificationShowResource($notification);
+        return new NotificationShowResource($requestedNotification);
     }
 }

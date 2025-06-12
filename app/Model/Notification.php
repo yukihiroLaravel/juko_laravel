@@ -7,6 +7,7 @@ use App\Enums\Notification\TypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Builder;
 
 class Notification extends Model
 {
@@ -77,5 +78,10 @@ class Notification extends Model
             'status' => StatusEnum::class,
             'type' => TypeEnum::class,
         ];
+    }
+
+    public function scopePublic(Builder $query): Builder
+    {
+        return $query->where('status', StatusEnum::PUBLIC);
     }
 }

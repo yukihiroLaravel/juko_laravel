@@ -197,7 +197,7 @@ class ChapterController extends Controller
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
 
             // 認可処理 policy使用
-            $this->authorizeResource('bulkDelete', [Chapter::class, $chapters]);
+            $this->authorize('bulkDelete', $chapters);
 
             $chapters->each(function (Chapter $chapter) use ($courseId) {
                 if ((int) $courseId !== $chapter->course_id) {

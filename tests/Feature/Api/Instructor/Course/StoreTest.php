@@ -64,7 +64,25 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(404);
         $response->assertJson([
-            'message' => 'No query results for model [App\\Model\\Tag].',
+            'message' => 'Not Found Tag.',
         ]);
+    }
+
+    public function test_バリデーションエラー_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->post('/api/v1/instructor/course', [
+            'title' => '',
+            'image' => null,
+            'tag_id' => '',
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['title', 'image', 'tag_id']);
     }
 }

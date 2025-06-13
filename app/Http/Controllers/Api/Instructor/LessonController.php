@@ -18,7 +18,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Policies\LessonPolicy;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
@@ -118,7 +118,7 @@ class LessonController extends Controller
         try {
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
+            // ログイン講師のidと削除レッスンの講師IDが一致しないと削除できない
             $this->authorize('delete', $lesson);
 
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
@@ -164,9 +164,7 @@ class LessonController extends Controller
 
             $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
                 // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
-                if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                    throw new AuthorizationException('Invalid instructor_id.');
-                }
+                $this->authorize('delete', $lesson);
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter.');
@@ -261,9 +259,7 @@ class LessonController extends Controller
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
 
         // 現在の講師がチャプターの講座の作成者であるか確認
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('delete', $chapter);
 
         // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
         if ((int) $request->course_id !== $chapter->course->id) {

@@ -85,13 +85,11 @@ class LessonController extends Controller
      */
     public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
-        $user = Instructor::find($request->user()->id);
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
         assert($lesson instanceof Lesson);
 
-        if ($lesson->chapter->course->instructor_id !== $user->id) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // Policy による認可チェック
+        $this->authorize('update', $lesson);
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             throw new AuthorizationException('Forbidden, invalid course_id.');

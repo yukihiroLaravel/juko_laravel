@@ -116,15 +116,15 @@ class LessonController extends Controller
         try {
             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
+            $this->authorize('delete', $lesson);
 
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
                 throw new AuthorizationException('Invalid chapter_id.');
             }
 
+            // 受講情報が登録されている場合は削除を許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');
             }

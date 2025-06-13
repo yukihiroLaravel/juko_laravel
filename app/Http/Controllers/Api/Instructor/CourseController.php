@@ -161,6 +161,7 @@ class CourseController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            DB::rollback();
             Log::error($e);
             throw $e;
         }

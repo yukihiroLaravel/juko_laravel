@@ -20,9 +20,6 @@ class StoreCourseService
         $extension = $image->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
         $filePath = Storage::putFileAs('public/course', $image, $filename);
-        if (! $filePath) {
-            throw new Exception('Unable to write image');
-        }
         $filePath = Course::convertImagePath($filePath);
 
         // 講座を作成

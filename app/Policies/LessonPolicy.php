@@ -9,11 +9,6 @@ class LessonPolicy
 {
     /**
      * レッスンの更新処理に関する認可処理
-     * 
-     * @param Instructor $instructor
-     * @param Lesson $lesson
-     * 
-     * @return bool
      */
     public function update(Instructor $instructor, Lesson $lesson): bool
     {

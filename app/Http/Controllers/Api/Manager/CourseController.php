@@ -203,7 +203,7 @@ class CourseController extends Controller
         $managingIds[] = $instructorId;
 
         // 更新処理 serviceクラス呼び出し
-        $service($managingIds, $request->status);
+        $service(managerIds:$managingIds, status:$request->status);
 
         return response()->json([
             'result' => 'true',

@@ -15,11 +15,8 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
-<<<<<<< HEAD
 use App\Services\Course\PutStatusService;
-=======
 use App\Services\Course\StoreCourseService;
->>>>>>> develop
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;

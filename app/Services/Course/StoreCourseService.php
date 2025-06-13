@@ -17,10 +17,9 @@ class StoreCourseService
     public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId): Course
     {
         // ファイルパスを作成
-        $file = $image;
-        $extension = $file->getClientOriginalExtension();
+        $extension = $image->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
-        $filePath = Storage::putFileAs('public/course', $file, $filename);
+        $filePath = Storage::putFileAs('public/course', $image, $filename);
         $filePath = Course::convertImagePath($filePath);
 
         // 講座を作成

@@ -96,9 +96,9 @@ class CourseController extends Controller
      */
     public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         DB::beginTransaction();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
             $storeCourseService(

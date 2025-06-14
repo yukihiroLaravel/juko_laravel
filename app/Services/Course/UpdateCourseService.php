@@ -42,8 +42,10 @@ class UpdateCourseService
             $extension = $imageFile->getClientOriginalExtension();
             $filename = Str::uuid()->toString().'.'.$extension;
             $imagePath = Storage::putFileAs('public/course', $imageFile, $filename);
+
             return Course::convertImagePath($imagePath);
         }
+
         // 画像ファイルがない場合は既存の画像パスを使用
         return $course->image;
     }

@@ -16,8 +16,8 @@ use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\QueryService;
-use App\Services\Course\UpdateCourseService;
 use App\Services\Course\StoreCourseService;
+use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -26,8 +26,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Manager-Course

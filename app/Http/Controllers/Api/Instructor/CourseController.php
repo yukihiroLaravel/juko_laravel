@@ -15,9 +15,9 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
-use App\Services\Course\UpdateCourseService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreCourseService;
+use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -25,8 +25,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Instructor-Course

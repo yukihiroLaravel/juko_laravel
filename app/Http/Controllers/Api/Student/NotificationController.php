@@ -102,14 +102,12 @@ class NotificationController extends Controller
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
 
         /** @var Notification $notification */
-        $notification = Notification::with(['course'])->findOrFail($request->notification_id);
+        $notification = Notification::with(['course'])->public()->findOrFail($request->notification_id);
 
         if (! in_array($notification->course_id, $courseIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to this notification.');
         }
 
-        $requestedNotification = Notification::public()->findOrFail($notification->id);
-
-        return new NotificationShowResource($requestedNotification);
+        return new NotificationShowResource($notification);
     }
 }

@@ -196,7 +196,7 @@ class CourseController extends Controller
     /**
      * 講座ステータス更新API
      */
-    public function status(StatusRequest $request, PutStatusService $service): JsonResponse
+    public function putStatus(StatusRequest $request, PutStatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -206,8 +206,11 @@ class CourseController extends Controller
         $managingIds = $instructor->managings->pluck('id')->toArray();
         $managingIds[] = $instructorId;
 
-        // 更新処理 serviceクラス呼び出し
-        $service(instructorIds: $managingIds, status: $request->status);
+        // 更新処理
+        $service(
+            instructorIds: $managingIds,
+            status: $request->status
+        );
 
         return response()->json([
             'result' => 'true',

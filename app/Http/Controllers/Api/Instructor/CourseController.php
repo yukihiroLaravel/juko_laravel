@@ -194,7 +194,7 @@ class CourseController extends Controller
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 更新処理 serviceクラス呼び出し
+        // 更新処理
         $service(instructorIds: [$instructorId], status: $request->status);
 
         return response()->json([

@@ -7,7 +7,10 @@ use App\Model\Course;
 class PutStatusService
 {
     /**
-     * 講座のstatusを更新
+     * 講座の状態を更新
+     *
+     * @param  array<int>  $instructorIds
+     * @param  'public'|'private'  $status
      */
     public function __invoke(array $instructorIds, string $status): void
     {

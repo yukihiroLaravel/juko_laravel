@@ -13,31 +13,38 @@ class UpdateCourseService
      * 講座登録サービス
      */
     public function __invoke(
-        Course $course, string $title, ?UploadedFile $imageFile, string $status
+        Course $course,
+        string $title,
+        ?UploadedFile $imageFile,
+        string $status
     ): void {
-
-        if (isset($imageFile)) {
-            // 更新前の画像ファイルを削除
-            Storage::disk('public')->exists($course->image);
-            Storage::disk('public')->delete($course->image);
-
-            // 画像ファイル保存処理
-            $extension = $imageFile->getClientOriginalExtension();
-            $filename = Str::uuid()->toString().'.'.$extension;
-            $imagePath = Storage::putFileAs('public/course', $imageFile, $filename);
-            $imagePath = Course::convertImagePath($imagePath);
-        }
-
-        // 画像ファイルがnullの場合は、既存の画像パスを使用
-        if (! isset($imageFile)) {
-            $imagePath = $course->image;
-        }
-
+        $imagePath = $this->getImagePath($course, $imageFile);
         // 講座を更新
         $course->update([
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,
         ]);
+    }
+
+    /**
+     * 画像パスを取得する
+     */
+    private function getImagePath(Course $course, ?UploadedFile $imageFile): string
+    {
+        // 画像ファイルがアップロードされた場合の処理
+        if ($imageFile) {
+            // 既存の画像ファイルを削除（存在する場合のみ）
+            if ($course->image && Storage::disk('public')->exists($course->image)) {
+                Storage::disk('public')->delete($course->image);
+            }
+            // 新しい画像ファイルを保存
+            $extension = $imageFile->getClientOriginalExtension();
+            $filename = Str::uuid()->toString().'.'.$extension;
+            $imagePath = Storage::putFileAs('public/course', $imageFile, $filename);
+            return Course::convertImagePath($imagePath);
+        }
+        // 画像ファイルがない場合は既存の画像パスを使用
+        return $course->image;
     }
 }

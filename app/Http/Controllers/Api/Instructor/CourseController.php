@@ -15,6 +15,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
+use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -189,13 +190,12 @@ class CourseController extends Controller
     /**
      * 講座ステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        Course::where('instructor_id', $instructorId)
-            ->update([
-                'status' => $request->status,
-            ]);
+
+        // 更新処理
+        $service(instructorIds: [$instructorId], status: $request->status);
 
         return response()->json([
             'result' => 'true',

@@ -19,15 +19,11 @@ class ChapterPolicy
             $managerIds = $instructor->managings->pluck('id')->toArray();
             $managerIds[] = $instructor->id;
 
-            return $chapters->every(function (Chapter $chapter) use ($managerIds) {
-                return in_array($chapter->course->instructor_id, $managerIds, true);
-            });
+            return $chapters->every(fn (Chapter $chapter) => in_array($chapter->course->instructor_id, $managerIds, true));
         }
 
         // 講師の場合、自分の講座のみ削除可能
-        return $chapters->every(function (Chapter $chapter) use ($instructor) {
-            return $chapter->course->instructor_id === $instructor->id;
-        });
+        return $chapters->every(fn (Chapter $chapter) => $chapter->course->instructor_id === $instructor->id);
     }
 
     public function deleteAll(Instructor $instructor, Course $course): bool

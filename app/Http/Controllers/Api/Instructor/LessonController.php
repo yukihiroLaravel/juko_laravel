@@ -18,7 +18,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Policies\LessonPolicy;
+use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
@@ -150,8 +150,6 @@ class LessonController extends Controller
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
         // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
@@ -162,7 +160,7 @@ class LessonController extends Controller
             // レッスン情報を取得
             $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
 
-            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
+            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
                 $this->authorize('delete', $lesson);
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない

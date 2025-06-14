@@ -370,14 +370,6 @@ class LessonController extends Controller
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // リクエストからデータを取得
         $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
@@ -389,11 +381,10 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $lesson->each(function (Lesson $lesson) use ($instructorIds, $chapterId, $courseId) {
+            $lesson->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
-                if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Invalid instructor_id.');
-                }
+                $this->authorize('delete', $lesson);
+
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
                     throw new AuthorizationException('Invalid course_id.');
@@ -431,23 +422,11 @@ class LessonController extends Controller
      */
     public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーと その管理下の講師を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // チャプターを取得
         /** @var Chapter $chapter */
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // ログイン中のマネージャーまたはその管理下の講師IDが、講座の作成者IDでなければエラー応答
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('delete', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定された講座がチャプターに関連付けられている講座と一致しない場合はエラー応答

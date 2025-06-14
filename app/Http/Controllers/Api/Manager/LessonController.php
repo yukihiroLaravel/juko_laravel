@@ -424,9 +424,9 @@ class LessonController extends Controller
     {
         // チャプターを取得
         /** @var Chapter $chapter */
-        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
-
-        $this->authorize('delete', $chapter);
+        $chapter = Chapter::with(['course', 'lessons.chapter.course'])->findOrFail($request->chapter_id);
+        $lesson = $chapter->lessons->first();
+        $this->authorize('delete', $lesson);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定された講座がチャプターに関連付けられている講座と一致しない場合はエラー応答

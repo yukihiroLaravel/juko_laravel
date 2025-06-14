@@ -106,6 +106,7 @@ class NotificationController extends Controller
                 'type' => $request->type,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
+                'status' => $request->status,
                 'content' => $request->content,
             ]);
             DB::commit();

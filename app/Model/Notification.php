@@ -80,6 +80,9 @@ class Notification extends Model
         ];
     }
 
+    /**
+     * スコープ: 公開中のお知らせを取得
+     */
     public function scopePublic(Builder $query): Builder
     {
         return $query->where('status', StatusEnum::PUBLIC);

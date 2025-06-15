@@ -10,6 +10,7 @@ use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
+use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
@@ -288,6 +289,62 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+    * お知らせ一覧 - ステータス一括変更API
+    *
+    * マネージャーが管理する講師に紐づくお知らせの公開ステータス（status）を
+    * 一括で「public」または「private」に変更します。
+    *
+    * @param string $status ステータス（"public" または "private"）
+    * @param UpdateStatusRequest $request リクエストバリデーション済みデータ（通知ID配列）
+    * @return JsonResponse 結果のJSONレスポンス
+    *
+    * @throws AuthorizationException 指定された通知がアクセス権限外だった場合
+    * @throws Exception データベースエラー時など
+    */
+    public function updateStatus(string $status, UpdateStatusRequest $request): JsonResponse
+    {
+        // ステータス値のバリデーション
+        if (!in_array($status, ['public', 'private'], true)) {
+            return response()->json(['message' => 'Invalid status.'], 422);
+        }
+
+        // ログイン中のマネージャーIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 管理下の講師IDをすべて取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 対象のお知らせを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+
+        // 各お知らせの講師IDが、管理下のIDに含まれているか確認
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
+        if (array_diff($notificationsInstructorIds, $instructorIds)) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        // 一括更新処理（トランザクション）
+        DB::beginTransaction();
+        try {
+            $notifications->each(function (Notification $notification) use ($status) {
+                $notification->status = $status;
+                $notification->save();
+            });
+
+            DB::commit();
+
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -253,8 +253,8 @@ class LessonController extends Controller
      */
     public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
     {
-        /** @var Chapter $chapter */
-        $chapter = Chapter::with(['course', 'lessons.chapter.course'])->findOrFail($request->chapter_id);
+        // チャプターを取得（policyによる認可チェックのために、lessonからcourseまでeager load。 例外throwのためにcourseもloadする。）
+        $chapter = Chapter::with(['lessons.chapter.course', 'course'])->findOrFail($request->chapter_id);
         $lesson = $chapter->lessons->first();
 
         // 現在の講師がチャプターの講座の作成者であるか確認

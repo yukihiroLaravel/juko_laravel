@@ -190,24 +190,16 @@ class ChapterController extends Controller
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $chapterIds = $request->input('chapters', []);
         $courseId = $request->input('course_id');
 
         try {
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
-            $chapters->each(function (Chapter $chapter) use ($instructorIds, $courseId) {
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
+
+            // 認可処理 policy使用
+            $this->authorize('bulkDelete', [Chapter::class, $chapters]);
+
+            $chapters->each(function (Chapter $chapter) use ($courseId) {
                 if ((int) $courseId !== $chapter->course_id) {
                     // 指定した講座に属するチャプターでなければエラー応答
                     throw new AuthorizationException('Forbidden, invalid course_id.');
@@ -233,34 +225,22 @@ class ChapterController extends Controller
      */
     public function deleteAll(DeleteAllRequest $request, DeleteAllChaptersService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        // リクエストから講座IDを取得
+        $courseId = $request->input('course_id');
 
         DB::beginTransaction();
 
         try {
-            // リクエストから講座IDを取得
-            $courseId = $request->input('course_id');
+            //コースに紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with('chapters.lessons')->find($courseId);
 
-            // チャプターを取得
-            $chapters = Chapter::with(['course', 'lessons'])->where('course_id', $courseId)->get();
-            $chapters->each(function (Chapter $chapter) use ($instructorIds) {
-                // 自分、または配下の講師の講座のチャプターでなければエラー応答
-                if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
-            });
+            $this->authorize('deleteAll', [Chapter::class, $course]);
 
             // チャプターに紐づく全レッスンIDを取得
-            $lessonIds = $chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
+            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
             if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
                 // 受講中のレッスンがあれば、エラー応答
-                throw new AuthorizationException('Forbidden, this lesson has attendance.');
+                throw new AuthorizationException('This lesson has attendance.');
             }
 
             $service(
@@ -272,9 +252,6 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            DB::rollBack();
-            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

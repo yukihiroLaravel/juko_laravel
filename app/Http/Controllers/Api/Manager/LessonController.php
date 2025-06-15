@@ -98,22 +98,11 @@ class LessonController extends Controller
      */
     public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        assert($manager instanceof Instructor);
-
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
         assert($lesson instanceof Lesson);
 
-        if (! in_array($lesson->chapter->course->instructor_id, $instructorIds, true)) {
-            // 配下の講師でない場合は403エラー
-            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
-        }
+        // Policy による認可チェック
+        $this->authorize('update', $lesson);
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             // 講座IDが不正な場合は403エラー

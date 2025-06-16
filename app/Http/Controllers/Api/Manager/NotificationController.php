@@ -299,16 +299,6 @@ class NotificationController extends Controller
 
     /**
     * お知らせ一覧 - ステータス一括変更API
-    *
-    * マネージャーが管理する講師に紐づくお知らせの公開ステータス（status）を
-    * 一括で「public」または「private」に変更します。
-    *
-    * @param string $status ステータス（"public" または "private"）
-    * @param UpdateStatusRequest $request リクエストバリデーション済みデータ（通知ID配列）
-    * @return JsonResponse 結果のJSONレスポンス
-    *
-    * @throws AuthorizationException 指定された通知がアクセス権限外だった場合
-    * @throws Exception データベースエラー時など
     */
     public function updateStatus(string $status, UpdateStatusRequest $request): JsonResponse
     {
@@ -322,9 +312,6 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // リクエストのステータス（バリデーション済み）
-        $status = StatusEnum::from($request->notification_status)->value;
-
         // 対象の通知をすべて取得（管理下の講師に紐づく）
         $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
 
@@ -332,8 +319,9 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             $notifications->each(function (Notification $notification) use ($status) {
-                $notification->status = $status;
-                $notification->save();
+                $notification->fill([
+                    'status' => $status,
+                ])->save();
             });
 
             DB::commit();

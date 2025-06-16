@@ -24,8 +24,7 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 必要な他のフィールドに加えて status をバリデーション
-            'status' => ['required', new Enum(StatusEnum::class)],
+            //
         ];
     }
 }

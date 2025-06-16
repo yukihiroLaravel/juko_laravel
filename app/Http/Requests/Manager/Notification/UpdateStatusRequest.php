@@ -8,9 +8,6 @@ use App\Enums\Notification\StatusEnum;
 
 /**
  * マネージャー側 お知らせステータス一括変更用リクエスト
- *
- * ルートパラメータとして渡された notification_status を事前にマージし、
- * StatusEnum によるバリデーションを行います。
  */
 class UpdateStatusRequest extends FormRequest
 {

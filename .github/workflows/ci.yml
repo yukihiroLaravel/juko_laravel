@@ -3,13 +3,51 @@ name: PHP CI
 on:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  format-code:
+  code-quality:
     runs-on: ubuntu-latest
+    name: Code Quality Checks
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        tools: composer:v2.8.8
+
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --ansi
+
+    - name: Run static analysis with PHPStan
+      run: composer analyze
+
+    - name: Check code with Rector (dry-run)
+      run: composer rector-dry-run
+    
+  format-code:
+    runs-on: ubuntu-latest
+    name: Auto-format Code
+    needs: [code-quality]
+    if: success()
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
       with:
         ref: ${{ github.event.pull_request.head.ref }}
 
@@ -21,9 +59,9 @@ jobs:
         tools: composer:v2.8.2
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --ansi
+      run: composer install --prefer-dist --no-progress --ansi --no-dev
 
-    - name: Check code style
+    - name: Format code with Pint
       run: composer pint
 
     - name: Commit and Push changes
@@ -31,5 +69,9 @@ jobs:
         git config --global user.name "GitHub Actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add -A
-        git commit -m "Automated code format" || exit 0
-        git push
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Automated code format"
+          git push
+        fi

@@ -100,9 +100,6 @@ class ChapterController extends Controller
      */
     public function put(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
-        /** @var Instructor $user */
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
-
         /** @var Chapter $chapter */
         $chapter = Chapter::findOrFail($request->chapter_id);
 

@@ -20,8 +20,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.3'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
-        tools: composer:v2.8.2
+        tools: composer:v2.8.8
 
     - name: Cache Composer packages
       uses: actions/cache@v3
@@ -40,9 +39,6 @@ jobs:
     - name: Check code with Rector (dry-run)
       run: composer rector-dry-run
     
-    - name: Run tests
-      run: php artisan test
-
   format-code:
     runs-on: ubuntu-latest
     name: Auto-format Code

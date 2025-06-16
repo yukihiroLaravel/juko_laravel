@@ -10,8 +10,8 @@ use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
+use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
@@ -55,7 +55,7 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      */
-    public function show(ShowRequest $request): NotificationShowResource
+    public function show(ShowRequest $request): NotificationResource
     {
         // ユーザーID取得
         $instructorId = $request->user()->id;
@@ -75,7 +75,7 @@ class NotificationController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        return new NotificationShowResource($notification);
+        return new NotificationResource($notification);
     }
 
     /**
@@ -106,6 +106,7 @@ class NotificationController extends Controller
                 'type' => $request->type,
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
+                'status' => $request->status,
                 'content' => $request->content,
             ]);
             DB::commit();

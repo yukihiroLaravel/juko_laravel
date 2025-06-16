@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -77,5 +78,13 @@ class Notification extends Model
             'status' => StatusEnum::class,
             'type' => TypeEnum::class,
         ];
+    }
+
+    /**
+     * スコープ: 公開中のお知らせを取得
+     */
+    public function scopePublic(Builder $query): Builder
+    {
+        return $query->where('status', StatusEnum::PUBLIC);
     }
 }

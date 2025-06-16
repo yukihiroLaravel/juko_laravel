@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Policies\CoursePolicy;
 use App\Policies\ChapterPolicy;
+use App\Policies\LessonPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Course::class => CoursePolicy::class,
         Chapter::class => ChapterPolicy::class,
+        Lesson::class => LessonPolicy::class,
     ];
 
     /**

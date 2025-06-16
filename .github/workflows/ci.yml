@@ -48,6 +48,9 @@ jobs:
       run: composer rector-dry-run
     
     - name: Run tests
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
       run: composer test
     
   format-code:

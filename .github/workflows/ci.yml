@@ -34,9 +34,6 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
-    - name: Generate application key
-      run: php artisan key:generate
-
     - name: Create SQLite database
       run: touch database/database.sqlite
 

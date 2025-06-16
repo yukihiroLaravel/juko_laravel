@@ -6,6 +6,12 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Enums\Notification\StatusEnum;
 
+/**
+ * マネージャー側 お知らせステータス一括変更用リクエスト
+ *
+ * ルートパラメータとして渡された notification_status を事前にマージし、
+ * StatusEnum によるバリデーションを行います。
+ */
 class UpdateStatusRequest extends FormRequest
 {
     /**
@@ -16,6 +22,9 @@ class UpdateStatusRequest extends FormRequest
         return true; // 認可チェックは Controller 側で実施
     }
 
+    /**
+     * ルートパラメータをリクエストデータにマージ
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -32,8 +41,6 @@ class UpdateStatusRequest extends FormRequest
     {
         return [
             'notification_status' => ['required', Rule::enum(StatusEnum::class)],
-            'notifications' => ['required', 'array'],
-            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

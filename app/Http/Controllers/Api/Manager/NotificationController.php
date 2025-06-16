@@ -23,6 +23,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Enums\Notification\StatusEnum;
 
 /**
  * @tags Manager-Notification
@@ -311,10 +312,6 @@ class NotificationController extends Controller
     */
     public function updateStatus(string $status, UpdateStatusRequest $request): JsonResponse
     {
-        // ステータス値のバリデーション
-        if (!in_array($status, ['public', 'private'], true)) {
-            return response()->json(['message' => 'Invalid status.'], 422);
-        }
 
         // ログイン中のマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -325,14 +322,11 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 対象のお知らせを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        // リクエストのステータス（バリデーション済み）
+        $status = StatusEnum::from($request->notification_status)->value;
 
-        // 各お知らせの講師IDが、管理下のIDに含まれているか確認
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
-        if (array_diff($notificationsInstructorIds, $instructorIds)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 対象の通知をすべて取得（管理下の講師に紐づく）
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
 
         // 一括更新処理（トランザクション）
         DB::beginTransaction();

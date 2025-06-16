@@ -24,7 +24,7 @@ class PutStatusAllRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::enum(StatusEnum::class)]
+            'status' => ['required', Rule::enum(StatusEnum::class)],
         ];
     }
 }

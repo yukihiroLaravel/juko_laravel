@@ -297,7 +297,7 @@ class NotificationController extends Controller
             ]);
 
         return response()->json([
-            'result' => 'true'
+            'result' => 'true',
         ]);
     }
 }

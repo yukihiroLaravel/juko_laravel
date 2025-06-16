@@ -7,6 +7,7 @@ use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
 use App\Http\Requests\Instructor\Notification\IndexRequest;
 use App\Http\Requests\Instructor\Notification\PutRequest;
+use App\Http\Requests\Instructor\Notification\PutStatusAllRequest;
 use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
@@ -287,8 +288,16 @@ class NotificationController extends Controller
     /**
      * お知らせ 一括公開・非公開API
      */
-    public function putStatusAll()
+    public function putStatusAll(PutStatusAllRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+        Notification::where('instructor_id', $instructorId)
+            ->update([
+                'status' => $request->status,
+            ]);
+
+        return response()->json([
+            'result' => 'true'
+        ]);
     }
 }

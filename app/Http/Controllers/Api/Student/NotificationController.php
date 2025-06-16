@@ -7,15 +7,14 @@ use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
+use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
 use App\Http\Resources\Student\NotificationReadResource;
-use App\Http\Resources\Student\NotificationShowResource;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -90,10 +89,8 @@ class NotificationController extends Controller
 
     /**
      * お知らせ詳細
-     *
-     * @return NotificationShowResource|JsonResponse
      */
-    public function show(ShowRequest $request)
+    public function show(ShowRequest $request): NotificationResource
     {
         /** @var Student $student */
         $student = Student::findOrFail($request->user()->id);
@@ -110,6 +107,6 @@ class NotificationController extends Controller
             throw new AuthorizationException('Forbidden, not allowed to this notification.');
         }
 
-        return new NotificationShowResource($notification);
+        return new NotificationResource($notification);
     }
 }

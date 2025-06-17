@@ -196,6 +196,13 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+    /**
+     * お知らせ一覧-タイプ変更API
+     */
+    public function updateTypeAll()
+    {
+        return response()->json([]);
+    }
 
     /**
      * お知らせ一括削除

@@ -10,6 +10,7 @@ use App\Http\Requests\Instructor\Notification\PutRequest;
 use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
+use App\Http\Requests\Instructor\notification\UpdateTypeAllRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
@@ -199,9 +200,18 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateTypeAll()
+    public function updateTypeAll(UpdateTypeAllRequest $request): JsonResponse
     {
-        return response()->json([]);
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        Notification::where('instructor_id', $instructorId)
+        ->update([
+            'type' => $request->notification_type,
+        ]);
+
+        return response()->json([
+            'result' => true
+        ]);
     }
 
     /**

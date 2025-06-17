@@ -11,8 +11,8 @@ use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
+use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Http\Resources\Manager\NotificationShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
@@ -23,7 +23,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Enums\Notification\StatusEnum;
 
 /**
  * @tags Manager-Notification
@@ -57,7 +56,7 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      */
-    public function show(ShowRequest $request): NotificationShowResource
+    public function show(ShowRequest $request): NotificationResource
     {
         // ユーザーID取得
         $instructorId = $request->user()->id;
@@ -77,7 +76,7 @@ class NotificationController extends Controller
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        return new NotificationShowResource($notification);
+        return new NotificationResource($notification);
     }
 
     /**

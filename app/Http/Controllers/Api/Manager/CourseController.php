@@ -17,6 +17,7 @@ use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
+use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -25,8 +26,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Manager-Course
@@ -128,42 +127,31 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
     {
-        $file = $request->file('image');
+        DB::beginTransaction();
 
         try {
             $course = Course::FindOrFail($request->course_id);
-            $imagePath = $course->image;
 
-            // 認可チェック(Policy 利用)
+            // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
-            if (isset($file)) {
-                // 更新前の画像ファイルを削除
-                if (Storage::disk('public')->exists($course->image)) {
-                    Storage::disk('public')->delete($course->image);
-                }
+            // 講座更新（Service 利用）
+            $updateCourseService(
+                course: $course,
+                title: $request->title,
+                imageFile: $request->file('image'),
+                status: $request->status,
+            );
 
-                // 画像ファイル保存処理
-                $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
-                $imagePath = Storage::putFileAs('public/course', $file, $filename);
-                $imagePath = Course::convertImagePath($imagePath);
-            }
-
-            $course->update([
-                'title' => $request->title,
-                'image' => $imagePath,
-                'status' => $request->status,
-            ]);
+            DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
         } catch (Exception $e) {
+            DB::rollback();
             Log::error($e);
             throw $e;
         }

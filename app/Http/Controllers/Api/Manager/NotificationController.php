@@ -11,6 +11,7 @@ use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
+use App\Enums\Notification\StatusEnum;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
@@ -299,7 +300,7 @@ class NotificationController extends Controller
     /**
     * お知らせ一覧 - ステータス一括変更API
     */
-    public function updateStatus(string $status, UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
 
         // ログイン中のマネージャーIDを取得
@@ -313,6 +314,10 @@ class NotificationController extends Controller
 
         // 対象の通知をすべて取得（管理下の講師に紐づく）
         $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
+
+        // $statusを$request経由で取得（ステータス変更API）
+        $status = StatusEnum::from($request->notification_status)->value;
+
 
         // 一括更新処理（トランザクション）
         DB::beginTransaction();

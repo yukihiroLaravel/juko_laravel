@@ -61,30 +61,30 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    // public function test_バリデーションエラー(): void
-    // {
-    //     // arrange
-    //     $instructor = Instructor::find(1);
-    //     $this->actingAs($instructor, 'instructor');
+    public function test_バリデーションエラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
 
-    //     // act
-    //     $response = $this->putJson('/api/v1/instructor/notification/aaaa', [
-    //         'title' => '',
-    //         'type' => '',
-    //         'start_date' => '',
-    //         'end_date' => '',
-    //         'content' => '',
-    //     ]);
+        // act
+        $response = $this->putJson('/api/v1/instructor/notification/aaaa', [
+            'title' => '',
+            'type' => '',
+            'start_date' => '',
+            'end_date' => '',
+            'content' => '',
+        ]);
 
-    //     // assert
-    //     $response->assertStatus(422);
-    //     $response->assertJsonValidationErrors([
-    //         'notification_id',
-    //         'title',
-    //         'type',
-    //         'start_date',
-    //         'end_date',
-    //         'content',
-    //     ]);
-    // }
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'notification_id',
+            'title',
+            'type',
+            'start_date',
+            'end_date',
+            'content',
+        ]);
+    }
 }

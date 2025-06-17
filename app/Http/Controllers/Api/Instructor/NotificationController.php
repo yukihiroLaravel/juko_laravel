@@ -205,7 +205,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一括削除
+     * お知らせ一覧-タイプ変更API
      */
     public function bulkDelete(BulkDeleteRequest $request): JsonResponse
     {

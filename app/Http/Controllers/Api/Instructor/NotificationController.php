@@ -197,7 +197,7 @@ class NotificationController extends Controller
         }
     }
 
-        /**
+    /**
      * 該当講師お知らせ一覧タイプ　一括変更
      */
     public function updateTypeAll()

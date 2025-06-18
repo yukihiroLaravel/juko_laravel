@@ -381,10 +381,10 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $lesson->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
-                $this->authorize('delete', $lesson);
+            // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
+            $this->authorize('bulkDelete', [Lesson::class, $lessons]);
 
+            $lesson->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
                     throw new AuthorizationException('Invalid course_id.');

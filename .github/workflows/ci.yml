@@ -26,10 +26,6 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
-    - name: Set up environment for testing
-      run: |
-        echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
-
     - name: Run static analysis with PHPStan
       run: composer analyze
 

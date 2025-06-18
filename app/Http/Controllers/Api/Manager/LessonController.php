@@ -376,13 +376,12 @@ class LessonController extends Controller
         $courseId = $request->input('course_id');
 
         // レッスン情報を取得
-        /** @var Lesson $lesson */
         $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         DB::beginTransaction();
 
         try {
             // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
-            $this->authorize('bulkDelete', [Lesson::class, $lessons]);
+            $this->authorize('bulkDelete', [Lesson::class, $lesson]);
 
             $lesson->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない

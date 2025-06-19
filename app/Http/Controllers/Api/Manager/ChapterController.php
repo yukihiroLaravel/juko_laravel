@@ -110,14 +110,6 @@ class ChapterController extends Controller
      */
     public function put(PutRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // チャプターを取得
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 

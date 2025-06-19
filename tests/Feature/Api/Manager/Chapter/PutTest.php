@@ -76,7 +76,7 @@ class PutTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to this chapter.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

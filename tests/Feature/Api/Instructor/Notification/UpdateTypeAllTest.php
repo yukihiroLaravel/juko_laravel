@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Model\Instructor;
 
 class UpdateTypeAllTest extends TestCase
 {

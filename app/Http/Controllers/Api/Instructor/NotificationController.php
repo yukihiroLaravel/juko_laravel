@@ -198,6 +198,14 @@ class NotificationController extends Controller
     }
 
     /**
+     * 該当講師お知らせ一覧タイプ　一括変更
+     */
+    public function updateTypeAll()
+    {
+        return response()->json([]);
+    }
+
+    /**
      * お知らせ一括削除
      */
     public function bulkDelete(BulkDeleteRequest $request): JsonResponse

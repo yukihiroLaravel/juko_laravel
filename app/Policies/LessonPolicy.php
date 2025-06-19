@@ -8,6 +8,9 @@ use Illuminate\Support\Collection;
 
 class LessonPolicy
 {
+    /**
+     * レッスン削除
+     */
     public function delete(Instructor $instructor, Lesson $lesson): bool
     {
         // マネージャー権限のある講師か判定
@@ -22,6 +25,11 @@ class LessonPolicy
         return $instructor->id === $lesson->chapter->course->instructor_id;
     }
 
+    /**
+     * 複数のレッスンを削除
+     *
+     * @param  Collection<int, Lesson>  $lessons
+     */
     public function bulkDelete(Instructor $instructor, Collection $lessons): bool
     {
         if ($instructor->isManager()) {

@@ -162,7 +162,7 @@ class ChapterController extends Controller
 
         if (
             LessonAttendance::whereIn('lesson_id', $lessonIds)
-            ->exists()
+                ->exists()
         ) {
             // 指定したチャプター内に受講中のレッスンがあればエラー応答
             throw new AuthorizationException('Forbidden, this lesson has attendance.');
@@ -221,10 +221,10 @@ class ChapterController extends Controller
         DB::beginTransaction();
 
         try {
-            //コースに紐づくチャプター情報とレッスン情報を取得
-            $course = Course::with('chapters.lessons')->find($courseId);
+            // 講座に紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with(['chapters.lessons', 'chapters.course'])->find($courseId);
 
-            $this->authorize('deleteAll', [Chapter::class, $course]);
+            $this->authorize('delete', $course->chapters->first());
 
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();

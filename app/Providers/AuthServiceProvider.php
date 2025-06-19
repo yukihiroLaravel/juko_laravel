@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Model\Course;
 use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Lesson;
-use App\Policies\CoursePolicy;
 use App\Policies\ChapterPolicy;
+use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 

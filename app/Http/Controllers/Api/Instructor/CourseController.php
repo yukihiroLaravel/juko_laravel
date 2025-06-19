@@ -15,6 +15,9 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
+use App\Services\Course\PutStatusService;
+use App\Services\Course\StoreCourseService;
+use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -22,8 +25,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @tags Instructor-Course
@@ -93,33 +94,19 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         DB::beginTransaction();
 
+        $instructorId = Auth::guard('instructor')->user()->id;
+
         try {
-            $file = $request->file('image');
-            $extension = $file->getClientOriginalExtension();
-            $filename = Str::uuid()->toString().'.'.$extension;
-            $filePath = Storage::putFileAs('public/course', $file, $filename);
-            $filePath = Course::convertImagePath($filePath);
-
-            $course = Course::create([
-                'instructor_id' => $instructorId,
-                'title' => $request->title,
-                'image' => $filePath,
-                'status' => Course::STATUS_PRIVATE,
-            ]);
-
-            // ログイン中の講師が作成したタグかどうか確認
-            $tag = Tag::where('id', $request->tag_id)
-                ->where('instructor_id', $instructorId)
-                ->firstOrFail();
-
-            // タグを中間テーブルに紐づける
-            $course->tags()->attach($tag->id);
+            $storeCourseService(
+                title: $request->title,
+                image: $request->file('image'),
+                tagId: $request->tag_id,
+                instructorId: $instructorId
+            );
 
             DB::commit();
 
@@ -136,42 +123,31 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(UpdateRequest $request): JsonResponse
+    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
     {
-        $file = $request->file('image');
+        DB::beginTransaction();
 
         try {
             $course = Course::FindOrFail($request->course_id);
-            $imagePath = $course->image;
 
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
-            if (isset($file)) {
-                // 更新前の画像ファイルを削除
-                if (Storage::exists($course->image)) {
-                    Storage::delete($course->image);
-                }
+            // 講座更新（Service 利用）
+            $updateCourseService(
+                course: $course,
+                title: $request->title,
+                imageFile: $request->file('image'),
+                status: $request->status,
+            );
 
-                // 画像ファイル保存処理
-                $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
-                $imagePath = Storage::putFileAs('public/course', $file, $filename);
-                $imagePath = Course::convertImagePath($imagePath);
-            }
-
-            $course->update([
-                'title' => $request->title,
-                'image' => $imagePath,
-                'status' => $request->status,
-            ]);
+            DB::commit();
 
             return response()->json([
                 'result' => true,
             ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
         } catch (Exception $e) {
+            DB::rollback();
             Log::error($e);
             throw $e;
         }
@@ -202,13 +178,12 @@ class CourseController extends Controller
     /**
      * 講座ステータス一括更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        Course::where('instructor_id', $instructorId)
-            ->update([
-                'status' => $request->status,
-            ]);
+
+        // 更新処理
+        $service(instructorIds: [$instructorId], status: $request->status);
 
         return response()->json([
             'result' => 'true',

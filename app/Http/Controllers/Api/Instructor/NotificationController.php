@@ -11,8 +11,8 @@ use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
+use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
-use App\Http\Resources\Instructor\NotificationShowResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
@@ -47,10 +47,8 @@ class NotificationController extends Controller
 
     /**
      * お知らせ詳細
-     *
-     * @return NotificationShowResource|JsonResponse
      */
-    public function show(ShowRequest $request)
+    public function show(ShowRequest $request): NotificationResource
     {
         $notification = Notification::with(['course'])
             ->findOrFail($request->notification_id);
@@ -59,7 +57,7 @@ class NotificationController extends Controller
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        return new NotificationShowResource($notification);
+        return new NotificationResource($notification);
     }
 
     /**

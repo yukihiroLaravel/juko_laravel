@@ -59,16 +59,19 @@
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "pint": [
-            "./vendor/bin/pint -v"
+            "vendor/bin/pint -v"
         ],
         "analyze": [
-            "./vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
+            "vendor/bin/phpstan analyse --memory-limit=2G --configuration=phpstan.neon"
         ],
         "rector-dry-run": [
             "vendor/bin/rector process --dry-run"
         ],
         "rector": [
             "vendor/bin/rector process"
+        ],
+        "test": [
+            "vendor/bin/phpunit"
         ]
     }
 }

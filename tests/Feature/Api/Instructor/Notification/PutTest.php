@@ -32,6 +32,7 @@ class PutTest extends TestCase
             'start_date' => '2024-01-01 00:00:00',
             'end_date' => '2024-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'public',
         ]);
 
         // assert
@@ -43,6 +44,7 @@ class PutTest extends TestCase
             'start_date' => '2024-01-01 00:00:00',
             'end_date' => '2024-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'public',
         ]);
     }
 
@@ -59,6 +61,7 @@ class PutTest extends TestCase
             'start_date' => '2024-01-01 00:00:00',
             'end_date' => '2024-01-02 00:00:00',
             'content' => 'content',
+            'status' => 'public',
         ]);
 
         // assert
@@ -81,6 +84,7 @@ class PutTest extends TestCase
             'start_date' => '',
             'end_date' => '',
             'content' => '',
+            'status' => '',
         ]);
 
         // assert
@@ -92,6 +96,7 @@ class PutTest extends TestCase
             'start_date',
             'end_date',
             'content',
+            'status',
         ]);
     }
 }

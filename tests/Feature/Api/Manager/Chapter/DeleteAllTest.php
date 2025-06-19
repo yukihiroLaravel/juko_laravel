@@ -76,7 +76,7 @@ class DeleteAllTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, this lesson has attendance.',
+            'message' => 'This lesson has attendance.',
         ]);
     }
 
@@ -92,7 +92,7 @@ class DeleteAllTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

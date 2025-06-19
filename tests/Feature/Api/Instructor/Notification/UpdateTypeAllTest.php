@@ -2,10 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use App\Model\Instructor;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class UpdateTypeAllTest extends TestCase
 {

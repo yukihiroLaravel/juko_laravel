@@ -13,7 +13,7 @@ class NotificationPolicy
     public function update(Instructor $instructor, Notification $notification)
     {
         // マネージャーの場合は配下の講師レッスンも更新可能
-        if($instructor->isManager()){
+        if ($instructor->isManager()) {
             $manager = Instructor::with('managings')->find($instructor->id);
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;

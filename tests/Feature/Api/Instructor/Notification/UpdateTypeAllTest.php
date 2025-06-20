@@ -31,7 +31,7 @@ class UpdateTypeAllTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $this->assertDatabaseHas('notifications',[
+        $this->assertDatabaseHas('notifications', [
             'id' => 1,
             'type' => 'once',
         ]);

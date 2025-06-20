@@ -153,7 +153,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'index']);
                 Route::prefix('type/{notification_type}')->group(function () {
                     Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateType']);
-                    Route::put('/all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateTypeAll']);
+                    Route::put('all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateTypeAll']);
                 });
                 Route::put('status', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatus']);
                 Route::delete('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'bulkDelete']);

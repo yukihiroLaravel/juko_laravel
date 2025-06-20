@@ -206,12 +206,12 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         Notification::where('instructor_id', $instructorId)
-        ->update([
-            'type' => $request->notification_type,
-        ]);
+            ->update([
+                'type' => $request->notification_type,
+            ]);
 
         return response()->json([
-            'result' => true
+            'result' => true,
         ]);
     }
 

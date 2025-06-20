@@ -18,7 +18,7 @@ class NotificationPolicy
             $instructorIds = $manager->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
 
-            return is_array($notification->instructor_id, $instructorIds, true);
+            return in_array($notification->instructor_id, $instructorIds, true);
         }
 
         // マネージャー権限のない講師の場合は自分のレッスンのみ更新可能

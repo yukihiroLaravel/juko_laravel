@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
+use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
@@ -124,25 +124,13 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function update(UpdateRequest $request): JsonResponse
+    public function put(PutRequest $request): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('course')->findOrFail($request->notification_id);
-        assert($notification instanceof Notification);
 
-        // アクセス権限のチェック
-        if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('update', $notification);
 
         DB::beginTransaction();
         try {

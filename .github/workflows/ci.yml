@@ -59,7 +59,7 @@ jobs:
         tools: composer:v2.8.2
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --ansi --no-dev
+      run: composer install --prefer-dist --no-progress --ansi
 
     - name: Format code with Pint
       run: composer pint

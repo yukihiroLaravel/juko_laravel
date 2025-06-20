@@ -19,17 +19,38 @@ class UpdateTypeAllTest extends TestCase
         $this->seed();
     }
 
-    public function test_空の配列返却_成功(): void
+    public function test_お知らせ更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
+        // act
         $notificationType = 'once';
-
         $response = $this->putJson("/api/v1/instructor/notification/type/{$notificationType}/all");
 
+        // assert
         $response->assertStatus(200);
-        $response->assertExactJson([]);
+        $this->assertDatabaseHas('notifications', [
+            'id' => 1,
+            'type' => 'once',
+        ]);
+    }
+
+    public function test_バリデーションエラー_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $notificationType = 'action';
+        $response = $this->putJson("/api/v1/instructor/notification/type/{$notificationType}/all");
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJson([
+            'message' => 'The selected notification type is invalid.',
+        ]);
     }
 }

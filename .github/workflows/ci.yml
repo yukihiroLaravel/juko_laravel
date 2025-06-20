@@ -2,6 +2,9 @@ name: PHP CI
 
 on:
   pull_request:
+    branches:
+      - develop
+      - 'topic/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

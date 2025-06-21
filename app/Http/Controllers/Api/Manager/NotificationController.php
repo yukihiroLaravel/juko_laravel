@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Notification\UpdateAllTypeRequest as NotificationUpdateAllTypeRequest;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
@@ -10,6 +11,7 @@ use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
+use App\Http\Requests\Manager\Notification\UpdateAllTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
@@ -245,6 +247,39 @@ class NotificationController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    public function updateAllType(UpdateAllTypeRequest $request)
+    {
+        // ログインしている講師のIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 配下の講師情報を取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // ログイン講師のお知らせを取得
+        $notifications = Notification::with(['course', 'instructor'])->whereIn('instructor_id', $instructorIds);
+        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
+
+        // 自分以外のお知らせは更新できない
+        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+
+        try {
+            $notifications->update([
+                'type' => $request->notification_type,
+            ]);
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
             Log::error($e);
             throw $e;
         }

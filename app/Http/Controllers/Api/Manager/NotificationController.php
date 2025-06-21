@@ -251,12 +251,6 @@ class NotificationController extends Controller
 
         // ログイン講師のお知らせを取得
         $notifications = Notification::whereIn('instructor_id', $instructorIds);
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
-
-        // 自分以外のお知らせは更新できない
-        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
 
         try {
             $notifications->update([

@@ -134,7 +134,7 @@ class NotificationController extends Controller
         $this->authorize('put', $notification);
 
         // 更新処理：serviceクラス呼び出し
-        $service($notification,title: $request->title, type: $request->type, start_date: $request->start_date, end_date: $request->end_date, status: $request->status, content: $request->content);
+        $service($notification, title: $request->title, type: $request->type, start_date: $request->start_date, end_date: $request->end_date, status: $request->status, content: $request->content);
 
         return response()->json([
             'result' => true,

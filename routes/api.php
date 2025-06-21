@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', fn(Request $request) => $request->user());
+Route::middleware('auth:sanctum')->get('/user', fn (Request $request) => $request->user());
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生側API

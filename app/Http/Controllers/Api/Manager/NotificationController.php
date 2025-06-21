@@ -8,9 +8,9 @@ use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
+use App\Http\Requests\Manager\Notification\UpdateAllTypeRequest;
 use App\Http\Requests\Manager\Notification\UpdateRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
-use App\Http\Requests\Manager\Notification\UpdateAllTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
@@ -274,6 +274,7 @@ class NotificationController extends Controller
             $notifications->update([
                 'type' => $request->notification_type,
             ]);
+
             return response()->json([
                 'result' => true,
             ]);

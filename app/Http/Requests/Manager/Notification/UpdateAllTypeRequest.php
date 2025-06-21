@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Manager\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Notification\TypeEnum;
 
 class UpdateAllTypeRequest extends FormRequest
 {

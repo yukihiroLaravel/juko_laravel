@@ -155,7 +155,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateType']);
                     Route::put('all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateTypeAll']);
                 });
-                Route::put('status', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatus']);
+                Route::prefix('status')->group(function () {
+                    Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatus']);
+                    Route::put('all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatusAll']);
+                });
                 Route::delete('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'bulkDelete']);
                 Route::prefix('{notification_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'show']);
@@ -268,7 +271,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                     Route::prefix('{notification_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'show']);
-                        Route::patch('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'update']);
+                        Route::put('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'put']);
                         Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'delete']);
                     });
                 });

@@ -13,37 +13,13 @@
         </testsuite>
     </testsuites>
     <php>
-        <server name="APP_ENV" value="testing"/>
-        <server name="BCRYPT_ROUNDS" value="4"/>
-        <server name="CACHE_DRIVER" value="array"/>
-        <server name="DB_CONNECTION" value="sqlite"/>
-        <server name="DB_DATABASE" value=":memory:"/>
-        <server name="MAIL_MAILER" value="array"/>
-        <server name="QUEUE_CONNECTION" value="sync"/>
-        <server name="SESSION_DRIVER" value="array"/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
     </php>
-
-    <!--
-        <filter>タグをコメントアウトした経緯の説明
-         
-        <filter>
-            <whitelist processUncoveredFilesFromWhitelist="true">
-                <directory suffix=".php">./app</directory>
-            </whitelist>
-        </filter>
-        の記法が、Laravel 10、PHPUnit10以降では使えない。
-
-        下記のような<coverage>タグを代わりに利用するとのことだが
-        詳細な記法は現時点で未調査。
-        ただし、直近でカバレッジを必要としないため、一旦、調査は保留とした。
-        テストクラスが増えて、必要性が生じた時に本格的な調査をお願いします。
-        <coverage>
-            <include>
-                <directory suffix=".php">./app</directory>
-            </include>
-            <report>
-                <text output="php://stdout"/>
-            </report>
-        </coverage>
-    -->
 </phpunit>

@@ -2,6 +2,9 @@ name: PHP CI
 
 on:
   pull_request:
+    branches:
+      - develop
+      - 'topic/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,15 +23,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
         tools: composer:v2.8.8
-
-    - name: Cache Composer packages
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
@@ -38,6 +34,9 @@ jobs:
 
     - name: Check code with Rector (dry-run)
       run: composer rector-dry-run
+    
+    - name: Run tests
+      run: composer test
     
   format-code:
     runs-on: ubuntu-latest

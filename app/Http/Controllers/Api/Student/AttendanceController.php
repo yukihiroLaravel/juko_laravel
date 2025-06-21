@@ -119,7 +119,6 @@ class AttendanceController extends Controller
             ->findOrFail($request->attendance_id);
 
         if ($authId !== $attendance->student_id) {
-            // ログインしている生徒が受講しているコースではない
             throw new AuthorizationException('Not authorized.');
         }
 

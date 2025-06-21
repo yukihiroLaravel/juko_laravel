@@ -10,7 +10,7 @@ class NotificationPolicy
     /**
      * お知らせの更新処理に関する認可処理
      */
-    public function update(Instructor $instructor, Notification $notification)
+    public function put(Instructor $instructor, Notification $notification)
     {
         // マネージャーの場合は配下の講師レッスンも更新可能
         if ($instructor->isManager()) {

@@ -17,6 +17,7 @@ use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Notification\PutService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -98,34 +99,19 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutService $service): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
 
         // policyによる認可チェック
         $this->authorize('update', $notification);
 
-        DB::beginTransaction();
-        try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
-            DB::commit();
+        // 更新処理：serviceクラス呼び出し
+        $service($notification,title: $request->title, type: $request->type, start_date: $request->start_date, end_date: $request->end_date, status: $request->status, content: $request->content);
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

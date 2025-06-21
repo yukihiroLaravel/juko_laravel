@@ -102,9 +102,8 @@ class NotificationController extends Controller
     {
         $notification = Notification::findOrFail($request->notification_id);
 
-        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('update', $notification);
 
         DB::beginTransaction();
         try {

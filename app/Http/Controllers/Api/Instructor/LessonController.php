@@ -204,9 +204,8 @@ class LessonController extends Controller
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-        if (Auth::guard('instructor')->user()->id !== $lesson->chapter->course->instructor_id) {
-            throw new AuthorizationException('invalid instructor_id.');
-        }
+        // Policy による認可チェック
+        $this->authorize('update', $lesson);
 
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
@@ -226,12 +225,10 @@ class LessonController extends Controller
      */
     public function updateTitle(UpdateTitleRequest $request): JsonResponse
     {
-        $user = Auth::guard('instructor')->user();
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-        if ($lesson->chapter->course->instructor_id !== $user->id) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // Policy による認可チェック
+        $this->authorize('update', $lesson);
 
         if ((int) $request->course_id !== $lesson->chapter->course_id) {
             throw new AuthorizationException('Invalid course_id.');
@@ -292,8 +289,6 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $instructorId = Auth::guard('instructor')->user()->id;
-
             $courseId = $request->input('course_id');
             $chapterId = $request->input('chapter_id');
             $inputLessons = $request->input('lessons');
@@ -301,12 +296,11 @@ class LessonController extends Controller
             // レッスン一括取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
 
+            // Policy による認可チェック
+            $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
+
             // 認可
-            $lessons->each(function (Lesson $lesson) use ($instructorId, $courseId, $chapterId) {
-                // 講座に紐づく講師でない場合は許可しない
-                if ((int) $instructorId !== $lesson->chapter->course->instructor_id) {
-                    throw new AuthorizationException('Forbidden, invalid instructor.');
-                }
+            $lessons->each(function (Lesson $lesson) use ($courseId, $chapterId) {
                 // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Forbidden, invalid course.');
@@ -336,9 +330,6 @@ class LessonController extends Controller
      */
     public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
@@ -347,13 +338,13 @@ class LessonController extends Controller
 
         // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
+
+        // Policy による認可チェック
+        $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
+
         try {
             // 認可
-            $lessons->each(function (Lesson $lesson) use ($instructorId, $chapterId, $courseId) {
-                // 講座に紐づく講師でない場合は許可しない
-                if ($instructorId !== $lesson->chapter->course->instructor_id) {
-                    throw new AuthorizationException('Invalid instructor_id.');
-                }
+            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course_id) {
                     throw new AuthorizationException('Invalid course_id.');

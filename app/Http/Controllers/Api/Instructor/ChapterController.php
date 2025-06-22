@@ -100,16 +100,11 @@ class ChapterController extends Controller
      */
     public function put(PatchRequest $request, UpdateChapterService $updateChapterService): JsonResponse
     {
-        /** @var Instructor $user */
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
-
         /** @var Chapter $chapter */
         $chapter = Chapter::findOrFail($request->chapter_id);
 
-        if ($chapter->course->instructor_id !== $user->id) {
-            // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('Forbidden, not allowed to this chapter.');
-        }
+        // Policy による認可処理に置き換え
+        $this->authorize('update', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない
@@ -211,10 +206,10 @@ class ChapterController extends Controller
 
         DB::beginTransaction();
         try {
-            //コースに紐づくチャプター情報とレッスン情報を取得
-            $course = Course::with('chapters.lessons')->find($courseId);
+            // 講座に紐づくチャプター情報とレッスン情報を取得
+            $course = Course::with(['chapters.lessons', 'chapters.course'])->find($courseId);
 
-            $this->authorize('deleteAll', [Chapter::class, $course]);
+            $this->authorize('delete', $course->chapters->first());
 
             // チャプターに紐づく全レッスンIDを取得
             $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();

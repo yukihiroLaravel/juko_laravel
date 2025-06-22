@@ -8,7 +8,7 @@ use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class UpdateTest extends TestCase
+class PutTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -30,7 +30,7 @@ class UpdateTest extends TestCase
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
+        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => 'update',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
@@ -62,7 +62,7 @@ class UpdateTest extends TestCase
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
+        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => '', // 空
             'type' => '',  // 空
             'start_date' => 'invalid-date', // 無効な日付
@@ -94,7 +94,7 @@ class UpdateTest extends TestCase
         ]);
 
         // act
-        $response = $this->patchJson('/api/v1/manager/notification/'.$notification->id, [
+        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
             'title' => '権限なしテスト',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',

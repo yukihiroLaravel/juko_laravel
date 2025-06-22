@@ -34,12 +34,11 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $courseIds = $request->input('courses', []); //複数のコースIDを取得
+        $courseIds = $request->input('courses', []);
 
         $loginId = Auth::guard('instructor')->user()->id;
 
         if (! empty($courseIds)) {
-            // コースtable内の指定されたコースIDの行（レコード）から、コースIDとｲﾝｽﾄﾗｸﾀｰIDを一括で取得
             $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
 
             foreach ($courses as $course) {
@@ -63,7 +62,6 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
-            // コース指定が空でないときに一致するレコードを取得
             ->when(! empty($courseIds), function (Builder $query) use ($courseIds) {
                 $query->whereIn('attendances.course_id', $courseIds);
             })

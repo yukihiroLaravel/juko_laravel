@@ -127,26 +127,15 @@ class ChapterController extends Controller
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         try {
-            // リクエストで送られたcourseとchapterのidを変数に格納
-            $courseId = $request->course_id;
+            // チャプター情報を取得（with('course') はPolicyの判定に必要）
+            $chapters = Chapter::whereIn('id', $request->chapters)
+                ->with('course')
+                ->get();
 
-            // 認証ユーザー情報取得
-            $instructorId = Auth::guard('instructor')->user()->id;
-
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
-
-            // バリデーション
-            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
-                // チャプターに紐づく講師でない場合は許可しない
-                if ((int) $instructorId !== $chapter->course->instructor_id) {
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
-                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $chapter->course_id) {
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
-            });
+            // 各チャプターに対してPolicyベースの認可チェックを行う
+            foreach ($chapters as $chapter) {
+                $this->authorize('update', $chapter);
+            }
 
             $updateChapterStatusService(
                 chapterIds: $chapters->pluck('id'),
@@ -241,15 +230,16 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $courseId = $request->input('course_id');
             $chapters = $request->input('chapters');
-            $course = Course::findOrFail($courseId);
 
-            if ($user->id !== $course->instructor_id) {
-                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            // 任意のチャプターを取得して認可（1件で十分）
+            $chapter = Chapter::with('course')
+                ->where('course_id', $courseId)
+                ->firstOrFail();
+
+            // Policy による認可チェック
+            $this->authorize('update', $chapter);
 
             $service(
                 chapters: $chapters,
@@ -280,10 +270,12 @@ class ChapterController extends Controller
         /** @var Course $course */
         $course = Course::findOrFail($request->course_id);
 
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            // ログインしていない講師の更新を許可しない
-            throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
+        // 任意のチャプターを1件取得して認可判定（Policyへ委譲）
+        $chapter = Chapter::with('course')
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+
+        $this->authorize('update', $chapter);
 
         $service(
             courseId: $request->course_id,

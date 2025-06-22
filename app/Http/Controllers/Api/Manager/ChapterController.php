@@ -255,34 +255,31 @@ class ChapterController extends Controller
      */
     public function sort(SortRequest $request, SortChaptersService $service): JsonResponse
     {
-
         $courseId = $request->input('course_id');
-        $chapterIds = $request->input('chapters');
+        $inputChapters = $request->input('chapters'); // ← chapter_id + orderの構造
 
-        $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+        // 認可チェック用にChapterモデルを取得
+        $chapterIds = array_column($inputChapters, 'chapter_id');
+        $chapters = Chapter::whereIn('id', $chapterIds)->get();
 
-        // 全チャプターに対して認可をチェック
         foreach ($chapters as $chapter) {
             $this->authorize('update', $chapter);
         }
 
         DB::beginTransaction();
         try {
-            $service($chapters, $courseId);
+            // サービスにはEloquentではなく、生の配列を渡す
+            $service($inputChapters, $courseId);
 
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
+            return response()->json(['result' => true]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-
             throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
-
             throw $e;
         }
     }

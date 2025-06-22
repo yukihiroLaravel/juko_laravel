@@ -52,6 +52,9 @@ class PutTest extends TestCase
 
         // assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
+        ]);
     }
 
     public function test_バリデーションエラー(): void

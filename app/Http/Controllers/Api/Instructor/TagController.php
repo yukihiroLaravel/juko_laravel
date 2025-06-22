@@ -51,7 +51,7 @@ class TagController extends Controller
 
         $query = Tag::where('instructor_id', $instructorId)
             ->when($tagId, function (Builder $query, string $tagId) {
-                $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
+                $query->whereHas('courses', fn(Builder $query) => $query->where('tags.id', $tagId));
             })
             ->with('courses')
             ->get();
@@ -97,12 +97,9 @@ class TagController extends Controller
      */
     public function put(PutRequest $request): JsonResponse
     {
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
         $tag = Tag::findOrFail($request->tag_id);
 
-        if ($user->id !== $tag->instructor_id) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        $this->authorize('update', $tag);
 
         $tag->update([
             'content' => $request->content,

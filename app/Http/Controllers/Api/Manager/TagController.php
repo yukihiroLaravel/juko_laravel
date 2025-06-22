@@ -51,7 +51,7 @@ class TagController extends Controller
 
         $query = Tag::whereIn('instructor_id', $instructorIds)
             ->when($tagId, function (Builder $query, string $tagId) {
-                $query->whereHas('courses', fn(Builder $query) => $query->where('tags.id', $tagId));
+                $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
             })
             ->with(['courses.instructor', 'courses.tags'])
             ->get();

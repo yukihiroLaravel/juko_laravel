@@ -12,7 +12,7 @@ class TagPolicy
      */
     public function delete(Instructor $instructor, Tag $tag)
     {
-        // マネージャーの場合は配下の講師レッスンも更新可能
+        // マネージャーの場合は配下の講師タグも削除可能
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
@@ -20,7 +20,7 @@ class TagPolicy
             return in_array($tag->instructor_id, $instructorIds, true);
         }
 
-        // マネージャー権限のない講師の場合は自分のレッスンのみ更新可能
+        // マネージャー権限のない講師の場合は自分のタグのみ削除可能
         return $tag->instructor_id === $instructor->id;
 
     }

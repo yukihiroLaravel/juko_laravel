@@ -21,6 +21,6 @@ class TagPolicy
         }
 
         // マネージャー権限のない講師
-        return $instructor->id === $tag->instructor_id;
+        return $tag->instructor_id === $instructor->id;
     }
 }

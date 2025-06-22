@@ -51,7 +51,7 @@ class TagController extends Controller
 
         $query = Tag::where('instructor_id', $instructorId)
             ->when($tagId, function (Builder $query, string $tagId) {
-                $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
+                $query->whereHas('courses', fn(Builder $query) => $query->where('tags.id', $tagId));
             })
             ->with('courses')
             ->get();
@@ -99,8 +99,10 @@ class TagController extends Controller
     {
         $tag = Tag::findOrFail($request->tag_id);
 
+        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
         $this->authorize('update', $tag);
 
+        // タグの更新
         $tag->update([
             'content' => $request->content,
         ]);

@@ -6,7 +6,7 @@ use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateAllTypeRequest extends FormRequest
+class UpdateTypeAllRequest extends FormRequest
 {
     public function authorize(): bool
     {

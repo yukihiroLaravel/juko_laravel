@@ -9,7 +9,7 @@ use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\UpdateAllTypeRequest;
+use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
@@ -239,7 +239,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function updateAllType(UpdateAllTypeRequest $request)
+    public function updateTypeAll(UpdateTypeAllRequest $request)
     {
         // ログインしている講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

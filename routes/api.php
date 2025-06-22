@@ -185,7 +185,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'update']);
                         Route::prefix('course')->group(function () {
-                            Route::get('index', 'Api\Manager\Instructor\CourseController@index');
+                            Route::get('index', [App\Http\Controllers\Api\Manager\Instructor\CourseController::class, 'index']);
                         });
                     });
                 });
@@ -210,7 +210,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::get('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'show']);
                                 Route::put('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'put']);
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'delete']);
-                                Route::patch('status', 'Api\Manager\ChapterController@updateStatus');
+                                Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus']);
+
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
                                     Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
@@ -263,7 +264,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\NotificationController::class, 'index']);
-                    Route::put('type/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateAllType']);
+                    Route::put('type/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateTypeAll']);
                     Route::put('type/{notification_type}', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
                     Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkDelete']);
 

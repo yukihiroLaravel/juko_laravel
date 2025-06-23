@@ -260,7 +260,9 @@ class ChapterController extends Controller
 
         // 認可チェック用にChapterモデルを取得
         $chapterIds = array_column($inputChapters, 'chapter_id');
-        $chapters = Chapter::whereIn('id', $chapterIds)->get();
+        $chapters = Chapter::with('course') // ← 必須
+            ->whereIn('id', $chapterIds)
+            ->get();
 
         foreach ($chapters as $chapter) {
             $this->authorize('update', $chapter);

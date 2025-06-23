@@ -67,7 +67,7 @@ class SortTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to delete this lesson. Invalid instructor.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

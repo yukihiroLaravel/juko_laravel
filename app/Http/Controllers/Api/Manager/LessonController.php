@@ -181,7 +181,7 @@ class LessonController extends Controller
             $lessons = Lesson::with('chapter.course')
                 ->whereIn('id', array_column($inputLessons, 'lesson_id'))
                 ->get();
-            
+
             // Policy による認可チェック
             $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
 
@@ -218,7 +218,7 @@ class LessonController extends Controller
     {
         // 指定されたレッスンを取得
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-        
+
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 

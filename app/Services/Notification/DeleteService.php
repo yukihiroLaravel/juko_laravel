@@ -3,11 +3,8 @@
 namespace App\Services\Notification;
 
 use App\Model\Notification;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
-class PutService
+class DeleteService
 {
     /**
      * お知らせ内容を削除する

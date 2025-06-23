@@ -8,6 +8,7 @@ use App\Model\Tag;
 class TagPolicy
 {
     /**
+
      * Create a new policy instance.
      */
     public function update(Instructor $instructor, Tag $tag): bool

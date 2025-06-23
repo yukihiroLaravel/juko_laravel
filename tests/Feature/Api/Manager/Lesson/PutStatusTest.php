@@ -6,7 +6,7 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class SortTest extends TestCase
+class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -18,20 +18,19 @@ class SortTest extends TestCase
         $this->seed();
     }
 
-    public function test_マネージャーのレッスン並び替え_成功(): void
+    public function test_レッスン更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+        $response = $this->putJson('/api/v1/manager/course/1/chapter/2/lesson/status', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                2,
+                3,
             ],
+            'status' => 'private',
         ]);
 
         // assert
@@ -39,29 +38,29 @@ class SortTest extends TestCase
         $response->assertJsonStructure([
             'result',
         ]);
-        collect([5, 4, 3, 2])->each(function ($id, $index) {
-            $this->assertDatabaseHas('lessons', [
-                'id' => $id,
-                'chapter_id' => 2,
-                'order' => $index + 1,
-            ]);
-        });
+        $this->assertDatabaseHas('lessons', [
+            'id' => 2,
+            'status' => 'private',
+        ]);
+        $this->assertDatabaseHas('lessons', [
+            'id' => 3,
+            'status' => 'private',
+        ]);
     }
 
-    public function test_配下でない講師_失敗(): void
+    public function test_権限がない講師のレッスン更新_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(4);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+        $response = $this->putJson('/api/v1/manager/course/1/chapter/2/lesson/status', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                2,
+                3,
             ],
+            'status' => 'private',
         ]);
 
         // assert
@@ -71,20 +70,19 @@ class SortTest extends TestCase
         ]);
     }
 
-    public function test_マネージャーではない講師_失敗(): void
+    public function test_マネージャーではない講師のレッスン登録_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+        $response = $this->putJson('/api/v1/manager/course/1/chapter/2/lesson/status', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                2,
+                3,
             ],
+            'status' => 'private',
         ]);
 
         // assert
@@ -101,14 +99,16 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/manager/course/aaa/chapter/bbb/lesson/sort');
+        $response = $this->putJson('/api/v1/manager/course/aaa/chapter/bbb/lesson/status', [
+            'lessons' => [],
+            'status' => 'invalid_status', // 無効なステータス
+        ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
-            'chapter_id',
             'lessons',
+            'status',
         ]);
     }
 }

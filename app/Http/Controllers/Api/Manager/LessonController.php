@@ -365,14 +365,14 @@ class LessonController extends Controller
         $courseId = $request->input('course_id');
 
         // レッスン情報を取得
-        $lesson = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
+        $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
         DB::beginTransaction();
 
         try {
             // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
-            $this->authorize('bulkDelete', [Lesson::class, $lesson]);
+            $this->authorize('bulkDelete', [Lesson::class, $lessons]);
 
-            $lesson->each(function (Lesson $lesson) use ($chapterId, $courseId) {
+            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                 if ((int) $courseId !== $lesson->chapter->course->id) {
                     throw new AuthorizationException('Invalid course_id.');
@@ -389,7 +389,7 @@ class LessonController extends Controller
 
             // サービスクラスで対象レッスンの削除処理を実行
             $service(
-                lessonIds: $lesson->pluck('id')->toArray(),
+                lessonIds: $lessons->pluck('id')->toArray(),
                 chapterId: $chapterId
             );
 

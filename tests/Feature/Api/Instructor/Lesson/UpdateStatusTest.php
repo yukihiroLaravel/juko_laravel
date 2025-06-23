@@ -1,15 +1,16 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Tag;
+namespace Tests\Feature\Api\Instructor\Lesson;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DeleteTest extends TestCase
+class UpdateStatusTest extends TestCase
 {
     use RefreshDatabase;
 
+    // setup
     #[\Override]
     protected function setUp(): void
     {
@@ -17,49 +18,38 @@ class DeleteTest extends TestCase
         $this->seed();
     }
 
-    public function test_タグ削除_成功(): void
+    public function test_レッスン状態更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/7');
+        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/2/lesson/2/status', [
+            'status' => 'private',
+        ]);
 
         // assert
         $response->assertStatus(200);
-        $response->assertJson([
-            'result' => true,
+        $response->assertJsonStructure([
+            'result',
         ]);
-        $this->assertDatabaseMissing('tags', [
-            'id' => 7,
-        ]);
-    }
-
-    public function test_タグに紐づく講座が存在_失敗(): void
-    {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/1');
-
-        // assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'Forbidden, this tag is linked to courses.',
+        $this->assertDatabaseHas('lessons', [
+            'id' => 2,
+            'status' => 'private',
         ]);
     }
 
-    public function test_権限エラー(): void
+    public function test_権限がない講師のレッスン更新_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/1');
+        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/2/lesson/2/status', [
+            'status' => 'private',
+        ]);
 
         // assert
         $response->assertStatus(403);
@@ -75,12 +65,17 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/aaa');
+        $response = $this->patchJson('/api/v1/instructor/course/aaa/chapter/bbb/lesson/ccc/status', [
+            'status' => '',
+        ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'tag_id',
+            'status' => 'The status field is required.',
+            'course_id' => 'The course id must be an integer.',
+            'chapter_id' => 'The chapter id must be an integer.',
+            'lesson_id' => 'The lesson id must be an integer.',
         ]);
     }
 }

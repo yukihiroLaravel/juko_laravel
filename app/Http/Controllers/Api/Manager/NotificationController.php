@@ -17,7 +17,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
-use App\Services\Course\DeleteService;
+use App\Services\Notification\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;

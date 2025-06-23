@@ -25,6 +25,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Notification\PutNotificationService;
+
 
 /**
  * @tags Instructor-Notification
@@ -99,7 +101,7 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
 
@@ -108,15 +110,15 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
+            $service(
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                title: $request->title,
+                content: $request->content,
+                status: $request->status,
+            );
+
             DB::commit();
 
             return response()->json([
@@ -172,7 +174,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -229,7 +231,7 @@ class NotificationController extends Controller
 
         // 講師と一致しないお知らせが含まれている場合はエラー
         if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
+            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructor->id)
         ) {
             // 講師と一致しないお知らせが含まれている場合はエラー
             throw new AuthorizationException('Invalid instructor_id.');
@@ -274,7 +276,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

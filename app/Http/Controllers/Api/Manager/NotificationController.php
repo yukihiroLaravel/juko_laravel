@@ -17,12 +17,14 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Notification\PutNotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\Notification\PutNotificationService;
 
 /**
  * @tags Manager-Notification
@@ -101,19 +103,19 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             Notification::create([
-                'course_id' => $request->course_id,
-                'instructor_id' => Auth::guard('instructor')->user()->id,
-                'title' => $request->title,
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'status' => $request->status,
-                'content' => $request->content,
+                'course_id' $request->course_id,
+                'instructor_id' Auth::guard('instructor')->user()->id,
+                'title' $request->title,
+                'type' $request->type,
+                'start_date' $request->start_date,
+                'end_date' $request->end_date,
+                'status' $request->status,
+                'content' $request->content,
             ]);
             DB::commit();
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -125,29 +127,29 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
         // 指定されたお知らせIDでお知らせを取得
-        $notification = Notification::with('course')->findOrFail($request->notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
         // policyによる認可チェック
         $this->authorize('update', $notification);
 
         DB::beginTransaction();
         try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
+            $service(
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                title: $request->title,
+                content: $request->content,
+                status: $request->status,
+            );
+
             DB::commit();
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -186,7 +188,7 @@ class NotificationController extends Controller
             DB::commit();
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -224,13 +226,13 @@ class NotificationController extends Controller
         try {
             $notifications->each(function (Notification $notification) use ($notificationType) {
                 $notification->fill([
-                    'type' => $notificationType,
+                    'type' $notificationType,
                 ])->save();
             });
             DB::commit();
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -254,11 +256,11 @@ class NotificationController extends Controller
 
         try {
             $notifications->update([
-                'type' => $request->notification_type,
+                'type' $request->notification_type,
             ]);
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -302,7 +304,7 @@ class NotificationController extends Controller
             DB::commit();
 
             return response()->json([
-                'result' => true,
+                'result' true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

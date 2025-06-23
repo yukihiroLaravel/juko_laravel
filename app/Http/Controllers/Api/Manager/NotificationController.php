@@ -17,6 +17,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Course\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -159,7 +160,7 @@ class NotificationController extends Controller
     /**
      * お知らせ削除
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
         // 認証している講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -181,8 +182,9 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $notification->students()->detach();
-            $notification->delete();
+            // DeleteServiceを呼び出し削除処理
+            $service($notification);
+
             DB::commit();
 
             return response()->json([

@@ -11,6 +11,8 @@ use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
+use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
+use App\Enums\Notification\StatusEnum;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
@@ -303,6 +305,47 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+    * お知らせ一覧 - ステータス一括変更API
+    */
+    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    {
+
+        // ログイン中のマネージャーIDを取得
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        // 管理下の講師IDをすべて取得
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->find($instructorId);
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 対象の通知をすべて取得（管理下の講師に紐づく）
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
+
+        // $statusを$request経由で取得（ステータス変更API）
+        $status = StatusEnum::from($request->notification_status)->value;
+
+
+        // 一括更新処理（トランザクション）
+        DB::beginTransaction();
+        try {
+            $notifications->each(function (Notification $notification) use ($status) {
+                $notification->fill([
+                    'status' => $status,
+                ])->save();
+            });
+
+            DB::commit();
+
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

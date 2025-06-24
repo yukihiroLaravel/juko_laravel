@@ -106,19 +106,19 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             Notification::create([
-                'course_id' $request->course_id,
-                'instructor_id' Auth::guard('instructor')->user()->id,
-                'title' $request->title,
-                'type' $request->type,
-                'start_date' $request->start_date,
-                'end_date' $request->end_date,
-                'status' $request->status,
-                'content' $request->content,
+                'course_id' => $request->course_id,
+                'instructor_id' => Auth::guard('instructor')->user()->id,
+                'title' => $request->title,
+                'type' => $request->type,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'status' => $request->status,
+                'content' => $request->content,
             ]);
             DB::commit();
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -157,7 +157,7 @@ class NotificationController extends Controller
             DB::commit();
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

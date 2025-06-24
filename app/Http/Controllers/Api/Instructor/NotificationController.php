@@ -18,9 +18,9 @@ use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Notification\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use App\Services\Notification\DeleteService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -139,7 +139,6 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 指定されたお知らせを取得
-        /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
 
         // お知らせが、現在ログインしている講師のものでなければエラー
@@ -149,8 +148,7 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            // DeleteServiceを呼び出し削除処理
-            $service($notification);
+            $service(notification: $notification);
 
             DB::commit();
 

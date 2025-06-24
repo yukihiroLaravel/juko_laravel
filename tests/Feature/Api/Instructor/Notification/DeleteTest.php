@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Model\Instructor;
 
 class DeleteTest extends TestCase
 {
@@ -29,8 +29,8 @@ class DeleteTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'result',
+        $response->assertJson([
+            'result' => true,
         ]);
 
         // リレーションされているデータが削除されているか確認

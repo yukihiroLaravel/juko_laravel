@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api\Manager\Notification;
 
+use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Model\Instructor;
 
 class DeleteTest extends TestCase
 {
@@ -29,8 +29,8 @@ class DeleteTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'result',
+        $response->assertJson([
+            'result' => true,
         ]);
 
         // リレーションされているデータが削除されているか確認
@@ -52,6 +52,22 @@ class DeleteTest extends TestCase
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Invalid instructor_id.',
+        ]);
+    }
+
+    public function test_マネージャー権限がない_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->deleteJson('/api/v1/manager/notification/2');
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
         ]);
     }
 

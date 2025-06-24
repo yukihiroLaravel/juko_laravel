@@ -167,13 +167,11 @@ class NotificationController extends Controller
 
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
         // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
-        assert($notification instanceof Notification);
 
         // アクセス権限のチェック
         if (! in_array($notification->instructor_id, $instructorIds, true)) {
@@ -182,8 +180,7 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            // DeleteServiceを呼び出し削除処理
-            $service($notification);
+            $service(notification: $notification);
 
             DB::commit();
 

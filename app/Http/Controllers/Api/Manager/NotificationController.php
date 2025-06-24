@@ -140,14 +140,18 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $service(
-                $notification,
+            $data = new PutDto(
                 type: $request->type,
                 start_date: $request->start_date,
                 end_date: $request->end_date,
                 title: $request->title,
                 content: $request->content,
-                status: $request->status,
+                status: $request->status
+            );
+
+            $service(
+                $notification,
+                $data
             );
 
             DB::commit();

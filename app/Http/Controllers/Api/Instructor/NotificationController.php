@@ -113,10 +113,9 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             $data = new PutDto(
-                notificationId: $request->notification_id,
                 type: $request->type,
-                startDate: $request->start_date,
-                endDate: $request->end_date,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
                 title: $request->title,
                 content: $request->content,
                 status: $request->status

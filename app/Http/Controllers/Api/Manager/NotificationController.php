@@ -27,7 +27,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Services\Notification\PutNotificationService;
+use App\Dto\Notification\PutDto;
 
 /**
  * @tags Manager-Notification
@@ -194,7 +194,7 @@ class NotificationController extends Controller
             DB::commit();
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -232,13 +232,13 @@ class NotificationController extends Controller
         try {
             $notifications->each(function (Notification $notification) use ($notificationType) {
                 $notification->fill([
-                    'type' $notificationType,
+                    'type' => $notificationType,
                 ])->save();
             });
             DB::commit();
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -262,11 +262,11 @@ class NotificationController extends Controller
 
         try {
             $notifications->update([
-                'type' $request->notification_type,
+                'type' => $request->notification_type,
             ]);
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             Log::error($e);
@@ -310,7 +310,7 @@ class NotificationController extends Controller
             DB::commit();
 
             return response()->json([
-                'result' true,
+                'result' => true,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

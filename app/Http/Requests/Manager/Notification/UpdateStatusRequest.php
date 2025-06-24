@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Manager\Notification;
 
+use App\Enums\Notification\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Notification\StatusEnum;
 
 /**
  * マネージャー側 お知らせステータス一括変更用リクエスト
@@ -22,6 +22,7 @@ class UpdateStatusRequest extends FormRequest
     /**
      * ルートパラメータをリクエストデータにマージ
      */
+    #[\Override]
     protected function prepareForValidation(): void
     {
         $this->merge([

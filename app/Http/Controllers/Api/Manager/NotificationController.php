@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Dto\Notification\PutDto;
 use App\Enums\Notification\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
@@ -19,15 +20,14 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
-use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\DeleteService;
+use App\Services\Notification\PutNotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Dto\Notification\PutDto;
 
 /**
  * @tags Manager-Notification

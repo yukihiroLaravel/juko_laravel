@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\Notification\PutNotificationService;
+use App\Dto\Notification\PutDto;
 
 
 /**
@@ -111,13 +112,19 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $service(
+            $data = new PutDto(
+                notificationId: $request->notification_id,
                 type: $request->type,
-                start_date: $request->start_date,
-                end_date: $request->end_date,
+                startDate: $request->start_date,
+                endDate: $request->end_date,
                 title: $request->title,
                 content: $request->content,
-                status: $request->status,
+                status: $request->status
+            );
+
+            $service(
+                $notification,
+                $data
             );
 
             DB::commit();

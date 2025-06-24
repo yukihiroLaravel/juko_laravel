@@ -11,9 +11,9 @@ class PutNotificationService
      */
     public function __invoke(
         Notification $notification,
-        int $type,
-        int $start_date,
-        int $end_date,
+        string $type,
+        string $start_date,
+        string $end_date,
         string $title,
         string $content,
         string $status

@@ -141,6 +141,7 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             $service(
+                $notification,
                 type: $request->type,
                 start_date: $request->start_date,
                 end_date: $request->end_date,

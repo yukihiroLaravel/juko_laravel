@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
 use App\Model\Lesson;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 
 class SortRequest extends FormRequest
 {
@@ -48,7 +48,7 @@ class SortRequest extends FormRequest
             // 対象のレッスンIDがすべて含まれているかチェック
             $diff = array_diff($validLessonIds, $inputLessonIds);
 
-            if (!empty($diff)) {
+            if (! empty($diff)) {
                 $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
             }
         });

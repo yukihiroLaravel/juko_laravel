@@ -2,6 +2,7 @@
 
 namespace App\Services\Lesson;
 
+use Illuminate\Database\Eloquent\Model;
 use App\Model\Lesson;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -14,9 +15,15 @@ class SortLessonsService
     {
         $inputLessonCollection = collect($inputLessons);
 
-        $lessons->each(function (Lesson $lesson) use ($inputLessonCollection) {
+        $lessons->each(function (Model $model) use ($inputLessonCollection) {
+            if (!$model instanceof Lesson) {
+                return;
+            }
+
+            $lesson = $model;
+
             // インデックスを取得
-            $index = $inputLessonCollection->search(function ($input) use ($lesson) {
+            $index = $inputLessonCollection->search(function (array $input) use ($lesson) {
                 return $input['lesson_id'] === $lesson->id;
             });
 

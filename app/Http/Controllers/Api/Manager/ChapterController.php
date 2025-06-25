@@ -255,30 +255,28 @@ class ChapterController extends Controller
      */
     public function sort(SortRequest $request, SortChaptersService $service): JsonResponse
     {
-        $courseId = $request->input('course_id');
-        $inputChapters = $request->input('chapters'); // ← chapter_id + orderの構造
-
-        // 認可チェック用にChapterモデルを取得
-        $chapterIds = array_column($inputChapters, 'chapter_id');
-        $chapters = Chapter::with('course') // ← 必須
-            ->whereIn('id', $chapterIds)
-            ->get();
-
-        foreach ($chapters as $chapter) {
-            $this->authorize('update', $chapter);
-        }
-
         DB::beginTransaction();
         try {
-            // サービスにはEloquentではなく、生の配列を渡す
+ 
+            $inputChapters = $request->input('chapters');
+            $courseId = $request->input('course_id');
+            $chapterIds = array_column($inputChapters, 'chapter_id');
+
+            $chapters = Chapter::with('course')
+                ->whereIn('id', $chapterIds)
+                ->get();
+
+            // Managerなら1件で十分
+            $this->authorize('update', $chapters->first());
+
             $service($inputChapters, $courseId);
 
             DB::commit();
-
             return response()->json(['result' => true]);
-        } catch (ModelNotFoundException $e) {
+            
+        } catch (ModelNotFoundException) {
             DB::rollBack();
-            throw $e;
+            throw new AuthorizationException('Not found.');
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -311,12 +309,12 @@ class ChapterController extends Controller
      */
     public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
     {
-        // 任意のチャプター1件を取得（認可チェック用）
+
         $chapter = Chapter::with('course')
             ->where('course_id', $request->course_id)
             ->firstOrFail();
 
-        // Policyで認可チェック（コースに対する間接認可）
+
         $this->authorize('update', $chapter);
 
         $service(
@@ -334,10 +332,11 @@ class ChapterController extends Controller
      */
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
+
         $chapterIds = $request->input('chapters');
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
-        // 各チャプターに対してPolicyで認可チェック
+
         foreach ($chapters as $chapter) {
             $this->authorize('update', $chapter);
         }

@@ -126,30 +126,26 @@ class ChapterController extends Controller
      */
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
-        try {
-            // チャプター情報を取得（with('course') はPolicyの判定に必要）
-            $chapters = Chapter::whereIn('id', $request->chapters)
-                ->with('course')
-                ->get();
 
-            // 各チャプターに対してPolicyベースの認可チェックを行う
-            foreach ($chapters as $chapter) {
-                $this->authorize('update', $chapter);
-            }
+        $chapters = Chapter::whereIn('id', $request->chapters)
+            ->with('course')
+            ->get();
 
-            $updateChapterStatusService(
-                chapterIds: $chapters->pluck('id'),
-                status: $request->status
-            );
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
+        foreach ($chapters as $chapter) {
+            $this->authorize('update', $chapter);
         }
+
+        $updateChapterStatusService(
+            chapterIds: $chapters->pluck('id'),
+            status: $request->status
+        );
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
+
 
     /**
      * 選択済チャプターの削除API
@@ -230,31 +226,27 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
+
+            $inputChapters = $request->input('chapters');
             $courseId = $request->input('course_id');
-            $chapters = $request->input('chapters');
+            $chapterIds = array_column($inputChapters, 'chapter_id');
 
-            // 任意のチャプターを取得して認可（1件で十分）
-            $chapter = Chapter::with('course')
-                ->where('course_id', $courseId)
-                ->firstOrFail();
+            $chapters = Chapter::with('course')
+                ->whereIn('id', $chapterIds)
+                ->get();
 
-            // Policy による認可チェック
-            $this->authorize('update', $chapter);
+            foreach ($chapters as $chapter) {
+                $this->authorize('update', $chapter);
+            }
 
-            $service(
-                chapters: $chapters,
-                courseId: $courseId
-            );
+            $service($inputChapters, $courseId);
 
             DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (ModelNotFoundException) {
+            return response()->json(['result' => true]);
+            
+        } catch (ModelNotFoundException $e) {
             DB::rollBack();
-
-            throw new AuthorizationException('Not found.');
+            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -267,10 +259,9 @@ class ChapterController extends Controller
      */
     public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
     {
-        /** @var Course $course */
+
         $course = Course::findOrFail($request->course_id);
 
-        // 任意のチャプターを1件取得して認可判定（Policyへ委譲）
         $chapter = Chapter::with('course')
             ->where('course_id', $course->id)
             ->firstOrFail();

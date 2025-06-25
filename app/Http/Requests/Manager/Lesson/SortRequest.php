@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Manager\Lesson;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use App\Model\Lesson;
 
 class SortRequest extends FormRequest
 {
@@ -28,8 +30,28 @@ class SortRequest extends FormRequest
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
             'lessons.*.lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
-            'lessons.*.order' => ['required', 'integer'],
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function (Validator $validator) {
+            $chapterId = $this->input('chapter_id');
+            $inputLessonIds = collect($this->input('lessons'))->pluck('lesson_id')->toArray();
+
+            // 指定された chapter_id に属し、論理削除されていないレッスンを取得
+            $validLessonIds = Lesson::where('chapter_id', $chapterId)
+                ->whereNull('deleted_at')
+                ->pluck('id')
+                ->toArray();
+
+            // 対象のレッスンIDがすべて含まれているかチェック
+            $diff = array_diff($validLessonIds, $inputLessonIds);
+
+            if (!empty($diff)) {
+                $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
+            }
+        });
     }
 
     #[\Override]

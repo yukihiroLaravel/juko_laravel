@@ -97,13 +97,12 @@ class TagController extends Controller
      */
     public function put(PutRequest $request): JsonResponse
     {
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
         $tag = Tag::findOrFail($request->tag_id);
 
-        if ($user->id !== $tag->instructor_id) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
+        $this->authorize('update', $tag);
 
+        // タグの更新
         $tag->update([
             'content' => $request->content,
         ]);

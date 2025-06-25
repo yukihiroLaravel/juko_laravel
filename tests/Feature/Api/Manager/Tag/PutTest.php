@@ -39,6 +39,24 @@ class PutTest extends TestCase
         ]);
     }
 
+    public function test_権限がないマネージャーで認証_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(4);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->putJson('/api/v1/manager/tag/1', [
+            'content' => 'test',
+        ]);
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'This action is unauthorized.',
+        ]);
+    }
+
     public function test_権限エラー(): void
     {
         // arrange
@@ -52,6 +70,9 @@ class PutTest extends TestCase
 
         // assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
+        ]);
     }
 
     public function test_バリデーションエラー(): void

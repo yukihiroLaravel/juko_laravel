@@ -135,16 +135,11 @@ class NotificationController extends Controller
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        // お知らせが、現在ログインしている講師のものでなければエラー
-        if ($instructorId !== $notification->instructor_id) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // Policy による認可処理
+        $this->authorize('delete', $notification);
 
         DB::beginTransaction();
         try {
@@ -171,7 +166,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -228,7 +223,7 @@ class NotificationController extends Controller
 
         // 講師と一致しないお知らせが含まれている場合はエラー
         if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
+            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructor->id)
         ) {
             // 講師と一致しないお知らせが含まれている場合はエラー
             throw new AuthorizationException('Invalid instructor_id.');
@@ -273,7 +268,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

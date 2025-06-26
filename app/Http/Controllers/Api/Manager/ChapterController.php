@@ -257,7 +257,7 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
- 
+
             $inputChapters = $request->input('chapters');
             $courseId = $request->input('course_id');
             $chapterIds = array_column($inputChapters, 'chapter_id');
@@ -273,7 +273,6 @@ class ChapterController extends Controller
 
             DB::commit();
             return response()->json(['result' => true]);
-            
         } catch (ModelNotFoundException) {
             DB::rollBack();
             throw new AuthorizationException('Not found.');
@@ -332,14 +331,10 @@ class ChapterController extends Controller
      */
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
-
         $chapterIds = $request->input('chapters');
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
-
-        foreach ($chapters as $chapter) {
-            $this->authorize('update', $chapter);
-        }
+        $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),

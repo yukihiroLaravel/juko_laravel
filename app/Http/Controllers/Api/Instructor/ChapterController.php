@@ -127,14 +127,9 @@ class ChapterController extends Controller
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
 
-        $chapters = Chapter::whereIn('id', $request->chapters)
-            ->with('course')
-            ->get();
+        $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
 
-
-        foreach ($chapters as $chapter) {
-            $this->authorize('update', $chapter);
-        }
+        $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),
@@ -231,19 +226,14 @@ class ChapterController extends Controller
             $courseId = $request->input('course_id');
             $chapterIds = array_column($inputChapters, 'chapter_id');
 
-            $chapters = Chapter::with('course')
-                ->whereIn('id', $chapterIds)
-                ->get();
+            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
-            foreach ($chapters as $chapter) {
-                $this->authorize('update', $chapter);
-            }
+            $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
             $service($inputChapters, $courseId);
 
             DB::commit();
             return response()->json(['result' => true]);
-            
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             throw $e;

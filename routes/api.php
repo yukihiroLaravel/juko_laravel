@@ -213,7 +213,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::get('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'show']);
                                 Route::put('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'put']);
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'delete']);
-                                Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus']);/
+                                Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus']);
 
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {

@@ -164,21 +164,11 @@ class NotificationController extends Controller
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        // アクセス権限のチェック
-        if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('delete', $notification);
 
         DB::beginTransaction();
         try {

@@ -27,65 +27,76 @@ class NotificationController extends Controller
      */
     public function index(IndexRequest $request): NotificationIndexResource
     {
+        // リクエストパラメータ
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
         $sortBy = $request->input('sort_by', 'start_date');
         $order = $request->input('order', 'asc');
+        /**
+         * 既読・未読フィルタ
+         * - all（全件。デフォルト）
+         * - read（既読のみ）
+         * - unread（未読のみ）
+         */
+        $filter = $request->input('filter', 'all');
+
         $student = $request->user();
         $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
         $currentDateTime = CarbonImmutable::now();
 
-        $notifications = Notification::with('course')
+        // お知らせ取得
+        $query = Notification::with('students', 'course')
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
-            ->orderBy($sortBy, $order)
+            ->where('end_date', '>=', $currentDateTime);
+
+        // 既読データ取得
+        if($filter === 'read'){
+            $query->whereHas('students', function($q) use ($student){
+                $q->where('student_id', $student->id);
+            });
+        // 未読データ取得
+        }elseif($filter === 'unread'){
+            $query->whereDoesntHave('students', function ($q) use ($student) {
+                $q->where('student_id', $student->id);
+            });
+        }
+
+        $notifications = $query->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }
 
     /**
-     * お知らせ既読API
+     * お知らせ既読登録API(Type->onceのみ)
      *
-     * @return NotificationReadResource
+     * ユーザが確認したお知らせIDを取得
+     * viewed_once_notificationsテーブルに登録
      */
-    public function read(Request $request)
+    public function markRead(Request $request)
     {
-        $student = Student::findOrFail($request->user()->id);
-        $notifications = $this->getNotifications($student);
-        $filteredNotifications = $this->filterAndMarkAsRead($student, $notifications);
+        $student = $request->user();
+        $notificationIds = $request->input('notification_ids', []);
 
-        return new NotificationReadResource($filteredNotifications);
-    }
-
-    private function getNotifications(Student $student)
-    {
-        $attendances = Attendance::where('student_id', $student->id)->get();
-        $courseIds = $attendances->pluck('course.id')->toArray();
-        $currentDateTime = CarbonImmutable::now();
-
-        return Notification::with('students')
-            ->whereIn('course_id', $courseIds)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
+        // typeがONCEのものだけを取得
+        $notifications = Notification::whereIn('id', $notificationIds)
+            ->where('type', TypeEnum::ONCE)
+            ->with('students')
             ->get();
-    }
 
-    private function filterAndMarkAsRead(Student $student, $notifications)
-    {
-        return $notifications->filter(function ($notification) use ($student) {
-            if ($notification->type === TypeEnum::ONCE) {
-                if ($notification->students->contains($student->id)) {
-                    return false;
-                }
+        // ユーザが確認したお知らせを登録(既読登録)
+        foreach ($notifications as $notification) {
+            if (!$notification->students->contains($student->id)) {
                 $notification->students()->attach($student->id);
             }
-
-            return true;
-        });
     }
+
+    return response()->json([
+        'result' => true,
+    ]);
+}
 
     /**
      * お知らせ詳細

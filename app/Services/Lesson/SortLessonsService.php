@@ -22,8 +22,8 @@ class SortLessonsService
 
             $lesson = $model;
 
-            // インデックスを取得
-            $index = $inputLessonCollection->search(fn (array $input) => $input['lesson_id'] === $lesson->id);
+            // lessons配列内における要素の順序を取得
+            $index = $inputLessonCollection->search(fn(array $input) => $input['lesson_id'] === $lesson->id);
 
             if ($index !== false) {
                 $lesson->update([

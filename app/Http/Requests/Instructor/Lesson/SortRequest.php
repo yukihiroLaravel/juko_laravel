@@ -29,7 +29,8 @@ class SortRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
-            'lessons.*.lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            // order値を検証する。
+            'lessons.*.order' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
         ];
     }
 

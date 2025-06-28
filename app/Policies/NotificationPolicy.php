@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Model\Instructor;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use App\Model\Notification;
 
 class NotificationPolicy
@@ -27,6 +27,7 @@ class NotificationPolicy
 
     /**
      * お知らせの一括削除処理に関する認可処理
+     * @param \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification> $notifications
      */
     public function bulkDelete(Instructor $instructor, Collection $notifications): bool
     {

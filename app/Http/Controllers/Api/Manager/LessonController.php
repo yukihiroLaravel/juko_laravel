@@ -175,12 +175,10 @@ class LessonController extends Controller
         try {
             $courseId = $request->input('course_id');
             $chapterId = $request->input('chapter_id');
-            $inputLessons = $request->input('lessons');
+            $inputLessons = $request->input('lessons'); // example: [5, 4, 3, 2, 1]
 
             // レッスンを一括取得
-            $lessons = Lesson::with('chapter.course')
-                ->whereIn('id', array_column($inputLessons, 'lesson_id'))
-                ->get();
+            $lessons = Lesson::with('chapter.course')->whereIn('id', $inputLessons)->get();
 
             // Policy による認可チェック
             $this->authorize('bulkUpdate', [Lesson::class, $lessons]);

@@ -29,7 +29,7 @@ class SortRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
-            'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
+            'lessons.*' => ['required', 'integer'],
         ];
     }
 
@@ -37,7 +37,7 @@ class SortRequest extends FormRequest
     {
         $validator->after(function (Validator $validator) {
             $chapterId = $this->input('chapter_id');
-            $inputLessonIds = collect($this->input('lessons'))->pluck('lesson_id')->toArray();
+            $inputLessonIds = $this->input('lessons', []);
 
             // 指定された chapter_id に属し、論理削除されていないレッスンを取得
             $validLessonIds = Lesson::where('chapter_id', $chapterId)

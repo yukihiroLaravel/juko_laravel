@@ -9,21 +9,19 @@ use Illuminate\Database\Eloquent\Model;
 class SortLessonsService
 {
     /**
-     * レッスン並び替えサービス order値は、配列要素のインデックス値にする。１から始まる値にする。
+     * レッスン並び替えサービス order値は、配列要素のインデックスにする。１から始まる値にする。
      */
     public function __invoke(Collection $lessons, array $inputLessons): void
     {
-        $inputLessonCollection = collect($inputLessons);
-
-        $lessons->each(function (Model $model) use ($inputLessonCollection) {
+        $lessons->each(function (Model $model) use ($inputLessons) {
             if (! $model instanceof Lesson) {
                 return;
             }
 
             $lesson = $model;
 
-            // lessons配列内における要素の順序を取得
-            $index = $inputLessonCollection->search(fn(array $input) => $input['lesson_id'] === $lesson->id);
+            // lessons配列内における要素のインデックスを取得
+            $index = array_search($lesson->id, $inputLessons, true);
 
             if ($index !== false) {
                 $lesson->update([

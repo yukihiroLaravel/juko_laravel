@@ -17,12 +17,10 @@ use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
-use App\Model\ViewedOnceNotification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -172,7 +170,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructorId)
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -261,7 +259,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

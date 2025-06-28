@@ -2,9 +2,9 @@
 
 namespace App\Services\Notification;
 
-use Illuminate\Database\Eloquent\Collection;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use Illuminate\Database\Eloquent\Collection;
 
 class BulkDeleteService
 {

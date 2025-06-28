@@ -18,7 +18,6 @@ use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\ViewedOnceNotification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use Exception;

@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Model\Instructor;
-use Illuminate\Database\Eloquent\Collection;
 use App\Model\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class NotificationPolicy
 {
@@ -27,7 +27,8 @@ class NotificationPolicy
 
     /**
      * お知らせの一括削除処理に関する認可処理
-     * @param \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification> $notifications
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification>  $notifications
      */
     public function bulkDelete(Instructor $instructor, Collection $notifications): bool
     {
@@ -37,13 +38,13 @@ class NotificationPolicy
             $managerIds[] = $instructor->id;
 
             return $notifications->every(
-                fn(Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
+                fn (Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
             );
         }
 
         // 講師の場合、自分の講座のみ削除可能
         return $notifications->every(
-            fn(Notification $notification) => $notification->instructor_id !== $instructor->id
+            fn (Notification $notification) => $notification->instructor_id !== $instructor->id
         );
     }
 }

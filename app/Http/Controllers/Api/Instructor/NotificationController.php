@@ -18,6 +18,7 @@ use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -171,7 +172,7 @@ class NotificationController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
 
         if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+            $notifications->contains(fn(Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -217,32 +218,19 @@ class NotificationController extends Controller
     /**
      * お知らせ一括削除
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
-        $notificationIds = $request->input('notifications', []);
-
-        $instructor = Auth::guard('instructor')->user();
-
-        /** @var Collection<int, Notification> $notifications */
-        $notifications = Notification::whereIn('id', $notificationIds)->get();
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
-        ) {
-            // 講師と一致しないお知らせが含まれている場合はエラー
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('bulkDelete', $notifications);
 
         // トランザクション開始
         DB::beginTransaction();
 
         try {
-            // viewed_once_notificationsテーブルのレコードを一括削除
-            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
-
-            // notificationsテーブルのレコードを一括削除
-            Notification::whereIn('id', $notificationIds)->delete();
+            // viewed_once_notifications, notificationsテーブルのレコードを一括削除するサービス
+            $service($notifications);
 
             // コミット
             DB::commit();
@@ -273,7 +261,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

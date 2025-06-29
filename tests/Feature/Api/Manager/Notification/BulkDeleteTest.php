@@ -6,7 +6,7 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DeleteTest extends TestCase
+class BulkDeleteTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -112,7 +112,7 @@ class DeleteTest extends TestCase
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'notification_id',
+            'notifications',
         ]);
     }
 }

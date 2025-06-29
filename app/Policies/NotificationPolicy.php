@@ -27,8 +27,8 @@ class NotificationPolicy
 
     /**
      * お知らせの一括削除処理に関する認可処理
-     *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification>  $notifications
+     * 静的解析エラー回避のためのアノテーション
+     * @param \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification> $notifications
      */
     public function bulkDelete(Instructor $instructor, Collection $notifications): bool
     {

@@ -257,7 +257,6 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-
             $inputChapters = $request->input('chapters');
             $courseId = $request->input('course_id');
             $chapterIds = array_column($inputChapters, 'chapter_id');
@@ -266,8 +265,7 @@ class ChapterController extends Controller
                 ->whereIn('id', $chapterIds)
                 ->get();
 
-            // Managerなら1件で十分
-            $this->authorize('update', $chapters->first());
+            $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
             $service($inputChapters, $courseId);
 
@@ -289,6 +287,12 @@ class ChapterController extends Controller
     public function updateStatus(UpdateStatusRequest $request): JsonResponse
     {
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
+
+        // course_idの整合性チェック（講座に属しているか確認）
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座に属するチャプターでなければエラー応答
+            throw new ValidationErrorException('Forbidden, invalid course_id.');
+        }
 
         // Policyによる認可処理
         $this->authorize('update', $chapter);
@@ -332,7 +336,15 @@ class ChapterController extends Controller
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         $chapterIds = $request->input('chapters');
+        $courseId = $request->input('course_id');
+
         $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+
+        $chapters->each(function (Chapter $chapter) use ($courseId) {
+            if ((int) $courseId !== $chapter->course->id) {
+                throw new AuthorizationException('Forbidden, invalid course_id.');
+            }
+        });
 
         $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 

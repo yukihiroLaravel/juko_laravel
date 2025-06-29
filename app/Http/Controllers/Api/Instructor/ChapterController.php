@@ -126,8 +126,20 @@ class ChapterController extends Controller
      */
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
-
         $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+
+        $instructorId = Auth::guard('instructor')->user()->id;
+        $courseId = $request->course_id;
+
+        $chapters->each(function ($chapter) use ($instructorId, $courseId) {
+            if ((int) $instructorId !== $chapter->course->instructor_id) {
+                throw new AuthorizationException('forbidden, invalid instructor_id.');
+            }
+
+            if ((int) $courseId !== $chapter->course->id) {
+                throw new AuthorizationException('forbidden, invalid course_id.');
+            }
+        });
 
         $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
@@ -221,19 +233,24 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-
-            $inputChapters = $request->input('chapters');
             $courseId = $request->input('course_id');
+            $inputChapters = $request->input('chapters');
             $chapterIds = array_column($inputChapters, 'chapter_id');
 
             $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
 
             $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
-            $service($inputChapters, $courseId);
+            $service(
+                chapters: $inputChapters,
+                courseId: $courseId
+            );
 
             DB::commit();
-            return response()->json(['result' => true]);
+
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             throw $e;

@@ -276,7 +276,7 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('bulkDelete', $notifications);
+        $this->authorize('bulkDelete', [Notification::class, $notifications]);
 
         DB::beginTransaction();
         try {

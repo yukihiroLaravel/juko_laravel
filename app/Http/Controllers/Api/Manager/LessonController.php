@@ -173,27 +173,13 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $courseId = $request->input('course_id');
-            $chapterId = $request->input('chapter_id');
-            $inputLessons = $request->input('lessons'); // example: [5, 4, 3, 2, 1]
+            $inputLessons = $request->input('lessons');
 
             // レッスンを一括取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', $inputLessons)->get();
 
             // Policy による認可チェック
             $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-            /// 認可
-            $lessons->each(function (Lesson $lesson) use ($courseId, $chapterId) {
-                // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course->id) {
-                    throw new AuthorizationException('Forbidden, not allowed to delete this lesson. Invalid course_id.');
-                }
-                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ((int) $chapterId !== $lesson->chapter->id) {
-                    throw new AuthorizationException('Forbidden, not allowed to delete this lesson. Invalid chapter_id.');
-                }
-            });
 
             $sortLessonsService($lessons, $inputLessons);
 

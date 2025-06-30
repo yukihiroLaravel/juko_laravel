@@ -36,18 +36,33 @@ class SortRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function (Validator $validator) {
-            $chapterId = $this->input('chapter_id');
-            $inputLessonIds = $this->input('lessons', []);
+            $courseId = (int)$this->input('course_id');
+            $chapterId = (int)$this->input('chapter_id');
+            $inputLessons = $this->input('lessons', []);
 
-            // 指定された chapter_id に属し、論理削除されていないレッスンを取得
+            // 取得
+            $lessons = Lesson::with('chapter.course')
+                ->whereIn('id', $inputLessons)
+                ->get();
+
+            // ① lesson が chapter_id に属しているか
+            $invalidChapter = $lessons->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
+            if ($invalidChapter->isNotEmpty()) {
+                $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
+            }
+
+            // ② lesson が course_id に属しているか
+            $invalidCourse = $lessons->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
+            if ($invalidCourse->isNotEmpty()) {
+                $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
+            }
+
+            // ③ chapter_id に属する lesson がすべて含まれているか（既存の検証）
             $validLessonIds = Lesson::where('chapter_id', $chapterId)
-                ->whereNull('deleted_at')
                 ->pluck('id')
                 ->toArray();
 
-            // 対象のレッスンIDがすべて含まれているかチェック
-            $diff = array_diff($validLessonIds, $inputLessonIds);
-
+            $diff = array_diff($validLessonIds, $inputLessons);
             if (! empty($diff)) {
                 $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
             }

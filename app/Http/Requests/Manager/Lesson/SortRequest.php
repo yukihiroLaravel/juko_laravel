@@ -36,8 +36,8 @@ class SortRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function (Validator $validator) {
-            $courseId = (int)$this->input('course_id');
-            $chapterId = (int)$this->input('chapter_id');
+            $courseId = (int) $this->input('course_id');
+            $chapterId = (int) $this->input('chapter_id');
             $inputLessons = $this->input('lessons', []);
 
             // 取得
@@ -46,13 +46,13 @@ class SortRequest extends FormRequest
                 ->get();
 
             // ① lesson が chapter_id に属しているか
-            $invalidChapter = $lessons->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
+            $invalidChapter = $lessons->reject(fn ($lesson) => $lesson->chapter_id === $chapterId);
             if ($invalidChapter->isNotEmpty()) {
                 $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
             }
 
             // ② lesson が course_id に属しているか
-            $invalidCourse = $lessons->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
+            $invalidCourse = $lessons->reject(fn ($lesson) => $lesson->chapter->course_id === $courseId);
             if ($invalidCourse->isNotEmpty()) {
                 $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
             }

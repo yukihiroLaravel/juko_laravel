@@ -6,6 +6,7 @@ use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
+use App\Http\Requests\Student\Notification\markReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
@@ -75,7 +76,7 @@ class NotificationController extends Controller
      * ユーザが確認したお知らせIDを取得
      * viewed_once_notificationsテーブルに登録
      */
-    public function markRead(Request $request)
+    public function markRead(markReadRequest $request)
     {
         $student = $request->user();
         $notificationIds = $request->input('notification_ids', []);

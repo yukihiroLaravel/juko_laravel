@@ -167,7 +167,7 @@ class NotificationController extends Controller
         // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        // Policy による認可処理
+        // policyによる認可チェック
         $this->authorize('delete', $notification);
 
         DB::beginTransaction();

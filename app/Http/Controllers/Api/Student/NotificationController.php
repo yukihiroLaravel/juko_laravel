@@ -14,6 +14,7 @@ use App\Http\Resources\Student\NotificationReadResource;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
+use App\Services\Notification\MarkReadService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -76,27 +77,16 @@ class NotificationController extends Controller
      * ユーザが確認したお知らせIDを取得
      * viewed_once_notificationsテーブルに登録
      */
-    public function markRead(markReadRequest $request)
+    public function markRead(markReadRequest $request, markReadService $service)
     {
         $student = $request->user();
         $notificationIds = $request->input('notification_ids', []);
 
-        // typeがONCEのものだけを取得
-        $notifications = Notification::whereIn('id', $notificationIds)
-            ->where('type', TypeEnum::ONCE)
-            ->with('students')
-            ->get();
+        $service($student, $notificationIds);
 
-        // ユーザが確認したお知らせを登録(既読登録)
-        foreach ($notifications as $notification) {
-            if (!$notification->students->contains($student->id)) {
-                $notification->students()->attach($student->id);
-            }
-    }
-
-    return response()->json([
-        'result' => true,
-    ]);
+        return response()->json([
+            'result' => true,
+        ]);
 }
 
     /**

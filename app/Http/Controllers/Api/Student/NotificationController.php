@@ -63,7 +63,7 @@ class NotificationController extends Controller
     private function getNotifications(Student $student)
     {
         $attendances = Attendance::where('student_id', $student->id)->get();
-        $courseIds = $attendances->pluck('course.id')->toArray();
+        $courseIds = $attendances->pluck('course_id')->toArray();
         $currentDateTime = CarbonImmutable::now();
 
         return Notification::with('students')

@@ -26,7 +26,6 @@ use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -245,9 +244,6 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            throw $e;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

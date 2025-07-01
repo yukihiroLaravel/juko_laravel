@@ -28,7 +28,6 @@ use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -267,14 +266,16 @@ class ChapterController extends Controller
 
             $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
-            $service($inputChapters, $courseId);
+            $service(
+                chapters: $inputChapters,
+                courseId: $courseId
+            );
 
             DB::commit();
 
-            return response()->json(['result' => true]);
-        } catch (ModelNotFoundException) {
-            DB::rollBack();
-            throw new AuthorizationException('Not found.');
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

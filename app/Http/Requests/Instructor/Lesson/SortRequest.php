@@ -5,6 +5,7 @@ namespace App\Http\Requests\Instructor\Lesson;
 use App\Model\Lesson;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Collection;
 
 class SortRequest extends FormRequest
 {
@@ -19,7 +20,7 @@ class SortRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * 最初のバリデーション
      *
      * @return array
      */
@@ -33,40 +34,48 @@ class SortRequest extends FormRequest
         ];
     }
 
-    public function withValidator($validator)
+    // 追加のバリデーション
+    public function after(): array
     {
-        $validator->after(function (Validator $validator) {
-            $courseId = (int) $this->input('course_id');
-            $chapterId = (int) $this->input('chapter_id');
-            $inputLessons = $this->input('lessons', []);
+        return [
+            function (Validator $validator) {
+                $courseId = (int) $this->input('course_id');
+                $chapterId = (int) $this->input('chapter_id');
+                $inputLessons = $this->input('lessons', []);
 
-            // 取得
-            $lessons = Lesson::with('chapter.course')
-                ->whereIn('id', $inputLessons)
-                ->get();
+                // chapter_id に紐づくレッスンを全て取得
+                $allLessonIds = Lesson::with('chapter.course')
+                    ->where('chapter_id', $chapterId)->get();
 
-            // ① lesson が chapter_id に属しているか
-            $invalidChapter = $lessons->reject(fn ($lesson) => $lesson->chapter_id === $chapterId);
-            if ($invalidChapter->isNotEmpty()) {
-                $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
+                // inputLessonsのレッスンを取得
+                $lessons = $allLessonIds->whereIn('id', $inputLessons);
+
+                // (1) lesson が chapter_id に属しているか
+                $invalidChapter = $lessons->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
+                if ($invalidChapter->isNotEmpty()) {
+                    $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
+                }
+
+                // (2) lesson が course_id に属しているか
+                $invalidCourse = $lessons->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
+                if ($invalidCourse->isNotEmpty()) {
+                    $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
+                }
+
+                // (3) chapter_id に属する lesson がすべて含まれているか
+                $allLessonIds = $allLessonIds->pluck('id')->toArray();
+
+                $diff = array_diff($allLessonIds, $inputLessons);
+                if (! empty($diff)) {
+                    $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
+                }
+
+                // (4) 重複しているlessonsがあるか
+                if (count($inputLessons) !== count(array_unique($inputLessons))) {
+                    $validator->errors()->add('lessons', 'duplicate lessons found.');
+                }
             }
-
-            // ② lesson が course_id に属しているか
-            $invalidCourse = $lessons->reject(fn ($lesson) => $lesson->chapter->course_id === $courseId);
-            if ($invalidCourse->isNotEmpty()) {
-                $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
-            }
-
-            // ③ chapter_id に属する lesson がすべて含まれているか（既存の検証）
-            $validLessonIds = Lesson::where('chapter_id', $chapterId)
-                ->pluck('id')
-                ->toArray();
-
-            $diff = array_diff($validLessonIds, $inputLessons);
-            if (! empty($diff)) {
-                $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
-            }
-        });
+        ];
     }
 
     #[\Override]

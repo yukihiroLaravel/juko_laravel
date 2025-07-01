@@ -88,4 +88,50 @@ class SortTest extends TestCase
             'lessons',
         ]);
     }
+
+    public function test_レッスン_i_dが不足している_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/instructor/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                3,
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'all valid lessons not found for the specified chapter.',
+        ]);
+    }
+
+    public function test_余計なレッスン_i_dが含まれている_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/instructor/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                1,
+                3,
+                2,
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'invalid lessons found for the specified chapter.',
+        ]);
+    }
 }

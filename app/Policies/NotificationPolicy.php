@@ -26,10 +26,26 @@ class NotificationPolicy
     }
 
     /**
+     * お知らせの削除に関する認可処理
+     */
+    public function delete(Instructor $instructor, Notification $notification): bool
+    {
+        // マネージャーの場合は配下の講師のお知らせも削除可能
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($notification->instructor_id, $instructorIds, true);
+        }
+
+        // マネージャー権限のない講師の場合は自分のお知らせのみ削除可能
+        return $instructor->id === $notification->instructor_id;
+    }
+
+    /**
      * お知らせの一括削除処理に関する認可処理
-     * 静的解析エラー回避のためのアノテーション
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification>  $notifications
+     * @param  Collection<int, Notification>  $notifications
      */
     public function bulkDelete(Instructor $instructor, Collection $notifications): bool
     {

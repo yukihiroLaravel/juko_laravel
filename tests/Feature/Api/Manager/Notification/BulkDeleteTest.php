@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Notification;
+namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,27 +18,6 @@ class BulkDeleteTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせ削除_成功(): void
-    {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/notification/2');
-
-        // assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'result' => true,
-        ]);
-
-        // リレーションされているデータが削除されているか確認
-        $this->assertDatabaseMissing('viewed_once_notifications', [
-            'id' => 1,
-        ]);
-    }
-
     public function test_お知らせ一括削除_成功(): void
     {
         // arrange
@@ -46,7 +25,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/notification', [
+        $response = $this->deleteJson('/api/v1/manager/notification', [
             'notifications' => [1, 2],
         ]);
 
@@ -66,46 +45,50 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    public function test_マネージャーではない講師_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/notification/1');
+        $response = $this->deleteJson('/api/v1/manager/notification', [
+            'notifications' => [1, 2],
+        ]);
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Invalid instructor_id.',
+            'message' => 'Forbidden, not allowed to use manager api.',
         ]);
     }
 
-    public function test_バリデーションエラー１(): void
+    public function test_権限がないマネージャー_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(4);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/notification/aaa');
+        $response = $this->deleteJson('/api/v1/manager/notification', [
+            'notifications' => [1, 2],
+        ]);
 
         // assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors([
-            'notification_id',
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'This action is unauthorized.',
         ]);
     }
 
-    public function test_バリデーションエラー２(): void
+    public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/notification', [
+        $response = $this->deleteJson('/api/v1/manager/notification', [
             'notifications' => [],
         ]);
 

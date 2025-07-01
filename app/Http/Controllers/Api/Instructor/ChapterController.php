@@ -127,14 +127,9 @@ class ChapterController extends Controller
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
-
-        $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
 
-        $chapters->each(function ($chapter) use ($instructorId, $courseId) {
-            if ((int) $instructorId !== $chapter->course->instructor_id) {
-                throw new AuthorizationException('forbidden, invalid instructor_id.');
-            }
+        $chapters->each(function (Chapter $chapter) use ($courseId) {
 
             if ((int) $courseId !== $chapter->course->id) {
                 throw new AuthorizationException('forbidden, invalid course_id.');

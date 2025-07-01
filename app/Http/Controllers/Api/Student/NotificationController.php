@@ -3,21 +3,19 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Enums\Notification\StatusEnum;
-use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
-use App\Http\Requests\Student\Notification\markReadRequest;
+use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-use App\Http\Resources\Student\NotificationReadResource;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
 use App\Services\Notification\MarkReadService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Student-Notification
@@ -77,11 +75,12 @@ class NotificationController extends Controller
      * ユーザが確認したお知らせIDを取得
      * viewed_once_notificationsテーブルに登録
      */
-    public function markRead(markReadRequest $request, markReadService $service)
+    public function markRead(MarkReadRequest $request, MarkReadService $service)
     {
         $student = $request->user();
         $notificationIds = $request->input('notification_ids', []);
 
+        // サービスクラス呼び出し(登録処理)
         $service($student, $notificationIds);
 
         return response()->json([

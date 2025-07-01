@@ -54,6 +54,18 @@ class NotificationSeeder extends Seeder
                 'created_at' => CarbonImmutable::now(),
                 'updated_at' => CarbonImmutable::now(),
             ],
+            [
+                'course_id' => 1,
+                'instructor_id' => 1,
+                'title' => 'Student Notification ReadMark Test',
+                'type' => TypeEnum::ONCE,
+                'status' => StatusEnum::PUBLIC,
+                'start_date' => '2023-08-01 00:00:00',
+                'end_date' => CarbonImmutable::now()->addMonth(),
+                'content' => 'Student Notification ReadMark Test',
+                'created_at' => CarbonImmutable::now(),
+                'updated_at' => CarbonImmutable::now(),
+            ],
         ]);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Student\Notification;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class markReadRequest extends FormRequest
+class MarkReadRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

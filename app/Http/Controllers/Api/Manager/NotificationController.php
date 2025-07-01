@@ -18,7 +18,7 @@ use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\ViewedOnceNotification;
+use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -164,21 +164,11 @@ class NotificationController extends Controller
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
 
-        // アクセス権限のチェック
-        if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('delete', $notification);
 
         DB::beginTransaction();
         try {
@@ -270,34 +260,18 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-一括削除API
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $notificationIds = $notifications->pluck('id')->toArray();
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
-        // アクセス権のチェック
-        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        $this->authorize('bulkDelete', [Notification::class, $notifications]);
 
         DB::beginTransaction();
         try {
-            // お知らせの閲覧状態を削除
-            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
-
-            // お知らせを削除
-            Notification::whereIn('id', $notificationIds)->delete();
+            // viewed_once_notifications, notificationsテーブルのレコードを一括削除するサービス
+            $service($notifications);
 
             // コミット
             DB::commit();

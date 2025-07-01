@@ -132,7 +132,7 @@ class ChapterController extends Controller
         $chapters->each(function (Chapter $chapter) use ($courseId) {
 
             if ((int) $courseId !== $chapter->course->id) {
-                throw new AuthorizationException('forbidden, invalid course_id.');
+                throw new AuthorizationException('Forbidden, invalid course_id.');
             }
         });
 
@@ -147,7 +147,6 @@ class ChapterController extends Controller
             'result' => true,
         ]);
     }
-
 
     /**
      * 選択済チャプターの削除API

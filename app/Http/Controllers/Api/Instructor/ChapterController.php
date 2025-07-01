@@ -26,7 +26,6 @@ use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -126,40 +125,26 @@ class ChapterController extends Controller
      */
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
-        try {
-            // リクエストで送られたcourseとchapterのidを変数に格納
-            $courseId = $request->course_id;
+        $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+        $courseId = $request->course_id;
 
-            // 認証ユーザー情報取得
-            $instructorId = Auth::guard('instructor')->user()->id;
+        $chapters->each(function (Chapter $chapter) use ($courseId) {
 
-            // 選択されたチャプターを取得
-            $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
+            if ((int) $courseId !== $chapter->course->id) {
+                throw new AuthorizationException('Forbidden, invalid course_id.');
+            }
+        });
 
-            // バリデーション
-            $chapters->each(function (Chapter $chapter) use ($instructorId, $courseId) {
-                // チャプターに紐づく講師でない場合は許可しない
-                if ((int) $instructorId !== $chapter->course->instructor_id) {
-                    throw new AuthorizationException('Forbidden, invalid instructor_id.');
-                }
-                // チャプターに紐づく講座IDがリクエストの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $chapter->course_id) {
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
-            });
+        $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
-            $updateChapterStatusService(
-                chapterIds: $chapters->pluck('id'),
-                status: $request->status
-            );
+        $updateChapterStatusService(
+            chapterIds: $chapters->pluck('id'),
+            status: $request->status
+        );
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**
@@ -241,18 +226,16 @@ class ChapterController extends Controller
     {
         DB::beginTransaction();
         try {
-            $user = Instructor::find(Auth::guard('instructor')->user()->id);
             $courseId = $request->input('course_id');
-            $chapters = $request->input('chapters');
-            $course = Course::findOrFail($courseId);
+            $inputChapters = $request->input('chapters');
+            $chapterIds = array_column($inputChapters, 'chapter_id');
 
-            if ($user->id !== $course->instructor_id) {
-                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            $chapters = Chapter::with('course')->whereIn('id', $chapterIds)->get();
+
+            $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
 
             $service(
-                chapters: $chapters,
+                chapters: $inputChapters,
                 courseId: $courseId
             );
 
@@ -261,10 +244,6 @@ class ChapterController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (ModelNotFoundException) {
-            DB::rollBack();
-
-            throw new AuthorizationException('Not found.');
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -277,13 +256,14 @@ class ChapterController extends Controller
      */
     public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
     {
-        /** @var Course $course */
+
         $course = Course::findOrFail($request->course_id);
 
-        if (Auth::guard('instructor')->user()->id !== $course->instructor_id) {
-            // ログインしていない講師の更新を許可しない
-            throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
+        $chapter = Chapter::with('course')
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+
+        $this->authorize('update', $chapter);
 
         $service(
             courseId: $request->course_id,

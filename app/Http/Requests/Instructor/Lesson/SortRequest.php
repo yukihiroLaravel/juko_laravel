@@ -43,12 +43,10 @@ class SortRequest extends FormRequest
                 $chapterId = (int) $this->input('chapter_id');
                 $inputLessons = $this->input('lessons', []);
 
-                // chapter_id に紐づくレッスンを全て取得
-                $allLessonIds = Lesson::with('chapter.course')
-                    ->where('chapter_id', $chapterId)->get();
-
-                // inputLessonsのレッスンを取得
-                $lessons = $allLessonIds->whereIn('id', $inputLessons);
+                // 取得
+                $lessons = Lesson::with('chapter.course')
+                    ->whereIn('id', $inputLessons)
+                    ->get();
 
                 // (1) lesson が chapter_id に属しているか
                 $invalidChapter = $lessons->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
@@ -63,9 +61,13 @@ class SortRequest extends FormRequest
                 }
 
                 // (3) chapter_id に属する lesson がすべて含まれているか
-                $allLessonIds = $allLessonIds->pluck('id')->toArray();
+                $validLessonIds = $lessons
+                    // $chapterIdと紐づくレッスンのみを残す
+                    ->filter(fn($lesson) => $lesson->chapter_id === $chapterId)
+                    ->pluck('id')
+                    ->toArray();
 
-                $diff = array_diff($allLessonIds, $inputLessons);
+                $diff = array_diff($validLessonIds, $inputLessons);
                 if (! empty($diff)) {
                     $validator->errors()->add('lessons', 'all valid lessons not found for the specified chapter.');
                 }

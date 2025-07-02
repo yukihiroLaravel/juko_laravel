@@ -5,7 +5,6 @@ namespace App\Http\Requests\Instructor\Lesson;
 use App\Model\Lesson;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Collection;
 
 class SortRequest extends FormRequest
 {
@@ -50,17 +49,17 @@ class SortRequest extends FormRequest
                     })
                     ->get();
 
-                // 入力されたレッスンのみ取り出し 
+                // 入力されたレッスンのみ取り出し
                 $inputLessonsCollection = $allLessons->whereIn('id', $inputLessons);
 
                 // (1) lesson が chapter_id に属しているか
-                $invalidChapter = $inputLessonsCollection->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
+                $invalidChapter = $inputLessonsCollection->reject(fn ($lesson) => $lesson->chapter_id === $chapterId);
                 if ($invalidChapter->isNotEmpty()) {
                     $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
                 }
 
                 // (2) lesson が course_id に属しているか
-                $invalidCourse = $inputLessonsCollection->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
+                $invalidCourse = $inputLessonsCollection->reject(fn ($lesson) => $lesson->chapter->course_id === $courseId);
                 if ($invalidCourse->isNotEmpty()) {
                     $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
                 }
@@ -79,7 +78,7 @@ class SortRequest extends FormRequest
                 if (count($inputLessons) !== count(array_unique($inputLessons))) {
                     $validator->errors()->add('lessons', 'duplicate lessons found.');
                 }
-            }
+            },
         ];
     }
 

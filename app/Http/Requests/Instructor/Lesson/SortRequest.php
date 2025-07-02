@@ -43,27 +43,30 @@ class SortRequest extends FormRequest
                 $chapterId = (int) $this->input('chapter_id');
                 $inputLessons = $this->input('lessons', []);
 
-                // 取得
-                $lessons = Lesson::with('chapter.course')
-                    ->whereIn('id', $inputLessons)
+                $allLessons = Lesson::with('chapter.course')
+                    ->where(function ($query) use ($chapterId, $inputLessons) {
+                        $query->whereIn('id', $inputLessons)
+                            ->orWhere('chapter_id', $chapterId);
+                    })
                     ->get();
 
+                // 入力されたレッスンのみ取り出し 
+                $inputLessonsCollection = $allLessons->whereIn('id', $inputLessons);
+
                 // (1) lesson が chapter_id に属しているか
-                $invalidChapter = $lessons->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
+                $invalidChapter = $inputLessonsCollection->reject(fn($lesson) => $lesson->chapter_id === $chapterId);
                 if ($invalidChapter->isNotEmpty()) {
                     $validator->errors()->add('lessons', 'invalid lessons found for the specified chapter.');
                 }
 
                 // (2) lesson が course_id に属しているか
-                $invalidCourse = $lessons->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
+                $invalidCourse = $inputLessonsCollection->reject(fn($lesson) => $lesson->chapter->course_id === $courseId);
                 if ($invalidCourse->isNotEmpty()) {
                     $validator->errors()->add('lessons', 'invalid lessons found for the specified course.');
                 }
 
                 // (3) chapter_id に属する lesson がすべて含まれているか
-                $validLessonIds = $lessons
-                    // $chapterIdと紐づくレッスンのみを残す
-                    ->filter(fn($lesson) => $lesson->chapter_id === $chapterId)
+                $validLessonIds = $allLessons->where('chapter_id', $chapterId)
                     ->pluck('id')
                     ->toArray();
 

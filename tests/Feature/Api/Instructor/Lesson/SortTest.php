@@ -111,7 +111,7 @@ class SortTest extends TestCase
         ]);
     }
 
-    public function test_余計なレッスン_i_dが含まれている_失敗(): void
+    public function test_余計なレッスンが含まれている_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(1);
@@ -132,6 +132,30 @@ class SortTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'lessons' => 'invalid lessons found for the specified chapter.',
+        ]);
+    }
+
+    public function test_レッスンが重複している_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/instructor/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                3,
+                2,
+                5, // 重複
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'duplicate lessons found.',
         ]);
     }
 }

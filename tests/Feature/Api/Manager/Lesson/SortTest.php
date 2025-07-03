@@ -27,10 +27,10 @@ class SortTest extends TestCase
         // act
         $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                5,
+                4,
+                3,
+                2,
             ],
         ]);
 
@@ -57,10 +57,10 @@ class SortTest extends TestCase
         // act
         $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                5,
+                4,
+                3,
+                2,
             ],
         ]);
 
@@ -80,10 +80,10 @@ class SortTest extends TestCase
         // act
         $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
             'lessons' => [
-                ['lesson_id' => 5, 'order' => 1],
-                ['lesson_id' => 4, 'order' => 2],
-                ['lesson_id' => 3, 'order' => 3],
-                ['lesson_id' => 2, 'order' => 4],
+                5,
+                4,
+                3,
+                2,
             ],
         ]);
 
@@ -109,6 +109,76 @@ class SortTest extends TestCase
             'course_id',
             'chapter_id',
             'lessons',
+        ]);
+    }
+
+    public function test_レッスンが不足している_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                3,
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'all valid lessons not found for the specified chapter.',
+        ]);
+    }
+
+    public function test_余計なレッスンが含まれている_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                1,
+                3,
+                2,
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'invalid lessons found for the specified chapter.',
+        ]);
+    }
+
+    public function test_レッスンが重複している_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/manager/course/1/chapter/2/lesson/sort', [
+            'lessons' => [
+                5,
+                4,
+                3,
+                2,
+                5, // 重複
+            ],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'lessons' => 'duplicate lessons found.',
         ]);
     }
 }

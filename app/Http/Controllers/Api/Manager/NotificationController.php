@@ -16,6 +16,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
+use App\Services\Notification\NotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -209,45 +210,23 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request): JsonResponse
+    //protected NotificationService $notificationService;
+
+    // public function __construct(NotificationService $notificationService)
+    // {
+    //     $this->notificationService = $notificationService;
+    // }
+
+    public function updateType(UpdateTypeRequest $request,NotificationService $notificationService): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $notificationService->handleManagerUpdateNotificationType(
+        $request->notifications,
+        $request->notification_type
+    );
 
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
-        // 選択されたお知らせリストを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
-
-        // アクセス権限のチェック
-        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
-
-        $notificationType = $request->notification_type;
-
-        DB::beginTransaction();
-        try {
-            $notifications->each(function (Notification $notification) use ($notificationType) {
-                $notification->fill([
-                    'type' => $notificationType,
-                ])->save();
-            });
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+    ]);
     }
 
     /**

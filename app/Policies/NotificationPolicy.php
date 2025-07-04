@@ -61,7 +61,7 @@ class NotificationPolicy
 
         // 講師の場合、自分の講座のみ削除可能
         return $notifications->every(
-            fn (Notification $notification) => $notification->instructor_id !== $instructor->id
+            fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
 }

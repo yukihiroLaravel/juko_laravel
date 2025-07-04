@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Enums\Notification\StatusEnum;
+use App\Dto\Student\Notification\IndexDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
 use App\Http\Requests\Student\Notification\MarkReadRequest;
@@ -12,10 +12,9 @@ use App\Http\Resources\Student\NotificationIndexResource;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
+use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
-use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Student-Notification
@@ -25,46 +24,25 @@ class NotificationController extends Controller
     /**
      * お知らせ取得API
      */
-    public function index(IndexRequest $request): NotificationIndexResource
+    public function index(IndexRequest $request, IndexService $service): NotificationIndexResource
     {
-        // リクエストパラメータ
-        $perPage = $request->input('per_page', 20);
-        $page = $request->input('page', 1);
-        $sortBy = $request->input('sort_by', 'start_date');
-        $order = $request->input('order', 'asc');
-        /**
-         * 既読・未読フィルタ
-         * - all（全件。デフォルト）
-         * - read（既読のみ）
-         * - unread（未読のみ）
-         */
-        $filter = $request->input('filter', 'all');
 
-        $student = $request->user();
-        $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-        $currentDateTime = CarbonImmutable::now();
+        $dto = new IndexDto(
+            studentId: $request->user()->id,
+            perPage: (int)$request->input('per_page', 20),
+            page: (int)$request->input('page', 1),
+            sortBy: $request->input('sort_by', 'start_date'),
+            order: $request->input('order', 'asc'),
+            filter: $request->input('filter', 'all')
+            /**
+            * 既読・未読フィルタ
+            * - all（全件。デフォルト）
+            * - read（既読のみ）
+            * - unread（未読のみ）
+            */
+        );
 
-        // お知らせ取得
-        $query = Notification::with('students', 'course')
-            ->whereIn('course_id', $courseIds)
-            ->where('status', StatusEnum::PUBLIC)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime);
-
-        // 既読データ取得
-        if($filter === 'read'){
-            $query->whereHas('students', function($q) use ($student){
-                $q->where('student_id', $student->id);
-            });
-        // 未読データ取得
-        }elseif($filter === 'unread'){
-            $query->whereDoesntHave('students', function ($q) use ($student) {
-                $q->where('student_id', $student->id);
-            });
-        }
-
-        $notifications = $query->orderBy($sortBy, $order)
-            ->paginate($perPage, ['*'], 'page', $page);
+        $notifications = $service($dto);
 
         return new NotificationIndexResource($notifications);
     }
@@ -78,10 +56,10 @@ class NotificationController extends Controller
     public function markRead(MarkReadRequest $request, MarkReadService $service)
     {
         $student = $request->user();
-        $notificationIds = $request->input('notification_ids', []);
+        $notifications = $request->input('notifications', []);
 
         // サービスクラス呼び出し(登録処理)
-        $service($student, $notificationIds);
+        $service($student, $notifications);
 
         return response()->json([
             'result' => true,

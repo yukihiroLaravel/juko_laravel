@@ -22,18 +22,18 @@ class MarkReadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notification_ids'   => 'required|array',
-            'notification_ids.*' => 'integer|exists:notifications,id',
+            'notifications'   => ['required', 'array'],
+            'notifications.*' => ['integer', 'exists:notifications,id'],
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
-            'notification_ids.required'   => 'notification_idsは必須です。',
-            'notification_ids.array'      => 'notification_idsは配列で指定してください。',
-            'notification_ids.*.integer'  => 'notification_idsの各要素は整数で指定してください。',
-            'notification_ids.*.exists'   => '指定されたnotification_idが存在しません。',
+            'notifications.required'   => 'notificationsは必須です。',
+            'notifications.array'      => 'notificationsは配列で指定してください。',
+            'notifications.*.integer'  => 'notificationsの各要素は整数で指定してください。',
+            'notifications.*.exists'   => '指定されたnotification_idが存在しません。',
         ];
     }
 }

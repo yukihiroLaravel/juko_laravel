@@ -66,7 +66,7 @@ class NotificationController extends Controller
         $courseIds = $attendances->pluck('course_id')->toArray();
         $currentDateTime = CarbonImmutable::now();
 
-        return Notification::with('students')
+        return Notification::with(['students', 'course'])
             ->whereIn('course_id', $courseIds)
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime)

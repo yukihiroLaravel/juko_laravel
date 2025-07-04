@@ -210,13 +210,6 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    //protected NotificationService $notificationService;
-
-    // public function __construct(NotificationService $notificationService)
-    // {
-    //     $this->notificationService = $notificationService;
-    // }
-
     public function updateType(UpdateTypeRequest $request,NotificationService $notificationService): JsonResponse
     {
         $notificationService->handleManagerUpdateNotificationType(

@@ -18,7 +18,6 @@ use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
 use App\Services\Notification\NotificationService;
-//use App\Services\Notification\NotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -168,21 +167,14 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    // protected NotificationService $notificationService;
-
-    // public function __construct(NotificationService $notificationService)
-    //{
-    //   $this->notificationService = $notificationService;
-    //}
-
     public function updateType(UpdateTypeRequest $request , NotificationService $notificationService ): JsonResponse
     {
-    //    $notificationService->handleUpdateNotificationType(
-    //         $request->notifications,
-    //         $request->notification_type,
-    //         'instructor',
-    //         'instructor_id'
-    //     );
+        $notificationService->handleUpdateNotificationType(
+            $request->notifications,
+            $request->notification_type,
+            'instructor',
+            'instructor_id'
+        );
 
         return response()->json(['result' => true]);
     }

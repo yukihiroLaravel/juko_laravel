@@ -78,7 +78,8 @@ class LessonPolicy
         }
 
         // 講師の場合、自分の講座のみ削除可能
-        return $lessons->every(fn (Lesson $lesson) => $lesson->chapter->course->instructor_id === $instructor->id
+        return $lessons->every(
+            fn (Lesson $lesson) => $lesson->chapter->course->instructor_id === $instructor->id
         );
     }
 }

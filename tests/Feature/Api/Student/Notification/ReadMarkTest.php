@@ -24,8 +24,8 @@ class ReadMarkTest extends TestCase
         $this->actingAs($student, 'web');
 
         // act
-        $response = $this->postJson('/api/v1/notification/mark_read', [
-            'notifications' => [4]
+        $response = $this->postJson('/api/v1/notification/mark-read', [
+            'notification_id' => 4
         ]);
 
         // assert

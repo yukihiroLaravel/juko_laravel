@@ -28,17 +28,12 @@ class IndexService
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime);
 
-        // 既読データ取得
-        if($dto->filter === 'read'){
-            $query->whereHas('students', function($q) use ($studentId){
-                $q->where('student_id', $studentId);
-            });
-        // 未読データ取得
-        }elseif($dto->filter === 'unread'){
-            $query->whereDoesntHave('students', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
-            });
-        }
+        $query = Notification::with(['students', 'course'])
+            ->whereIn('course_id', $courseIds)
+            ->where('status', StatusEnum::PUBLIC)
+            ->where('start_date', '<=', $currentDateTime)
+            ->where('end_date', '>=', $currentDateTime)
+            ->filterByReadStatus($dto->filter, $studentId);
 
         // ソート条件とページネーションを適用して結果を返却
         return $query->orderBy($dto->sortBy, $dto->order)

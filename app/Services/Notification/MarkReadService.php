@@ -11,19 +11,21 @@ class MarkReadService
     /**
      * 既読登録処理(Type->onceのみ)
      */
-    public function __invoke(Student $student, array $notifications): void
+    public function __invoke(Student $student, int $notificationId): void
     {
         // typeがONCEのものだけを取得
-        $OnceNotifications = Notification::whereIn('id', $notifications)
+        $OnceNotification = Notification::where('id', $notificationId)
             ->where('type', TypeEnum::ONCE)
             ->with('students')
-            ->get();
+            ->first();
+        // 存在しない場合、処理中断
+        if (!$OnceNotification) {
+            return;
+        }
 
         // ユーザが確認したお知らせを登録(既読登録)
-        foreach ($OnceNotifications as $OnceNotification) {
-            if (!$OnceNotification->students->contains($student->id)) {
-                $OnceNotification->students()->attach($student->id);
-            }
+        if (!$OnceNotification->students->contains($student->id)) {
+            $OnceNotification->students()->attach($student->id);
         }
     }
 }

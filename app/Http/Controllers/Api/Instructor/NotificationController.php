@@ -169,13 +169,13 @@ class NotificationController extends Controller
     public function updateType(UpdateTypeRequest $request): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $instructor = Auth::guard('instructor')->user();
 
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // Policy による認可処理
+        $notifications->each(function ($notification) use ($instructor) {
+            $this->authorize('bulkUpdateType', [$instructor, $notification]);
+        });
+
         DB::beginTransaction();
         try {
             $notificationType = $request->notification_type;
@@ -261,7 +261,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }

@@ -198,23 +198,16 @@ class NotificationController extends Controller
      */
     public function updateType(UpdateTypeRequest $request): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        // 認証している講師を取得
+        $instructor = Auth::guard('instructor')->user();
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
-        // アクセス権限のチェック
-        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // Policy による認可処理
+        $notifications->each(function ($notification) use ($instructor) {
+            $this->authorize('bulkUpdateType', [$instructor, $notification]);
+        });
 
         $notificationType = $request->notification_type;
 

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class NotificationPolicy
 {
@@ -55,13 +56,29 @@ class NotificationPolicy
             $managerIds[] = $instructor->id;
 
             return $notifications->every(
-                fn (Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
+                fn(Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
             );
         }
 
         // 講師の場合、自分の講座のみ削除可能
         return $notifications->every(
-            fn (Notification $notification) => $notification->instructor_id !== $instructor->id
+            fn(Notification $notification) => $notification->instructor_id !== $instructor->id
         );
+    }
+
+    /**
+     * お知らせタイプ変更処理に関する認可処理
+     */
+    public function bulkUpdateType(Instructor $instructor, Notification $notification): bool
+    {
+        Log::debug('bulkUpdateType called for Notification ID:', [$notification->id]);
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+            
+            return in_array($notification->instructor_id, $instructorIds, true);
+        }
+
+        return $notification->instructor_id === $instructor->id;
     }
 }

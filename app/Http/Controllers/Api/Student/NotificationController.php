@@ -56,10 +56,10 @@ class NotificationController extends Controller
     public function markRead(MarkReadRequest $request, MarkReadService $service)
     {
         $student = $request->user();
-        $notifications = $request->input('notifications', []);
+        $notificationId = $request->input('notification_id');
 
         // サービスクラス呼び出し(登録処理)
-        $service($student, $notifications);
+        $service($student, $notificationId);
 
         return response()->json([
             'result' => true,

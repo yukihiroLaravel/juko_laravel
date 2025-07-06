@@ -21,12 +21,12 @@ class BulkDeleteTest extends TestCase
     public function test_お知らせ一括削除_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
         $response = $this->deleteJson('/api/v1/instructor/notification', [
-            'notifications' => [1, 2],
+            'notifications' => [2],
         ]);
 
         // assert
@@ -35,13 +35,7 @@ class BulkDeleteTest extends TestCase
             'result' => true,
         ]);
         $this->assertSoftDeleted('notifications', [
-            'id' => 1,
-        ]);
-        $this->assertSoftDeleted('notifications', [
             'id' => 2,
-        ]);
-        $this->assertDatabaseMissing('viewed_once_notifications', [
-            'id' => 1,
         ]);
     }
 

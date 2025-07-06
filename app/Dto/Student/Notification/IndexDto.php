@@ -5,18 +5,19 @@ namespace App\Dto\Student\Notification;
 class IndexDto
 {
     /**
-     * @param  string|null  $searchWord
+     * お知らせ一覧取得用DTO
+     *
+     * 学生IDやページ情報、ソート・フィルタ条件をまとめて渡す
      */
     public function __construct(
-        private readonly int $studentId,
-        private readonly int $perPage,
-        private readonly int $page,
-        private readonly string $sortBy,
-        private readonly string $order,
-        private readonly string $filter
+        public readonly int $studentId,
+        public readonly int $perPage,
+        public readonly int $page,
+        public readonly string $sortBy,
+        public readonly string $order,
+        public readonly string $filter
     ) {}
 
-    // 全体取得
     public function getIndex(): array
     {
         return [
@@ -27,41 +28,5 @@ class IndexDto
             'order'      => $this->order,
             'filter'     => $this->filter,
         ];
-    }
-
-    // ユーザIDを取得
-    public function getStudentId(): int
-    {
-        return $this->studentId;
-    }
-
-    // 1ページあたりの件数を取得
-    public function getPerPage(): int
-    {
-        return $this->perPage;
-    }
-
-    // ページ番号を取得
-    public function getPage(): int
-    {
-        return $this->page;
-    }
-
-    // ソート対象カラムを取得
-    public function getSortBy(): string
-    {
-        return $this->sortBy;
-    }
-
-    // ソート順を取得
-    public function getOrder(): string
-    {
-        return $this->order;
-    }
-
-    // 既読・未読フィルタを取得
-    public function getFilter(): string
-    {
-        return $this->filter;
     }
 }

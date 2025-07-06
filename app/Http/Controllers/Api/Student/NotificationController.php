@@ -33,10 +33,9 @@ class NotificationController extends Controller
             page: (int)$request->input('page', 1),
             sortBy: $request->input('sort_by', 'start_date'),
             order: $request->input('order', 'asc'),
-            filter: $request->input('filter', 'all')
+            filter: $request->input('filter')
             /**
             * 既読・未読フィルタ
-            * - all（全件。デフォルト）
             * - read（既読のみ）
             * - unread（未読のみ）
             */

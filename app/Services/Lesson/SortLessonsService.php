@@ -8,21 +8,19 @@ use Illuminate\Database\Eloquent\Collection;
 class SortLessonsService
 {
     /**
-     * @param  Collection<int, Lesson>  $lessons
-     * @param array<int, array{
-     *    lesson_id: int,
-     *    order: int
-     * }> $inputLessons
+     * レッスン並び替えサービス order値は、配列要素のインデックスにする。１から始まる値にする。
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Lesson>  $lessons
      */
     public function __invoke(Collection $lessons, array $inputLessons): void
     {
-        $inputLessonCollection = collect($inputLessons);
+        $lessons->each(function (Lesson $lesson) use ($inputLessons) {
+            // lessons配列内における要素のインデックスを取得
+            $index = array_search($lesson->id, $inputLessons, true);
 
-        $lessons->each(function (Lesson $lesson) use ($inputLessonCollection) {
-            $input = $inputLessonCollection->firstWhere('lesson_id', $lesson->id);
-            if ($input) {
+            if ($index !== false) {
                 $lesson->update([
-                    'order' => $input['order'],
+                    'order' => $index + 1,
                 ]);
             }
         });

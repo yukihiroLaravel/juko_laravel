@@ -284,27 +284,13 @@ class LessonController extends Controller
         DB::beginTransaction();
 
         try {
-            $courseId = $request->input('course_id');
-            $chapterId = $request->input('chapter_id');
             $inputLessons = $request->input('lessons');
 
             // レッスン一括取得
-            $lessons = Lesson::with('chapter.course')->whereIn('id', array_column($inputLessons, 'lesson_id'))->get();
+            $lessons = Lesson::with('chapter.course')->whereIn('id', $inputLessons)->get();
 
             // Policy による認可チェック
             $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-            // 認可
-            $lessons->each(function (Lesson $lesson) use ($courseId, $chapterId) {
-                // 指定した講座IDが1レッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course_id) {
-                    throw new AuthorizationException('Forbidden, invalid course.');
-                }
-                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ((int) $chapterId !== $lesson->chapter_id) {
-                    throw new AuthorizationException('Forbidden, invalid chapter.');
-                }
-            });
 
             $sortLessonsService($lessons, $inputLessons);
 

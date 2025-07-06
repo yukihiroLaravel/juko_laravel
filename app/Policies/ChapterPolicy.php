@@ -43,6 +43,23 @@ class ChapterPolicy
     }
 
     /**
+     * 複数チャプターの更新に関する認可処理(bulkDeleteとまったく同じ)
+     *
+     * @param  Collection<int, Chapter>  $chapters
+     */
+    public function bulkUpdate(Instructor $instructor, Collection $chapters): bool
+    {
+        if ($instructor->isManager()) {
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return $chapters->every(fn (Chapter $chapter) => in_array($chapter->course->instructor_id, $managerIds, true));
+        }
+
+        return $chapters->every(fn (Chapter $chapter) => $chapter->course->instructor_id === $instructor->id);
+    }
+
+    /**
      * チャプターの削除処理に関する認可処理
      *
      * @param  Collection<int, Chapter>  $chapters

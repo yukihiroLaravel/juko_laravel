@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Dto\Notification\PutDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
@@ -19,6 +20,7 @@ use App\Model\Course;
 use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
+use App\Services\Notification\PutNotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -99,7 +101,7 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
 
@@ -108,15 +110,20 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
+            $data = new PutDto(
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                title: $request->title,
+                content: $request->content,
+                status: $request->status
+            );
+
+            $service(
+                $notification,
+                $data
+            );
+
             DB::commit();
 
             return response()->json([

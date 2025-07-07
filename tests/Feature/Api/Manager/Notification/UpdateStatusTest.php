@@ -19,15 +19,16 @@ class UpdateStatusTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせステータス一括更新_成功(): void
+    public function test_お知らせステータス一括更新_public_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(200);
@@ -47,8 +48,9 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'private';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+            'status' => 'private',
+        ]);
 
         // assert
         $response->assertStatus(200);
@@ -68,13 +70,14 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'invalid_status';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+            'status' => 'invalid_status',
+        ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJson([
-            'message' => 'The selected notification status is invalid.',
+            'message' => 'The selected status is invalid.',
         ]);
     }
 
@@ -85,8 +88,9 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(403);
@@ -98,8 +102,9 @@ class UpdateStatusTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(401);

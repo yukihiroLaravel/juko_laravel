@@ -22,6 +22,7 @@ use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
+use App\Services\Notification\PutStatusAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -296,9 +297,8 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧 - ステータス一括変更API
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, PutStatusAllService $service): JsonResponse
     {
-
         // ログイン中のマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -308,24 +308,24 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 対象の通知をすべて取得（管理下の講師に紐づく）
-        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
+        $status = StatusEnum::from($request->status);
 
-        // $statusを$request経由で取得（ステータス変更API）
-        $status = StatusEnum::from($request->notification_status)->value;
+        // 対象の通知をすべて取得（管理下の講師に紐づく）
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get(['id', 'instructor_id', 'status']);
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        $this->authorize('putStatusAll', [Notification::class, $notifications]);
 
         // 一括更新処理（トランザクション）
         DB::beginTransaction();
         try {
-            $notifications->each(function (Notification $notification) use ($status) {
-                $notification->fill([
-                    'status' => $status,
-                ])->save();
-            });
+            $service($status, $notifications);
 
             DB::commit();
 
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

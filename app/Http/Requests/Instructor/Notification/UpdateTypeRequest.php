@@ -38,4 +38,20 @@ class UpdateTypeRequest extends FormRequest
             'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
+
+    // ✅ 共通呼び出し用メソッド
+    public function notificationIds(): array
+    {
+        return $this->input('notifications', []);
+    }
+
+    public function authGuard(): string
+    {
+        return 'instructor';
+    }
+
+    public function ownerColumn(): string
+    {
+        return 'instructor_id';
+    }
 }

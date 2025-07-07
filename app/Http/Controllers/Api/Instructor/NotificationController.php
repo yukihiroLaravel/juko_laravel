@@ -17,7 +17,7 @@ use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
-use App\Services\Notification\NotificationService;
+use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -167,16 +167,28 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request , NotificationService $notificationService ): JsonResponse
+    public function updateType(UpdateTypeRequest $request, UpdateTypeService $updateTypeService): JsonResponse
     {
-        $notificationService->handleUpdateNotificationType(
-            $request->notifications,
-            $request->notification_type,
-            'instructor',
-            'instructor_id'
+        $type = $request->notification_type;
+
+        // ✅ 共通呼び出し（UpdateTypeRequest で guard / column 判定）
+        $notifications = $updateTypeService(
+            $request->notificationIds(),
+            $request->authGuard(),
+            $request->ownerColumn()
         );
 
-        return response()->json(['result' => true]);
+        // ✅ 共通の保存処理
+        DB::beginTransaction();
+        try {
+            $notifications->each(fn($notification) => $notification->fill(['type' => $type])->save());
+            DB::commit();
+
+            return response()->json(['result' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**

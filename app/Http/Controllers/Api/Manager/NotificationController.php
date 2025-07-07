@@ -9,9 +9,9 @@ use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
+use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
@@ -320,7 +320,7 @@ class NotificationController extends Controller
         $service($status, $notifications);
 
         return response()->json([
-            'result' => true
+            'result' => true,
         ]);
     }
 }

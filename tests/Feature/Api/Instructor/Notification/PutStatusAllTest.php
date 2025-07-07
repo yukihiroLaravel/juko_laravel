@@ -95,7 +95,7 @@ class PutStatusAllTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // act
-        $response = $this->putJson("/api/v1/instructor/notification/status/all", [
+        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
             'status' => 'public',
         ]);
 

@@ -26,7 +26,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
             'status' => 'public',
         ]);
 
@@ -52,7 +52,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
             'status' => 'private',
         ]);
 
@@ -96,7 +96,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
             'status' => 'invalid_status',
         ]);
 
@@ -114,7 +114,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
             'status' => 'public',
         ]);
 
@@ -128,7 +128,7 @@ class PutStatusAllTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // act
-        $response = $this->putJson("/api/v1/manager/notification/status/all", [
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
             'status' => 'public',
         ]);
 

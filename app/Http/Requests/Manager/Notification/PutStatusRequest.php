@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 /**
  * マネージャー側 お知らせステータス一括変更用リクエスト
  */
-class UpdateStatusRequest extends FormRequest
+class PutStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

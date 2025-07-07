@@ -11,7 +11,7 @@ use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
+use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
@@ -297,7 +297,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧 - ステータス一括変更API
      */
-    public function updateStatus(UpdateStatusRequest $request, PutStatusAllService $service): JsonResponse
+    public function putStatusAll(PutStatusRequest $request, PutStatusAllService $service): JsonResponse
     {
         // ログイン中のマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -316,20 +316,11 @@ class NotificationController extends Controller
         // 講師と一致しないお知らせが含まれている場合はエラー
         $this->authorize('putStatusAll', [Notification::class, $notifications]);
 
-        // 一括更新処理（トランザクション）
-        DB::beginTransaction();
-        try {
-            $service($status, $notifications);
+        // 一括更新サービス
+        $service($status, $notifications);
 
-            DB::commit();
-
-            return response()->json([
-                'result' => true
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true
+        ]);
     }
 }

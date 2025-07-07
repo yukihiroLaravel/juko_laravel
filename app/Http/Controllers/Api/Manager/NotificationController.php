@@ -205,9 +205,7 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // Policy による認可処理
-        $notifications->each(function ($notification) use ($instructor) {
-            $this->authorize('bulkUpdateType', [$instructor, $notification]);
-        });
+        $this->authorize('bulkUpdateType', [Notification::class, $notifications]);
 
         $notificationType = $request->notification_type;
 

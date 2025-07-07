@@ -21,6 +21,7 @@ use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
+use App\Policies\NotificationPolicy;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -168,13 +169,16 @@ class NotificationController extends Controller
      */
     public function updateType(UpdateTypeRequest $request): JsonResponse
     {
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        // 認証している講師を取得
         $instructor = Auth::guard('instructor')->user();
 
+        // 選択されたお知らせリストを取得
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
+
         // Policy による認可処理
-        $notifications->each(function ($notification) use ($instructor) {
-            $this->authorize('bulkUpdateType', [$instructor, $notification]);
-        });
+        $this->authorize('bulkUpdateType', [Notification::class, $notifications]);
+
+        $notificationType = $request->notification_type;
 
         DB::beginTransaction();
         try {

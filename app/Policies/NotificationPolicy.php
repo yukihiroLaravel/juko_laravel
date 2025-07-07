@@ -69,16 +69,18 @@ class NotificationPolicy
     /**
      * お知らせタイプ変更処理に関する認可処理
      */
-    public function bulkUpdateType(Instructor $instructor, Notification $notification): bool
+    public function bulkUpdateType(Instructor $instructor, Collection $notifications): bool
     {
-        Log::debug('bulkUpdateType called for Notification ID:', [$notification->id]);
+        // マネージャーの場合、管理しているインストラクターのIDを取得
         if ($instructor->isManager()) {
-            $instructorIds = $instructor->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructor->id;
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
 
-            return in_array($notification->instructor_id, $instructorIds, true);
+            // すべての通知が、管理しているインストラクターIDと一致するかを確認
+            return $notifications->every(fn($notification) => in_array($notification->instructor_id, $managerIds, true));
         }
 
-        return $notification->instructor_id === $instructor->id;
+        // マネージャーでない場合、自分の通知のみ更新できる
+        return $notifications->every(fn($notification) => $notification->instructor_id === $instructor->id);
     }
 }

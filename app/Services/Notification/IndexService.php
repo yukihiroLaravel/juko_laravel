@@ -27,13 +27,6 @@ class IndexService
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime);
 
-        $query = Notification::with(['students', 'course'])
-            ->whereIn('course_id', $courseIds)
-            ->where('status', StatusEnum::PUBLIC)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
-            ->filterByReadStatus($dto->filter, $studentId);
-
         // ソート条件とページネーションを適用して結果を返却
         return $query->orderBy($dto->sortBy, $dto->order)
             ->paginate($dto->perPage, ['*'], 'page', $dto->page);

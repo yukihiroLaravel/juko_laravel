@@ -42,6 +42,29 @@ class NotificationPolicy
         return $instructor->id === $notification->instructor_id;
     }
 
+        /**
+     * お知らせの一括更新処理に関する認可処理
+     *
+     * @param  Collection<int, Notification>  $notifications
+     */
+    public function bulkUpdate(Instructor $instructor, Collection $notifications): bool
+    {
+        if ($instructor->isManager()) {
+            // 管理者の場合、配下の講師の講座も更新可能
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return $notifications->every(
+                fn (Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
+            );
+        }
+
+        // 講師の場合、自分の講座のみ更新可能
+        return $notifications->every(
+            fn (Notification $notification) => $notification->instructor_id === $instructor->id
+        );
+    }
+
     /**
      * お知らせの一括削除処理に関する認可処理
      *
@@ -61,7 +84,7 @@ class NotificationPolicy
 
         // 講師の場合、自分の講座のみ削除可能
         return $notifications->every(
-            fn (Notification $notification) => $notification->instructor_id !== $instructor->id
+            fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
 }

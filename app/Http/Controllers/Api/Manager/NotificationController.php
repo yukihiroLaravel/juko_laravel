@@ -232,19 +232,18 @@ class NotificationController extends Controller
 
     public function updateTypeAll(UpdateTypeAllRequest $request)
     {
-        // ログインしている講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $instructor = Auth::guard('instructor')->user();
 
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
+        $manager = Instructor::with('managings')->find($instructor->id);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // ログイン講師のお知らせを取得
-        $notifications = Notification::whereIn('instructor_id', $instructorIds);
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
+
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         try {
-            $notifications->update([
+            Notification::whereIn('instructor_id', $instructorIds)->update([
                 'type' => $request->notification_type,
             ]);
 

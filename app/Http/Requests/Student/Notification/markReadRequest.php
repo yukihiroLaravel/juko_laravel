@@ -26,12 +26,13 @@ class MarkReadRequest extends FormRequest
         ];
     }
 
+    #[\Override]
     public function messages(): array
     {
         return [
-            'notification_id.required'  => 'notification_idは必須です。',
-            'notification_id.integer'   => 'notification_idは整数で指定してください。',
-            'notification_id.exists'    => '指定されたnotification_idが存在しません。',
+            'notification_id.required' => 'notification_idは必須です。',
+            'notification_id.integer' => 'notification_idは整数で指定してください。',
+            'notification_id.exists' => '指定されたnotification_idが存在しません。',
         ];
     }
 }

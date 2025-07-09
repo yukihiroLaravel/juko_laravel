@@ -15,6 +15,7 @@ use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 
 /**
  * @tags Student-Notification
@@ -29,17 +30,11 @@ class NotificationController extends Controller
 
         $dto = new IndexDto(
             studentId: $request->user()->id,
-            perPage: (int)$request->input('per_page', 20),
-            page: (int)$request->input('page', 1),
+            perPage: (int) $request->input('per_page', 20),
+            page: (int) $request->input('page', 1),
             sortBy: $request->input('sort_by', 'start_date'),
             order: $request->input('order', 'asc'),
             filter: $request->input('filter', 'read'),
-            /**
-            * 既読・未読フィルタ
-            * - デフォルト read
-            * - read（既読のみ）
-            * - unread（未読のみ）
-            */
         );
 
         $notifications = $service($dto);
@@ -48,23 +43,23 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ既読登録API(Type->onceのみ)
-     *
-     * ユーザが確認したお知らせIDを取得
-     * viewed_once_notificationsテーブルに登録
+     * お知らせ既読登録API
      */
-    public function markRead(MarkReadRequest $request, MarkReadService $service)
+    public function markRead(MarkReadRequest $request, MarkReadService $service): JsonResponse
     {
         $student = $request->user();
         $notificationId = $request->input('notification_id');
 
         // サービスクラス呼び出し(登録処理)
-        $service($student, $notificationId);
+        $service(
+            student: $student,
+            notificationId: $notificationId
+        );
 
         return response()->json([
             'result' => true,
         ]);
-}
+    }
 
     /**
      * お知らせ詳細

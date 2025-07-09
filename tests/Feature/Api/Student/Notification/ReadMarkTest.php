@@ -2,9 +2,9 @@
 
 namespace tests\Feature\Api\Student\Notification;
 
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Model\Student;
 
 class ReadMarkTest extends TestCase
 {
@@ -25,7 +25,7 @@ class ReadMarkTest extends TestCase
 
         // act
         $response = $this->postJson('/api/v1/notification/mark-read', [
-            'notification_id' => 4
+            'notification_id' => 4,
         ]);
 
         // assert

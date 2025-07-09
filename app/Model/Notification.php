@@ -93,11 +93,9 @@ class Notification extends Model
      */
     public function scopeFilterByReadStatus($query, string $filter, int $studentId)
     {
-        return match($filter) {
-            'read' => $query->whereHas('students', fn($q) =>
-    $q->where('student_id', $studentId)),
-            'unread' => $query->whereDoesntHave('students', fn($q) =>
-    $q->where('student_id', $studentId)),
+        return match ($filter) {
+            'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),
+            'unread' => $query->whereDoesntHave('students', fn ($q) => $q->where('student_id', $studentId)),
             default => $query,
         };
     }

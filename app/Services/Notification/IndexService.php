@@ -3,10 +3,10 @@
 namespace App\Services\Notification;
 
 use App\Dto\Student\Notification\IndexDto;
-use App\Model\Notification;
-use Carbon\CarbonImmutable;
 use App\Enums\Notification\StatusEnum;
 use App\Model\Attendance;
+use App\Model\Notification;
+use Carbon\CarbonImmutable;
 
 class IndexService
 {
@@ -19,7 +19,6 @@ class IndexService
         $studentId = $dto->studentId;
         $currentDateTime = CarbonImmutable::now();
         $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
-
 
         // お知らせ取得
         $query = Notification::with('students', 'course')

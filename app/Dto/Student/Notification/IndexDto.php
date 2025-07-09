@@ -22,11 +22,11 @@ class IndexDto
     {
         return [
             'student_id' => $this->studentId,
-            'per_page'   => $this->perPage,
-            'page'       => $this->page,
-            'sort_by'    => $this->sortBy,
-            'order'      => $this->order,
-            'filter'     => $this->filter,
+            'per_page' => $this->perPage,
+            'page' => $this->page,
+            'sort_by' => $this->sortBy,
+            'order' => $this->order,
+            'filter' => $this->filter,
         ];
     }
 }

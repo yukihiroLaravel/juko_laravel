@@ -2,30 +2,25 @@
 
 namespace App\Services\Notification;
 
+use App\Enums\Notification\TypeEnum;
 use App\Model\Notification;
 use App\Model\Student;
-use App\Enums\Notification\TypeEnum;
 
 class MarkReadService
 {
     /**
-     * 既読登録処理(Type->onceのみ)
+     * お知らせ既読処理
      */
     public function __invoke(Student $student, int $notificationId): void
     {
-        // typeがONCEのものだけを取得
-        $OnceNotification = Notification::where('id', $notificationId)
+        $notification = Notification::where('id', $notificationId)
             ->where('type', TypeEnum::ONCE)
-            ->with('students')
-            ->first();
-        // 存在しない場合、処理中断
-        if (!$OnceNotification) {
-            return;
-        }
+            ->with(['students'])
+            ->firstOrFail();
 
         // ユーザが確認したお知らせを登録(既読登録)
-        if (!$OnceNotification->students->contains($student->id)) {
-            $OnceNotification->students()->attach($student->id);
+        if (! $notification->students->contains($student->id)) {
+            $notification->students()->attach($student->id);
         }
     }
 }

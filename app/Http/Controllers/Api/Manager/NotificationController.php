@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Dto\Notification\PutDto;
 use App\Enums\Notification\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
+use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\UpdateStatusRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
@@ -20,6 +21,8 @@ use App\Model\Instructor;
 use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
+use App\Services\Notification\PutNotificationService;
+use App\Services\Notification\PutStatusAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -128,25 +131,30 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
         // 指定されたお知らせIDでお知らせを取得
-        $notification = Notification::with('course')->findOrFail($request->notification_id);
+        $notification = Notification::findOrFail($request->notification_id);
 
         // policyによる認可チェック
         $this->authorize('update', $notification);
 
         DB::beginTransaction();
         try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
+            $data = new PutDto(
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                title: $request->title,
+                content: $request->content,
+                status: $request->status
+            );
+
+            $service(
+                $notification,
+                $data
+            );
+
             DB::commit();
 
             return response()->json([
@@ -288,9 +296,8 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧 - ステータス一括変更API
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function putStatusAll(PutStatusRequest $request, PutStatusAllService $service): JsonResponse
     {
-
         // ログイン中のマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -300,28 +307,19 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
+        $status = StatusEnum::from($request->status);
+
         // 対象の通知をすべて取得（管理下の講師に紐づく）
-        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get(['id', 'instructor_id', 'status']);
 
-        // $statusを$request経由で取得（ステータス変更API）
-        $status = StatusEnum::from($request->notification_status)->value;
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        $this->authorize('putStatusAll', [Notification::class, $notifications]);
 
-        // 一括更新処理（トランザクション）
-        DB::beginTransaction();
-        try {
-            $notifications->each(function (Notification $notification) use ($status) {
-                $notification->fill([
-                    'status' => $status,
-                ])->save();
-            });
+        // 一括更新サービス
+        $service($status, $notifications);
 
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 }

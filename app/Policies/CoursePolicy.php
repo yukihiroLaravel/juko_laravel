@@ -25,8 +25,7 @@ class CoursePolicy
     {
         // マネージャー権限のある講師か判定
         if ($instructor->isManager()) {
-            $manager = Instructor::with('managings')->find($instructor->id);
-            $instructorIds = $manager->managings->pluck('id')->toArray();
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
 
             return in_array($course->instructor_id, $instructorIds, true);

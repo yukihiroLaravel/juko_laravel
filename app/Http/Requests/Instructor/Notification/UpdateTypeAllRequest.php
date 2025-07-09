@@ -6,14 +6,12 @@ use App\Enums\Notification\TypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateTypeRequest extends FormRequest
+class UpdateTypeAllRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -29,13 +27,12 @@ class UpdateTypeRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'notification_type' => ['required', Rule::enum(TypeEnum::class)],
-            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }
 }

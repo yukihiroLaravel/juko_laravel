@@ -56,7 +56,7 @@ class PatchStatusTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

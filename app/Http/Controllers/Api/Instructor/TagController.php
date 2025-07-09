@@ -97,13 +97,12 @@ class TagController extends Controller
      */
     public function put(PutRequest $request): JsonResponse
     {
-        $user = Instructor::find(Auth::guard('instructor')->user()->id);
         $tag = Tag::findOrFail($request->tag_id);
 
-        if ($user->id !== $tag->instructor_id) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
+        $this->authorize('update', $tag);
 
+        // タグの更新
         $tag->update([
             'content' => $request->content,
         ]);
@@ -118,13 +117,11 @@ class TagController extends Controller
      */
     public function delete(DeleteRequest $request): JsonResponse
     {
-        $user = Auth::guard('instructor')->user();
+        // タグの取得
         $tag = Tag::findOrFail($request->tag_id);
 
-        // タグの所有者が現在のログイン講師でない場合は処理を中断（認可エラー）
-        if ($user->id !== $tag->instructor_id) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        // policyによる認可チェック
+        $this->authorize('delete', $tag);
 
         // タグに紐づく講座が存在する場合は削除処理を中止
         if ($tag->courses()->exists()) {

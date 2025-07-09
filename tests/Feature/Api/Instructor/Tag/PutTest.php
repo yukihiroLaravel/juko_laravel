@@ -51,7 +51,7 @@ class PutTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

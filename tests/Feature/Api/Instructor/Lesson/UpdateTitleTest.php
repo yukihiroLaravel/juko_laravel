@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Chapter;
+namespace Tests\Feature\Api\Instructor\Lesson;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class PutStatusTest extends TestCase
+class UpdateTitleTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -18,15 +18,15 @@ class PutStatusTest extends TestCase
         $this->seed();
     }
 
-    public function test_チャプターのステータス一括更新_成功(): void
+    public function test_レッスンタイトル更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson('/api/v1/instructor/course/1/chapter/status', [
-            'status' => 'private',
+        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/2/lesson/2/title', [
+            'title' => '新しいタイトル',
         ]);
 
         // assert
@@ -34,21 +34,21 @@ class PutStatusTest extends TestCase
         $response->assertJsonStructure([
             'result',
         ]);
-        $this->assertDatabaseHas('chapters', [
-            'course_id' => 1,
-            'status' => 'private',
+        $this->assertDatabaseHas('lessons', [
+            'id' => 2,
+            'title' => '新しいタイトル',
         ]);
     }
 
-    public function test_講師が一致しない_失敗(): void
+    public function test_権限がない講師のレッスン更新_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(4);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson('/api/v1/instructor/course/1/chapter/status', [
-            'status' => 'private',
+        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/2/lesson/2/title', [
+            'title' => '新しいタイトル',
         ]);
 
         // assert
@@ -65,15 +65,17 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->putJson('/api/v1/instructor/course/aaa/chapter/status', [
-            'status' => 'string',
+        $response = $this->patchJson('/api/v1/instructor/course/aaa/chapter/bbb/lesson/ccc/title', [
+            'title' => '',
         ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
-            'status',
+            'title' => 'The title field is required.',
+            'course_id' => 'The course id must be an integer.',
+            'chapter_id' => 'The chapter id must be an integer.',
+            'lesson_id' => 'The lesson id must be an integer.',
         ]);
     }
 }

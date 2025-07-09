@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Dto\Notification\PutDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
@@ -12,15 +13,18 @@ use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
+use App\Http\Requests\Manager\Notification\UpdateTypeRequest as NotificationUpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
-use App\Services\Notification\UpdateTypeService;
+use App\Services\Notification\Service;
+use App\Services\Notification\BulkDeleteService;
+use App\Services\Notification\DeleteService;
+use App\Services\Notification\PutNotificationService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -99,25 +103,29 @@ class NotificationController extends Controller
     /**
      * お知らせ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
         $notification = Notification::findOrFail($request->notification_id);
 
-        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('update', $notification);
 
         DB::beginTransaction();
         try {
-            $notification->fill([
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'title' => $request->title,
-                'content' => $request->content,
-                'status' => $request->status,
-            ])
-                ->save();
+            $data = new PutDto(
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                title: $request->title,
+                content: $request->content,
+                status: $request->status
+            );
+
+            $service(
+                $notification,
+                $data
+            );
+
             DB::commit();
 
             return response()->json([
@@ -133,25 +141,18 @@ class NotificationController extends Controller
     /**
      * お知らせ削除
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         // 指定されたお知らせを取得
-        /** @var Notification $notification */
         $notification = Notification::findOrFail($request->notification_id);
 
-        // お知らせが、現在ログインしている講師のものでなければエラー
-        if ($instructorId !== $notification->instructor_id) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('delete', $notification);
 
         DB::beginTransaction();
         try {
-            // 中間テーブルにお知らせと生徒の関係があれば行を削除
-            $notification->students()->detach();
-            $notification->delete();
+            $service(notification: $notification);
+
             DB::commit();
 
             return response()->json([
@@ -167,59 +168,52 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request, UpdateTypeService $updateTypeService): JsonResponse
+    public function updateType(UpdateTypeRequest $request, Service $service): JsonResponse
     {
-        $type = $request->notification_type;
-
-        // ✅ 共通呼び出し（UpdateTypeRequest で guard / column 判定）
-        $notifications = $updateTypeService(
-            $request->notificationIds(),
-            $request->authGuard(),
-            $request->ownerColumn()
+        $service(
+            $request->input('notifications', []),
+            'instructor',
+            'instructor_id',
+            $request->input('notification_type')
         );
 
-        // ✅ 共通の保存処理
-        DB::beginTransaction();
-        try {
-            $notifications->each(fn($notification) => $notification->fill(['type' => $type])->save());
-            DB::commit();
+        return response()->json(['result' => true]);
+    }
 
-            return response()->json(['result' => true]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+
+    /**
+     * 該当講師お知らせ一覧タイプ　一括変更
+     */
+    public function updateTypeAll(NotificationUpdateTypeRequest $request): JsonResponse
+    {
+        $instructorId = Auth::guard('instructor')->user()->id;
+
+        Notification::where('instructor_id', $instructorId)
+            ->update([
+                'type' => $request->notification_type,
+            ]);
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**
      * お知らせ一括削除
      */
-    public function bulkDelete(BulkDeleteRequest $request): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
-        $notificationIds = $request->input('notifications', []);
-
-        $instructor = Auth::guard('instructor')->user();
-
-        /** @var Collection<int, Notification> $notifications */
-        $notifications = Notification::whereIn('id', $notificationIds)->get();
+        $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructor->id)
-        ) {
-            // 講師と一致しないお知らせが含まれている場合はエラー
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('bulkDelete', [Notification::class, $notifications]);
 
         // トランザクション開始
         DB::beginTransaction();
 
         try {
-            // viewed_once_notificationsテーブルのレコードを一括削除
-            ViewedOnceNotification::whereIn('notification_id', $notificationIds)->delete();
-
-            // notificationsテーブルのレコードを一括削除
-            Notification::whereIn('id', $notificationIds)->delete();
+            // viewed_once_notifications, notificationsテーブルのレコードを一括削除するサービス
+            $service($notifications);
 
             // コミット
             DB::commit();

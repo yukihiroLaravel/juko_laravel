@@ -6,7 +6,7 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class UpdateStatusTest extends TestCase
+class PutStatusAllTest extends TestCase
 {
     // データベース初期化
     use RefreshDatabase;
@@ -19,15 +19,16 @@ class UpdateStatusTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせステータス一括更新_成功(): void
+    public function test_お知らせステータス一括更新_public_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(200);
@@ -36,6 +37,10 @@ class UpdateStatusTest extends TestCase
         ]);
         $this->assertDatabaseHas('notifications', [
             'id' => 1,
+            'status' => 'public',
+        ]);
+        $this->assertDatabaseHas('notifications', [
+            'id' => 2,
             'status' => 'public',
         ]);
     }
@@ -47,8 +52,9 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'private';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => 'private',
+        ]);
 
         // assert
         $response->assertStatus(200);
@@ -59,22 +65,45 @@ class UpdateStatusTest extends TestCase
             'id' => 1,
             'status' => 'private',
         ]);
+        $this->assertDatabaseHas('notifications', [
+            'id' => 2,
+            'status' => 'private',
+        ]);
     }
 
-    public function test_バリデーションエラー_無効なステータス_失敗(): void
+    public function test_ステータス空欄_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'invalid_status';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => '',
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'status' => 'The status field is required.',
+        ]);
+    }
+
+    public function test_無効なステータス_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => 'invalid_status',
+        ]);
 
         // assert
         $response->assertStatus(422);
         $response->assertJson([
-            'message' => 'The selected notification status is invalid.',
+            'message' => 'The selected status is invalid.',
         ]);
     }
 
@@ -85,8 +114,9 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(403);
@@ -98,8 +128,9 @@ class UpdateStatusTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // act
-        $notificationStatus = 'public';
-        $response = $this->putJson("/api/v1/manager/notification/status/{$notificationStatus}");
+        $response = $this->putJson('/api/v1/manager/notification/status/all', [
+            'status' => 'public',
+        ]);
 
         // assert
         $response->assertStatus(401);

@@ -64,4 +64,27 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+
+    /**
+     * お知らせの一括更新に関する認可処理
+     *
+     * @param  Collection<int, Notification>  $notifications
+     */
+    public function putStatusAll(Instructor $instructor, Collection $notifications): bool
+    {
+        if ($instructor->isManager()) {
+            // 管理者の場合、配下の講師の講座も更新可能
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return $notifications->every(
+                fn (Notification $notification) => in_array($notification->instructor_id, $managerIds, true)
+            );
+        }
+
+        // 講師の場合、自分の講座のみ削除可能
+        return $notifications->every(
+            fn (Notification $notification) => $notification->instructor_id === $instructor->id
+        );
+    }
 }

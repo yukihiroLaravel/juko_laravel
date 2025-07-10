@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Dto\Notification\PutDto;
+use App\Enums\Notification\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Notification\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Notification\DeleteRequest;
@@ -22,6 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Policies\NotificationPolicy;
+use App\Services\Notification\PutStatusAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -169,9 +171,6 @@ class NotificationController extends Controller
      */
     public function updateType(UpdateTypeRequest $request): JsonResponse
     {
-        // 認証している講師を取得
-        $instructor = Auth::guard('instructor')->user();
-
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
@@ -294,16 +293,21 @@ class NotificationController extends Controller
     /**
      * お知らせ 一括公開・非公開API
      */
-    public function putStatusAll(PutStatusAllRequest $request): JsonResponse
+    public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        Notification::where('instructor_id', $instructorId)
-            ->update([
-                'status' => $request->status,
-            ]);
+
+        $status = StatusEnum::from($request->status);
+
+        $notifications = Notification::where('instructor_id', $instructorId)->get(['id', 'instructor_id', 'status']);
+
+        // 講師と一致しないお知らせが含まれている場合はエラー
+        $this->authorize('putStatusAll', [Notification::class, $notifications]);
+
+        $service($status, $notifications);
 
         return response()->json([
-            'result' => 'true',
+            'result' => true,
         ]);
     }
 }

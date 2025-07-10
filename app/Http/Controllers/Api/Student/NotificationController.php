@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers\Api\Student;
 
-use App\Enums\Notification\StatusEnum;
-use App\Enums\Notification\TypeEnum;
+use App\Dto\Student\Notification\IndexDto;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
+use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-use App\Http\Resources\Student\NotificationReadResource;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
-use Carbon\CarbonImmutable;
+use App\Services\Notification\IndexService;
+use App\Services\Notification\MarkReadService;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 /**
  * @tags Student-Notification
@@ -25,66 +25,40 @@ class NotificationController extends Controller
     /**
      * お知らせ取得API
      */
-    public function index(IndexRequest $request): NotificationIndexResource
+    public function index(IndexRequest $request, IndexService $service): NotificationIndexResource
     {
-        $perPage = $request->input('per_page', 20);
-        $page = $request->input('page', 1);
-        $sortBy = $request->input('sort_by', 'start_date');
-        $order = $request->input('order', 'asc');
-        $student = $request->user();
-        $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-        $currentDateTime = CarbonImmutable::now();
 
-        $notifications = Notification::with('course')
-            ->whereIn('course_id', $courseIds)
-            ->where('status', StatusEnum::PUBLIC)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
-            ->orderBy($sortBy, $order)
-            ->paginate($perPage, ['*'], 'page', $page);
+        $dto = new IndexDto(
+            studentId: $request->user()->id,
+            perPage: (int) $request->input('per_page', 20),
+            page: (int) $request->input('page', 1),
+            sortBy: $request->input('sort_by', 'start_date'),
+            order: $request->input('order', 'asc'),
+            filter: $request->input('filter', 'read'),
+        );
+
+        $notifications = $service($dto);
 
         return new NotificationIndexResource($notifications);
     }
 
     /**
-     * お知らせ既読API
-     *
-     * @return NotificationReadResource
+     * お知らせ既読登録API
      */
-    public function read(Request $request)
+    public function markRead(MarkReadRequest $request, MarkReadService $service): JsonResponse
     {
-        $student = Student::findOrFail($request->user()->id);
-        $notifications = $this->getNotifications($student);
-        $filteredNotifications = $this->filterAndMarkAsRead($student, $notifications);
+        $student = $request->user();
+        $notificationId = $request->input('notification_id');
 
-        return new NotificationReadResource($filteredNotifications);
-    }
+        // サービスクラス呼び出し(登録処理)
+        $service(
+            student: $student,
+            notificationId: $notificationId
+        );
 
-    private function getNotifications(Student $student)
-    {
-        $attendances = Attendance::where('student_id', $student->id)->get();
-        $courseIds = $attendances->pluck('course_id')->toArray();
-        $currentDateTime = CarbonImmutable::now();
-
-        return Notification::with(['students', 'course'])
-            ->whereIn('course_id', $courseIds)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
-            ->get();
-    }
-
-    private function filterAndMarkAsRead(Student $student, $notifications)
-    {
-        return $notifications->filter(function ($notification) use ($student) {
-            if ($notification->type === TypeEnum::ONCE) {
-                if ($notification->students->contains($student->id)) {
-                    return false;
-                }
-                $notification->students()->attach($student->id);
-            }
-
-            return true;
-        });
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

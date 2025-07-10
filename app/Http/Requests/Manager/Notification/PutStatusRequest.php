@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 /**
  * マネージャー側 お知らせステータス一括変更用リクエスト
  */
-class UpdateStatusRequest extends FormRequest
+class PutStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,17 +20,6 @@ class UpdateStatusRequest extends FormRequest
     }
 
     /**
-     * ルートパラメータをリクエストデータにマージ
-     */
-    #[\Override]
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'notification_status' => $this->route('notification_status'),
-        ]);
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -38,7 +27,7 @@ class UpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notification_status' => ['required', Rule::enum(StatusEnum::class)],
+            'status' => ['required', Rule::enum(StatusEnum::class)],
         ];
     }
 }

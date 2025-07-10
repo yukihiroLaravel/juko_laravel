@@ -58,7 +58,7 @@ class DeleteTest extends TestCase
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act

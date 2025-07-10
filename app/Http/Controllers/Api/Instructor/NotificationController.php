@@ -301,7 +301,7 @@ class NotificationController extends Controller
         $notifications = Notification::where('instructor_id', $instructorId)->get(['id', 'instructor_id', 'status']);
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('putStatusAll', [Notification::class, $notifications]);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         $service($status, $notifications);
 

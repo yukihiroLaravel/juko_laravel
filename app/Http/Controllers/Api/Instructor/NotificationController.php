@@ -180,7 +180,6 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            $notificationType = $request->notification_type;
             $notifications->each(function ($notification) use ($notificationType) {
                 // 指定されたお知らせIDでお知らせを取得
                 $notification->fill([

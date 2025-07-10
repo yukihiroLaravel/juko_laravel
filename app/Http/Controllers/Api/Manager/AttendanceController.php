@@ -142,26 +142,14 @@ class AttendanceController extends Controller
     {
         DB::beginTransaction();
 
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         try {
-            $attendanceId = $request->attendance_id;
+            $attendanceId = $request->route('attendance_id');
+            $attendance = Attendance::with('course.instructor')->findOrFail($attendanceId);
 
-            // ログインしている講師、またはそのマネージャーが管理する受講データのIDのリストを取得
-            $managedAttendances = Attendance::whereIn('course_id', $instructorIds)->pluck('id')->toArray();
+            $this->authorize('delete', $attendance);
 
-            if (! in_array((int) $attendanceId, $managedAttendances, true)) {
-                // ログインしている講師、またはそのマネージャーが管理する受講データでない場合はエラーを返す
-                throw new AuthorizationException('Forbidden.');
-            }
-
-            // 受講状況を削除
-            Attendance::findOrFail($attendanceId)->delete();
+            // 受講状況に紐づくレッスン受講状況を削除
+            $attendance->delete();
 
             DB::commit();
 
@@ -202,7 +190,7 @@ class AttendanceController extends Controller
             Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
             Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
             Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
-            default => throw new Exception('Invalid period. ['.$request->period.']'),
+            default => throw new Exception('Invalid period. [' . $request->period . ']'),
         };
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
@@ -252,7 +240,7 @@ class AttendanceController extends Controller
         $period = $request->period;
 
         // 完了したレッスンの数を取得
-        $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+        $completedLessonsCount = $attendances->flatMap(fn(Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
             $updatedAtRequestPeriod = match ($period) {
                 LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
                 LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
@@ -263,9 +251,9 @@ class AttendanceController extends Controller
         }))->count();
 
         // 完了したチャプターの数を取得
-        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) =>
-            // 各出席情報に関連するレッスン出席情報をフィルタリング
-            $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
+        $completedChaptersCount = $attendances->flatMap(fn(Attendance $attendance) =>
+        // 各出席情報に関連するレッスン出席情報をフィルタリング
+        $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 // チャプターに含まれているすべてのレッスンIDを取得
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
@@ -286,12 +274,12 @@ class AttendanceController extends Controller
                 // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
                 return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);
             })
-            ->map(fn (LessonAttendance $lessonAttendance) =>
-                // chapter_idとattendance_idをキーにもつ新しい配列を作成
-                [
-                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                    'attendance_id' => $lessonAttendance->attendance_id,
-                ])
+            ->map(fn(LessonAttendance $lessonAttendance) =>
+            // chapter_idとattendance_idをキーにもつ新しい配列を作成
+            [
+                'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                'attendance_id' => $lessonAttendance->attendance_id,
+            ])
             ->unique() // 重複するチャプターと出席情報の組み合わせを削除
             ->count();
 

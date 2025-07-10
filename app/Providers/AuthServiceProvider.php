@@ -12,6 +12,8 @@ use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
 use App\Policies\NotificationPolicy;
 use App\Policies\TagPolicy;
+use App\Policies\AttendancePolicy;
+use App\Model\Attendance;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -27,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         Lesson::class => LessonPolicy::class,
         Notification::class => NotificationPolicy::class,
         Tag::class => TagPolicy::class,
+        Attendance::class => AttendancePolicy::class,
     ];
 
     /**

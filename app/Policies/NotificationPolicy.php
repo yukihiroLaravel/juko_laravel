@@ -13,21 +13,24 @@ class NotificationPolicy
      */
     public function update(Instructor $instructor, Collection $notifications, string $ownerColumn): bool
     {
-        $manager = $instructor->load('managings');
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        // マネージャーの場合（自分と管轄インストラクターの通知を更新可能）
+        if ($instructor->isManager()) {
+            // 自身 + 管轄インストラクターのIDを取得
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
 
-        // 通知の所有者(instructor_id)が、ログイン中インストラクターの管轄内でなければfalse
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
-        if (array_diff($notificationsInstructorIds, $instructorIds)) {
+        // 通知内の全 instructor_id が 管轄リスト内にあるか確認
+        $notificationInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
+        if (array_diff($notificationInstructorIds, $managerIds)) {
             return false;
         }
 
-        // 所有カラムが一致しない通知が含まれていればfalse
-        $userId = $instructor->id; // または他に必要なID
-        if ($notifications->contains(fn($n) => $n->{$ownerColumn} !== $userId)) {
-            return false;
-        }
+        return true;
+    }
+
+        // 一般インストラクターの場合（自分が所有している通知のみ）
+        $userId = $instructor->id;
+        return !$notifications->contains(fn($notification) => $notification->{$ownerColumn} !== $userId);
 
         return true;
     }

@@ -20,7 +20,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\ViewedOnceNotification;
-use App\Services\Notification\Service;
+use App\Services\Notification\UpdateTypeService;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
@@ -198,16 +198,24 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request, Service $service): JsonResponse
+    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
-        $service(
-            $request->input('notifications', []),
-            'instructor',
-            'instructor_id',
-            $request->input('notification_type')
-        );
+        $notificationIds = $request->input('notifications', []);
+        $type = $request->notification_type;
 
-        return response()->json(['result' => true]);
+        $notifications = $service->authorizeAndGetNotifications($notificationIds);
+
+        // try ~ catch はここで管理
+        DB::beginTransaction();
+        try {
+            $service->updateNotificationType($notifications, $type);
+            DB::commit();
+
+            return response()->json(['result' => true]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
 

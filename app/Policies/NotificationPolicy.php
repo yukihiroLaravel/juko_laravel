@@ -11,7 +11,7 @@ class NotificationPolicy
     /**
      * お知らせの更新処理に関する認可処理
      */
-    public function update(Instructor $instructor, Collection $notifications, string $ownerColumn): bool
+    public function update(Instructor $instructor, Notification $notification): bool
     {
         // マネージャーの場合（自分と管轄インストラクターの通知を更新可能）
         if ($instructor->isManager()) {
@@ -19,20 +19,29 @@ class NotificationPolicy
             $managerIds = $instructor->managings->pluck('id')->toArray();
             $managerIds[] = $instructor->id;
 
-        // 通知内の全 instructor_id が 管轄リスト内にあるか確認
-        $notificationInstructorIds = $notifications->pluck('instructor_id')->unique()->toArray();
-        if (array_diff($notificationInstructorIds, $managerIds)) {
-            return false;
+            return in_array($notification->instructor_id, $managerIds, true);
         }
 
-        return true;
+        // 一般講師なら、自分の通知のみ更新可能
+        return $notification->instructor_id === $instructor->id;
     }
 
-        // 一般インストラクターの場合（自分が所有している通知のみ）
-        $userId = $instructor->id;
-        return !$notifications->contains(fn($notification) => $notification->{$ownerColumn} !== $userId);
+    public function updateBulk(Instructor $instructor, Collection $notifications): bool
+    {
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
 
-        return true;
+            // 管轄内のインストラクターの通知のみか？
+            return $notifications->every(
+                fn($n) => in_array($n->instructor_id, $instructorIds, true)
+            );
+        }
+
+        // 講師自身の通知のみ
+        return $notifications->every(
+            fn($n) => $n->instructor_id === $instructor->id
+        );
     }
 
     /**

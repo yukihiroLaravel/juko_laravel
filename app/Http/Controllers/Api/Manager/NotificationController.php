@@ -203,16 +203,21 @@ class NotificationController extends Controller
         $notificationIds = $request->input('notifications', []);
         $type = $request->notification_type;
 
-        $notifications = $service->authorizeAndGetNotifications($notificationIds);
+        $notifications = Notification::whereIn('id', $notificationIds)->get();
+
+        // ここで1件ずつポリシー認可を確認
+        foreach ($notifications as $notification) {
+        $this->authorize('update', $notification);
+        }
 
         // try ~ catch はここで管理
         DB::beginTransaction();
         try {
-            $service->updateNotificationType($notifications, $type);
+            $service($notifications, $type);
             DB::commit();
 
             return response()->json(['result' => true]);
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }

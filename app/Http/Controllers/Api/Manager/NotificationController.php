@@ -203,7 +203,7 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // Policy による認可処理
-        $this->authorize('bulkUpdateType', [Notification::class, $notifications]);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         $notificationType = $request->notification_type;
 
@@ -302,7 +302,7 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('instructor_id', $instructorIds)->get(['id', 'instructor_id', 'status']);
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('putStatusAll', [Notification::class, $notifications]);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         // 一括更新サービス
         $service($status, $notifications);

@@ -22,7 +22,6 @@ use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
-use App\Policies\NotificationPolicy;
 use App\Services\Notification\PutStatusAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -264,7 +263,7 @@ class NotificationController extends Controller
 
         // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
         if (
-            $chosenNotifications->contains(fn($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
+            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
@@ -302,7 +301,7 @@ class NotificationController extends Controller
         $notifications = Notification::where('instructor_id', $instructorId)->get(['id', 'instructor_id', 'status']);
 
         // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('putStatusAll', [Notification::class, $notifications]);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         $service($status, $notifications);
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Attendance;
+namespace Tests\Feature\Api\Manager\Attendance;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;

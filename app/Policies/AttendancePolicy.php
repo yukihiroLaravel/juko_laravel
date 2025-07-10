@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Model\Instructor;
 use App\Model\Attendance;
+use App\Model\Instructor;
 
 class AttendancePolicy
 {

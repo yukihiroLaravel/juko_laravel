@@ -190,7 +190,7 @@ class AttendanceController extends Controller
             Attendance::PERIOD_WEEK => $nowDate->copy()->subWeek(),
             Attendance::PERIOD_MONTH => $nowDate->copy()->subMonth(),
             Attendance::PERIOD_YEAR => $nowDate->copy()->subYear(),
-            default => throw new Exception('Invalid period. [' . $request->period . ']'),
+            default => throw new Exception('Invalid period. ['.$request->period.']'),
         };
 
         $attendances = Attendance::with('student')->where('course_id', $request->course_id)->get();
@@ -240,7 +240,7 @@ class AttendanceController extends Controller
         $period = $request->period;
 
         // 完了したレッスンの数を取得
-        $completedLessonsCount = $attendances->flatMap(fn(Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+        $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
             $updatedAtRequestPeriod = match ($period) {
                 LessonAttendance::PERIOD_TODAY => $lessonAttendance->updated_at->isToday(),
                 LessonAttendance::PERIOD_MONTH => $lessonAttendance->updated_at->isCurrentMonth(),
@@ -251,7 +251,7 @@ class AttendanceController extends Controller
         }))->count();
 
         // 完了したチャプターの数を取得
-        $completedChaptersCount = $attendances->flatMap(fn(Attendance $attendance) =>
+        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) =>
         // 各出席情報に関連するレッスン出席情報をフィルタリング
         $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
@@ -274,7 +274,7 @@ class AttendanceController extends Controller
                 // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
                 return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);
             })
-            ->map(fn(LessonAttendance $lessonAttendance) =>
+            ->map(fn (LessonAttendance $lessonAttendance) =>
             // chapter_idとattendance_idをキーにもつ新しい配列を作成
             [
                 'chapter_id' => $lessonAttendance->lesson->chapter_id,

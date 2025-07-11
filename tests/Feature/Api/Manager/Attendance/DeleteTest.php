@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Attendance;
+namespace Tests\Feature\Api\Manager\Attendance;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,11 +21,11 @@ class DeleteTest extends TestCase
     public function test_受講削除_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/attendance/3');
+        $response = $this->deleteJson('/api/v1/instructor/attendance/1');
 
         // assert
         $response->assertStatus(200);
@@ -35,7 +35,10 @@ class DeleteTest extends TestCase
 
         // 論理削除されているか確認
         $this->assertSoftDeleted('attendances', [
-            'id' => 3,
+            'id' => 1,
+        ]);
+        $this->assertSoftDeleted('lesson_attendances', [
+            'attendance_id' => 1,
         ]);
     }
 
@@ -46,7 +49,7 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/attendance/2');
+        $response = $this->deleteJson('/api/v1/instructor/attendance/1');
 
         // assert
         $response->assertStatus(403);
@@ -58,7 +61,7 @@ class DeleteTest extends TestCase
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act

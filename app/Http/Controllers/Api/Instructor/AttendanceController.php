@@ -48,7 +48,8 @@ class AttendanceController extends Controller
 
         if (Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)
-            ->exists()) {
+            ->exists()
+        ) {
             // 受講状況が存在する場合はエラーを返す
             throw new AuthorizationException('Attendance record already exists.');
         }
@@ -117,14 +118,11 @@ class AttendanceController extends Controller
 
         try {
             $attendanceId = $request->route('attendance_id');
-            $attendance = Attendance::with('lessonAttendances')->findOrFail($attendanceId);
+            $attendance = Attendance::with('course.instructor')->findOrFail($attendanceId);
 
-            if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-                throw new AuthorizationException(
-                    'Forbidden, invalid instructor_id.'
-                );
-            }
+            $this->authorize('delete', $attendance);
 
+            // 受講状況に紐づくレッスン受講状況を削除
             $attendance->delete();
 
             DB::commit();
@@ -134,7 +132,7 @@ class AttendanceController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e);
+            Log::error($e->getMessage());
             throw $e;
         }
     }
@@ -234,11 +232,11 @@ class AttendanceController extends Controller
                 return $updatedAtRequestPeriod && $totalLessonsCount === $completedLessonsCount;
             })
             ->map(fn (LessonAttendance $lessonAttendance) =>
-                // chapter_idとattendance_idをキーにもつ新しい配列を作成
-                [
-                    'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                    'attendance_id' => $lessonAttendance->attendance_id,
-                ])
+            // chapter_idとattendance_idをキーにもつ新しい配列を作成
+            [
+                'chapter_id' => $lessonAttendance->lesson->chapter_id,
+                'attendance_id' => $lessonAttendance->attendance_id,
+            ])
             ->unique()
             ->count();
 

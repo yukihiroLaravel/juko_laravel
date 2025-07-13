@@ -151,7 +151,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-お知らせ
             Route::prefix('notification')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'index']);
-                Route::prefix('type/{notification_type}')->group(function () {
+                Route::prefix('type')->group(function () {
                     Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateType']);
                     Route::put('all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'updateTypeAll']);
                 });

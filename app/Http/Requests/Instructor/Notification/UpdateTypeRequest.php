@@ -21,9 +21,11 @@ class UpdateTypeRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation()
     {
-        $this->merge([
-            'notification_type' => $this->route('notification_type'),
-        ]);
+        if ($this->route('notification_type') !== null) {
+            $this->merge([
+                'notification_type' => $this->route('notification_type'),
+            ]);
+        }
     }
 
     /**

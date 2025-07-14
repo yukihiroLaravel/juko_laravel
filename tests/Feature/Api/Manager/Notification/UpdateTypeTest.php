@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Notification;
+namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class UpdateTypeAllTest extends TestCase
+class UpdateTypeTest extends TestCase
 {
     // データベース初期化
     use RefreshDatabase;
@@ -27,15 +27,36 @@ class UpdateTypeAllTest extends TestCase
 
         // act
         $notificationType = 'once';
-        $response = $this->putJson('/api/v1/instructor/notification/type/all', [
+        $response = $this->putJson('/api/v1/manager/notification/type', [
             'notification_type' => $notificationType,
+            'notifications' => [1],
         ]);
 
         // assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'id' => 1,
+            'id' => 2,
             'type' => 'once',
+        ]);
+    }
+
+    public function test_権限なし_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(1);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $notificationType = 'once';
+        $response = $this->putJson('/api/v1/manager/notification/type', [
+            'notification_type' => $notificationType,
+            'notifications' => [3],
+        ]);
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Invalid instructor_id.',
         ]);
     }
 
@@ -47,14 +68,16 @@ class UpdateTypeAllTest extends TestCase
 
         // act
         $notificationType = 'action';
-        $response = $this->putJson('/api/v1/instructor/notification/type/all', [
+        $response = $this->putJson('/api/v1/manager/notification/type', [
             'notification_type' => $notificationType,
+            'notifications' => [],
         ]);
 
         // assert
         $response->assertStatus(422);
-        $response->assertJson([
-            'message' => 'The selected notification type is invalid.',
+        $response->assertJsonValidationErrors([
+            'notification_type' => 'The selected notification type is invalid.',
+            'notifications' => 'The notifications field is required.',
         ]);
     }
 }

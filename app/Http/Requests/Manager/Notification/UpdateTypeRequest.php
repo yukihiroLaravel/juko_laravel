@@ -18,14 +18,6 @@ class UpdateTypeRequest extends FormRequest
         return true;
     }
 
-    #[\Override]
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'notification_type' => $this->route('notification_type'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -35,7 +27,8 @@ class UpdateTypeRequest extends FormRequest
     {
         return [
             'notification_type' => ['required',  Rule::enum(TypeEnum::class)],
-            'notifications.*' => ['integer', 'exists:notifications,id,deleted_at,NULL'],
+            'notifications' => ['required', 'array', 'min:1'],
+            'notifications.*' => ['integer', 'exists:notifications,id'],
         ];
     }
 }

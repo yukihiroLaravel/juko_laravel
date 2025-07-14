@@ -267,7 +267,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-お知らせ
                 Route::prefix('notification')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\NotificationController::class, 'index']);
-                    Route::put('type/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateTypeAll']);
+                    Route::prefix('type')->group(function () {
+                        Route::put('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
+                        Route::put('all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateTypeAll']);
+                    });
                     Route::put('type/{notification_type}', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
                     Route::put('status/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatusAll']);
                     Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkDelete']);

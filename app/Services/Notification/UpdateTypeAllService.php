@@ -16,9 +16,10 @@ class UpdateTypeAllService
             Notification::whereIn('instructor_id', $instructorIds)->update([
                 'type' => $notificationType,
             ]);
+
             return true;
         } catch (\Exception $e) {
-            Log::error('Notification update failed: ' . $e->getMessage());
+            Log::error('Notification update failed: '.$e->getMessage());
             throw $e;
         }
     }

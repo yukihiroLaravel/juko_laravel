@@ -207,7 +207,7 @@ class NotificationController extends Controller
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $notificationService): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $notificationService->updateNotificationType([$instructorId], $request->notification_type);//[$instructorId]→サービスクラスを共通に使いたいため、配列の形にする
+        $notificationService->updateNotificationType([$instructorId], $request->notification_type); //[$instructorId]→サービスクラスを共通に使いたいため、配列の形にする
 
         return response()->json([
             'result' => true,

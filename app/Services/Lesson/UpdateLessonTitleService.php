@@ -8,10 +8,6 @@ final class UpdateLessonTitleService
 {
     /**
      * レッスンタイトルを更新する
-     *
-     * @param int $lessonId
-     * @param string $title
-     * @return bool
      */
     public function __invoke(int $lessonId, string $title): bool
     {

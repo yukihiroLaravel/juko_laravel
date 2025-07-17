@@ -4,7 +4,7 @@ namespace App\Services\Lesson;
 
 use App\Model\Lesson;
 
-final class UpdateLessonTitleService
+class UpdateLessonTitleService
 {
     /**
      * レッスンタイトルを更新する

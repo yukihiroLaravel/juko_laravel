@@ -23,6 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
+use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -203,14 +204,10 @@ class NotificationController extends Controller
     /**
      * 該当講師お知らせ一覧タイプ　一括変更
      */
-    public function updateTypeAll(UpdateTypeAllRequest $request): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $notificationService): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-
-        Notification::where('instructor_id', $instructorId)
-            ->update([
-                'type' => $request->notification_type,
-            ]);
+        $notificationService->updateNotificationType([$instructorId], $request->notification_type);
 
         return response()->json([
             'result' => true,

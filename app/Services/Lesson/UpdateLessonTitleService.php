@@ -13,6 +13,7 @@ class UpdateLessonTitleService
     {
         $lesson = Lesson::findOrFail($lessonId);
         $lesson->title = $title;
+
         return $lesson->save();
     }
 }

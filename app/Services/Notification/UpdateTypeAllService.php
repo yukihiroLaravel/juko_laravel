@@ -7,7 +7,10 @@ use App\Model\Notification;
 class UpdateTypeAllService
 {
     /**
-     * 指定されたinstructorId配列に属する通知タイプを一括更新
+     * お知らせのタイプを一括更新するサービス
+     *
+     * @param  array<int>  $instructorIds
+     * @param  'always' | 'once'  $notificationType
      */
     public function updateNotificationType(array $instructorIds, string $notificationType): void
     {

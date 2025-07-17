@@ -25,6 +25,7 @@ use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
+use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -219,7 +220,7 @@ class LessonController extends Controller
     /**
      * レッスンタイトル変更API
      */
-    public function updateTitle(UpdateTitleRequest $request): JsonResponse
+    public function updateTitle(UpdateTitleRequest $request, UpdateLessonTitleService $service): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
@@ -234,9 +235,7 @@ class LessonController extends Controller
             throw new AuthorizationException('Invalid chapter_id.');
         }
 
-        $lesson->update([
-            'title' => $request->title,
-        ]);
+        $service($lesson->id, $request->title);
 
         return response()->json([
             'result' => true,

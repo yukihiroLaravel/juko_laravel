@@ -246,7 +246,10 @@ class LessonController extends Controller
             throw new ValidationErrorException('Invalid chapter_id.');
         }
 
-        $service($lesson->id, $request->title);
+        $service(
+            lessonId: $lesson->id,
+            title: $request->title,
+        );
 
         return response()->json([
             'result' => true,

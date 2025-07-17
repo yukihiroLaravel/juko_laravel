@@ -9,11 +9,10 @@ class UpdateLessonTitleService
     /**
      * レッスンタイトルを更新する
      */
-    public function __invoke(int $lessonId, string $title): bool
+    public function __invoke(int $lessonId, string $title): void
     {
         $lesson = Lesson::findOrFail($lessonId);
         $lesson->title = $title;
-
-        return $lesson->save();
+        $lesson->save();
     }
 }

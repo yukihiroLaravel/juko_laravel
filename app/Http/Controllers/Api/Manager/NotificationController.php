@@ -249,7 +249,7 @@ class NotificationController extends Controller
 
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
-        $notificationService->updateNotificationType($instructorIds, $request->notification_type);
+        $notificationService($instructorIds, $request->notification_type);
 
         return response()->json([
             'result' => true,

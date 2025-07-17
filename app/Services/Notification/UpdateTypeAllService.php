@@ -12,7 +12,7 @@ class UpdateTypeAllService
      * @param  array<int>  $instructorIds
      * @param  'always' | 'once'  $notificationType
      */
-    public function updateNotificationType(array $instructorIds, string $notificationType): void
+    public function __invoke(array $instructorIds, string $notificationType): void
     {
         Notification::whereIn('instructor_id', $instructorIds)->update([
             'type' => $notificationType,

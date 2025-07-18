@@ -239,7 +239,7 @@ class NotificationController extends Controller
         }
     }
 
-    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $notificationService): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $manager = Auth::guard('instructor')->user();
         $instructorIds = $manager->managings->pluck('id')->toArray();
@@ -249,7 +249,10 @@ class NotificationController extends Controller
 
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
-        $notificationService($instructorIds, $request->notification_type);
+        $service(
+            instructorIds: $instructorIds,
+            notificationType: $request->notification_type
+        );
 
         return response()->json([
             'result' => true,

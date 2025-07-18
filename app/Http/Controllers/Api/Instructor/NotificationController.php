@@ -204,10 +204,13 @@ class NotificationController extends Controller
     /**
      * 該当講師お知らせ一覧タイプ　一括変更
      */
-    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $notificationService): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $notificationService([$instructorId], $request->notification_type);
+        $service(
+            instructorIds: [$instructorId],
+            notificationType: $request->notification_type
+        );
 
         return response()->json([
             'result' => true,

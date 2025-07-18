@@ -3,8 +3,8 @@
 namespace App\Services\Instructor;
 
 use App\Mail\AuthenticationConfirmationMail;
-use App\Model\TemporaryInstructor;
 use App\Model\Instructor;
+use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use Carbon\Carbon;
 use Exception;
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Mail;
  * @param  int|null  $managerId  管理者ID（未指定ならnull）
  * @return void
  *
- * @throws \Exception  登録中にエラーが発生した場合
+ * @throws \Exception 登録中にエラーが発生した場合
  */
 class StoreService
 {
@@ -42,12 +42,12 @@ class StoreService
         try {
             // 認証コードを生成
             $code = $credentialGeneratorService->createCode(
-                existsChecker: fn(string $code) => TemporaryInstructor::where('code', $code)->exists(),
+                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
             // トークンを生成
             $token = $credentialGeneratorService->createToken(
-                existsChecker: fn(string $token) => TemporaryInstructor::where('token', $token)->exists(),
+                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
             $temporaryInstructor = TemporaryInstructor::create([
@@ -75,7 +75,7 @@ class StoreService
             ));
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error($e->getMessage() . ' email: ' . $email);
+            Log::error($e->getMessage().' email: '.$email);
             throw $e;
         }
     }

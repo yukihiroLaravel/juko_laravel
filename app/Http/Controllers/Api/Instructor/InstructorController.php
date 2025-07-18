@@ -13,8 +13,8 @@ use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
-use App\Services\Instructor\VerifyCodeService;
 use App\Services\Instructor\StoreService;
+use App\Services\Instructor\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -64,7 +64,6 @@ class InstructorController extends Controller
         }
     }
 
-
     /**
      * 講師更新API
      */
@@ -85,7 +84,7 @@ class InstructorController extends Controller
 
                 // 画像ファイル保存処理
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 

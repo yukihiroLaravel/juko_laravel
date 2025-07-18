@@ -15,6 +15,7 @@ use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Instructor\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -129,7 +130,7 @@ class InstructorController extends Controller
 
                 // 画像ファイルを保存
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -158,64 +159,22 @@ class InstructorController extends Controller
      */
     public function store(
         StoreRequest $request,
+        StoreService $registerService,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
-        $email = $request->email;
-        DB::beginTransaction();
         try {
-
-            // 認証コードを生成する。
-            $code = $credentialGeneratorService->createCode(
-                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
+            $registerService(
+                email: $request->email,
+                nickName: $request->nick_name,
+                lastName: $request->last_name,
+                firstName: $request->first_name,
+                credentialGeneratorService: $credentialGeneratorService,
+                managerId: Auth::guard('instructor')->user()->id
             );
 
-            // トークンを生成する。
-            $token = $credentialGeneratorService->createToken(
-                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
-            );
-
-            $temporaryInstructor = TemporaryInstructor::create([
-                'manager_id' => Auth::guard('instructor')->user()->id,
-                'trial_count' => 0,
-                'code' => $code,
-                'token' => $token,
-                'expire_at' => Carbon::now()->addMinutes(60),
-                'nick_name' => $request->nick_name,
-                'last_name' => $request->last_name,
-                'first_name' => $request->first_name,
-                'email' => $email,
-                'type' => Instructor::TYPE_INSTRUCTOR,
-            ]);
-
-            assert($temporaryInstructor instanceof TemporaryInstructor);
-
-            DB::commit();
-
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (DuplicateAuthorizationCodeException $e) {
-            DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to generate unique authorization code.',
-            ], 400);
-        } catch (DuplicateAuthorizationTokenException $e) {
-            DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
-
-            return response()->json([
-                'result' => false,
-                'message' => 'Failed to generate unique authorization token.',
-            ], 400);
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
+            return response()->json(['result' => false, 'message' => $e->getMessage()], 400);
         }
     }
 }

@@ -214,10 +214,8 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
-        // アクセス権限のチェック
-        if (array_diff($notificationsInstructorIds, $instructorIds) !== []) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('changeType', [Notification::class, $notifications]);
 
         $notificationType = $request->notification_type;
 

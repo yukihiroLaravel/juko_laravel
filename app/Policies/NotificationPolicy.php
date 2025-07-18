@@ -87,4 +87,25 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+    
+    /**
+     * お知らせタイプ機能変更に関する可変処理
+     * 
+     * @param Collection<int, Notification> $notifications
+     */
+    public function changeType(Instructor $instructor, Collection $notifications): bool
+    {
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return $notifications->every(
+                fn (Notification $notification) => in_array($notification->instructor_id, $instructorIds, true)
+            );
+        }
+
+        return $notifications->every(
+            fn (Notification $notification) => $notification->instructor_id === $instructor->id
+        );
+    }
 }

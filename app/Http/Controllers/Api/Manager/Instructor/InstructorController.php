@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api\Manager\Instructor;
 
-use App\Exceptions\DuplicateAuthorizationCodeException;
-use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Instructor\IndexRequest;
 use App\Http\Requests\Manager\Instructor\ShowRequest;
@@ -11,19 +9,15 @@ use App\Http\Requests\Manager\Instructor\StoreRequest;
 use App\Http\Requests\Manager\Instructor\UpdateRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
-use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
-use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;

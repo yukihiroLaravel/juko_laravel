@@ -236,7 +236,7 @@ class LessonController extends Controller
         }
 
         $service(
-            lessonId: $lesson->id,
+            lesson: $lesson,
             title: $request->title,
         );
 

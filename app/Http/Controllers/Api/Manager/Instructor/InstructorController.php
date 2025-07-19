@@ -130,7 +130,7 @@ class InstructorController extends Controller
 
                 // 画像ファイルを保存
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString().'.'.$extension;
+                $filename = Str::uuid()->toString() . '.' . $extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -166,14 +166,17 @@ class InstructorController extends Controller
 
         DB::beginTransaction();
         try {
+            // 認証コードを生成する
             $code = $credentialGeneratorService->createCode(
                 existsChecker: fn(string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
+            // トークンを生成する。
             $token = $credentialGeneratorService->createToken(
                 existsChecker: fn(string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
+            //サービスクラス呼び出し
             $attributes = $storeService(
                 $code,
                 $token,
@@ -187,8 +190,10 @@ class InstructorController extends Controller
                 Auth::guard('instructor')->user()->id //自分のID
             );
 
+            //保存
             $temporaryInstructor = TemporaryInstructor::create($attributes);
 
+            //送信
             Mail::send(new AuthenticationConfirmationMail(
                 $email,
                 $temporaryInstructor->full_name,

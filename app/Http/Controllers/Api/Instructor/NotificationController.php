@@ -24,6 +24,7 @@ use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\UpdateTypeService;
+use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -173,7 +174,11 @@ class NotificationController extends Controller
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
-    
+        if (
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+        ) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
         // サービス呼び出し（認可チェック＋トランザクション処理）
         $allowedInstructorIds = [$instructorId]; // 単一の講師IDを配列にする
         $service(

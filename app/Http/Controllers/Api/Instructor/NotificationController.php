@@ -23,6 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
+use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -168,36 +169,20 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request): JsonResponse
+    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
-
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
-        DB::beginTransaction();
-        try {
-            $notificationType = $request->notification_type;
-            $notifications->each(function ($notification) use ($notificationType) {
-                // 指定されたお知らせIDでお知らせを取得
-                $notification->fill([
-                    'type' => $notificationType,
-                ])
-                    ->save();
-            });
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+    
+        // サービス呼び出し（認可チェック＋トランザクション処理）
+        $allowedInstructorIds = [$instructorId]; // 単一の講師IDを配列にする
+        $service(
+            notifications: $notifications,
+            allowedInstructorIds: $allowedInstructorIds,
+            type: $request->notification_type
+        );
+    
+        return response()->json(['result' => true]);
     }
 
     /**

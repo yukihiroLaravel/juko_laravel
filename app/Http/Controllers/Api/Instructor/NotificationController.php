@@ -13,8 +13,8 @@ use App\Http\Requests\Instructor\Notification\PutStatusAllRequest;
 use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
+use App\Http\Requests\Instructor\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
-use App\Http\Requests\Manager\Notification\UpdateTypeRequest as NotificationUpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
@@ -193,14 +193,13 @@ class NotificationController extends Controller
     /**
      * 該当講師お知らせ一覧タイプ　一括変更
      */
-    public function updateTypeAll(NotificationUpdateTypeRequest $request): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-
-        Notification::where('instructor_id', $instructorId)
-            ->update([
-                'type' => $request->notification_type,
-            ]);
+        $service(
+            instructorIds: [$instructorId],
+            notificationType: $request->notification_type
+        );
 
         return response()->json([
             'result' => true,

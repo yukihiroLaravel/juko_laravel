@@ -215,7 +215,7 @@ class NotificationController extends Controller
         $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // policyによる認可チェック
-        $this->authorize('changeType', [Notification::class, $notifications]);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         $notificationType = $request->notification_type;
 

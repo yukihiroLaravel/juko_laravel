@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Exceptions\ExpiredAuthorizationCodeException;
 use App\Exceptions\TryCountOverAuthorizationCodeException;
 use App\Http\Controllers\Controller;
@@ -9,19 +11,21 @@ use App\Http\Requests\Instructor\StoreRequest;
 use App\Http\Requests\Instructor\UpdateRequest;
 use App\Http\Requests\Instructor\UserAuthenticationRequest;
 use App\Http\Resources\Base\Instructor\InstructorResource;
+use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\VerifyCodeService;
-use App\Services\Instructor\StoreService;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -45,22 +49,64 @@ class InstructorController extends Controller
      */
     public function store(
         StoreRequest $request,
-        StoreService $registerService,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
+        $email = $request->email;
+        DB::beginTransaction();
         try {
-            $registerService(
-                email: $request->email,
-                nickName: $request->nick_name,
-                lastName: $request->last_name,
-                firstName: $request->first_name,
-                credentialGeneratorService: $credentialGeneratorService,
-                managerId: null
+
+            // 認証コードを生成する。
+            $code = $credentialGeneratorService->createCode(
+                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
-            return response()->json(['result' => true]);
+            // トークンを生成する。
+            $token = $credentialGeneratorService->createToken(
+                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
+            );
+
+            $temporaryInstructor = TemporaryInstructor::create([
+                'manager_id' => null,
+                'trial_count' => 0,
+                'code' => $code,
+                'token' => $token,
+                'expire_at' => Carbon::now()->addMinutes(60),
+                'nick_name' => $request->nick_name,
+                'last_name' => $request->last_name,
+                'first_name' => $request->first_name,
+                'email' => $email,
+                'type' => Instructor::TYPE_INSTRUCTOR,
+            ]);
+
+            assert($temporaryInstructor instanceof TemporaryInstructor);
+
+            DB::commit();
+
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (DuplicateAuthorizationCodeException $e) {
+            DB::rollBack();
+            Log::error($e->getMessage().' email: '.$request->email);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to generate unique authorization code.',
+            ], 400);
+        } catch (DuplicateAuthorizationTokenException $e) {
+            DB::rollBack();
+            Log::error($e->getMessage().' email: '.$request->email);
+
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to generate unique authorization token.',
+            ], 400);
         } catch (Exception $e) {
-            return response()->json(['result' => false, 'message' => $e->getMessage()], 400);
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
         }
     }
 

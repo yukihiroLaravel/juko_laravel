@@ -62,7 +62,7 @@ class InstructorController extends Controller
                 existsChecker: fn(string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
-            // トークンを生成する。
+            // トークンを生成する
             $token = $credentialGeneratorService->createToken(
                 existsChecker: fn(string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );

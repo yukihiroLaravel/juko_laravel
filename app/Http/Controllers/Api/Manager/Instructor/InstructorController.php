@@ -182,7 +182,7 @@ class InstructorController extends Controller
                     'nick_name' => $request->nick_name,
                     'last_name' => $request->last_name,
                     'first_name' => $request->first_name,
-                    'type' => Instructor::TYPE_MANAGER,
+                    'type' => Instructor::TYPE_INSTRUCTOR,
                 ],
                 Auth::guard('instructor')->user()->id //自分のID
             );

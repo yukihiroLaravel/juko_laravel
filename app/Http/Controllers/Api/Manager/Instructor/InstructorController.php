@@ -15,10 +15,11 @@ use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Instructor\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -154,63 +155,67 @@ class InstructorController extends Controller
     }
 
     /**
-     * 講師新規仮登録API
+     * マネージャー用 仮登録API
      */
     public function store(
         StoreRequest $request,
+        StoreService $storeService,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
         $email = $request->email;
+
         DB::beginTransaction();
         try {
-
-            // 認証コードを生成する。
             $code = $credentialGeneratorService->createCode(
-                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
+                existsChecker: fn(string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
-            // トークンを生成する。
             $token = $credentialGeneratorService->createToken(
-                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
+                existsChecker: fn(string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
-            $temporaryInstructor = TemporaryInstructor::create([
-                'manager_id' => Auth::guard('instructor')->user()->id,
-                'trial_count' => 0,
-                'code' => $code,
-                'token' => $token,
-                'expire_at' => Carbon::now()->addMinutes(60),
-                'nick_name' => $request->nick_name,
-                'last_name' => $request->last_name,
-                'first_name' => $request->first_name,
-                'email' => $email,
-                'type' => Instructor::TYPE_INSTRUCTOR,
-            ]);
+            $attributes = $storeService(
+                $code,
+                $token,
+                [
+                    'email' => $email,
+                    'nick_name' => $request->nick_name,
+                    'last_name' => $request->last_name,
+                    'first_name' => $request->first_name,
+                    'type' => Instructor::TYPE_MANAGER,
+                ],
+                Auth::guard('instructor')->user()->id //自分のID
+            );
 
-            assert($temporaryInstructor instanceof TemporaryInstructor);
+            $temporaryInstructor = TemporaryInstructor::create($attributes);
+
+            Mail::send(new AuthenticationConfirmationMail(
+                $email,
+                $temporaryInstructor->full_name,
+                $code,
+                $token
+            ));
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
-
             return response()->json([
-                'result' => true,
+                'result' => true
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
+            Log::error($e->getMessage() . ' email: ' . $request->email);
 
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to generate unique authorization code.',
+                'message' => 'Failed to generate unique authorization code.'
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e->getMessage().' email: '.$request->email);
+            Log::error($e->getMessage() . ' email: ' . $request->email);
 
             return response()->json([
                 'result' => false,
-                'message' => 'Failed to generate unique authorization token.',
+                'message' => 'Failed to generate unique authorization token.'
             ], 400);
         } catch (Exception $e) {
             DB::rollBack();

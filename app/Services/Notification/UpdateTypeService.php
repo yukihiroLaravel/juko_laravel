@@ -13,7 +13,7 @@ class UpdateTypeService
      * 通知タイプを一括更新
      *
      * @param  Collection<int, Notification>  $notifications
-     * @param  array<int>  $allowedInstructorIds
+     * @param  array<int>
      * @param  string  $type
      * @throws AuthorizationException
      */

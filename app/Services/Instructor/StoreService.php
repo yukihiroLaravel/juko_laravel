@@ -9,8 +9,6 @@ class StoreService
     /**
      * 仮講師の保存に必要な配列を生成
      *
-     * @param string $code
-     * @param string $token
      * @param array{
      *     email: string,
      *     nick_name: string,
@@ -18,8 +16,6 @@ class StoreService
      *     first_name: string,
      *     type: string
      * } $data
-     * @param int|null $managerId
-     * @return array
      */
     public function __invoke(
         string $code,
@@ -41,4 +37,3 @@ class StoreService
         ];
     }
 }
-

@@ -9,8 +9,8 @@ use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
-use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
+use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
@@ -296,7 +296,7 @@ class NotificationController extends Controller
     {
         $notificationIds = $request->input('notifications', []);
         $status = $request->input('status');
-        
+
         DB::beginTransaction();
 
         try {

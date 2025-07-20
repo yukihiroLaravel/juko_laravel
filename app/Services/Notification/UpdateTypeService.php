@@ -13,7 +13,6 @@ class UpdateTypeService
      * 通知タイプを一括更新
      *
      * @param  Collection<int, Notification>  $notifications
-     * @param  string  $type
      * @throws AuthorizationException
      */
     public function __invoke(Collection $notifications, string $type): void

@@ -216,7 +216,7 @@ class NotificationController extends Controller
         // 認可チェック（対象講師が管理下か確認）
         if (
             $notifications->contains(
-                fn (Notification $notification) => !in_array($notification->instructor_id, $allowedInstructorIds, true)
+                fn (Notification $notification) => ! in_array($notification->instructor_id, $allowedInstructorIds, true)
             )
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
@@ -228,7 +228,7 @@ class NotificationController extends Controller
             $service(
                 $notifications,
                 $request->notification_type // ここも第2引数として string
-            );                        
+            );
 
             DB::commit();
 

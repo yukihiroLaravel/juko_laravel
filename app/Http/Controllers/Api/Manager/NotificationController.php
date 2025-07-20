@@ -226,10 +226,10 @@ class NotificationController extends Controller
         try {
             // サービス呼び出し
             $service(
-                notifications: $notifications,
-                allowedInstructorIds: $allowedInstructorIds,
-                type: $request->notification_type
-            );
+                $notifications,
+                $allowedInstructorIds,
+                $request->notification_type
+            );            
 
             DB::commit();
 

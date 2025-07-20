@@ -184,9 +184,9 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             $service(
-                notifications: $notifications,
-                allowedInstructorIds: [$instructorId], // 自分だけ許可
-                type: $request->notification_type
+                $notifications,
+                [$instructorId], // 配列のままでOK
+                $request->notification_type
             );
 
             DB::commit();

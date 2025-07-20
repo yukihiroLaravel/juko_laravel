@@ -2,13 +2,10 @@
 
 namespace App\Services\Notification;
 
-use App\Model\Course;
 use App\Model\Notification;
-use Illuminate\Support\Facades\Auth;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class StoreNotificationService
 {
@@ -20,14 +17,14 @@ class StoreNotificationService
         DB::beginTransaction();
         try {
             Notification::create([
-                'course_id'     => $data['course_id'],
+                'course_id' => $data['course_id'],
                 'instructor_id' => $data['instructor_id'],
-                'title'         => $data['title'],
-                'type'          => $data['type'],
-                'start_date'    => $data['start_date'],
-                'end_date'      => $data['end_date'],
-                'status'        => $data['status'] ?? 'public',
-                'content'       => $data['content'],
+                'title' => $data['title'],
+                'type' => $data['type'],
+                'start_date' => $data['start_date'],
+                'end_date' => $data['end_date'],
+                'status' => $data['status'] ?? 'public',
+                'content' => $data['content'],
             ]);
 
             DB::commit();

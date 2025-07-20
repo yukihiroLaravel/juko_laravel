@@ -108,14 +108,14 @@ class NotificationController extends Controller
 
         // サービスに渡すデータをまとめる
         $data = [
-            'course_id'     => $request->course_id,
+            'course_id' => $request->course_id,
             'instructor_id' => $instructorId,
-            'title'         => $request->title,
-            'type'          => $request->type,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'status'        => $request->status,
-            'content'       => $request->content,
+            'title' => $request->title,
+            'type' => $request->type,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'status' => $request->status,
+            'content' => $request->content,
         ];
 
         // サービスを実行（データベースに保存）
@@ -123,6 +123,7 @@ class NotificationController extends Controller
 
         return response()->json(['result' => true]);
     }
+
     /**
      * お知らせ更新API
      */

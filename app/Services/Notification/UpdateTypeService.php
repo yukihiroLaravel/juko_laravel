@@ -5,6 +5,7 @@ namespace App\Services\Notification;
 use App\Model\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 
 class UpdateTypeService
 {
@@ -27,7 +28,16 @@ class UpdateTypeService
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        // タイプ一括更新
-        Notification::whereIn('id', $notifications->pluck('id'))->update(['type' => $type]);
+        // トランザクション内で一括更新
+        DB::beginTransaction();
+        try {
+            Notification::whereIn('id', $notifications->pluck('id'))
+                ->update(['type' => $type]);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

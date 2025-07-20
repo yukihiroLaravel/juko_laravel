@@ -169,7 +169,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request): JsonResponse
+    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -179,22 +179,19 @@ class NotificationController extends Controller
         ) {
             throw new AuthorizationException('Invalid instructor_id.');
         }
+
         DB::beginTransaction();
         try {
-            $notificationType = $request->notification_type;
-            $notifications->each(function ($notification) use ($notificationType) {
-                // 指定されたお知らせIDでお知らせを取得
-                $notification->fill([
-                    'type' => $notificationType,
-                ])
-                    ->save();
-            });
+            $service(
+                notifications: $notifications,
+                allowedInstructorIds: [$instructorId], // 自分だけ許可
+                type: $request->notification_type
+            );
+
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
+            return response()->json(['result' => true]);
+        } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;

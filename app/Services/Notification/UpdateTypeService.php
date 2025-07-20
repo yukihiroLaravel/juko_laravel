@@ -19,14 +19,6 @@ class UpdateTypeService
      */
     public function __invoke(Collection $notifications, array $allowedInstructorIds, string $type): void
     {
-        // 認可チェック
-        if (
-            $notifications->contains(
-                fn (Notification $notification) => !in_array($notification->instructor_id, $allowedInstructorIds, true)
-            )
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
 
         // トランザクション内で一括更新
         DB::beginTransaction();

@@ -45,7 +45,10 @@ class NotificationController extends Controller
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
 
+        // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
+        
+        // 配下のインストラクター情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
@@ -62,13 +65,18 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
+        // ユーザーID取得
         $instructorId = $request->user()->id;
+        
+        // 配下のインストラクター情報を取得
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
+        // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
 
+        // アクセス権限のチェック
         if (!in_array($notification->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
@@ -89,7 +97,7 @@ class NotificationController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         if (!in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         DB::beginTransaction();
@@ -107,7 +115,9 @@ class NotificationController extends Controller
 
             DB::commit();
 
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -120,7 +130,10 @@ class NotificationController extends Controller
      */
     public function put(PutRequest $request, PutNotificationService $service): JsonResponse
     {
+        // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
+        
+        // policyによる認可チェック
         $this->authorize('update', $notification);
 
         DB::beginTransaction();
@@ -132,13 +145,16 @@ class NotificationController extends Controller
                 start_date:  $request->start_date,
                 end_date:    $request->end_date,
                 status:      $request->status
+        
+                $notification,
+                $data
             );
-
-            $service($notification, $data);
 
             DB::commit();
 
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -151,7 +167,10 @@ class NotificationController extends Controller
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
+        // 指定されたお知らせを取得
         $notification = Notification::findOrFail($request->notification_id);
+        
+        // policyによる認可チェック
         $this->authorize('delete', $notification);
 
         DB::beginTransaction();
@@ -160,7 +179,9 @@ class NotificationController extends Controller
 
             DB::commit();
 
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -214,9 +235,13 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            Notification::whereIn('instructor_id', $instructorIds)->update([
-                'type' => $request->notification_type,
-            ]);
+            $notificationType = $request->notification_type;
+
+            $notifications->each(function ($notification) use ($notificationType) {
+                $notification->fill([
+                    'type' => $notificationType,
+                ])->save();
+            });
 
             DB::commit();
 

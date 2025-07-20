@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Dto\Notification\PutDto;
@@ -11,8 +13,8 @@ use App\Http\Requests\Instructor\Notification\PutStatusAllRequest;
 use App\Http\Requests\Instructor\Notification\PutStatusRequest;
 use App\Http\Requests\Instructor\Notification\ShowRequest;
 use App\Http\Requests\Instructor\Notification\StoreRequest;
+use App\Http\Requests\Instructor\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Instructor\Notification\UpdateTypeRequest;
-use App\Http\Requests\Manager\Notification\UpdateTypeRequest as NotificationUpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Instructor\NotificationIndexResource;
 use App\Model\Course;
@@ -21,7 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
-use App\Services\Notification\UpdateTypeService;
+use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -167,31 +169,48 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧-タイプ変更API
      */
-    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
+    public function updateType(UpdateTypeRequest $request): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
-    
-        // サービス呼び出し（認可チェック＋トランザクション処理）
-        $allowedInstructorIds = [$instructorId]; // 単一の講師IDを配列にする
-        $service->execute($notifications, $allowedInstructorIds, $request->notification_type);
-    
-        return response()->json([
-            'result' => true,
-        ]);
+
+        if (
+            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
+        ) {
+            throw new AuthorizationException('Invalid instructor_id.');
+        }
+        DB::beginTransaction();
+        try {
+            $notificationType = $request->notification_type;
+            $notifications->each(function ($notification) use ($notificationType) {
+                // 指定されたお知らせIDでお知らせを取得
+                $notification->fill([
+                    'type' => $notificationType,
+                ])
+                    ->save();
+            });
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 
     /**
-     * 該当講師お知らせ一覧タイプ一括変更
+     * 該当講師お知らせ一覧タイプ　一括変更
      */
-    public function updateTypeAll(NotificationUpdateTypeRequest $request): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-
-        Notification::where('instructor_id', $instructorId)
-            ->update([
-                'type' => $request->notification_type,
-            ]);
+        $service(
+            instructorIds: [$instructorId],
+            notificationType: $request->notification_type
+        );
 
         return response()->json([
             'result' => true,

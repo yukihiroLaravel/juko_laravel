@@ -24,6 +24,7 @@ use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\UpdateTypeAllService;
+use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;

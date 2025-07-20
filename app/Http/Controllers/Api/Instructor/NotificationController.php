@@ -185,8 +185,7 @@ class NotificationController extends Controller
         try {
             $service(
                 $notifications,
-                [$instructorId], // 配列のままでOK
-                $request->notification_type
+                $request->notification_type // ここが第2引数として string
             );
 
             DB::commit();

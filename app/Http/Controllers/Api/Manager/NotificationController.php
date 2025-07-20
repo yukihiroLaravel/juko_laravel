@@ -227,9 +227,8 @@ class NotificationController extends Controller
             // サービス呼び出し
             $service(
                 $notifications,
-                $allowedInstructorIds,
-                $request->notification_type
-            );            
+                $request->notification_type // ここも第2引数として string
+            );                        
 
             DB::commit();
 

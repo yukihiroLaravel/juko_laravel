@@ -17,7 +17,7 @@ class UpdateTypeService
      * @param  string  $type
      * @throws AuthorizationException
      */
-    public function __invoke(Collection $notifications, array $allowedInstructorIds, string $type): void
+    public function __invoke(Collection $notifications, string $type): void
     {
 
         // トランザクション内で一括更新

@@ -135,37 +135,11 @@ class ChapterController extends Controller
      */
     public function delete(DeleteRequest $request): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         // チャプターを取得
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
 
-        // チャプターに紐づく全レッスンIDを取得
-        $lessonIds = $chapter->lessons->pluck('id')->toArray();
-
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座のチャプターでなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to delete this chapter.');
-        }
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定した講座に属するチャプターでなければエラー応答
-            throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
-
-        if (
-            LessonAttendance::whereIn('lesson_id', $lessonIds)
-                ->exists()
-        ) {
-            // 指定したチャプター内に受講中のレッスンがあればエラー応答
-            throw new AuthorizationException('Forbidden, this lesson has attendance.');
-        }
+        // Policyによる認可
+        $this->authorize('delete', $chapter);
 
         $chapter->delete();
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Chapter\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Chapter\DeleteAllRequest;
+use App\Http\Requests\Instructor\Chapter\DeleteRequest;
 use App\Http\Requests\Instructor\Chapter\PatchRequest;
 use App\Http\Requests\Instructor\Chapter\PatchStatusRequest;
 use App\Http\Requests\Instructor\Chapter\PutStatusRequest;
@@ -180,6 +181,23 @@ class ChapterController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+
+    /**
+     * チャプター削除API
+     */
+    public function delete(DeleteRequest $request): JsonResponse
+    {
+        $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+
+        // Policy による認可チェック
+        $this->authorize('delete', $chapter);
+        
+        $chapter->delete();
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

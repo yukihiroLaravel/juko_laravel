@@ -23,6 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
+use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -70,35 +71,32 @@ class NotificationController extends Controller
     /**
      * お知らせ登録
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $course = Course::findOrFail($request->course_id);
+        $instructorId = Auth::guard('instructor')->user()->id;
 
-        if ($course->instructor_id !== Auth::guard('instructor')->user()->id) {
+        // 講座がこの講師のものか確認
+        $course = Course::findOrFail($request->course_id);
+        if ($course->instructor_id !== $instructorId) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
-        DB::beginTransaction();
-        try {
-            Notification::create([
-                'course_id' => $request->course_id,
-                'instructor_id' => Auth::guard('instructor')->user()->id,
-                'title' => $request->title,
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'content' => $request->content,
-            ]);
-            DB::commit();
+        // サービスに渡すデータをまとめる
+        $data = [
+            'course_id'     => $request->course_id,
+            'instructor_id' => $instructorId,
+            'title'         => $request->title,
+            'type'          => $request->type,
+            'start_date'    => $request->start_date,
+            'end_date'      => $request->end_date,
+            'content'       => $request->content,
+            'status'        => $request->status ?? 'public',
+        ];
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        // サービスを実行（データベースに保存）
+        $service($data);
+
+        return response()->json(['result' => true]);
     }
 
     /**

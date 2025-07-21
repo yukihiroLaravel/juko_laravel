@@ -77,7 +77,7 @@ class InstructorController extends Controller
                     'first_name' => $request->first_name,
                     'type' => Instructor::TYPE_INSTRUCTOR,
                 ],
-                managerId: NULL,
+                managerId: null,
             );
 
             DB::commit();

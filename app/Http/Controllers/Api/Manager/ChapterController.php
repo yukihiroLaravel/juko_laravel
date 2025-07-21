@@ -138,6 +138,11 @@ class ChapterController extends Controller
         // チャプターを取得
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
 
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座に属するチャプターでなければエラー応答
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
+
         // Policyによる認可
         $this->authorize('delete', $chapter);
 

@@ -188,7 +188,13 @@ class ChapterController extends Controller
      */
     public function delete(DeleteRequest $request): JsonResponse
     {
+        // チャプターを取得
         $chapter = Chapter::with(['course', 'lessons'])->findOrFail($request->chapter_id);
+
+        if ((int) $request->course_id !== $chapter->course->id) {
+            // 指定した講座に属するチャプターでなければエラー応答
+            throw new AuthorizationException('Forbidden, invalid course_id.');
+        }
 
         // Policy による認可チェック
         $this->authorize('delete', $chapter);

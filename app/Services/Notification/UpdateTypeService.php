@@ -10,11 +10,7 @@ use Illuminate\Support\Facades\DB;
 class UpdateTypeService
 {
     /**
-     * 通知タイプを一括更新
-     *
-     * @param  Collection<int, Notification>  $notifications
-     *
-     * @throws AuthorizationException
+     * 通知タイプを一括更新     
      */
     public function __invoke(Collection $notifications, string $type): void
     {  

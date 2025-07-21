@@ -129,7 +129,7 @@ class InstructorController extends Controller
 
                 // 画像ファイルを保存
                 $extension = $file->getClientOriginalExtension();
-                $filename = Str::uuid()->toString() . '.' . $extension;
+                $filename = Str::uuid()->toString().'.'.$extension;
                 $imagePath = Storage::disk('public')->putFileAs('instructor', $file, $filename);
             }
 
@@ -167,12 +167,12 @@ class InstructorController extends Controller
         try {
             // 認証コードを生成する
             $code = $credentialGeneratorService->createCode(
-                existsChecker: fn(string $code) => TemporaryInstructor::where('code', $code)->exists(),
+                existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
             // トークンを生成する
             $token = $credentialGeneratorService->createToken(
-                existsChecker: fn(string $token) => TemporaryInstructor::where('token', $token)->exists(),
+                existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
             //サービスクラス呼び出し
@@ -204,7 +204,7 @@ class InstructorController extends Controller
             ]);
         } catch (DuplicateAuthorizationCodeException $e) {
             DB::rollBack();
-            Log::error($e->getMessage() . ' email: ' . $request->email);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,
@@ -212,7 +212,7 @@ class InstructorController extends Controller
             ], 400);
         } catch (DuplicateAuthorizationTokenException $e) {
             DB::rollBack();
-            Log::error($e->getMessage() . ' email: ' . $request->email);
+            Log::error($e->getMessage().' email: '.$request->email);
 
             return response()->json([
                 'result' => false,

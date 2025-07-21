@@ -81,7 +81,7 @@ class InstructorController extends Controller
             );
 
             DB::commit();
-            
+
             //送信
             Mail::send(new AuthenticationConfirmationMail(
                 $email,

@@ -56,7 +56,7 @@ class UpdateTypeTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

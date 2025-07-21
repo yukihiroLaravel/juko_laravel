@@ -20,14 +20,14 @@ class StoreNotificationService
         string $status = 'public'
     ): void {
         Notification::create([
-            'course_id'     => $course_id,
+            'course_id' => $course_id,
             'instructor_id' => $instructor_id,
-            'title'         => $title,
-            'type'          => $type,
-            'start_date'    => $start_date,
-            'end_date'      => $end_date,
-            'status'        => $status,
-            'content'       => $content,
+            'title' => $title,
+            'type' => $type,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'status' => $status,
+            'content' => $content,
         ]);
     }
 }

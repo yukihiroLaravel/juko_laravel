@@ -13,8 +13,10 @@ class UpdateTypeService
      * 通知タイプを一括更新
      *
      * @param  Collection<int, Notification>  $notifications
-     *
-     * @throws AuthorizationException
      */
     public function __invoke(Collection $notifications, string $type): void
+    {  
+        Notification::whereIn('id', $notifications->pluck('id'))
+            ->update(['type' => $type]);
+    }
 }

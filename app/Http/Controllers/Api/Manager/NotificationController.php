@@ -106,22 +106,26 @@ class NotificationController extends Controller
             throw new AuthorizationException('Invalid instructor_id.');
         }
 
-        // サービスに渡すデータをまとめる
-        $data = [
-            'course_id'     => $request->course_id,
-            'instructor_id' => $instructorId,
-            'title'         => $request->title,
-            'type'          => $request->type,
-            'start_date'    => $request->start_date,
-            'end_date'      => $request->end_date,
-            'status'        => $request->status,
-            'content'       => $request->content,
-        ];
-
-        // サービスを実行（データベースに保存）
-        $service($data);
-
-        return response()->json(['result' => true]);
+        DB::beginTransaction();
+    try {
+        $service(
+            course_id: $request->course_id,
+            instructor_id: $instructorId,
+            title: $request->title,
+            type: $request->type,
+            start_date: $request->start_date,
+            end_date: $request->end_date,
+            content: $request->content,
+            status: $request->status ?? 'public'
+        );
+            
+            DB::commit();
+            return response()->json(['result' => true]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
     /**
      * お知らせ更新API

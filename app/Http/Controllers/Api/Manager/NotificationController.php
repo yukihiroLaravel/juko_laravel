@@ -127,6 +127,7 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+
     /**
      * お知らせ更新API
      */

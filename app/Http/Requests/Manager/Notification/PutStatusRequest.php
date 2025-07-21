@@ -26,7 +26,10 @@ class PutStatusRequest extends FormRequest
         return [
             'status' => ['required', Rule::enum(StatusEnum::class)],
             'notifications' => ['required', 'array', 'min:1'],
-            'notifications.*' => ['integer', 'exists:notifications,id'],
+            'notifications.*' => [
+                'integer',
+                Rule::exists('notifications', 'id')->whereNull('deleted_at')
+            ],
         ];
     }
 }

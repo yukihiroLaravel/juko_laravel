@@ -17,7 +17,7 @@ class StoreNotificationService
         string $start_date,
         string $end_date,
         string $content,
-        string $status = 'public'
+        string $status
     ): void {
         Notification::create([
             'course_id'     => $course_id,

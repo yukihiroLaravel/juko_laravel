@@ -82,17 +82,17 @@ class NotificationController extends Controller
         }
 
         DB::beginTransaction();
-    try {
-        $service(
-            course_id: $request->course_id,
-            instructor_id: $instructorId,
-            title: $request->title,
-            type: $request->type,
-            start_date: $request->start_date,
-            end_date: $request->end_date,
-            content: $request->content,
-            status: $request->status ?? 'public'
-        );
+        try {
+            $service(
+                course_id: $request->course_id,
+                instructor_id: $instructorId,
+                title: $request->title,
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                content: $request->content,
+                status: $request->status
+            );
             
             DB::commit();
             return response()->json(['result' => true]);

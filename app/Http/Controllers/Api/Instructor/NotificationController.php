@@ -174,6 +174,9 @@ class NotificationController extends Controller
         $notifications = Notification::whereIn('id', $request->notifications)->get();
         $instructorId = Auth::guard('instructor')->user()->id;
 
+        // policyによる認可チェック
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
+
         if (
             $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
         ) {

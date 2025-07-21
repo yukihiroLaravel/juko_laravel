@@ -95,6 +95,7 @@ class NotificationController extends Controller
             );
             
             DB::commit();
+
             return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -102,6 +103,7 @@ class NotificationController extends Controller
             throw $e;
         }
     }
+
     /**
      * お知らせ更新API
      */

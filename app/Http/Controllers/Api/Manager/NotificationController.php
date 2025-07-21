@@ -120,6 +120,7 @@ class NotificationController extends Controller
             );
             
             DB::commit();
+
             return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();

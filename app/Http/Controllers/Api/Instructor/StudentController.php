@@ -10,7 +10,7 @@ use App\Http\Resources\Instructor\StudentIndexResource;
 use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
-use Carbon\Carbon;
+use App\Services\Student\StoreStudentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
@@ -120,14 +120,12 @@ class StudentController extends Controller
     /**
      * 受講生登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreStudentService $service): JsonResponse
     {
-        Student::create([
-            'given_name_by_instructor' => $request->given_name_by_instructor,
-            'email' => $request->email,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        ($service)($request->only([
+            'given_name_by_instructor',
+            'email',
+        ]));
 
         return response()->json([
             'result' => true,

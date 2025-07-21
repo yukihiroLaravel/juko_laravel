@@ -213,14 +213,8 @@ class NotificationController extends Controller
         // 選択されたお知らせを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
-        // 認可チェック（対象講師が管理下か確認）
-        if (
-            $notifications->contains(
-                fn (Notification $notification) => ! in_array($notification->instructor_id, $allowedInstructorIds, true)
-            )
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // policyによる認可チェック
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         DB::beginTransaction();
         try {

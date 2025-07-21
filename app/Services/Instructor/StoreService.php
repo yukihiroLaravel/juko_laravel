@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class StoreService
 {
     /**
-     * 仮講師の保存に必要な配列を生成
+     * 仮講師を保存
      *
      * @param array{
      *     email: string,

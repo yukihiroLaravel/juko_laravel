@@ -212,7 +212,6 @@ class NotificationController extends Controller
 
         // 選択されたお知らせリストを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $notificationsInstructorIds = $notifications->pluck('instructor_id')->toArray();
 
         // policyによる認可チェック
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);

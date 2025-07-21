@@ -17,18 +17,4 @@ class UpdateTypeService
      * @throws AuthorizationException
      */
     public function __invoke(Collection $notifications, string $type): void
-    {
-
-        // トランザクション内で一括更新
-        DB::beginTransaction();
-        try {
-            Notification::whereIn('id', $notifications->pluck('id'))
-                ->update(['type' => $type]);
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
 }

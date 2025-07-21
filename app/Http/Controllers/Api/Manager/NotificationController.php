@@ -207,8 +207,8 @@ class NotificationController extends Controller
         // マネージャーが管理する講師IDリストを取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
-        $allowedInstructorIds = $manager->managings->pluck('id')->toArray();
-        $allowedInstructorIds[] = $manager->id;
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
         // 選択されたお知らせを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
@@ -227,7 +227,7 @@ class NotificationController extends Controller
             // サービス呼び出し
             $service(
                 $notifications,
-                $request->notification_type // ここも第2引数として string
+                $request->notification_type
             );
 
             DB::commit();
@@ -235,7 +235,7 @@ class NotificationController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
             throw $e;

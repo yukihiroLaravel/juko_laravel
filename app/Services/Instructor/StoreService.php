@@ -3,6 +3,7 @@
 namespace App\Services\Instructor;
 
 use Carbon\Carbon;
+use App\Model\TemporaryInstructor;
 
 class StoreService
 {
@@ -22,8 +23,8 @@ class StoreService
         string $token,
         array $data,
         ?int $managerId = null
-    ): array {
-        return [
+    ): TemporaryInstructor {
+        return TemporaryInstructor::create([
             'manager_id' => $managerId,
             'trial_count' => 0,
             'code' => $code,
@@ -34,6 +35,6 @@ class StoreService
             'first_name' => $data['first_name'],
             'email' => $data['email'],
             'type' => $data['type'],
-        ];
+        ]);
     }
 }

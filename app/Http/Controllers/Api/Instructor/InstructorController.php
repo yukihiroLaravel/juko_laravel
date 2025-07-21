@@ -67,21 +67,19 @@ class InstructorController extends Controller
             );
 
             //サービスクラス呼び出し
-            $attributes = $storeService(
-                $code,
-                $token,
-                [
+            $temporaryInstructor = $storeService(
+                code: $code,
+                token: $token,
+                data: [
                     'email' => $email,
                     'nick_name' => $request->nick_name,
                     'last_name' => $request->last_name,
                     'first_name' => $request->first_name,
                     'type' => Instructor::TYPE_INSTRUCTOR,
                 ],
-                null
+                managerId: NULL,
             );
 
-            //保存
-            $temporaryInstructor = TemporaryInstructor::create($attributes);
 
             //送信
             Mail::send(new AuthenticationConfirmationMail(

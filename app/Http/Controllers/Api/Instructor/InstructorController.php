@@ -80,7 +80,8 @@ class InstructorController extends Controller
                 managerId: NULL,
             );
 
-
+            DB::commit();
+            
             //送信
             Mail::send(new AuthenticationConfirmationMail(
                 $email,
@@ -88,8 +89,6 @@ class InstructorController extends Controller
                 $code,
                 $token
             ));
-
-            DB::commit();
 
             return response()->json([
                 'result' => true,

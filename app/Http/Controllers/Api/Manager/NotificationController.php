@@ -118,7 +118,7 @@ class NotificationController extends Controller
                 content: $request->content,
                 status: $request->status
             );
-            
+
             DB::commit();
 
             return response()->json(['result' => true]);

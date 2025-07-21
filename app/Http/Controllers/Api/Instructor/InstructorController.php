@@ -77,9 +77,8 @@ class InstructorController extends Controller
                     'first_name' => $request->first_name,
                     'type' => Instructor::TYPE_INSTRUCTOR,
                 ],
-                managerId: NULL,
+                managerId: null,
             );
-
 
             //送信
             Mail::send(new AuthenticationConfirmationMail(

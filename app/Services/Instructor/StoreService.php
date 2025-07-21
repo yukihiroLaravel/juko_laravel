@@ -2,8 +2,8 @@
 
 namespace App\Services\Instructor;
 
-use Carbon\Carbon;
 use App\Model\TemporaryInstructor;
+use Carbon\Carbon;
 
 class StoreService
 {

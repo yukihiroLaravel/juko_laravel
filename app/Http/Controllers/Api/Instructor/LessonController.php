@@ -23,6 +23,7 @@ use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
@@ -37,12 +38,12 @@ use Illuminate\Support\Facades\Log;
  */
 class LessonController extends Controller
 {
+    
     /**
      * レッスン新規作成API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
-        $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
         $course = Course::findOrFail($request->course_id);
         if ($course->instructor_id !== $request->user()->id) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
@@ -50,16 +51,15 @@ class LessonController extends Controller
 
         DB::beginTransaction();
         try {
-            $lesson = Lesson::create([
-                'chapter_id' => $request->chapter_id,
-                'title' => $request->title,
-                'status' => Lesson::STATUS_PRIVATE,
-                'order' => (int) $maxOrder + 1,
-            ]);
+            $lesson = $service(
+                chapter_id: $request->chapter_id,
+                title: $request->title,
+                status: Lesson::STATUS_PRIVATE
+            );
 
             $attendances = Attendance::where('course_id', $request->course_id)->get();
             $lesson_id = $lesson->id;
-            $attendances->each(function ($attendance) use (&$lesson_id) {
+            $attendances->each(function ($attendance) use ($lesson_id) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
                     'lesson_id' => $lesson_id,

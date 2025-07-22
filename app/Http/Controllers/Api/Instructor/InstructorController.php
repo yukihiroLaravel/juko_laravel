@@ -16,11 +16,11 @@ use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Instructor\StoreService;
 use App\Services\Instructor\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,44 +45,49 @@ class InstructorController extends Controller
     }
 
     /**
-     * 仮講師登録API
+     * 講師用 仮登録API
      */
     public function store(
         StoreRequest $request,
+        StoreService $storeService,
         CredentialGeneratorService $credentialGeneratorService
     ): JsonResponse {
         $email = $request->email;
+
         DB::beginTransaction();
         try {
-
-            // 認証コードを生成する。
+            // 認証コードを生成する
             $code = $credentialGeneratorService->createCode(
                 existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
-            // トークンを生成する。
+            // トークンを生成する
             $token = $credentialGeneratorService->createToken(
                 existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
-            $temporaryInstructor = TemporaryInstructor::create([
-                'manager_id' => null,
-                'trial_count' => 0,
-                'code' => $code,
-                'token' => $token,
-                'expire_at' => Carbon::now()->addMinutes(60),
-                'nick_name' => $request->nick_name,
-                'last_name' => $request->last_name,
-                'first_name' => $request->first_name,
-                'email' => $email,
-                'type' => Instructor::TYPE_INSTRUCTOR,
-            ]);
-
-            assert($temporaryInstructor instanceof TemporaryInstructor);
+            //サービスクラス呼び出し
+            $temporaryInstructor = $storeService(
+                code: $code,
+                token: $token,
+                data: [
+                    'email' => $email,
+                    'nick_name' => $request->nick_name,
+                    'last_name' => $request->last_name,
+                    'first_name' => $request->first_name,
+                ],
+                managerId: null,
+            );
 
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryInstructor->full_name, $code, $token));
+            //送信
+            Mail::send(new AuthenticationConfirmationMail(
+                $email,
+                $temporaryInstructor->full_name,
+                $code,
+                $token
+            ));
 
             return response()->json([
                 'result' => true,

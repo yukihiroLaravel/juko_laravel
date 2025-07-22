@@ -2,6 +2,7 @@
 
 namespace App\Services\Instructor;
 
+use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use Carbon\Carbon;
 
@@ -14,8 +15,7 @@ class StoreService
      *     email: string,
      *     nick_name: string,
      *     last_name: string,
-     *     first_name: string,
-     *     type: string
+     *     first_name: string
      * } $data
      */
     public function __invoke(
@@ -34,7 +34,7 @@ class StoreService
             'last_name' => $data['last_name'],
             'first_name' => $data['first_name'],
             'email' => $data['email'],
-            'type' => $data['type'],
+            'type' => Instructor::TYPE_INSTRUCTOR,
         ]);
     }
 }

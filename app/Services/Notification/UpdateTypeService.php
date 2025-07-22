@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class UpdateTypeService
 {
     /**
-     * 通知タイプを一括更新     
+     * 選択されたお知らせのタイプ変更     
      */
     public function __invoke(Collection $notifications, string $type): void
     {

@@ -187,8 +187,8 @@ class NotificationController extends Controller
         DB::beginTransaction();
         try {
             $service(
-                $notifications,
-                $request->notification_type
+                notifications: $notifications,
+                type: $request->notification_type
             );
 
             DB::commit();

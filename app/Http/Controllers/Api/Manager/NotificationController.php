@@ -220,8 +220,8 @@ class NotificationController extends Controller
         try {
             // サービス呼び出し
             $service(
-                $notifications,
-                $request->notification_type
+                notifications: $notifications,
+                type: $request->notification_type
             );
 
             DB::commit();

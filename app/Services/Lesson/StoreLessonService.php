@@ -12,12 +12,12 @@ class StoreLessonService
         string $status
     ): Lesson {
         $nextOrder = Lesson::where('chapter_id', $chapter_id)->max('order') + 1;
-        
+
         return Lesson::create([
             'chapter_id' => $chapter_id,
             'title' => $title,
             'status' => $status,
-            'order' =>$nextOrder 
+            'order' => $nextOrder,
         ]);
     }
 }

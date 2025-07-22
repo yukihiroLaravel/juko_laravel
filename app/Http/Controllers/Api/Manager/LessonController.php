@@ -67,7 +67,7 @@ class LessonController extends Controller
                 title: $request->title,
                 status: Lesson::STATUS_PRIVATE
             );
-            
+
             $attendances = Attendance::where('course_id', $request->course_id)->get();
             $lesson_id = $lesson->id;
             $attendances->each(function (Attendance $attendance) use ($lesson_id) {

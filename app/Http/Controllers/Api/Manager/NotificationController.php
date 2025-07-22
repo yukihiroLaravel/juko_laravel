@@ -23,6 +23,7 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
+use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -89,7 +90,7 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
 
@@ -107,21 +108,20 @@ class NotificationController extends Controller
 
         DB::beginTransaction();
         try {
-            Notification::create([
-                'course_id' => $request->course_id,
-                'instructor_id' => Auth::guard('instructor')->user()->id,
-                'title' => $request->title,
-                'type' => $request->type,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'status' => $request->status,
-                'content' => $request->content,
-            ]);
+            $service(
+                course_id: $request->course_id,
+                instructor_id: $instructorId,
+                title: $request->title,
+                type: $request->type,
+                start_date: $request->start_date,
+                end_date: $request->end_date,
+                content: $request->content,
+                status: $request->status
+            );
+
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

@@ -294,33 +294,16 @@ class NotificationController extends Controller
      */
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         $notificationIds = $request->input('notifications', []);
-        $chosenInstructorIds = Notification::whereIn('id', $notificationIds)
-        ->pluck('instructor_id');
+        
+        $notifications = Notification::whereIn('id', $notificationIds)->get(['id', 'instructor_id', 'status']);
 
-        $instructorIds = DB::table('manage_instructors')
-            ->where('manager_id', $instructorId)
-            ->whereNull('deleted_at')
-            ->pluck('instructor_id');
-
-        $instructorIds->push($instructorId);
-
-        if (
-            $chosenInstructorIds->contains(
-                fn ($instructorIdFromNotificationsTable) => 
-                    !$instructorIds->contains($instructorIdFromNotificationsTable)
-            )
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
         
         DB::beginTransaction();
 
         try {
             Notification::whereIn('id', $notificationIds)
-            ->whereIn('instructor_id', $chosenInstructorIds)
             ->update(['status' => $request->status]);
 
             DB::commit();

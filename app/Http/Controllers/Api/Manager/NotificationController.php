@@ -292,16 +292,16 @@ class NotificationController extends Controller
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
-        
+
         $notifications = Notification::whereIn('id', $notificationIds)->get(['id', 'instructor_id', 'status']);
 
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-        
+
         DB::beginTransaction();
 
         try {
             Notification::whereIn('id', $notificationIds)
-            ->update(['status' => $request->status]);
+                ->update(['status' => $request->status]);
 
             DB::commit();
 

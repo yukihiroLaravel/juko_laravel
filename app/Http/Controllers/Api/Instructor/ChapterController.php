@@ -198,7 +198,13 @@ class ChapterController extends Controller
 
         // Policy による認可チェック
         $this->authorize('delete', $chapter);
-        
+
+        // 受講中レッスンがあれば削除不可
+        $lessonIds = $chapter->lessons->pluck('id')->toArray();
+        if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+            throw new AuthorizationException('This lesson has attendance.');
+        }
+
         $chapter->delete();
 
         return response()->json([

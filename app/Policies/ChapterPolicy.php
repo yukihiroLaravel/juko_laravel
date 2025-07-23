@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Model\Chapter;
 use App\Model\Instructor;
 use Illuminate\Support\Collection;
-use App\Model\LessonAttendance;
 
 class ChapterPolicy
 {
@@ -28,19 +27,9 @@ class ChapterPolicy
 
     /**
      * チャプターの削除処理に関する認可処理
-     * 
-     * @param Instructor $instructor
-     * @param Chapter $chapter
-     * @return bool
      */
     public function delete(Instructor $instructor, Chapter $chapter): bool
     {
-        // 受講中レッスンがあれば削除不可
-        $lessonIds = $chapter->lessons->pluck('id')->toArray();
-        if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-            return false;
-        }
-
         if ($instructor->isManager()) {
             // 管理者の場合、配下の講師のチャプターも削除可能
             $managerIds = $instructor->managings->pluck('id')->toArray();

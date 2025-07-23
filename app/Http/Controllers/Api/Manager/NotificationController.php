@@ -25,6 +25,7 @@ use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
+use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -62,7 +63,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細
+     * お知らせ詳細API
      */
     public function show(ShowRequest $request): NotificationResource
     {
@@ -169,7 +170,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ削除
+     * お知らせ削除API
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
@@ -196,34 +197,33 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-タイプ変更API
+     * お知らせ種別一括更新API
      */
-    public function updateType(UpdateTypeRequest $request): JsonResponse
+    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
-        // 認証している講師のIDを取得
+        // 認証しているマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        // 配下の講師情報を取得
+        // マネージャーが管理する講師IDリストを取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        // 選択されたお知らせリストを取得
+        // 選択されたお知らせを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 
         // policyによる認可チェック
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
-        $notificationType = $request->notification_type;
-
         DB::beginTransaction();
         try {
-            $notifications->each(function (Notification $notification) use ($notificationType) {
-                $notification->fill([
-                    'type' => $notificationType,
-                ])->save();
-            });
+            // サービス呼び出し
+            $service(
+                notifications: $notifications,
+                type: $request->notification_type
+            );
+
             DB::commit();
 
             return response()->json([
@@ -236,6 +236,9 @@ class NotificationController extends Controller
         }
     }
 
+    /**
+     * お知らせ種別全更新API
+     */
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $manager = Auth::guard('instructor')->user();
@@ -257,7 +260,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-一括削除API
+     * お知らせ一括削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
@@ -286,7 +289,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧 - ステータス一括変更API
+     * お知らせ状態一括更新API
      */
     public function putStatusAll(PutStatusRequest $request, PutStatusAllService $service): JsonResponse
     {

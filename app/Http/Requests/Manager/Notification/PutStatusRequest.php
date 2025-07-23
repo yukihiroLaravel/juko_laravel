@@ -28,7 +28,7 @@ class PutStatusRequest extends FormRequest
             'notifications' => ['required', 'array', 'min:1'],
             'notifications.*' => [
                 'integer',
-                Rule::exists('notifications', 'id')->whereNull('deleted_at'),
+                'exists:notifications,id,deleted_at,NULL',
             ],
         ];
     }

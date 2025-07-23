@@ -38,7 +38,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LessonController extends Controller
 {
-    
     /**
      * レッスン新規作成API
      */

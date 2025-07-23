@@ -63,26 +63,17 @@ class LessonController extends Controller
         DB::beginTransaction();
         try {
             $lesson = $service(
-                chapter_id: $request->chapter_id,
+                courseId: $request->course_id,
+                chapterId: $request->chapter_id,
                 title: $request->title,
                 status: Lesson::STATUS_PRIVATE
             );
-            
-            $attendances = Attendance::where('course_id', $request->course_id)->get();
-            $lesson_id = $lesson->id;
-            $attendances->each(function (Attendance $attendance) use ($lesson_id) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson_id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            });
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
-                'lesson_id' => $lesson->id,
+                'id' => $lesson->id,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

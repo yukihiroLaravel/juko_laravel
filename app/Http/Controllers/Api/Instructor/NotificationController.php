@@ -55,7 +55,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細
+     * お知らせ詳細API
      */
     public function show(ShowRequest $request): NotificationResource
     {
@@ -70,7 +70,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ登録
+     * お知らせ登録API
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
@@ -144,7 +144,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ削除
+     * お知らせ削除API
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
@@ -171,7 +171,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-タイプ変更API
+     * お知らせ種別一括更新API
      */
     public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
@@ -207,7 +207,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * 該当講師お知らせ一覧タイプ　一括変更
+     * お知らせ種別全更新API
      */
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
@@ -223,7 +223,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一括削除
+     * お知らせ一括削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
@@ -253,7 +253,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * 選択されたお知らせ 一括公開・非公開API
+     * お知らせステータス更新API
      */
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
@@ -295,7 +295,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ 一括公開・非公開API
+     * お知らせ状態一括更新API
      */
     public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {

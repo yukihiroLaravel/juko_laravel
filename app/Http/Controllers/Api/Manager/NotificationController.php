@@ -63,7 +63,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細
+     * お知らせ詳細API
      */
     public function show(ShowRequest $request): NotificationResource
     {
@@ -170,7 +170,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ削除
+     * お知らせ削除API
      */
     public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
     {
@@ -197,7 +197,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-タイプ変更API
+     * お知らせ種別一括更新API
      */
     public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
@@ -236,6 +236,9 @@ class NotificationController extends Controller
         }
     }
 
+    /**
+     * お知らせ種別全更新API
+     */
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $manager = Auth::guard('instructor')->user();
@@ -257,7 +260,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧-一括削除API
+     * お知らせ一括削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
     {
@@ -286,7 +289,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧 - ステータス一括変更API
+     * お知らせ状態一括更新API
      */
     public function putStatusAll(PutStatusRequest $request, PutStatusAllService $service): JsonResponse
     {

@@ -9,6 +9,7 @@ use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
+use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
 use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
@@ -289,9 +290,38 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ状態一括更新API
+     * お知らせ一括公開・非公開API
      */
-    public function putStatusAll(PutStatusRequest $request, PutStatusAllService $service): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
+    {
+        $notificationIds = $request->input('notifications', []);
+
+        $notifications = Notification::whereIn('id', $notificationIds)->get(['id', 'instructor_id', 'status']);
+
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
+
+        DB::beginTransaction();
+
+        try {
+            Notification::whereIn('id', $notificationIds)
+                ->update(['status' => $request->status]);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせステータス一括変更API
+     */
+    public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {
         // ログイン中のマネージャーIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

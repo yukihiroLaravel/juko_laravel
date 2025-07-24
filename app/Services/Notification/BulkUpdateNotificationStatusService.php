@@ -9,9 +9,6 @@ class BulkUpdateNotificationStatusService
 {
     /**
      * お知らせのステータスを一括更新する
-     *
-     * @param  Collection<int, Notification>  $notifications
-     * @param  'public'|'private'  $status
      */
     public function __invoke(Collection $notifications, string $status): void
     {

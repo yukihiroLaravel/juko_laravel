@@ -16,6 +16,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Tag\UpdateTagService;
 
 /**
  * @tags Manager-Tag
@@ -69,22 +70,15 @@ class TagController extends Controller
     /**
      * タグ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, int $tag_id, UpdateTagService $service): JsonResponse
     {
-        // タグの取得
-        $tag = Tag::findOrFail($request->tag_id);
-
-        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
-        $this->authorize('update', $tag);
-
-        // タグの更新
-        $tag->update([
+        ($service)([
+            'tag_id' => $tag_id,
             'content' => $request->content,
+            'user' => $request->user(),
         ]);
 
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json(['result' => true]);
     }
 
     /**

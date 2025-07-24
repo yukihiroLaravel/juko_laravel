@@ -73,7 +73,7 @@ class LessonController extends Controller
 
             return response()->json([
                 'result' => true,
-                'id' => $lesson->id,
+                'lesson_id' => $lesson->id,
             ]);
         } catch (Exception $e) {
             DB::rollBack();

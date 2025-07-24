@@ -26,6 +26,7 @@ use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
+use App\Services\Notification\BulkUpdateNotificationStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -255,13 +256,14 @@ class NotificationController extends Controller
     /**
      * お知らせステータス更新API
      */
-    public function putStatus(PutStatusRequest $request): JsonResponse
+    public function putStatus(PutStatusRequest $request, BulkUpdateNotificationStatusService $service): JsonResponse
     {
         // ログインしている講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 選択されたお知らせidを取得
         $notificationIds = $request->input('notifications', []);
+        $status = $request->status;
 
         // 選択されたお知らせを取得
         $chosenNotifications = Notification::whereIn('id', $notificationIds)->pluck('instructor_id');
@@ -277,12 +279,14 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            Notification::where('instructor_id', $instructorId)
+            $notifications = Notification::where('instructor_id', $instructorId)
                 ->whereIn('id', $notificationIds)
-                ->update(['status' => $request->status]);
+                ->get(['id', 'instructor_id', 'status']);
 
-            // コミット
-            DB::commit();
+            $service(
+                notifications: $notifications,
+                status: $status
+            );
 
             return response()->json([
                 'result' => true,

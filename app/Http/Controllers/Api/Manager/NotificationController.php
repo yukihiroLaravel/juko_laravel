@@ -290,7 +290,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * 選択されたお知らせ 一括公開・非公開API
+     * お知らせ一括公開・非公開API
      */
     public function putStatus(PutStatusRequest $request): JsonResponse
     {
@@ -319,7 +319,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一覧 - ステータス一括変更API
+     * お知らせステータス一括変更API
      */
     public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {

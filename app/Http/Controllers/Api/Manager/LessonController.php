@@ -13,7 +13,6 @@ use App\Http\Requests\Manager\Lesson\SortRequest;
 use App\Http\Requests\Manager\Lesson\StoreRequest;
 use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
-use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;

@@ -70,12 +70,16 @@ class TagController extends Controller
     /**
      * タグ更新API
      */
-    public function put(PutRequest $request, int $tag_id, UpdateTagService $service): JsonResponse
+    public function put(PutRequest $request, UpdateTagService $service): JsonResponse
     {
+        $tag = Tag::finorFail($request->tag_id;)
+
+        // 認可処理
+        $this->authorize('update', $tag);
+
         ($service)([
             'tag_id' => $tag_id,
             'content' => $request->content,
-            'user' => $request->user(),
         ]);
 
         return response()->json(['result' => true]);

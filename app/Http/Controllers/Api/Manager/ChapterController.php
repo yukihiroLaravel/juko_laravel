@@ -71,17 +71,10 @@ class ChapterController extends Controller
      */
     public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        /** @var Instructor $manager */
-        // 認可ポリシー内で managings を使用するため、ここで読み込んでおく
-        $manager = Instructor::with('managings')->find($managerId);
-
         /** @var Course $course */
         $course = Course::FindOrFail($request->course_id);
 
-        $this->authorize('create', [\App\Model\Chapter::class, $course]);
+        $this->authorize('create', [Chapter::class, $course]);
 
         try {
             $chapter = $createChapterService(

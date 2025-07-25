@@ -13,7 +13,6 @@ use App\Http\Requests\Manager\Lesson\SortRequest;
 use App\Http\Requests\Manager\Lesson\StoreRequest;
 use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
-use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -24,6 +23,7 @@ use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
+use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
@@ -42,7 +42,7 @@ class LessonController extends Controller
     /**
      * レッスン新規作成API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -52,34 +52,21 @@ class LessonController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $course = Course::find($request->course_id);
+        $course = Course::findOrFail($request->course_id);
 
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分、または配下の講師の講座でなければエラー応答
             throw new AuthorizationException('Forbidden, not allowed to this lesson.');
         }
 
-        $maxOrder = Lesson::where('chapter_id', $request->chapter_id)->max('order');
-
         DB::beginTransaction();
         try {
-            $lesson = Lesson::create([
-                'chapter_id' => $request->chapter_id,
-                'title' => $request->title,
-                'status' => Lesson::STATUS_PRIVATE,
-                'order' => (int) $maxOrder + 1,
-            ]);
-            assert($lesson instanceof Lesson);
-
-            $attendances = Attendance::where('course_id', $request->course_id)->get();
-            $lessonId = $lesson->id;
-            $attendances->each(function (Attendance $attendance) use ($lessonId) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lessonId,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            });
+            $lesson = $service(
+                courseId: $request->course_id,
+                chapterId: $request->chapter_id,
+                title: $request->title,
+                status: Lesson::STATUS_PRIVATE
+            );
 
             DB::commit();
 

@@ -26,7 +26,7 @@ use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
-use App\Services\Notification\BulkUpdateNotificationStatusService;
+use App\Services\Notification\PutStatusService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -256,7 +256,7 @@ class NotificationController extends Controller
     /**
      * お知らせステータス更新API
      */
-    public function putStatus(PutStatusRequest $request, BulkUpdateNotificationStatusService $service): JsonResponse
+    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
         // ログインしている講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

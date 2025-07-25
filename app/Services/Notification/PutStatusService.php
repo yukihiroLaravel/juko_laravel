@@ -5,7 +5,7 @@ namespace App\Services\Notification;
 use App\Model\Notification;
 use Illuminate\Support\Collection;
 
-class BulkUpdateNotificationStatusService
+class PutStatusService
 {
     /**
      * お知らせのステータスを一括更新する

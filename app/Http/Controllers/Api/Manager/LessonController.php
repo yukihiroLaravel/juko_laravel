@@ -44,20 +44,10 @@ class LessonController extends Controller
      */
     public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $course = Course::findOrFail($request->course_id);
 
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
-        }
+        // Policyパターンによる認可チェック
+        $this->authorize('create', [Lesson::class, $course]);
 
         DB::beginTransaction();
         try {

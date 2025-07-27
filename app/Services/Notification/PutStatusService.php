@@ -3,12 +3,15 @@
 namespace App\Services\Notification;
 
 use App\Model\Notification;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 class PutStatusService
 {
     /**
      * お知らせのステータスを一括更新する
+     *
+     * @param  Collection<int, Notification>  $notifications
+     * @param  'public'|'private'  $status
      */
     public function __invoke(Collection $notifications, string $status): void
     {

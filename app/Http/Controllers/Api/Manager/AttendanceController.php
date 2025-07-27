@@ -57,7 +57,10 @@ class AttendanceController extends Controller
 
     DB::beginTransaction();
     try {
-        $attendance->save();
+        $attendance = Attendance::create([
+            'course_id' => $request->course_id,
+            'student_id' => $request->student_id,
+        ]);
 
         $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
             $query->where('course_id', $request->course_id);

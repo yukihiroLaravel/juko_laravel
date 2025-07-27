@@ -3,11 +3,27 @@
 namespace App\Policies;
 
 use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Support\Collection;
 
 class ChapterPolicy
 {
+    /**
+     * チャプターの作成処理に関する認可処理
+     */
+    public function create(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $managerIds, true);
+        }
+
+        return $instructor->id === $course->instructor_id;
+    }
+
     /**
      * チャプターの更新処理に関する認可処理
      */

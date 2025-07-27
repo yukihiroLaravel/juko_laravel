@@ -98,13 +98,13 @@ class TagController extends Controller
      */
     public function put(PutRequest $request, UpdateTagService $service): JsonResponse
     {
-        $tag = Tag::finorFail($request->tag_id;)
+        $tag = Tag::findOrFail($request->tag_id);
 
         // 認可処理
         $this->authorize('update', $tag);
 
         ($service)([
-            'tag_id' => $tag_id,
+            'tag_id' => $tag->id,
             'content' => $request->content,
         ]);
 

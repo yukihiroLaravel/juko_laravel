@@ -12,11 +12,11 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Services\Tag\UpdateTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use App\Services\Tag\UpdateTagService;
 
 /**
  * @tags Manager-Tag
@@ -77,10 +77,10 @@ class TagController extends Controller
         // 認可処理
         $this->authorize('update', $tag);
 
-        ($service)([
-            'tag_id' => $tag->id,
-            'content' => $request->content,
-        ]);
+        ($service)(
+            tag: $tag,
+            content: $request->content
+        );
 
         return response()->json(['result' => true]);
     }

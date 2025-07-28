@@ -201,16 +201,7 @@ class NotificationController extends Controller
      * お知らせ種別一括更新API
      */
     public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
-    {
-        // 認証しているマネージャーIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーが管理する講師IDリストを取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
+    {    
         // 選択されたお知らせを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 

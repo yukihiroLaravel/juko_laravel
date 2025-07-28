@@ -288,6 +288,8 @@ class NotificationController extends Controller
                 status: $status
             );
 
+            DB::commit();
+
             return response()->json([
                 'result' => true,
             ]);

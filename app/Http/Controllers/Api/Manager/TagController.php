@@ -12,6 +12,7 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Services\Tag\DeleteTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -90,25 +91,11 @@ class TagController extends Controller
     /**
      * タグ削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteTagService $deleteTagService): JsonResponse
     {
-        // タグの取得
-        $tag = Tag::findOrFail($request->tag_id);
+        $deleteTagService(['tag_id' => $request->tag_id]);
 
-        // policyによる認可チェック
-        $this->authorize('delete', $tag);
-
-        // タグに関連付けられた講座がある場合は削除不可
-        if ($tag->courses()->exists()) {
-            throw new AuthorizationException('Forbidden, this tag is linked to courses.');
-        }
-
-        // タグの削除
-        $tag->delete();
-
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json(['result' => true]);
     }
 
     /**

@@ -201,7 +201,7 @@ class NotificationController extends Controller
      * お知らせ種別一括更新API
      */
     public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
-    {    
+    {
         // 選択されたお知らせを取得
         $notifications = Notification::whereIn('id', $request->notifications)->get();
 

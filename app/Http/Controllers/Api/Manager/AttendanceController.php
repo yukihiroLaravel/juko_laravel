@@ -36,15 +36,11 @@ class AttendanceController extends Controller
     public function store(StoreRequest $request): JsonResponse
 {
     /** @var Attendance $attendance */
-    $attendance = new Attendance([
-        'course_id' => $request->course_id,
-        'student_id' => $request->student_id,
-    ]);
-
-    $attendance->setRelation('course', Course::findOrFail($request->course_id));
-
+    
+    $course = Course::findOrFail($request->course_id);
+    
     // Policyによる認可チェック
-    $this->authorize('create', $attendance);
+    $this->authorize('create', $course);
 
     if (Attendance::where('course_id', $request->course_id)
         ->where('student_id', $request->student_id)

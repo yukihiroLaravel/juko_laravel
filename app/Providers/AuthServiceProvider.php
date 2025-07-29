@@ -30,6 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         Notification::class => NotificationPolicy::class,
         Tag::class => TagPolicy::class,
         Attendance::class => AttendancePolicy::class,
+        Course::class => AttendancePolicy::class,
     ];
 
     /**

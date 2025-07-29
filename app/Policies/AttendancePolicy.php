@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Model\Attendance;
 use App\Model\Instructor;
+use App\Model\Course;
 
 class AttendancePolicy
 {
@@ -24,17 +25,17 @@ class AttendancePolicy
         return $instructor->id === $attendance->course->instructor_id;
     }
 
-    public function create(Instructor $instructor, Attendance $attendance): bool
+    public function create(Instructor $instructor, Course $course): bool
     {
         // マネージャー権限のある講師か判定
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
 
-            return in_array($attendance->course->instructor_id, $instructorIds, true);
+            return in_array($course->instructor_id, $instructorIds, true);
         }
 
         // マネージャー権限のない講師
-        return $instructor->id === $attendance->course->instructor_id;
+        return $instructor->id === $course->instructor_id;
     }
 }

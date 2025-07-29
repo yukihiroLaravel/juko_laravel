@@ -82,7 +82,7 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to this lesson.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

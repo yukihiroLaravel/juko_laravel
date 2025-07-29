@@ -43,7 +43,7 @@ class LessonController extends Controller
     public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
-        
+
         // Policyパターンによる認可チェック
         $this->authorize('create', [Lesson::class, $course]);
 

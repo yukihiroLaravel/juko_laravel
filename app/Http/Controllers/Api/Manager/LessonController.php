@@ -15,7 +15,6 @@ use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
@@ -30,7 +29,6 @@ use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

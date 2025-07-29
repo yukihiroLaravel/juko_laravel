@@ -2,12 +2,30 @@
 
 namespace App\Policies;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use Illuminate\Support\Collection;
 
 class LessonPolicy
 {
+    /**
+     * レッスンの閲覧に関する認可処理
+     */
+    public function create(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            // マネージャーは自分または配下講師のコースにレッスン作成可能
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // 通常講師は自分のコースのみ作成可能
+        return $course->instructor_id === $instructor->id;
+    }
+
     /**
      * レッスンの更新処理に関する認可処理
      */

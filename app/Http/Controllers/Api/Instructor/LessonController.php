@@ -43,9 +43,9 @@ class LessonController extends Controller
     public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
-        if ($course->instructor_id !== $request->user()->id) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+
+        // Policyパターンによる認可チェック
+        $this->authorize('create', [Lesson::class, $course]);
 
         DB::beginTransaction();
         try {

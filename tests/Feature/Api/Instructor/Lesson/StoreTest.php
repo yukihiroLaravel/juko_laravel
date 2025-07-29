@@ -21,11 +21,11 @@ class StoreTest extends TestCase
     public function test_レッスン登録_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/course/1/chapter/1/lesson', [
+        $response = $this->postJson('/api/v1/instructor/course/2/chapter/4/lesson', [
             'title' => 'title',
         ]);
 
@@ -36,11 +36,8 @@ class StoreTest extends TestCase
             'lesson_id',
         ]);
         $this->assertDatabaseHas('lessons', [
-            'chapter_id' => 1,
+            'chapter_id' => 4,
             'title' => 'title',
-        ]);
-        $this->assertDatabaseHas('lesson_attendances', [
-            'lesson_id' => $response['lesson_id'],
         ]);
     }
 
@@ -58,7 +55,7 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

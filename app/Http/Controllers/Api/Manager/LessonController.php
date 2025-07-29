@@ -15,7 +15,6 @@ use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
@@ -30,7 +29,6 @@ use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -44,20 +42,10 @@ class LessonController extends Controller
      */
     public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $course = Course::findOrFail($request->course_id);
 
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to this lesson.');
-        }
+        // Policyパターンによる認可チェック
+        $this->authorize('create', [Lesson::class, $course]);
 
         DB::beginTransaction();
         try {

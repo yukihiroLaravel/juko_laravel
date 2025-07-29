@@ -176,16 +176,9 @@ class NotificationController extends Controller
     public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
     {
         $notifications = Notification::whereIn('id', $request->notifications)->get();
-        $instructorId = Auth::guard('instructor')->user()->id;
 
         // policyによる認可チェック
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-
-        if (
-            $notifications->contains(fn (Notification $notification) => $notification->instructor_id !== $instructorId)
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
 
         DB::beginTransaction();
         try {

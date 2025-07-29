@@ -4,10 +4,32 @@ namespace App\Policies;
 
 use App\Model\Instructor;
 use App\Model\Notification;
+use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
 
 class NotificationPolicy
 {
+    /**
+     * お知らせの作成処理に関する認可処理
+     */
+    public function create(Instructor $instructor, Notification $notification): bool
+    {
+        $course = Course::find($notification->course_id);
+
+        if (!$course) {
+            return false;
+        }
+
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        return $course->instructor_id === $instructor->id;
+    }
+
     /**
      * お知らせの更新処理に関する認可処理
      */

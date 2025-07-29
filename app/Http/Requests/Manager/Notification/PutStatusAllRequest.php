@@ -6,14 +6,17 @@ use App\Enums\Notification\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class PutStatusRequest extends FormRequest
+/**
+ * マネージャー側 お知らせステータス一括変更用リクエスト
+ */
+class PutStatusAllRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return true; // 認可チェックは Controller 側で実施
     }
 
     /**
@@ -25,11 +28,6 @@ class PutStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', Rule::enum(StatusEnum::class)],
-            'notifications' => ['required', 'array', 'min:1'],
-            'notifications.*' => [
-                'integer',
-                'exists:notifications,id,deleted_at,NULL',
-            ],
         ];
     }
 }

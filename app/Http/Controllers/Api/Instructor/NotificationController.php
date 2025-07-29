@@ -212,6 +212,11 @@ class NotificationController extends Controller
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
+
+        $notifications = Notification::whereIn('instructor_id', [$instructorId])->get();
+
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
+
         $service(
             instructorIds: [$instructorId],
             notificationType: $request->notification_type

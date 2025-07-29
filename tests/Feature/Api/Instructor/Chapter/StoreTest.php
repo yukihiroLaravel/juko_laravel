@@ -55,7 +55,7 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Invalid instructor_id for this course.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

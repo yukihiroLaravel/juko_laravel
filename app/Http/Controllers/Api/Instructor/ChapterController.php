@@ -73,10 +73,7 @@ class ChapterController extends Controller
             /** @var Course $course */
             $course = Course::with('chapters')->findOrFail($request->input('course_id'));
 
-            if ($course->instructor_id !== $user->id) {
-                // 講座の作成者が現在の講師と一致しない場合はエラーを返す
-                throw new AuthorizationException('Invalid instructor_id for this course.');
-            }
+            $this->authorize('create', [Chapter::class, $course]);
 
             $chapter = $createChapterService(
                 course: $course,

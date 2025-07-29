@@ -13,6 +13,7 @@ use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Tag\DeleteTagService;
+use App\Services\Tag\UpdateTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -96,21 +97,19 @@ class TagController extends Controller
     /**
      * タグ更新API
      */
-    public function put(PutRequest $request): JsonResponse
+    public function put(PutRequest $request, UpdateTagService $service): JsonResponse
     {
         $tag = Tag::findOrFail($request->tag_id);
 
-        // 配下のインストラクターまたは本人が作成したタグのみ更新可能
+        // 認可処理
         $this->authorize('update', $tag);
 
-        // タグの更新
-        $tag->update([
-            'content' => $request->content,
-        ]);
+        ($service)(
+            tag: $tag,
+            content: $request->content
+        );
 
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json(['result' => true]);
     }
 
     /**

@@ -71,21 +71,10 @@ class ChapterController extends Controller
      */
     public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         /** @var Course $course */
         $course = Course::FindOrFail($request->course_id);
 
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            throw new AuthorizationException('Forbidden, not allowed to create new chapter.');
-        }
+        $this->authorize('create', [Chapter::class, $course]);
 
         try {
             $chapter = $createChapterService(

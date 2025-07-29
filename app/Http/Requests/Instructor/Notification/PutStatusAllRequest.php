@@ -25,6 +25,8 @@ class PutStatusAllRequest extends FormRequest
     {
         return [
             'status' => ['required', Rule::enum(StatusEnum::class)],
+            'notification_ids' => ['required', 'array', 'min:1'],
+            'notification_ids.*' => ['integer', 'distinct'], // 各通知IDが数値で重複なし
         ];
     }
 }

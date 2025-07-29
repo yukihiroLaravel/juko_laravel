@@ -323,19 +323,10 @@ class NotificationController extends Controller
      */
     public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {
-        // ログイン中のマネージャーIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 管理下の講師IDをすべて取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $status = StatusEnum::from($request->status);
 
         // 対象の通知をすべて取得（管理下の講師に紐づく）
-        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get(['id', 'instructor_id', 'status']);
+        $notifications = Notification::whereIn('id', $request->notification_ids)->get(['id', 'instructor_id', 'status']);
 
         // 講師と一致しないお知らせが含まれている場合はエラー
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);

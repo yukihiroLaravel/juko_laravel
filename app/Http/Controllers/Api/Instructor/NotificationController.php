@@ -299,11 +299,9 @@ class NotificationController extends Controller
      */
     public function putStatusAll(PutStatusAllRequest $request, PutStatusAllService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         $status = StatusEnum::from($request->status);
 
-        $notifications = Notification::where('instructor_id', $instructorId)->get(['id', 'instructor_id', 'status']);
+        $notifications = Notification::whereIn('id', $request->notification_ids)->get(['id', 'instructor_id', 'status']);
 
         // 講師と一致しないお知らせが含まれている場合はエラー
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);

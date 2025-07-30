@@ -69,23 +69,12 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
-        // ユーザーID取得
-        $instructorId = $request->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
+        
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
-        assert($notification instanceof Notification);
-
-        // アクセス権限のチェック
-        if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        
+        // Policyによる認可チェック
+        $this->authorize('view', $notification);
 
         return new NotificationResource($notification);
     }

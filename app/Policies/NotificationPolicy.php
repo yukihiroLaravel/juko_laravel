@@ -87,4 +87,20 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+    
+    /**
+     * お知らせの閲覧に関する認可処理
+     */
+    public function view(Instructor $instructor, Notification $notification): bool
+    {
+        // マネージャーの場合は配下の講師の通知も見られる
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+            return in_array($notification->instructor_id, $instructorIds, true);
+        }
+
+        // 講師権限のみの場合は、自分の通知だけが見られる
+        return $notification->instructor_id === $instructor->id;
+    }
 }

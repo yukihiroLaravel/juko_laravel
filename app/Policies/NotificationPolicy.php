@@ -98,7 +98,6 @@ class NotificationPolicy
      */
     public function create(Instructor $user, Course $course): bool
     {
-        // マネージャーの場合は配下の講師の講座も作成可能
         if ($user->isManager()) {
             $instructorIds = $user->managings->pluck('id')->toArray();
             $instructorIds[] = $user->id;
@@ -106,7 +105,6 @@ class NotificationPolicy
             return in_array($course->instructor_id, $instructorIds, true);
         }
 
-        // 講師の場合は自分の講座のみ作成可能
         return $course->instructor_id === $user->id;
     }
 }

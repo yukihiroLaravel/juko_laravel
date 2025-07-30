@@ -14,7 +14,7 @@ class NotificationPolicy
     /**
      * お知らせの更新処理に関する認可処理
      */
-    public function update(Instructor $instructor, Notification $notification)
+    public function update(Instructor $instructor, Notification $notification): bool
     {
         // マネージャーの場合は配下の講師レッスンも更新可能
         if ($instructor->isManager()) {
@@ -31,7 +31,7 @@ class NotificationPolicy
     /**
      * お知らせの削除に関する認可処理
      */
-    public function delete(Instructor $instructor, Notification $notification): bool
+    public function delete(Instructor $instructor, Notification $notification)
     {
         // マネージャーの場合は配下の講師のお知らせも削除可能
         if ($instructor->isManager()) {
@@ -94,11 +94,10 @@ class NotificationPolicy
     /**
      * お知らせ作成処理に関する認可処理
      *
-     * @param  mixed  $user   ユーザー（Instructor または Manager）
-     * @param  mixed  $course 対象の講座
-     * @return bool
+     * @param  Instructor|Manager $user   ユーザー（Instructor または Manager）
+     * @param  Course              $course 対象の講座
      */
-    public function create($user, $course): bool
+    public function create($user, Course $course): bool
     {
         // Instructor 側
         if ($user instanceof Instructor) {
@@ -106,9 +105,11 @@ class NotificationPolicy
         }
 
         // Manager 側
-        if ($user instanceof Manager) {
+        if ($user instanceof Instructor && $user->isManager()) {
+            // 自分と配下のInstructorを取得
             $instructorIds = $user->managings->pluck('id')->toArray();
             $instructorIds[] = $user->id;
+
             return in_array($course->instructor_id, $instructorIds, true);
         }
 

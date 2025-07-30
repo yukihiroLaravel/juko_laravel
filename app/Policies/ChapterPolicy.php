@@ -9,6 +9,9 @@ use Illuminate\Support\Collection;
 
 class ChapterPolicy
 {
+    /**
+     * チャプターの閲覧に関する認可処理
+     */
     public function view(Instructor $instructor, Chapter $chapter): bool
     {
         if ($instructor->isManager()) {

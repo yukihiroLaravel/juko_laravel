@@ -38,7 +38,7 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         // Policyによる認可チェック
-        $this->authorize('create', $course);
+        $this->authorize('create', [Attendance::class, $course]);
 
         if (Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)

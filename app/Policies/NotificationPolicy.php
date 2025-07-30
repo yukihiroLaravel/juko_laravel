@@ -3,6 +3,9 @@
 namespace App\Policies;
 
 use App\Model\Instructor;
+use App\Model\Manager;
+use App\Model\User;
+use App\Model\Course;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -91,11 +94,11 @@ class NotificationPolicy
     /**
      * お知らせ作成処理に関する認可処理
      *
-     * @param  \App\Models\User   $user    ユーザー（Instructor または Manager）
-     * @param  \App\Models\Course $course  対象の講座
+     * @param  mixed  $user   ユーザー（Instructor または Manager）
+     * @param  mixed  $course 対象の講座
      * @return bool
      */
-    public function create(User $user, Course $course): bool
+    public function create($user, $course): bool
     {
         // Instructor 側
         if ($user instanceof Instructor) {

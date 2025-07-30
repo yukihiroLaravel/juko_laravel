@@ -23,7 +23,6 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
-use App\Services\Notification\PutStatusService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
@@ -255,14 +254,13 @@ class NotificationController extends Controller
     /**
      * お知らせステータス更新API
      */
-    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         // ログインしている講師のIDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
 
         // 選択されたお知らせidを取得
         $notificationIds = $request->input('notifications', []);
-        $status = $request->status;
 
         // 選択されたお知らせを取得
         $chosenNotifications = Notification::whereIn('id', $notificationIds)->pluck('instructor_id');
@@ -278,15 +276,11 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            $notifications = Notification::where('instructor_id', $instructorId)
+            Notification::where('instructor_id', $instructorId)
                 ->whereIn('id', $notificationIds)
-                ->get(['id', 'instructor_id', 'status']);
+                ->update(['status' => $request->status]);
 
-            $service(
-                notifications: $notifications,
-                status: $status
-            );
-
+            // コミット
             DB::commit();
 
             return response()->json([

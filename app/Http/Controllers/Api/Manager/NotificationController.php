@@ -24,7 +24,6 @@ use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
-use App\Services\Notification\PutStatusService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
@@ -95,19 +94,14 @@ class NotificationController extends Controller
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
+        // コース取得
         $course = Course::findOrFail($request->course_id);
-        assert($course instanceof Course);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+
+        // Policyによる認可チェック
+        $this->authorize('create', $course);
+
+        // ログインしているInstructor(Manager)のID
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
         try {
@@ -284,10 +278,9 @@ class NotificationController extends Controller
     /**
      * お知らせ一括公開・非公開API
      */
-    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
+    public function putStatus(PutStatusRequest $request): JsonResponse
     {
         $notificationIds = $request->input('notifications', []);
-        $status = $request->input('status');
 
         $notifications = Notification::whereIn('id', $notificationIds)->get(['id', 'instructor_id', 'status']);
 
@@ -296,10 +289,8 @@ class NotificationController extends Controller
         DB::beginTransaction();
 
         try {
-            $service(
-                notifications: $notifications,
-                status: $status
-            );
+            Notification::whereIn('id', $notificationIds)
+                ->update(['status' => $request->status]);
 
             DB::commit();
 

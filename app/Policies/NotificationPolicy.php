@@ -87,4 +87,28 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+
+    /**
+     * お知らせ作成処理に関する認可処理
+     *
+     * @param  \App\Models\User   $user    ユーザー（Instructor または Manager）
+     * @param  \App\Models\Course $course  対象の講座
+     * @return bool
+     */
+    public function create(User $user, Course $course): bool
+    {
+        // Instructor 側
+        if ($user instanceof Instructor) {
+            return $course->instructor_id === $user->id;
+        }
+
+        // Manager 側
+        if ($user instanceof Manager) {
+            $instructorIds = $user->managings->pluck('id')->toArray();
+            $instructorIds[] = $user->id;
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        return false;
+    }
 }

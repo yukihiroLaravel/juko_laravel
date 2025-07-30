@@ -10,6 +10,21 @@ use Illuminate\Support\Collection;
 class ChapterPolicy
 {
     /**
+     * チャプターの閲覧に関する認可処理
+     */
+    public function view(Instructor $instructor, Chapter $chapter): bool
+    {
+        if ($instructor->isManager()) {
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return in_array($chapter->course->instructor_id, $managerIds, true);
+        }
+
+        return $instructor->id === $chapter->course->instructor_id;
+    }
+
+    /**
      * チャプターの作成処理に関する認可処理
      */
     public function create(Instructor $instructor, Course $course): bool

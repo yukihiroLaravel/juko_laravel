@@ -43,24 +43,13 @@ class ChapterController extends Controller
      */
     public function show(ShowRequest $request): ChapterShowResource
     {
-        // ログイン中の講師IDを取得
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $chapter = Chapter::with(['lessons', 'course'])->findOrFail($request->chapter_id);
+
+        $this->authorize('view', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合はエラー応答
             throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
-
-        if (! in_array($chapter->course->instructor_id, $instructorIds, true)) {
-            // 自身もしくは配下の講師が作成した講座でない場合、権限エラーを返す
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 
         return new ChapterShowResource($chapter);

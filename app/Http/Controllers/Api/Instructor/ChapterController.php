@@ -46,10 +46,7 @@ class ChapterController extends Controller
         // チャプターを取得
         $chapter = $queryService->getChapter($request->chapter_id);
 
-        if (Auth::guard('instructor')->user()->id !== $chapter->course->instructor_id) {
-            // ログインしている講師が作成していないチャプターの更新を許可しない
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('view', $chapter);
 
         if ((int) $request->course_id !== $chapter->course->id) {
             // 指定した講座IDがチャプターの講座IDと一致しない場合は更新を許可しない

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Manager\Chapter;
+namespace Tests\Feature\Api\Instructor\Chapter;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,11 +21,11 @@ class ShowTest extends TestCase
     public function test_チャプター取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/1/chapter/1');
+        $response = $this->getJson('/api/v1/instructor/course/2/chapter/4');
 
         // assert
         $response->assertStatus(200);
@@ -34,11 +34,11 @@ class ShowTest extends TestCase
     public function test_講師が一致しない_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(4);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/1/chapter/1');
+        $response = $this->getJson('/api/v1/instructor/course/1/chapter/1');
 
         // assert
         $response->assertStatus(403);
@@ -54,12 +54,12 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/2/chapter/1');
+        $response = $this->getJson('/api/v1/instructor/course/2/chapter/1');
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid course_id.',
+            'message' => 'Invalid course_id.',
         ]);
     }
 
@@ -70,12 +70,13 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/manager/course/aaa/chapter/bbb');
+        $response = $this->getJson('/api/v1/instructor/course/aaa/chapter/bbb');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',
+            'chapter_id',
         ]);
     }
 }

@@ -76,15 +76,16 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
-        // ログイン中の講師IDを取得
-        $userId = Auth::guard('instructor')->user()->id;
+        $instructorId = Auth::guard('instructor')->id();
 
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($userId);
+        $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId;
+        $instructorIds[] = $instructorId;
 
         $course = $queryService->getCourse($request->course_id);
+
+        // 認可チェック
+        $this->authorize('show', $course);
 
         // 自身 もしくは 配下の講師でない場合はエラー応答
         if (! in_array($course->instructor_id, $instructorIds, true)) {

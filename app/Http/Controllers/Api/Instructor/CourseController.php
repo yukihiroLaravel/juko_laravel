@@ -80,9 +80,12 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request): CourseShowResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $instructorId = Auth::guard('instructor')->id();
 
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+
+        // 認可チェック
+        $this->authorize('show', $course);
 
         if ($course->instructor_id !== $instructorId) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');

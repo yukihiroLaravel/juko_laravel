@@ -87,7 +87,7 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
-    
+
     /**
      * お知らせの閲覧に関する認可処理
      */
@@ -97,6 +97,7 @@ class NotificationPolicy
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
+
             return in_array($notification->instructor_id, $instructorIds, true);
         }
 

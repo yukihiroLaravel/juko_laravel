@@ -94,26 +94,19 @@ class NotificationPolicy
      *
      * @param  Instructor  $user   認可を確認するユーザー（Instructor）
      * @param  Course      $course 対象の講座
-     * @return bool  認可された場合 true を返す
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException 認可されない場合は 403 エラーを投げる
+     * @return bool  認可された場合 true、されなければ false を返す
      */
     public function create(Instructor $user, Course $course): bool
     {
+        // マネージャーの場合は配下の講師の講座も作成可能
         if ($user->isManager()) {
             $instructorIds = $user->managings->pluck('id')->toArray();
             $instructorIds[] = $user->id;
 
-            if (! in_array($course->instructor_id, $instructorIds, true)) {
-                abort(403, 'Forbidden, invalid instructor_id.');
-            }
-            return true;
+            return in_array($course->instructor_id, $instructorIds, true);
         }
 
-        if ($course->instructor_id !== $user->id) {
-            abort(403, 'Forbidden, invalid instructor_id.');
-        }
-
-        return true;
+        // 講師の場合は自分の講座のみ作成可能
+        return $course->instructor_id === $user->id;
     }
 }

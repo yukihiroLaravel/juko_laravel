@@ -78,7 +78,7 @@ class NotificationController extends Controller
         $course = Course::findOrFail($request->course_id);
 
         // Policyを使った認可チェック
-        $this->authorize('create', [$course], 'Forbidden, invalid instructor_id.');
+        $this->authorize('create', [$course]);
 
         // 講師IDは認可済みなので、ログインユーザーから取得
         $instructorId = Auth::guard('instructor')->user()->id;

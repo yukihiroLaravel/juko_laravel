@@ -94,25 +94,20 @@ class NotificationPolicy
     /**
      * お知らせ作成処理に関する認可処理
      *
-     * @param  Instructor|Manager $user   ユーザー（Instructor または Manager）
-     * @param  Course              $course 対象の講座
+     * @param  Instructor $user   ユーザー（Instructor）
+     * @param  Course     $course 対象の講座
      */
-    public function create($user, Course $course): bool
+    public function create(Instructor $user, Course $course): bool
     {
-        // Instructor 側
-        if ($user instanceof Instructor) {
-            return $course->instructor_id === $user->id;
-        }
-
-        // Manager 側
-        if ($user instanceof Instructor && $user->isManager()) {
-            // 自分と配下のInstructorを取得
+        // マネージャーかどうか判定
+        if ($user->isManager()) {
             $instructorIds = $user->managings->pluck('id')->toArray();
             $instructorIds[] = $user->id;
 
             return in_array($course->instructor_id, $instructorIds, true);
         }
 
-        return false;
+        // 講師の場合は自分の講座のみ
+        return $course->instructor_id === $user->id;
     }
 }

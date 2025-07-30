@@ -34,51 +34,50 @@ class AttendanceController extends Controller
      * 受講状況登録API
      */
     public function store(StoreRequest $request): JsonResponse
-{
-    /** @var Attendance $attendance */
-    
-    $course = Course::findOrFail($request->course_id);
-    
-    // Policyによる認可チェック
-    $this->authorize('create', $course);
+    {
+        /** @var Attendance $attendance */
+        $course = Course::findOrFail($request->course_id);
 
-    if (Attendance::where('course_id', $request->course_id)
-        ->where('student_id', $request->student_id)
-        ->exists()
-    ) {
-        throw new AuthorizationException(
-            'Attendance record already exists.'
-        );
-    }
+        // Policyによる認可チェック
+        $this->authorize('create', $course);
 
-    DB::beginTransaction();
-    try {
-        $attendance = Attendance::create([
-            'course_id' => $request->course_id,
-            'student_id' => $request->student_id,
-        ]);
+        if (Attendance::where('course_id', $request->course_id)
+            ->where('student_id', $request->student_id)
+            ->exists()
+        ) {
+            throw new AuthorizationException(
+                'Attendance record already exists.'
+            );
+        }
 
-        $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
-            $query->where('course_id', $request->course_id);
-        })->get();
-
-        $lessons->each(function (Lesson $lesson) use ($attendance) {
-            LessonAttendance::create([
-                'attendance_id' => $attendance->id,
-                'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        DB::beginTransaction();
+        try {
+            $attendance = Attendance::create([
+                'course_id' => $request->course_id,
+                'student_id' => $request->student_id,
             ]);
-        });
 
-        DB::commit();
+            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
+                $query->where('course_id', $request->course_id);
+            })->get();
 
-        return response()->json(['result' => true]);
-    } catch (Exception $e) {
-        DB::rollBack();
-        Log::error($e);
-        throw $e;
+            $lessons->each(function (Lesson $lesson) use ($attendance) {
+                LessonAttendance::create([
+                    'attendance_id' => $attendance->id,
+                    'lesson_id' => $lesson->id,
+                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                ]);
+            });
+
+            DB::commit();
+
+            return response()->json(['result' => true]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
-}
 
     /**
      * 受講状況取得API

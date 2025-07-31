@@ -15,7 +15,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
@@ -74,9 +73,9 @@ class CourseController extends Controller
     /**
      * 講座情報取得API
      */
-    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        $course = $queryService->getCourse($request->course_id);
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
         // 認可チェック
         $this->authorize('view', $course);

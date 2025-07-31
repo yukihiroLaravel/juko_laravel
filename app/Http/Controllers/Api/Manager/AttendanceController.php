@@ -11,13 +11,13 @@ use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
-use App\Policies\AttendancePolicy;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Policies\AttendancePolicy;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -108,7 +108,7 @@ class AttendanceController extends Controller
         $courseId = $request->course_id;
 
         $course = Course::findOrFail($courseId);
-        
+
         if (! (new AttendancePolicy)->view($instructor, $course)) {
             throw new AuthorizationException('Forbidden, not allowed to access this course.');
         }

@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Model\Attendance;
-use App\Model\Instructor;
 use App\Model\Course;
+use App\Model\Instructor;
 
 class AttendancePolicy
 {
@@ -16,9 +16,10 @@ class AttendancePolicy
 
             return in_array($course->instructor_id, $instructorIds, true);
         }
+
         return $instructor->id === $course->instructor_id;
     }
-    
+
     /**
      * Create a new policy instance.
      */

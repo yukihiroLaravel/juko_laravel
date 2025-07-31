@@ -11,6 +11,7 @@ use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Manager\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
+use App\Policies\AttendancePolicy;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -103,22 +104,13 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
+        $instructor = Auth::guard('instructor')->user();
         $courseId = $request->course_id;
 
-        // 現在ログインしているinstructorのidを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // ログインしている講師とその管理している講師を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $course = Course::findOrFail($courseId);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
+        
+        if (! (new AttendancePolicy)->view($instructor, $course)) {
+            throw new AuthorizationException('Forbidden, not allowed to access this course.');
         }
 
         $chapters = Chapter::with([

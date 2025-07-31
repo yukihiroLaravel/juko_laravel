@@ -11,6 +11,7 @@ use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Instructor\AttendanceStatusResource;
+use App\Policies\AttendancePolicy;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -87,12 +88,11 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $instructor = Auth::guard('instructor')->user();
         $courseId = $request->course_id;
         $course = Course::with('tags')->findOrFail($courseId);
 
-        if ($course->instructor_id !== $instructorId) {
-            // ログインしている講師の講座でない場合はエラーを返す
+        if (! (new AttendancePolicy)->view($instructor, $course)) {
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
         }
 

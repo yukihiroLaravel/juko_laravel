@@ -4,9 +4,21 @@ namespace App\Policies;
 
 use App\Model\Attendance;
 use App\Model\Instructor;
+use App\Model\Course;
 
 class AttendancePolicy
 {
+    public function view(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+        return $instructor->id === $course->instructor_id;
+    }
+    
     /**
      * Create a new policy instance.
      */

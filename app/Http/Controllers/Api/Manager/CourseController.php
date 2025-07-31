@@ -76,21 +76,10 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
     {
-        $instructorId = Auth::guard('instructor')->id();
-
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $course = $queryService->getCourse($request->course_id);
 
         // 認可チェック
-        $this->authorize('show', $course);
-
-        // 自身 もしくは 配下の講師でない場合はエラー応答
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        $this->authorize('view', $course);
 
         return new CourseShowResource($course);
     }

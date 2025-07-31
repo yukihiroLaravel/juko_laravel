@@ -35,7 +35,7 @@ class CoursePolicy
         return $instructor->id === $course->instructor_id;
     }
 
-    public function show(Instructor $instructor, Course $course): bool
+    public function view(Instructor $instructor, Course $course): bool
     {
         // マネージャー権限のある講師か判定
         if ($instructor->isManager()) {

@@ -24,7 +24,7 @@ class AttendancePolicy
         // マネージャー権限のない講師
         return $instructor->id === $course->instructor_id;
     }
-    
+
     /**
      * 受講状況削除時のポリシー
      */
@@ -41,5 +41,4 @@ class AttendancePolicy
         // マネージャー権限のない講師
         return $instructor->id === $attendance->course->instructor_id;
     }
-
 }

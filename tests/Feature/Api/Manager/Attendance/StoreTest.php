@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Attendance;
+namespace Tests\Feature\Api\Manager\Attendance;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,13 +21,13 @@ class StoreTest extends TestCase
     public function test_受講登録_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/attendance', [
-            'course_id' => 2,
-            'student_id' => 1,
+        $response = $this->postJson('/api/v1/manager/attendance', [
+            'course_id' => 1,
+            'student_id' => 3,
         ]);
 
         // assert
@@ -37,15 +37,34 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    public function test_受講中の生徒_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/attendance', [
+        $response = $this->postJson('/api/v1/manager/attendance', [
             'course_id' => 1,
+            'student_id' => 1,
+        ]);
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Attendance record already exists.',
+        ]);
+    }
+
+    public function test_権限がない講師_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(4);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/manager/attendance', [
+            'course_id' => 2,
             'student_id' => 3,
         ]);
 
@@ -59,11 +78,11 @@ class StoreTest extends TestCase
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/attendance', []);
+        $response = $this->postJson('/api/v1/manager/attendance', []);
 
         // assert
         $response->assertStatus(422);

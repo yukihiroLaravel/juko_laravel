@@ -21,11 +21,11 @@ class ShowTest extends TestCase
     public function test_講座取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/1');
+        $response = $this->getJson('/api/v1/instructor/course/2');
 
         // assert
         $response->assertStatus(200);
@@ -34,16 +34,16 @@ class ShowTest extends TestCase
     public function test_権限がない講師_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(3);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/1');
+        $response = $this->getJson('/api/v1/instructor/course/2');
 
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 }

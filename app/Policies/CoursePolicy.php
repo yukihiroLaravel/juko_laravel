@@ -7,6 +7,20 @@ use App\Model\Instructor;
 
 class CoursePolicy
 {
+    public function view(Instructor $instructor, Course $course): bool
+    {
+        // マネージャー権限のある講師か判定
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // マネージャー権限のない講師
+        return $instructor->id === $course->instructor_id;
+    }
+
     public function update(Instructor $instructor, Course $course): bool
     {
         if ($instructor->isManager()) {

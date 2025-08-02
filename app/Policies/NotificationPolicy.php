@@ -87,4 +87,27 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+
+    /**
+     * お知らせの新規作成に関する認可処理
+     *
+     * マネージャーのみ作成可能。講師は作成できない。
+     *
+     * @param  \App\Model\Instructor  $instructor  ログイン中のユーザー
+     * @param  \App\Model\Course  $course  お知らせを作成する対象コース
+     * @return bool
+     */
+    public function create(Instructor $instructor, \App\Model\Course $course): bool
+    {
+        // マネージャーのみ作成可能
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // 講師は作成できない
+        return false;
+    }
 }

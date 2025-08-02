@@ -15,7 +15,6 @@ use App\Services\Student\StoreStudentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -112,7 +111,6 @@ class StudentController extends Controller
 
         return new StudentShowResource($student);
     }
-
 
     /**
      * 受講生登録API

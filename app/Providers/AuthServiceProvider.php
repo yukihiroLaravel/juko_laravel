@@ -8,12 +8,14 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\Notification;
 use App\Model\Tag;
+use App\Model\Student;
 use App\Policies\AttendancePolicy;
 use App\Policies\ChapterPolicy;
 use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
 use App\Policies\NotificationPolicy;
 use App\Policies\TagPolicy;
+use App\Policies\StudentPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider

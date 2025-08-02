@@ -106,28 +106,13 @@ class StudentController extends Controller
      */
     public function show(ShowRequest $request, QueryService $queryService)
     {
-        // 認証されたマネージャーが管理する講師のIDのリストを取得
-        $authManagerId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($authManagerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-
-        // 自身のIDを追加
-        $instructorIds[] = $authManagerId;
-
-        // 認証されたマネージャーとマネージャーが管理する講師の講座IDのリストを取得
-        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
-
-        // リクエストされた受講生を取得
         $student = $queryService->getStudent($request->student_id);
 
-        // 受講生が講師の講座に所属しているか確認
-        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
-        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        $this->authorize('view', $student);
 
         return new StudentShowResource($student);
     }
+
 
     /**
      * 受講生登録API

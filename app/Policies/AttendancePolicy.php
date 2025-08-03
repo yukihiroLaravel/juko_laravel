@@ -3,12 +3,30 @@
 namespace App\Policies;
 
 use App\Model\Attendance;
+use App\Model\Course;
 use App\Model\Instructor;
 
 class AttendancePolicy
 {
     /**
-     * Create a new policy instance.
+     * 受講作成時のポリシー
+     */
+    public function create(Instructor $instructor, Course $course): bool
+    {
+        // マネージャー権限のある講師か判定
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // マネージャー権限のない講師
+        return $instructor->id === $course->instructor_id;
+    }
+
+    /**
+     * 受講状況削除時のポリシー
      */
     public function delete(Instructor $instructor, Attendance $attendance): bool
     {

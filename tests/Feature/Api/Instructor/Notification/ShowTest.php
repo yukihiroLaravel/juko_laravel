@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Course;
+namespace Tests\Feature\Api\Instructor\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,7 +10,6 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
     #[\Override]
     protected function setUp(): void
     {
@@ -18,32 +17,32 @@ class ShowTest extends TestCase
         $this->seed();
     }
 
-    public function test_講座取得_成功(): void
+    public function test_お知らせ取得_成功(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/2');
+        $response = $this->getJson('/api/v1/instructor/notification/2');
 
         // assert
         $response->assertStatus(200);
     }
 
-    public function test_権限がない講師_失敗(): void
+    public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(3);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/2');
+        //act
+        $response = $this->getJson('/api/v1/instructor/notification/aaa');
 
         // assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'This action is unauthorized.',
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors([
+            'notification_id',
         ]);
     }
 }

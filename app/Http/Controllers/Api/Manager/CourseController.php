@@ -15,7 +15,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
@@ -74,22 +73,12 @@ class CourseController extends Controller
     /**
      * 講座情報取得API
      */
-    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        // ログイン中の講師IDを取得
-        $userId = Auth::guard('instructor')->user()->id;
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($userId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId;
-
-        $course = $queryService->getCourse($request->course_id);
-
-        // 自身 もしくは 配下の講師でない場合はエラー応答
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 認可チェック
+        $this->authorize('view', $course);
 
         return new CourseShowResource($course);
     }

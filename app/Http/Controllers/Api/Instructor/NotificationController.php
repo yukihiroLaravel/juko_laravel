@@ -63,9 +63,8 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])
             ->findOrFail($request->notification_id);
 
-        if ($notification->instructor_id !== Auth::guard('instructor')->user()->id) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // Policyによる認可チェック
+        $this->authorize('view', $notification);
 
         return new NotificationResource($notification);
     }

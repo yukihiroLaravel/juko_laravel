@@ -45,7 +45,7 @@ class NotificationPolicy
     /**
      * お知らせの削除に関する認可処理
      */
-    public function delete(Instructor $instructor, Notification $notification)
+    public function delete(Instructor $instructor, Notification $notification): bool
     {
         // マネージャーの場合は配下の講師のお知らせも削除可能
         if ($instructor->isManager()) {

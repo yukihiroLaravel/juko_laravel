@@ -85,11 +85,17 @@ class NotificationController extends Controller
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
-
-        // 認可チェック (CoursePolicy::create)
-        $this->authorize('create', $course);
-
         $instructorId = Auth::guard('instructor')->user()->id;
+
+        try {
+            // 認可チェック（Instructor・Manager 両方を含む）
+            $this->authorize('create', $course);
+        } catch (AuthorizationException $e) {
+            // カスタムメッセージを返す
+            return response()->json([
+                'message' => 'Forbidden, invalid instructor_id.'
+            ], 403);
+        }
 
         DB::beginTransaction();
         try {

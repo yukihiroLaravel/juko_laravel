@@ -50,7 +50,7 @@ class CoursePolicy
     }
 
     public function create(Instructor $user, Course $course): bool
-    {            
+    {
         // マネージャーの場合、配下の講師の講座も可能
         if ($user->isManager()) {
             $instructorIds = $user->managings->pluck('id')->toArray();

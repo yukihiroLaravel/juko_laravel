@@ -93,7 +93,7 @@ class NotificationController extends Controller
         } catch (AuthorizationException $e) {
             // カスタムメッセージを返す
             return response()->json([
-                'message' => 'Forbidden, invalid instructor_id.'
+                'message' => 'Forbidden, invalid instructor_id.',
             ], 403);
         }
 

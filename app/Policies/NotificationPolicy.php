@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,7 +12,7 @@ class NotificationPolicy
     /**
      * お知らせの更新処理に関する認可処理
      */
-    public function update(Instructor $instructor, Notification $notification)
+    public function update(Instructor $instructor, Notification $notification): bool
     {
         // マネージャーの場合は配下の講師レッスンも更新可能
         if ($instructor->isManager()) {
@@ -28,7 +29,7 @@ class NotificationPolicy
     /**
      * お知らせの削除に関する認可処理
      */
-    public function delete(Instructor $instructor, Notification $notification): bool
+    public function delete(Instructor $instructor, Notification $notification)
     {
         // マネージャーの場合は配下の講師のお知らせも削除可能
         if ($instructor->isManager()) {
@@ -88,26 +89,24 @@ class NotificationPolicy
         );
     }
 
-   /**
-     * お知らせの新規作成に関する認可処理
+    /**
+     * お知らせ作成処理に関する認可処理
      *
-     * マネージャーのみ作成可能。講師は作成できない。
-     *
-     * @param  \App\Model\Instructor  $instructor  ログイン中のユーザー
-     * @param  \App\Model\Course  $course  お知らせを作成する対象コース
-     * @return bool
+     * @param  Instructor  $user   認可を確認するユーザー（Instructor）
+     * @param  Course      $course 対象の講座
+     * @return bool  認可された場合 true、されなければ false を返す
      */
-    public function create(Instructor $instructor, \App\Model\Course $course): bool
+    public function create(Instructor $user, Course $course): bool
     {
-        // マネージャーのみ作成可能
-        if ($instructor->isManager()) {
-            $instructorIds = $instructor->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructor->id;
+        if ($user->isManager()) {
+            // 管理者の場合、配下の講師の講座も可能
+            $instructorIds = $user->managings->pluck('id')->toArray();
+            $instructorIds[] = $user->id;
 
             return in_array($course->instructor_id, $instructorIds, true);
         }
 
-        // 講師は作成できない
-        return false;
+        // 講師の場合、自分のコースだけを許可
+        return $course->instructor_id === $user->id;
     }
 }

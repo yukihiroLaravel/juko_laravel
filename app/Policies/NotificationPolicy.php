@@ -88,25 +88,4 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
-
-    /**
-     * お知らせ作成処理に関する認可処理
-     *
-     * @param  Instructor  $user   認可を確認するユーザー（Instructor）
-     * @param  Course      $course 対象の講座
-     * @return bool  認可された場合 true、されなければ false を返す
-     */
-    public function create(Instructor $user, Course $course): bool
-    {
-        if ($user->isManager()) {
-            // 管理者の場合、配下の講師の講座も可能
-            $instructorIds = $user->managings->pluck('id')->toArray();
-            $instructorIds[] = $user->id;
-
-            return in_array($course->instructor_id, $instructorIds, true);
-        }
-
-        // 講師の場合、自分のコースだけを許可
-        return $course->instructor_id === $user->id;
-    }
 }

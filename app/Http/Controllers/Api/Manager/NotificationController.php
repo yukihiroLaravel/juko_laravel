@@ -95,19 +95,12 @@ class NotificationController extends Controller
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $course = Course::findOrFail($request->course_id);
-        assert($course instanceof Course);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+
+        // 認可チェック (CoursePolicy::create)
+        $this->authorize('create', $course);
+
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
         try {

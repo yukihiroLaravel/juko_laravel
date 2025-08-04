@@ -4,17 +4,13 @@ namespace App\Services\Tag;
 
 use App\Model\Tag;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class DeleteTagService
 {
     /**
      * タグを削除する
      *
-     * @param Tag $tag
-     * @return void
-     * 
+     *
      * @throws AuthorizationException
      */
     public function __invoke(Tag $tag): void

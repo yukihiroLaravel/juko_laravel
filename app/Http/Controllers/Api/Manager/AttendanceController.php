@@ -104,14 +104,10 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
-        $instructor = Auth::guard('instructor')->user();
         $courseId = $request->course_id;
-
         $course = Course::findOrFail($courseId);
 
-        if (! (new AttendancePolicy)->view($instructor, $course)) {
-            throw new AuthorizationException('Forbidden, not allowed to access this course.');
-        }
+        $this->authorize('view', [Attendance::class, $course]);
 
         $chapters = Chapter::with([
             'course.tags',

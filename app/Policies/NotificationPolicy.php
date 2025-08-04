@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Model\Instructor;
 use App\Model\Notification;
+use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
 
 class NotificationPolicy

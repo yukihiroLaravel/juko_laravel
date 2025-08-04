@@ -43,7 +43,7 @@ class ShowTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 
@@ -60,6 +60,22 @@ class ShowTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'student_id',
+        ]);
+    }
+
+    public function test_権限エラー(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/manager/student/bbb');
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
         ]);
     }
 }

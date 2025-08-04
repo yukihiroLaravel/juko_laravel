@@ -98,21 +98,10 @@ class StudentController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        // 認証ユーザー情報取得
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $student = Student::with('attendances')->findOrFail($request->student_id);
 
-        // 認証された講師が作成した講座のIDを取得
-        $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
-
-        // リクエストされた受講生を取得
-        $student = Student::find($request->student_id);
-        assert($student instanceof Student);
-
-        // 受講生が講師の講座に所属しているか確認
-        $studentCourseIds = $student->attendances->pluck('course_id')->unique();
-        if ($studentCourseIds->intersect($courseIds)->isEmpty()) {
-            throw new AuthorizationException('Forbidden, invalid instructor.');
-        }
+        // 認可チェック
+        $this->authorize('view', $student);
 
         return new StudentShowResource($student);
     }

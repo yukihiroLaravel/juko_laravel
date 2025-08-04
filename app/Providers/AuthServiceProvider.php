@@ -7,12 +7,14 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\Notification;
+use App\Model\Student;
 use App\Model\Tag;
 use App\Policies\AttendancePolicy;
 use App\Policies\ChapterPolicy;
 use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
 use App\Policies\NotificationPolicy;
+use App\Policies\StudentPolicy;
 use App\Policies\TagPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -30,6 +32,7 @@ class AuthServiceProvider extends ServiceProvider
         Notification::class => NotificationPolicy::class,
         Tag::class => TagPolicy::class,
         Attendance::class => AttendancePolicy::class,
+        Student::class => StudentPolicy::class,
     ];
 
     /**

@@ -21,7 +21,7 @@ class ShowTest extends TestCase
     public function test_生徒取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
@@ -43,14 +43,14 @@ class ShowTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act

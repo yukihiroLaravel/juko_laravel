@@ -104,4 +104,25 @@ class NotificationPolicy
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
     }
+
+    /**
+     * お知らせの作成に関する認可処理
+     *
+     * @param  \App\Model\Instructor  $user   認可対象の講師またはマネージャー
+     * @param  \App\Model\Course      $course 対象のコース
+     * @return bool
+     */
+    public function store(Instructor $user, Course $course): bool
+    {
+        if ($user->isManager()) {
+            // 管理者の場合、配下の講師の講座も可能
+            $instructorIds = $user->managings->pluck('id')->toArray();
+            $instructorIds[] = $user->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // 講師の場合、自分のコースだけを許可
+        return $course->instructor_id === $user->id;
+    }
 }

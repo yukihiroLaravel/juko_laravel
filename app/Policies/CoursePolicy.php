@@ -48,18 +48,4 @@ class CoursePolicy
         // マネージャー権限のない講師
         return $instructor->id === $course->instructor_id;
     }
-
-    public function create(Instructor $user, Course $course): bool
-    {
-        // マネージャーの場合、配下の講師の講座も可能
-        if ($user->isManager()) {
-            $instructorIds = $user->managings->pluck('id')->toArray();
-            $instructorIds[] = $user->id;
-
-            return in_array($course->instructor_id, $instructorIds, true);
-        }
-
-        // 講師の場合、自分のコースだけを許可
-        return $course->instructor_id === $user->id;
-    }
 }

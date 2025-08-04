@@ -111,7 +111,6 @@ class NotificationPolicy
      *
      * @param  \App\Model\Instructor  $user   認可対象の講師またはマネージャー
      * @param  \App\Model\Course      $course 対象のコース
-     * @return bool
      */
     public function store(Instructor $user, Course $course): bool
     {

@@ -14,7 +14,7 @@ class StoreCourseService
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId): Course
+    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId, ?string $attendanceDeadline = null): Course
     {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();
@@ -28,6 +28,7 @@ class StoreCourseService
             'title' => $title,
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
+            'attendance_deadline' => $attendanceDeadline,
         ]);
 
         // ログイン中の講師が作成したタグかどうか確認

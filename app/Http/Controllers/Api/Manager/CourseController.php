@@ -97,7 +97,8 @@ class CourseController extends Controller
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
-                instructorId: $managerId
+                instructorId: $managerId,
+                attendanceDeadline: $request->attendance_deadline
             );
 
             DB::commit();

@@ -26,6 +26,7 @@ class StoreRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:30'],
             'image' => ['required', 'mimes:jpg,png', 'max:2048'],
+            'attendance_deadline' => ['nullable', 'date', 'after_or_equal:today'],
         ];
     }
 }

@@ -23,7 +23,7 @@ class CreateCoursesTable extends Migration
             $table->dateTime('updated_at');
             $table->softDeletes();
             $table->foreign('instructor_id')->references('id')->on('instructors');
-            $table->dateTime('attendance_deadline')->nullable();
+            $table->dateTime('attendance_deadline')->nullable()->comment('受講期限');
         });
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Course;
+namespace Tests\Feature\Api\Manager\Course;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,16 +22,16 @@ class StoreTest extends TestCase
     public function test_講座登録_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
         // act
-        $response = $this->post('/api/v1/instructor/course', [
+        $response = $this->post('/api/v1/manager/course', [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 2,
+            'tag_id' => 1,
             'attendance_deadline' => now()->addDays(30)->format('Y-m-d'),
         ]);
 
@@ -43,23 +43,23 @@ class StoreTest extends TestCase
 
         $this->assertDatabaseHas('course_tag', [
             'course_id' => 8,
-            'tag_id' => 2,
+            'tag_id' => 1,
         ]);
     }
 
     public function test_無効なタグの指定_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
         // act
-        $response = $this->post('/api/v1/instructor/course', [
+        $response = $this->post('/api/v1/manager/course', [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 1,
+            'tag_id' => 2,
         ]);
 
         // assert
@@ -76,7 +76,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->post('/api/v1/instructor/course', [
+        $response = $this->post('/api/v1/manager/course', [
             'title' => '',
             'image' => null,
             'tag_id' => '',

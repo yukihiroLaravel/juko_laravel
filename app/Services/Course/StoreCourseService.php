@@ -35,12 +35,13 @@ class StoreCourseService
         $tag = Tag::where('id', $tagId)
             ->where('instructor_id', $instructorId)
             ->first();
+
         if ($tag === null) {
             throw new NotFoundHttpException('Not Found Tag.');
         }
 
         // タグを中間テーブルに紐づける
-        $course->tags()->attach($tagId);
+        $course->tags()->attach($tag->id);
 
         return $course;
     }

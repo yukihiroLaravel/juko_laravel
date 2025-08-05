@@ -27,7 +27,6 @@ class StoreRequest extends FormRequest
             'title' => ['required'],
             'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'tag_id' => ['required', 'exists:tags,id'],
-            // 受講期限（任意）
             'attendance_deadline' => ['nullable', 'date', 'after_or_equal:today'],
         ];
     }

@@ -90,6 +90,11 @@ class AttendanceController extends Controller
             ->where('id', $request->attendance_id)
             ->firstOrFail();
 
+        // 受講期限チェック
+        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
+            throw new AuthorizationException('受講期限が切れています。');
+        }
+
         // 公開されているチャプターのみ抽出
         $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
         $attendance->course->chapters = $publicChapters;
@@ -117,6 +122,10 @@ class AttendanceController extends Controller
             'lessonAttendances',
         ])
             ->findOrFail($request->attendance_id);
+
+        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
+            throw new AuthorizationException('受講期限が切れています。');
+        }
 
         if ($authId !== $attendance->student_id) {
             throw new AuthorizationException('Not authorized.');
@@ -146,6 +155,11 @@ class AttendanceController extends Controller
 
         // 受講レコードを取得
         $attendance = Attendance::findOrFail($request->attendance_id);
+
+        // 受講期限チェック
+       if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
+            throw new AuthorizationException('受講期限が切れています。');
+        }
 
         // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
         if ($attendance->student_id !== $studentId) {
@@ -185,6 +199,10 @@ class AttendanceController extends Controller
         $studentId = Auth::id();
 
         $attendance = Attendance::findOrFail($request->attendance_id);
+
+        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
+            throw new AuthorizationException('受講期限が切れています。');
+        }
 
         if ($studentId !== $attendance->student_id) {
             // ログインしている生徒が受講している講座ではない場合エラー応答

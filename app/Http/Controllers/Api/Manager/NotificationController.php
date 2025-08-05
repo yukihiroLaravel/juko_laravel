@@ -29,7 +29,6 @@ use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -84,8 +83,8 @@ class NotificationController extends Controller
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $course = Course::findOrFail($request->course_id);       
-       
+        $course = Course::findOrFail($request->course_id);
+
         // Policyによる認可チェック
         $this->authorize('store', [Notification::class, $course]);
 

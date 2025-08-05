@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\Course;
 use Illuminate\Database\Eloquent\Collection;
 
 class NotificationPolicy
@@ -110,7 +110,7 @@ class NotificationPolicy
      * お知らせの作成に関する認可処理
      *
      * @param  \App\Model\Instructor  $instructor  認可対象の講師またはマネージャー
-     * @param  \App\Model\Course      $course  対象のコース
+     * @param  \App\Model\Course  $course  対象のコース
      */
     public function store(Instructor $instructor, Course $course): bool
     {

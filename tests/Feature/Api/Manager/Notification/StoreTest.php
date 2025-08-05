@@ -103,4 +103,27 @@ class StoreTest extends TestCase
             'message' => 'Forbidden, not allowed to use manager api.',
         ]);
     }
+
+    public function test_権限がない講師_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(4);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/manager/course/1/notification', [
+            'title' => 'title',
+            'type' => 'always',
+            'start_date' => '2022-01-01 00:00:00',
+            'end_date' => '2022-01-02 00:00:00',
+            'content' => 'content',
+            'status' => 'private',
+        ]);
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'This action is unauthorized.',
+        ]);
+    }
 }

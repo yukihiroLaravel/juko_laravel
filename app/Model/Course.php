@@ -140,7 +140,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'datetime',
         ];
     }
 }

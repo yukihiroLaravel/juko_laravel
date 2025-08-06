@@ -91,18 +91,19 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
     {
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
-            $storeCourseService(
+            $service(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
-                instructorId: $instructorId
+                instructorId: $instructorId,
+                attendanceDeadline: $request->attendance_deadline
             );
 
             DB::commit();

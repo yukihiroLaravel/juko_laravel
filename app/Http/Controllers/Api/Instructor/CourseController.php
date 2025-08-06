@@ -11,7 +11,6 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
-use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
@@ -186,11 +185,5 @@ class CourseController extends Controller
         return response()->json([
             'result' => 'true',
         ]);
-    }
-
-    public function edit($courseId)
-    {
-        $course = Course::findOrFail($courseId);
-        return new CourseResource($course);
     }
 }

@@ -18,6 +18,12 @@ class CourseShowResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'attendance_deadline' => $this->attendance_deadline 
+                ? $this->attendance_deadline->format('Y-m-d') 
+                : null,
+            
             'chapters' => $this->resource->chapters->map(fn ($chapter) => [
                 new ChapterResource($chapter),
                 'lessons' => LessonResource::collection($chapter->lessons),

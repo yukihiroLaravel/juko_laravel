@@ -27,6 +27,7 @@ class StoreRequest extends FormRequest
             'title' => ['required'],
             'image' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             'tag_id' => ['required', 'exists:tags,id'],
+            'attendance_deadline' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
         ];
     }
 }

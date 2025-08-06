@@ -89,7 +89,7 @@ class StoreTest extends TestCase
             'title' => 'The title field is required.',
             'image' => 'The image field is required.',
             'tag_id' => 'The tag id field is required.',
-            'attendance_deadline' => 'The attendance deadline is not a valid date.',
+            'attendance_deadline' => 'The attendance deadline does not match the format Y-m-d.',
         ]);
     }
 }

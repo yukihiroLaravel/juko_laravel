@@ -242,7 +242,7 @@ class LessonController extends Controller
         $courseId = $request->input('course_id');
         $status = $request->input('status');
 
-        //レッスンデータの取得
+        // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
         // Policy による認可チェック
@@ -251,11 +251,11 @@ class LessonController extends Controller
         try {
             $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
                 if ((int) $courseId !== $lesson->chapter->course->id) {
-                    //指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+                    // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
                     throw new AuthorizationException('Invalid course_id.');
                 }
                 if ((int) $chapterId !== $lesson->chapter_id) {
-                    //指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
+                    // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                     throw new AuthorizationException('Invalid chapter_id.');
                 }
             });

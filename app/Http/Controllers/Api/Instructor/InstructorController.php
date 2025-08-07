@@ -66,7 +66,7 @@ class InstructorController extends Controller
                 existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
-            //サービスクラス呼び出し
+            // サービスクラス呼び出し
             $temporaryInstructor = $storeService(
                 code: $code,
                 token: $token,
@@ -81,7 +81,7 @@ class InstructorController extends Controller
 
             DB::commit();
 
-            //送信
+            // 送信
             Mail::send(new AuthenticationConfirmationMail(
                 $email,
                 $temporaryInstructor->full_name,

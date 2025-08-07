@@ -36,7 +36,7 @@ class ShowTest extends TestCase
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
-        //act
+        // act
         $response = $this->getJson('/api/v1/manager/notification/aaa');
 
         // assert

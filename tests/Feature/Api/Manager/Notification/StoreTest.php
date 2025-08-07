@@ -57,7 +57,7 @@ class StoreTest extends TestCase
 
         $course = Course::find(1);
 
-        //act
+        // act
         $response = $this->postJson('/api/v1/manager/course/'.$course->id.'/notification', [
             'title' => '', // 空
             'type' => '',  // 空

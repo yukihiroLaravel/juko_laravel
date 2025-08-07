@@ -88,7 +88,7 @@ class Attendance extends Model
         return self::where('course_id', $courseId)->exists();
     }
 
-    //ソート項目
+    // ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
 
     const SORT_BY_EMAIL = 'email';
@@ -97,7 +97,7 @@ class Attendance extends Model
 
     const SORT_BY_LAST_LOGIN_AT = 'last_login_at';
 
-    //$periodのバリデーションに利用する定数
+    // $periodのバリデーションに利用する定数
     const PERIOD_WEEK = 'week';
 
     const PERIOD_MONTH = 'month';

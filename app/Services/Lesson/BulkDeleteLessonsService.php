@@ -18,7 +18,7 @@ class BulkDeleteLessonsService
         // 対象レッスンの削除
         Lesson::whereIn('id', $lessonIds)->delete();
 
-        //レッスン順序の更新
+        // レッスン順序の更新
         Lesson::where('chapter_id', $chapterId)
             ->orderBy('order')
             ->get()

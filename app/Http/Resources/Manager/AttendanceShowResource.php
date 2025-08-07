@@ -29,6 +29,9 @@ class AttendanceShowResource extends JsonResource
                 'tags' => TagResource::collection($chapter->course->tags),
             ]),
             'students_count' => $this->resource['studentsCount'],
+            'attendanceDeadline' => $this['attendanceDeadline']
+                ? $this['attendanceDeadline']->format('Y-m-d')
+                : null,
         ];
     }
 }

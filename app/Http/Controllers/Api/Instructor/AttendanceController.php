@@ -102,6 +102,7 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

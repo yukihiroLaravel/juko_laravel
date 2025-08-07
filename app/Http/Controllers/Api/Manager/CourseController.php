@@ -80,6 +80,11 @@ class CourseController extends Controller
         // 認可チェック
         $this->authorize('view', $course);
 
+        // 受講期限チェック
+        if ($course->attendance_deadline && now() > $course->attendance_deadline) {
+            throw new AuthorizationException('受講期限を過ぎています。');
+        }
+
         return new CourseShowResource($course);
     }
 

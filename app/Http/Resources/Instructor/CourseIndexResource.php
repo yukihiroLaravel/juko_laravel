@@ -4,7 +4,6 @@ namespace App\Http\Resources\Instructor;
 
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Course;
-use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseIndexResource extends JsonResource
@@ -28,9 +27,10 @@ class CourseIndexResource extends JsonResource
             'status' => $this->resource->status,
             'has_active_students' => (bool) $this->resource->has_active_students,
             'tags' => TagResource::collection($this->resource->tags),
-            'attendance_deadline' => $this->resource->attendance_deadline
-            ? $this->resource->attendance_deadline->format('Y-m-d H:i:s')
-            : null,
+            'attendance_deadline' =>
+                $this->resource->attendance_deadline !== null
+                    ? $this->resource->attendance_deadline->format('Y-m-d')
+                    : null,
         ];
     }
 }

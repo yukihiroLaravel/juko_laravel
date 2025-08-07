@@ -59,6 +59,13 @@ class TagController extends Controller
             ->with('courses')
             ->get();
 
+        // 1件ずつinstructor_idをチェックする（もしチェックが必要な場合）
+        foreach ($query as $tag) {
+            if ($tag->instructor_id !== $instructorId) {
+                throw new AuthorizationException('Forbidden, invalid instructor_id.');
+            }
+        }
+
         return TagIndexResource::collection($query);
     }
 

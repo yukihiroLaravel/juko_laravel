@@ -47,7 +47,7 @@ class InstructorController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        //指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
+        // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
         if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to this instructor.');
         }
@@ -175,7 +175,7 @@ class InstructorController extends Controller
                 existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 
-            //サービスクラス呼び出し
+            // サービスクラス呼び出し
             $temporaryInstructor = $storeService(
                 code: $code,
                 token: $token,
@@ -190,7 +190,7 @@ class InstructorController extends Controller
 
             DB::commit();
 
-            //送信
+            // 送信
             Mail::send(new AuthenticationConfirmationMail(
                 $email,
                 $temporaryInstructor->full_name,

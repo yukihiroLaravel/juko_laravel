@@ -247,7 +247,7 @@ class CompareRoute extends Command
                 }
 
                 if (! $checkFlag) {
-                    //「uri」の次の行としての「method」が取得できない状況は、想定外の状況なので例外を投げる。
+                    // 「uri」の次の行としての「method」が取得できない状況は、想定外の状況なので例外を投げる。
                     throw new Exception('invalid status. 00100 lines:'.($index + 1));
                 }
 

@@ -92,7 +92,7 @@ class AttendanceController extends Controller
 
         // 受講期限チェック
         if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('受講期限が切れています。');
+            throw new AuthorizationException('The course has expired.');
         }
 
         // 公開されているチャプターのみ抽出
@@ -124,7 +124,7 @@ class AttendanceController extends Controller
             ->findOrFail($request->attendance_id);
 
         if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('受講期限が切れています。');
+            throw new AuthorizationException('The course has expired.');
         }
 
         if ($authId !== $attendance->student_id) {
@@ -158,7 +158,7 @@ class AttendanceController extends Controller
 
         // 受講期限チェック
        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('受講期限が切れています。');
+            throw new AuthorizationException('The course has expired.');
         }
 
         // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
@@ -201,7 +201,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::findOrFail($request->attendance_id);
 
         if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('受講期限が切れています。');
+            throw new AuthorizationException('The course has expired.');
         }
 
         if ($studentId !== $attendance->student_id) {

@@ -29,7 +29,7 @@ class AttendanceShowResource extends JsonResource
             ]),
             'students_count' => $this->resource['studentsCount'],
             'tags' => TagResource::collection($this->resource['tags']),
-            'attendanceDeadline' => $this['attendanceDeadline']
+            'attendance_deadline' => $this['attendanceDeadline']
                 ? $this['attendanceDeadline']->format('Y-m-d')
                 : null,
         ];

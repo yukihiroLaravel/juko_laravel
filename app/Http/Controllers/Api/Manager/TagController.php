@@ -29,7 +29,7 @@ class TagController extends Controller
      */
     public function index(IndexRequest $request)
     {
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -41,8 +41,8 @@ class TagController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id; // 自身のIDも追加
 
-        if ($tagId) {
-            // タグの取得
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしているマネージャー(講師)もしくはその配下の講師とtag_idの講師が一致しない

@@ -18,6 +18,7 @@ use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -75,10 +76,8 @@ class AttendanceController extends Controller
 
     /**
      * 受講講座の進捗情報を取得
-     *
-     * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
      */
-    public function progress(ProgressRequest $request)
+    public function progress(ProgressRequest $request): AttendanceCourseProgressResource
     {
         $authId = Auth::id();
         $attendance = Attendance::with([
@@ -87,7 +86,8 @@ class AttendanceController extends Controller
         ])
             ->findOrFail($request->attendance_id);
 
-        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
+        // 受講期限当日は受講可能
+        if ($attendance->course->attendance_deadline && CarbonImmutable::now()->gte($attendance->course->attendance_deadline->endOfDay())) {
             throw new AuthorizationException('The course has expired.');
         }
 
@@ -119,11 +119,6 @@ class AttendanceController extends Controller
 
         // 受講レコードを取得
         $attendance = Attendance::findOrFail($request->attendance_id);
-
-        // 受講期限チェック
-       if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('The course has expired.');
-        }
 
         // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
         if ($attendance->student_id !== $studentId) {
@@ -163,10 +158,6 @@ class AttendanceController extends Controller
         $studentId = Auth::id();
 
         $attendance = Attendance::findOrFail($request->attendance_id);
-
-        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('The course has expired.');
-        }
 
         if ($studentId !== $attendance->student_id) {
             // ログインしている生徒が受講している講座ではない場合エラー応答

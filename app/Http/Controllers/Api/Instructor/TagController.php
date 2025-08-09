@@ -17,6 +17,7 @@ use App\Services\Tag\UpdateTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -35,14 +36,20 @@ class TagController extends Controller
         return TagResource::collection($tags);
     }
 
-    public function courseIndex(IndexRequest $request)
+    /**
+     * 講座のタグ一覧を取得する
+     *
+     * @return AnonymousResourceCollection<TagIndexResource>
+     */
+    public function courseIndex(IndexRequest $request): AnonymousResourceCollection
     {
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
         // ログインしている講師
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        if ($tagId) {
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない

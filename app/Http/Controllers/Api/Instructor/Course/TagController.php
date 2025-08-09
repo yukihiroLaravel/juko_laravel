@@ -21,12 +21,13 @@ class TagController extends Controller
      */
     public function index(IndexRequest $request): AnonymousResourceCollection
     {
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
         // ログインしている講師
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        if ($tagId) {
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない

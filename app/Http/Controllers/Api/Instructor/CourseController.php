@@ -40,9 +40,10 @@ class CourseController extends Controller
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
         $searchWord = $request->query('search_word');
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
-        if ($tagId) {
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない

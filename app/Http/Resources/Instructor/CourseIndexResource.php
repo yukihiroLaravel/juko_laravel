@@ -27,6 +27,9 @@ class CourseIndexResource extends JsonResource
             'status' => $this->resource->status,
             'has_active_students' => (bool) $this->resource->has_active_students,
             'tags' => TagResource::collection($this->resource->tags),
+            'attendance_deadline' => $this->resource->attendance_deadline
+                ? $this->resource->attendance_deadline->format('Y-m-d H:i:s')
+                : null,
         ];
     }
 }

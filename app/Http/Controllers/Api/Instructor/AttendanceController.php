@@ -93,7 +93,9 @@ class AttendanceController extends Controller
         }
 
         /** @var Collection<int, Chapter> */
-        $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
+        $chapters = Chapter::with([
+            'lessons.lessonAttendances',
+        ])->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -102,6 +104,7 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

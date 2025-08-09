@@ -9,7 +9,7 @@ use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
-use App\Http\Resources\Manager\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -19,6 +19,7 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -94,16 +95,14 @@ class AttendanceController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $instructorId;
 
-        $course = Course::findOrFail($courseId);
+        $course = Course::with('tags')->findOrFail($courseId);
         if (! in_array($course->instructor_id, $instructorIds, true)) {
             // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
+            throw new AuthorizationException('Forbidden, not allowed to access this course.');
         }
 
+        /** @var Collection<int, Chapter> */
         $chapters = Chapter::with([
-            'course.tags',
             'lessons.lessonAttendances',
         ])->where('course_id', $courseId)->get();
 
@@ -113,6 +112,8 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
+            'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

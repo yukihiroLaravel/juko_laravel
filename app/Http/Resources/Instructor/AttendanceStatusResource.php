@@ -31,6 +31,9 @@ class AttendanceStatusResource extends JsonResource
                 'chapters' => $this->mapChapters($this->resource->course->chapters),
                 'title' => $this->resource->course->title,
                 'tags' => TagResource::collection($this->resource->course->tags),
+                'attendance_deadline' => $this->resource->course->attendance_deadline !== null
+                    ? $this->resource->course->attendance_deadline->format('Y-m-d')
+                    : null,
             ],
         ];
     }

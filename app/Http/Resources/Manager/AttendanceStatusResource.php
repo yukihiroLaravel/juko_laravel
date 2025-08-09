@@ -29,6 +29,9 @@ class AttendanceStatusResource extends JsonResource
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'chapters' => $this->mapChapters($this->resource->course->chapters),
+                'attendance_deadline' => $this->resource->course->attendance_deadline !== null
+                    ? $this->resource->course->attendance_deadline->format('Y-m-d')
+                    : null,
             ],
         ];
     }

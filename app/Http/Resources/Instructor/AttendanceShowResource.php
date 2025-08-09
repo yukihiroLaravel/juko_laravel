@@ -25,7 +25,7 @@ class AttendanceShowResource extends JsonResource
             'chapters' => $chapters->map(fn (Chapter $chapter) => [
                 'chapter_id' => $chapter->id,
                 'title' => $chapter->title,
-                'completed_count' => $chapter->completed_count,
+                'completed_count' => $chapter->completed_count,  
             ]),
             'students_count' => $this->resource['studentsCount'],
             'tags' => TagResource::collection($this->resource['tags']),

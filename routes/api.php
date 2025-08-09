@@ -32,16 +32,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']);
                 Route::PUT('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters']);
                 Route::put('chapter/{chapter_id}/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllLessons']);
-                Route::prefix('course')->group(function () {
-                    Route::prefix('{course_id}')->group(function () {
-                        Route::prefix('chapter')->group(function () {
-                            // 受講生-受講-講座-チャプター
-                            Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'showChapter']);
-                            });
-                        });
-                    });
-                });
             });
         });
 

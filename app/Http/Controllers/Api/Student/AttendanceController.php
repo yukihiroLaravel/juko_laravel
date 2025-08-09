@@ -9,11 +9,9 @@ use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
-use App\Http\Requests\Student\Attendance\ShowChapterRequest;
 use App\Http\Requests\Student\Attendance\ShowRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Resources\Student\AttendanceIndexResource;
-use App\Http\Resources\Student\AttendanceShowChapterResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -73,40 +71,6 @@ class AttendanceController extends Controller
             Log::error($e->getMessage()."\n".$e->getTraceAsString());
             throw $e;
         }
-    }
-
-    /**
-     * チャプター詳細情報を取得
-     *
-     * @return AttendanceShowChapterResource
-     */
-    public function showChapter(ShowChapterRequest $request)
-    {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances',
-            'course.tags',
-        ])
-            ->where('id', $request->attendance_id)
-            ->firstOrFail();
-
-        // 受講期限チェック
-        if ($attendance->course->attendance_deadline && now()->gt($attendance->course->attendance_deadline)) {
-            throw new AuthorizationException('The course has expired.');
-        }
-
-        // 公開されているチャプターのみ抽出
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
-
-        // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(fn ($chapter) => $chapter->id === (int) $request->chapter_id)
-            ->first();
-
-        return new AttendanceShowChapterResource([
-            'attendance' => $attendance,
-            'chapter' => $chapter,
-        ]);
     }
 
     /**

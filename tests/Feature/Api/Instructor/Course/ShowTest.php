@@ -29,6 +29,32 @@ class ShowTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'course_id',
+                'title',
+                'image',
+                'status',
+                'attendance_deadline',
+                'chapters' => [
+                    '*' => [
+                        'chapter_id',
+                        'title',
+                        'order',
+                        'status',
+                        'lessons' => [
+                            '*' => [
+                                'lesson_id',
+                                'title',
+                                'remarks',
+                                'status',
+                                'order',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
     }
 
     public function test_権限がない講師_失敗(): void

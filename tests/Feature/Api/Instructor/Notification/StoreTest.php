@@ -22,11 +22,11 @@ class StoreTest extends TestCase
     public function test_お知らせ登録_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/course/1/notification', [
+        $response = $this->postJson('/api/v1/instructor/course/2/notification', [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',
@@ -38,7 +38,7 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'course_id' => 1,
+            'course_id' => 2,
             'title' => 'title',
             'type' => TypeEnum::ALWAYS,
             'start_date' => '2022-01-01 00:00:00',
@@ -55,7 +55,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/course/1/notification', [
+        $response = $this->postJson('/api/v1/instructor/course/2/notification', [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',
@@ -67,7 +67,7 @@ class StoreTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

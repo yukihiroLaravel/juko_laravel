@@ -29,7 +29,6 @@ use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -84,19 +83,12 @@ class NotificationController extends Controller
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $course = Course::findOrFail($request->course_id);
-        assert($course instanceof Course);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+
+        // Policyによる認可チェック
+        $this->authorize('store', [Notification::class, $course]);
+
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
         try {

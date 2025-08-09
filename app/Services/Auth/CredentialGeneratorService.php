@@ -20,7 +20,7 @@ class CredentialGeneratorService
     {
         $randomGenerator = $randomGenerator ?: fn () => Str::random(4);
 
-        //認証コードの生成
+        // 認証コードの生成
         $code = $randomGenerator(4);
 
         for ($i = 1; $i <= 5; $i++) {
@@ -45,7 +45,7 @@ class CredentialGeneratorService
      */
     public function createToken(callable $existsChecker, ?callable $randomGenerator = null): string
     {
-        //トークンの生成
+        // トークンの生成
         $randomGenerator = $randomGenerator ?: fn () => Str::random(10);
 
         $token = $randomGenerator();

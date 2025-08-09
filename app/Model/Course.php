@@ -39,7 +39,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline'
+        'attendance_deadline',
     ];
 
     /**
@@ -131,7 +131,12 @@ class Course extends Model
     }
 
     /**
-     * @return array<string, string>
+     * @return array{
+     *  instructor_id: 'int',
+     *  created_at: 'immutable_datetime',
+     *  updated_at: 'immutable_datetime',
+     *  attendance_deadline: 'immutable_datetime'
+     * }
      */
     #[\Override]
     protected function casts(): array

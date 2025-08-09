@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
-            //講師-講座タグ一覧
+            // 講師-講座タグ一覧
             Route::get('tag/index', [App\Http\Controllers\Api\Instructor\TagController::class, 'index']);
 
             // 講師-講座
@@ -224,7 +224,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('notification')->group(function () {
                             Route::post('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'store']);
                         });
-                        //マネージャー生徒学習状況
+                        // マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {
                                 Route::get('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'show']);

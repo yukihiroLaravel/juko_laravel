@@ -256,31 +256,21 @@ class NotificationController extends Controller
      */
     public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
-        // ログインしている講師のIDを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         // 選択されたお知らせidを取得
         $notificationIds = $request->input('notifications', []);
-        $status = $request->status;
+        $status = $request->input('status');
 
-        // 選択されたお知らせを取得
-        $chosenNotifications = Notification::whereIn('id', $notificationIds)->pluck('instructor_id');
+        // Policy判定で使うので instructor_id を含めて取得
+        $notifications = Notification::whereIn('id', $notificationIds)
+            ->get(['id', 'instructor_id', 'status']);
 
-        // 選択されたお知らせの中に、講師と一致しないお知らせが、１つでも含まれている場合はエラー
-        if (
-            $chosenNotifications->contains(fn ($instructorIdFromNotificationsTable) => $instructorIdFromNotificationsTable !== $instructorId)
-        ) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 認可はPolicyへ一任
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
         // トランザクション開始
         DB::beginTransaction();
 
         try {
-            $notifications = Notification::where('instructor_id', $instructorId)
-                ->whereIn('id', $notificationIds)
-                ->get(['id', 'instructor_id', 'status']);
-
             $service(
                 notifications: $notifications,
                 status: $status

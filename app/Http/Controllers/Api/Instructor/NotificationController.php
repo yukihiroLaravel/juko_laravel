@@ -28,7 +28,6 @@ use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -260,7 +259,6 @@ class NotificationController extends Controller
         $notificationIds = $request->input('notifications', []);
         $status = $request->input('status');
 
-        // Policy判定で使うので instructor_id を含めて取得
         $notifications = Notification::whereIn('id', $notificationIds)
             ->get(['id', 'instructor_id', 'status']);
 

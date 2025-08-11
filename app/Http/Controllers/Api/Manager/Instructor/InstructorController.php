@@ -102,7 +102,7 @@ class InstructorController extends Controller
     {
         try {
             /** @var Instructor $instructor */
-            $instructor = Instructor::findOrFail($request->instructor_id);           
+            $instructor = Instructor::findOrFail($request->instructor_id);
 
             // ★ここでPolicyを呼ぶ（Manager 自身 or 配下講師のみ許可）
             $this->authorize('update', $instructor);

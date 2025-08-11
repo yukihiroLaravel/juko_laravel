@@ -122,6 +122,7 @@ class InstructorController extends Controller
     {
         try {
             $instructor = Auth::user();
+            $this->authorize('update', $instructor);
 
             // 更新前の画像パスを使用
             $imagePath = $instructor->profile_image;

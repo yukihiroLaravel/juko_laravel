@@ -100,22 +100,12 @@ class InstructorController extends Controller
      */
     public function update(UpdateRequest $request)
     {
-        // マネージャーと配下の講師情報を取得
-        $managerId = $request->user()->id;
-
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         try {
             /** @var Instructor $instructor */
-            $instructor = Instructor::FindOrFail($request->instructor_id);
+            $instructor = Instructor::findOrFail($request->instructor_id);           
 
-            // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-            if (! in_array($instructor->id, $instructorIds, true)) {
-                throw new AuthorizationException('Forbidden, not allowed to this instructor.');
-            }
+            // ★ここでPolicyを呼ぶ（Manager 自身 or 配下講師のみ許可）
+            $this->authorize('update', $instructor);
 
             // 更新前の画像情報を取得
             $imagePath = $instructor->profile_image;

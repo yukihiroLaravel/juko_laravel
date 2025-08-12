@@ -15,7 +15,7 @@ class InstructorPolicy
      * @param  \App\Model\Instructor  $instructor  ログイン中、更新対象の講師     
      * @return bool
      */
-    public function update(Instructor $instructor, Instructor $instructor)
+    public function update(Instructor $instructor)
     {
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
@@ -25,4 +25,5 @@ class InstructorPolicy
 
         return $instructor->id === $instructor->id;
     }
+    this->authorize('update');
 }

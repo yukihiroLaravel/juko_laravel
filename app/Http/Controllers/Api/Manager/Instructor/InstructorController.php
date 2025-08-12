@@ -105,7 +105,7 @@ class InstructorController extends Controller
             $instructor = Instructor::findOrFail($request->instructor_id);
 
             // ★ここでPolicyを呼ぶ（Manager 自身 or 配下講師のみ許可）
-            $this->authorize('update', $instructor);
+            $this->authorize('update');
 
             // 更新前の画像情報を取得
             $imagePath = $instructor->profile_image;

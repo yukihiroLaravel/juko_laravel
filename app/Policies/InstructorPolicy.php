@@ -25,5 +25,4 @@ class InstructorPolicy
 
         return $instructor->id === $instructor->id;
     }
-    this->authorize('update');
 }

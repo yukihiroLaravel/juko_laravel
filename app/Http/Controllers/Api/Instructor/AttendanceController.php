@@ -16,7 +16,6 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Policies\AttendancePolicy;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;

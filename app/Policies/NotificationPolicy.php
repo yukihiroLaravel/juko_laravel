@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -9,9 +10,26 @@ use Illuminate\Database\Eloquent\Collection;
 class NotificationPolicy
 {
     /**
+     * お知らせの閲覧に関する認可処理
+     */
+    public function view(Instructor $instructor, Notification $notification): bool
+    {
+        // マネージャーの場合は配下の講師の通知も見られる
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($notification->instructor_id, $instructorIds, true);
+        }
+
+        // 講師権限のみの場合は、自分の通知だけが見られる
+        return $notification->instructor_id === $instructor->id;
+    }
+
+    /**
      * お知らせの更新処理に関する認可処理
      */
-    public function update(Instructor $instructor, Notification $notification)
+    public function update(Instructor $instructor, Notification $notification): bool
     {
         // マネージャーの場合は配下の講師レッスンも更新可能
         if ($instructor->isManager()) {
@@ -86,5 +104,25 @@ class NotificationPolicy
         return $notifications->every(
             fn (Notification $notification) => $notification->instructor_id === $instructor->id
         );
+    }
+
+    /**
+     * お知らせの作成に関する認可処理
+     *
+     * @param  \App\Model\Instructor  $instructor  認可対象の講師またはマネージャー
+     * @param  \App\Model\Course  $course  対象のコース
+     */
+    public function store(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            // 管理者の場合、配下の講師の講座も可能
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        // 講師の場合、自分のコースだけを許可
+        return $course->instructor_id === $instructor->id;
     }
 }

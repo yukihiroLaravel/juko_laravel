@@ -20,11 +20,11 @@ class DeleteTest extends TestCase
     public function test_タグ削除_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/7');
+        $response = $this->deleteJson('/api/v1/instructor/tag/5');
 
         // assert
         $response->assertStatus(200);
@@ -32,18 +32,18 @@ class DeleteTest extends TestCase
             'result' => true,
         ]);
         $this->assertDatabaseMissing('tags', [
-            'id' => 7,
+            'id' => 5,
         ]);
     }
 
     public function test_タグに紐づく講座が存在_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/1');
+        $response = $this->deleteJson('/api/v1/instructor/tag/2');
 
         // assert
         $response->assertStatus(403);
@@ -59,7 +59,7 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/1');
+        $response = $this->deleteJson('/api/v1/instructor/tag/6');
 
         // assert
         $response->assertStatus(403);

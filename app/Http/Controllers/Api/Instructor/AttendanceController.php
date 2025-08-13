@@ -36,23 +36,18 @@ class AttendanceController extends Controller
      */
     public function store(StoreRequest $request): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
+        $course = Course::findOrFail($request->course_id);
 
-        $courseIds = Course::where('instructor_id', $instructorId)
-            ->pluck('id')
-            ->toArray();
-
-        if (! in_array($request->course_id, $courseIds, true)) {
-            // 講師の所有する講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // Policyによる認可チェック
+        $this->authorize('create', [Attendance::class, $course]);
 
         if (Attendance::where('course_id', $request->course_id)
             ->where('student_id', $request->student_id)
             ->exists()
         ) {
-            // 受講状況が存在する場合はエラーを返す
-            throw new AuthorizationException('Attendance record already exists.');
+            throw new AuthorizationException(
+                'Attendance record already exists.'
+            );
         }
 
         DB::beginTransaction();
@@ -61,9 +56,11 @@ class AttendanceController extends Controller
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
             ]);
+
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);
             })->get();
+
             foreach ($lessons as $lesson) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
@@ -71,11 +68,10 @@ class AttendanceController extends Controller
                     'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 ]);
             }
+
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -94,7 +90,9 @@ class AttendanceController extends Controller
         $this->authorize('view', [Attendance::class, $course]);
 
         /** @var Collection<int, Chapter> */
-        $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
+        $chapters = Chapter::with([
+            'lessons.lessonAttendances',
+        ])->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -103,6 +101,7 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

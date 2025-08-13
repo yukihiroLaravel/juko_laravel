@@ -32,16 +32,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress']);
                 Route::PUT('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters']);
                 Route::put('chapter/{chapter_id}/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllLessons']);
-                Route::prefix('course')->group(function () {
-                    Route::prefix('{course_id}')->group(function () {
-                        Route::prefix('chapter')->group(function () {
-                            // 受講生-受講-講座-チャプター
-                            Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'showChapter']);
-                            });
-                        });
-                    });
-                });
             });
         });
 
@@ -63,7 +53,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
-            //講師-講座タグ一覧
+            // 講師-講座タグ一覧
             Route::get('tag/index', [App\Http\Controllers\Api\Instructor\TagController::class, 'index']);
 
             // 講師-講座
@@ -234,7 +224,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('notification')->group(function () {
                             Route::post('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'store']);
                         });
-                        //マネージャー生徒学習状況
+                        // マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {
                                 Route::get('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'show']);

@@ -40,9 +40,10 @@ class CourseController extends Controller
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
         $searchWord = $request->query('search_word');
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
-        if ($tagId) {
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしている講師とtag_idの講師が一致しない
@@ -80,13 +81,10 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request): CourseShowResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
-        if ($course->instructor_id !== $instructorId) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // 認可チェック
+        $this->authorize('view', $course);
 
         return new CourseShowResource($course);
     }
@@ -94,18 +92,19 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
     {
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
         try {
-            $storeCourseService(
+            $service(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
-                instructorId: $instructorId
+                instructorId: $instructorId,
+                attendanceDeadline: $request->attendance_deadline
             );
 
             DB::commit();

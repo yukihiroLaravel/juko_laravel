@@ -29,7 +29,6 @@ use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -69,23 +68,12 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
-        // ユーザーID取得
-        $instructorId = $request->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
 
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
-        assert($notification instanceof Notification);
 
-        // アクセス権限のチェック
-        if (! in_array($notification->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // Policyによる認可チェック
+        $this->authorize('view', $notification);
 
         return new NotificationResource($notification);
     }
@@ -95,19 +83,12 @@ class NotificationController extends Controller
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // 配下のインストラクター情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        assert($manager instanceof Instructor);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
         $course = Course::findOrFail($request->course_id);
-        assert($course instanceof Course);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+
+        // Policyによる認可チェック
+        $this->authorize('store', [Notification::class, $course]);
+
+        $instructorId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
         try {

@@ -19,6 +19,7 @@ class CreateCoursesTable extends Migration
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
             $table->string('status', 30)->comment('ステータス');
+            $table->dateTime('attendance_deadline')->nullable()->comment('受講期限');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

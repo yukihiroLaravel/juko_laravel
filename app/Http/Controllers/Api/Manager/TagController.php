@@ -12,6 +12,7 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
+use App\Services\Tag\DeleteTagService;
 use App\Services\Tag\UpdateTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -28,7 +29,7 @@ class TagController extends Controller
      */
     public function index(IndexRequest $request)
     {
-        $tagId = $request->query('tag_id');
+        $tagId = $request->query('tag_id', null);
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -40,8 +41,8 @@ class TagController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id; // 自身のIDも追加
 
-        if ($tagId) {
-            // タグの取得
+        if ($tagId !== null) {
+            /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
             // ログインしているマネージャー(講師)もしくはその配下の講師とtag_idの講師が一致しない
@@ -88,25 +89,16 @@ class TagController extends Controller
     /**
      * タグ削除API
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteTagService $service): JsonResponse
     {
-        // タグの取得
         $tag = Tag::findOrFail($request->tag_id);
 
-        // policyによる認可チェック
+        // 認可処理
         $this->authorize('delete', $tag);
 
-        // タグに関連付けられた講座がある場合は削除不可
-        if ($tag->courses()->exists()) {
-            throw new AuthorizationException('Forbidden, this tag is linked to courses.');
-        }
+        $service(tag: $tag);
 
-        // タグの削除
-        $tag->delete();
-
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json(['result' => true]);
     }
 
     /**

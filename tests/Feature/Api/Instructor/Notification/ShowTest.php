@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Student;
+namespace Tests\Feature\Api\Instructor\Notification;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,7 +10,6 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
     #[\Override]
     protected function setUp(): void
     {
@@ -18,33 +17,17 @@ class ShowTest extends TestCase
         $this->seed();
     }
 
-    public function test_生徒取得_成功(): void
+    public function test_お知らせ取得_成功(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
+        $response = $this->getJson('/api/v1/instructor/notification/2');
 
         // assert
         $response->assertStatus(200);
-    }
-
-    public function test_許可がない講師_失敗(): void
-    {
-        // arrange
-        $instructor = Instructor::find(3);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/1');
-
-        // assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'This action is unauthorized.',
-        ]);
     }
 
     public function test_バリデーションエラー(): void
@@ -54,12 +37,12 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/student/bbb');
+        $response = $this->getJson('/api/v1/instructor/notification/aaa');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'student_id',
+            'notification_id',
         ]);
     }
 }

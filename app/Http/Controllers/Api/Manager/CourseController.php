@@ -9,13 +9,12 @@ use App\Http\Requests\Manager\Course\ShowRequest;
 use App\Http\Requests\Manager\Course\StatusRequest;
 use App\Http\Requests\Manager\Course\StoreRequest;
 use App\Http\Requests\Manager\Course\UpdateRequest;
+use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
-use App\Http\Resources\Manager\CourseShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\QueryService;
 use App\Services\Course\StoreCourseService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
@@ -74,22 +73,12 @@ class CourseController extends Controller
     /**
      * 講座情報取得API
      */
-    public function show(ShowRequest $request, QueryService $queryService): CourseShowResource
+    public function show(ShowRequest $request): CourseShowResource
     {
-        // ログイン中の講師IDを取得
-        $userId = Auth::guard('instructor')->user()->id;
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
-        // 配下の講師情報を取得
-        $manager = Instructor::with('managings')->find($userId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $userId;
-
-        $course = $queryService->getCourse($request->course_id);
-
-        // 自身 もしくは 配下の講師でない場合はエラー応答
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 認可チェック
+        $this->authorize('view', $course);
 
         return new CourseShowResource($course);
     }
@@ -97,18 +86,19 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $storeCourseService): JsonResponse
+    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
         DB::beginTransaction();
 
         try {
-            $course = $storeCourseService(
+            $course = $service(
                 title: $request->title,
                 image: $request->file('image'),
                 tagId: $request->tag_id,
-                instructorId: $managerId
+                instructorId: $managerId,
+                attendanceDeadline: $request->attendance_deadline
             );
 
             DB::commit();

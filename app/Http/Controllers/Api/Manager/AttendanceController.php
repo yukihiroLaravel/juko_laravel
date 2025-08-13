@@ -9,7 +9,7 @@ use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
-use App\Http\Resources\Manager\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -17,9 +17,9 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Policies\AttendancePolicy;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -36,29 +36,16 @@ class AttendanceController extends Controller
      */
     public function store(StoreRequest $request): JsonResponse
     {
-        $managerId = $request->user()->id;
-
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
-        $courseIds = Course::with('instructor')
-            ->whereIn('instructor_id', $instructorIds)
-            ->pluck('id')
-            ->toArray();
-
         /** @var Course $course */
-        $course = Course::find($request->course_id);
+        $course = Course::findOrFail($request->course_id);
 
-        if (! in_array($course->id, $courseIds, true)) {
-            // 自分もしくは配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden.');
-        }
+        // Policyによる認可チェック
+        $this->authorize('create', [Attendance::class, $course]);
 
-        if (Attendance::where('course_id', $request->course_id)->where('student_id', $request->student_id)->exists()) {
-            // 受講状況が存在すれば、エラーを返す
+        if (Attendance::where('course_id', $request->course_id)
+            ->where('student_id', $request->student_id)
+            ->exists()
+        ) {
             throw new AuthorizationException(
                 'Attendance record already exists.'
             );
@@ -66,19 +53,15 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
-            // 受講状況を登録
-            /** @var Attendance $attendance */
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
             ]);
 
-            // 指定した講座のレッスンを取得
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);
             })->get();
 
-            // レッスン受講情報を登録
             $lessons->each(function (Lesson $lesson) use ($attendance) {
                 LessonAttendance::create([
                     'attendance_id' => $attendance->id,
@@ -89,9 +72,7 @@ class AttendanceController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'result' => true,
-            ]);
+            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);
@@ -109,8 +90,8 @@ class AttendanceController extends Controller
 
         $this->authorize('view', [Attendance::class, $course]);
 
+        /** @var Collection<int, Chapter> */
         $chapters = Chapter::with([
-            'course.tags',
             'lessons.lessonAttendances',
         ])->where('course_id', $courseId)->get();
 
@@ -120,6 +101,8 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
+            'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

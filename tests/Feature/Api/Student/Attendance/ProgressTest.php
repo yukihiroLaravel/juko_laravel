@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
+use App\Model\Course;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -55,5 +56,36 @@ class ProgressTest extends TestCase
 
         // assert
         $response->assertStatus(422);
+    }
+
+    public function test_受講期限切れの受講進捗を取得_失敗(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
+        Course::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
+
+        // act
+        $response = $this->getJson('/api/v1/attendance/1/progress');
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'The course has expired.',
+        ]);
+    }
+
+    public function test_受講期限当日は受講進捗を取得_成功(): void
+    {
+        // arrange
+        $student = Student::find(1);
+        $this->actingAs($student);
+        Course::find(1)->update(['attendance_deadline' => now()]);
+
+        // act
+        $response = $this->getJson('/api/v1/attendance/1/progress');
+
+        // assert
+        $response->assertStatus(200);
     }
 }

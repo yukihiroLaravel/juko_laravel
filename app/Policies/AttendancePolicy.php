@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 
 class AttendancePolicy
 {
@@ -40,5 +41,17 @@ class AttendancePolicy
 
         // マネージャー権限のない講師
         return $instructor->id === $attendance->course->instructor_id;
+    }
+
+    /** Student: 進捗閲覧（progress） */
+    public function progress(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;        
+    }
+
+    /** Student: 更新（completeAllLessons / completeAllChapters） */
+    public function update(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
     }
 }

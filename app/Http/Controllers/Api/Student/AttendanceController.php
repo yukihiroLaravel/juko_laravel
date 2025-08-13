@@ -79,7 +79,6 @@ class AttendanceController extends Controller
      */
     public function progress(ProgressRequest $request): AttendanceCourseProgressResource
     {
-        $authId = Auth::id();
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
@@ -91,9 +90,8 @@ class AttendanceController extends Controller
             throw new AuthorizationException('The course has expired.');
         }
 
-        if ($authId !== $attendance->student_id) {
-            throw new AuthorizationException('Not authorized.');
-        }
+        // 本人チェックは Policy に委譲
+        $this->authorize('progress', $attendance);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
@@ -114,16 +112,11 @@ class AttendanceController extends Controller
      */
     public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
     {
-        // ログイン中の生徒ID
-        $studentId = Auth::id();
-
         // 受講レコードを取得
         $attendance = Attendance::findOrFail($request->attendance_id);
 
-        // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
-        if ($attendance->student_id !== $studentId) {
-            throw new AuthorizationException('Forbidden, invalid student.');
-        }
+        // 本人のみ更新可
+        $this->authorize('update', $attendance);
 
         // 該当チャプターを取得
         $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
@@ -155,14 +148,10 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $studentId = Auth::id();
-
         $attendance = Attendance::findOrFail($request->attendance_id);
 
-        if ($studentId !== $attendance->student_id) {
-            // ログインしている生徒が受講している講座ではない場合エラー応答
-            throw new AuthorizationException('Not authorized.');
-        }
+        // 本人のみ更新可
+        $this->authorize('update', $attendance);
 
         $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
             ->pluck('id')

@@ -44,7 +44,7 @@ class AttendancePolicy
     }
 
     /** Student: 進捗閲覧（progress） */
-    public function progress(Student $student, Attendance $attendance): bool
+    public function view(Student $student, Attendance $attendance): bool
     {
         return $attendance->student_id === $student->id;        
     }

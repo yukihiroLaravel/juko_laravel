@@ -91,7 +91,7 @@ class AttendanceController extends Controller
         }
 
         // 本人チェックは Policy に委譲
-        $this->authorize('progress', $attendance);
+        $this->authorize('view', $attendance);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),

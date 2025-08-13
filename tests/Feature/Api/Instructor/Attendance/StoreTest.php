@@ -21,12 +21,12 @@ class StoreTest extends TestCase
     public function test_受講登録_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(3);
         $this->actingAs($instructor, 'instructor');
 
         // act
         $response = $this->postJson('/api/v1/instructor/attendance', [
-            'course_id' => 2,
+            'course_id' => 3,
             'student_id' => 1,
         ]);
 

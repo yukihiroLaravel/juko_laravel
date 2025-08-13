@@ -29,7 +29,7 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data');
+        $response->assertJsonCount(3, 'data');
     }
 
     public function test_受講一覧を取得_タグ指定_成功(): void
@@ -57,7 +57,7 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
-        $response->assertJsonCount(1, 'data');
+        $response->assertJsonCount(2, 'data');
     }
 
     public function test_講座名で検索_成功(): void

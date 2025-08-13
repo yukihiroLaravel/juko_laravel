@@ -8,6 +8,18 @@ use App\Model\Instructor;
 
 class AttendancePolicy
 {
+    public function view(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        return $instructor->id === $course->instructor_id;
+    }
+
     /**
      * 受講作成時のポリシー
      */

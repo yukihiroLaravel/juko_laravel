@@ -86,20 +86,9 @@ class AttendanceController extends Controller
     public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
+        $course = Course::findOrFail($courseId);
 
-        // 現在ログインしているinstructorのidを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // ログインしている講師とその管理している講師を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
-        $course = Course::with('tags')->findOrFail($courseId);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden, not allowed to access this course.');
-        }
+        $this->authorize('view', [Attendance::class, $course]);
 
         /** @var Collection<int, Chapter> */
         $chapters = Chapter::with([

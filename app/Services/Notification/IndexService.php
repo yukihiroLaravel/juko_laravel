@@ -25,7 +25,13 @@ class IndexService
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime);
+            ->where('end_date', '>=', $currentDateTime)
+            ->whereHas('course', function ($q) use ($currentDateTime) {
+                $q->where(function ($sub) use ($currentDateTime) {
+                    $sub->whereNull('attendance_deadline') // 期限なし
+                        ->orWhere('attendance_deadline', '>=', $currentDateTime);
+                });
+            });
 
         // ソート条件とページネーションを適用して結果を返却
         return $query->orderBy($dto->sortBy, $dto->order)

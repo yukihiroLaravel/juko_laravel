@@ -10,6 +10,14 @@ use App\Model\Student;
 class AttendancePolicy
 {
     /**
+     * 閲覧権限
+     */
+    public function view(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
      * 受講作成時のポリシー
      */
     public function create(Instructor $instructor, Course $course): bool
@@ -27,7 +35,15 @@ class AttendancePolicy
     }
 
     /**
-     * 受講状況削除時のポリシー
+     * 更新権限
+     */
+    public function update(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
+     * 削除権限
      */
     public function delete(Instructor $instructor, Attendance $attendance): bool
     {
@@ -41,17 +57,5 @@ class AttendancePolicy
 
         // マネージャー権限のない講師
         return $instructor->id === $attendance->course->instructor_id;
-    }
-
-    /** Student: 進捗閲覧（progress） */
-    public function view(Student $student, Attendance $attendance): bool
-    {
-        return $attendance->student_id === $student->id;        
-    }
-
-    /** Student: 更新（completeAllLessons / completeAllChapters） */
-    public function update(Student $student, Attendance $attendance): bool
-    {
-        return $attendance->student_id === $student->id;
     }
 }

@@ -90,7 +90,6 @@ class AttendanceController extends Controller
             throw new AuthorizationException('The course has expired.');
         }
 
-        // 本人チェックは Policy に委譲
         $this->authorize('view', $attendance);
 
         $progressData = [
@@ -115,7 +114,6 @@ class AttendanceController extends Controller
         // 受講レコードを取得
         $attendance = Attendance::findOrFail($request->attendance_id);
 
-        // 本人のみ更新可
         $this->authorize('update', $attendance);
 
         // 該当チャプターを取得

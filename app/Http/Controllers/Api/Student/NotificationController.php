@@ -88,13 +88,18 @@ class NotificationController extends Controller
             // 今日（アプリTZ）の Y-m-d
             $today = (new DateTimeImmutable('today', $tz))->format('Y-m-d');
 
-            // 期限日を Y-m-d に正規化（string/DateTime/Carbon いずれでもOKにする）
+            // 期限日を Y-m-d に正規化
             $deadline = $course->attendance_deadline;
-            if ($deadline instanceof DateTimeInterface) {
-                $dueDate = DateTimeImmutable::createFromInterface($deadline)->setTimezone($tz)->format('Y-m-d');
-            } else {
-                $dueDate = (new DateTimeImmutable($deadline, $tz))->format('Y-m-d');
+            $tz = new DateTimeZone(config('app.timezone'));
+
+            // $deadline が文字列でも DateTimeInterface でも OK に正規化
+            if (!$deadline instanceof DateTimeInterface) {
+                $deadline = new DateTimeImmutable((string) $deadline, $tz);
             }
+
+            $dueDate = DateTimeImmutable::createFromInterface($deadline)
+                ->setTimezone($tz)
+                ->format('Y-m-d');
 
             // ★ 前日までOK：締切日当日（today == dueDate）から期限切れ
             if ($today >= $dueDate) {

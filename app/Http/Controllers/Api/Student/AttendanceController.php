@@ -85,11 +85,6 @@ class AttendanceController extends Controller
         ])
             ->findOrFail($request->attendance_id);
 
-        // 受講期限当日は受講可能
-        if ($attendance->course->attendance_deadline && CarbonImmutable::now()->gte($attendance->course->attendance_deadline->endOfDay())) {
-            throw new AuthorizationException('The course has expired.');
-        }
-
         $this->authorize('view', $attendance);
 
         $progressData = [

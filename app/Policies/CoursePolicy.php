@@ -9,6 +9,11 @@ class CoursePolicy
 {
     public function view(Instructor $instructor, Course $course): bool
     {
+        // 受講期限が切れている場合は拒否
+        if ($course->attendance_deadline && now()->gte($course->attendance_deadline->endOfDay())) {
+            return false;
+        }
+
         // マネージャー権限のある講師か判定
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();

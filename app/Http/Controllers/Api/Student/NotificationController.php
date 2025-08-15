@@ -16,6 +16,9 @@ use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 
 /**
  * @tags Student-Notification
@@ -76,6 +79,28 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])
             ->public()
             ->findOrFail($request->notification_id);
+        
+        // === 受講期限切れチェック：前日までOK／締切日当日からNG ===
+        $course = $notification->course;
+        if ($course && $course->attendance_deadline) {
+            $tz = new DateTimeZone(config('app.timezone'));
+
+            // 今日（アプリTZ）の Y-m-d
+            $today = (new DateTimeImmutable('today', $tz))->format('Y-m-d');
+
+            // 期限日を Y-m-d に正規化（string/DateTime/Carbon いずれでもOKにする）
+            $deadline = $course->attendance_deadline;
+            if ($deadline instanceof DateTimeInterface) {
+                $dueDate = DateTimeImmutable::createFromInterface($deadline)->setTimezone($tz)->format('Y-m-d');
+            } else {
+                $dueDate = (new DateTimeImmutable($deadline, $tz))->format('Y-m-d');
+            }
+
+            // ★ 前日までOK：締切日当日（today == dueDate）から期限切れ
+            if ($today >= $dueDate) {
+                throw new AuthorizationException('The course has expired.');
+            }
+        }
 
         if (! in_array($notification->course_id, $courseIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to this notification.');

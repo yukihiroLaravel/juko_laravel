@@ -5,9 +5,30 @@ namespace App\Policies;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 
 class AttendancePolicy
 {
+    public function view(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $instructorIds, true);
+        }
+
+        return $instructor->id === $course->instructor_id;
+    }
+
+    /**
+     * 閲覧権限
+     */
+    public function view(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
     /**
      * 受講作成時のポリシー
      */
@@ -26,7 +47,15 @@ class AttendancePolicy
     }
 
     /**
-     * 受講状況削除時のポリシー
+     * 更新権限
+     */
+    public function update(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
+     * 削除権限
      */
     public function delete(Instructor $instructor, Attendance $attendance): bool
     {

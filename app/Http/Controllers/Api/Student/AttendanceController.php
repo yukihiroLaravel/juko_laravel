@@ -9,17 +9,16 @@ use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
-use App\Http\Requests\Student\Attendance\ShowChapterRequest;
 use App\Http\Requests\Student\Attendance\ShowRequest;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Resources\Student\AttendanceIndexResource;
-use App\Http\Resources\Student\AttendanceShowChapterResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -76,51 +75,22 @@ class AttendanceController extends Controller
     }
 
     /**
-     * チャプター詳細情報を取得
-     *
-     * @return AttendanceShowChapterResource
-     */
-    public function showChapter(ShowChapterRequest $request)
-    {
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances',
-            'course.tags',
-        ])
-            ->where('id', $request->attendance_id)
-            ->firstOrFail();
-
-        // 公開されているチャプターのみ抽出
-        $publicChapters = Chapter::extractPublicChapter($attendance->course->chapters);
-        $attendance->course->chapters = $publicChapters;
-
-        // リクエストのチャプターIDと一致するチャプターのみ抽出
-        $chapter = $attendance->course->chapters->filter(fn ($chapter) => $chapter->id === (int) $request->chapter_id)
-            ->first();
-
-        return new AttendanceShowChapterResource([
-            'attendance' => $attendance,
-            'chapter' => $chapter,
-        ]);
-    }
-
-    /**
      * 受講講座の進捗情報を取得
-     *
-     * @return AttendanceCourseProgressResource|\Illuminate\Http\JsonResponse
      */
-    public function progress(ProgressRequest $request)
+    public function progress(ProgressRequest $request): AttendanceCourseProgressResource
     {
-        $authId = Auth::id();
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
         ])
             ->findOrFail($request->attendance_id);
 
-        if ($authId !== $attendance->student_id) {
-            throw new AuthorizationException('Not authorized.');
+        // 受講期限当日は受講可能
+        if ($attendance->course->attendance_deadline && CarbonImmutable::now()->gte($attendance->course->attendance_deadline->endOfDay())) {
+            throw new AuthorizationException('The course has expired.');
         }
+
+        $this->authorize('view', $attendance);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
@@ -141,16 +111,10 @@ class AttendanceController extends Controller
      */
     public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
     {
-        // ログイン中の生徒ID
-        $studentId = Auth::id();
-
         // 受講レコードを取得
         $attendance = Attendance::findOrFail($request->attendance_id);
 
-        // 認証チェック: この生徒が対象の受講レコードにアクセスできるか
-        if ($attendance->student_id !== $studentId) {
-            throw new AuthorizationException('Forbidden, invalid student.');
-        }
+        $this->authorize('update', $attendance);
 
         // 該当チャプターを取得
         $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
@@ -182,14 +146,10 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $studentId = Auth::id();
-
         $attendance = Attendance::findOrFail($request->attendance_id);
 
-        if ($studentId !== $attendance->student_id) {
-            // ログインしている生徒が受講している講座ではない場合エラー応答
-            throw new AuthorizationException('Not authorized.');
-        }
+        // 本人のみ更新可
+        $this->authorize('update', $attendance);
 
         $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
             ->pluck('id')

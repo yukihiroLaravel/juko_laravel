@@ -83,17 +83,15 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
         $course = Course::with('tags')->findOrFail($courseId);
 
-        if ($course->instructor_id !== $instructorId) {
-            // ログインしている講師の講座でない場合はエラーを返す
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        $this->authorize('view', [Attendance::class, $course]);
 
         /** @var Collection<int, Chapter> */
-        $chapters = Chapter::with('lessons.lessonAttendances')->where('course_id', $courseId)->get();
+        $chapters = Chapter::with([
+            'lessons.lessonAttendances',
+        ])->where('course_id', $courseId)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
@@ -102,6 +100,7 @@ class AttendanceController extends Controller
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

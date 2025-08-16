@@ -10,7 +10,7 @@ use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Http\Resources\Manager\AttendanceShowResource;
+use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -19,6 +19,7 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -85,25 +86,12 @@ class AttendanceController extends Controller
     public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
-
-        // 現在ログインしているinstructorのidを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // ログインしている講師とその管理している講師を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $course = Course::findOrFail($courseId);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
 
+        $this->authorize('view', [Attendance::class, $course]);
+
+        /** @var Collection<int, Chapter> */
         $chapters = Chapter::with([
-            'course.tags',
             'lessons.lessonAttendances',
         ])->where('course_id', $courseId)->get();
 
@@ -113,6 +101,8 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
+            'tags' => $course->tags,
+            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

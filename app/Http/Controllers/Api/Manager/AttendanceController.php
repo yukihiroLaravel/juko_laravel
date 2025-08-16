@@ -9,8 +9,8 @@ use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
+use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Manager\AttendanceShowResource;
-use App\Http\Resources\Manager\AttendanceStatusResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -272,10 +272,8 @@ class AttendanceController extends Controller
 
     /**
      * 受講状況取得API
-     *
-     * @return AttendanceStatusResource|JsonResponse
      */
-    public function status(StatusRequest $request)
+    public function status(StatusRequest $request): StatusResource
     {
         $attendanceId = $request->attendance_id;
         $instructorId = Auth::guard('instructor')->user()->id;
@@ -297,6 +295,6 @@ class AttendanceController extends Controller
             );
         }
 
-        return new AttendanceStatusResource($attendance);
+        return new StatusResource($attendance);
     }
 }

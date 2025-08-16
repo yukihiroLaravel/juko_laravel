@@ -16,9 +16,7 @@ use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use DateTimeImmutable;
-use DateTimeInterface;
-use DateTimeZone;
+use Carbon\CarbonImmutable;
 
 /**
  * @tags Student-Notification
@@ -80,29 +78,18 @@ class NotificationController extends Controller
             ->public()
             ->findOrFail($request->notification_id);
         
-        // === 受講期限切れチェック：前日までOK／締切日当日からNG ===
+        // === 受講期限切れチェック：締切日当日からNG（前日までOK） ===
         $course = $notification->course;
+
         if ($course && $course->attendance_deadline) {
-            $tz = new DateTimeZone(config('app.timezone'));
-
-            // 今日（アプリTZ）の Y-m-d
-            $today = (new DateTimeImmutable('today', $tz))->format('Y-m-d');
-
-            // 期限日を Y-m-d に正規化
             $deadline = $course->attendance_deadline;
-            $tz = new DateTimeZone(config('app.timezone'));
 
-            // $deadline が文字列でも DateTimeInterface でも OK に正規化
-            if (!$deadline instanceof DateTimeInterface) {
-                $deadline = new DateTimeImmutable((string) $deadline, $tz);
-            }
+            // $deadline が DateTime/Carbon/文字列のいずれでも安全に CarbonImmutable へ
+            $deadlineEnd = $deadline instanceof \DateTimeInterface
+                ? CarbonImmutable::instance($deadline)->endOfDay()
+                : CarbonImmutable::parse((string) $deadline, config('app.timezone'))->endOfDay();
 
-            $dueDate = DateTimeImmutable::createFromInterface($deadline)
-                ->setTimezone($tz)
-                ->format('Y-m-d');
-
-            // ★ 前日までOK：締切日当日（today == dueDate）から期限切れ
-            if ($today >= $dueDate) {
+            if (CarbonImmutable::now(config('app.timezone'))->gte($deadlineEnd)) {
                 throw new AuthorizationException('The course has expired.');
             }
         }

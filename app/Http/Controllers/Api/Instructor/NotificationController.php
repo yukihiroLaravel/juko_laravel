@@ -75,10 +75,10 @@ class NotificationController extends Controller
     {
         $course = Course::findOrFail($request->course_id);
 
-         // 受講期限チェック
+        // 受講期限チェック
         if ($course->attendance_deadline && now()->gt($course->attendance_deadline)) {
             return response()->json([
-                'message' => 'The course has expired.'
+                'message' => 'The course has expired.',
             ], 422); // 422 Unprocessable Entity
         }
 

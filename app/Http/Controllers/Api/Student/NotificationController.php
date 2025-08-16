@@ -82,17 +82,24 @@ class NotificationController extends Controller
         $course = $notification->course;
 
         if ($course && $course->attendance_deadline) {
+            $tz = config('app.timezone');
+
             $deadline = $course->attendance_deadline;
 
-            // $deadline が DateTime/Carbon/文字列のいずれでも安全に CarbonImmutable へ
-            $deadlineEnd = $deadline instanceof \DateTimeInterface
-                ? CarbonImmutable::instance($deadline)->endOfDay()
-                : CarbonImmutable::parse((string) $deadline, config('app.timezone'))->endOfDay();
+            // もし文字列等なら DateTimeInterface に寄せてから扱う
+            if (!$deadline instanceof \DateTimeInterface) {
+                $deadline = new \DateTimeImmutable((string) $deadline, new \DateTimeZone($tz));
+            }
 
-            if (CarbonImmutable::now(config('app.timezone'))->gte($deadlineEnd)) {
+            // ここからはインスタンス前提で Carbon に載せ替え
+            $deadlineEnd = CarbonImmutable::instance($deadline)
+                ->setTimezone($tz)
+                ->endOfDay();
+
+            if (CarbonImmutable::now($tz)->gte($deadlineEnd)) {
                 throw new AuthorizationException('The course has expired.');
             }
-        }
+        }   
 
         if (! in_array($notification->course_id, $courseIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to this notification.');

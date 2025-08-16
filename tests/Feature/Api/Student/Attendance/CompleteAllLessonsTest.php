@@ -48,7 +48,7 @@ class CompleteAllLessonsTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid student.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

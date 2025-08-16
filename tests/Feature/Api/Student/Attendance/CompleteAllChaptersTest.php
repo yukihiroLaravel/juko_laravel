@@ -47,7 +47,7 @@ class CompleteAllChaptersTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Not authorized.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 class PutStatusAllService
 {
     /**
-     * お知らせ内容を削除する
+     * お知らせのステータスを一括更新する
      *
      * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification>  $notifications
      */

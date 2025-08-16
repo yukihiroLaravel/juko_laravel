@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Attendance;
+namespace Tests\Feature\Api\Manager\Attendance;
 
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,11 +21,11 @@ class StatusTest extends TestCase
     public function test_受講状況取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/attendance/3/status');
+        $response = $this->getJson('/api/v1/manager/attendance/1/status');
 
         // assert
         $response->assertStatus(200);
@@ -38,7 +38,7 @@ class StatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/attendance/1/status');
+        $response = $this->getJson('/api/v1/manager/attendance/1/status');
 
         // assert
         $response->assertStatus(403);
@@ -51,7 +51,7 @@ class StatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/attendance/aaa/status');
+        $response = $this->getJson('/api/v1/manager/attendance/aaa/status');
 
         // assert
         $response->assertStatus(422);

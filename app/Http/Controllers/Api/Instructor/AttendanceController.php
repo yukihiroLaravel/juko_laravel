@@ -9,8 +9,8 @@ use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
+use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
-use App\Http\Resources\Instructor\AttendanceStatusResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -244,12 +244,12 @@ class AttendanceController extends Controller
     /**
      * 受講状況API
      */
-    public function status(StatusRequest $request): AttendanceStatusResource
+    public function status(StatusRequest $request): StatusResource
     {
         $attendanceId = $request->attendance_id;
 
+        /** @var Attendance $attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
-        assert($attendance instanceof Attendance);
 
         if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
             throw new AuthorizationException(
@@ -257,6 +257,6 @@ class AttendanceController extends Controller
             );
         }
 
-        return new AttendanceStatusResource($attendance);
+        return new StatusResource($attendance);
     }
 }

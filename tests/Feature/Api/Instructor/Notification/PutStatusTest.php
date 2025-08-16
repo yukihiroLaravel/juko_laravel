@@ -21,13 +21,13 @@ class PutStatusTest extends TestCase
     public function test_お知らせ更新_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
         $response = $this->putJson('/api/v1/instructor/notification/status', [
             'notifications' => [
-                1,
+                2,
             ],
             'status' => 'private',
         ]);
@@ -35,7 +35,7 @@ class PutStatusTest extends TestCase
         // assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'id' => 1,
+            'id' => 2,
             'status' => 'private',
         ]);
     }
@@ -43,7 +43,7 @@ class PutStatusTest extends TestCase
     public function test_権限がない講師_失敗(): void
     {
         // arrange
-        $instructor = Instructor::find(4);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
@@ -57,14 +57,14 @@ class PutStatusTest extends TestCase
         // assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Invalid instructor_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act

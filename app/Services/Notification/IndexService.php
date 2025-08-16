@@ -7,6 +7,7 @@ use App\Enums\Notification\StatusEnum;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 
 class IndexService
 {
@@ -26,8 +27,8 @@ class IndexService
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
             ->where('end_date', '>=', $currentDateTime)
-            ->whereHas('course', function ($q) use ($currentDateTime) {
-                $q->where(function ($sub) use ($currentDateTime) {
+            ->whereHas('course', function (Builder $q) use ($currentDateTime) {
+                $q->where(function (Builder $sub) use ($currentDateTime) {
                     $sub->whereNull('attendance_deadline') // 期限なし
                         ->orWhere('attendance_deadline', '>=', $currentDateTime);
                 });

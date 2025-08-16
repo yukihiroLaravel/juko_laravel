@@ -3,13 +3,13 @@
 namespace App\Model;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property bool $has_active_students
@@ -140,7 +140,7 @@ class Course extends Model
 
         return $query->where(function (Builder $q) use ($todayEnd) {
             $q->whereNull('attendance_deadline')
-              ->orWhere('attendance_deadline', '>=', $todayEnd);
+                ->orWhere('attendance_deadline', '>=', $todayEnd);
         });
     }
 

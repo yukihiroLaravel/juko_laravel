@@ -85,9 +85,9 @@ class AttendanceController extends Controller
     {
         $courseId = $request->course_id;
         $course = Course::with('tags')
-        ->whereKey($courseId)
-        ->withinDeadline()
-        ->firstOrFail();
+            ->whereKey($courseId)
+            ->withinDeadline()
+            ->firstOrFail();
 
         $this->authorize('view', [Attendance::class, $course]);
 

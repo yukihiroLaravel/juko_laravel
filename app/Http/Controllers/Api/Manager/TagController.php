@@ -106,17 +106,10 @@ class TagController extends Controller
      */
     public function show(ShowRequest $request): TagResource
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $tag = Tag::findOrFail($request->tag_id);
 
-        if (! in_array($tag->instructor_id, $instructorIds, true)) {
-            // 自分、または配下の講師の講座でなければエラー応答
-            throw new AuthorizationException('Invalid instructor_id.');
-        }
+        // 認可処理
+        $this->authorize('view', $tag);
 
         return new TagResource($tag);
     }

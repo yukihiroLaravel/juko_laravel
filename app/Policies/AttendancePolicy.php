@@ -9,6 +9,17 @@ use App\Model\Student;
 
 class AttendancePolicy
 {
+    /**
+     * 生徒の閲覧権限ポリシー
+     */
+    public function viewStudent(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
+     * 講師側の閲覧権限ポリシー
+     */
     public function view(Instructor $instructor, Course $course): bool
     {
         if ($instructor->isManager()) {
@@ -19,14 +30,6 @@ class AttendancePolicy
         }
 
         return $instructor->id === $course->instructor_id;
-    }
-
-    /**
-     * 閲覧権限
-     */
-    public function view(Student $student, Attendance $attendance): bool
-    {
-        return $attendance->student_id === $student->id;
     }
 
     /**

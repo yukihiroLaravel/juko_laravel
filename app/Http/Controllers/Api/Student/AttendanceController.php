@@ -90,7 +90,7 @@ class AttendanceController extends Controller
             throw new AuthorizationException('The course has expired.');
         }
 
-        $this->authorize('view', $attendance);
+        $this->authorize('viewStudent', [Attendance::class, $attendance]);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),

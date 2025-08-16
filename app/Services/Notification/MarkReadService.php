@@ -5,8 +5,8 @@ namespace App\Services\Notification;
 use App\Enums\Notification\TypeEnum;
 use App\Model\Notification;
 use App\Model\Student;
-use Illuminate\Auth\Access\AuthorizationException;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class MarkReadService
 {
@@ -27,7 +27,7 @@ class MarkReadService
             )
         ) {
             throw new AuthorizationException('The course has expired.');
-        }       
+        }
 
         // ユーザが確認したお知らせを登録(既読登録)
         if (! $notification->students->contains($student->id)) {

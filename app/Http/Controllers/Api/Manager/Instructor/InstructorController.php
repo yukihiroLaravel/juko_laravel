@@ -84,6 +84,10 @@ class InstructorController extends Controller
             ->withCount([
                 'courses as student_count' => function ($query) {
                     $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
+                        ->where(function ($query) {
+                            $query->whereNull('courses.attendance_deadline')
+                                ->orWhere('courses.attendance_deadline', '>', now());
+                        })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
                 },
             ])

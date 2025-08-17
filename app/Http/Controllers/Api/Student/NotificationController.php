@@ -79,8 +79,8 @@ class NotificationController extends Controller
             ->findOrFail($request->notification_id);
         
         // 受講期限切れチェック（締切日当日からNG）
-        if ($notification->course?->attendance_deadline
-            && CarbonImmutable::now(config('app.timezone'))->gte($notification->course->attendance_deadline->endOfDay())) {
+        if ($notification->course->attendance_deadline
+            && CarbonImmutable::now()->gte($notification->course->attendance_deadline->endOfDay())) {
             throw new AuthorizationException('The course has expired.');
         }
    

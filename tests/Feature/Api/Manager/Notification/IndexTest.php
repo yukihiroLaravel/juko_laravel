@@ -28,6 +28,7 @@ class IndexTest extends TestCase
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonCount(3, 'data.notifications');
     }
 
     public function test_権限エラー_失敗(): void

@@ -2,8 +2,8 @@
 
 namespace App\Services\Notification;
 
-use App\Model\Notification;
 use App\Model\Course;
+use App\Model\Notification;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 
@@ -22,7 +22,7 @@ class StoreNotificationService
         string $content,
         string $status
     ): void {
-        
+
         $course = Course::select('id', 'attendance_deadline')->findOrFail($course_id);
 
         if (
@@ -31,7 +31,7 @@ class StoreNotificationService
         ) {
             throw new AuthorizationException('The course has expired.');
         }
-        
+
         Notification::create([
             'course_id' => $course_id,
             'instructor_id' => $instructor_id,

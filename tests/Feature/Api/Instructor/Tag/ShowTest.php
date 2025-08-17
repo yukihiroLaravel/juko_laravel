@@ -21,11 +21,11 @@ class ShowTest extends TestCase
     public function test_タグ取得_成功(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/tag/1');
+        $response = $this->getJson('/api/v1/instructor/tag/2');
 
         // assert
         $response->assertStatus(200);
@@ -34,7 +34,7 @@ class ShowTest extends TestCase
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(1);
+        $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act

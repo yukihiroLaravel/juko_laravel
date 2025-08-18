@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Notification;
 
 use App\Enums\Notification\TypeEnum;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,6 +46,30 @@ class StoreTest extends TestCase
             'end_date' => '2022-01-02 00:00:00',
             'content' => 'content',
             'status' => 'private',
+        ]);
+    }
+
+    public function test_期限切れの講座_失敗(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        Course::find(6)->update(['attendance_deadline' => now()->subDays(1)]);
+        $this->actingAs($instructor, 'instructor');
+
+        // act
+        $response = $this->postJson('/api/v1/instructor/course/6/notification', [
+            'title' => 'title',
+            'type' => 'always',
+            'start_date' => '2022-01-01 00:00:00',
+            'end_date' => '2022-01-02 00:00:00',
+            'content' => 'content',
+            'status' => 'private',
+        ]);
+
+        // assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'The course has expired.',
         ]);
     }
 

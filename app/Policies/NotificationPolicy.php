@@ -5,9 +5,9 @@ namespace App\Policies;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use Illuminate\Database\Eloquent\Collection;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 
 class NotificationPolicy
 {

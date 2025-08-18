@@ -18,7 +18,6 @@ use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
-use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -85,7 +84,7 @@ class AttendanceController extends Controller
         ])
             ->findOrFail($request->attendance_id);
 
-        $this->authorize('view', $attendance);
+        $this->authorize('viewStudent', $attendance);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),

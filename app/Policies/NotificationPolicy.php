@@ -6,6 +6,8 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class NotificationPolicy
 {
@@ -114,6 +116,11 @@ class NotificationPolicy
      */
     public function store(Instructor $instructor, Course $course): bool
     {
+        // 受講期限チェック
+        if ($course->attendance_deadline_end && CarbonImmutable::now()->gte($course->attendance_deadline_end)) {
+            throw new AuthorizationException('The course has expired.');
+        }
+
         if ($instructor->isManager()) {
             // 管理者の場合、配下の講師の講座も可能
             $instructorIds = $instructor->managings->pluck('id')->toArray();

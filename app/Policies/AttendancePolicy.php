@@ -27,6 +27,11 @@ class AttendancePolicy
      */
     public function view(Instructor $instructor, Course $course): bool
     {
+        // 期限切れならNG
+        if ($course->attendance_deadline_end && now()->greaterThan($course->attendance_deadline_end)) {
+            return false;
+        }
+        
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;

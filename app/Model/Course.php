@@ -148,4 +148,14 @@ class Course extends Model
             'attendance_deadline' => 'immutable_datetime',
         ];
     }
+
+    /**
+     * 受講期限を当日 23:59:59 に揃えて返す
+     */
+    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    {
+        return $this->attendance_deadline
+            ? $this->attendance_deadline->endOfDay()
+            : null;
+    }
 }

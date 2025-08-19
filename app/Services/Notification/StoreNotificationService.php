@@ -4,11 +4,15 @@ namespace App\Services\Notification;
 
 use App\Model\Notification;
 use App\Model\Course;
-use Carbon\CarbonImmutable;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Services\Course\AttendanceDeadlineValidator;
 
 class StoreNotificationService
 {
+
+    public function __construct(
+        private AttendanceDeadlineValidator $deadlineValidator
+    ) {}
+
     /**
      * 通知を保存する共通処理
      */
@@ -23,14 +27,9 @@ class StoreNotificationService
         string $status
     ): void {
         
-        $course = Course::select('id', 'attendance_deadline')->findOrFail($course_id);
+        $course = Course::select('id','attendance_deadline')->findOrFail($course_id);
 
-        if (
-            $course->attendance_deadline &&
-            CarbonImmutable::now()->gte($course->attendance_deadline->endOfDay())
-        ) {
-            throw new AuthorizationException('The course has expired.');
-        }
+        ($this->deadlineValidator)($course);
         
         Notification::create([
             'course_id' => $course_id,

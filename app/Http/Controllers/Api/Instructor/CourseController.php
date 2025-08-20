@@ -11,9 +11,6 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
-use App\Http\Resources\Base\Instructor\CourseResource as BaseCourseResource;
-use App\Http\Resources\Base\Instructor\ChapterResource as BaseChapterResource;
-use App\Http\Resources\Base\Instructor\LessonResource as BaseLessonResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
@@ -82,7 +79,7 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request)
+    public function show(ShowRequest $request): JsonResponse
     {
         // 章・レッスン・タグなど必要な関連を読み込み
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
@@ -90,18 +87,31 @@ class CourseController extends Controller
         // 認可チェック
         $this->authorize('view', $course);
 
-        // 既存の Resource を一度配列に解決
-        $payload = (new CourseShowResource($course))->toArray($request);
-
-        // 受講期限があるときだけキーを追加（無ければ追加しない）
-        if (filled($course->attendance_deadline)) {
-            // 時刻不要なら toDateString()、必要なら toDateTimeString()
-            $payload['attendance_deadline'] = $course->attendance_deadline->toDateString();
-        }
-
-        // テストが期待する data 包みで返す
         return response()->json([
-            'data' => $payload,
+            'data' => [
+                'course_id' => $course->id,
+                'title'     => $course->title,
+                'image'     => $course->image,
+                'status'    => $course->status,
+                // ★ attendance_deadline があるときだけ追加
+                ...($course->attendance_deadline
+                    ? ['attendance_deadline' => $course->attendance_deadline->toDateString()]
+                    : []),
+                'chapters'  => $course->chapters->map(fn($chapter) => [
+                    'chapter_id' => $chapter->id,
+                    'title'      => $chapter->title,
+                    'order'      => $chapter->order,
+                    'status'     => $chapter->status,
+                    'lessons'    => $chapter->lessons->map(fn($lesson) => [
+                        'lesson_id' => $lesson->id,
+                        'url'       => $lesson->url,
+                        'title'     => $lesson->title,
+                        'remarks'   => $lesson->remarks,
+                        'status'    => $lesson->status,
+                        'order'     => $lesson->order,
+                    ])->values(),
+                ])->values(),
+            ],
         ]);
     }
 

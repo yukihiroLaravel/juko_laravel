@@ -34,7 +34,7 @@ class AttendancePolicy
         if (!$validator($course)) {
             return false;
         }
-        
+
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;

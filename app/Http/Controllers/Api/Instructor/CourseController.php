@@ -11,6 +11,9 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
+use App\Http\Resources\Base\Instructor\CourseResource as BaseCourseResource;
+use App\Http\Resources\Base\Instructor\ChapterResource as BaseChapterResource;
+use App\Http\Resources\Base\Instructor\LessonResource as BaseLessonResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
@@ -79,14 +82,29 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request): CourseShowResource
+    public function show(ShowRequest $request): JsonResponse
     {
-        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        // 章・レッスン・タグなど必要な関連を読み込み
+        $course = Course::with(['chapters.lessons', 'tags'])->findOrFail($request->course_id);
 
         // 認可チェック
         $this->authorize('view', $course);
 
-        return new CourseShowResource($course);
+        $base = [
+            'course_id' => $course->id,
+            'title'     => $course->title,
+            'image'     => $course->image,
+            'status'    => $course->status,
+        ];
+    
+        // 期限があるときだけキーを追加
+        if (filled($course->attendance_deadline)) {
+            $base['attendance_deadline'] = $course->attendance_deadline->toDateString();
+        }
+    
+        // 章・レッスンを付けるならここで組み立て（省略可）
+    
+        return response()->json($base);
     }
 
     /**

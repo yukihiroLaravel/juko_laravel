@@ -8,7 +8,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class AttendanceDeadlineValidator
 {
-    /** 期限切れなら例外を投げる（期限当日23:59:59までは許可） */
+    /**
+     * 受講期限のバリデーション
+     */
     public function __invoke(Course $course): void
     {
         if (
@@ -19,7 +21,9 @@ class AttendanceDeadlineValidator
         }
     }
 
-    /** 判定だけ欲しい場合 */
+    /**
+     * 受講期限が切れているかどうかを判定
+     */
     public function isExpired(Course $course): bool
     {
         return $course->attendance_deadline &&

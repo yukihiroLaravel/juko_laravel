@@ -82,29 +82,27 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request): JsonResponse
+    public function show(ShowRequest $request)
     {
         // 章・レッスン・タグなど必要な関連を読み込み
-        $course = Course::with(['chapters.lessons', 'tags'])->findOrFail($request->course_id);
+        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
         // 認可チェック
         $this->authorize('view', $course);
 
-        $base = [
-            'course_id' => $course->id,
-            'title'     => $course->title,
-            'image'     => $course->image,
-            'status'    => $course->status,
-        ];
-    
-        // 期限があるときだけキーを追加
+        // 既存の Resource を一度配列に解決
+        $payload = (new CourseShowResource($course))->toArray($request);
+
+        // 受講期限があるときだけキーを追加（無ければ追加しない）
         if (filled($course->attendance_deadline)) {
-            $base['attendance_deadline'] = $course->attendance_deadline->toDateString();
+            // 時刻不要なら toDateString()、必要なら toDateTimeString()
+            $payload['attendance_deadline'] = $course->attendance_deadline->toDateString();
         }
-    
-        // 章・レッスンを付けるならここで組み立て（省略可）
-    
-        return response()->json($base);
+
+        // テストが期待する data 包みで返す
+        return response()->json([
+            'data' => $payload,
+        ]);
     }
 
     /**

@@ -119,7 +119,7 @@ class InstructorController extends Controller
             );
 
             // サービスクラス呼び出し
-            $temporaryInstructor = $storeService->store(
+            $temporaryInstructor = $storeService(
                 code: $code,
                 token: $token,
                 data: [

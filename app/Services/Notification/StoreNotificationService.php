@@ -2,15 +2,14 @@
 
 namespace App\Services\Notification;
 
-use App\Model\Notification;
 use App\Model\Course;
+use App\Model\Notification;
 use App\Services\Course\AttendanceDeadlineValidator;
 
 class StoreNotificationService
 {
-
     public function __construct(
-        private AttendanceDeadlineValidator $deadlineValidator
+        private readonly AttendanceDeadlineValidator $deadlineValidator
     ) {}
 
     /**
@@ -26,11 +25,11 @@ class StoreNotificationService
         string $content,
         string $status
     ): void {
-        
-        $course = Course::select('id','attendance_deadline')->findOrFail($course_id);
+
+        $course = Course::select('id', 'attendance_deadline')->findOrFail($course_id);
 
         ($this->deadlineValidator)($course);
-        
+
         Notification::create([
             'course_id' => $course_id,
             'instructor_id' => $instructor_id,

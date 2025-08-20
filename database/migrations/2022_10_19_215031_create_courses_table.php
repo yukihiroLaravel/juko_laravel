@@ -19,7 +19,9 @@ class CreateCoursesTable extends Migration
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
             $table->string('status', 30)->comment('ステータス');
-            $table->dateTime('attendance_deadline')->nullable()->comment('受講期限');
+            $table->dateTime('attendance_deadline')->nullable()->comment('受講期限（fixed用）');
+            $table->string('expiration_mode')->default('none')->comment('受講期限タイプ: none, fixed, relative');
+            $table->integer('valid_days')->nullable()->comment('受講開始から何日後まで有効か（relative用）');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();

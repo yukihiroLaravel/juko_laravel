@@ -90,13 +90,10 @@ class TagController extends Controller
      */
     public function show(ShowRequest $request)
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-
         $tag = Tag::findOrFail($request->tag_id);
 
-        if ($tag->instructor_id !== $instructorId) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
+        // 認可処理
+        $this->authorize('view', $tag);
 
         return new TagResource($tag);
     }

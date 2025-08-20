@@ -26,7 +26,6 @@ class InstructorIndexResource extends JsonResource
                 'nick_name' => $instructor->nick_name,
                 'email' => $instructor->email,
                 'profile_image' => $instructor->profile_image,
-                'created_at' => $instructor->created_at,
                 'course_count' => $instructor->courses()->count(),
                 'student_count' => $instructor->student_count ?? 0,
             ]),

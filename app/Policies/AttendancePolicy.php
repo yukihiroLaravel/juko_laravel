@@ -5,9 +5,26 @@ namespace App\Policies;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 
 class AttendancePolicy
 {
+    /**
+     * 生徒の閲覧権限ポリシー
+     */
+    public function viewStudent(Student $student, Attendance $attendance): bool
+    {
+        // 受講期限切れの場合は閲覧不可
+        if ($attendance->course->attendance_deadline && now()->gte($attendance->course->attendance_deadline->endOfDay())) {
+            return false;
+        }
+
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
+     * 講師側の閲覧権限ポリシー
+     */
     public function view(Instructor $instructor, Course $course): bool
     {
         if ($instructor->isManager()) {
@@ -38,7 +55,15 @@ class AttendancePolicy
     }
 
     /**
-     * 受講状況削除時のポリシー
+     * 更新権限
+     */
+    public function update(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id;
+    }
+
+    /**
+     * 削除権限
      */
     public function delete(Instructor $instructor, Attendance $attendance): bool
     {

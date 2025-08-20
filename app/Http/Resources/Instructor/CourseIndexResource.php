@@ -27,9 +27,12 @@ class CourseIndexResource extends JsonResource
             'status' => $this->resource->status,
             'has_active_students' => (bool) $this->resource->has_active_students,
             'tags' => TagResource::collection($this->resource->tags),
-            'attendance_deadline' => $this->resource->attendance_deadline
-                ? $this->resource->attendance_deadline->format('Y-m-d H:i:s')
-                : null,
+            
+            // 期限があるときはキーを出す（期限が無いときはキーを出さない）
+            'attendance_deadline' => $this->when(
+                filled($this->resource->attendance_deadline),
+                fn () => $this->resource->attendance_deadline->toDateString() // 時刻も必要なら toDateTimeString()
+            ),
         ];
     }
 }

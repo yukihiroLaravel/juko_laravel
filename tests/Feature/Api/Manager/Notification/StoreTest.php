@@ -49,7 +49,7 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_期限切れ講座_失敗(): void
+    public function test_期限切れの講座_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(1);

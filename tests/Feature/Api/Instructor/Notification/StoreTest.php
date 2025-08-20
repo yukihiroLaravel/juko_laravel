@@ -49,15 +49,15 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_期限切れ講座_失敗(): void
+    public function test_期限切れの講座_失敗(): void
     {
         // arrange
         $instructor = Instructor::find(2);
-        Course::find(2)->update(['attendance_deadline' => now()->subDays(1)]);
+        Course::find(6)->update(['attendance_deadline' => now()->subDays(1)]);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/course/2/notification', [
+        $response = $this->postJson('/api/v1/instructor/course/6/notification', [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',

@@ -14,6 +14,7 @@ use App\Model\Notification;
 use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 
@@ -76,6 +77,12 @@ class NotificationController extends Controller
         $notification = Notification::with(['course'])
             ->public()
             ->findOrFail($request->notification_id);
+
+        // 受講期限切れチェック（締切日当日からNG）
+        if ($notification->course->attendance_deadline
+            && CarbonImmutable::now()->gte($notification->course->attendance_deadline->endOfDay())) {
+            throw new AuthorizationException('The course has expired.');
+        }
 
         if (! in_array($notification->course_id, $courseIds, true)) {
             throw new AuthorizationException('Forbidden, not allowed to this notification.');

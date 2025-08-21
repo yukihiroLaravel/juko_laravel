@@ -28,10 +28,10 @@ class AttendancePolicy
      */
     public function view(Instructor $instructor, Course $course): bool
     {
-        $validator = new AttendanceDeadlineValidator();
-        
+        $validator = new AttendanceDeadlineValidator;
+
         // 期限切れならNG
-        if (!$validator($course)) {
+        if (! $validator(course: $course)) {
             return false;
         }
 

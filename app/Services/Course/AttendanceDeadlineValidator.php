@@ -3,22 +3,20 @@
 namespace App\Services\Course;
 
 use App\Model\Course;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 
 class AttendanceDeadlineValidator
 {
     /**
-     * 受講期限チェック
-     *
-     * @param  Course  $course
-     * @return bool
+     * 受講期限の検証
+     * 期限内の場合は true、期限切れの場合は false を返す
      */
     public function __invoke(Course $course): bool
     {
-        if (!$course->attendance_deadline_end) {
+        if (! $course->attendance_deadline_end) {
             return true;
         }
 
-        return now()->lessThanOrEqualTo($course->attendance_deadline_end);
+        return CarbonImmutable::now()->lessThanOrEqualTo($course->attendance_deadline_end);
     }
 }

@@ -79,7 +79,7 @@ class CourseController extends Controller
     /**
      * 講座取得API
      */
-    public function show(ShowRequest $request): JsonResponse
+    public function show(ShowRequest $request): CourseShowResource
     {
         // 章・レッスン・タグなど必要な関連を読み込み
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
@@ -87,32 +87,8 @@ class CourseController extends Controller
         // 認可チェック
         $this->authorize('view', $course);
 
-        return response()->json([
-            'data' => [
-                'course_id' => $course->id,
-                'title'     => $course->title,
-                'image'     => $course->image,
-                'status'    => $course->status,
-                // ★ attendance_deadline があるときだけ追加
-                ...($course->attendance_deadline
-                    ? ['attendance_deadline' => $course->attendance_deadline->toDateString()]
-                    : []),
-                'chapters'  => $course->chapters->map(fn($chapter) => [
-                    'chapter_id' => $chapter->id,
-                    'title'      => $chapter->title,
-                    'order'      => $chapter->order,
-                    'status'     => $chapter->status,
-                    'lessons'    => $chapter->lessons->map(fn($lesson) => [
-                        'lesson_id' => $lesson->id,
-                        'url'       => $lesson->url,
-                        'title'     => $lesson->title,
-                        'remarks'   => $lesson->remarks,
-                        'status'    => $lesson->status,
-                        'order'     => $lesson->order,
-                    ])->values(),
-                ])->values(),
-            ],
-        ]);
+        // Resource経由で返す（= data キーが自動で付与され、CIテスト想定に一致）
+        return new CourseShowResource($course);
     }
 
     /**

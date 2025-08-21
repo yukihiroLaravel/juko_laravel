@@ -81,13 +81,11 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request): CourseShowResource
     {
-        // 章・レッスン・タグなど必要な関連を読み込み
         $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
 
         // 認可チェック
         $this->authorize('view', $course);
 
-        // Resource経由で返す（= data キーが自動で付与され、CIテスト想定に一致）
         return new CourseShowResource($course);
     }
 

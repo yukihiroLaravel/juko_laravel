@@ -16,7 +16,6 @@ class CreateCoursesTable extends Migration
         Schema::create('courses', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('instructor_id')->unsigned()->comment('講師ID');
-            $table->string('name', 255)->comment('講座名');
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
             $table->string('status', 30)->comment('ステータス');

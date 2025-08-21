@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Model\Course;
 
 return new class extends Migration
 {
@@ -13,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('course_deadlines', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('期限設定ID');
-            $table->bigInteger('course_id')->unsigned()->comment('講座ID');
+            $table->foreignIdFor(Course::class)->constrained()->comment('講座ID');
             $table->date('fixed_date')->nullable()->comment('固定期限日（fixed_dateタイプの場合のみ使用）');
-            $table->integer('relative_days')->nullable()->comment('相対日数（relative_daysタイプの場合のみ使用）');
-            $table->timestamp('created_at');
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->unsignedSmallInteger('relative_days')->nullable()->comment('相対日数（relative_daysタイプの場合のみ使用）');
+            $table->datetime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

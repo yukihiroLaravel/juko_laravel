@@ -33,6 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         Tag::class => TagPolicy::class,
         Attendance::class => AttendancePolicy::class,
         Student::class => StudentPolicy::class,
+        \App\Model\Instructor::class => \App\Policies\InstructorPolicy::class,
     ];
 
     /**

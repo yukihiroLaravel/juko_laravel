@@ -28,17 +28,23 @@ use App\Services\Notification\PutStatusService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
+use App\Services\Course\AttendanceDeadlineValidator;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
 
 /**
  * @tags Manager-Notification
  */
 class NotificationController extends Controller
 {
+    public function __construct(
+        private AttendanceDeadlineValidator $attendanceDeadlineValidator
+    ) {}
+    
     /**
      * お知らせ一覧取得API
      */
@@ -90,6 +96,10 @@ class NotificationController extends Controller
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
+        if (($this->attendanceDeadlineValidator)($course)) {
+            throw new AuthorizationException('The course has expired.');
+        }
+        
         DB::beginTransaction();
         try {
             $service(

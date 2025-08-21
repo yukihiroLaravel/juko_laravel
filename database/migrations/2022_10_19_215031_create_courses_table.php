@@ -1,5 +1,6 @@
 <?php
 
+use App\Model\Instructor;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,7 @@ class CreateCoursesTable extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('instructor_id')->unsigned()->comment('講師ID');
+            $table->foreignIdFor(Instructor::class, 'instructor_id')->constrained()->comment('講師ID');
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
             $table->string('status', 30)->comment('ステータス');
@@ -23,7 +24,6 @@ class CreateCoursesTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
-            $table->foreign('instructor_id')->references('id')->on('instructors');
         });
     }
 

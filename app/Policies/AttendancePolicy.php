@@ -6,6 +6,7 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
+use App\Services\Course\AttendanceDeadlineValidator;
 
 class AttendancePolicy
 {
@@ -27,6 +28,13 @@ class AttendancePolicy
      */
     public function view(Instructor $instructor, Course $course): bool
     {
+        $validator = new AttendanceDeadlineValidator;
+
+        // 期限切れならNG
+        if (! $validator(course: $course)) {
+            return false;
+        }
+
         if ($instructor->isManager()) {
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;

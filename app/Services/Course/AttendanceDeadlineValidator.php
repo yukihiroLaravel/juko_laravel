@@ -12,7 +12,9 @@ class AttendanceDeadlineValidator
      */
     public function __invoke(Course $course): bool
     {
-        return $course->attendance_deadline &&
-               CarbonImmutable::now()->gte($course->attendance_deadline->endOfDay());
+        return !(
+            $course->attendance_deadline &&
+            CarbonImmutable::now()->gte($course->attendance_deadline->endOfDay())
+        );
     }
 }

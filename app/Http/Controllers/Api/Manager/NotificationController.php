@@ -41,10 +41,7 @@ use Illuminate\Auth\Access\AuthorizationException;
  */
 class NotificationController extends Controller
 {
-    public function __construct(
-        private AttendanceDeadlineValidator $attendanceDeadlineValidator
-    ) {}
-    
+   
     /**
      * お知らせ一覧取得API
      */
@@ -87,8 +84,11 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      */
-    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
-    {
+    public function store(
+        StoreRequest $request, 
+        StoreNotificationService $service, 
+        AttendanceDeadlineValidator $attendanceDeadlineValidator
+        ): JsonResponse{
         $course = Course::findOrFail($request->course_id);
 
         // Policyによる認可チェック
@@ -96,7 +96,7 @@ class NotificationController extends Controller
 
         $instructorId = Auth::guard('instructor')->user()->id;
 
-        if (($this->attendanceDeadlineValidator)($course)) {
+        if (! $attendanceDeadlineValidator($course)) {
             throw new AuthorizationException('The course has expired.');
         }
         

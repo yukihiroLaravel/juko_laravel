@@ -84,10 +84,8 @@ class AttendanceController extends Controller
     public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
-        $course = Course::with('tags')
-        ->whereKey($courseId)
-        ->withinDeadline()
-        ->firstOrFail();
+        
+        $course = Course::with('tags')->findOrFail($courseId);
 
         $this->authorize('view', [Attendance::class, $course]);
 

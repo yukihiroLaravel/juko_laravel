@@ -134,6 +134,35 @@ class CourseController extends Controller
                 imageFile: $request->file('image'),
                 status: $request->status,
             );
+        
+            // 期限3択の保存（course_deadlines へ upsert）
+            if ($request->has('deadline_mode')) {
+                $mode = $request->input('deadline_mode');
+
+                // ① モードは courses.deadline_type に保存
+                DB::table('courses')->where('id', $course->id)->update([
+                    'deadline_type' => $mode,
+                ]);
+
+                // ② 詳細は course_deadlines（まず既存をクリア）
+                DB::table('course_deadlines')->where('course_id', $course->id)->delete();
+
+                if ($mode === 'fixed_date') {
+                    DB::table('course_deadlines')->insert([
+                        'course_id'  => $course->id,
+                        'fixed_date' => $request->input('deadline_fixed_date'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                } elseif ($mode === 'relative') {
+                    DB::table('course_deadlines')->insert([
+                        'course_id'      => $course->id,
+                        'relative_days'  => (int) $request->input('deadline_relative_value'),
+                        'created_at'     => now(),
+                        'updated_at'     => now(),
+                    ]);
+                }
+            }
 
             DB::commit();
 

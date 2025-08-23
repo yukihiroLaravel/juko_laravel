@@ -39,7 +39,6 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
     ];
 
     /**
@@ -135,7 +134,6 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -144,18 +142,15 @@ class Course extends Model
         return [
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
-            'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',           
         ];
     }
 
     /**
-     * 受講期限を当日 23:59:59 に揃えて返す
+     * 旧カラム互換：どこから参照されても常に null を返す
      */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    public function getAttendanceDeadlineAttribute(): ?\Carbon\CarbonImmutable
     {
-        return $this->attendance_deadline
-            ? $this->attendance_deadline->endOfDay()
-            : null;
+        return null;
     }
 }

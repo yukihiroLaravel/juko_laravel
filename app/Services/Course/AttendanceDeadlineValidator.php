@@ -8,13 +8,15 @@ use Carbon\CarbonImmutable;
 class AttendanceDeadlineValidator
 {
     /**
-     * 受講期限が切れているかどうかを判定
+     * 受講期限の検証
+     * 期限内の場合は true、期限切れの場合は false を返す
      */
     public function __invoke(Course $course): bool
     {
-        return !(
-            $course->attendance_deadline &&
-            CarbonImmutable::now()->gte($course->attendance_deadline->endOfDay())
-        );
+        if (! $course->attendance_deadline_end) {
+            return true;
+        }
+
+        return CarbonImmutable::now()->lessThanOrEqualTo($course->attendance_deadline_end);
     }
 }

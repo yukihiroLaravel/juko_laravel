@@ -6,7 +6,6 @@ use App\Model\Notification;
 
 class StoreNotificationService
 {
-    
     /**
      * 通知を保存する共通処理
      */
@@ -20,7 +19,7 @@ class StoreNotificationService
         string $content,
         string $status
     ): void {
-        
+
         Notification::create([
             'course_id' => $course_id,
             'instructor_id' => $instructor_id,

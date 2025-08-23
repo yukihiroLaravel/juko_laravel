@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property bool $has_active_students
  * @property int $progress_percentage
+ * @property-read \Carbon\CarbonImmutable|null $attendance_deadline
+ * @property-read \Carbon\CarbonImmutable|null $attendance_deadline_end
  */
 class Course extends Model
 {
@@ -149,8 +151,13 @@ class Course extends Model
     /**
      * 旧カラム互換：どこから参照されても常に null を返す
      */
-    public function getAttendanceDeadlineAttribute(): ?\Carbon\CarbonImmutable
+    public function getAttendanceDeadlineAttribute(): ?CarbonImmutable
     {
         return null;
+    }
+
+    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    {
+    return null;
     }
 }

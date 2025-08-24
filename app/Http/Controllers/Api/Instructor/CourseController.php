@@ -104,7 +104,6 @@ class CourseController extends Controller
                 image: $request->file('image'),
                 tagId: $request->tag_id,
                 instructorId: $instructorId,
-                attendanceDeadline: $request->attendance_deadline,
                 deadlineType: $request->deadline_type,
                 fixedDate: $request->fixed_date,
                 relativeDays: $request->relative_days,

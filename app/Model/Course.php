@@ -40,10 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
         'deadline_type',
-        'fixed_date',
-        'relative_days',
     ];
 
     /**

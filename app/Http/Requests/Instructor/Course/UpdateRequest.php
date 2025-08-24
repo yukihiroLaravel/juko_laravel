@@ -37,6 +37,9 @@ class UpdateRequest extends FormRequest
             'title' => ['required', 'string'],
             'image' => ['mimes:jpg,png'],
             'status' => ['required', 'string', new CourseStatusRule],
+            'deadline_type' => ['required', 'in:none,fixed_date,relative_days'],
+            'fixed_date' => ['required_if:deadline_type,fixed_date', 'date_format:Y-m-d', 'after_or_equal:today', 'nullable'],
+            'relative_days' => ['required_if:deadline_type,relative_days', 'integer', 'min:1', 'nullable'],
         ];
     }
 }

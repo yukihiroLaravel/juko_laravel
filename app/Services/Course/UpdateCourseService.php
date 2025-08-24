@@ -16,7 +16,10 @@ class UpdateCourseService
         Course $course,
         string $title,
         ?UploadedFile $imageFile,
-        string $status
+        string $status,
+        string $deadlineType,
+        ?string $fixedDate = null,
+        ?int $relativeDays = null
     ): void {
         $imagePath = $this->getImagePath($course, $imageFile);
         // 講座を更新
@@ -24,7 +27,23 @@ class UpdateCourseService
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,
+            'deadline_type' => $deadlineType ?? 'none',
         ]);
+
+        $hasDeadline = in_array($deadlineType, ['fixed_date', 'relative_days'], true);
+
+        if (!$hasDeadline) {
+            $course->deadline()->delete();
+            return;
+        }
+
+        $course->deadline()->updateOrCreate(
+            ['course_id' => $course->id],
+            [
+                'fixed_date' => $deadlineType === 'fixed_date' ? $fixedDate : null,
+                'relative_days' => $deadlineType === 'relative_days' ? $relativeDays : null,
+            ]
+        );
     }
 
     /**

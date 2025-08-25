@@ -2,12 +2,14 @@
 
 namespace App\Model;
 
+use App\Model\CourseDeadline;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -157,5 +159,15 @@ class Course extends Model
         return $this->attendance_deadline
             ? $this->attendance_deadline->endOfDay()
             : null;
+    }
+
+    /**
+     * 受講期限の設定を取得
+     *
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function deadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
     }
 }

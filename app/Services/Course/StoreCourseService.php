@@ -14,7 +14,7 @@ class StoreCourseService
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId, ?string $attendanceDeadline = null): Course
+    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId,?string $deadlineType = null, ?string $fixedDate = null, ?int $relativeDays = null): Course
     {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();
@@ -28,8 +28,16 @@ class StoreCourseService
             'title' => $title,
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
-            'attendance_deadline' => $attendanceDeadline,
+            'deadline_type' => $deadlineType ?? 'none',
         ]);
+
+        // course_deadlines に保存（どちらか一方）
+        if (in_array($deadlineType, ['fixed_date', 'relative_days'], true)) {
+            $course->deadline()->create([
+                'fixed_date' => $deadlineType === 'fixed_date' ? $fixedDate : null,
+                'relative_days' => $deadlineType === 'relative_days' ? $relativeDays : null,
+            ]);
+        }
 
         // ログイン中の講師が作成したタグかどうか確認
         $tag = Tag::where('id', $tagId)

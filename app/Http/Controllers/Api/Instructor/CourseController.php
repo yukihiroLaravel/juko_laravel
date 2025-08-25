@@ -138,6 +138,7 @@ class CourseController extends Controller
                 title: $request->title,
                 imageFile: $request->file('image'),
                 status: $request->status,
+                attendanceDeadline: $request->attendance_deadline
             );
 
             DB::commit();

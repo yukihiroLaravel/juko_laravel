@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -128,6 +129,16 @@ class Course extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'course_tag', 'course_id', 'tag_id');
+    }
+
+    /**
+     * 期限設定（1:1）
+     *
+     * @return HasOne<\App\Model\CourseDeadline, $this>
+     */
+    public function deadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
     }
 
     /**

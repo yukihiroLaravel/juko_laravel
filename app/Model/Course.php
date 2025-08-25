@@ -132,22 +132,6 @@ class Course extends Model
     }
 
     /**
-<<<<<<< HEAD
-=======
-     * スコープ: 期限内（NULL or 今日の23:59:59 以降）の講座のみ
-     */
-    public function scopeWithinDeadline(Builder $query): Builder
-    {
-        $todayEnd = CarbonImmutable::now()->endOfDay();
-
-        return $query->where(function (Builder $q) use ($todayEnd) {
-            $q->whereNull('attendance_deadline')
-                ->orWhere('attendance_deadline', '>=', $todayEnd);
-        });
-    }
-
-    /**
->>>>>>> 9440275daaf4669af5394fdbaff81102313b026d
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',

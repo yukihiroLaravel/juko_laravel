@@ -28,6 +28,38 @@ class CourseShowResource extends JsonResource
                 ...(new ChapterResource($chapter))->toArray($request),
                 'lessons' => $chapter->lessons->map(fn ($lesson) => (new LessonResource($lesson))->toArray($request)),
             ]),
+            ...$this->formatDeadline(),
         ];
+    }
+
+    /**
+     * deadline 整形（行なし/両方NULLなら空配列）
+     */
+    private function formatDeadline(): array
+    {
+        $dl = $this->resource->deadline;
+
+        // ① 固定日
+        if ($dl && $dl->fixed_date) {
+            return [
+                'deadline' => [
+                    'mode'       => 'fixed_date',
+                    'fixed_date' => $dl->fixed_date,
+                ],
+            ];
+        }
+
+        // ② 相対日数
+        if ($dl && $dl->relative_days !== null) {
+            return [
+                'deadline' => [
+                    'mode'          => 'relative',
+                    'relative_days' => (int)$dl->relative_days,
+                ],
+            ];
+        }
+
+        // ③ 期限なし
+        return [];
     }
 }

@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Model\CourseDeadline;
 
 /**
  * @property bool $has_active_students
@@ -39,7 +41,6 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
     ];
 
     /**
@@ -135,7 +136,6 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -145,7 +145,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 
@@ -157,5 +156,15 @@ class Course extends Model
         return $this->attendance_deadline
             ? $this->attendance_deadline->endOfDay()
             : null;
+    }
+
+    /**
+     * 受講期限 (course_deadlines) への1対1
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function deadline(): HasOne
+    {
+        // 1コース=1行の想定。最新取得は不要なので simple に hasOne
+        return $this->hasOne(CourseDeadline::class, 'course_id', 'id');
     }
 }

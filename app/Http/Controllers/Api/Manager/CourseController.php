@@ -75,9 +75,10 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request): CourseShowResource
     {
-        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        $course = Course::with(['chapters.lessons', 'deadline'])
+            ->findOrFail($request->course_id);
 
-        // 認可チェック
+        // 認可
         $this->authorize('view', $course);
 
         return new CourseShowResource($course);

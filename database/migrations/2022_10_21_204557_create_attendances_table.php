@@ -17,12 +17,12 @@ class CreateAttendancesTable extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->bigIncrements('id');
-           $table->foreignIdFor(Course::class, 'course_id')->constrained()->comment('講座ID');
-           $table->foreignIdFor(Student::class, 'student_id')->constrained()->comment('生徒ID');
-           $table->date('attendance_deadline')->nullable()->comment('受講期限日（計算済み）');
-           $table->dateTime('created_at');
-           $table->dateTime('updated_at');
-           $table->softDeletes();
+            $table->foreignIdFor(Course::class, 'course_id')->constrained()->comment('講座ID');
+            $table->foreignIdFor(Student::class, 'student_id')->constrained()->comment('生徒ID');
+            $table->date('attendance_deadline')->nullable()->comment('受講期限日（計算済み）');
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
+            $table->softDeletes();
         });
     }
 

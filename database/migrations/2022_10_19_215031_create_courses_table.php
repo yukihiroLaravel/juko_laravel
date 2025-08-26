@@ -16,14 +16,14 @@ class CreateCoursesTable extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->bigIncrements('id');
-           $table->foreignIdFor(Instructor::class, 'instructor_id')->constrained()->comment('講師ID');
-           $table->string('title', 50)->comment('タイトル');
-           $table->text('image')->comment('サムネイルファイルパス');
-           $table->string('status', 30)->comment('ステータス');
-           $table->string('deadline_type', 50)->default('none')->comment('期限タイプ（none, fixed_date, relative_days）');
-           $table->dateTime('created_at');
-           $table->dateTime('updated_at');
-           $table->softDeletes();
+            $table->foreignIdFor(Instructor::class, 'instructor_id')->constrained()->comment('講師ID');
+            $table->string('title', 50)->comment('タイトル');
+            $table->text('image')->comment('サムネイルファイルパス');
+            $table->string('status', 30)->comment('ステータス');
+            $table->string('deadline_type', 50)->default('none')->comment('期限タイプ（none, fixed_date, relative_days）');
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
+            $table->softDeletes();
         });
     }
 

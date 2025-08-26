@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Model\Course;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -27,7 +26,7 @@ class CourseDeadline extends Model
     /**
      * 講座とのリレーション
      *
-     * @return BelongsTo<Course, self>
+     * @return BelongsTo<Course, $this>
      */
     public function course(): BelongsTo
     {

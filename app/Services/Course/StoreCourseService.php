@@ -14,7 +14,16 @@ class StoreCourseService
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId, ?string $attendanceDeadline = null,?string $deadlineType = null, ?string $fixedDate = null, ?int $relativeDays = null): Course
+    public function __invoke(
+        string $title, 
+        UploadedFile $image,
+        int $tagId, 
+        int $instructorId, 
+        ?string $attendanceDeadline = null, 
+        ?string $deadlineType = null, 
+        ?string $fixedDate = null, 
+        ?int $relativeDays = null
+    ): Course
     {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();

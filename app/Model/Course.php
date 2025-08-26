@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Model\CourseDeadline;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -163,7 +162,7 @@ class Course extends Model
     /**
      * 講座の受講期限設定（固定日／相対日数）を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne<CourseDeadline, self>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<CourseDeadline, $this>
      */
     public function deadline(): \Illuminate\Database\Eloquent\Relations\HasOne
     {

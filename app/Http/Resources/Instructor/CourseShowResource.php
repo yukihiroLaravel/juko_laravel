@@ -30,7 +30,7 @@ class CourseShowResource extends JsonResource
                 'fixed_date' => $this->resource->deadline->fixed_date,
                 'relative_days' => $this->resource->deadline->relative_days,
             ] : null,
-            
+
             'chapters' => $this->resource->chapters->map(fn ($chapter) => [
                 ...(new ChapterResource($chapter))->toArray($request),
                 'lessons' => $chapter->lessons->map(fn ($lesson) => (new LessonResource($lesson))->toArray($request)),

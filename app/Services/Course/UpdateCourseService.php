@@ -6,6 +6,7 @@ use App\Model\Course;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Enums\Course\DeadlineTypeEnum;
 
 class UpdateCourseService
 {
@@ -17,7 +18,7 @@ class UpdateCourseService
         string $title,
         ?UploadedFile $imageFile,
         string $status,
-        string $deadlineType,
+        DeadlineTypeEnum $deadlineType,
         ?string $fixedDate = null,
         ?int $relativeDays = null
     ): void {
@@ -27,10 +28,13 @@ class UpdateCourseService
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,
-            'deadline_type' => $deadlineType ?? 'none',
+            'deadline_type' => $deadlineType->value,
         ]);
 
-        $hasDeadline = in_array($deadlineType, ['fixed_date', 'relative_days'], true);
+        $hasDeadline = in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true);
 
         if (!$hasDeadline) {
             $course->deadline()->delete();
@@ -40,8 +44,8 @@ class UpdateCourseService
         $course->deadline()->updateOrCreate(
             ['course_id' => $course->id],
             [
-                'fixed_date' => $deadlineType === 'fixed_date' ? $fixedDate : null,
-                'relative_days' => $deadlineType === 'relative_days' ? $relativeDays : null,
+                'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
+                'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
             ]
         );
     }

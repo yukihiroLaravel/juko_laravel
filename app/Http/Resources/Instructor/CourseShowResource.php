@@ -44,9 +44,7 @@ class CourseShowResource extends JsonResource
             return [
                 'deadline' => [
                     'mode'       => 'fixed_date',
-                    'fixed_date' => $dl->fixed_date instanceof \Carbon\CarbonInterface
-                        ? $dl->fixed_date->toDateString()   // ← "2025-09-30"
-                        : (string) $dl->fixed_date,          // 念のため文字列ならそのまま
+                    'fixed_date' => $dl->fixed_date->toDateString(), // ← これでOK
                 ],
             ];
         }
@@ -56,7 +54,7 @@ class CourseShowResource extends JsonResource
             return [
                 'deadline' => [
                     'mode'          => 'relative',
-                    'relative_days' => (int)$dl->relative_days,
+                    'relative_days' => (int) $dl->relative_days,
                 ],
             ];
         }

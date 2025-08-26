@@ -46,13 +46,16 @@ class NotificationController extends Controller
     {
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
+
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;
+
         // 配下のインストラクター情報を取得
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->find($instructorId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
+
         $notifications = Notification::with(['course', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
@@ -65,8 +68,10 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
+
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
+
         // Policyによる認可チェック
         $this->authorize('view', $notification);
 
@@ -97,6 +102,7 @@ class NotificationController extends Controller
                 content: $request->content,
                 status: $request->status
             );
+
             DB::commit();
 
             return response()->json(['result' => true]);

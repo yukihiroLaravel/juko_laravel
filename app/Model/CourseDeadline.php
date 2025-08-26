@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CourseDeadline extends Model
 {
     protected $table = 'course_deadlines';
-    public $timestamps = true; // created_at / updated_at あり
+    public $timestamps = true;
 
     protected $fillable = [
         'course_id',
@@ -15,10 +15,14 @@ class CourseDeadline extends Model
         'relative_days',
     ];
 
-    protected $casts = [
-        'fixed_date'    => 'date:Y-m-d',
-        'relative_days' => 'int',
-        'created_at'    => 'immutable_datetime',
-        'updated_at'    => 'immutable_datetime',
-    ];
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fixed_date'    => 'date:Y-m-d',
+            'relative_days' => 'int',
+            'created_at'    => 'immutable_datetime',
+            'updated_at'    => 'immutable_datetime',
+        ];
+    }
 }

@@ -37,18 +37,14 @@ class CourseShowResource extends JsonResource
      */
     private function formatDeadline(): array
     {
-        $dl = $this->resource->deadline; // ← ここがポイント（$this->deadline はNG）
+        $dl = $this->resource->deadline;
 
         // ① 固定日
         if ($dl && $dl->fixed_date) {
-            $fixed = $dl->fixed_date instanceof \Carbon\CarbonInterface
-                ? $dl->fixed_date->toDateString()
-                : (string) $dl->fixed_date;
-
             return [
                 'deadline' => [
                     'mode'       => 'fixed_date',
-                    'fixed_date' => $fixed,
+                    'fixed_date' => $dl->getRawOriginal('fixed_date') ?? substr((string) $dl->fixed_date, 0, 10),
                 ],
             ];
         }

@@ -44,7 +44,9 @@ class CourseShowResource extends JsonResource
             return [
                 'deadline' => [
                     'mode'       => 'fixed_date',
-                    'fixed_date' => $dl->fixed_date->toDateString(),
+                    'fixed_date' => $this->deadline && $this->deadline->fixed_date instanceof \Carbon\CarbonInterface
+                    ? $this->deadline->fixed_date->toDateString()
+                    : $this->deadline?->fixed_date,
                 ],
             ];
         }

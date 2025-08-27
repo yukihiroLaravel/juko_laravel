@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
@@ -16,7 +17,7 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\StoreCourseService;
+use App\Services\Course\StoreService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -25,7 +26,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Enums\Course\DeadlineTypeEnum;
 
 /**
  * @tags Instructor-Course
@@ -93,7 +93,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
+    public function store(StoreRequest $request, StoreService $service): JsonResponse
     {
         DB::beginTransaction();
 

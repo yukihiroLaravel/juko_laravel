@@ -2,6 +2,7 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
@@ -19,7 +20,7 @@ class StoreService
         UploadedFile $image,
         int $tagId,
         int $instructorId,
-        ?string $deadlineType = null,
+        DeadlineTypeEnum $deadlineType,
         ?string $fixedDate = null,
         ?int $relativeDays = null
     ): Course {
@@ -35,14 +36,17 @@ class StoreService
             'title' => $title,
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
-            'deadline_type' => $deadlineType ?? 'none',
+            'deadline_type' => $deadlineType->value,
         ]);
 
         // course_deadlines に保存（どちらか一方）
-        if (in_array($deadlineType, ['fixed_date', 'relative_days'], true)) {
+        if (in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true)) {
             $course->deadline()->create([
-                'fixed_date' => $deadlineType === 'fixed_date' ? $fixedDate : null,
-                'relative_days' => $deadlineType === 'relative_days' ? $relativeDays : null,
+                'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
+                'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
             ]);
         }
 

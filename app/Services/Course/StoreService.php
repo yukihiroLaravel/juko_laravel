@@ -9,13 +9,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class StoreCourseService
+class StoreService
 {
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId,?string $deadlineType = null, ?string $fixedDate = null, ?int $relativeDays = null): Course
-    {
+    public function __invoke(
+        string $title,
+        UploadedFile $image,
+        int $tagId,
+        int $instructorId,
+        ?string $deadlineType = null,
+        ?string $fixedDate = null,
+        ?int $relativeDays = null
+    ): Course {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;

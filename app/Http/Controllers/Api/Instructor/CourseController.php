@@ -16,7 +16,7 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\StoreCourseService;
+use App\Services\Course\StoreService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -92,7 +92,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
+    public function store(StoreRequest $request, StoreService $service): JsonResponse
     {
         DB::beginTransaction();
 

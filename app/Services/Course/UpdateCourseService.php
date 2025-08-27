@@ -31,10 +31,7 @@ class UpdateCourseService
             'deadline_type' => $deadlineType->value,
         ]);
 
-        $hasDeadline = in_array($deadlineType, [
-            DeadlineTypeEnum::FIXED_DATE,
-            DeadlineTypeEnum::RELATIVE_DAYS,
-        ], true);
+        $hasDeadline = $this->hasDeadline($deadlineType);
 
         if (!$hasDeadline) {
             $course->deadline()->delete();
@@ -48,6 +45,14 @@ class UpdateCourseService
                 'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
             ]
         );
+    }
+
+    private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+    {
+        return in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true);
     }
 
     /**

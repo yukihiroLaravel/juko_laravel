@@ -19,7 +19,7 @@ class StoreTest extends TestCase
         $this->seed();
     }
 
-    public function test_講座登録_成功(): void
+    public function test_受講期限なし_講座登録_成功(): void
     {
         // arrange
         $instructor = Instructor::find(2);
@@ -32,7 +32,7 @@ class StoreTest extends TestCase
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => 2,
-            'attendance_deadline' => now()->addDays(30)->format('Y-m-d'),
+            'deadline_type' => 'none',
         ]);
 
         // assert
@@ -44,6 +44,78 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('course_tag', [
             'course_id' => 8,
             'tag_id' => 2,
+        ]);
+
+        $this->assertDatabaseMissing('course_deadlines', [
+            'course_id' => 8,
+        ]);
+    }
+
+    public function test_固定受講期限あり_講座登録_成功(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
+
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // act
+        $response = $this->post('/api/v1/instructor/course', [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => 2,
+            'deadline_type' => 'fixed_date',
+            'fixed_date' => now()->addDays(30)->format('Y-m-d'),
+        ]);
+
+        // assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'title' => 'テスト講座',
+        ]);
+
+        $this->assertDatabaseHas('course_tag', [
+            'course_id' => 8,
+            'tag_id' => 2,
+        ]);
+
+        $this->assertDatabaseHas('course_deadlines', [
+            'course_id' => 8,
+            'fixed_date' => now()->addDays(30)->format('Y-m-d'),
+        ]);
+    }
+
+    public function test_相対受講期限あり_講座登録_成功(): void
+    {
+        // arrange
+        $instructor = Instructor::find(2);
+        $this->actingAs($instructor, 'instructor');
+
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // act
+        $response = $this->post('/api/v1/instructor/course', [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => 2,
+            'deadline_type' => 'relative_days',
+            'relative_days' => 30,
+        ]);
+
+        // assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'title' => 'テスト講座',
+        ]);
+
+        $this->assertDatabaseHas('course_tag', [
+            'course_id' => 8,
+            'tag_id' => 2,
+        ]);
+
+        $this->assertDatabaseHas('course_deadlines', [
+            'course_id' => 8,
+            'relative_days' => 30,
         ]);
     }
 
@@ -60,6 +132,7 @@ class StoreTest extends TestCase
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => 1,
+            'deadline_type' => 'none',
         ]);
 
         // assert
@@ -80,7 +153,7 @@ class StoreTest extends TestCase
             'title' => '',
             'image' => null,
             'tag_id' => '',
-            'attendance_deadline' => 'invalid-date',
+            'deadline_type' => '',
         ]);
 
         // assert
@@ -89,7 +162,7 @@ class StoreTest extends TestCase
             'title' => 'The title field is required.',
             'image' => 'The image field is required.',
             'tag_id' => 'The tag id field is required.',
-            'attendance_deadline' => 'The attendance deadline does not match the format Y-m-d.',
+            'deadline_type' => 'The deadline type field is required.',
         ]);
     }
 }

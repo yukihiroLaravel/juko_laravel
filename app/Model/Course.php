@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -39,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
+        'deadline_type',
     ];
 
     /**
@@ -157,5 +158,15 @@ class Course extends Model
         return $this->attendance_deadline
             ? $this->attendance_deadline->endOfDay()
             : null;
+    }
+
+    /**
+     * 講座の受講期限設定（固定日／相対日数）を取得
+     *
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function deadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
@@ -9,13 +10,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class StoreCourseService
+class StoreService
 {
     /**
      * 講座登録サービス
      */
-    public function __invoke(string $title, UploadedFile $image, int $tagId, int $instructorId, ?string $attendanceDeadline = null): Course
-    {
+    public function __invoke(
+        string $title,
+        UploadedFile $image,
+        int $tagId,
+        int $instructorId,
+        DeadlineTypeEnum $deadlineType,
+        ?string $fixedDate = null,
+        ?int $relativeDays = null
+    ): Course {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();
         $filename = Str::uuid()->toString().'.'.$extension;
@@ -28,8 +36,19 @@ class StoreCourseService
             'title' => $title,
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
-            'attendance_deadline' => $attendanceDeadline,
+            'deadline_type' => $deadlineType->value,
         ]);
+
+        // course_deadlines に保存（どちらか一方）
+        if (in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true)) {
+            $course->deadline()->create([
+                'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
+                'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
+            ]);
+        }
 
         // ログイン中の講師が作成したタグかどうか確認
         $tag = Tag::where('id', $tagId)

@@ -24,9 +24,7 @@ class StoreTest extends TestCase
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
-
         $file = UploadedFile::fake()->image('test.jpg');
-
         // act
         $response = $this->post('/api/v1/instructor/course', [
             'title' => 'テスト講座',
@@ -40,7 +38,6 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
         ]);
-
         $this->assertDatabaseHas('course_tag', [
             'course_id' => 8,
             'tag_id' => 2,
@@ -124,9 +121,7 @@ class StoreTest extends TestCase
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
-
         $file = UploadedFile::fake()->image('test.jpg');
-
         // act
         $response = $this->post('/api/v1/instructor/course', [
             'title' => 'テスト講座',
@@ -147,7 +142,6 @@ class StoreTest extends TestCase
         // arrange
         $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
-
         // act
         $response = $this->post('/api/v1/instructor/course', [
             'title' => '',

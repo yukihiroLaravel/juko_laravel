@@ -135,8 +135,7 @@ class Course extends Model
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
-     *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
+     *  updated_at: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -146,7 +145,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 

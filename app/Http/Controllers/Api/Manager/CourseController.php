@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Course\DeleteRequest;
 use App\Http\Requests\Manager\Course\IndexRequest;
@@ -98,7 +99,9 @@ class CourseController extends Controller
                 image: $request->file('image'),
                 tagId: $request->tag_id,
                 instructorId: $managerId,
-                attendanceDeadline: $request->attendance_deadline
+                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
+                fixedDate: $request->fixed_date,
+                relativeDays: $request->relative_days,
             );
 
             DB::commit();

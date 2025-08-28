@@ -70,7 +70,6 @@ class IndexTest extends TestCase
         $response = $this->getJson('/api/v1/manager/instructor/index');
 
         // assert
-        $response->dump();
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data.instructors');
         $response->assertJson([

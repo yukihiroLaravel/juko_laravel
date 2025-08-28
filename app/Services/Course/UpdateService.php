@@ -2,12 +2,13 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class UpdateCourseService
+class UpdateService
 {
     /**
      * 講座登録サービス
@@ -16,7 +17,10 @@ class UpdateCourseService
         Course $course,
         string $title,
         ?UploadedFile $imageFile,
-        string $status
+        string $status,
+        DeadlineTypeEnum $deadlineType,
+        ?string $fixedDate = null,
+        ?int $relativeDays = null
     ): void {
         $imagePath = $this->getImagePath($course, $imageFile);
         // 講座を更新
@@ -24,7 +28,33 @@ class UpdateCourseService
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,
+            'deadline_type' => $deadlineType->value,
         ]);
+
+        if (! $this->hasDeadline($deadlineType)) {
+            $course->courseDeadline()->delete();
+
+            return;
+        }
+
+        $course->courseDeadline()->updateOrCreate(
+            ['course_id' => $course->id],
+            [
+                'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
+                'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
+            ]
+        );
+    }
+
+    /**
+     * 受講期限設定があるかどうか
+     */
+    private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+    {
+        return in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true);
     }
 
     /**

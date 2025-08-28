@@ -163,7 +163,7 @@ class Course extends Model
      *
      * @return HasOne<CourseDeadline, $this>
      */
-    public function deadline(): HasOne
+    public function courseDeadline(): HasOne
     {
         return $this->hasOne(CourseDeadline::class);
     }

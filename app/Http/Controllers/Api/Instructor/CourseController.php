@@ -17,7 +17,7 @@ use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
-use App\Services\Course\UpdateCourseService;
+use App\Services\Course\UpdateService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -124,7 +124,7 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service): JsonResponse
     {
         DB::beginTransaction();
 
@@ -135,7 +135,7 @@ class CourseController extends Controller
             $this->authorize('update', $course);
 
             // 講座更新（Service 利用）
-            $updateCourseService(
+            $service(
                 course: $course,
                 title: $request->title,
                 imageFile: $request->file('image'),

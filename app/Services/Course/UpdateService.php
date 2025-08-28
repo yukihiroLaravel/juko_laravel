@@ -8,7 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class UpdateCourseService
+class UpdateService
 {
     /**
      * 講座登録サービス
@@ -31,15 +31,13 @@ class UpdateCourseService
             'deadline_type' => $deadlineType->value,
         ]);
 
-        $hasDeadline = $this->hasDeadline($deadlineType);
-
-        if (! $hasDeadline) {
-            $course->deadline()->delete();
+        if (! $this->hasDeadline($deadlineType)) {
+            $course->courseDeadline()->delete();
 
             return;
         }
 
-        $course->deadline()->updateOrCreate(
+        $course->courseDeadline()->updateOrCreate(
             ['course_id' => $course->id],
             [
                 'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
@@ -48,6 +46,9 @@ class UpdateCourseService
         );
     }
 
+    /**
+     * 受講期限設定があるかどうか
+     */
     private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
     {
         return in_array($deadlineType, [

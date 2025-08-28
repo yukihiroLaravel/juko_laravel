@@ -2,10 +2,10 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\CarbonImmutable;
 
 class Attendance extends Model
 {
@@ -27,17 +27,18 @@ class Attendance extends Model
         'student_id',
         'progress',
     ];
-    
+
     /** JSONに常に含める“計算項目” */
     protected $appends = ['deadline_date', 'expired'];
 
-    public function getDeadlineDateAttribute(): ?string 
+    public function getDeadlineDateAttribute(): ?string
     {
         $d = $this->calcDeadlineForStudent();
+
         return $d ? $d->format('Y-m-d') : null;
     }
-    
-    public function getExpiredAttribute(): bool 
+
+    public function getExpiredAttribute(): bool
     {
         return $this->isExpired();
     }
@@ -133,6 +134,7 @@ class Attendance extends Model
             'updated_at' => 'datetime',
         ];
     }
+
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
      * - fixed_date があればそれを優先
@@ -140,33 +142,34 @@ class Attendance extends Model
      */
     public function calcDeadlineForStudent(): ?CarbonImmutable
     {
-    // N+1避けのため、呼び出し側では with('course.deadline') を推奨
-    $course   = $this->course;
-    $deadline = $course?->deadline; // Course::deadline() (hasOne)
+        // N+1避けのため、呼び出し側では with('course.deadline') を推奨
+        $course = $this->course;
+        $deadline = $course?->deadline; // Course::deadline() (hasOne)
 
-    if (! $deadline) {
-        return null; // 期限設定なし
-    }
+        if (! $deadline) {
+            return null; // 期限設定なし
+        }
 
-    // 1) 固定日が設定されている場合はそれを優先
-    if (! empty($deadline->fixed_date)) {
-        return CarbonImmutable::parse($deadline->fixed_date)->endOfDay();
-    }
+        // 1) 固定日が設定されている場合はそれを優先
+        if (! empty($deadline->fixed_date)) {
+            return CarbonImmutable::parse($deadline->fixed_date)->endOfDay();
+        }
 
-    // 2) 相対日（受講開始からN日）
-    if (! empty($deadline->relative_days)) {
-        $start = CarbonImmutable::parse($this->created_at);
-        return $start->addDays((int)$deadline->relative_days)->endOfDay();
-    }
+        // 2) 相対日（受講開始からN日）
+        if (! empty($deadline->relative_days)) {
+            $start = CarbonImmutable::parse($this->created_at);
 
-    return null; // どちらも未設定＝期限なし
+            return $start->addDays((int) $deadline->relative_days)->endOfDay();
+        }
+
+        return null; // どちらも未設定＝期限なし
     }
 
     /** 期限切れか？ */
     public function isExpired(): bool
     {
         $limit = $this->calcDeadlineForStudent();
-        return $limit ? CarbonImmutable::now()->greaterThan($limit) : false;
-    }
 
+        return $limit && CarbonImmutable::now()->greaterThan($limit);
+    }
 }

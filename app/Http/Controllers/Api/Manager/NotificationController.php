@@ -68,6 +68,7 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
+        
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
 

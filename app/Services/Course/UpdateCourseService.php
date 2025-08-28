@@ -2,11 +2,11 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Enums\Course\DeadlineTypeEnum;
 
 class UpdateCourseService
 {
@@ -33,8 +33,9 @@ class UpdateCourseService
 
         $hasDeadline = $this->hasDeadline($deadlineType);
 
-        if (!$hasDeadline) {
+        if (! $hasDeadline) {
             $course->deadline()->delete();
+
             return;
         }
 

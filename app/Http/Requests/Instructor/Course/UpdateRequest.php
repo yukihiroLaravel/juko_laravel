@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Instructor\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Enums\Course\DeadlineTypeEnum;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateRequest extends FormRequest

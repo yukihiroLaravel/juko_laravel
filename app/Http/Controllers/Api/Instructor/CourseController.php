@@ -13,7 +13,6 @@ use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
@@ -26,7 +25,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Enums\Course\DeadlineTypeEnum;
 
 /**
  * @tags Instructor-Course

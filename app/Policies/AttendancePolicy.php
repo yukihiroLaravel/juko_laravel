@@ -28,7 +28,6 @@ class AttendancePolicy
      */
     public function view(Instructor $instructor, Course $course): bool
     {
-
         $validator = new AttendanceDeadlineValidator;
 
         // 期限切れならNG

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
@@ -16,7 +17,7 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\StoreCourseService;
+use App\Services\Course\StoreService;
 use App\Services\Course\UpdateCourseService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -93,7 +94,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
+    public function store(StoreRequest $request, StoreService $service): JsonResponse
     {
         DB::beginTransaction();
 
@@ -105,7 +106,9 @@ class CourseController extends Controller
                 image: $request->file('image'),
                 tagId: $request->tag_id,
                 instructorId: $instructorId,
-                attendanceDeadline: $request->attendance_deadline
+                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
+                fixedDate: $request->fixed_date,
+                relativeDays: $request->relative_days,
             );
 
             DB::commit();

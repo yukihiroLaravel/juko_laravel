@@ -36,7 +36,6 @@ class CoursesSeeder extends Seeder
                 'instructor_id' => 3,
                 'title' => 'React入門講座',
                 'image' => 'course/5c5edaa5-a1cf-42be-b56b-ff2692210df3.png',
-                'attendance_deadline' => Carbon::now()->addDays(30),
                 'status' => Course::STATUS_PUBLIC,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

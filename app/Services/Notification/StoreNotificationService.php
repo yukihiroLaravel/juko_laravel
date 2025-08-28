@@ -19,6 +19,7 @@ class StoreNotificationService
         string $content,
         string $status
     ): void {
+
         Notification::create([
             'course_id' => $course_id,
             'instructor_id' => $instructor_id,

@@ -16,7 +16,8 @@ class UpdateCourseService
         Course $course,
         string $title,
         ?UploadedFile $imageFile,
-        string $status
+        string $status,
+        ?string $attendanceDeadline = null
     ): void {
         $imagePath = $this->getImagePath($course, $imageFile);
         // 講座を更新
@@ -24,6 +25,7 @@ class UpdateCourseService
             'title' => $title,
             'image' => $imagePath,
             'status' => $status,
+            'attendance_deadline' => $attendanceDeadline,
         ]);
     }
 

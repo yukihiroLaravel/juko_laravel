@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Course\DeleteRequest;
 use App\Http\Requests\Manager\Course\IndexRequest;
@@ -25,7 +26,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Enums\Course\DeadlineTypeEnum;
 
 /**
  * @tags Manager-Course

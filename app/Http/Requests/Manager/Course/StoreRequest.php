@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Manager\Course;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Enums\Course\DeadlineTypeEnum;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreRequest extends FormRequest

@@ -139,6 +139,7 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
+     *  attendance_deadline: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -148,6 +149,7 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 
@@ -165,9 +167,9 @@ class Course extends Model
      * 受講期限 (course_deadlines) への1対1
      * @return HasOne<CourseDeadline, $this>
      */
-    public function deadline(): HasOne
+    public function courseDeadline(): HasOne
     {
         // 1コース=1行の想定。最新取得は不要なので simple に hasOne
-        return $this->hasOne(CourseDeadline::class, 'course_id', 'id');
+        return $this->hasOne(CourseDeadline::class);
     }
 }

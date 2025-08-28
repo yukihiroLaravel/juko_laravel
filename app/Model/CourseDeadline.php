@@ -14,15 +14,4 @@ class CourseDeadline extends Model
         'fixed_date',
         'relative_days',
     ];
-
-    #[\Override]
-    protected function casts(): array
-    {
-        return [
-            'fixed_date'    => 'immutable_date',
-            'relative_days' => 'int',
-            'created_at'    => 'immutable_datetime',
-            'updated_at'    => 'immutable_datetime',
-        ];
-    }
 }

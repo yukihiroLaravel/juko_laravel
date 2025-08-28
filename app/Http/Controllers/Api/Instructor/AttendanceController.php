@@ -251,7 +251,7 @@ class AttendanceController extends Controller
 
         /** @var Attendance $attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
-        
+
         // Policyによる認可チェック
         $this->authorize('view', $attendance->course);
 

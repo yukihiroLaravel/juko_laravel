@@ -28,6 +28,7 @@ use App\Services\Notification\PutStatusService;
 use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

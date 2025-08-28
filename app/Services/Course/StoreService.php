@@ -31,6 +31,7 @@ class StoreService
         $filePath = Course::convertImagePath($filePath);
 
         // 講座を作成
+        /** @var Course $course */
         $course = Course::create([
             'instructor_id' => $instructorId,
             'title' => $title,
@@ -44,7 +45,7 @@ class StoreService
             DeadlineTypeEnum::FIXED_DATE,
             DeadlineTypeEnum::RELATIVE_DAYS,
         ], true)) {
-            $course->deadline()->create([
+            $course->courseDeadline()->create([
                 'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
                 'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
             ]);

@@ -266,12 +266,6 @@ class AttendanceController extends Controller
     public function status(StatusRequest $request): StatusResource
     {
         $attendanceId = $request->attendance_id;
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーとその配下の講師のIDを取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
 
         $attendance = Attendance::with([
             'course.chapters.lessons.lessonAttendances',
@@ -279,11 +273,8 @@ class AttendanceController extends Controller
         ])
             ->findOrFail($attendanceId);
 
-        if (! in_array($attendance->course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+        // Policyによる認可チェック
+        $this->authorize('view', $attendance->course);
 
         return new StatusResource($attendance);
     }

@@ -57,7 +57,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->postJson('/api/v1/instructor/course/1/notification', [
+        $response = $this->postJson('/api/v1/manager/course/1/notification', [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',

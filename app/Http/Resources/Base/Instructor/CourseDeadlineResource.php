@@ -13,16 +13,15 @@ class CourseDeadlineResource extends JsonResource
     #[\Override]
     public function toArray(Request $request): array
     {
-        if ($this->fixed_date) {
-            return [
-                'mode'       => 'fixed_date',
-                'fixed_date' => $this->getRawOriginal('fixed_date')
-                    ?? substr((string) $this->fixed_date, 0, 10),
-            ];
-        }
-
-        return $this->relative_days !== null
-            ? ['mode' => 'relative', 'relative_days' => (int) $this->relative_days]
-            : [];
+        return [
+            'course_deadline_id' => $this->resource->id,
+            'fixed_date' => $this->resource->fixed_date
+                ? ($this->resource->getRawOriginal('fixed_date')
+                    ?? substr((string) $this->resource->fixed_date, 0, 10))
+                : null,
+            'relative_days' => $this->resource->relative_days !== null
+                ? (int) $this->resource->relative_days
+                : null,
+        ];
     }
 }

@@ -10,15 +10,18 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource
 {
-    public function toArray($request): array
-    {
-        // まず deadline の配列を作る（なければ空配列）
-        $deadlineArr = [];
-        if ($this->resource->courseDeadline) {
-            $deadlineArr = (new CourseDeadlineResource($this->resource->courseDeadline))
-                ->toArray($request);
-        }
+    /** @var Course */
+    public $resource;
 
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    #[\Override]
+    public function toArray($request)
+    {
         return [
             ...(new CourseResource($this->resource))->toArray($request),
             'chapters' => $this->resource->chapters->map(fn ($chapter) => [
@@ -26,11 +29,6 @@ class CourseShowResource extends JsonResource
                 'lessons' => $chapter->lessons->map(
                     fn ($lesson) => (new LessonResource($lesson))->toArray($request)
                 ),
-            ]),
-
-            // 中身があるときだけ 'deadline' キーを出す
-            $this->mergeWhen(!empty($deadlineArr), [
-                'deadline' => $deadlineArr,
             ]),
         ];
     }

@@ -7,7 +7,6 @@ use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\LessonResource;
 use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Base\Instructor\CourseDeadlineResource;
 
 class CourseShowResource extends JsonResource
 {
@@ -25,12 +24,6 @@ class CourseShowResource extends JsonResource
     {
         return [
             ...(new CourseResource($this->resource))->toArray($request),
-
-            // 講座の期限情報を追加
-            'course_deadline' => $this->resource->courseDeadline
-                ? new CourseDeadlineResource($this->resource->courseDeadline)
-                : null,
-
             'chapters' => $this->resource->chapters->map(fn ($chapter) => [
                 ...(new ChapterResource($chapter))->toArray($request),
                 'lessons' => $chapter->lessons->map(fn ($lesson) => (new LessonResource($lesson))->toArray($request)),

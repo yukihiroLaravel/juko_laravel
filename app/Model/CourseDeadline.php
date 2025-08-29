@@ -24,6 +24,19 @@ class CourseDeadline extends Model
     ];
 
     /**
+     * @return array{
+     *  fixed_date: 'immutable_datetime'
+     * }
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'fixed_date' => 'immutable_datetime',
+        ];
+    }
+
+    /**
      * 講座とのリレーション
      *
      * @return BelongsTo<Course, $this>

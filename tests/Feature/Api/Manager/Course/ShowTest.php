@@ -35,7 +35,8 @@ class ShowTest extends TestCase
                 'title',
                 'image',
                 'status',
-                'attendance_deadline',
+                'deadline_type',
+                'course_deadline',
                 'chapters' => [
                     '*' => [
                         'chapter_id',

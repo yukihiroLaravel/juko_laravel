@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Base\Instructor;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Model\CourseDeadline;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseDeadlineResource extends JsonResource
 {
@@ -14,7 +14,8 @@ class CourseDeadlineResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'fixed_date' => optional($this->resource->fixed_date)?->toDateString(),
+            'course_deadline_id' => $this->resource->id,
+            'fixed_date' => $this->resource->fixed_date?->format('Y-m-d'),
             'relative_days' => $this->resource->relative_days,
         ];
     }

@@ -28,7 +28,6 @@ class ShowTest extends TestCase
         $response = $this->getJson('/api/v1/instructor/course/2');
 
         // assert
-        $response->dump();
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [

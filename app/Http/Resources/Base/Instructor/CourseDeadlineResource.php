@@ -13,24 +13,16 @@ class CourseDeadlineResource extends JsonResource
     #[\Override]
     public function toArray(Request $request): array
     {
-        // 固定日
-        if ($this->resource->fixed_date) {
+        if ($this->fixed_date) {
             return [
                 'mode'       => 'fixed_date',
-                'fixed_date' => $this->resource->getRawOriginal('fixed_date')
-                    ?? substr((string) $this->resource->fixed_date, 0, 10),
+                'fixed_date' => $this->getRawOriginal('fixed_date')
+                    ?? substr((string) $this->fixed_date, 0, 10),
             ];
         }
 
-        // 相対日数
-        if ($this->resource->relative_days !== null) {
-            return [
-                'mode'          => 'relative',
-                'relative_days' => (int) $this->resource->relative_days,
-            ];
-        }
-
-        // 期限なし（このリソース単体は空）
-        return [];
+        return $this->relative_days !== null
+            ? ['mode' => 'relative', 'relative_days' => (int) $this->relative_days]
+            : [];
     }
 }

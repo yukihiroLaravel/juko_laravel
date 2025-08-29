@@ -3,8 +3,8 @@
 namespace App\Services\Notification;
 
 use App\Dto\Student\Notification\IndexDto;
-use App\Enums\Notification\StatusEnum;
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Enums\Notification\StatusEnum;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;

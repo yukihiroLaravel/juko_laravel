@@ -26,7 +26,7 @@ class CourseDeadline extends Model
     /**
      * 講座とのリレーション
      *
-     * @return BelongsTo<Course, self>
+     * @return BelongsTo<Course, $this>
      */
     public function course(): BelongsTo
     {

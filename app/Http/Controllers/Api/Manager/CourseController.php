@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Course\DeleteRequest;
 use App\Http\Requests\Manager\Course\IndexRequest;
@@ -15,8 +16,8 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\StoreCourseService;
-use App\Services\Course\UpdateCourseService;
+use App\Services\Course\StoreService;
+use App\Services\Course\UpdateService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -86,7 +87,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
+    public function store(StoreRequest $request, StoreService $service): JsonResponse
     {
         $managerId = Auth::guard('instructor')->user()->id;
 
@@ -98,7 +99,9 @@ class CourseController extends Controller
                 image: $request->file('image'),
                 tagId: $request->tag_id,
                 instructorId: $managerId,
-                attendanceDeadline: $request->attendance_deadline
+                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
+                fixedDate: $request->fixed_date,
+                relativeDays: $request->relative_days,
             );
 
             DB::commit();
@@ -117,7 +120,7 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service): JsonResponse
     {
         DB::beginTransaction();
 
@@ -128,7 +131,7 @@ class CourseController extends Controller
             $this->authorize('update', $course);
 
             // 講座更新（Service 利用）
-            $updateCourseService(
+            $service(
                 course: $course,
                 title: $request->title,
                 imageFile: $request->file('image'),

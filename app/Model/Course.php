@@ -40,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
+        'deadline_type',
     ];
 
     /**
@@ -135,8 +135,7 @@ class Course extends Model
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
-     *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
+     *  updated_at: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -146,7 +145,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 
@@ -161,7 +159,7 @@ class Course extends Model
     }
 
     /**
-     * 受講期限の設定を取得
+     * 講座の受講期限設定（固定日／相対日数）を取得
      *
      * @return HasOne<CourseDeadline, $this>
      */

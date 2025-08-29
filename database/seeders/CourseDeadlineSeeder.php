@@ -19,7 +19,7 @@ class CourseDeadlineSeeder extends Seeder
         CourseDeadline::insert([
             [
                 'course_id' => 2,
-                'fixed_date' => CarbonImmutable::now()->addMonth(1),
+                'fixed_date' => CarbonImmutable::now()->addMonth(),
                 'relative_days' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

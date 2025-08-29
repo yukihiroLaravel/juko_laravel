@@ -19,16 +19,9 @@ class CourseResource extends JsonResource
             'title' => $this->resource->title,
             'image' => $this->resource->image,
             'status' => $this->resource->status,
-
-            'deadline_type' => $this->resource->courseDeadline?->fixed_date
-                ? 'fixed_date'
-                : ($this->resource->courseDeadline?->relative_days !== null
-                    ? 'relative'
-                    : null),
-                    
+            'deadline_type' => $this->resource->deadline_type,
             'course_deadline' => $this->resource->courseDeadline
-                ? ($this->resource->courseDeadline->fixed_date
-                    ?? $this->resource->courseDeadline->relative_days)
+                ? new CourseDeadlineResource($this->resource->courseDeadline)
                 : null,
         ];
     }

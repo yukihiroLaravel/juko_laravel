@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Student;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Http\Resources\Base\Student\AttendanceResource;
 use App\Http\Resources\Base\Student\ChapterResource;
 use App\Http\Resources\Base\Student\CourseResource;
 use App\Http\Resources\Base\Student\InstructorResource;
@@ -22,40 +23,23 @@ class AttendanceShowResource extends JsonResource
     #[\Override]
     public function toArray($request): array
     {
-        $deadlineDate = $this->resource->calcDeadlineForStudent();
-        $setting      = optional($this->resource->course->deadline);
-
-        $type = $setting?->fixed_date
-            ? DeadlineTypeEnum::FIXED_DATE->value
-            : ($setting?->relative_days
-                ? DeadlineTypeEnum::RELATIVE_DAYS->value
-                : DeadlineTypeEnum::NONE->value);
-
         return [
-            'attendance_id' => $this->resource->id,
-            'deadline_date' => $deadlineDate?->format('Y-m-d'),
-            'expired'       => $this->resource->isExpired(),
-
+            ...(new AttendanceResource($this->resource))->toArray($request),
+            
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'instructor' => new InstructorResource($this->resource->course->instructor),
                 'tags'       => TagResource::collection($this->resource->course->tags),
-
-                'deadline' => [
-                    'type'          => $type,
-                    'fixed_date'    => $setting?->fixed_date?->format('Y-m-d'),
-                    'relative_days' => $setting?->relative_days,
-                ],
-
+                'deadline_type' => $this->resource->course->deadline_type ?? 'none',
                 'chapters' => ChapterResource::collection(
                     $this->resource->course->publicChapters
                 )->collection->map(fn (ChapterResource $chapterResource) => [
                     ...$chapterResource->toArray($request),
-                    'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) {
-                        $la = $this->resource->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+                    'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
+                        $lessonAttendance = $this->resource->lessonAttendances->firstWhere('lesson_id', $lesson->id);
                         return [
-                            ...(new LessonResource($lesson))->toArray(request()),
-                            'lessonAttendance' => new LessonAttendanceResource($la),
+                            ...(new LessonResource($lesson))->toArray($request),
+                            'lessonAttendance' => new LessonAttendanceResource($lessonAttendance),
                         ];
                     }),
                 ]),

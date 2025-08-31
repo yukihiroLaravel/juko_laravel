@@ -40,7 +40,6 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
     ];
 
     /**
@@ -136,9 +135,15 @@ class Course extends Model
      *
      * @return HasOne<\App\Model\CourseDeadline, $this>
      */
-    public function deadline(): HasOne
+    public function courseDeadline(): HasOne
     {
         return $this->hasOne(CourseDeadline::class);
+    }
+
+    public function deadline(): HasOne
+    {
+        
+        return $this->courseDeadline(); 
     }
 
     /**
@@ -146,7 +151,6 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -156,17 +160,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
-    }
-
-    /**
-     * 受講期限を当日 23:59:59 に揃えて返す
-     */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
-    {
-        return $this->attendance_deadline
-            ? $this->attendance_deadline->endOfDay()
-            : null;
     }
 }

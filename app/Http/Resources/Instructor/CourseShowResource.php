@@ -3,9 +3,9 @@
 namespace App\Http\Resources\Instructor;
 
 use App\Http\Resources\Base\Instructor\ChapterResource;
-use App\Http\Resources\Base\Instructor\CourseDeadlineResource;
 use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\LessonResource;
+use App\Model\Course;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CourseShowResource extends JsonResource

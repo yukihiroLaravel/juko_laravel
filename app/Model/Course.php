@@ -15,9 +15,6 @@ use App\Model\CourseDeadline;
 /**
  * @property bool $has_active_students
  * @property int $progress_percentage
- * @property \Carbon\CarbonImmutable|null $attendance_deadline
- * @property-read \Carbon\CarbonImmutable|null $attendance_deadline_end
-
  */
 class Course extends Model
 {
@@ -139,7 +136,7 @@ class Course extends Model
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
-     *  updated_at: 'immutable_datetime'
+     *  updated_at: 'immutable_datetime',
      *  attendance_deadline: 'immutable_datetime'
      * }
      */

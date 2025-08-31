@@ -12,7 +12,6 @@ use App\Http\Resources\Base\Student\LessonResource;
 use App\Http\Resources\Base\Student\TagResource;
 use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowResource extends JsonResource

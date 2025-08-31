@@ -29,17 +29,17 @@ class Attendance extends Model
         'student_id',
         'progress',
     ];
-    
+
     /** JSONに常に含める“計算項目” */
     protected $appends = ['deadline_date', 'expired'];
 
-    public function getDeadlineDateAttribute(): ?string 
+    public function getDeadlineDateAttribute(): ?string
     {
         $d = $this->calcDeadline();
         return $d ? $d->format('Y-m-d') : null;
     }
-    
-    public function getExpiredAttribute(): bool 
+
+    public function getExpiredAttribute(): bool
     {
         return $this->isExpired();
     }
@@ -135,6 +135,7 @@ class Attendance extends Model
             'updated_at' => 'immutable_datetime',
         ];
     }
+
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
      * - fixed_date があればそれを優先
@@ -173,5 +174,4 @@ class Attendance extends Model
         $limit = $this->calcDeadline();
         return $limit ? CarbonImmutable::now()->gte($limit) : false;
     }
-
 }

@@ -15,7 +15,7 @@ class ShowService
             'course.publicChapters.lessons',
             'course.instructor',
             'lessonAttendances',
-            'course.deadline',
+            'course', 'course.courseDeadline',
         ])
             ->findOrFail($showDto->getAttendanceId());
 

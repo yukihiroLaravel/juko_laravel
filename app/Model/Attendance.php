@@ -30,15 +30,6 @@ class Attendance extends Model
         'progress',
     ];
 
-    /** JSONに常に含める“計算項目” */
-    protected $appends = ['deadline_date', 'expired'];
-
-    public function getDeadlineDateAttribute(): ?string
-    {
-        $d = $this->calcDeadline();
-        return $d ? $d->format('Y-m-d') : null;
-    }
-
     public function getExpiredAttribute(): bool
     {
         return $this->isExpired();
@@ -143,16 +134,16 @@ class Attendance extends Model
      */
     public function calcDeadline(): ?CarbonImmutable
     {
-    // N+1避けのため、呼び出し側では with('course.deadline') を推奨
+    // N+1避けのため、呼び出し側では with('course.courseDeadline') を推奨
     $course   = $this->course;
-    $deadline = $course?->deadline; // Course::deadline() (hasOne)
-    $type = DeadlineTypeEnum::tryFrom($course?->deadline_type ?? 'none');
+    $deadline = $course?->courseDeadline; // Course::deadline() (hasOne)
+    $type = DeadlineTypeEnum::tryFrom($course?->deadline_type ?? 'none')?? DeadlineTypeEnum::NONE;
     
     if ($type === DeadlineTypeEnum::FIXED_DATE) {
         if ($deadline !== null && $deadline->fixed_date !== null) {
             return CarbonImmutable::parse($deadline->fixed_date)->endOfDay();
         }
-        throw new LogicException('deadline_type=fixed_date なのに fixed_date が未設定です');
+        throw new LogicException('deadline_type is fixed_date but fixed_date is null');
     }
 
     if ($type === DeadlineTypeEnum::RELATIVE_DAYS) {
@@ -161,7 +152,7 @@ class Attendance extends Model
                 ->addDays((int) $deadline->relative_days)
                 ->endOfDay();
         }
-        throw new LogicException('deadline_type=relative_days なのに relative_days が未設定です');
+        throw new LogicException('deadline_type is relative_days but relative_days is null');
     }
 
     // NONE もしくは不明値→期限なし

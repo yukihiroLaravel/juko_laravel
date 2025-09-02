@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Student;
 
-use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Resources\Base\Student\AttendanceResource;
 use App\Http\Resources\Base\Student\ChapterResource;
 use App\Http\Resources\Base\Student\CourseResource;
@@ -29,7 +28,7 @@ class AttendanceShowResource extends JsonResource
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'instructor' => new InstructorResource($this->resource->course->instructor),
                 'tags'       => TagResource::collection($this->resource->course->tags),
-                'deadline_type' => $this->resource->course->deadline_type ?? 'none',
+                
                 'chapters' => ChapterResource::collection(
                     $this->resource->course->publicChapters
                 )->collection->map(fn (ChapterResource $chapterResource) => [

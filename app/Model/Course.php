@@ -40,6 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
+        'deadline_type',
     ];
 
     /**
@@ -138,12 +139,6 @@ class Course extends Model
     public function courseDeadline(): HasOne
     {
         return $this->hasOne(CourseDeadline::class);
-    }
-
-    public function deadline(): HasOne
-    {
-        
-        return $this->courseDeadline(); 
     }
 
     /**

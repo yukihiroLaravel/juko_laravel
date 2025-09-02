@@ -22,12 +22,18 @@ class StatusResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
+        $courseDeadline = $this->resource->course->deadline;
+        
         return [
             'attendance_id' => $this->resource->id,
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'tags' => TagResource::collection($this->resource->course->tags),
                 'chapters' => ChapterResource::collection($this->resource->course->chapters),
+                'course_deadline' => $courseDeadline ? [
+                    'fixed_date'    => $courseDeadline->fixed_date,
+                    'relative_days' => $courseDeadline->relative_days,
+                ] : null,
             ],
         ];
     }

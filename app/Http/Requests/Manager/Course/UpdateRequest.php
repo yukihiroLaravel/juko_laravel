@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Manager\Course;
 
-use App\Rules\CourseStatusRule;
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 

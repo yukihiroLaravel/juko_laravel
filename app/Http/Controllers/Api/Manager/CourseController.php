@@ -51,7 +51,7 @@ class CourseController extends Controller
         $instructorIds[] = $instructorId;
 
         // 自分、または配下の講師の講座情報を取得
-        $courses = Course::with('instructor', 'tags')
+        $courses = Course::with('instructor', 'tags', 'courseDeadline')
             ->whereIn('instructor_id', $instructorIds)
             ->when($tagId, fn (Builder $q) => $q->whereHas('tags', fn (Builder $q) => $q->where('tags.id', $tagId)))
             ->when($searchWord, function (Builder $query) use ($searchWord) {

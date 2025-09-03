@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Enums\Course\DeadlineTypeEnum;
 use LogicException;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -129,40 +128,20 @@ class Attendance extends Model
 
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
-     * - fixed_date があればそれを優先
-     * - なければ relative_days を「受講開始日（created_at）」から加算
      */
     public function calcDeadline(): ?CarbonImmutable
     {
-    // N+1避けのため、呼び出し側では with('course.courseDeadline') を推奨
-    $course   = $this->course;
-    $deadline = $course?->courseDeadline; // Course::deadline() (hasOne)
-    $type = DeadlineTypeEnum::tryFrom($course?->deadline_type ?? 'none')?? DeadlineTypeEnum::NONE;
     
-    if ($type === DeadlineTypeEnum::FIXED_DATE) {
-        if ($deadline !== null && $deadline->fixed_date !== null) {
-            return CarbonImmutable::parse($deadline->fixed_date)->endOfDay();
-        }
-        throw new LogicException('deadline_type is fixed_date but fixed_date is null');
+    return $this->attendance_deadline
+        ? CarbonImmutable::parse($this->attendance_deadline)->endOfDay()
+        : null;
     }
-
-    if ($type === DeadlineTypeEnum::RELATIVE_DAYS) {
-        if ($deadline !== null && $deadline->relative_days !== null) {
-            return $this->created_at
-                ->addDays((int) $deadline->relative_days)
-                ->endOfDay();
-        }
-        throw new LogicException('deadline_type is relative_days but relative_days is null');
-    }
-
-    // NONE もしくは不明値→期限なし
-    return null;
-    }
-
+    
     /** 期限切れか？ */
     public function isExpired(): bool
     {
-        $limit = $this->calcDeadline();
-        return $limit ? CarbonImmutable::now()->gte($limit) : false;
+        return $this->attendance_deadline !== null
+        ? CarbonImmutable::now()->gte(CarbonImmutable::parse($this->attendance_deadline)->endOfDay())
+        : false;
     }
 }

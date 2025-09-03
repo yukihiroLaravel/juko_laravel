@@ -25,7 +25,7 @@ class IndexService
             'course.chapters.lessons',
             'lessonAttendances',
             'course.tags',
-            'course', 'course.courseDeadline',
+            'course.courseDeadline',
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {

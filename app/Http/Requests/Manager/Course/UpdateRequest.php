@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Manager\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateRequest extends FormRequest
 {
@@ -37,6 +39,9 @@ class UpdateRequest extends FormRequest
             'title' => ['required', 'string'],
             'image' => ['mimes:jpg,png'],
             'status' => ['required', 'string', new CourseStatusRule],
+            'deadline_type' => ['required', new Enum(DeadlineTypeEnum::class)],
+            'fixed_date' => ['nullable', 'date_format:Y-m-d'],
+            'relative_days' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

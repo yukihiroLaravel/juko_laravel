@@ -11,6 +11,7 @@ use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -37,7 +38,7 @@ class AttendanceController extends Controller
     public function store(StoreRequest $request): JsonResponse
     {
         /** @var Course $course */
-        $course = Course::findOrFail($request->course_id);
+        $course = Course::with('courseDeadline')->findOrFail($request->course_id);
 
         // Policyによる認可チェック
         $this->authorize('create', [Attendance::class, $course]);
@@ -57,6 +58,20 @@ class AttendanceController extends Controller
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
             ]);
+
+            // 受講期限の確定
+            $deadline = match ($course->deadline_type) {
+                DeadlineTypeEnum::NONE->value => null,
+                DeadlineTypeEnum::FIXED_DATE->value => optional($course->courseDeadline)->fixed_date,
+                DeadlineTypeEnum::RELATIVE_DAYS->value => optional($course->courseDeadline)->relative_days
+                    ? Carbon::parse($attendance->created_at)->addDays($course->courseDeadline->relative_days)
+                    : null,
+                default => null,
+            };
+
+            // attendances.attendance_deadline に保存
+            $attendance->attendance_deadline = $deadline;
+            $attendance->save();
 
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);

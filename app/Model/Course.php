@@ -40,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'deadline_type',
+        'attendance_type',
     ];
 
     /**

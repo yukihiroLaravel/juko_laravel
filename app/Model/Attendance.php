@@ -28,6 +28,7 @@ class Attendance extends Model
         'course_id',
         'student_id',
         'progress',
+        'attendance_deadline',
     ];
 
     public function getExpiredAttribute(): bool

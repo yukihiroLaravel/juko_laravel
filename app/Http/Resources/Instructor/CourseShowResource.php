@@ -26,7 +26,9 @@ class CourseShowResource extends JsonResource
             ...(new CourseResource($this->resource))->toArray($request),
             'chapters' => $this->resource->chapters->map(fn ($chapter) => [
                 ...(new ChapterResource($chapter))->toArray($request),
-                'lessons' => $chapter->lessons->map(fn ($lesson) => (new LessonResource($lesson))->toArray($request)),
+                'lessons' => $chapter->lessons->map(
+                    fn ($lesson) => (new LessonResource($lesson))->toArray($request)
+                ),
             ]),
         ];
     }

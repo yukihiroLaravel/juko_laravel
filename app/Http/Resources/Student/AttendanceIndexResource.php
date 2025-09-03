@@ -24,7 +24,6 @@ class AttendanceIndexResource extends JsonResource
     {
         return [
             ...(new AttendanceResource($this->resource))->toArray($request),
-
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'tags' => TagResource::collection($this->resource->course->tags),

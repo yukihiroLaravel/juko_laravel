@@ -9,14 +9,16 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
+use App\Model\CourseDeadline;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
-use Carbon\CarbonImmutable;
+use App\Services\CourseDeadlineService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 
 /**
  * @tags Student-Notification
@@ -65,7 +67,7 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      */
-    public function show(ShowRequest $request): NotificationResource
+    public function show(ShowRequest $request, CourseDeadlineService $deadlineService): NotificationResource
     {
         /** @var Student $student */
         $student = Student::findOrFail($request->user()->id);
@@ -78,9 +80,17 @@ class NotificationController extends Controller
             ->public()
             ->findOrFail($request->notification_id);
 
-        // 受講期限切れチェック（締切日当日からNG）
-        if ($notification->course->attendance_deadline
-            && CarbonImmutable::now()->gte($notification->course->attendance_deadline->endOfDay())) {
+        // 受講期限切れチェック（course_deadlines / attendance_deadline 両対応）
+        $startedAt = Attendance::where('student_id', $student->id)
+            ->where('course_id', $notification->course_id)
+            ->oldest('created_at') 
+            ->value('created_at');
+        $deadline = CourseDeadline::where('course_id', $notification->course_id)->first();
+        if ($deadlineService->isExpired(
+            $notification->course,
+            $startedAt ? Carbon::parse($startedAt) : null,
+            $deadline
+        )) {
             throw new AuthorizationException('The course has expired.');
         }
 

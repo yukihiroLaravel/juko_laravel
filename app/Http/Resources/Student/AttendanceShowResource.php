@@ -23,18 +23,19 @@ class AttendanceShowResource extends JsonResource
     {
         return [
             ...(new AttendanceResource($this->resource))->toArray($request),
-            
+
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'instructor' => new InstructorResource($this->resource->course->instructor),
-                'tags'       => TagResource::collection($this->resource->course->tags),
-                
+                'tags' => TagResource::collection($this->resource->course->tags),
+
                 'chapters' => ChapterResource::collection(
                     $this->resource->course->publicChapters
                 )->collection->map(fn (ChapterResource $chapterResource) => [
                     ...$chapterResource->toArray($request),
                     'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
                         $lessonAttendance = $this->resource->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
                         return [
                             ...(new LessonResource($lesson))->toArray($request),
                             'lessonAttendance' => new LessonAttendanceResource($lessonAttendance),

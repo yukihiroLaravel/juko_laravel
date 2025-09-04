@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use LogicException;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -132,12 +131,12 @@ class Attendance extends Model
      */
     public function calcDeadline(): ?CarbonImmutable
     {
-    
-    return $this->attendance_deadline
-        ? CarbonImmutable::parse($this->attendance_deadline)->endOfDay()
-        : null;
+
+        return $this->attendance_deadline
+            ? CarbonImmutable::parse($this->attendance_deadline)->endOfDay()
+            : null;
     }
-    
+
     /** 期限切れか？ */
     public function isExpired(): bool
     {

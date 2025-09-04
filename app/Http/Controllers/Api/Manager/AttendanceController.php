@@ -17,7 +17,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Course\AttendanceDeadlineValidator;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
@@ -84,7 +83,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況取得API
      */
-    public function show(ShowRequest $request, AttendanceDeadlineValidator $validator): AttendanceShowResource
+    public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
         $course = Course::findOrFail($courseId);

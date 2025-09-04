@@ -140,8 +140,6 @@ class Attendance extends Model
     /** 期限切れか？ */
     public function isExpired(): bool
     {
-        return $this->attendance_deadline !== null
-        ? CarbonImmutable::now()->gte(CarbonImmutable::parse($this->attendance_deadline)->endOfDay())
-        : false;
+        return $this->attendance_deadline !== null && CarbonImmutable::now()->gte(CarbonImmutable::parse($this->attendance_deadline)->endOfDay());
     }
 }

@@ -134,7 +134,7 @@ class Course extends Model
     /**
      * 期限設定（1:1）
      *
-     * @return HasOne<\App\Model\CourseDeadline, $this>
+     * @return HasOne<CourseDeadline, $this>
      */
     public function courseDeadline(): HasOne
     {

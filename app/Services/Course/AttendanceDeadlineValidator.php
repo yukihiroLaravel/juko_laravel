@@ -13,10 +13,10 @@ class AttendanceDeadlineValidator
      */
     public function __invoke(Course $course): bool
     {
-        if (! $course->course_deadline_end) {
+        if (! $course->courseDeadline?->fixed_deadline_end) {
             return true;
         }
 
-        return CarbonImmutable::now()->lessThanOrEqualTo($course->course_deadline_end);
+        return CarbonImmutable::now()->lessThanOrEqualTo($course->courseDeadline->fixed_deadline_end);
     }
 }

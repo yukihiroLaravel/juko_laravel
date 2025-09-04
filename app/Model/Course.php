@@ -149,16 +149,6 @@ class Course extends Model
     }
 
     /**
-     * 受講期限を当日 23:59:59 に揃えて返す
-     */
-    public function getCourseDeadlineEndAttribute(): ?CarbonImmutable
-    {
-        return $this->courseDeadline && $this->courseDeadline->fixed_date
-            ? CarbonImmutable::parse($this->courseDeadline->fixed_date)->endOfDay()
-            : null;
-    }
-
-    /**
      * 講座の受講期限設定（固定日／相対日数）を取得
      *
      * @return HasOne<CourseDeadline, $this>

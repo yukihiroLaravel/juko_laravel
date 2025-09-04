@@ -97,19 +97,12 @@ class AttendanceController extends Controller
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
-        
-        $courseDeadline = $course->courseDeadline;
 
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
-            'course_deadline' => $course->courseDeadline
-                ? [
-                    'fixed_date' => $course->courseDeadline->fixed_date,
-                    'relative_days' => $course->courseDeadline->relative_days,
-                ]
-                : null,
+            'course_deadline' => $course->courseDeadline,
         ]);
     }
 

@@ -86,7 +86,7 @@ class AttendanceController extends Controller
     public function show(ShowRequest $request): AttendanceShowResource
     {
         $courseId = $request->course_id;
-        $course = Course::findOrFail($courseId);
+        $course = Course::with('courseDeadline', 'tags')->findOrFail($courseId);
 
         $this->authorize('view', [Attendance::class, $course]);
 
@@ -97,12 +97,19 @@ class AttendanceController extends Controller
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $courseId)->count();
+        
+        $courseDeadline = $course->courseDeadline;
 
         return new AttendanceShowResource([
             'chapters' => $chapters,
             'studentsCount' => $studentsCount,
             'tags' => $course->tags,
-            'attendanceDeadline' => $course->attendance_deadline,
+            'course_deadline' => $course->courseDeadline
+                ? [
+                    'fixed_date' => $course->courseDeadline->fixed_date,
+                    'relative_days' => $course->courseDeadline->relative_days,
+                ]
+                : null,
         ]);
     }
 
@@ -276,7 +283,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::with([
             'course.chapters.lessons.lessonAttendances',
             'course.tags',
-            'course.deadline',
+            'course.courseDeadline',
         ])
             ->findOrFail($attendanceId);
 

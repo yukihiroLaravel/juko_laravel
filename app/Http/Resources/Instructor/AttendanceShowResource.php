@@ -6,6 +6,7 @@ use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Chapter;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\CarbonImmutable;
 
 class AttendanceShowResource extends JsonResource
 {
@@ -21,6 +22,8 @@ class AttendanceShowResource extends JsonResource
         /** @var Collection<int, Chapter> */
         $chapters = $this->resource['chapters'];
 
+        $courseDeadline = $this->resource['course_deadline'];
+
         return [
             'chapters' => $chapters->map(fn (Chapter $chapter) => [
                 'chapter_id' => $chapter->id,
@@ -29,9 +32,12 @@ class AttendanceShowResource extends JsonResource
             ]),
             'students_count' => $this->resource['studentsCount'],
             'tags' => TagResource::collection($this->resource['tags']),
-            'attendance_deadline' => $this['attendanceDeadline']
-                ? $this['attendanceDeadline']->format('Y-m-d')
-                : null,
+            'attendance_deadline' => $this->resource['course_deadline'] ? [
+                'fixed_date' => $this->resource['course_deadline']['fixed_date']
+                    ? \Carbon\Carbon::parse($this->resource['course_deadline']['fixed_date'])->format('Y-m-d')
+                    : null,
+                'relative_days' => $this->resource['course_deadline']['relative_days'],
+            ] : null,
         ];
     }
 }

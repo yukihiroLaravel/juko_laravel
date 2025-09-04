@@ -123,23 +123,24 @@ class Attendance extends Model
             'progress' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
      */
-    public function calcDeadline(): ?CarbonImmutable
+    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
     {
 
         return $this->attendance_deadline
-            ? CarbonImmutable::parse($this->attendance_deadline)->endOfDay()
+            ? $this->attendance_deadline->endOfDay()
             : null;
     }
 
     /** 期限切れか？ */
     public function isExpired(): bool
     {
-        return $this->attendance_deadline !== null && CarbonImmutable::now()->gte(CarbonImmutable::parse($this->attendance_deadline)->endOfDay());
+        return $this->attendance_deadline !== null && CarbonImmutable::now()->gte($this->attendance_deadline_end);
     }
 }

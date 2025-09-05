@@ -115,6 +115,7 @@ class Attendance extends Model
             'student_id' => 'int',
             'course_id' => 'int',
             'progress' => 'int',
+            'attendance_deadline' => 'immutable_datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

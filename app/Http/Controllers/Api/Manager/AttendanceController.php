@@ -11,7 +11,7 @@ use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
-use App\Enums\Course\DeadlineTypeEnum;
+use App\Services\Attendance\AttendanceDeadlineCalculator;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -32,6 +32,10 @@ use Illuminate\Support\Facades\Log;
  */
 class AttendanceController extends Controller
 {
+    public function __construct(
+        private readonly AttendanceDeadlineCalculator $deadlineCalculator
+    ) {}
+
     /**
      * 受講状況登録API
      */
@@ -60,14 +64,12 @@ class AttendanceController extends Controller
             ]);
 
             // 受講期限の確定
-            $deadline = match ($course->deadline_type) {
-                DeadlineTypeEnum::NONE->value => null,
-                DeadlineTypeEnum::FIXED_DATE->value => optional($course->courseDeadline)->fixed_date,
-                DeadlineTypeEnum::RELATIVE_DAYS->value => optional($course->courseDeadline)->relative_days
-                    ? Carbon::parse($attendance->created_at)->addDays($course->courseDeadline->relative_days)
-                    : null,
-                default => null,
-            };
+            $deadline = $this->deadlineCalculator->compute(
+                deadlineType: $course->deadline_type,
+                fixedDate:    $course->courseDeadline?->fixed_date,
+                relativeDays: $course->courseDeadline?->relative_days,
+                startAt:      $attendance->created_at->toDateTimeImmutable(),
+            );
 
             // attendances.attendance_deadline に保存
             $attendance->attendance_deadline = $deadline;

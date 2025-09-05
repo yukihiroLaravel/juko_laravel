@@ -26,7 +26,7 @@ class MarkReadService
             ->where('course_id', $notification->course_id)
             ->value('attendance_deadline');
 
-        if ($deadline && CarbonImmutable::now()->gte(CarbonImmutable::parse($deadline)->endOfDay())) {
+        if ($deadline !== null && CarbonImmutable::now()->gte(CarbonImmutable::parse($deadline)->endOfDay())) {
             throw new AuthorizationException('The course has expired.');
         }
 

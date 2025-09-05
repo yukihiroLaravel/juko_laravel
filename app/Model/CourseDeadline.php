@@ -26,7 +26,7 @@ class CourseDeadline extends Model
 
     /**
      * @return array{
-     *  fixed_date: 'immutable_datetime'
+     *  fixed_date: 'immutable_date'
      * }
      */
     #[\Override]
@@ -53,6 +53,6 @@ class CourseDeadline extends Model
     public function getFixedDeadlineEndAttribute(): ?CarbonImmutable
     {
         return $this->fixed_date ? $this->fixed_date->endOfDay() : null;
-            
+
     }
 }

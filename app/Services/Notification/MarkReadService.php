@@ -3,10 +3,9 @@
 namespace App\Services\Notification;
 
 use App\Enums\Notification\TypeEnum;
+use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
-use App\Model\Attendance;
-use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class MarkReadService
@@ -20,7 +19,7 @@ class MarkReadService
             ->where('type', TypeEnum::ONCE)
             ->with(['students'])
             ->firstOrFail();
-        
+
         // 該当生徒の受講期限(attendance_deadline)を取得
         $deadline = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)

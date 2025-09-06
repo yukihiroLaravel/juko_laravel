@@ -21,11 +21,11 @@ class MarkReadService
             ->firstOrFail();
 
         // 該当生徒の受講期限(attendance_deadline)を取得
-        $deadline = Attendance::where('student_id', $student->id)
+        $attendance = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)
-            ->value('attendance_deadline');
+            ->first();
 
-        if ($deadline !== null && now()->gte($deadline->endOfDay())) {
+        if ($attendance !== null && $attendance->isExpired()) {
             throw new AuthorizationException('The course has expired.');
         }
 

@@ -106,7 +106,14 @@ class Attendance extends Model
     const PERIOD_YEAR = 'year';
 
     /**
-     * @return array<string, string>
+     * @return array{
+     *   student_id: 'int',
+     *   course_id: 'int',
+     *   progress: 'int',
+     *   created_at: 'immutable_datetime',
+     *   updated_at: 'immutable_datetime',
+     *   attendance_deadline: 'immutable_datetime',
+     * }
      */
     #[\Override]
     protected function casts(): array
@@ -115,8 +122,9 @@ class Attendance extends Model
             'student_id' => 'int',
             'course_id' => 'int',
             'progress' => 'int',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 }

@@ -13,7 +13,7 @@ use DomainException;
  */
 final class AttendanceDeadlineCalculator
 {
-    public function compute(
+    public function __invoke(
         string $deadlineType,
         ?DateTimeImmutable $fixedDate,
         ?int $relativeDays,

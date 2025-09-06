@@ -28,14 +28,10 @@ use Illuminate\Support\Facades\Log;
  */
 class AttendanceController extends Controller
 {
-    public function __construct(
-        private readonly AttendanceDeadlineCalculator $deadlineCalculator
-    ) {}
-
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, AttendanceDeadlineCalculator $deadlineCalculator): JsonResponse
     {
         /** @var Course $course */
         $course = Course::with('courseDeadline')->findOrFail($request->course_id);
@@ -54,22 +50,20 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
-            $attendance = Attendance::create([
-                'course_id' => $request->course_id,
-                'student_id' => $request->student_id,
-            ]);
-
             // 受講期限の確定
-            $deadline = $this->deadlineCalculator->compute(
+            $startAt = now()->toDateTimeImmutable();
+            $deadline = $deadlineCalculator(
                 deadlineType: $course->deadline_type,
                 fixedDate:    $course->courseDeadline?->fixed_date,
                 relativeDays: $course->courseDeadline?->relative_days,
-                startAt:      $attendance->created_at->toDateTimeImmutable(),
+                startAt:      $startAt,
             );
 
-            // attendances.attendance_deadline に保存
-            $attendance->attendance_deadline = $deadline;
-            $attendance->save();
+            $attendance = Attendance::create([
+                'course_id' => $request->course_id,
+                'student_id' => $request->student_id,
+                'attendance_deadline' => $deadline,
+            ]);
 
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
                 $query->where('course_id', $request->course_id);

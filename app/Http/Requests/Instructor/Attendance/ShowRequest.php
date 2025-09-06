@@ -16,6 +16,14 @@ class ShowRequest extends FormRequest
         return true;
     }
 
+    #[\Override]
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'attendance_id' => $this->route('attendance_id'),
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,15 +32,7 @@ class ShowRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];
-    }
-
-    #[\Override]
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'course_id' => $this->route('course_id'),
-        ]);
     }
 }

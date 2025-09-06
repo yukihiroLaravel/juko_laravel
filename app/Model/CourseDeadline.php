@@ -25,14 +25,14 @@ class CourseDeadline extends Model
 
     /**
      * @return array{
-     *  fixed_date: 'immutable_datetime'
+     *  fixed_date: 'immutable_date'
      * }
      */
     #[\Override]
     protected function casts(): array
     {
         return [
-            'fixed_date' => 'immutable_datetime',
+            'fixed_date' => 'immutable_date',
         ];
     }
 

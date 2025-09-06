@@ -102,7 +102,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
                         Route::prefix('status')->group(function () {
-                            Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
                         });
                         Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate']);
@@ -125,6 +124,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);
                 // 講師-生徒学習状況
                 Route::prefix('{attendance_id}')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
                     Route::get('status', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'status']);
                     Route::delete('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'delete']);
                 });
@@ -227,7 +227,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         // マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {
-                                Route::get('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'show']);
                                 Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'showStatus']);
                             });
                             Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'loginRate']);

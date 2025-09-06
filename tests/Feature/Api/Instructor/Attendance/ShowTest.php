@@ -18,17 +18,64 @@ class ShowTest extends TestCase
         $this->seed();
     }
 
-    public function test_受講状況取得_成功(): void
+    public function test_マネージャーで受講状況を取得(): void
+    {
+        // arrange
+        $manager = Instructor::find(1);
+        $this->actingAs($manager, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/instructor/attendance/1');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'attendance_id',
+                'attendance_deadline',
+                'students_count',
+            ],
+        ]);
+    }
+
+    public function test_マネージャーで配下の講師で受講状況を取得(): void
+    {
+        // arrange
+        $manager = Instructor::find(1);
+        $this->actingAs($manager, 'instructor');
+
+        // act
+        $response = $this->getJson('/api/v1/instructor/attendance/1');
+
+        // assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'attendance_id',
+                'attendance_deadline',
+                'students_count',
+            ],
+        ]);
+    }
+
+    public function test_講師で状況状況を取得(): void
     {
         // arrange
         $instructor = Instructor::find(2);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/2/attendance/status');
+        $response = $this->getJson('/api/v1/instructor/attendance/4');
 
         // assert
         $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'attendance_id',
+                'attendance_deadline',
+                'students_count',
+            ],
+        ]);
     }
 
     public function test_権限がない講師_失敗(): void
@@ -38,7 +85,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/2/attendance/status');
+        $response = $this->getJson('/api/v1/instructor/attendance/4');
 
         // assert
         $response->assertStatus(403);
@@ -50,16 +97,16 @@ class ShowTest extends TestCase
     public function test_バリデーションエラー(): void
     {
         // arrange
-        $instructor = Instructor::find(2);
+        $instructor = Instructor::find(1);
         $this->actingAs($instructor, 'instructor');
 
         // act
-        $response = $this->getJson('/api/v1/instructor/course/aaa/attendance/status');
+        $response = $this->getJson('/api/v1/instructor/attendance/aaa');
 
         // assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
+            'attendance_id',
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Base\Student;
+namespace App\Http\Resources\Base\Instructor;
 
 use App\Model\Attendance;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,8 +21,7 @@ class AttendanceResource extends JsonResource
     {
         return [
             'attendance_id' => $this->resource->id,
-            'deadline_date' => $this->resource->attendance_deadline_end?->format('Y-m-d'),
-            'expired' => $this->resource->isExpired(),
+            'attendance_deadline' => $this->resource->attendance_deadline?->format('Y-m-d') ?? null,
         ];
     }
 }

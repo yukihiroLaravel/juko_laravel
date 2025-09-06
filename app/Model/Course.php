@@ -40,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_type',
+        'deadline_type',
     ];
 
     /**
@@ -146,16 +146,6 @@ class Course extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
-    }
-
-    /**
-     * 受講期限を当日 23:59:59 に揃えて返す
-     */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
-    {
-        return $this->attendance_deadline
-            ? $this->attendance_deadline->endOfDay()
-            : null;
     }
 
     /**

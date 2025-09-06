@@ -15,8 +15,9 @@ class AttendancePolicy
      */
     public function viewStudent(Student $student, Attendance $attendance): bool
     {
+        $validator = new AttendanceDeadlineValidator;
         // 受講期限切れの場合は閲覧不可
-        if ($attendance->course->attendance_deadline && now()->gte($attendance->course->attendance_deadline->endOfDay())) {
+        if (! $validator(attendance: $attendance)) {
             return false;
         }
 
@@ -26,12 +27,12 @@ class AttendancePolicy
     /**
      * 講師側の閲覧権限ポリシー
      */
-    public function view(Instructor $instructor, Course $course): bool
+    public function view(Instructor $instructor, Attendance $attendance): bool
     {
         $validator = new AttendanceDeadlineValidator;
 
         // 期限切れならNG
-        if (! $validator(course: $course)) {
+        if (! $validator(attendance: $attendance)) {
             return false;
         }
 
@@ -39,10 +40,10 @@ class AttendancePolicy
             $instructorIds = $instructor->managings->pluck('id')->toArray();
             $instructorIds[] = $instructor->id;
 
-            return in_array($course->instructor_id, $instructorIds, true);
+            return in_array($attendance->course->instructor_id, $instructorIds, true);
         }
 
-        return $instructor->id === $course->instructor_id;
+        return $instructor->id === $attendance->course->instructor_id;
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace tests\Feature\Api\Student\Notification;
 
-use App\Model\Course;
+use App\Model\Attendance;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,7 +45,7 @@ class MarkReadTest extends TestCase
         // arrange
         $student = Student::find(1);
         $this->actingAs($student, 'web');
-        Course::find(1)->update([
+        Attendance::find(1)->update([
             'attendance_deadline' => now()->subDays(1), // 期限切れに設定
         ]);
 

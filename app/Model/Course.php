@@ -40,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_type',
+        'deadline_type',
     ];
 
     /**
@@ -132,10 +132,20 @@ class Course extends Model
     }
 
     /**
+     * 期限設定（1:1）
+     *
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function courseDeadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
+    }
+
+    /**
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
-     *  updated_at: 'immutable_datetime'
+     *  updated_at: 'immutable_datetime',
      * }
      */
     #[\Override]
@@ -146,25 +156,5 @@ class Course extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
-    }
-
-    /**
-     * 受講期限を当日 23:59:59 に揃えて返す
-     */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
-    {
-        return $this->attendance_deadline
-            ? $this->attendance_deadline->endOfDay()
-            : null;
-    }
-
-    /**
-     * 講座の受講期限設定（固定日／相対日数）を取得
-     *
-     * @return HasOne<CourseDeadline, $this>
-     */
-    public function courseDeadline(): HasOne
-    {
-        return $this->hasOne(CourseDeadline::class);
     }
 }

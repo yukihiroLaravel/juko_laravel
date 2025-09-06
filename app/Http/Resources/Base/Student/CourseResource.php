@@ -18,9 +18,6 @@ class CourseResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
-            'attendance_deadline' => $this->resource->attendance_deadline
-                ? $this->resource->attendance_deadline->format('Y-m-d H:i:s')
-                : null,
         ];
     }
 }

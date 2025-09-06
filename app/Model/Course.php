@@ -132,10 +132,20 @@ class Course extends Model
     }
 
     /**
+     * 期限設定（1:1）
+     *
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function courseDeadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
+    }
+
+    /**
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
-     *  updated_at: 'immutable_datetime'
+     *  updated_at: 'immutable_datetime',
      * }
      */
     #[\Override]
@@ -146,15 +156,5 @@ class Course extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
-    }
-
-    /**
-     * 講座の受講期限設定（固定日／相対日数）を取得
-     *
-     * @return HasOne<CourseDeadline, $this>
-     */
-    public function courseDeadline(): HasOne
-    {
-        return $this->hasOne(CourseDeadline::class);
     }
 }

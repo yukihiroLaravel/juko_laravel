@@ -6,7 +6,6 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
-use App\Services\Course\AttendanceDeadlineValidator;
 
 class AttendancePolicy
 {
@@ -15,9 +14,8 @@ class AttendancePolicy
      */
     public function viewStudent(Student $student, Attendance $attendance): bool
     {
-        $validator = new AttendanceDeadlineValidator;
         // 受講期限切れの場合は閲覧不可
-        if (! $validator(attendance: $attendance)) {
+        if (! $attendance->isExpired()) {
             return false;
         }
 
@@ -29,10 +27,8 @@ class AttendancePolicy
      */
     public function view(Instructor $instructor, Attendance $attendance): bool
     {
-        $validator = new AttendanceDeadlineValidator;
-
         // 期限切れならNG
-        if (! $validator(attendance: $attendance)) {
+        if (! $attendance->isExpired()) {
             return false;
         }
 

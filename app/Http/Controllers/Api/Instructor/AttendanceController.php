@@ -84,7 +84,7 @@ class AttendanceController extends Controller
     {
         $attendance = Attendance::with('course.tags')->findOrFail($request->attendance_id);
 
-        $this->authorize('view', [Attendance::class, $attendance->course]);
+        $this->authorize('view', [Attendance::class, $attendance]);
 
         Chapter::with([
             'lessons.lessonAttendances',

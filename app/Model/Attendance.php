@@ -29,11 +29,6 @@ class Attendance extends Model
         'attendance_deadline',
     ];
 
-    public function getExpiredAttribute(): bool
-    {
-        return $this->isExpired();
-    }
-
     // 受講状態初期値
     const PROGRESS_DEFAULT_VALUE = 0;
 
@@ -145,7 +140,9 @@ class Attendance extends Model
             : null;
     }
 
-    /** 期限切れか？ */
+    /**
+     * 受講期限切れかどうか
+     */
     public function isExpired(): bool
     {
         return $this->attendance_deadline !== null && CarbonImmutable::now()->gte($this->attendance_deadline_end);

@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -106,7 +107,14 @@ class Attendance extends Model
     const PERIOD_YEAR = 'year';
 
     /**
-     * @return array<string, string>
+     * @return array{
+     *   student_id: 'int',
+     *   course_id: 'int',
+     *   progress: 'int',
+     *   created_at: 'immutable_datetime',
+     *   updated_at: 'immutable_datetime',
+     *   attendance_deadline: 'immutable_datetime',
+     * }
      */
     #[\Override]
     protected function casts(): array
@@ -115,8 +123,28 @@ class Attendance extends Model
             'student_id' => 'int',
             'course_id' => 'int',
             'progress' => 'int',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
+            'attendance_deadline' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
+     */
+    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    {
+
+        return $this->attendance_deadline
+            ? $this->attendance_deadline->endOfDay()
+            : null;
+    }
+
+    /**
+     * 受講期限切れかどうか
+     */
+    public function isExpired(): bool
+    {
+        return $this->attendance_deadline !== null && CarbonImmutable::now()->gte($this->attendance_deadline_end);
     }
 }

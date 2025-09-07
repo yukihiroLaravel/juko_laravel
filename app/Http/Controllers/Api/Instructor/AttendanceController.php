@@ -18,7 +18,6 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -83,24 +82,20 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
-        $courseId = $request->course_id;
-        $course = Course::with('tags')->findOrFail($courseId);
+        $attendance = Attendance::with('course.tags')->findOrFail($request->attendance_id);
 
-        $this->authorize('view', [Attendance::class, $course]);
+        $this->authorize('view', [Attendance::class, $attendance]);
 
-        /** @var Collection<int, Chapter> */
-        $chapters = Chapter::with([
+        Chapter::with([
             'lessons.lessonAttendances',
-        ])->where('course_id', $courseId)->get();
+        ])->where('course_id', $attendance->course_id)->get();
 
         /** @var int */
-        $studentsCount = Attendance::where('course_id', $courseId)->count();
+        $studentsCount = Attendance::where('course_id', $attendance->course_id)->count();
 
         return new AttendanceShowResource([
-            'chapters' => $chapters,
+            'attendance' => $attendance,
             'studentsCount' => $studentsCount,
-            'tags' => $course->tags,
-            'attendanceDeadline' => $course->attendance_deadline,
         ]);
     }
 

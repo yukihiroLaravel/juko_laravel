@@ -9,12 +9,13 @@ use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Services\Attendance\AttendanceDeadlineCalculator;
+use App\Services\Attendance\CalculateDeadlineService;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -31,7 +32,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request, AttendanceDeadlineCalculator $deadlineCalculator): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $deadlineCalculator): JsonResponse
     {
         /** @var Course $course */
         $course = Course::with('courseDeadline')->findOrFail($request->course_id);
@@ -51,7 +52,7 @@ class AttendanceController extends Controller
         DB::beginTransaction();
         try {
             // 受講期限の確定
-            $startAt = now()->toDateTimeImmutable();
+            $startAt = CarbonImmutable::now();
             $deadline = $deadlineCalculator(
                 deadlineType: $course->deadline_type,
                 fixedDate:    $course->courseDeadline?->fixed_date,

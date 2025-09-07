@@ -9,9 +9,9 @@ use DateTimeImmutable;
 use DomainException;
 
 /**
- * 受講期限（attendance_deadline）を算出する純粋ロジック
+ * 受講期限を算出する純粋ロジック
  */
-final class AttendanceDeadlineCalculator
+final class CalculateDeadlineService
 {
     public function __invoke(
         string $deadlineType,

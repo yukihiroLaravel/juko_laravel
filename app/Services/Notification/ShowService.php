@@ -2,120 +2,103 @@
 
 namespace App\Services\Notification;
 
-use App\Model\Notification;
 use App\Model\Attendance;
 use App\Model\CourseDeadline;
+use App\Model\Notification;
 use App\Model\Student;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class ShowService
 {
     /**
-     * お知らせ詳細の取得 + 受講期限チェック
-     * 優先順位: 個別期限(attendances.attendance_deadline) > 講座設定(fixed/relative/none)
-     *
-     * 403時メッセージ: "The course has expired."
+     * お知らせ詳細 + 受講期限チェック
+     * 基本：Attendance::isExpired() を使う
+     * 例外：attendance_deadline が NULL の古いデータのみ course_deadlines でフォールバック
      */
     public function __invoke(Student $student, int $notificationId): Notification
     {
-        // 通知本体（タイプで絞らない / 必要最小の関連のみ）
         /** @var Notification $notification */
-        $notification = Notification::with(['course'])
-            ->public()
+        $notification = Notification::public()
+            ->with('course')
             ->findOrFail($notificationId);
 
-        // 受講していない通知は閲覧不可（従来の挙動を維持）
-        $courseIds = Attendance::where('student_id', $student->id)
-            ->pluck('course_id')->toArray();
+        /** @var Attendance|null $attendance */
+        $attendance = Attendance::where('student_id', $student->id)
+            ->where('course_id', $notification->course_id)
+            ->first();
 
-        if (! in_array($notification->course_id, $courseIds, true)) {
+        if (! $attendance) {
             throw new AuthorizationException('Forbidden, not allowed to this notification.');
         }
 
-        // === 1) 個別期限（最優先） ===========================================
-        $individual = Attendance::where('student_id', $student->id)
-            ->where('course_id', $notification->course_id)
-            ->value('attendance_deadline'); // NULLなら個別期限なし
-
-        if ($individual !== null) {
-            $ind = $this->toCarbonImmutable($individual);
-            if (now()->gte($ind->endOfDay())) {
+        // 1) 通常パス：個別期限だけを見る
+        if ($attendance->attendance_deadline !== null) {
+            if ($attendance->isExpired()) {
                 throw new AuthorizationException('The course has expired.');
             }
-            // 個別期限が未来なら講座設定を見ずに閲覧許可
             return $notification;
         }
 
-        // === 2) 講座設定（fixed / relative / none） =========================
-        $mode = strtolower((string)($notification->course->deadline_type ?? ''));
-        $deadline = CourseDeadline::where('course_id', $notification->course_id)->first();
-        $now = CarbonImmutable::now();
+        // 2) フォールバック：個別期限がNULL（レガシーデータ）だけ講座設定を見る
+        $exp = $this->fallbackExpiry(
+            (string) ($notification->course->deadline_type ?? ''),
+            $notification->course_id,
+            $student->id
+        );
 
-        // relative 計算用（この受講生の受講開始=最初のcreated_at）
-        $startedAt = Attendance::where('student_id', $student->id)
-            ->where('course_id', $notification->course_id)
-            ->oldest('created_at')
-            ->value('created_at');
-        $startedAt = $startedAt ? CarbonImmutable::parse($startedAt) : null;
+        if ($exp && CarbonImmutable::now()->gte($exp)) {
+            throw new AuthorizationException('The course has expired.');
+        }
+
+        return $notification;
+    }
+
+    private function fallbackExpiry(string $mode, int $courseId, int $studentId): ?CarbonImmutable
+    {
+        $mode = strtolower(trim($mode) ?: 'none');
+        $deadline = CourseDeadline::where('course_id', $courseId)->first();
 
         if ($mode === 'fixed') {
-            $date = $deadline?->fixed_date;
-            if ($date) {
-                $exp = $this->toCarbonImmutable($date)->endOfDay();
-                if ($now->gte($exp)) {
-                    throw new AuthorizationException('The course has expired.');
-                }
-            }
-            // fixed_date 未設定なら期限なし扱い
-            return $notification;
+            return $deadline?->fixed_date ? $this->toCI($deadline->fixed_date)->endOfDay() : null;
         }
 
         if ($mode === 'relative') {
             $days = $deadline?->relative_days;
-            if ($days !== null && $startedAt) {
-                $exp = $startedAt->addDays((int)$days)->endOfDay();
-                if ($now->gte($exp)) {
-                    throw new AuthorizationException('The course has expired.');
-                }
+            if ($days !== null) {
+                $startedAt = Attendance::where('student_id', $studentId)
+                    ->where('course_id', $courseId)
+                    ->oldest('created_at')
+                    ->value('created_at');
+                return $startedAt
+                    ? CarbonImmutable::parse($startedAt)->addDays((int)$days)->endOfDay()
+                    : null;
             }
-            // relative_days 未設定 or startedAtなし → 期限なし扱い
-            return $notification;
+            return null;
         }
 
-        // none: 基本は期限なし。ただし course_deadlines に値があればフォールバック採用
-        if ($mode === 'none' || $mode === '') {
-            if ($deadline) {
-                if ($deadline->fixed_date) {
-                    $exp = $this->toCarbonImmutable($deadline->fixed_date)->endOfDay();
-                    if ($now->gte($exp)) {
-                        throw new AuthorizationException('The course has expired.');
-                    }
-                    return $notification;
-                }
-                if ($deadline->relative_days !== null && $startedAt) {
-                    $exp = $startedAt->addDays((int)$deadline->relative_days)->endOfDay();
-                    if ($now->gte($exp)) {
-                        throw new AuthorizationException('The course has expired.');
-                    }
-                    return $notification;
-                }
-            }
-            // 完全に未設定 → 期限なし
-            return $notification;
+        // none：基本は期限なし。ただし course_deadlinesに値があれば採用
+        if ($deadline?->fixed_date) {
+            return $this->toCI($deadline->fixed_date)->endOfDay();
+        }
+        if ($deadline?->relative_days !== null) {
+            $startedAt = Attendance::where('student_id', $studentId)
+                ->where('course_id', $courseId)
+                ->oldest('created_at')
+                ->value('created_at');
+            return $startedAt
+                ? CarbonImmutable::parse($startedAt)->addDays((int)$deadline->relative_days)->endOfDay()
+                : null;
         }
 
-        // 不明モードは期限なし扱い（安全側に倒すなら 403 でも可）
-        return $notification;
+        return null;
     }
 
     /** @param \DateTimeInterface|string $v */
-    private function toCarbonImmutable($v): CarbonImmutable
+    private function toCI($v): CarbonImmutable
     {
-        if ($v instanceof \DateTimeInterface) {
-            return CarbonImmutable::instance(Carbon::instance($v));
-        }
-        return CarbonImmutable::parse($v);
+        return $v instanceof \DateTimeInterface
+            ? CarbonImmutable::instance($v)
+            : CarbonImmutable::parse((string)$v);
     }
 }

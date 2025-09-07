@@ -124,8 +124,8 @@ class Attendance extends Model
             'course_id' => 'int',
             'progress' => 'int',
             'attendance_deadline' => 'immutable_date',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at' => 'immutable_datetime',
+            'updated_at' => 'immutable_datetime',
         ];
     }
 

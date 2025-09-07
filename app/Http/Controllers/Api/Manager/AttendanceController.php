@@ -9,12 +9,12 @@ use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Services\Attendance\CalculateDeadlineService;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Attendance\CalculateDeadlineService;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -55,9 +55,9 @@ class AttendanceController extends Controller
             $startAt = CarbonImmutable::now();
             $deadline = $deadlineCalculator(
                 deadlineType: $course->deadline_type,
-                fixedDate:    $course->courseDeadline?->fixed_date,
+                fixedDate: $course->courseDeadline?->fixed_date,
                 relativeDays: $course->courseDeadline?->relative_days,
-                startAt:      $startAt,
+                startAt: $startAt,
             );
 
             $attendance = Attendance::create([

@@ -32,7 +32,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request, CalculateDeadlineService $deadlineCalculator): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $service): JsonResponse
     {
         /** @var Course $course */
         $course = Course::with('courseDeadline')->findOrFail($request->course_id);
@@ -53,7 +53,7 @@ class AttendanceController extends Controller
         try {
             // 受講期限の確定
             $startAt = CarbonImmutable::now();
-            $deadline = $deadlineCalculator(
+            $deadline = $service(
                 deadlineType: $course->deadline_type,
                 fixedDate: $course->courseDeadline?->fixed_date,
                 relativeDays: $course->courseDeadline?->relative_days,

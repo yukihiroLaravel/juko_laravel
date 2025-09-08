@@ -9,16 +9,6 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-// --- 旧実装で使っていた import は残しつつ、CI 警告を避けるためコメントアウトにして温存しています。---
-/* legacy imports (kept for reference)
-use App\Model\CourseDeadline;
-use App\Model\Attendance;
-use App\Model\Notification;
-use App\Model\Student;
-use App\Services\CourseDeadlineService;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Carbon;
-*/
 use App\Services\Notification\ShowService;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;

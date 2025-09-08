@@ -41,6 +41,8 @@ class InstructorController extends Controller
     {
         $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
 
+        $this->authorize('view', $instructor);
+
         return new InstructorResource($instructor);
     }
 

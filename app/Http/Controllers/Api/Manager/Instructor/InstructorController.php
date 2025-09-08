@@ -75,12 +75,9 @@ class InstructorController extends Controller
      */
     public function show(ShowRequest $request): InstructorShowResource
     {
-
-        $managerId = Auth::guard('instructor')->user()->id;
-
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail($request->instructor_id);
-    
+
         $this->authorize('view', $instructor);
 
         return new InstructorShowResource($instructor);

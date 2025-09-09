@@ -29,7 +29,7 @@ class ShowTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_講座の期限切れ_失敗(): void
+    public function test_講座の期限切れは403になる(): void
     {
         // arrange
         $this->loginAsStudent();

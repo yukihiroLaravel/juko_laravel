@@ -24,11 +24,7 @@ class ShowService
         /** @var Attendance|null $attendance */
         $attendance = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)
-            ->first();
-
-        if (! $attendance) {
-            throw new AuthorizationException('Forbidden, not allowed to this notification.');
-        }
+            ->firstOrFail();
 
         if ($attendance->isExpired()) {
             throw new AuthorizationException('The course has expired.');

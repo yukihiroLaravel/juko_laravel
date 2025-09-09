@@ -3,11 +3,21 @@
 namespace Tests;
 
 use App\Model\Instructor;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+
+    /**
+     * 生徒でログインする
+     */
+    protected function loginAsStudent(int $studentId = 1): void
+    {
+        $student = Student::find($studentId);
+        $this->actingAs($student, 'web');
+    }
 
     /**
      * マネージャーでログインする

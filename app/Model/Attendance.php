@@ -111,9 +111,9 @@ class Attendance extends Model
      *   student_id: 'int',
      *   course_id: 'int',
      *   progress: 'int',
+     *   attendance_deadline: 'immutable_date',
      *   created_at: 'immutable_datetime',
      *   updated_at: 'immutable_datetime',
-     *   attendance_deadline: 'immutable_datetime',
      * }
      */
     #[\Override]
@@ -123,9 +123,9 @@ class Attendance extends Model
             'student_id' => 'int',
             'course_id' => 'int',
             'progress' => 'int',
+            'attendance_deadline' => 'immutable_date',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
     }
 

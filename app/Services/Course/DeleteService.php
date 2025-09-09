@@ -6,7 +6,6 @@ use App\Model\Attendance;
 use App\Model\Course;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 
 class DeleteService
 {
@@ -28,8 +27,8 @@ class DeleteService
             $disk->delete($course->image);
         }
 
-        // CourseDeadline を先に削除（存在しなければ何もしない）
-        $course->courseDeadline()?->delete();
+        // 講座締切データ削除
+        $course->courseDeadline()->delete();
 
         // 講座データ削除
         $course->delete();

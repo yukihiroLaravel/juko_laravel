@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Course\DeleteRequest;
 use App\Http\Requests\Manager\Course\IndexRequest;
 use App\Http\Requests\Manager\Course\ShowRequest;
 use App\Http\Requests\Manager\Course\StatusRequest;
@@ -14,12 +13,10 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -149,30 +146,6 @@ class CourseController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollback();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * 講座削除API
-     */
-    public function delete(DeleteRequest $request, DeleteService $service): JsonResponse
-    {
-        try {
-            $course = Course::findOrFail($request->course_id);
-
-            // 自分、または配下の講師の講座でないと削除できない
-            $this->authorize('delete', $course);
-
-            $service(course: $course);
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (AuthorizationException $e) {
-            throw $e;
-        } catch (Exception $e) {
             Log::error($e);
             throw $e;
         }

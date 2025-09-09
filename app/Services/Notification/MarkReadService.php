@@ -3,9 +3,9 @@
 namespace App\Services\Notification;
 
 use App\Enums\Notification\TypeEnum;
+use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
-use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class MarkReadService
@@ -17,15 +17,15 @@ class MarkReadService
     {
         $notification = Notification::where('id', $notificationId)
             ->where('type', TypeEnum::ONCE)
-            ->with(['students', 'course'])
+            ->with(['students'])
             ->firstOrFail();
 
-        if (
-            $notification->course->attendance_deadline &&
-            CarbonImmutable::now()->gte(
-                $notification->course->attendance_deadline->endOfDay()
-            )
-        ) {
+        // 該当生徒の受講期限(attendance_deadline)を取得
+        $attendance = Attendance::where('student_id', $student->id)
+            ->where('course_id', $notification->course_id)
+            ->firstOrFail();
+
+        if ($attendance->isExpired()) {
             throw new AuthorizationException('The course has expired.');
         }
 

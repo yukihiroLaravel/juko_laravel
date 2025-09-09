@@ -18,7 +18,7 @@ class MarkReadTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせ既読登録成功(): void
+    public function test_お知らせ既読登録できる(): void
     {
         // arrange
         $student = Student::find(1);

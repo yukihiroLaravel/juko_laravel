@@ -9,9 +9,9 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-use App\Services\Notification\ShowService;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
+use App\Services\Notification\ShowService;
 use Illuminate\Http\JsonResponse;
 
 /**

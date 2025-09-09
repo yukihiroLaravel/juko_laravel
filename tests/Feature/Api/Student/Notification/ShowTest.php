@@ -2,8 +2,7 @@
 
 namespace Tests\Feature\Api\Student\Notification;
 
-use App\Model\Course;
-use App\Model\Student;
+use App\Model\Attendance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,11 +17,10 @@ class ShowTest extends TestCase
         $this->seed();
     }
 
-    public function test_お知らせ詳細取得_成功(): void
+    public function test_お知らせ取得できる(): void
     {
         // arrange
-        $student = Student::find(1);
-        $this->actingAs($student, 'web');
+        $this->loginAsStudent();
 
         // act
         $response = $this->getJson('/api/v1/notification/1');
@@ -34,10 +32,9 @@ class ShowTest extends TestCase
     public function test_講座の期限切れ_失敗(): void
     {
         // arrange
-        // 期限切れの講座を設定
-        Course::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
-        $student = Student::find(1);
-        $this->actingAs($student, 'web');
+        $this->loginAsStudent();
+        // 期限切れの講座にする
+        Attendance::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
 
         // act
         $response = $this->getJson('/api/v1/notification/1');

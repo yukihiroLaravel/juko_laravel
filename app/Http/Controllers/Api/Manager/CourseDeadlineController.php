@@ -20,6 +20,7 @@ class CourseDeadlineController extends Controller
         // managerIDを取得
         $managerId = Auth::guard('instructor')->id();
 
+        // トランザクションの責務
         DB::transaction(function () use ($service, $managerId) {
             $service($managerId);
         });

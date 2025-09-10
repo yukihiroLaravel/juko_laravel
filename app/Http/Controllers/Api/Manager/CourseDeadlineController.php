@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Services\Course\ClearAllDeadlineService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CourseDeadlineController extends Controller
 {
@@ -15,8 +17,12 @@ class CourseDeadlineController extends Controller
      */
     public function clearAll(ClearAllDeadlineService $service): JsonResponse
     {
-        // ルートは manager ミドルウェア配下なので認可は満たしている想定
-        $service();
+        // managerIDを取得
+        $managerId = Auth::guard('instructor')->id();
+
+        DB::transaction(function () use ($service, $managerId) {
+            $service($managerId);
+        });
 
         return response()->json(['result' => true], 200);
     }

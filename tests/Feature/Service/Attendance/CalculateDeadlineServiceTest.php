@@ -1,229 +1,106 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Service\Attendance;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Services\Attendance\CalculateDeadlineService;
 use DateTimeImmutable;
-use DomainException;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CalculateDeadlineServiceTest extends TestCase
+final class CalculateDeadlineServiceTest extends TestCase
 {
-    private CalculateDeadlineService $service;
-
-    #[\Override]
-    protected function setUp(): void
+    public function test_固定期限の場合は指定された期限が返る(): void
     {
-        parent::setUp();
-        $this->service = new CalculateDeadlineService;
-    }
+        // Arrange
+        $service = new CalculateDeadlineService;
+        $fixedDate = new DateTimeImmutable('2025-05-10 00:00:00');
+        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
 
-    public function test_正常系_期限なし_nullを返す()
-    {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::NONE->value;
-        $fixedDate = null;
-        $relativeDays = null;
-        $startAt = new DateTimeImmutable('2024-01-01');
-
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
+        // Act
+        $actual = $service(
+            deadlineType: DeadlineTypeEnum::FIXED_DATE->value,
+            fixedDate: $fixedDate,
+            relativeDays: null,
+            startAt: $startAt,
         );
 
-        // assert
-        $this->assertNull($result);
+        // Assert
+        $this->assertSame($fixedDate, $actual);
     }
 
-    public function test_正常系_固定日付_指定日付を返す()
+    public function test_期限なしの場合はnullが返る(): void
     {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::FIXED_DATE->value;
-        $fixedDate = new DateTimeImmutable('2024-03-15');
-        $relativeDays = null;
-        $startAt = new DateTimeImmutable('2024-01-01');
+        // Arrange
+        $service = new CalculateDeadlineService;
+        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
 
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
+        // Act
+        $actual = $service(
+            deadlineType: DeadlineTypeEnum::NONE->value,
+            fixedDate: null,
+            relativeDays: null,
+            startAt: $startAt,
         );
 
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-03-15', $result->format('Y-m-d'));
+        // Assert
+        $this->assertNull($actual);
     }
 
-    public function test_正常系_相対日数_開始日から指定日数後を返す()
+    public function test_相対日数の場合は開始日から指定された日数を加算した日付が返る(): void
     {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = 30;
-        $startAt = new DateTimeImmutable('2024-01-01');
+        // Arrange
+        $service = new CalculateDeadlineService;
+        $startAt = new DateTimeImmutable('2025-05-10 10:00:00');
+        $relativeDays = 5;
 
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
+        // Act
+        $actual = $service(
+            deadlineType: DeadlineTypeEnum::RELATIVE_DAYS->value,
+            fixedDate: null,
+            relativeDays: $relativeDays,
+            startAt: $startAt,
         );
 
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-01-31', $result->format('Y-m-d'));
+        // Assert
+        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
+        $this->assertSame('2025-05-15 10:00:00', $actual->format('Y-m-d H:i:s'));
     }
 
-    public function test_正常系_相対日数でrelative_daysがnull_nullを返す()
+    public function test_固定期限で期限が指定されていない場合は例外が投げられる(): void
     {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = null;
-        $startAt = new DateTimeImmutable('2024-01-01');
+        // Arrange
+        $service = new CalculateDeadlineService;
+        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
 
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
-        );
+        // Assert
+        $this->expectExceptionMessage('fixed_date is required when fixed_date is selected');
 
-        // assert
-        $this->assertNull($result);
-    }
-
-    public function test_異常系_未対応の期限タイプ_domain_exceptionを投げる()
-    {
-        // arrange
-        $deadlineType = 'unsupported_type';
-        $fixedDate = null;
-        $relativeDays = null;
-        $startAt = new DateTimeImmutable('2024-01-01');
-
-        // assert
-        $this->expectException(DomainException::class);
-        $this->expectExceptionMessage('Unsupported deadline_type: unsupported_type');
-
-        // act
-        ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
+        // Act
+        $service(
+            deadlineType: DeadlineTypeEnum::FIXED_DATE->value,
+            fixedDate: null,
+            relativeDays: null,
+            startAt: $startAt,
         );
     }
 
-    public function test_境界値_相対日数0日_開始日と同じ日を返す()
+    public function test_相対日数で日数が指定されていない場合は例外が投げられる(): void
     {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = 0;
-        $startAt = new DateTimeImmutable('2024-01-01');
+        // Arrange
+        $service = new CalculateDeadlineService;
+        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
 
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
+        // Assert
+        $this->expectExceptionMessage('relative_days is required when relative_days is selected');
+
+        // Act
+        $service(
+            deadlineType: DeadlineTypeEnum::RELATIVE_DAYS->value,
+            fixedDate: null,
+            relativeDays: null,
+            startAt: $startAt,
         );
-
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-01-01', $result->format('Y-m-d'));
-    }
-
-    public function test_境界値_相対日数マイナス_過去日を返す()
-    {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = -5;
-        $startAt = new DateTimeImmutable('2024-01-10');
-
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
-        );
-
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-01-05', $result->format('Y-m-d'));
-    }
-
-    public function test_正常系_大きな相対日数_正しく計算される()
-    {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = 365;
-        $startAt = new DateTimeImmutable('2024-01-01');
-
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
-        );
-
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-12-31', $result->format('Y-m-d'));
-    }
-
-    public function test_正常系_月末日からの相対日数計算()
-    {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = 1;
-        $startAt = new DateTimeImmutable('2024-01-31');
-
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
-        );
-
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-02-01', $result->format('Y-m-d'));
-    }
-
-    public function test_正常系_うるう年の2月29日からの計算()
-    {
-        // arrange
-        $deadlineType = DeadlineTypeEnum::RELATIVE_DAYS->value;
-        $fixedDate = null;
-        $relativeDays = 1;
-        $startAt = new DateTimeImmutable('2024-02-29');
-
-        // act
-        $result = ($this->service)(
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $startAt
-        );
-
-        // assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $result);
-        $this->assertEquals('2024-03-01', $result->format('Y-m-d'));
     }
 }

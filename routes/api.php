@@ -190,7 +190,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
-                        Route::delete('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'delete']);
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);

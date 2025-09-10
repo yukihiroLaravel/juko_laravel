@@ -26,6 +26,10 @@ class DeleteService
         if ($disk->exists($course->image)) {
             $disk->delete($course->image);
         }
+
+        // 講座締切データ削除
+        $course->courseDeadline()->delete();
+
         // 講座データ削除
         $course->delete();
     }

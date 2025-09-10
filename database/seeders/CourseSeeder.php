@@ -40,7 +40,7 @@ class CourseSeeder extends Seeder
                 'title' => 'React入門講座',
                 'image' => 'course/5c5edaa5-a1cf-42be-b56b-ff2692210df3.png',
                 'status' => Course::STATUS_PUBLIC,
-                'deadline_type' => DeadlineTypeEnum::NONE->value,
+                'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

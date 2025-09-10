@@ -42,9 +42,6 @@ class ClearAllDeadlineService
 
             // 2) 該当コースの course_deadlines を削除
             CourseDeadline::whereIn('course_id', $courseIds)->delete();
-
-            // （もし将来「受講生ごとの期限」テーブルができたらここで同様に削除）
-            // AttendanceDeadline::whereIn('course_id', $courseIds)->delete();
         });
     }
 }

@@ -239,7 +239,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
                 // マネージャー-全講座（受講期限操作）
                 Route::prefix('courses')->group(function () {
-                    // 全て受講期限をなくす（ひとまず空配列返却）
+                    // 全て受講期限をなくす
                     Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll']);
                 });
                 // マネージャー-受講

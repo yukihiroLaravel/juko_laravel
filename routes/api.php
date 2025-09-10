@@ -237,6 +237,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
                     });
                 });
+                // マネージャー-全講座（受講期限操作）
+                Route::prefix('courses')->group(function () {
+                    // 全て受講期限をなくす（ひとまず空配列返却）
+                    Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll']);
+                });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
                     Route::post('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'store']);

@@ -2,6 +2,7 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\CourseDeadline;
 use App\Model\Instructor;
@@ -9,29 +10,28 @@ use App\Model\Instructor;
 class ClearAllDeadlineService
 {
     /**
-     * @param int $managerId 実行マネージャーのID
+     * @param  int  $managerId  実行マネージャーのID
      */
     public function __invoke(int $managerId): void
     {
-        // マネージャー + 配下講師のID一覧
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $managerId;
 
-        // 対象コースID
+        // 対象講座ID
         $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
 
         if ($courseIds->isEmpty()) {
             return; // 冪等：対象なしなら何もしない
         }
 
-        // 1) コースの期限タイプを none に更新
+        // 講座の期限タイプを「なし」に更新
         Course::whereIn('id', $courseIds)->update([
-            'deadline_type' => 'none',
+            'deadline_type' => DeadlineTypeEnum::NONE,
         ]);
 
-        // 2) 該当コースの course_deadlines を削除
+        // 講座の受講期限を削除
         CourseDeadline::whereIn('course_id', $courseIds)->delete();
     }
 }

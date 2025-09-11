@@ -187,6 +187,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\CourseController::class, 'index']);
                     Route::put('status', [App\Http\Controllers\Api\Manager\CourseController::class, 'putStatus']);
                     Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'store']);
+                    Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll']);
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
@@ -236,11 +237,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('tag')->group(function () {
                         Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
                     });
-                });
-                // マネージャー-全講座（受講期限操作）
-                Route::prefix('courses')->group(function () {
-                    // 全て受講期限をなくす
-                    Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll']);
                 });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {

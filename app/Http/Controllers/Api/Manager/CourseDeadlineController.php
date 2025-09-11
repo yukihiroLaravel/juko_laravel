@@ -11,16 +11,13 @@ use Illuminate\Support\Facades\DB;
 class CourseDeadlineController extends Controller
 {
     /**
-     * 全て受講期限をなくすAPI（仮）
-     *
-     * @return JsonResponse
+     * すべての講座の受講期限をクリアする
      */
     public function clearAll(ClearAllDeadlineService $service): JsonResponse
     {
         // managerIDを取得
         $managerId = Auth::guard('instructor')->id();
 
-        // トランザクションの責務
         DB::transaction(function () use ($service, $managerId) {
             $service($managerId);
         });

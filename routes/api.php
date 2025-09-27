@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('instructor')->group(function () {
         // TODO 講師側APIはここに記述
         Route::prefix('instructor')->group(function () {
-            Route::get('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
+            Route::get('{id}', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'show']);
             Route::post('update', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'update']);
 
             // 講師-講座タグ一覧

@@ -37,9 +37,9 @@ class InstructorController extends Controller
     /**
      * 講師取得API
      */
-    public function show(): InstructorResource
+    public function show(int $id): InstructorResource
     {
-        $instructor = Instructor::findOrFail(Auth::guard('instructor')->user()->id);
+        $instructor = Instructor::findOrFail($id);
 
         $this->authorize('view', $instructor);
 

@@ -56,33 +56,6 @@ class ChapterController extends Controller
     }
 
     /**
-     * チャプター新規作成API
-     */
-    public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
-    {
-        /** @var Course $course */
-        $course = Course::FindOrFail($request->course_id);
-
-        $this->authorize('create', [Chapter::class, $course]);
-
-        try {
-            $chapter = $createChapterService(
-                course: $course,
-                title: $request->title
-            );
-
-            return response()->json([
-                'result' => true,
-                'chapter_id' => $chapter->id,
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-
-            throw $e;
-        }
-    }
-
-    /**
      * チャプター更新API
      */
     public function put(PutRequest $request, UpdateChapterService $updateChapterService): JsonResponse

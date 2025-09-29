@@ -240,7 +240,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
                 // マネージャー-受講
                 Route::prefix('attendance')->group(function () {
-                    Route::post('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'store']);
                     // 講師-生徒学習状況
                     Route::prefix('{attendance_id}')->group(function () {
                         Route::get('status', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'status']);

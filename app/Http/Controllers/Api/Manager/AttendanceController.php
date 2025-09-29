@@ -8,14 +8,12 @@ use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
-use App\Http\Requests\Manager\Attendance\StoreRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -31,55 +29,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AttendanceController extends Controller
 {
-    /**
-     * 受講状況登録API
-     */
-    public function store(StoreRequest $request): JsonResponse
-    {
-        /** @var Course $course */
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('create', [Attendance::class, $course]);
-
-        if (Attendance::where('course_id', $request->course_id)
-            ->where('student_id', $request->student_id)
-            ->exists()
-        ) {
-            throw new AuthorizationException(
-                'Attendance record already exists.'
-            );
-        }
-
-        DB::beginTransaction();
-        try {
-            $attendance = Attendance::create([
-                'course_id' => $request->course_id,
-                'student_id' => $request->student_id,
-            ]);
-
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
-                $query->where('course_id', $request->course_id);
-            })->get();
-
-            $lessons->each(function (Lesson $lesson) use ($attendance) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            });
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
     /**
      * 受講状況取得API
      */

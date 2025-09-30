@@ -53,7 +53,7 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-            ->with(['tags'])
+            ->with(['tags', 'courseDeadline'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {
                 $query->where(function (Builder $query) use ($searchWord) {
                     $query->where('title', 'LIKE', "%{$searchWord}%")

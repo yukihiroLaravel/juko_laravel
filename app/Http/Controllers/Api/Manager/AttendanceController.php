@@ -14,6 +14,8 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Attendance\CalculateDeadlineService;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -30,10 +32,10 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $service): JsonResponse
     {
         /** @var Course $course */
-        $course = Course::findOrFail($request->course_id);
+        $course = Course::with('courseDeadline')->findOrFail($request->course_id);
 
         // Policyによる認可チェック
         $this->authorize('create', [Attendance::class, $course]);
@@ -49,9 +51,19 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
+            // 受講期限の確定
+            $startAt = CarbonImmutable::now();
+            $deadline = $service(
+                deadlineType: $course->deadline_type,
+                fixedDate: $course->courseDeadline?->fixed_date,
+                relativeDays: $course->courseDeadline?->relative_days,
+                startAt: $startAt,
+            );
+
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
+                'attendance_deadline' => $deadline,
             ]);
 
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {

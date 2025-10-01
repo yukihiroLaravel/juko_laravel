@@ -9,13 +9,9 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-use App\Model\Attendance;
-use App\Model\Notification;
-use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
-use Carbon\CarbonImmutable;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Services\Notification\ShowService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -28,7 +24,6 @@ class NotificationController extends Controller
      */
     public function index(IndexRequest $request, IndexService $service): NotificationIndexResource
     {
-
         $dto = new IndexDto(
             studentId: $request->user()->id,
             perPage: (int) $request->input('per_page', 20),
@@ -65,28 +60,12 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細
      */
-    public function show(ShowRequest $request): NotificationResource
+    public function show(ShowRequest $request, ShowService $service): NotificationResource
     {
-        /** @var Student $student */
-        $student = Student::findOrFail($request->user()->id);
+        /** @var \App\Model\Student $student */
+        $student = $request->user();
 
-        /** @var array<int> $courseIds */
-        $courseIds = Attendance::where('student_id', $student->id)->pluck('course_id')->toArray();
-
-        /** @var Notification $notification */
-        $notification = Notification::with(['course'])
-            ->public()
-            ->findOrFail($request->notification_id);
-
-        // 受講期限切れチェック（締切日当日からNG）
-        if ($notification->course->attendance_deadline
-            && CarbonImmutable::now()->gte($notification->course->attendance_deadline->endOfDay())) {
-            throw new AuthorizationException('The course has expired.');
-        }
-
-        if (! in_array($notification->course_id, $courseIds, true)) {
-            throw new AuthorizationException('Forbidden, not allowed to this notification.');
-        }
+        $notification = $service($student, (int) $request->notification_id);
 
         return new NotificationResource($notification);
     }

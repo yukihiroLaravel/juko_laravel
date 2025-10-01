@@ -24,6 +24,13 @@ class CourseDeadlineSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'course_id' => 3,
+                'fixed_date' => null,
+                'relative_days' => 30,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }

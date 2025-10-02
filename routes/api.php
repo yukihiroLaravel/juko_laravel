@@ -194,7 +194,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);
-                            Route::post('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'store']);
                             Route::put('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'putStatus']);
                             Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'bulkDelete']);
                             Route::delete('all', [App\Http\Controllers\Api\Manager\ChapterController::class, 'deleteAll']);

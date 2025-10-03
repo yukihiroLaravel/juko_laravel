@@ -5,19 +5,15 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Attendance\DeleteRequest;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
-use App\Http\Requests\Manager\Attendance\ShowRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Http\Requests\Manager\Attendance\StatusRequest;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
-use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -29,32 +25,6 @@ use Illuminate\Support\Facades\Log;
  */
 class AttendanceController extends Controller
 {
-    /**
-     * 受講状況取得API
-     */
-    public function show(ShowRequest $request): AttendanceShowResource
-    {
-        $courseId = $request->course_id;
-        $course = Course::findOrFail($courseId);
-
-        $this->authorize('view', [Attendance::class, $course]);
-
-        /** @var Collection<int, Chapter> */
-        $chapters = Chapter::with([
-            'lessons.lessonAttendances',
-        ])->where('course_id', $courseId)->get();
-
-        /** @var int */
-        $studentsCount = Attendance::where('course_id', $courseId)->count();
-
-        return new AttendanceShowResource([
-            'chapters' => $chapters,
-            'studentsCount' => $studentsCount,
-            'tags' => $course->tags,
-            'attendanceDeadline' => $course->attendance_deadline,
-        ]);
-    }
-
     /**
      * 受講状況削除API
      */

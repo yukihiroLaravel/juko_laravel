@@ -226,7 +226,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         // マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {
-                                Route::get('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'show']);
                                 Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'showStatus']);
                             });
                             Route::get('{period}', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'loginRate']);

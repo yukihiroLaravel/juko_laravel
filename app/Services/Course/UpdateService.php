@@ -4,9 +4,11 @@ namespace App\Services\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
+use App\Model\Attendance;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class UpdateService
 {
@@ -44,6 +46,18 @@ class UpdateService
                 'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
             ]
         );
+
+        // 受講期限を再計算
+        foreach ($course->attendances as $attendance) {
+            $newDeadline = match ($deadlineType) {
+                DeadlineTypeEnum::NONE => null,
+                DeadlineTypeEnum::FIXED_DATE => $fixedDate,
+                DeadlineTypeEnum::RELATIVE_DAYS => Carbon::parse($attendance->created_at)->addDays($relativeDays ?? 0),
+                default => null,
+            };
+
+            $attendance->update(['attendance_deadline' => $newDeadline]);
+        }
     }
 
     /**

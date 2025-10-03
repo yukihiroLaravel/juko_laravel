@@ -50,9 +50,24 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
+            // 受講開始日
+            $startDate = Carbon::today();
+
+            // 受講期限日を計算して取得
+            $deadlineType = $course->deadline_type;
+            $deadlineSetting = $course->courseDeadline;
+
+            $attendanceDeadline = match ($deadlineType) {
+                \App\Enums\Course\DeadlineTypeEnum::NONE->value => null,
+                \App\Enums\Course\DeadlineTypeEnum::FIXED_DATE->value => $deadlineSetting?->fixed_date,
+                \App\Enums\Course\DeadlineTypeEnum::RELATIVE_DAYS->value => $startDate->copy()->addDays($deadlineSetting?->relative_days ?? 0),
+                default => null,
+            };
+
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,
                 'student_id' => $request->student_id,
+                'attendance_deadline' => $attendanceDeadline,
             ]);
 
             $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {

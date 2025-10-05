@@ -235,15 +235,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('tag')->group(function () {
                         Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
                     });
-                });
-                // マネージャー-受講
-                Route::prefix('attendance')->group(function () {
-                    // 講師-生徒学習状況
-                    Route::prefix('{attendance_id}')->group(function () {
-                        Route::get('status', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'status']);
-                        Route::delete('/', [App\Http\Controllers\Api\Manager\AttendanceController::class, 'delete']);
-                    });
-                });
+                });                
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     // マネージャー-講座-生徒

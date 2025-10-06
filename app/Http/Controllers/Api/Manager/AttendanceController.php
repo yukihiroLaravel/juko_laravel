@@ -5,21 +5,15 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
-use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
-use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Manager-Attendance

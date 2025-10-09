@@ -235,7 +235,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('tag')->group(function () {
                         Route::get('index', [App\Http\Controllers\Api\Manager\TagController::class, 'index']);
                     });
-                });                
+                });
                 // マネージャー-生徒
                 Route::prefix('student')->group(function () {
                     // マネージャー-講座-生徒

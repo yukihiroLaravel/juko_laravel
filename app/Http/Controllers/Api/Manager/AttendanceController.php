@@ -3,11 +3,8 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Attendance\DeleteRequest;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
-use App\Http\Requests\Manager\Attendance\StatusRequest;
-use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -17,42 +14,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Manager-Attendance
  */
 class AttendanceController extends Controller
 {
-    /**
-     * 受講状況削除API
-     */
-    public function delete(DeleteRequest $request): JsonResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $attendanceId = $request->route('attendance_id');
-            $attendance = Attendance::with('course.instructor')->findOrFail($attendanceId);
-
-            $this->authorize('delete', $attendance);
-
-            // 受講状況に紐づくレッスン受講状況を削除
-            $attendance->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
     /**
      * 受講生ログイン率取得API
      */
@@ -177,24 +144,5 @@ class AttendanceController extends Controller
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount,
         ]);
-    }
-
-    /**
-     * 受講状況取得API
-     */
-    public function status(StatusRequest $request): StatusResource
-    {
-        $attendanceId = $request->attendance_id;
-
-        $attendance = Attendance::with([
-            'course.chapters.lessons.lessonAttendances',
-            'course.tags',
-        ])
-            ->findOrFail($attendanceId);
-
-        // Policyによる認可チェック
-        $this->authorize('view', $attendance->course);
-
-        return new StatusResource($attendance);
     }
 }

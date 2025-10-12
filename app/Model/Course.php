@@ -146,7 +146,7 @@ class Course extends Model
                 return optional($this->courseDeadline?->fixed_date)?->format('Y/m/d');
 
             case 'relative':
-                $days = $this->courseDeadline?->relative_days;
+                $days = $this->valid_days ?? $this->courseDeadline?->relative_days;
                 return $days ? "受講開始から{$days}日有効" : null;
 
             default:

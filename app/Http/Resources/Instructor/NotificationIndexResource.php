@@ -27,6 +27,7 @@ class NotificationIndexResource extends JsonResource
         return [
             'notifications' => $notifications->map(fn (Notification $notification) => [
                 ...(new NotificationResource($notification))->toArray($request),
+                'expiration_date' => $notification->course?->getDeadlineForInstructor(),
                 'tags' => TagResource::collection($notification->course->tags),
             ]),
             'pagination' => [

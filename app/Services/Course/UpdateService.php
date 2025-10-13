@@ -5,6 +5,8 @@ namespace App\Services\Course;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\Attendance;
+use App\Services\Attendance\CalculateDeadlineService; 
+use DateTimeImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -35,11 +37,14 @@ class UpdateService
 
         if (! $this->hasDeadline($deadlineType)) {
             $course->courseDeadline()->delete();
+            
+            // コースの受講期限を削除
+            Attendance::where('course_id', $course->id)->update(['attendance_deadline' => null]);
 
             return;
         }
 
-        $course->courseDeadline()->updateOrCreate(
+        $deadline = $course->courseDeadline()->updateOrCreate(
             ['course_id' => $course->id],
             [
                 'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
@@ -47,16 +52,23 @@ class UpdateService
             ]
         );
 
-        // 受講期限を再計算
-        foreach ($course->attendances as $attendance) {
-            $newDeadline = match ($deadlineType) {
-                DeadlineTypeEnum::NONE => null,
-                DeadlineTypeEnum::FIXED_DATE => $fixedDate,
-                DeadlineTypeEnum::RELATIVE_DAYS => Carbon::parse($attendance->created_at)->addDays($relativeDays ?? 0),
-                default => null,
-            };
+        // === Attendance の期限も更新 === 
+        $calculateDeadline = app(CalculateDeadlineService::class); 
 
-            $attendance->update(['attendance_deadline' => $newDeadline]);
+        $attendances = Attendance::where('course_id', $course->id)->get(); 
+        
+        foreach ($attendances as $attendance) { 
+            $startAt = new DateTimeImmutable($attendance->created_at); 
+            $newDeadline = $calculateDeadline( 
+                $deadlineType->value, 
+                $deadline->fixed_date ? new DateTimeImmutable($deadline->fixed_date) : null, 
+                $deadline->relative_days, 
+                $startAt 
+            );
+
+            $attendance->update([
+                'attendance_deadline' => $newDeadline?->format('Y-m-d'),
+            ]);
         }
     }
 

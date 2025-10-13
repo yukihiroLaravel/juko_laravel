@@ -16,6 +16,8 @@ use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Services\Attendance\CalculateDeadlineService;
+use DateTimeImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +34,7 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
 
@@ -50,19 +52,18 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
-            // 受講開始日
-            $startDate = Carbon::today();
-
-            // 受講期限日を計算して取得
+            $deadlineSetting = $course->courseDeadline; 
             $deadlineType = $course->deadline_type;
-            $deadlineSetting = $course->courseDeadline;
 
-            $attendanceDeadline = match ($deadlineType) {
-                \App\Enums\Course\DeadlineTypeEnum::NONE->value => null,
-                \App\Enums\Course\DeadlineTypeEnum::FIXED_DATE->value => $deadlineSetting?->fixed_date,
-                \App\Enums\Course\DeadlineTypeEnum::RELATIVE_DAYS->value => $startDate->copy()->addDays($deadlineSetting?->relative_days ?? 0),
-                default => null,
-            };
+            $startAt = new DateTimeImmutable();
+
+            // CalculateDeadlineServiceを使用して受講期限を計算
+            $attendanceDeadline = $calculateDeadline(
+                 $deadlineType, 
+                 $deadlineSetting?->fixed_date ? new DateTimeImmutable($deadlineSetting->fixed_date) : null, 
+                 $deadlineSetting?->relative_days, 
+                 $startAt
+                 );
 
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,

@@ -41,6 +41,7 @@ class Course extends Model
         'image',
         'status',
         'deadline_type',
+        'valid_days',
     ];
 
     /**

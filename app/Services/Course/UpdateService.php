@@ -7,6 +7,7 @@ use App\Model\Course;
 use App\Model\Attendance;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UpdateService

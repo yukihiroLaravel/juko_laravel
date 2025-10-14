@@ -5,17 +5,16 @@ namespace App\Services\Course;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\Attendance;
-use App\Services\Attendance\CalculateDeadlineService; 
-use DateTimeImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 
 class UpdateService
 {
     /**
      * 講座登録サービス
+     * @param array<int, string|\DateTimeInterface|null> $attendanceDeadlines
+     *             受講者ごとの更新後の受講期限（[attendance_id => 'YYYY-MM-DD']）
      */
     public function __invoke(
         Course $course,
@@ -24,52 +23,67 @@ class UpdateService
         string $status,
         DeadlineTypeEnum $deadlineType,
         ?string $fixedDate = null,
-        ?int $relativeDays = null
+        ?int $relativeDays = null,
+        array $attendanceDeadlines = []
     ): void {
-        $imagePath = $this->getImagePath($course, $imageFile);
-        // 講座を更新
-        $course->update([
-            'title' => $title,
-            'image' => $imagePath,
-            'status' => $status,
-            'deadline_type' => $deadlineType->value,
-        ]);
+        DB::transaction(function () use (
+            $course,
+            $title,
+            $imageFile,
+            $status,
+            $deadlineType,
+            $fixedDate,
+            $relativeDays,
+            $attendanceDeadlines
+        ) {
+            $imagePath = $this->getImagePath($course, $imageFile);
 
-        if (! $this->hasDeadline($deadlineType)) {
-            $course->courseDeadline()->delete();
-            
-            // コースの受講期限を削除
-            Attendance::where('course_id', $course->id)->update(['attendance_deadline' => null]);
+            // 講座を更新
+            $course->update([
+                'title' => $title,
+                'image' => $imagePath,
+                'status' => $status,
+                'deadline_type' => $deadlineType->value,
+            ]);
 
-            return;
-        }
+            if (! $this->hasDeadline($deadlineType)) {
+                $course->courseDeadline()->delete();
+                
+                // コースの受講期限を削除
+                Attendance::where('course_id', $course->id)->update(['attendance_deadline' => null]);
 
-        $deadline = $course->courseDeadline()->updateOrCreate(
-            ['course_id' => $course->id],
-            [
-                'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
-                'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
-            ]
-        );
+                return;
+            }
 
-        // === Attendance の期限も更新 === 
-        $calculateDeadline = app(CalculateDeadlineService::class); 
-
-        $attendances = Attendance::where('course_id', $course->id)->get(); 
-        
-        foreach ($attendances as $attendance) { 
-            $startAt = new DateTimeImmutable($attendance->created_at); 
-            $newDeadline = $calculateDeadline( 
-                $deadlineType->value, 
-                $deadline->fixed_date ? new DateTimeImmutable($deadline->fixed_date) : null, 
-                $deadline->relative_days, 
-                $startAt 
+            $course->courseDeadline()->updateOrCreate(
+                ['course_id' => $course->id],
+                [
+                    'fixed_date' => $deadlineType === DeadlineTypeEnum::FIXED_DATE ? $fixedDate : null,
+                    'relative_days' => $deadlineType === DeadlineTypeEnum::RELATIVE_DAYS ? $relativeDays : null,
+                ]
             );
 
-            $attendance->update([
-                'attendance_deadline' => $newDeadline?->format('Y-m-d'),
-            ]);
-        }
+            // === Attendance の期限をバルクアップデート ===
+            if (! empty($attendanceDeadlines)) {
+                // バルクアップデート（MySQL対応）
+                $caseSql = '';
+                $ids = [];
+
+                foreach ($attendanceDeadlines as $attendanceId => $deadlineDate) {
+                    $ids[] = (int) $attendanceId;
+                    $date = $deadlineDate ? "'{$deadlineDate}'" : 'NULL';
+                    $caseSql .= "WHEN id = {$attendanceId} THEN {$date} ";
+                }
+
+                $idsString = implode(',', $ids);
+                $query = "
+                    UPDATE attendances
+                    SET attendance_deadline = CASE {$caseSql}END
+                    WHERE id IN ({$idsString})
+                ";
+                DB::update($query);
+            }
+        });
     }
 
     /**

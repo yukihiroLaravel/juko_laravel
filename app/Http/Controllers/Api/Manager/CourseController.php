@@ -12,11 +12,14 @@ use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Model\Course;
+use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
+use App\Services\Attendance\CalculateDeadlineService;
 use Exception;
+use DateTimeImmutable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -128,15 +131,44 @@ class CourseController extends Controller
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
-            // 講座更新（Service 利用）
+            // CalculateDeadlineServiceを利用
+            $calculateDeadline = app(CalculateDeadlineService::class);
+            $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
+            $fixedDate = $request->fixed_date ? new DateTimeImmutable($request->fixed_date) : null;
+            $relativeDays = $request->relative_days;
+            $attendanceDeadlines = [];
+
+            if ($this->hasDeadline($deadlineType)) {
+                $attendances = Attendance::where('course_id', $course->id)->get();
+            
+                foreach ($attendances as $attendance) {
+                    $startAt = new DateTimeImmutable($attendance->created_at);
+                    $deadlineDate = $calculateDeadline(
+                        $deadlineType->value,
+                        $fixedDate,
+                        $relativeDays,
+                        $startAt
+                    );
+                    $attendanceDeadlines[$attendance->id] = $deadlineDate?->format('Y-m-d');
+                }
+            } else {
+                // 受講期限なしの場合、attendanceの期限も削除
+                $attendanceDeadlines = Attendance::where('course_id', $course->id)
+                    ->pluck('id')
+                    ->mapWithKeys(fn ($id) => [$id => null])
+                    ->toArray();
+            }
+
+            // 講座更新（UpdateServiceを利用）
             $service(
                 course: $course,
                 title: $request->title,
                 imageFile: $request->file('image'),
                 status: $request->status,
-                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
-                fixedDate: $request->fixed_date,
-                relativeDays: $request->relative_days,
+                deadlineType: $deadlineType,
+                fixedDate: $fixedDate,
+                relativeDays: $relativeDays,
+                attendanceDeadlines: $attendanceDeadlines,           
             );
 
             DB::commit();

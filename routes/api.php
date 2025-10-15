@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::prefix('course')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
                 Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);
+                Route::post('deadline/clear-all', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'clearAll']);
                 Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
                 Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index']);
                 Route::prefix('{course_id}')->group(function () {

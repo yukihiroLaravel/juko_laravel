@@ -133,29 +133,6 @@ class Course extends Model
     }
 
     /**
-     * 期限取得（講師画面用）
-     *
-     * @return string|null
-     */
-    public function getDeadlineForInstructor(): ?string
-    {
-        switch ($this->deadline_type) {
-            case 'none':
-                return null;
-
-            case 'fixed':
-                return optional($this->courseDeadline?->fixed_date)?->format('Y/m/d');
-
-            case 'relative':
-                $days = $this->valid_days ?? $this->courseDeadline?->relative_days;
-                return $days ? "受講開始から{$days}日有効" : null;
-
-            default:
-                return null;
-        }
-    }
-
-    /**
      * 期限設定（1:1）
      *
      * @return HasOne<CourseDeadline, $this>

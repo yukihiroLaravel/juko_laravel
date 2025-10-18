@@ -23,10 +23,14 @@ class UpdateService
         ?UploadedFile $imageFile,
         string $status,
         DeadlineTypeEnum $deadlineType,
-        ?string $fixedDate = null,
+        string|\DateTimeInterface|null $fixedDate = null,
         ?int $relativeDays = null,
         array $attendanceDeadlines = []
     ): void {
+        if ($fixedDate instanceof \DateTimeInterface) {
+            $fixedDate = $fixedDate->format('Y-m-d');
+        }
+        
         DB::transaction(function () use (
             $course,
             $title,
@@ -35,7 +39,7 @@ class UpdateService
             $deadlineType,
             $fixedDate,
             $relativeDays,
-            $attendanceDeadlines
+            $attendanceDeadlines,
         ) {
             $imagePath = $this->getImagePath($course, $imageFile);
 

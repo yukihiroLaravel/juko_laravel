@@ -138,6 +138,7 @@ class CourseController extends Controller
             $relativeDays = $request->relative_days;
             $attendanceDeadlines = [];
 
+            // 受講生の受講期限計算
             if ($this->hasDeadline($deadlineType)) {
                 $attendances = Attendance::where('course_id', $course->id)->get();
             
@@ -181,6 +182,16 @@ class CourseController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+    /**
+     * 受講期限設定の有無判定
+     */
+    private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+    {
+        return in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true);
     }
 
     /**

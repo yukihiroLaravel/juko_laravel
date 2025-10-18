@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Instructor;
 
+use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Notification;
@@ -27,6 +28,7 @@ class NotificationIndexResource extends JsonResource
         return [
             'notifications' => $notifications->map(fn (Notification $notification) => [
                 ...(new NotificationResource($notification))->toArray($request),
+                'course' => new CourseResource($notification->course),
                 'tags' => TagResource::collection($notification->course->tags),
             ]),
             'pagination' => [

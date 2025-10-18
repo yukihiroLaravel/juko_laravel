@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Manager;
 
+use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\InstructorResource;
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -50,6 +51,7 @@ class NotificationIndexResource extends JsonResource
             'start_date' => $notification->start_date,
             'end_date' => $notification->end_date,
             'status' => $notification->status,
+            'course' => new CourseResource($notification->course),
         ])
             ->toArray();
     }

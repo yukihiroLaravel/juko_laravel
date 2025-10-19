@@ -5,17 +5,17 @@ namespace App\Services\Course;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\Attendance;
+use App\Services\Attendance\CalculateDeadlineService;
+use DateTimeImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UpdateService
 {
     /**
      * 講座登録サービス
-     * @param array<int, string|\DateTimeInterface|null> $attendanceDeadlines
-     *             受講者ごとの更新後の受講期限（[attendance_id => 'YYYY-MM-DD']）
      */
     public function __invoke(
         Course $course,
@@ -23,26 +23,12 @@ class UpdateService
         ?UploadedFile $imageFile,
         string $status,
         DeadlineTypeEnum $deadlineType,
-        string|\DateTimeInterface|null $fixedDate = null,
+        ?string $fixedDate = null,
         ?int $relativeDays = null,
-        array $attendanceDeadlines = []
     ): void {
-        if ($fixedDate instanceof \DateTimeInterface) {
-            $fixedDate = $fixedDate->format('Y-m-d');
-        }
-        
-        DB::transaction(function () use (
-            $course,
-            $title,
-            $imageFile,
-            $status,
-            $deadlineType,
-            $fixedDate,
-            $relativeDays,
-            $attendanceDeadlines,
-        ) {
+        try {
+            // 画像パスを取得
             $imagePath = $this->getImagePath($course, $imageFile);
-
             // 講座を更新
             $course->update([
                 'title' => $title,
@@ -51,15 +37,14 @@ class UpdateService
                 'deadline_type' => $deadlineType->value,
             ]);
 
-            if (! $this->hasDeadline($deadlineType)) {
+            // もし受講期限設定がない場合、講座期限と受講生の期限を削除
+            if (! $course->courseDeadline?->hasDeadline($deadlineType)) {
                 $course->courseDeadline()->delete();
-                
-                // コースの受講期限を削除
-                Attendance::where('course_id', $course->id)->update(['attendance_deadline' => null]);
-
+                $course->attendances()->update(['attendance_deadline' => null]);
                 return;
             }
 
+            // 受講期限テーブルを更新
             $course->courseDeadline()->updateOrCreate(
                 ['course_id' => $course->id],
                 [
@@ -68,38 +53,56 @@ class UpdateService
                 ]
             );
 
-            // === Attendance の期限をバルクアップデート ===
-            if (! empty($attendanceDeadlines)) {
-                // バルクアップデート（MySQL対応）
-                $caseSql = '';
-                $ids = [];
+            //　受講生の受講期限を更新
+            $calculateDeadline = app(CalculateDeadlineService::class);
 
-                foreach ($attendanceDeadlines as $attendanceId => $deadlineDate) {
-                    $ids[] = (int) $attendanceId;
-                    $date = $deadlineDate ? "'{$deadlineDate}'" : 'NULL';
-                    $caseSql .= "WHEN id = {$attendanceId} THEN {$date} ";
-                }
-
-                $idsString = implode(',', $ids);
-                $query = "
-                    UPDATE attendances
-                    SET attendance_deadline = CASE {$caseSql}END
-                    WHERE id IN ({$idsString})
-                ";
-                DB::update($query);
-            }
-        });
+            // 受講期限タイプに応じて処理を分岐
+            match ($deadlineType) {
+                DeadlineTypeEnum::FIXED_DATE => $this->updateFixedDeadline($course, $fixedDate),
+                DeadlineTypeEnum::RELATIVE_DAYS => $this->updateRelativeDeadline($course, $relativeDays, $calculateDeadline),
+                default => $course->attendances()->update(['attendance_deadline' => null]),
+            };
+        } catch (\Exception $e) {
+            Log::error('UpdateService Error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+    /**
+     * 受講期限（固定年月日）の更新
+     */
+    private function updateFixedDeadline(Course $course, ?string $fixedDate): void
+    {
+        // 固定日が空の場合は何もしない
+        if (empty($fixedDate)) {
+            return;
+        }
+        // 受講生の受講期限（固定日）を一括更新
+        $attendanceIds = $course->attendances()->pluck('id')->all();
+        Attendance::whereIn('id', $attendanceIds)
+            ->update(['attendance_deadline' => $fixedDate]);
     }
 
     /**
-     * 受講期限設定があるかどうか
+     * 受講期限（受講日から〇日）の更新
      */
-    private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+    private function updateRelativeDeadline(Course $course, ?int $relativeDays, CalculateDeadlineService $calculateDeadline): void
     {
-        return in_array($deadlineType, [
-            DeadlineTypeEnum::FIXED_DATE,
-            DeadlineTypeEnum::RELATIVE_DAYS,
-        ], true);
+        // 受講生の受講期限を再計算して更新
+        foreach ($course->attendances as $attendance) {
+            $startAt = new DateTimeImmutable($attendance->created_at);
+
+            $newDeadline = $calculateDeadline(
+                DeadlineTypeEnum::RELATIVE_DAYS->value,
+                null,
+                $relativeDays,
+                $startAt
+            );
+
+            // 受講生の受講期限を更新
+            $attendance->update([
+                'attendance_deadline' => $newDeadline?->format('Y-m-d'),
+            ]);
+        }
     }
 
     /**

@@ -12,12 +12,10 @@ use App\Http\Requests\Manager\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Model\Course;
-use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
-use App\Services\Attendance\CalculateDeadlineService;
 use Exception;
 use DateTimeImmutable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -131,34 +129,11 @@ class CourseController extends Controller
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
-            // CalculateDeadlineServiceを利用
-            $calculateDeadline = app(CalculateDeadlineService::class);
             $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
-            $fixedDate = $request->fixed_date ? new DateTimeImmutable($request->fixed_date) : null;
+            $fixedDate = $request->fixed_date
+                ? (new DateTimeImmutable($request->fixed_date) )->format('Y-m-d')
+                : null;
             $relativeDays = $request->relative_days;
-            $attendanceDeadlines = [];
-
-            // 受講生の受講期限計算
-            if ($this->hasDeadline($deadlineType)) {
-                $attendances = Attendance::where('course_id', $course->id)->get();
-            
-                foreach ($attendances as $attendance) {
-                    $startAt = new DateTimeImmutable($attendance->created_at);
-                    $deadlineDate = $calculateDeadline(
-                        $deadlineType->value,
-                        $fixedDate,
-                        $relativeDays,
-                        $startAt
-                    );
-                    $attendanceDeadlines[$attendance->id] = $deadlineDate?->format('Y-m-d');
-                }
-            } else {
-                // 受講期限なしの場合、attendanceの期限も削除
-                $attendanceDeadlines = Attendance::where('course_id', $course->id)
-                    ->pluck('id')
-                    ->mapWithKeys(fn ($id) => [$id => null])
-                    ->toArray();
-            }
 
             // 講座更新（UpdateServiceを利用）
             $service(
@@ -168,8 +143,7 @@ class CourseController extends Controller
                 status: $request->status,
                 deadlineType: $deadlineType,
                 fixedDate: $fixedDate,
-                relativeDays: $relativeDays,
-                attendanceDeadlines: $attendanceDeadlines,           
+                relativeDays: $relativeDays,      
             );
 
             DB::commit();
@@ -179,19 +153,9 @@ class CourseController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollback();
-            Log::error($e);
+            Log::error('CourseController@update Error: ' . $e->getMessage());
             throw $e;
         }
-    }
-    /**
-     * 受講期限設定の有無判定
-     */
-    private function hasDeadline(DeadlineTypeEnum $deadlineType): bool
-    {
-        return in_array($deadlineType, [
-            DeadlineTypeEnum::FIXED_DATE,
-            DeadlineTypeEnum::RELATIVE_DAYS,
-        ], true);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Services\Course\ClearAllDeadlineService;
 use App\Model\Course;
 
@@ -19,7 +20,9 @@ class CourseDeadlineController extends Controller
         $courseIds = Course::where('instructor_id', $instructorId)->pluck('id');
 
         // サービスを呼び出して処理実行
-        $service($courseIds);
+        DB::transaction(function () use ($service, $courseIds) {
+            $service($courseIds);
+        });
 
         return response()->json(['result' => true], 200);
     }

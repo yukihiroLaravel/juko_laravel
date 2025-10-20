@@ -26,7 +26,6 @@ class UpdateService
         ?string $fixedDate = null,
         ?int $relativeDays = null,
     ): void {
-        try {
             // 画像パスを取得
             $imagePath = $this->getImagePath($course, $imageFile);
             // 講座を更新
@@ -62,10 +61,6 @@ class UpdateService
                 DeadlineTypeEnum::RELATIVE_DAYS => $this->updateRelativeDeadline($course, $relativeDays, $calculateDeadline),
                 default => $course->attendances()->update(['attendance_deadline' => null]),
             };
-        } catch (\Exception $e) {
-            Log::error('UpdateService Error: ' . $e->getMessage());
-            throw $e;
-        }
     }
     /**
      * 受講期限（固定年月日）の更新

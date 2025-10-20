@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Services\Course\ClearAllDeadlineService;
-use App\Model\Instructor;
 use App\Model\Course;
+use App\Model\Instructor;
+use App\Services\Course\ClearAllDeadlineService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 
 class CourseDeadlineController extends Controller
 {
@@ -21,7 +20,7 @@ class CourseDeadlineController extends Controller
         // managerIDを取得
         $managerId = Auth::guard('instructor')->id();
 
-       /** @var \App\Model\Instructor $manager */
+        /** @var \App\Model\Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
 
         // 配下講師 + 自身 の講師ID集合

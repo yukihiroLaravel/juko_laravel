@@ -14,12 +14,14 @@ class ClearAllDeadlineService
     public function __invoke(iterable $courseIds): void
     {
         $ids = collect($courseIds)->filter()->unique()->values();
-        if ($ids->isEmpty()) return;
+        if ($ids->isEmpty()) {
+            return;
+        }
 
-            Course::whereIn('id', $ids)->update([
-                'deadline_type' => DeadlineTypeEnum::NONE,
-            ]);
-            
+        Course::whereIn('id', $ids)->update([
+            'deadline_type' => DeadlineTypeEnum::NONE,
+        ]);
+
         CourseDeadline::whereIn('course_id', $ids)->delete();
     }
 }

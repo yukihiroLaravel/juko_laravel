@@ -246,11 +246,8 @@ class AttendanceController extends Controller
         /** @var Attendance $attendance */
         $attendance = Attendance::with(['course.chapters.lessons.lessonAttendances'])->findOrFail($attendanceId);
 
-        if (Auth::guard('instructor')->user()->id !== $attendance->course->instructor_id) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+        // Policyによる認可チェック
+        $this->authorize('view', $attendance->course);
 
         return new StatusResource($attendance);
     }

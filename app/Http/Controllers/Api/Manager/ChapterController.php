@@ -12,7 +12,6 @@ use App\Http\Requests\Manager\Chapter\PutRequest;
 use App\Http\Requests\Manager\Chapter\PutStatusRequest;
 use App\Http\Requests\Manager\Chapter\ShowRequest;
 use App\Http\Requests\Manager\Chapter\SortRequest;
-use App\Http\Requests\Manager\Chapter\StoreRequest;
 use App\Http\Requests\Manager\Chapter\UpdateStatusRequest;
 use App\Http\Resources\Manager\ChapterShowResource;
 use App\Model\Chapter;
@@ -20,7 +19,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
-use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\DeleteAllChaptersService;
 use App\Services\Chapter\SortChaptersService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
@@ -53,33 +51,6 @@ class ChapterController extends Controller
         }
 
         return new ChapterShowResource($chapter);
-    }
-
-    /**
-     * チャプター新規作成API
-     */
-    public function store(StoreRequest $request, CreateChapterService $createChapterService): JsonResponse
-    {
-        /** @var Course $course */
-        $course = Course::FindOrFail($request->course_id);
-
-        $this->authorize('create', [Chapter::class, $course]);
-
-        try {
-            $chapter = $createChapterService(
-                course: $course,
-                title: $request->title
-            );
-
-            return response()->json([
-                'result' => true,
-                'chapter_id' => $chapter->id,
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-
-            throw $e;
-        }
     }
 
     /**

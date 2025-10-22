@@ -143,7 +143,7 @@ class CourseController extends Controller
                 status: $request->status,
                 deadlineType: $deadlineType,
                 fixedDate: $fixedDate,
-                relativeDays: $relativeDays,      
+                relativeDays: $relativeDays,
             );
 
             DB::commit();
@@ -153,7 +153,7 @@ class CourseController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollback();
-            Log::error('CourseController@update Error: ' . $e->getMessage());
+            Log::error($e);
             throw $e;
         }
     }

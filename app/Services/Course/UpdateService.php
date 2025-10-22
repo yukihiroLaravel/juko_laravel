@@ -1,16 +1,19 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Services\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
-use App\Model\Attendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use DateTimeImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
+use LogicException;
+use RuntimeException;
 
 class UpdateService
 {
@@ -25,6 +28,7 @@ class UpdateService
         DeadlineTypeEnum $deadlineType,
         ?string $fixedDate = null,
         ?int $relativeDays = null,
+        CalculateDeadlineService $calculateDeadline,
     ): void {
             // 画像パスを取得
             $imagePath = $this->getImagePath($course, $imageFile);
@@ -52,14 +56,14 @@ class UpdateService
                 ]
             );
 
-            //　受講生の受講期限を更新
-            $calculateDeadline = app(CalculateDeadlineService::class);
-
             // 受講期限タイプに応じて処理を分岐
             match ($deadlineType) {
                 DeadlineTypeEnum::FIXED_DATE => $this->updateFixedDeadline($course, $fixedDate),
                 DeadlineTypeEnum::RELATIVE_DAYS => $this->updateRelativeDeadline($course, $relativeDays, $calculateDeadline),
-                default => $course->attendances()->update(['attendance_deadline' => null]),
+                // deadline が NONE の場合は受講生の期限を null に更新
+                DeadlineTypeEnum::NONE => $course->attendances()->update(['attendance_deadline' => null]),
+                // 想定外の受講期限タイプの場合は例外をスロー
+                default => throw new LogicException("Unexpected deadline type: {$deadlineType->value}"),
             };
     }
     /**
@@ -67,31 +71,46 @@ class UpdateService
      */
     private function updateFixedDeadline(Course $course, ?string $fixedDate): void
     {
-        // 固定日が空の場合は何もしない
-        if (empty($fixedDate)) {
-            return;
+        // 固定年月日が null の場合は「nullではダメ」とスロー
+        if ($fixedDate === null) {
+            throw new InvalidArgumentException('Fixed date cannot be null.');
         }
         // 受講生の受講期限（固定日）を一括更新
-        $attendanceIds = $course->attendances()->pluck('id')->all();
-        Attendance::whereIn('id', $attendanceIds)
-            ->update(['attendance_deadline' => $fixedDate]);
+        $attendanceIds = $course->attendances()->update([
+            'attendance_deadline' => $fixedDate
+        ]);
     }
 
     /**
      * 受講期限（受講日から〇日）の更新
      */
-    private function updateRelativeDeadline(Course $course, ?int $relativeDays, CalculateDeadlineService $calculateDeadline): void
-    {
-        // 受講生の受講期限を再計算して更新
-        foreach ($course->attendances as $attendance) {
+    private function updateRelativeDeadline(
+        Course $course,
+        ?int $relativeDays,
+        CalculateDeadlineService $calculateDeadline,
+    ): void{
+        // 受講日からの日数がnullの場合は「nullではダメ」とスロー
+        if ($relativeDays === null) {
+            throw new InvalidArgumentException('Relative days must not be null.');
+        }
+        
+        // 受講期限を計算して更新
+        $attendances = $course->attendances()->get();
+        foreach ($attendances as $attendance) {
+            // 受講開始日を取得
             $startAt = new DateTimeImmutable($attendance->created_at);
-
+            // 新しい受講期限を計算
             $newDeadline = $calculateDeadline(
                 DeadlineTypeEnum::RELATIVE_DAYS->value,
                 null,
                 $relativeDays,
                 $startAt
             );
+
+            // 新しい受講期限が null の場合は例外をスロー
+            if ($newDeadline === null) {
+                throw new RuntimeException('Failed to calculate new attendance deadline.');
+            }
 
             // 受講生の受講期限を更新
             $attendance->update([

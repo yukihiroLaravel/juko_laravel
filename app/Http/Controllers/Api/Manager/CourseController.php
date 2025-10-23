@@ -119,7 +119,7 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request, UpdateService $service): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service, \App\Services\Course\CalculateDeadlineService $calculateDeadline,): JsonResponse
     {
         DB::beginTransaction();
 
@@ -144,6 +144,7 @@ class CourseController extends Controller
                 deadlineType: $deadlineType,
                 fixedDate: $fixedDate,
                 relativeDays: $relativeDays,
+                calculateDeadline: $calculateDeadline,
             );
 
             DB::commit();

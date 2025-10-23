@@ -16,6 +16,7 @@ use App\Model\Instructor;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
+use App\Services\Attendance\CalculateDeadlineService;
 use Exception;
 use DateTimeImmutable;
 use Illuminate\Contracts\Database\Eloquent\Builder;

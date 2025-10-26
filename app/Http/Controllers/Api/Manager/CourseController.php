@@ -120,7 +120,7 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request, UpdateService $service, \App\Services\Course\CalculateDeadlineService $calculateDeadline): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service, CalculateDeadlineService $calculateDeadline): JsonResponse
     {
         DB::beginTransaction();
 

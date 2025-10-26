@@ -40,7 +40,7 @@ class TagController extends Controller
             ->when($tagId, function (Builder $query, string $tagId) {
                 $query->whereHas('courses', fn (Builder $query) => $query->where('tags.id', $tagId));
             })
-            ->with('courses')
+            ->with(['courses.courseDeadline'])
             ->get();
 
         return TagIndexResource::collection($query);

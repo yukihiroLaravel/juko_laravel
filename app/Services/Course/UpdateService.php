@@ -5,6 +5,7 @@ namespace App\Services\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
+use App\Model\CourseDeadline;
 use App\Services\Attendance\CalculateDeadlineService;
 use DateTimeImmutable;
 use Illuminate\Http\UploadedFile;
@@ -26,9 +27,9 @@ class UpdateService
         ?UploadedFile $imageFile,
         string $status,
         DeadlineTypeEnum $deadlineType,
-        ?string $fixedDate = null,
-        ?int $relativeDays = null,
         CalculateDeadlineService $calculateDeadline,
+        ?string $fixedDate = null,
+        ?int $relativeDays = null,   
     ): void {
             // 画像パスを取得
             $imagePath = $this->getImagePath($course, $imageFile);
@@ -41,7 +42,7 @@ class UpdateService
             ]);
 
             // もし受講期限設定がない場合、講座期限と受講生の期限を削除
-            if (! $course->courseDeadline?->hasDeadline($deadlineType)) {
+            if (! CourseDeadline::hasDeadline($deadlineType)) {
                 $course->courseDeadline()->delete();
                 $course->attendances()->update(['attendance_deadline' => null]);
                 return;
@@ -98,7 +99,7 @@ class UpdateService
         $attendances = $course->attendances()->get();
         foreach ($attendances as $attendance) {
             // 受講開始日を取得
-            $startAt = new DateTimeImmutable($attendance->created_at);
+            $startAt = new DateTimeImmutable($attendance->created_at->format('Y-m-d H:i:s'));
             // 新しい受講期限を計算
             $newDeadline = $calculateDeadline(
                 DeadlineTypeEnum::RELATIVE_DAYS->value,
@@ -114,7 +115,7 @@ class UpdateService
 
             // 受講生の受講期限を更新
             $attendance->update([
-                'attendance_deadline' => $newDeadline?->format('Y-m-d'),
+                'attendance_deadline' => $newDeadline->format('Y-m-d'),
             ]);
         }
     }

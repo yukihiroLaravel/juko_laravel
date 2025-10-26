@@ -120,7 +120,7 @@ class CourseController extends Controller
     /**
      * 講座情報更新API
      */
-    public function update(UpdateRequest $request, UpdateService $service, \App\Services\Course\CalculateDeadlineService $calculateDeadline,): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service, \App\Services\Course\CalculateDeadlineService $calculateDeadline): JsonResponse
     {
         DB::beginTransaction();
 
@@ -143,9 +143,9 @@ class CourseController extends Controller
                 imageFile: $request->file('image'),
                 status: $request->status,
                 deadlineType: $deadlineType,
+                calculateDeadline: $calculateDeadline,
                 fixedDate: $fixedDate,
                 relativeDays: $relativeDays,
-                calculateDeadline: $calculateDeadline,
             );
 
             DB::commit();

@@ -50,7 +50,7 @@ class CourseDeadline extends Model
     /**
      * 受講期限設定があるかどうか
      */
-     public function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+     public static function hasDeadline(DeadlineTypeEnum $deadlineType): bool
     {
         return in_array($deadlineType, [
             DeadlineTypeEnum::FIXED_DATE,

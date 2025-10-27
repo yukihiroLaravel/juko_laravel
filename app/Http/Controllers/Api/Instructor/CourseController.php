@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
@@ -12,12 +13,11 @@ use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
-use App\Services\Course\StoreCourseService;
-use App\Services\Course\UpdateCourseService;
+use App\Services\Course\StoreService;
+use App\Services\Course\UpdateService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -53,7 +53,7 @@ class CourseController extends Controller
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
-            ->with(['tags'])
+            ->with(['tags', 'courseDeadline'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {
                 $query->where(function (Builder $query) use ($searchWord) {
                     $query->where('title', 'LIKE', "%{$searchWord}%")
@@ -81,7 +81,7 @@ class CourseController extends Controller
      */
     public function show(ShowRequest $request): CourseShowResource
     {
-        $course = Course::with(['chapters.lessons'])->findOrFail($request->course_id);
+        $course = Course::with(['chapters.lessons', 'courseDeadline'])->findOrFail($request->course_id);
 
         // 認可チェック
         $this->authorize('view', $course);
@@ -92,7 +92,7 @@ class CourseController extends Controller
     /**
      * 講座登録API
      */
-    public function store(StoreRequest $request, StoreCourseService $service): JsonResponse
+    public function store(StoreRequest $request, StoreService $service): JsonResponse
     {
         DB::beginTransaction();
 
@@ -104,7 +104,9 @@ class CourseController extends Controller
                 image: $request->file('image'),
                 tagId: $request->tag_id,
                 instructorId: $instructorId,
-                attendanceDeadline: $request->attendance_deadline
+                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
+                fixedDate: $request->fixed_date,
+                relativeDays: $request->relative_days,
             );
 
             DB::commit();
@@ -122,7 +124,7 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(UpdateRequest $request, UpdateCourseService $updateCourseService): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service): JsonResponse
     {
         DB::beginTransaction();
 
@@ -133,12 +135,14 @@ class CourseController extends Controller
             $this->authorize('update', $course);
 
             // 講座更新（Service 利用）
-            $updateCourseService(
+            $service(
                 course: $course,
                 title: $request->title,
                 imageFile: $request->file('image'),
                 status: $request->status,
-                attendanceDeadline: $request->attendance_deadline
+                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
+                fixedDate: $request->fixed_date,
+                relativeDays: $request->relative_days,
             );
 
             DB::commit();

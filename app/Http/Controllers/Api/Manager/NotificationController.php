@@ -20,7 +20,6 @@ use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Services\Course\AttendanceDeadlineValidator;
 use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
@@ -30,7 +29,6 @@ use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,7 +56,7 @@ class NotificationController extends Controller
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;
 
-        $notifications = Notification::with(['course', 'instructor'])
+        $notifications = Notification::with(['course', 'course.courseDeadline', 'instructor'])
             ->whereIn('instructor_id', $instructorIds)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -70,7 +68,6 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request): NotificationResource
     {
-
         // 指定されたお知らせIDでお知らせを取得
         $notification = Notification::with('instructor')->findOrFail($request->notification_id);
 
@@ -83,21 +80,14 @@ class NotificationController extends Controller
     /**
      * お知らせ登録API
      */
-    public function store(
-        StoreRequest $request,
-        StoreNotificationService $service,
-        AttendanceDeadlineValidator $attendanceDeadlineValidator
-    ): JsonResponse {
+    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
+    {
         $course = Course::findOrFail($request->course_id);
 
         // Policyによる認可チェック
         $this->authorize('store', [Notification::class, $course]);
 
         $instructorId = Auth::guard('instructor')->user()->id;
-
-        if (! $attendanceDeadlineValidator($course)) {
-            throw new AuthorizationException('The course has expired.');
-        }
 
         DB::beginTransaction();
         try {

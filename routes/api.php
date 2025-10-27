@@ -102,7 +102,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->group(function () {
                         Route::prefix('status')->group(function () {
-                            Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus']);
                         });
                         Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate']);
@@ -125,6 +124,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);
                 // 講師-生徒学習状況
                 Route::prefix('{attendance_id}')->group(function () {
+                    Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);
                     Route::get('status', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'status']);
                     Route::delete('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'delete']);
                 });
@@ -187,10 +187,10 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\CourseController::class, 'index']);
                     Route::put('status', [App\Http\Controllers\Api\Manager\CourseController::class, 'putStatus']);
                     Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'store']);
+                    Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll']);
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
-                        Route::delete('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'delete']);
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
                             Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);

@@ -47,7 +47,7 @@ class NotificationController extends Controller
         $perPage = $request->input('per_page', 20);
         $page = $request->input('page', 1);
 
-        $notifications = Notification::with(['course.tags'])
+        $notifications = Notification::with(['course', 'course.tags', 'course.courseDeadline'])
             ->where('instructor_id', $instructorId)
             ->paginate($perPage, ['*'], 'page', $page);
 

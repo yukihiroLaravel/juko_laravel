@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -39,7 +40,7 @@ class Course extends Model
         'title',
         'image',
         'status',
-        'attendance_deadline',
+        'deadline_type',
     ];
 
     /**
@@ -131,11 +132,20 @@ class Course extends Model
     }
 
     /**
+     * 期限設定（1:1）
+     *
+     * @return HasOne<CourseDeadline, $this>
+     */
+    public function courseDeadline(): HasOne
+    {
+        return $this->hasOne(CourseDeadline::class);
+    }
+
+    /**
      * @return array{
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  attendance_deadline: 'immutable_datetime'
      * }
      */
     #[\Override]
@@ -145,17 +155,6 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'attendance_deadline' => 'immutable_datetime',
         ];
-    }
-
-    /**
-     * 受講期限を当日 23:59:59 に揃えて返す
-     */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
-    {
-        return $this->attendance_deadline
-            ? $this->attendance_deadline->endOfDay()
-            : null;
     }
 }

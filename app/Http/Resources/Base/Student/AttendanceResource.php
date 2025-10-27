@@ -21,6 +21,8 @@ class AttendanceResource extends JsonResource
     {
         return [
             'attendance_id' => $this->resource->id,
+            'deadline_date' => $this->resource->attendance_deadline_end?->format('Y-m-d'),
+            'expired' => $this->resource->isExpired(),
         ];
     }
 }

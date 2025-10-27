@@ -1,5 +1,7 @@
 <?php
 
+use App\Model\Course;
+use App\Model\Instructor;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +17,8 @@ class CreateNotificationsTable extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('course_id')->unsigned();
-            $table->bigInteger('instructor_id')->unsigned();
+            $table->foreignIdFor(Course::class, 'course_id')->constrained()->comment('講座ID');
+            $table->foreignIdFor(Instructor::class, 'instructor_id')->constrained()->comment('講師ID');
             $table->string('title', 50)->comment('タイトル');
             $table->enum('type', ['always', 'once'])->comment('表示パターン区分');
             $table->dateTime('start_date')->comment('開始日時');
@@ -26,8 +28,6 @@ class CreateNotificationsTable extends Migration
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->softDeletes();
-            $table->foreign('course_id')->references('id')->on('courses');
-            $table->foreign('instructor_id')->references('id')->on('instructors');
         });
     }
 

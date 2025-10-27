@@ -15,13 +15,11 @@ class CreateManageInstructorsTable extends Migration
     {
         Schema::create('manage_instructors', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('instructor_id')->unsigned()->comment('通常講師');
-            $table->bigInteger('manager_id')->unsigned()->comment('マネージャ');
+            $table->foreignIdFor(App\Model\Instructor::class, 'instructor_id')->constrained()->comment('通常講師ID');
+            $table->foreignIdFor(App\Model\Instructor::class, 'manager_id')->constrained()->comment('マネージャID');
             $table->datetime('created_at');
             $table->datetime('updated_at');
             $table->softDeletes();
-            $table->foreign('instructor_id')->references('id')->on('instructors');
-            $table->foreign('manager_id')->references('id')->on('instructors');
         });
     }
 

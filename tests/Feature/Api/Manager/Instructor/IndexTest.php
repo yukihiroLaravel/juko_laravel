@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Manager\Instructor;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -63,7 +62,6 @@ class IndexTest extends TestCase
     {
         // arrange
         $instructor = Instructor::find(1);
-        Course::find(6)->update(['attendance_deadline' => now()->subDays(1)]); // 期限切れの講座を設定
         $this->actingAs($instructor, 'instructor');
 
         // act

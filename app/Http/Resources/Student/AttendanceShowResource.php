@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Student;
 
+use App\Http\Resources\Base\Student\AttendanceResource;
 use App\Http\Resources\Base\Student\ChapterResource;
 use App\Http\Resources\Base\Student\CourseResource;
 use App\Http\Resources\Base\Student\InstructorResource;
@@ -10,7 +11,6 @@ use App\Http\Resources\Base\Student\LessonResource;
 use App\Http\Resources\Base\Student\TagResource;
 use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowResource extends JsonResource
@@ -18,26 +18,23 @@ class AttendanceShowResource extends JsonResource
     /** @var Attendance */
     public $resource;
 
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
     #[\Override]
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
-            'attendance_id' => $this->resource->id,
+            ...(new AttendanceResource($this->resource))->toArray($request),
+
             'course' => [
                 ...(new CourseResource($this->resource->course))->toArray($request),
                 'instructor' => new InstructorResource($this->resource->course->instructor),
                 'tags' => TagResource::collection($this->resource->course->tags),
-                'chapters' => ChapterResource::collection($this->resource->course->publicChapters)->collection->map(fn (ChapterResource $chapterResource) => [
+
+                'chapters' => ChapterResource::collection(
+                    $this->resource->course->publicChapters
+                )->collection->map(fn (ChapterResource $chapterResource) => [
                     ...$chapterResource->toArray($request),
                     'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
-                        $lessonAttendance = $this->resource->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lesson->id === $lessonAttendance->lesson_id)->first();
-                        assert($lessonAttendance instanceof LessonAttendance);
+                        $lessonAttendance = $this->resource->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
                         return [
                             ...(new LessonResource($lesson))->toArray($request),

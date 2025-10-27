@@ -17,7 +17,7 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
-use DateTimeImmutable;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -52,18 +52,15 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
-            $deadlineSetting = $course->courseDeadline; 
+            $deadlineSetting = $course->courseDeadline;
             $deadlineType = $course->deadline_type;
 
-            $startAt = new DateTimeImmutable();
-
-            // CalculateDeadlineServiceを使用して受講期限を計算
             $attendanceDeadline = $calculateDeadline(
-                 $deadlineType, 
-                 $deadlineSetting?->fixed_date ? new DateTimeImmutable($deadlineSetting->fixed_date) : null, 
-                 $deadlineSetting?->relative_days, 
-                 $startAt
-                 );
+                deadlineType: $deadlineType,
+                startAt: new CarbonImmutable,
+                fixedDate: $deadlineSetting?->fixed_date ? new CarbonImmutable($deadlineSetting->fixed_date) : null,
+                relativeDays: $deadlineSetting?->relative_days,
+            );
 
             $attendance = Attendance::create([
                 'course_id' => $request->course_id,

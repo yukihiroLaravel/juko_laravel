@@ -58,13 +58,8 @@ class InstructorController extends Controller
                 'courses as student_count' => function (Builder $query) {
                     $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
                         ->where(function ($query) {
-                            $query->whereDoesntHave('courseDeadline')
-                                ->orWhereHas('courseDeadline', function ($q) {
-                                    $q->where(function ($sub) {
-                                        $sub->whereNull('fixed_date')
-                                            ->orWhere('fixed_date', '>', now());
-                                    });
-                                });
+                            $query->whereNull('attendances.attendance_deadline')
+                                ->orWhere('attendances.attendance_deadline', '>', now());
                         })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
                 },

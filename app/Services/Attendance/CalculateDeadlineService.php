@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Attendance;
 
 use App\Enums\Course\DeadlineTypeEnum;
-use DateTimeImmutable;
+use Carbon\CarbonImmutable;
 use DomainException;
 
 /**
@@ -15,10 +15,10 @@ final class CalculateDeadlineService
 {
     public function __invoke(
         string $deadlineType,
-        ?DateTimeImmutable $fixedDate,
+        ?CarbonImmutable $fixedDate,
         ?int $relativeDays,
-        DateTimeImmutable $startAt
-    ): ?DateTimeImmutable {
+        CarbonImmutable $startAt
+    ): ?CarbonImmutable {
         if ($deadlineType === DeadlineTypeEnum::FIXED_DATE->value && $fixedDate === null) {
             throw new DomainException('fixed_date is required when fixed_date is selected');
         }
@@ -29,8 +29,8 @@ final class CalculateDeadlineService
         return match ($deadlineType) {
             DeadlineTypeEnum::NONE->value => null,
             DeadlineTypeEnum::FIXED_DATE->value => $fixedDate,
-            DeadlineTypeEnum::RELATIVE_DAYS->value => $startAt->modify(sprintf('+%d days', $relativeDays)),
-            default => throw new DomainException('Unsupported deadline type'),
+            DeadlineTypeEnum::RELATIVE_DAYS->value => $startAt->addDays($relativeDays),
+            default => throw new DomainException("Invalid deadline type: {$deadlineType}"),
         };
     }
 }

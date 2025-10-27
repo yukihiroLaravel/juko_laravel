@@ -6,7 +6,7 @@ namespace Tests\Feature\Service\Attendance;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Services\Attendance\CalculateDeadlineService;
-use DateTimeImmutable;
+use Carbon\CarbonImmutable;
 use PHPUnit\Framework\TestCase;
 
 final class CalculateDeadlineServiceTest extends TestCase
@@ -15,8 +15,8 @@ final class CalculateDeadlineServiceTest extends TestCase
     {
         // Arrange
         $service = new CalculateDeadlineService;
-        $fixedDate = new DateTimeImmutable('2025-05-10 00:00:00');
-        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
+        $fixedDate = new CarbonImmutable('2025-05-10 00:00:00');
+        $startAt = new CarbonImmutable('2025-05-01 12:34:56');
 
         // Act
         $actual = $service(
@@ -34,7 +34,7 @@ final class CalculateDeadlineServiceTest extends TestCase
     {
         // Arrange
         $service = new CalculateDeadlineService;
-        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
+        $startAt = new CarbonImmutable('2025-05-01 12:34:56');
 
         // Act
         $actual = $service(
@@ -52,7 +52,7 @@ final class CalculateDeadlineServiceTest extends TestCase
     {
         // Arrange
         $service = new CalculateDeadlineService;
-        $startAt = new DateTimeImmutable('2025-05-10 10:00:00');
+        $startAt = new CarbonImmutable('2025-05-10 10:00:00');
         $relativeDays = 5;
 
         // Act
@@ -64,7 +64,7 @@ final class CalculateDeadlineServiceTest extends TestCase
         );
 
         // Assert
-        $this->assertInstanceOf(DateTimeImmutable::class, $actual);
+        $this->assertInstanceOf(CarbonImmutable::class, $actual);
         $this->assertSame('2025-05-15 10:00:00', $actual->format('Y-m-d H:i:s'));
     }
 
@@ -72,7 +72,7 @@ final class CalculateDeadlineServiceTest extends TestCase
     {
         // Arrange
         $service = new CalculateDeadlineService;
-        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
+        $startAt = new CarbonImmutable('2025-05-01 12:34:56');
 
         // Assert
         $this->expectExceptionMessage('fixed_date is required when fixed_date is selected');
@@ -90,7 +90,7 @@ final class CalculateDeadlineServiceTest extends TestCase
     {
         // Arrange
         $service = new CalculateDeadlineService;
-        $startAt = new DateTimeImmutable('2025-05-01 12:34:56');
+        $startAt = new CarbonImmutable('2025-05-01 12:34:56');
 
         // Assert
         $this->expectExceptionMessage('relative_days is required when relative_days is selected');

@@ -13,12 +13,11 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Http\Resources\Manager\CourseIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
-use App\Services\Attendance\CalculateDeadlineService;
 use Exception;
-use DateTimeImmutable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -131,9 +130,7 @@ class CourseController extends Controller
             $this->authorize('update', $course);
 
             $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
-            $fixedDate = $request->fixed_date
-                ? (new DateTimeImmutable($request->fixed_date) )->format('Y-m-d')
-                : null;
+            $fixedDate = $request->fixed_date;
             $relativeDays = $request->relative_days;
 
             // 講座更新（UpdateServiceを利用）

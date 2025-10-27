@@ -81,7 +81,7 @@ class StoreTest extends TestCase
 
         $this->assertDatabaseHas('course_deadlines', [
             'course_id' => 8,
-            'fixed_date' => now()->addDays(30)->format('Y-m-d'),
+            'fixed_date' => now()->addDays(30)->format('Y-m-d 00:00:00'),
         ]);
     }
 

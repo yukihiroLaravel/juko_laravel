@@ -3,119 +3,23 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Attendance\DeleteRequest;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
-use App\Http\Requests\Manager\Attendance\StatusRequest;
-use App\Http\Requests\Manager\Attendance\StoreRequest;
-use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Attendance\CalculateDeadlineService;
-use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Manager-Attendance
  */
 class AttendanceController extends Controller
 {
-    /**
-     * 受講状況登録API
-     */
-    public function store(StoreRequest $request, CalculateDeadlineService $service): JsonResponse
-    {
-        /** @var Course $course */
-        $course = Course::with('courseDeadline')->findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('create', [Attendance::class, $course]);
-
-        if (Attendance::where('course_id', $request->course_id)
-            ->where('student_id', $request->student_id)
-            ->exists()
-        ) {
-            throw new AuthorizationException(
-                'Attendance record already exists.'
-            );
-        }
-
-        DB::beginTransaction();
-        try {
-            // 受講期限の確定
-            $startAt = CarbonImmutable::now();
-            $deadline = $service(
-                deadlineType: $course->deadline_type,
-                fixedDate: $course->courseDeadline?->fixed_date,
-                relativeDays: $course->courseDeadline?->relative_days,
-                startAt: $startAt,
-            );
-
-            $attendance = Attendance::create([
-                'course_id' => $request->course_id,
-                'student_id' => $request->student_id,
-                'attendance_deadline' => $deadline,
-            ]);
-
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
-                $query->where('course_id', $request->course_id);
-            })->get();
-
-            $lessons->each(function (Lesson $lesson) use ($attendance) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            });
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * 受講状況削除API
-     */
-    public function delete(DeleteRequest $request): JsonResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $attendanceId = $request->route('attendance_id');
-            $attendance = Attendance::with('course.instructor')->findOrFail($attendanceId);
-
-            $this->authorize('delete', $attendance);
-
-            // 受講状況に紐づくレッスン受講状況を削除
-            $attendance->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
     /**
      * 受講生ログイン率取得API
      */
@@ -240,34 +144,5 @@ class AttendanceController extends Controller
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount,
         ]);
-    }
-
-    /**
-     * 受講状況取得API
-     */
-    public function status(StatusRequest $request): StatusResource
-    {
-        $attendanceId = $request->attendance_id;
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        // マネージャーとその配下の講師のIDを取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
-        $attendance = Attendance::with([
-            'course.chapters.lessons.lessonAttendances',
-            'course.tags',
-            'course.courseDeadline',
-        ])
-            ->findOrFail($attendanceId);
-
-        if (! in_array($attendance->course->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
-
-        return new StatusResource($attendance);
     }
 }

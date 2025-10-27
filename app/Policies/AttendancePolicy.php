@@ -15,7 +15,7 @@ class AttendancePolicy
     public function viewStudent(Student $student, Attendance $attendance): bool
     {
         // 受講期限切れの場合は閲覧不可
-        if (! $attendance->isExpired()) {
+        if ($attendance->isExpired()) {
             return false;
         }
 
@@ -28,7 +28,7 @@ class AttendancePolicy
     public function view(Instructor $instructor, Attendance $attendance): bool
     {
         // 期限切れならNG
-        if (! $attendance->isExpired()) {
+        if ($attendance->isExpired()) {
             return false;
         }
 

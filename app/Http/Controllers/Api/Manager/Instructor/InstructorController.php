@@ -57,9 +57,14 @@ class InstructorController extends Controller
             ->withCount([
                 'courses as student_count' => function (Builder $query) {
                     $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
-                        ->where(function (Builder $query) {
-                            $query->whereNull('courses.attendance_deadline')
-                                ->orWhere('courses.attendance_deadline', '>', now());
+                        ->where(function ($query) {
+                            $query->whereDoesntHave('courseDeadline')
+                                ->orWhereHas('courseDeadline', function ($q) {
+                                    $q->where(function ($sub) {
+                                        $sub->whereNull('fixed_date')
+                                            ->orWhere('fixed_date', '>', now());
+                                    });
+                                });
                         })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
                 },
@@ -75,22 +80,10 @@ class InstructorController extends Controller
      */
     public function show(ShowRequest $request): InstructorShowResource
     {
-
-        $managerId = Auth::guard('instructor')->user()->id;
-
-        // 配下の講師情報を取得
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
-        // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-        if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, not allowed to this instructor.');
-        }
-
         /** @var Instructor $instructor */
         $instructor = Instructor::findOrFail($request->instructor_id);
+
+        $this->authorize('view', $instructor);
 
         return new InstructorShowResource($instructor);
     }

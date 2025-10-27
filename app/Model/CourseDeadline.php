@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -44,5 +45,16 @@ class CourseDeadline extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    /**
+     * 受講期限設定があるかどうか
+     */
+    public static function hasDeadline(DeadlineTypeEnum $deadlineType): bool
+    {
+        return in_array($deadlineType, [
+            DeadlineTypeEnum::FIXED_DATE,
+            DeadlineTypeEnum::RELATIVE_DAYS,
+        ], true);
     }
 }

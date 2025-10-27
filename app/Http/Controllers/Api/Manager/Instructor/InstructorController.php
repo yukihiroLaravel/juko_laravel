@@ -63,7 +63,7 @@ class InstructorController extends Controller
                                     $q->where(function ($sub) {
                                         $sub->whereNull('fixed_date')
                                             ->orWhere('fixed_date', '>', now());
-                                    });        
+                                    });
                                 });
                         })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));

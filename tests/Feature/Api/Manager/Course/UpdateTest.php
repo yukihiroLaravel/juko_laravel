@@ -73,7 +73,7 @@ class UpdateTest extends TestCase
         ]);
         $this->assertDatabaseHas('course_deadlines', [
             'course_id' => 1,
-            'fixed_date' => now()->addDays(30)->format('Y-m-d'),
+            'fixed_date' => now()->addDays(30)->format('Y-m-d 00:00:00'),
         ]);
     }
 

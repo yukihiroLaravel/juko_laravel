@@ -21,9 +21,14 @@ class IndexService
         $studentId = $dto->studentId;
         $currentDateTime = CarbonImmutable::now();
         $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
-
-        // お知らせ取得
-        $query = Notification::with('students', 'course')
+        // お知らせ取得クエリ
+        $query = Notification::with([
+            'students',
+            'course.courseDeadline',
+            'course.attendances' => fn ($q) => $q
+                ->where('student_id', $studentId)
+                ->select('id', 'course_id', 'student_id', 'created_at', 'attendance_deadline'),
+        ])
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
@@ -33,10 +38,21 @@ class IndexService
                     $sub
                         // ① 期限なし（none）
                         ->where('deadline_type', DeadlineTypeEnum::NONE->value)
-                        // ②・③ 固定期限日（fixed_date）と相対日数（relative_days）
+
+                        // ② 固定期限（fixed_date）を許可：course_deadlines.fixed_date >= 今日
+                        ->orWhere(function (Builder $fx) use ($currentDateTime) {
+                            $fx->where('deadline_type', DeadlineTypeEnum::FIXED_DATE->value)
+                            ->whereHas('courseDeadline', function (Builder $cd) use ($currentDateTime) {
+                                // fixed_date が DATE 型なら toDateString() 比較が安全
+                                $cd->whereNotNull('fixed_date')
+                                    ->where('fixed_date', '>=', $currentDateTime->toDateString());
+                            });
+                        })
+
+                        // ③ 相対日数（relative_days）：受講生ごとの attendance_deadline >= now
                         ->orWhereHas('attendances', function (Builder $q2) use ($studentId, $currentDateTime) {
                             $q2->where('student_id', $studentId)
-                                ->where('attendance_deadline', '>=', $currentDateTime);
+                            ->where('attendance_deadline', '>=', $currentDateTime);
                         });
                 });
             });

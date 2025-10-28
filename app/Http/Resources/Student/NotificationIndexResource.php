@@ -36,19 +36,29 @@ class NotificationIndexResource extends JsonResource
      * @param  Collection<int, Notification>  $notifications
      * @return array
      */
+    
     private function mapNotifications($notifications)
     {
-        return $notifications->map(fn (Notification $notification) => [
-            'notification_id' => $notification->id,
-            'course_id' => $notification->course_id,
-            'instructor_id' => $notification->instructor_id,
-            'course_title' => $notification->course->title,
-            'title' => $notification->title,
-            'type' => $notification->type,
-            'content' => $notification->content,
-            'start_date' => $notification->start_date,
-            'end_date' => $notification->end_date,
-        ])
-            ->toArray();
+        return $notifications->map(function (Notification $notification) {
+            $deadline = optional($notification->course->courseDeadline);
+
+            return [
+                'notification_id' => $notification->id,
+                'course_id' => $notification->course_id,
+                'instructor_id' => $notification->instructor_id,
+                'course_title' => $notification->course->title,
+                'title' => $notification->title,
+                'type' => $notification->type,
+                'content' => $notification->content,
+                'start_date' => $notification->start_date,
+                'end_date' => $notification->end_date,
+
+                // 期限情報（null か、オブジェクト）
+                'deadline' => $deadline ? [
+                    'fixed_date' => optional($deadline->fixed_date)->toDateString(),  // Y-m-d 等（cast/formatは必要に応じて）
+                    'relative_days' => $deadline->relative_days,  // int|null
+                ] : null,
+            ];
+        })->toArray();
     }
 }

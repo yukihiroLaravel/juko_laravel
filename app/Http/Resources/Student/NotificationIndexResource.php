@@ -36,7 +36,6 @@ class NotificationIndexResource extends JsonResource
      * @param  Collection<int, Notification>  $notifications
      * @return array
      */
-    
     private function mapNotifications($notifications)
     {
         return $notifications->map(function (Notification $notification) {

@@ -42,17 +42,17 @@ class IndexService
                         // ② 固定期限（fixed_date）を許可：course_deadlines.fixed_date >= 今日
                         ->orWhere(function (Builder $fx) use ($currentDateTime) {
                             $fx->where('deadline_type', DeadlineTypeEnum::FIXED_DATE->value)
-                            ->whereHas('courseDeadline', function (Builder $cd) use ($currentDateTime) {
-                                // fixed_date が DATE 型なら toDateString() 比較が安全
-                                $cd->whereNotNull('fixed_date')
-                                    ->where('fixed_date', '>=', $currentDateTime->toDateString());
-                            });
+                                ->whereHas('courseDeadline', function (Builder $cd) use ($currentDateTime) {
+                                    // fixed_date が DATE 型なら toDateString() 比較が安全
+                                    $cd->whereNotNull('fixed_date')
+                                        ->where('fixed_date', '>=', $currentDateTime->toDateString());
+                                });
                         })
 
                         // ③ 相対日数（relative_days）：受講生ごとの attendance_deadline >= now
                         ->orWhereHas('attendances', function (Builder $q2) use ($studentId, $currentDateTime) {
                             $q2->where('student_id', $studentId)
-                            ->where('attendance_deadline', '>=', $currentDateTime);
+                                ->where('attendance_deadline', '>=', $currentDateTime);
                         });
                 });
             });

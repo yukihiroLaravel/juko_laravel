@@ -26,8 +26,8 @@ class ShowService
             ->where('course_id', $notification->course_id)
             ->first();
 
-        // 受講していないとき    
-        if (!$attendance) {
+        // 受講していないとき
+        if (! $attendance) {
             throw new AuthorizationException('You are not enrolled in the course.');
         }
 

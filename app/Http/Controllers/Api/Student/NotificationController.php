@@ -12,6 +12,7 @@ use App\Http\Resources\Student\NotificationIndexResource;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use App\Services\Notification\ShowService;
+use App\Model\Attendance;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -66,7 +67,17 @@ class NotificationController extends Controller
         $student = $request->user();
 
         $notification = $service($student, (int) $request->notification_id);
+        $course = $notification->course;
+        $attendance = Attendance::where('student_id', $student->id)
+        ->where('course_id', $course->id)
+        ->first();
 
-        return new NotificationResource($notification);
+        $responseData = [
+        'notification' => $notification,
+        'deadline_type' => $course->deadline_type,
+        'attendance_deadline' => $attendance?->attendance_deadline?->format('Y-m-d'),
+        ];
+
+        return new NotificationResource($responseData);
     }
 }

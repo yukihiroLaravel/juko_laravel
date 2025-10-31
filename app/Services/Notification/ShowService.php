@@ -24,8 +24,14 @@ class ShowService
         /** @var Attendance|null $attendance */
         $attendance = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)
-            ->firstOrFail();
+            ->first();
 
+        // 受講していないとき    
+        if (!$attendance) {
+            throw new AuthorizationException('You are not enrolled in the course.');
+        }
+
+        // 期限切れのとき
         if ($attendance->isExpired()) {
             throw new AuthorizationException('The course has expired.');
         }

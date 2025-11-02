@@ -20,7 +20,7 @@ class NotificationResource extends JsonResource
     public function toArray($request)
     {
         $notification = $this->resource['notification'];
-        
+
         return [
             'notification_id' => $notification->id,
             'course_id' => $notification->course_id,

@@ -9,10 +9,10 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
+use App\Model\Attendance;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use App\Services\Notification\ShowService;
-use App\Model\Attendance;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -69,8 +69,8 @@ class NotificationController extends Controller
         $notification = $service($student, (int) $request->notification_id);
         $course = $notification->course;
         $attendance = Attendance::where('student_id', $student->id)
-        ->where('course_id', $course->id)
-        ->first();
+            ->where('course_id', $course->id)
+            ->first();
 
         $responseData = [
         'notification' => $notification,

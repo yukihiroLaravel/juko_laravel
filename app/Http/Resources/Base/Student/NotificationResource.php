@@ -29,7 +29,6 @@ class NotificationResource extends JsonResource
             'content' => $notification->content,
             'start_date' => $notification->start_date,
             'end_date' => $notification->end_date,
-            'deadline_type' => $this->resource['deadline_type'] ?? null,
             'attendance_deadline' => $this->resource['attendance_deadline'] ?? null,
         ];
     }

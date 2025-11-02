@@ -74,7 +74,6 @@ class NotificationController extends Controller
 
         $responseData = [
         'notification' => $notification,
-        'deadline_type' => $course->deadline_type,
         'attendance_deadline' => $attendance?->attendance_deadline?->format('Y-m-d'),
         ];
 

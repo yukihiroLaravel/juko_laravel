@@ -73,8 +73,8 @@ class NotificationController extends Controller
             ->first();
 
         $responseData = [
-        'notification' => $notification,
-        'attendance_deadline' => $attendance?->attendance_deadline?->format('Y-m-d'),
+            'notification' => $notification,
+            'attendance_deadline' => $attendance?->attendance_deadline?->format('Y-m-d'),
         ];
 
         return new NotificationResource($responseData);

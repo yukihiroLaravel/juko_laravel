@@ -19,6 +19,7 @@ class NotificationResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
+        /** @var Notification $notification */
         $notification = $this->resource['notification'];
 
         return [

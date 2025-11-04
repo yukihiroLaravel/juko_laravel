@@ -10,26 +10,30 @@ use Illuminate\Auth\Access\AuthorizationException;
 class ShowService
 {
     /**
-     * お知らせ詳細 + 受講期限チェック（最小）
-     * 期限判定は Attendance::isExpired() に委譲
-     * 期限切れ時: 403 "The course has expired."
+     * お知らせ詳細取得
+     *
+     * @return array {notification: Notification, attendance: Attendance}
      */
-    public function __invoke(Student $student, int $notificationId): Notification
+    public function __invoke(Student $student, int $notificationId): array
     {
         /** @var Notification $notification */
         $notification = Notification::public()
             ->with('course') // 不要なら外してOK
             ->findOrFail($notificationId);
 
-        /** @var Attendance|null $attendance */
+        /** @var Attendance $attendance */
         $attendance = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)
             ->firstOrFail();
 
         if ($attendance->isExpired()) {
+            // 受講期限切れ
             throw new AuthorizationException('The course has expired.');
         }
 
-        return $notification;
+        return [
+            'notification' => $notification,
+            'attendance' => $attendance,
+        ];
     }
 }

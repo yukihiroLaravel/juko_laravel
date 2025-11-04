@@ -9,7 +9,6 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
-use App\Model\Attendance;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use App\Services\Notification\ShowService;
@@ -40,6 +39,25 @@ class NotificationController extends Controller
     }
 
     /**
+     * お知らせ詳細
+     */
+    public function show(ShowRequest $request, ShowService $service): NotificationResource
+    {
+        /** @var \App\Model\Student $student */
+        $student = $request->user();
+
+        $response = $service(
+            student: $student,
+            notificationId: (int) $request->notification_id
+        );
+
+        return new NotificationResource([
+            'notification' => $response['notification'],
+            'attendance_deadline' => $response['attendance']->attendance_deadline?->format('Y-m-d'),
+        ]);
+    }
+
+    /**
      * お知らせ既読登録API
      */
     public function markRead(MarkReadRequest $request, MarkReadService $service): JsonResponse
@@ -56,27 +74,5 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-     * お知らせ詳細
-     */
-    public function show(ShowRequest $request, ShowService $service): NotificationResource
-    {
-        /** @var \App\Model\Student $student */
-        $student = $request->user();
-
-        $notification = $service($student, (int) $request->notification_id);
-        $course = $notification->course;
-        $attendance = Attendance::where('student_id', $student->id)
-            ->where('course_id', $course->id)
-            ->first();
-
-        $responseData = [
-            'notification' => $notification,
-            'attendance_deadline' => $attendance?->attendance_deadline?->format('Y-m-d'),
-        ];
-
-        return new NotificationResource($responseData);
     }
 }

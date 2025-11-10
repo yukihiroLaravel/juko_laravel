@@ -67,6 +67,11 @@ class Course extends Model
             foreach ($course->chapters()->get() as $child) {
                 $child->delete();
             }
+
+            // 講座期限設定があれば削除
+            if ($course->courseDeadline()->exists()) {
+                $course->courseDeadline()->delete();
+            }
         });
     }
 

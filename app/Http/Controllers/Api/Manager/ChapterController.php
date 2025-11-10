@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
  */
 class ChapterController extends Controller
 {
-   
     /**
      * チャプター削除API(単一)
      */

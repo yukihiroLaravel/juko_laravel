@@ -7,13 +7,15 @@ use App\Model\Course;
 class PutStatusService
 {
     /**
-     * 講座の状態を更新
+     * 選択した講座のステータスを更新する
      *
-     * @param  array<int>  $instructorIds
+     * @param  array<int>  $courseIds
      * @param  'public'|'private'  $status
+     * @param  int $instructorId
      */
-    public function __invoke(array $instructorIds, string $status): void
+    public function __invoke(array $courseIds, string $status, int $instructorId): void
     {
-        Course::whereIn('instructor_id', $instructorIds)->update(['status' => $status]);
+        // 講座のステータスを一括更新
+        Course::whereIn('id', $courseIds)->where('instructor_id', $instructorId)->update(['status' => $status]);
     }
 }

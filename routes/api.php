@@ -63,7 +63,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
                 Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index']);
                 // 受講期限 一括変更（講師）
-                Route::put('deadline/bulk-update', [App\Http\Controllers\Api\Instructor\CourseController::class, 'bulkUpdate']);
+                Route::put('deadline/bulk-update', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'bulkUpdate']);
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'update']);

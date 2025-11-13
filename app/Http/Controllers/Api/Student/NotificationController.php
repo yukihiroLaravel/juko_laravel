@@ -39,6 +39,25 @@ class NotificationController extends Controller
     }
 
     /**
+     * お知らせ詳細
+     */
+    public function show(ShowRequest $request, ShowService $service): NotificationResource
+    {
+        /** @var \App\Model\Student $student */
+        $student = $request->user();
+
+        $response = $service(
+            student: $student,
+            notificationId: (int) $request->notification_id
+        );
+
+        return new NotificationResource([
+            'notification' => $response['notification'],
+            'attendance_deadline' => $response['attendance']->attendance_deadline?->format('Y-m-d'),
+        ]);
+    }
+
+    /**
      * お知らせ既読登録API
      */
     public function markRead(MarkReadRequest $request, MarkReadService $service): JsonResponse
@@ -55,18 +74,5 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-     * お知らせ詳細
-     */
-    public function show(ShowRequest $request, ShowService $service): NotificationResource
-    {
-        /** @var \App\Model\Student $student */
-        $student = $request->user();
-
-        $notification = $service($student, (int) $request->notification_id);
-
-        return new NotificationResource($notification);
     }
 }

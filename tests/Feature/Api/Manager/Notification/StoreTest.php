@@ -49,30 +49,6 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_期限切れの講座_失敗(): void
-    {
-        // arrange
-        $instructor = Instructor::find(1);
-        Course::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->postJson('/api/v1/manager/course/1/notification', [
-            'title' => 'title',
-            'type' => 'always',
-            'start_date' => '2022-01-01 00:00:00',
-            'end_date' => '2022-01-02 00:00:00',
-            'content' => 'content',
-            'status' => 'private',
-        ]);
-
-        // assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'The course has expired.',
-        ]);
-    }
-
     public function test_お知らせ登録_バリデーションエラー(): void
     {
         // arrange

@@ -19,14 +19,18 @@ class NotificationResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
+        /** @var Notification $notification */
+        $notification = $this->resource['notification'];
+
         return [
-            'notification_id' => $this->resource->id,
-            'course_id' => $this->resource->course_id,
-            'course_title' => $this->resource->course->title,
-            'title' => $this->resource->title,
-            'content' => $this->resource->content,
-            'start_date' => $this->resource->start_date,
-            'end_date' => $this->resource->end_date,
+            'notification_id' => $notification->id,
+            'course_id' => $notification->course_id,
+            'course_title' => $notification->course->title,
+            'title' => $notification->title,
+            'content' => $notification->content,
+            'start_date' => $notification->start_date,
+            'end_date' => $notification->end_date,
+            'attendance_deadline' => $this->resource['attendance_deadline'] ?? null,
         ];
     }
 }

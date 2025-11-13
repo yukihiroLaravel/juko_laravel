@@ -14,7 +14,7 @@ use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Tag;
-use App\Model\CourseDeadline;
+use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
@@ -126,7 +126,7 @@ class CourseController extends Controller
     /**
      * 講座更新API
      */
-    public function update(UpdateRequest $request, UpdateService $service): JsonResponse
+    public function update(UpdateRequest $request, UpdateService $service, CalculateDeadlineService $calculateDeadline): JsonResponse
     {
         DB::beginTransaction();
 
@@ -136,15 +136,20 @@ class CourseController extends Controller
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
+            $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
+            $fixedDate = $request->fixed_date;
+            $relativeDays = $request->relative_days;
+
             // 講座更新（Service 利用）
             $service(
                 course: $course,
                 title: $request->title,
                 imageFile: $request->file('image'),
                 status: $request->status,
-                deadlineType: DeadlineTypeEnum::from($request->deadline_type),
-                fixedDate: $request->fixed_date,
-                relativeDays: $request->relative_days,
+                deadlineType: $deadlineType,
+                calculateDeadline: $calculateDeadline,
+                fixedDate: $fixedDate,
+                relativeDays: $relativeDays,
             );
 
             DB::commit();

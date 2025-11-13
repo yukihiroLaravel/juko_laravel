@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
-use App\Model\Course;
+use App\Model\Attendance;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -63,7 +63,7 @@ class ProgressTest extends TestCase
         // arrange
         $student = Student::find(1);
         $this->actingAs($student);
-        Course::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
+        Attendance::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
 
         // act
         $response = $this->getJson('/api/v1/attendance/1/progress');
@@ -80,7 +80,7 @@ class ProgressTest extends TestCase
         // arrange
         $student = Student::find(1);
         $this->actingAs($student);
-        Course::find(1)->update(['attendance_deadline' => now()]);
+        Attendance::find(1)->update(['attendance_deadline' => now()]);
 
         // act
         $response = $this->getJson('/api/v1/attendance/1/progress');

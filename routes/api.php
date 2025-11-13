@@ -197,14 +197,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);
                         // マネージャー-講座-チャプター
                         Route::prefix('chapter')->group(function () {
-                            Route::post('sort', [App\Http\Controllers\Api\Manager\ChapterController::class, 'sort']);
-                            Route::put('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'putStatus']);
-                            Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'bulkDelete']);
-                            Route::delete('all', [App\Http\Controllers\Api\Manager\ChapterController::class, 'deleteAll']);
-                            Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'patchStatus']);
                             Route::prefix('{chapter_id}')->group(function () {
-                                Route::get('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'show']);
-                                Route::put('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'put']);
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\ChapterController::class, 'delete']);
                                 Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus']);
 

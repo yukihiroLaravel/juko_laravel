@@ -27,9 +27,6 @@ class DeleteService
             $disk->delete($course->image);
         }
 
-        // 講座締切データ削除
-        $course->courseDeadline()->delete();
-
         // 講座データ削除
         $course->delete();
     }

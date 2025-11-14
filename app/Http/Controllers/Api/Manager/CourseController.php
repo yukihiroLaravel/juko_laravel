@@ -173,7 +173,7 @@ class CourseController extends Controller
         // 更新対象の講座IDを抽出
         $courseIds = Course::whereIn('instructor_id', $managingIds)->pluck('id')->toArray();
 
-        // 更新処理(instructorと同様に変更)
+        // 更新処理
         $service(courseIds: $courseIds, status: $request->status, instructorId: $instructorId);
 
         return response()->json([

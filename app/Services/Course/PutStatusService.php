@@ -11,7 +11,6 @@ class PutStatusService
      *
      * @param  array<int>  $courseIds
      * @param  'public'|'private'  $status
-     * @param  int $instructorId
      */
     public function __invoke(array $courseIds, string $status, int $instructorId): void
     {

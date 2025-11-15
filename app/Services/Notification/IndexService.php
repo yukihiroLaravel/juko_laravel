@@ -3,62 +3,69 @@
 namespace App\Services\Notification;
 
 use App\Dto\Student\Notification\IndexDto;
-use App\Enums\Course\DeadlineTypeEnum;
 use App\Enums\Notification\StatusEnum;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService
 {
     /**
      * お知らせ取得
      */
-    public function __invoke(IndexDto $dto)
+    public function __invoke(IndexDto $dto): LengthAwarePaginator
     {
-        // ユーザID取得(DTO使用)
         $studentId = $dto->studentId;
-        $currentDateTime = CarbonImmutable::now();
-        $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
-        // お知らせ取得クエリ
-        $query = Notification::with([
-            'students',
-            'course.courseDeadline',
-            'course.attendances' => fn ($q) => $q
-                ->where('student_id', $studentId)
-                ->select('id', 'course_id', 'student_id', 'created_at', 'attendance_deadline'),
-        ])
+        $now = CarbonImmutable::now();
+
+        // ① 受講生の受講情報をまとめて取得
+        $attendances = Attendance::where('student_id', $studentId)->get();
+
+        // 受講している講座がなければ空のページネーションを返す
+        if ($attendances->isEmpty()) {
+            return new LengthAwarePaginator(collect(), 0, $dto->perPage, $dto->page);
+        }
+
+        // ② course_id => Attendance のマップを作る
+        $attendanceByCourse = $attendances->keyBy('course_id');
+
+        // ③ Notification 用の course_id 一覧
+        $courseIds = $attendanceByCourse->keys();
+
+        // ④ 基本条件だけ DB で絞る
+        $items = Notification::with([
+                'students',
+                'course:id,title', 
+            ])
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
-            ->where('start_date', '<=', $currentDateTime)
-            ->where('end_date', '>=', $currentDateTime)
-            ->whereHas('course', function (Builder $q) use ($studentId, $currentDateTime) {
-                $q->where(function (Builder $sub) use ($studentId, $currentDateTime) {
-                    $sub
-                        // ① 期限なし（none）
-                        ->where('deadline_type', DeadlineTypeEnum::NONE->value)
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->orderBy($dto->sortBy, $dto->order)
+            ->get();
 
-                        // ② 固定期限（fixed_date）を許可：course_deadlines.fixed_date >= 今日
-                        ->orWhere(function (Builder $fx) use ($currentDateTime) {
-                            $fx->where('deadline_type', DeadlineTypeEnum::FIXED_DATE->value)
-                                ->whereHas('courseDeadline', function (Builder $cd) use ($currentDateTime) {
-                                    // fixed_date が DATE 型なら toDateString() 比較が安全
-                                    $cd->whereNotNull('fixed_date')
-                                        ->where('fixed_date', '>=', $currentDateTime->toDateString());
-                                });
-                        })
+            // 受講期限が null（期限なし） or 未来（now以降）だけ残す
+        $filtered = $items->filter(function (Notification $n) use ($attendanceByCourse, $now) {
+            $att = $attendanceByCourse->get($n->course_id);
+            if (!$att || is_null($att->attendance_deadline)) return true;
+            return $att->attendance_deadline->toDateString() >= $now->toDateString(); 
+        })->values();
 
-                        // ③ 相対日数（relative_days）：受講生ごとの attendance_deadline >= now
-                        ->orWhereHas('attendances', function (Builder $q2) use ($studentId, $currentDateTime) {
-                            $q2->where('student_id', $studentId)
-                                ->where('attendance_deadline', '>=', $currentDateTime);
-                        });
-                });
-            });
+        // 各通知へ受講情報を紐付け
+        $filtered->each(function (Notification $n) use ($attendanceByCourse) {
+            if ($att = $attendanceByCourse->get($n->course_id)) {
+                $n->setRelation('student_attendance', $att);
+            }
+        });
 
-        // ソート条件とページネーションを適用して結果を返却
-        return $query->orderBy($dto->sortBy, $dto->order)
-            ->paginate($dto->perPage, ['*'], 'page', $dto->page);
+        // ⑦ フィルタ済みコレクションを手動ページネーション
+        $total   = $filtered->count();
+        $page    = max(1, (int) $dto->page);
+        $perPage = max(1, (int) $dto->perPage);
+
+        $slice = $filtered->forPage($page, $perPage)->values();
+
+        return new LengthAwarePaginator($slice, $total, $perPage, $page);
     }
 }

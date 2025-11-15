@@ -3,7 +3,7 @@
 namespace App\Http\Resources\Student;
 
 use App\Model\Notification;
-use Illuminate\Database\Eloquent\Collection;
+use App\Http\Resources\Base\Student\NotificationResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -12,52 +12,32 @@ class NotificationIndexResource extends JsonResource
     /** @var LengthAwarePaginator */
     public $resource;
 
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
     #[\Override]
     public function toArray($request)
     {
+        /** @var LengthAwarePaginator $notifications */
         $notifications = $this->resource;
 
         return [
-            'notifications' => $this->mapNotifications($notifications->getCollection()),
+            'notifications' => $notifications->getCollection()
+                ->map(function (Notification $notification) use ($request) {
+                    // Service側で積んだ擬似リレーションを使う
+                    $attendance = $notification->getRelation('student_attendance');
+                    $deadline   = $attendance?->attendance_deadline; // DATE型（cast）
+
+                    // 既存ベースに追記
+                    return (new NotificationResource($notification))->toArray($request) + [
+                        'attendance_deadline' => $deadline?->toDateString(), // 'Y-m-d' or null
+                    ];
+                })
+                ->values()
+                ->toArray(),
+
+            // totalはServiceでフィルタ後件数になっているので整合性◎
             'pagination' => [
-                'page' => $notifications->currentPage(),
+                'page'  => $notifications->currentPage(),
                 'total' => $notifications->total(),
             ],
         ];
-    }
-
-    /**
-     * @param  Collection<int, Notification>  $notifications
-     * @return array
-     */
-    private function mapNotifications($notifications)
-    {
-        return $notifications->map(function (Notification $notification) {
-            $deadline = optional($notification->course->courseDeadline);
-
-            return [
-                'notification_id' => $notification->id,
-                'course_id' => $notification->course_id,
-                'instructor_id' => $notification->instructor_id,
-                'course_title' => $notification->course->title,
-                'title' => $notification->title,
-                'type' => $notification->type,
-                'content' => $notification->content,
-                'start_date' => $notification->start_date,
-                'end_date' => $notification->end_date,
-
-                // 期限情報（null か、オブジェクト）
-                'deadline' => $deadline ? [
-                    'fixed_date' => optional($deadline->fixed_date)->toDateString(),  // Y-m-d 等（cast/formatは必要に応じて）
-                    'relative_days' => $deadline->relative_days,  // int|null
-                ] : null,
-            ];
-        })->toArray();
     }
 }

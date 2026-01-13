@@ -60,8 +60,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
-    - name: Format code with Pint
-      run: composer pint
+    - name: Format code
+      run: composer format
 
     - name: Commit and Push changes
       run: |

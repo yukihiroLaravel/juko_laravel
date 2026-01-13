@@ -27,7 +27,7 @@ class StudentShowResource extends JsonResource
             'occupation' => $this->resource->occupation,
             'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
-            'gender' => $this->resource->gender,
+            'gender' => $this->resource->gender?->label(),
             'address' => $this->resource->address,
             'profile_image' => $this->resource->profile_image,
         ];

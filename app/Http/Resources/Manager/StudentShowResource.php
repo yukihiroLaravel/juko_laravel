@@ -31,7 +31,7 @@ class StudentShowResource extends JsonResource
             'purpose' => $this->resource->purpose,
             'birth_date' => $this->resource->birth_date->format('Y/m/d'),
             'age' => $this->resource->calcAge(new CarbonImmutable),
-            'gender' => $this->resource->gender,
+            'gender' => $this->resource->gender?->label(),
             'address' => $this->resource->address,
             'created_at' => $this->resource->created_at->format('Y/m/d'),
             'last_login_at' => $this->resource->last_login_at->format('Y/m/d'),

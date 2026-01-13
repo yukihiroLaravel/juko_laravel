@@ -58,7 +58,8 @@
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
-        "pint": [
+        "format": [
+            "vendor/bin/rector process",
             "vendor/bin/pint -v"
         ],
         "analyze": [
@@ -66,9 +67,6 @@
         ],
         "rector-dry-run": [
             "vendor/bin/rector process --dry-run"
-        ],
-        "rector": [
-            "vendor/bin/rector process"
         ],
         "test": [
             "vendor/bin/phpunit"

@@ -27,7 +27,7 @@ class StudentFactory extends Factory
             'nick_name' => fake()->userName(),
             'occupation' => fake()->jobTitle(),
             'birth_date' => fake()->date(),
-            'gender' => fake()->randomElement([0, 1]),
+            'gender' => fake()->randomElement(['man', 'woman']),
             'address' => fake()->address(),
         ];
     }

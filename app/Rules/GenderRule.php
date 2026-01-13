@@ -17,10 +17,10 @@ class GenderRule implements ValidationRule
         // 入力値が 'man' または 'woman' であることを検証
         $isValid = collect(Gender::cases())
             ->filter(fn (Gender $gender) => $gender !== Gender::UNKNOWN)
-            ->contains(fn (Gender $gender) => $gender->label() === $value);
+            ->contains(fn (Gender $gender) => $gender->value === $value);
 
         if (! $isValid) {
-            $fail('The :attribute must be either '.Gender::MAN->label().' or '.Gender::WOMAN->label().'.');
+            $fail('The :attribute must be either '.Gender::MAN->value.' or '.Gender::WOMAN->value.'.');
         }
     }
 }

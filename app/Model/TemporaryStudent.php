@@ -49,8 +49,8 @@ class TemporaryStudent extends Model
      *  birth_date: 'immutable_date',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  gender: 'App\Enums\Student\Gender',
-     *  expire_at: 'immutable_datetime'
+     *  expire_at: 'immutable_datetime',
+     *  gender: 'App\Enums\Student\Gender'
      * }
      */
     #[\Override]
@@ -60,8 +60,8 @@ class TemporaryStudent extends Model
             'birth_date' => 'immutable_date',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'gender' => Gender::class,
             'expire_at' => 'immutable_datetime',
+            'gender' => Gender::class,
         ];
     }
 }

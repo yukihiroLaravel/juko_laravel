@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('occupation', 50)->nullable()->comment('職業');
             $table->string('purpose', 50)->nullable()->comment('目的');
             $table->date('birth_date')->nullable()->comment('誕生日');
-            $table->tinyInteger('gender')->nullable()->comment('性別');
+            $table->string('gender', 10)->nullable()->comment('性別');
             $table->string('address', 255)->nullable()->comment('都道府県');
             $table->timestamps();
         });

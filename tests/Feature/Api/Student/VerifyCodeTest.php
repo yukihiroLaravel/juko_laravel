@@ -34,7 +34,7 @@ class VerifyCodeTest extends TestCase
             'occupation' => 'test',
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
-            'gender' => 'man',
+            'gender' => \App\Enums\Student\Gender::MAN,
         ]);
 
         // act
@@ -64,7 +64,7 @@ class VerifyCodeTest extends TestCase
             'occupation' => 'test',
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
-            'gender' => 'man',
+            'gender' => \App\Enums\Student\Gender::MAN,
         ]);
 
         // act
@@ -94,7 +94,7 @@ class VerifyCodeTest extends TestCase
             'occupation' => 'test',
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
-            'gender' => 'man',
+            'gender' => \App\Enums\Student\Gender::MAN,
         ]);
 
         // act
@@ -124,7 +124,7 @@ class VerifyCodeTest extends TestCase
             'occupation' => 'test',
             'purpose' => 'test',
             'birth_date' => '2000-01-01',
-            'gender' => 'man',
+            'gender' => \App\Enums\Student\Gender::MAN,
         ]);
 
         // act

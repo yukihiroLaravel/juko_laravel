@@ -14,7 +14,6 @@ use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
-use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;

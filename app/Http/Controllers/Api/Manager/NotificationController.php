@@ -12,12 +12,10 @@ use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
 use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
-use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Services\Notification\BulkDeleteService;
@@ -25,7 +23,6 @@ use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\PutStatusService;
-use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
@@ -76,42 +73,7 @@ class NotificationController extends Controller
 
         return new NotificationResource($notification);
     }
-
-    /**
-     * お知らせ登録API
-     */
-    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
-    {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('store', [Notification::class, $course]);
-
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        DB::beginTransaction();
-        try {
-            $service(
-                course_id: $request->course_id,
-                instructor_id: $instructorId,
-                title: $request->title,
-                type: $request->type,
-                start_date: $request->start_date,
-                end_date: $request->end_date,
-                content: $request->content,
-                status: $request->status
-            );
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
+    
     /**
      * お知らせ更新API
      */

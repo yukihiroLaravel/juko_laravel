@@ -14,7 +14,6 @@ use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
-use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
 use App\Model\Notification;
@@ -63,10 +62,6 @@ class NotificationController extends Controller
     /**
      * お知らせ詳細API
      */
-    public function show(ShowRequest $request): NotificationResource
-    {
-        // 指定されたお知らせIDでお知らせを取得
-        $notification = Notification::with('instructor')->findOrFail($request->notification_id);
 
         // Policyによる認可チェック
         $this->authorize('view', $notification);

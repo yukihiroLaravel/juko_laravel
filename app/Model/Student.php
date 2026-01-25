@@ -66,25 +66,6 @@ class Student extends Authenticatable
         return $this->hasMany(Attendance::class);
     }
 
-    public function getGenderAttribute($value)
-    {
-        // データベースのgenderカラムの数値を Gender enumに変換し、対応するラベル（文字列）を返す
-        return Gender::from($value)->label();
-    }
-
-    public function setGenderAttribute($value)
-    {
-        // ユーザー入力の値（$value）に基づき Gender enumのインスタンスを決定
-        $gender = match ($value) {
-            'man' => Gender::MAN, // 'man' の場合は Gender::MAN に対応
-            'woman' => Gender::WOMAN,
-            default => Gender::UNKNOWN,
-        };
-
-        // $genderはGender::MAN 等に対応していてこれらのインスタンスはenumのcaseで数値が定義されているので$gender->valueは対応する数値になる。
-        $this->attributes['gender'] = $gender->value;
-    }
-
     /**
      * フルネームアクセサー
      */

@@ -13,7 +13,20 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', fn (Request $request) => $request->user());
+Route::middleware('auth:sanctum')->get('/user',
+    function (Request $request) {
+        $user = $request->user();
+
+        return [
+            ...$user->toArray(),
+            'role' => match (true) {
+                $user instanceof \App\Model\Student => 'student',
+                $user instanceof \App\Model\Instructor => 'instructor',
+                default => 'unknown',
+            },
+        ];
+    }
+);
 
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     // 受講生側API
@@ -247,7 +260,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'bulkDelete']);
 
                     Route::prefix('{notification_id}')->group(function () {
-                        Route::get('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'show']);
                         Route::put('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'put']);
                         Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'delete']);
                     });

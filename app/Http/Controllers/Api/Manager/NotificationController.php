@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Dto\Notification\PutDto;
 use App\Enums\Notification\StatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
@@ -17,7 +16,6 @@ use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
@@ -189,34 +187,7 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * お知らせ一括削除API
-     */
-    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
-    {
-        // 選択されたお知らせリストを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
-
-        // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('bulkDelete', [Notification::class, $notifications]);
-
-        DB::beginTransaction();
-        try {
-            // viewed_once_notifications, notificationsテーブルのレコードを一括削除するサービス
-            $service($notifications);
-
-            // コミット
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
+    
 
     /**
      * お知らせ一括公開・非公開API

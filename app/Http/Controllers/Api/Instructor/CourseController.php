@@ -198,7 +198,7 @@ class CourseController extends Controller
         $service(courseIds: $courseIds, status: $status, instructorId: $instructorId);
 
         return response()->json([
-            'result' => 'true',
+            'result' => true,
         ]);
     }
 }

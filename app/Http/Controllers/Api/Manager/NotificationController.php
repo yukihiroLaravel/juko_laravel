@@ -10,7 +10,6 @@ use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
 use App\Http\Requests\Manager\Notification\PutStatusRequest;
-use App\Http\Requests\Manager\Notification\ShowRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
@@ -55,16 +54,6 @@ class NotificationController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
-    }
-
-    /**
-     * お知らせ詳細API
-     */
-
-        // Policyによる認可チェック
-        $this->authorize('view', $notification);
-
-        return new NotificationResource($notification);
     }
     
     /**

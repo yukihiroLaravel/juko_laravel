@@ -60,11 +60,6 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ詳細API
-     */
-
-
-    /**
      * お知らせ登録API
      */
     public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
@@ -218,8 +213,6 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
-
-    
 
     /**
      * お知らせ一括公開・非公開API

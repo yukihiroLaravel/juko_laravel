@@ -191,15 +191,14 @@ class CourseController extends Controller
     public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
         $instructorId = Auth::guard('instructor')->user()->id;
-        $courseIds = $request->input('course_ids', []);
+        $courseIds = $request->input('courses', []);
         $status = $request->input('status');
 
         // 更新処理
         $service(courseIds: $courseIds, status: $status, instructorId: $instructorId);
 
         return response()->json([
-            'result' => 'true',
-            'updated_ids' => $courseIds,
+            'result' => true,
         ]);
     }
 }

@@ -25,8 +25,8 @@ class PutStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_ids' => ['required', 'array', 'min:1'],
-            'course_ids.*' => ['integer', 'exists:courses,id,deleted_at,NULL'],
+            'courses' => ['required', 'array', 'min:1'],
+            'courses.*' => ['integer', 'exists:courses,id,deleted_at,NULL'],
             'status' => ['required', 'string', new CourseStatusRule],
         ];
     }

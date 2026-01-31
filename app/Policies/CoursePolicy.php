@@ -48,4 +48,26 @@ class CoursePolicy
         // マネージャー権限のない講師
         return $instructor->id === $course->instructor_id;
     }
+    
+    public function bulkUpdateStatus(Instructor $instructor, array $courseIds): bool
+    {
+        // マネージャー権限あり
+        if ($instructor->isManager()) {
+            $instructorIds = $instructor->managings->pluck('id')->toArray();
+            $instructorIds[] = $instructor->id;
+
+            $count = Course::whereIn('id', $courseIds)
+                ->whereIn('instructor_id', $instructorIds)
+                ->count();
+
+            return $count === count($courseIds);
+        }
+
+        // マネージャー権限なし（一般講師）
+        $count = Course::whereIn('id', $courseIds)
+            ->where('instructor_id', $instructor->id)
+            ->count();
+
+        return $count === count($courseIds);
+    }
 }

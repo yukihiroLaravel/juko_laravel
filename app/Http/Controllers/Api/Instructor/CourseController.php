@@ -193,14 +193,17 @@ class CourseController extends Controller
         $courseIds = $request->input('courses', []);
         $status = $request->input('status');
 
-        // 認可チェック（他人の講座が混じっていたら 403）
+         // 対象講座を取得（ここでDBアクセス）
+        $courses = Course::whereIn('id', $courseIds)->get();
+
+        // 認可チェック
         $this->authorize(
             'bulkUpdateStatus',
-            [Course::class, $courseIds]
+            [Course::class, $courses]
         );
 
-        // 更新処理（認可済みのものを更新するだけ）
-        $service(courseIds: $courseIds, status: $status,);
+        // 更新処理
+        $service(courseIds: $courseIds, status: $status);
 
         return response()->json([
             'result' => true,

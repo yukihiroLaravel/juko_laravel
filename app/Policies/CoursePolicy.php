@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Model\Course;
 use App\Model\Instructor;
+use Illuminate\Support\Collection;
 
 class CoursePolicy
 {
@@ -49,25 +50,22 @@ class CoursePolicy
         return $instructor->id === $course->instructor_id;
     }
     
-    public function bulkUpdateStatus(Instructor $instructor, array $courseIds): bool
+    public function bulkUpdateStatus(Instructor $instructor, Collection $courses): bool
     {
         // マネージャー権限あり
         if ($instructor->isManager()) {
-            $instructorIds = $instructor->managings->pluck('id')->toArray();
-            $instructorIds[] = $instructor->id;
+            $allowedInstructorIds = $instructor->managings
+                ->pluck('id')
+                ->push($instructor->id);
 
-            $count = Course::whereIn('id', $courseIds)
-                ->whereIn('instructor_id', $instructorIds)
-                ->count();
-
-            return $count === count($courseIds);
+            return $courses->every(
+                fn ($course) => $allowedInstructorIds->contains($course->instructor_id)
+            );
         }
 
-        // マネージャー権限なし（一般講師）
-        $count = Course::whereIn('id', $courseIds)
-            ->where('instructor_id', $instructor->id)
-            ->count();
-
-        return $count === count($courseIds);
+        // 一般講師
+        return $courses->every(
+            fn ($course) => $course->instructor_id === $instructor->id
+        );
     }
 }

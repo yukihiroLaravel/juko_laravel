@@ -226,9 +226,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 });
                             });
                         });
-                        Route::prefix('notification')->group(function () {
-                            Route::post('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'store']);
-                        });
+                        
                         // マネージャー生徒学習状況
                         Route::prefix('attendance')->group(function () {
                             Route::prefix('status')->group(function () {

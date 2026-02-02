@@ -55,7 +55,7 @@ class NotificationController extends Controller
 
         return new NotificationIndexResource($notifications);
     }
-    
+
     /**
      * お知らせ更新API
      */
@@ -175,8 +175,6 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
-
-    
 
     /**
      * お知らせ一括公開・非公開API

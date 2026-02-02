@@ -49,23 +49,23 @@ class CoursePolicy
         // マネージャー権限のない講師
         return $instructor->id === $course->instructor_id;
     }
-    
-    public function bulkUpdateStatus(Instructor $instructor, Collection $courses): bool
+
+    /**
+     * 複数講座のステータス更新に関する認可処理
+     *
+     * @param  Collection<int, Course>  $courses
+     */
+    public function bulkUpdate(Instructor $instructor, Collection $courses): bool
     {
         // マネージャー権限あり
         if ($instructor->isManager()) {
-            $allowedInstructorIds = $instructor->managings
-                ->pluck('id')
-                ->push($instructor->id);
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
 
-            return $courses->every(
-                fn ($course) => $allowedInstructorIds->contains($course->instructor_id)
-            );
+            return $courses->every(fn (Course $course) => in_array($course->instructor_id, $managerIds, true));
         }
 
         // 一般講師
-        return $courses->every(
-            fn ($course) => $course->instructor_id === $instructor->id
-        );
+        return $courses->every(fn (Course $course) => $course->instructor_id === $instructor->id);
     }
 }

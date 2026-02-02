@@ -193,14 +193,11 @@ class CourseController extends Controller
         $courseIds = $request->input('courses', []);
         $status = $request->input('status');
 
-         // 対象講座を取得（ここでDBアクセス）
+        // 対象講座を取得
         $courses = Course::whereIn('id', $courseIds)->get();
 
         // 認可チェック
-        $this->authorize(
-            'bulkUpdateStatus',
-            [Course::class, $courses]
-        );
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
 
         // 更新処理
         $service(courseIds: $courseIds, status: $status);

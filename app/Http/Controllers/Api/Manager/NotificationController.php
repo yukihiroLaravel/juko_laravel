@@ -12,8 +12,6 @@ use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
 use App\Http\Requests\Manager\Notification\PutStatusRequest;
 use App\Http\Requests\Manager\Notification\StoreRequest;
-use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
-use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -24,8 +22,6 @@ use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\PutStatusService;
 use App\Services\Notification\StoreNotificationService;
-use App\Services\Notification\UpdateTypeAllService;
-use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -165,60 +161,6 @@ class NotificationController extends Controller
             Log::error($e);
             throw $e;
         }
-    }
-
-    /**
-     * お知らせ種別一括更新API
-     */
-    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
-    {
-        // 選択されたお知らせを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
-
-        // policyによる認可チェック
-        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-
-        DB::beginTransaction();
-        try {
-            // サービス呼び出し
-            $service(
-                notifications: $notifications,
-                type: $request->notification_type
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * お知らせ種別全更新API
-     */
-    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
-    {
-        $manager = Auth::guard('instructor')->user();
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
-
-        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
-
-        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-
-        $service(
-            instructorIds: $instructorIds,
-            notificationType: $request->notification_type
-        );
-
-        return response()->json([
-            'result' => true,
-        ]);
     }
 
     /**

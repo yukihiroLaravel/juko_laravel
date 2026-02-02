@@ -4,8 +4,8 @@ namespace App\Http\Resources\Student;
 
 use App\Http\Resources\Base\Student\AttendanceResource;
 use App\Http\Resources\Base\Student\CourseResource;
-use App\Http\Resources\Base\Student\TagResource;
 use App\Http\Resources\Base\Student\InstructorResource;
+use App\Http\Resources\Base\Student\TagResource;
 use App\Model\Attendance;
 use Illuminate\Http\Resources\Json\JsonResource;
 

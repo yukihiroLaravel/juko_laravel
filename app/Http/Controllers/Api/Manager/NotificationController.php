@@ -63,7 +63,6 @@ class NotificationController extends Controller
      * お知らせ詳細API
      */
 
-
     /**
      * お知らせ登録API
      */
@@ -218,8 +217,6 @@ class NotificationController extends Controller
             'result' => true,
         ]);
     }
-
-    
 
     /**
      * お知らせ一括公開・非公開API

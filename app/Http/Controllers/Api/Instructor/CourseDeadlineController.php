@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Model\Course;
 use App\Http\Controllers\Controller;
-use App\Services\Course\BulkUpdateDeadlineService;
+use App\Model\Course;
 use App\Policies\CoursePolicy;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourseDeadlineController extends Controller
 {
@@ -21,7 +21,7 @@ class CourseDeadlineController extends Controller
         $instructor = Auth::guard('instructor')->user();
 
         if (! $policy->bulkUpdate($instructor, $courses)) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         $updatedCount = $service->execute(

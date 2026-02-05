@@ -17,7 +17,7 @@ class BulkUpdateDeadlineService
             foreach ($courses as $course) {
 
                 $data = [
-                    'fixed_date'    => null,
+                    'fixed_date' => null,
                     'relative_days' => null,
                 ];
 
@@ -41,4 +41,3 @@ class BulkUpdateDeadlineService
         });
     }
 }
-

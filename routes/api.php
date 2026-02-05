@@ -81,7 +81,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'update']);
                     Route::delete('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'delete']);
-                    Route::patch('deadline', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'update']);
                     // 講師-講座-チャプター
                     Route::prefix('chapter')->group(function () {
                         Route::post('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'store']);

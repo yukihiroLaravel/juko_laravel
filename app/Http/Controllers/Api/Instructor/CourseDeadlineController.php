@@ -15,9 +15,4 @@ class CourseDeadlineController extends Controller
         return response()->json([]);
     }
 
-    // 受講期限単一変更
-    public function update(): JsonResponse
-    {
-        return response()->json([]);
-    }
 }

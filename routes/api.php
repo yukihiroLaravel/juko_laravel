@@ -212,7 +212,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
-                                    Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
                                     Route::post('sort', [App\Http\Controllers\Api\Manager\LessonController::class, 'sort']);
                                     Route::put('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'putStatus']);
                                     Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);

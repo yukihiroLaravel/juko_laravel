@@ -5,23 +5,18 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Dto\Notification\PutDto;
 use App\Enums\Notification\StatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Notification\BulkDeleteRequest;
 use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
 use App\Http\Requests\Manager\Notification\PutStatusRequest;
-use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Services\Notification\BulkDeleteService;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
 use App\Services\Notification\PutStatusService;
-use App\Services\Notification\StoreNotificationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -55,46 +50,6 @@ class NotificationController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
-    }
-
-    /**
-     * お知らせ詳細API
-     */
-
-
-    /**
-     * お知らせ登録API
-     */
-    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
-    {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('store', [Notification::class, $course]);
-
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        DB::beginTransaction();
-        try {
-            $service(
-                course_id: $request->course_id,
-                instructor_id: $instructorId,
-                title: $request->title,
-                type: $request->type,
-                start_date: $request->start_date,
-                end_date: $request->end_date,
-                content: $request->content,
-                status: $request->status
-            );
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
     }
 
     /**
@@ -164,32 +119,26 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ一括削除API
+     * お知らせ種別全更新API
      */
-    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteService $service): JsonResponse
+    public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
     {
-        // 選択されたお知らせリストを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
+        $manager = Auth::guard('instructor')->user();
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
 
-        // 講師と一致しないお知らせが含まれている場合はエラー
-        $this->authorize('bulkDelete', [Notification::class, $notifications]);
+        $notifications = Notification::whereIn('instructor_id', $instructorIds)->get();
 
-        DB::beginTransaction();
-        try {
-            // viewed_once_notifications, notificationsテーブルのレコードを一括削除するサービス
-            $service($notifications);
+        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
-            // コミット
-            DB::commit();
+        $service(
+            instructorIds: $instructorIds,
+            notificationType: $request->notification_type
+        );
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

@@ -12,5 +12,4 @@ class CourseDeadlineController extends Controller
     {
         return response()->json([]);
     }
-
 }

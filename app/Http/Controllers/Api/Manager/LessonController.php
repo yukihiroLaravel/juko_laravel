@@ -140,10 +140,6 @@ class LessonController extends Controller
     }
 
     /**
-     * レッスン並び替えAPI->Instructor/LessonController.phpのsortメソッドに集約
-     */
-
-    /**
      * レッスンステータス更新API
      */
     public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse

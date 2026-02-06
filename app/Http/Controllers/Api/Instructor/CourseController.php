@@ -190,16 +190,20 @@ class CourseController extends Controller
      */
     public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
-        $courseIds = $request->input('course_ids', []);
+        $courseIds = $request->input('courses', []);
         $status = $request->input('status');
 
+        // 対象講座を取得
+        $courses = Course::whereIn('id', $courseIds)->get();
+
+        // 認可チェック
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
         // 更新処理
-        $service(courseIds: $courseIds, status: $status, instructorId: $instructorId);
+        $service(courseIds: $courseIds, status: $status);
 
         return response()->json([
-            'result' => 'true',
-            'updated_ids' => $courseIds,
+            'result' => true,
         ]);
     }
 }

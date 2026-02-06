@@ -9,7 +9,6 @@ use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\PutStatusRequest;
-use App\Http\Requests\Manager\Lesson\SortRequest;
 use App\Http\Requests\Manager\Lesson\StoreRequest;
 use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
@@ -21,7 +20,6 @@ use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
-use App\Services\Lesson\SortLessonsService;
 use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
@@ -128,36 +126,6 @@ class LessonController extends Controller
             }
 
             $deleteLessonService($lesson);
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * レッスン並び替えAPI
-     */
-    public function sort(SortRequest $request, SortLessonsService $sortLessonsService): JsonResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $inputLessons = $request->input('lessons');
-
-            // レッスンを一括取得
-            $lessons = Lesson::with('chapter.course')->whereIn('id', $inputLessons)->get();
-
-            // Policy による認可チェック
-            $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-            $sortLessonsService($lessons, $inputLessons);
 
             DB::commit();
 

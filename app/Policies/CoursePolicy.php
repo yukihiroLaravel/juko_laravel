@@ -61,10 +61,10 @@ class CoursePolicy
         if ($instructor->isManager()) {
             $managerIds = $instructor->managings->pluck('id')->push($instructor->id);
 
-        return $courses->every(
-            fn (Course $course) => $managerIds->contains($course->instructor_id)
-        );
-    }
+            return $courses->every(
+                fn (Course $course) => $managerIds->contains($course->instructor_id)
+            );
+        }
 
         // 一般講師
         return $courses->every(fn (Course $course) => $course->instructor_id === $instructor->id);

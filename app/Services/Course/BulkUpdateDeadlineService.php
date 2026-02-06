@@ -15,7 +15,7 @@ class BulkUpdateDeadlineService
      * @param  Collection<int, Course>  $courses
      * @param  array{deadline_type: string, fixed_date?: string, relative_days?: int}  $deadlineParams
      */
-    
+
     public function __invoke(Collection $courses, array $deadlineParams): int
     {
         return DB::transaction(function () use ($courses, $deadlineParams) {

@@ -9,18 +9,15 @@ use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\PutStatusRequest;
-use App\Http\Requests\Manager\Lesson\StoreRequest;
 use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
-use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
@@ -35,38 +32,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LessonController extends Controller
 {
-    /**
-     * レッスン新規作成API
-     */
-    public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
-    {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyパターンによる認可チェック
-        $this->authorize('create', [Lesson::class, $course]);
-
-        DB::beginTransaction();
-        try {
-            $lesson = $service(
-                courseId: $request->course_id,
-                chapterId: $request->chapter_id,
-                title: $request->title,
-                status: Lesson::STATUS_PRIVATE
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-                'lesson_id' => $lesson->id,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
     /**
      * レッスン更新API
      */

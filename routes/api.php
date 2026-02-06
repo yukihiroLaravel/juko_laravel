@@ -252,7 +252,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\NotificationController::class, 'index']);
                     Route::prefix('type')->group(function () {
                         Route::put('all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateTypeAll']);
-                    }
+                    });
                     Route::put('status', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatus']);
                     Route::put('status/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatusAll']);
 

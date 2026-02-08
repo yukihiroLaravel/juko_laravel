@@ -6,6 +6,7 @@ use App\Model\Course;
 use App\Model\CourseDeadline;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Enums\Course\DeadlineTypeEnum;
 
 class BulkUpdateDeadlineService
 {
@@ -25,7 +26,7 @@ class BulkUpdateDeadlineService
             foreach ($courses as $course) {
 
                 // none の場合は期限レコードを削除
-                if ($deadlineParams['deadline_type'] === 'none') {
+                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
                     CourseDeadline::where('course_id', $course->id)->delete();
                     $updatedCount++;
                     continue;
@@ -36,11 +37,11 @@ class BulkUpdateDeadlineService
                     'relative_days' => null,
                 ];
 
-                if ($deadlineParams['deadline_type'] === 'fixed') {
+                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::FIXED_DATE->value) {
                     $data['fixed_date'] = $deadlineParams['fixed_date'] ?? null;
                 }
 
-                if ($deadlineParams['deadline_type'] === 'relative') {
+                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::RELATIVE_DAYS->value) {
                     $data['relative_days'] = $deadlineParams['relative_days'] ?? null;
                 }
 

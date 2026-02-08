@@ -2,11 +2,11 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\CourseDeadline;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Enums\Course\DeadlineTypeEnum;
 
 class BulkUpdateDeadlineService
 {

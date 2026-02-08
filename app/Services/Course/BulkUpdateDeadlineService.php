@@ -16,7 +16,6 @@ class BulkUpdateDeadlineService
      * @param  Collection<int, Course>  $courses
      * @param  array{deadline_type: string, fixed_date?: string, relative_days?: int}  $deadlineParams
      */
-
     public function __invoke(Collection $courses, array $deadlineParams): int
     {
         return DB::transaction(function () use ($courses, $deadlineParams) {
@@ -29,6 +28,7 @@ class BulkUpdateDeadlineService
                 if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
                     CourseDeadline::where('course_id', $course->id)->delete();
                     $updatedCount++;
+
                     continue;
                 }
 

@@ -20,16 +20,12 @@ class BulkUpdateDeadlineService
     {
         return DB::transaction(function () use ($courses, $deadlineParams) {
 
-            $updatedCount = 0;
-
-            foreach ($courses as $course) {
+            $courses->each(function (Course $course) use ($deadlineParams) {
 
                 // none の場合は期限レコードを削除
                 if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
                     CourseDeadline::where('course_id', $course->id)->delete();
-                    $updatedCount++;
-
-                    continue;
+                    return; // each内ではreturnでcontinue相当
                 }
 
                 $data = [
@@ -49,11 +45,9 @@ class BulkUpdateDeadlineService
                     ['course_id' => $course->id],
                     $data
                 );
+            });
 
-                $updatedCount++;
-            }
-
-            return $updatedCount;
+            return $courses->count();
         });
     }
 }

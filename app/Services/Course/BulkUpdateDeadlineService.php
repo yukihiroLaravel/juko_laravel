@@ -25,6 +25,7 @@ class BulkUpdateDeadlineService
                 // none の場合は期限レコードを削除
                 if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
                     CourseDeadline::where('course_id', $course->id)->delete();
+
                     return; // each内ではreturnでcontinue相当
                 }
 

@@ -206,4 +206,13 @@ class CourseController extends Controller
             'result' => true,
         ]);
     }
+
+    /**
+     * 講座一括削除API
+     * 
+     */
+    public function bulkDelete()
+    {
+        return response()->json([]);
+    }
 }

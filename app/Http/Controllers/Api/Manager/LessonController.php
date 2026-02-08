@@ -232,52 +232,6 @@ class LessonController extends Controller
     }
 
     /**
-     * 選択済みレッスンステータス一括更新API
-     */
-    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
-    {
-        // リクエストからデータを取得
-        $lessonIds = $request->input('lessons');
-        $chapterId = $request->input('chapter_id');
-        $courseId = $request->input('course_id');
-        $status = $request->input('status');
-
-        // レッスンデータの取得
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
-        // Policy による認可チェック
-        $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-        try {
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                if ((int) $courseId !== $lesson->chapter->course->id) {
-                    // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid course_id.');
-                }
-                if ((int) $chapterId !== $lesson->chapter_id) {
-                    // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid chapter_id.');
-                }
-            });
-
-            $service(
-                lessons: $lessons,
-                status: $status
-            );
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (AuthorizationException $e) {
-            // エラーハンドリング、認可に失敗した場合エラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
-        }
-    }
-
-    /**
      * 選択済みレッスン削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse

@@ -211,8 +211,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
-                                    Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
-                                    Route::post('sort', [App\Http\Controllers\Api\Manager\LessonController::class, 'sort']);
                                     Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);
                                     Route::delete('all', [App\Http\Controllers\Api\Manager\LessonController::class, 'deleteAll']);
                                     Route::prefix('{lesson_id}')->group(function () {
@@ -251,12 +249,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::prefix('type')->group(function () {
                         Route::put('all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateTypeAll']);
                     });
-<<<<<<< HEAD
                     Route::put('type/{notification_type}', [App\Http\Controllers\Api\Manager\NotificationController::class, 'updateType']);
-=======
-                    Route::put('status', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatus']);
-                    Route::put('status/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatusAll']);
->>>>>>> 6468675700cd52d0271f971a1232330e1e5f3bfa
 
                     Route::prefix('{notification_id}')->group(function () {
                         Route::put('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'put']);

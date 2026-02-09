@@ -59,10 +59,11 @@ class CoursePolicy
     {
         // マネージャー権限あり
         if ($instructor->isManager()) {
-            $managerIds = $instructor->managings->pluck('id')->toArray();
-            $managerIds[] = $instructor->id;
+            $managerIds = $instructor->managings->pluck('id')->push($instructor->id);
 
-            return $courses->every(fn (Course $course) => in_array($course->instructor_id, $managerIds, true));
+            return $courses->every(
+                fn (Course $course) => $managerIds->contains($course->instructor_id)
+            );
         }
 
         // 一般講師

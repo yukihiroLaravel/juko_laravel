@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
-use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\PutStatusRequest;
@@ -16,7 +15,6 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
-use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
@@ -254,38 +252,6 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * チャプターに紐づく全レッスンを削除するAPI
-     */
-    public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
-    {
-        // チャプターを取得（policyによる認可チェックのために、lessonからcourseまでeager load。 例外throwのためにcourseもloadする。）
-        $chapter = Chapter::with(['lessons.chapter.course', 'course'])->findOrFail($request->chapter_id);
-        $lesson = $chapter->lessons->first();
-
-        // 現在のマネージャーor配下の講師がチャプターの講座の作成者であるか確認
-        $this->authorize('delete', $lesson);
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定された講座がチャプターに関連付けられている講座と一致しない場合はエラー応答
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        DB::beginTransaction();
-        try {
-            // サービスクラスで削除処理を実行
-            $service($chapter->lessons);
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

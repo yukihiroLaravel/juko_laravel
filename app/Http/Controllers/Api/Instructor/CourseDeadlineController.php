@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\BulkUpdateCourseDeadlineRequest;
 
 class CourseDeadlineController extends Controller
@@ -15,7 +14,7 @@ class CourseDeadlineController extends Controller
     public function bulkUpdate(BulkUpdateCourseDeadlineRequest $request, BulkUpdateDeadlineService $service): JsonResponse
     {
 
-        $courses = Course::whereIn('id', $request->input('course_ids', []))->get();
+        $courses = Course::whereIn('id', $request->input('courses', []))->get();
 
         // Policy による認可（失敗時は自動で AuthorizationException）
         $this->authorize('bulkUpdate', [Course::class, $courses]);

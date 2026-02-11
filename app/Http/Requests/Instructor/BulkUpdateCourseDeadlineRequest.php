@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class BulkUpdateCourseDeadlineRequest extends FormRequest
 {
@@ -22,8 +23,11 @@ class BulkUpdateCourseDeadlineRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_ids' => ['required', 'array', 'min:1'],
-            'course_ids.*' => ['integer', 'exists:courses,id'],
+            'courses' => ['required', 'array', 'min:1'],
+            'courses.*' => [
+                'integer',
+                Rule::exists('courses', 'id')->whereNull('deleted_at'),
+            ],
 
             'deadline_type' => ['required', 'in:none,fixed,relative'],
 

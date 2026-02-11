@@ -8,7 +8,6 @@ use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\PutStatusRequest;
-use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -16,7 +15,6 @@ use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\UpdateLessonService;
-use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -99,36 +97,6 @@ class LessonController extends Controller
             Log::error($e);
             throw $e;
         }
-    }
-
-    /**
-     * レッスンステータス更新API
-     */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
-    {
-        // 指定されたレッスンを取得
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        // Policy による認可チェック
-        $this->authorize('update', $lesson);
-
-        if ((int) $request->course_id !== $lesson->chapter->course->id) {
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
-            throw new ValidationErrorException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            throw new ValidationErrorException('Invalid chapter_id.');
-        }
-
-        $lesson = Lesson::findOrFail($request->lesson_id);
-        // サービスの呼び出し（関数のように使える）
-        $updateLessonStatusService($lesson, $request->status);
-
-        return response()->json([
-            'result' => true,
-        ]);
     }
 
     /**

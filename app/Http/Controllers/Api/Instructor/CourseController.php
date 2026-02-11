@@ -26,6 +26,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 /**
  * @tags Instructor-Course
@@ -211,8 +212,43 @@ class CourseController extends Controller
      * 講座一括削除API
      * 
      */
-    public function bulkDelete()
+    public function bulkDelete(Request $request)
     {
-        return response()->json([]);
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+
+            $courseIds = $request->input('courses', []);
+
+            $query = Course::whereIn('id', $courseIds);
+
+            // 認可ロジック：ログインユーザーの権限に応じて対象を制限
+            if ($user->isManager()) {
+                // マネージャーの場合：自分 ＋ 管理下の講師の講座
+                $instructorIds = $user->managings->pluck('id')->toArray();
+                $instructorIds[] = $user->id;
+                $query->whereIn('instructor_id', $instructorIds);
+            } else {
+                // 一般講師の場合：自分の講座のみ
+                $query->where('instructor_id', $user->id);
+            }
+
+            $deletedCount = $query->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'deleted_count' => $deletedCount,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            return response()->json([
+                'result' => false,
+                'message' => 'Failed to delete courses.',
+            ], 500);
+        }
     }
 }

@@ -213,7 +213,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
                                     Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);
-                                    Route::delete('all', [App\Http\Controllers\Api\Manager\LessonController::class, 'deleteAll']);
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put']);
                                         Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'delete']);

@@ -212,7 +212,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
-                                    Route::put('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'putStatus']);
                                     Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put']);
@@ -252,7 +251,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     });
                     Route::put('status', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatus']);
                     Route::put('status/all', [App\Http\Controllers\Api\Manager\NotificationController::class, 'putStatusAll']);
-
                     Route::prefix('{notification_id}')->group(function () {
                         Route::put('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'put']);
                         Route::delete('/', [App\Http\Controllers\Api\Manager\NotificationController::class, 'delete']);

@@ -26,7 +26,7 @@ class BulkUpdateCourseDeadlineRequest extends FormRequest
             'courses' => ['required', 'array', 'min:1'],
             'courses.*' => [
                 'integer',
-                Rule::exists('courses', 'id')->whereNull('deleted_at'),
+                'exists:courses,id,deleted_at,NULL',
             ],
 
             'deadline_type' => ['required', 'in:none,fixed,relative'],

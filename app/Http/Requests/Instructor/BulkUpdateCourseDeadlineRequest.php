@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+
 
 class BulkUpdateCourseDeadlineRequest extends FormRequest
 {

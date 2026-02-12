@@ -193,6 +193,11 @@ class LessonController extends Controller
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 
+        if ((int) $request->course_id !== $lesson->chapter->course->id) {
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
+            throw new AuthorizationException('Invalid course_id.');
+        }
+
         if ((int) $request->chapter_id !== $lesson->chapter->id) {
             // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
             throw new AuthorizationException('Invalid chapter_id.');

@@ -11,16 +11,19 @@ class ClearAllDeadlineService
 {
     /**
      * @param  int  $managerId  実行マネージャーのID
+     * @param array $selectedCourseIds
      */
-    public function __invoke(int $managerId): void
+    public function __invoke(int $managerId, array $selectedCourseIds): void
     {
         /** @var Instructor $manager */
         $manager = Instructor::with('managings')->findOrFail($managerId);
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $managerId;
 
-        // 対象講座ID
-        $courseIds = Course::whereIn('instructor_id', $instructorIds)->pluck('id');
+        // マネージャー配下かつ、選択された講座だけに限定
+        $courseIds = Course::whereIn('instructor_id', $instructorIds)
+            ->whereIn('id', $selectedCourseIds)
+            ->pluck('id');
 
         if ($courseIds->isEmpty()) {
             return; // 冪等：対象なしなら何もしない

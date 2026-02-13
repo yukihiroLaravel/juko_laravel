@@ -7,11 +7,12 @@ use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\Instructor\BulkUpdateCourseDeadlineRequest;
+use App\Http\Resources\Instructor\CourseDeadlineBulkUpdateResource;
 
 class CourseDeadlineController extends Controller
 {
     // 受講期限一括変更
-    public function bulkUpdate(BulkUpdateCourseDeadlineRequest $request, BulkUpdateDeadlineService $service): JsonResponse
+    public function bulkUpdate(BulkUpdateCourseDeadlineRequest $request, BulkUpdateDeadlineService $service): CourseDeadlineBulkUpdateResource
     {
 
         $courses = Course::whereIn('id', $request->input('courses', []))->get();
@@ -28,8 +29,7 @@ class CourseDeadlineController extends Controller
             ])
         );
 
-        return response()->json([
-            'result' => true,
+        return new CourseDeadlineBulkUpdateResource([
             'updated_count' => $updatedCount,
         ]);
     }

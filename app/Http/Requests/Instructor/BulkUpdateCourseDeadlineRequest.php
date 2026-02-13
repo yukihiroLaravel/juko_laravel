@@ -29,9 +29,9 @@ class BulkUpdateCourseDeadlineRequest extends FormRequest
                 'exists:courses,id,deleted_at,NULL',
             ],
 
-            'deadline_type' => ['required', 'in:none,fixed,relative'],
+            'deadline_type' => ['required', 'in:none,fixed_date,relative'],
 
-            'fixed_date' => ['nullable', 'date', 'required_if:deadline_type,fixed'],
+            'fixed_date' => ['nullable', 'date', 'required_if:deadline_type,fixed_date'],
             'relative_days' => ['nullable', 'integer', 'min:1', 'required_if:deadline_type,relative'],
         ];
     }

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\BulkUpdateCourseDeadlineRequest;
 use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Requests\Instructor\BulkUpdateCourseDeadlineRequest;
 
 class CourseDeadlineController extends Controller
 {

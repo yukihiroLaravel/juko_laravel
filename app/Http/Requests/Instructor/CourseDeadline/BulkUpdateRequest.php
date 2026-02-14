@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Instructor;
+namespace App\Http\Requests\Instructor\CourseDeadline;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
-class BulkUpdateCourseDeadlineRequest extends FormRequest
+class BulkUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

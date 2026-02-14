@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Instructor\BulkUpdateCourseDeadlineRequest;
+use App\Http\Requests\Instructor\CourseDeadline\BulkUpdateRequest;
 use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 class CourseDeadlineController extends Controller
 {
     // 受講期限一括変更
-    public function bulkUpdate(BulkUpdateCourseDeadlineRequest $request, BulkUpdateDeadlineService $service): JsonResponse
+    public function bulkUpdate(BulkUpdateRequest $request, BulkUpdateDeadlineService $service): JsonResponse
     {
 
         $courses = Course::whereIn('id', $request->input('courses', []))->get();

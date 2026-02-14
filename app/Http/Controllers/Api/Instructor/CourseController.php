@@ -14,6 +14,7 @@ use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Tag;
+use App\Model\Attendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
@@ -26,6 +27,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 /**
@@ -216,8 +218,6 @@ class CourseController extends Controller
     {
         DB::beginTransaction();
         try {
-            $instructor = Auth::guard('instructor')->user();
-
             $courseIds = $request->input('courses', []);
 
             // 対象講座を取得（Policyに渡すため）
@@ -225,6 +225,19 @@ class CourseController extends Controller
 
             // 認可チェック（CoursePolicy@bulkDelete を利用）
             $this->authorize('bulkDelete', [Course::class, $courses]);
+
+            foreach ($courses as $course) {
+                // 該当講座に受講生がいる場合、削除不可
+                if (Attendance::where('course_id', $course->id)->exists()) {
+                    throw new AuthorizationException('This course has already been taken by students.');
+                }
+
+                // publicディレクトリに画像がある場合、削除
+                $disk = Storage::disk('public');
+                if ($course->image && $disk->exists($course->image)) {
+                    $disk->delete($course->image);
+                }
+            }
 
             // 削除処理
             $deletedCount = Course::whereIn('id', $courseIds)->delete();

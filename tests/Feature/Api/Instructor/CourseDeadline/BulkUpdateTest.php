@@ -27,7 +27,7 @@ class BulkUpdateTest extends TestCase
 
         // act
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [1],
+            'courses' => [1],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
@@ -53,7 +53,7 @@ class BulkUpdateTest extends TestCase
 
         // act
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [1],
+            'courses' => [1],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 30,
         ]);
@@ -84,7 +84,7 @@ class BulkUpdateTest extends TestCase
 
         // act
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [2],
+            'courses' => [2],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
 
@@ -107,7 +107,7 @@ class BulkUpdateTest extends TestCase
 
         // act (course 1 と 5 は instructor_id=1)
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [1, 5],
+            'courses' => [1, 5],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-06-30',
         ]);
@@ -137,7 +137,7 @@ class BulkUpdateTest extends TestCase
 
         // act (course 2 は instructor_id=2 の講座)
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [2],
+            'courses' => [2],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 60,
         ]);
@@ -163,7 +163,7 @@ class BulkUpdateTest extends TestCase
 
         // act (course 4 は instructor_id=4 の講座)
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [4],
+            'courses' => [4],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
@@ -184,7 +184,7 @@ class BulkUpdateTest extends TestCase
 
         // act (course 1 は自分の講座、course 4 は instructor_id=4 の講座)
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [1, 4],
+            'courses' => [1, 4],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
@@ -196,7 +196,7 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
-    public function test_空のcourse_idsで更新_成功(): void
+    public function test_空のcoursesで更新_成功(): void
     {
         // arrange
         $instructor = Instructor::find(1);
@@ -204,23 +204,20 @@ class BulkUpdateTest extends TestCase
 
         // act
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [],
+            'courses' => [],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
 
         // assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'result' => true,
-            'updated_count' => 0,
-        ]);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['courses']);
     }
 
     public function test_未認証でアクセス_失敗(): void
     {
         // act
         $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'course_ids' => [1],
+            'courses' => [1],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);

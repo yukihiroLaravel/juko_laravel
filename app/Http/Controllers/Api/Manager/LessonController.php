@@ -5,26 +5,14 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
-use App\Http\Requests\Manager\Lesson\DeleteAllRequest;
 use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
-use App\Http\Requests\Manager\Lesson\PutStatusRequest;
-use App\Http\Requests\Manager\Lesson\SortRequest;
-use App\Http\Requests\Manager\Lesson\StoreRequest;
-use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
-use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
-use App\Services\Lesson\BulkUpdateLessonStatusService;
-use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
-use App\Services\Lesson\SortLessonsService;
-use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
-use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -37,38 +25,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LessonController extends Controller
 {
-    /**
-     * レッスン新規作成API
-     */
-    public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
-    {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyパターンによる認可チェック
-        $this->authorize('create', [Lesson::class, $course]);
-
-        DB::beginTransaction();
-        try {
-            $lesson = $service(
-                courseId: $request->course_id,
-                chapterId: $request->chapter_id,
-                title: $request->title,
-                status: Lesson::STATUS_PRIVATE
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-                'lesson_id' => $lesson->id,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
     /**
      * レッスン更新API
      */
@@ -142,66 +98,6 @@ class LessonController extends Controller
     }
 
     /**
-     * レッスン並び替えAPI
-     */
-    public function sort(SortRequest $request, SortLessonsService $sortLessonsService): JsonResponse
-    {
-        DB::beginTransaction();
-
-        try {
-            $inputLessons = $request->input('lessons');
-
-            // レッスンを一括取得
-            $lessons = Lesson::with('chapter.course')->whereIn('id', $inputLessons)->get();
-
-            // Policy による認可チェック
-            $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-            $sortLessonsService($lessons, $inputLessons);
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * レッスンステータス更新API
-     */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
-    {
-        // 指定されたレッスンを取得
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        // Policy による認可チェック
-        $this->authorize('update', $lesson);
-
-        if ((int) $request->course_id !== $lesson->chapter->course->id) {
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
-            throw new ValidationErrorException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            throw new ValidationErrorException('Invalid chapter_id.');
-        }
-
-        $lesson = Lesson::findOrFail($request->lesson_id);
-        // サービスの呼び出し（関数のように使える）
-        $updateLessonStatusService($lesson, $request->status);
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
-    /**
      * レッスンタイトル変更API
      */
     public function updateTitle(UpdateTitleRequest $request, UpdateLessonTitleService $service): JsonResponse
@@ -229,52 +125,6 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-     * 選択済みレッスンステータス一括更新API
-     */
-    public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
-    {
-        // リクエストからデータを取得
-        $lessonIds = $request->input('lessons');
-        $chapterId = $request->input('chapter_id');
-        $courseId = $request->input('course_id');
-        $status = $request->input('status');
-
-        // レッスンデータの取得
-        $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
-        // Policy による認可チェック
-        $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
-
-        try {
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                if ((int) $courseId !== $lesson->chapter->course->id) {
-                    // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid course_id.');
-                }
-                if ((int) $chapterId !== $lesson->chapter_id) {
-                    // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                    throw new AuthorizationException('Invalid chapter_id.');
-                }
-            });
-
-            $service(
-                lessons: $lessons,
-                status: $status
-            );
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (AuthorizationException $e) {
-            // エラーハンドリング、認可に失敗した場合エラーを返す
-            return response()->json([
-                'result' => false,
-                'message' => $e->getMessage(),
-            ], 403);
-        }
     }
 
     /**
@@ -321,38 +171,6 @@ class LessonController extends Controller
             return response()->json([
                 'result' => true,
             ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
-     * チャプターに紐づく全レッスンを削除するAPI
-     */
-    public function deleteAll(DeleteAllRequest $request, DeleteAllLessonsService $service): JsonResponse
-    {
-        // チャプターを取得（policyによる認可チェックのために、lessonからcourseまでeager load。 例外throwのためにcourseもloadする。）
-        $chapter = Chapter::with(['lessons.chapter.course', 'course'])->findOrFail($request->chapter_id);
-        $lesson = $chapter->lessons->first();
-
-        // 現在のマネージャーor配下の講師がチャプターの講座の作成者であるか確認
-        $this->authorize('delete', $lesson);
-
-        if ((int) $request->course_id !== $chapter->course->id) {
-            // 指定された講座がチャプターに関連付けられている講座と一致しない場合はエラー応答
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        DB::beginTransaction();
-        try {
-            // サービスクラスで削除処理を実行
-            $service($chapter->lessons);
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
         } catch (Exception $e) {
             DB::rollBack();
             Log::error($e);

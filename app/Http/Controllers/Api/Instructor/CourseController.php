@@ -233,15 +233,13 @@ class CourseController extends Controller
                 throw new AuthorizationException('This course has already been taken by students.');
             }
 
-            foreach ($courses as $course) {
-                $service($course);
-            }
+            $courses->each(fn (Course $course) => $service($course));
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
-                'deleted_count' => count($courses),
+                'deleted_count' => $courses->count(),
             ]);
 
         } catch (Exception $e) {

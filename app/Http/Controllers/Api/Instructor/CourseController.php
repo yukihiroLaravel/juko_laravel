@@ -27,7 +27,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 /**
@@ -214,7 +213,7 @@ class CourseController extends Controller
      * 講座一括削除API
      * 
      */
-    public function bulkDelete(Request $request): JsonResponse
+    public function bulkDelete(Request $request, DeleteService $service): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -226,27 +225,23 @@ class CourseController extends Controller
             // 認可チェック（CoursePolicy@bulkDelete を利用）
             $this->authorize('bulkDelete', [Course::class, $courses]);
 
-            foreach ($courses as $course) {
-                // 該当講座に受講生がいる場合、削除不可
-                if (Attendance::where('course_id', $course->id)->exists()) {
-                    throw new AuthorizationException('This course has already been taken by students.');
-                }
+            $courseIds = $courses->pluck('id')->toArray();
 
-                // publicディレクトリに画像がある場合、削除
-                $disk = Storage::disk('public');
-                if ($course->image && $disk->exists($course->image)) {
-                    $disk->delete($course->image);
-                }
+            $attendedCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id')->toArray();
+
+            if (count($attendedCourseIds) > 0) {
+                throw new AuthorizationException('This course has already been taken by students.');
             }
 
-            // 削除処理
-            $deletedCount = Course::whereIn('id', $courseIds)->delete();
+            foreach ($courses as $course) {
+                $service($course);
+            }
 
             DB::commit();
 
             return response()->json([
                 'result' => true,
-                'deleted_count' => $deletedCount,
+                'deleted_count' => count($courses),
             ]);
 
         } catch (Exception $e) {

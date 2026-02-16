@@ -14,7 +14,6 @@ use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Tag;
-use App\Model\Attendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
@@ -24,10 +23,10 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
 
 /**
  * @tags Instructor-Course
@@ -211,7 +210,6 @@ class CourseController extends Controller
 
     /**
      * 講座一括削除API
-     * 
      */
     public function bulkDelete(Request $request, DeleteService $service): JsonResponse
     {
@@ -224,14 +222,6 @@ class CourseController extends Controller
 
             // 認可チェック（CoursePolicy@bulkDelete を利用）
             $this->authorize('bulkDelete', [Course::class, $courses]);
-
-            $courseIds = $courses->pluck('id')->toArray();
-
-            $attendedCourseIds = Attendance::whereIn('course_id', $courseIds)->pluck('course_id')->toArray();
-
-            if (count($attendedCourseIds) > 0) {
-                throw new AuthorizationException('This course has already been taken by students.');
-            }
 
             $courses->each(fn (Course $course) => $service($course));
 

@@ -11,7 +11,6 @@ class ClearSelectedDeadlineService
 {
     /**
      * @param  int  $managerId  実行マネージャーのID
-     * @param array $selectedCourseIds
      */
     public function __invoke(int $managerId, array $selectedCourseIds): void
     {
@@ -20,7 +19,7 @@ class ClearSelectedDeadlineService
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $managerId;
 
-         // マネージャー配下かつ、選択された講座だけに限定
+        // マネージャー配下かつ、選択された講座だけに限定
         $courseIds = Course::whereIn('instructor_id', $instructorIds)
             ->whereIn('id', $selectedCourseIds)
             ->pluck('id');

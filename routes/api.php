@@ -201,7 +201,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::put('status', [App\Http\Controllers\Api\Manager\CourseController::class, 'putStatus']);
                     Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'store']);
                     Route::post('deadline/clear-selected', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearSelected'])->name('manager.course.deadline.clear-selected');
-                    Route::post('deadline/clear-all', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearAll'])->name('manager.course.deadline.clear-all');
                     Route::prefix('{course_id}')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show']);
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'update']);

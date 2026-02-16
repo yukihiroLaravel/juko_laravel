@@ -108,6 +108,10 @@ class LessonController extends Controller
             // ログイン講師のidと削除レッスンの講師IDが一致しないと削除できない
             $this->authorize('delete', $lesson);
 
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+            if ((int) $request->course_id !== $lesson->chapter->course_id) {
+                throw new AuthorizationException('Invalid course_id.');
+        }
             if ((int) $request->chapter_id !== $lesson->chapter->id) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
                 throw new AuthorizationException('Invalid chapter_id.');

@@ -16,7 +16,7 @@ class CourseDeadlineController extends Controller
      */
     public function clearSelected(ClearSelectedDeadlineRequest $request, ClearAllDeadlineService $service): JsonResponse
     {
-        $courseIds = $request->validated()['course_ids'];
+        $courseIds = $request->validated()['courses'];
 
         // managerIDを取得
         $managerId = Auth::guard('instructor')->id();

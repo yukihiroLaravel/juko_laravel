@@ -20,7 +20,7 @@ class ClearAllDeadlineService
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $managerId;
 
-        // マネージャー配下かつ、選択された講座だけに限定
+         // マネージャー配下かつ、選択された講座だけに限定
         $courseIds = Course::whereIn('instructor_id', $instructorIds)
             ->whereIn('id', $selectedCourseIds)
             ->pluck('id');

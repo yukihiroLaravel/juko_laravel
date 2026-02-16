@@ -7,7 +7,7 @@ use App\Model\Course;
 use App\Model\CourseDeadline;
 use App\Model\Instructor;
 
-class ClearAllDeadlineService
+class ClearSelectedDeadlineService
 {
     /**
      * @param  int  $managerId  実行マネージャーのID

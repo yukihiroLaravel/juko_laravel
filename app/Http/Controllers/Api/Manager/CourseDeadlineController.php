@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Services\Course\ClearAllDeadlineService;
+use App\Services\Course\ClearSelectedDeadlineService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class CourseDeadlineController extends Controller
     /**
      * すべての講座の受講期限をクリアする
      */
-    public function clearSelected(ClearSelectedDeadlineRequest $request, ClearAllDeadlineService $service): JsonResponse
+    public function clearSelected(ClearSelectedDeadlineRequest $request, ClearSelectedDeadlineService $service): JsonResponse
     {
         $courseIds = $request->validated()['courses'];
 

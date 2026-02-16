@@ -23,6 +23,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -209,10 +210,32 @@ class CourseController extends Controller
 
     /**
      * 講座一括削除API
-     * 
      */
-    public function bulkDelete()
+    public function bulkDelete(Request $request, DeleteService $service): JsonResponse
     {
-        return response()->json([]);
+        DB::beginTransaction();
+        try {
+            $courseIds = $request->input('courses', []);
+
+            // 対象講座を取得（Policyに渡すため）
+            $courses = Course::whereIn('id', $courseIds)->get();
+
+            // 認可チェック（CoursePolicy@bulkDelete を利用）
+            $this->authorize('bulkDelete', [Course::class, $courses]);
+
+            $courses->each(fn (Course $course) => $service($course));
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'deleted_count' => $courses->count(),
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 }

@@ -68,4 +68,23 @@ class CoursePolicy
         // 一般講師
         return $courses->every(fn (Course $course) => $course->instructor_id === $instructor->id);
     }
+
+    /**
+     * 講座一括削除に関する認可処理
+     *
+     * @param  Collection<int, Course>  $courses
+     */
+    public function bulkDelete(Instructor $instructor, Collection $courses): bool
+    {
+        // マネージャー権限あり
+        if ($instructor->isManager()) {
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return $courses->every(fn (Course $course) => in_array($course->instructor_id, $managerIds, true));
+        }
+
+        // 一般講師
+        return $courses->every(fn (Course $course) => $course->instructor_id === $instructor->id);
+    }
 }

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Manager\Course\ClearSelectedDeadlineRequest;
 use App\Services\Course\ClearSelectedDeadlineService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\Manager\Course\ClearSelectedDeadlineRequest;
 
 class CourseDeadlineController extends Controller
 {

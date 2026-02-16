@@ -135,7 +135,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-受講
             Route::prefix('attendance')->group(function () {
                 Route::post('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'store']);
-                Route::post('deadline/clear-Selected', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearSelected']);
                 // 講師-生徒学習状況
                 Route::prefix('{attendance_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'show']);

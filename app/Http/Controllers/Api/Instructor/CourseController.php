@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
@@ -205,5 +206,36 @@ class CourseController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * 講座一括削除API
+     */
+    public function bulkDelete(BulkDeleteRequest $request, DeleteService $service): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $courseIds = $request->input('courses');
+
+            // 対象講座を取得（Policyに渡すため）
+            $courses = Course::whereIn('id', $courseIds)->get();
+
+            // 認可チェック（CoursePolicy@bulkDelete を利用）
+            $this->authorize('bulkDelete', [Course::class, $courses]);
+
+            $courses->each(fn (Course $course) => $service($course));
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'deleted_count' => $courses->count(),
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($e);
+            throw $e;
+        }
     }
 }

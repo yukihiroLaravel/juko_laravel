@@ -19,7 +19,7 @@ class BulkDeleteRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'courses' => ['required', 'array', 'min:1'],

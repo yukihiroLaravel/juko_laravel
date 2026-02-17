@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
@@ -23,7 +24,6 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -211,11 +211,11 @@ class CourseController extends Controller
     /**
      * 講座一括削除API
      */
-    public function bulkDelete(Request $request, DeleteService $service): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, DeleteService $service): JsonResponse
     {
         DB::beginTransaction();
         try {
-            $courseIds = $request->input('courses', []);
+            $courseIds = $request->input('courses');
 
             // 対象講座を取得（Policyに渡すため）
             $courses = Course::whereIn('id', $courseIds)->get();

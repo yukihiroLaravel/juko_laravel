@@ -12,6 +12,7 @@ use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
+use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Model\Course;
 use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
@@ -211,11 +212,11 @@ class CourseController extends Controller
     /**
      * 講座一括削除API
      */
-    public function bulkDelete(Request $request, DeleteService $service): JsonResponse
+    public function bulkDelete(BulkDeleteRequest $request, DeleteService $service): JsonResponse
     {
         DB::beginTransaction();
         try {
-            $courseIds = $request->input('courses', []);
+            $courseIds = $request->input('courses');
 
             // 対象講座を取得（Policyに渡すため）
             $courses = Course::whereIn('id', $courseIds)->get();

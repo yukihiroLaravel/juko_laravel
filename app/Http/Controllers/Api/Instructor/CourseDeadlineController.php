@@ -7,7 +7,7 @@ use App\Http\Requests\Instructor\CourseDeadline\BulkUpdateRequest;
 use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
-use App\Http\Resources\Instructor\CourseDeadlineBulkUpdateResource;
+use App\Http\Resources\Shared\ResultResource;
 
 class CourseDeadlineController extends Controller
 {
@@ -29,8 +29,9 @@ class CourseDeadlineController extends Controller
             ])
         );
 
-        return new CourseDeadlineBulkUpdateResource([
+        return (new ResultResource([
+            'result' => true,
             'updated_count' => $updatedCount,
-        ]);
+        ]))->response();
     }
 }

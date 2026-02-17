@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Course;
 
+use App\Model\Course;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -191,5 +192,95 @@ class BulkDeleteTest extends TestCase
             'id' => 5,
             'deleted_at' => null,
         ]);
+    }
+
+    public function test_バリデーションエラー_coursesが未送信(): void
+    {
+        // arrange
+        $this->loginAsManager();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', []);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses']);
+    }
+
+    public function test_バリデーションエラー_coursesが空配列(): void
+    {
+        // arrange
+        $this->loginAsManager();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', [
+            'courses' => [],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses']);
+    }
+
+    public function test_バリデーションエラー_coursesが配列でない(): void
+    {
+        // arrange
+        $this->loginAsManager();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', [
+            'courses' => 'abc',
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses']);
+    }
+
+    public function test_バリデーションエラー_courses要素が整数でない(): void
+    {
+        // arrange
+        $this->loginAsManager();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', [
+            'courses' => ['abc'],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses.0']);
+    }
+
+    public function test_バリデーションエラー_存在しない_i_dを含む(): void
+    {
+        // arrange
+        $this->loginAsManager();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', [
+            'courses' => [99999],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses.0']);
+    }
+
+    public function test_バリデーションエラー_削除済みの_i_dを含む(): void
+    {
+        // arrange
+        $this->loginAsManager();
+        $course = Course::find(5);
+        $course->delete();
+
+        // act
+        $response = $this->deleteJson('/api/v1/instructor/course', [
+            'courses' => [5],
+        ]);
+
+        // assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['courses.0']);
     }
 }

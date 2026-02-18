@@ -142,7 +142,6 @@ class NotificationController extends Controller
         ]);
     }
 
-    
     /**
      * お知らせステータス一括変更API
      */

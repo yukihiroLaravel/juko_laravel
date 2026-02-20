@@ -26,6 +26,7 @@ class CourseIndexResource extends JsonResource
             'image' => $this->resource->image,
             'title' => $this->resource->title,
             'status' => $this->resource->status,
+            'capacity' => $this->resource->capacity,
             'has_active_students' => (bool) $this->resource->has_active_students,
             'tags' => TagResource::collection($this->resource->tags),
             'course_deadline' => $this->resource->courseDeadline

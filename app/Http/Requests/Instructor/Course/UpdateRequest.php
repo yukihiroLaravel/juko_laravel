@@ -42,6 +42,7 @@ class UpdateRequest extends FormRequest
             'deadline_type' => ['required', new Enum(DeadlineTypeEnum::class)],
             'fixed_date' => ['required_if:deadline_type,fixed_date', 'date_format:Y-m-d', 'after_or_equal:today', 'nullable'],
             'relative_days' => ['required_if:deadline_type,relative_days', 'integer', 'min:1', 'nullable'],
+            'capacity' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

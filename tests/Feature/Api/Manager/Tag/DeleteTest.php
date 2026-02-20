@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Manager\Tag;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,42 +12,39 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_タグ削除_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 講座に紐づかないタグ
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/manager/tag/7');
+        // Act
+        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
         ]);
         $this->assertDatabaseMissing('tags', [
-            'id' => 7,
+            'id' => $tag->id,
         ]);
     }
 
     public function test_タグに紐づく講座が存在_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 講座に紐づくタグ
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $course->tags()->attach($tag->id);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/manager/tag/1');
+        // Act
+        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, this tag is linked to courses.',
@@ -54,14 +53,16 @@ class DeleteTest extends TestCase
 
     public function test_権限がないマネージャーで認証_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーが所有するタグ
+        $ownerManager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $ownerManager->id]);
+        $otherManager = Instructor::factory()->create();
+        $this->actingAs($otherManager, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/manager/tag/1');
+        // Act
+        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -70,14 +71,15 @@ class DeleteTest extends TestCase
 
     public function test_権限エラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $tag = Tag::factory()->create();
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/manager/tag/1');
+        // Act
+        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',
@@ -86,14 +88,14 @@ class DeleteTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/manager/tag/aaa');
+        // Act
+        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => 'aaa']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'tag_id',

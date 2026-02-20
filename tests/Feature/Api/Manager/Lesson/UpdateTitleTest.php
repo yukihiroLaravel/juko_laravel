@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Manager\Lesson;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,48 +13,55 @@ class UpdateTitleTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_レッスンタイトル更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/manager/course/1/chapter/2/lesson/2/title', [
+        // Act
+        $response = $this->patchJson(route('manager.lesson.update-title', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]), [
             'title' => '新しいタイトル',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
         ]);
         $this->assertDatabaseHas('lessons', [
-            'id' => 2,
+            'id' => $lesson->id,
             'title' => '新しいタイトル',
         ]);
     }
 
     public function test_権限がない講師のレッスン更新_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座のレッスンを更新しようとする
+        $otherManager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $otherManager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/manager/course/1/chapter/2/lesson/2/title', [
+        // Act
+        $response = $this->patchJson(route('manager.lesson.update-title', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]), [
             'title' => '新しいタイトル',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -60,16 +70,23 @@ class UpdateTitleTest extends TestCase
 
     public function test_マネージャーではない講師のレッスン登録_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/manager/course/1/chapter/2/lesson/2/title', [
+        // Act
+        $response = $this->patchJson(route('manager.lesson.update-title', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]), [
             'title' => '新しいタイトル',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',
@@ -78,16 +95,20 @@ class UpdateTitleTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/manager/course/aaa/chapter/bbb/lesson/ccc/title', [
+        // Act
+        $response = $this->patchJson(route('manager.lesson.update-title', [
+            'course_id' => 'aaa',
+            'chapter_id' => 'bbb',
+            'lesson_id' => 'ccc',
+        ]), [
             'title' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'title' => 'The title field is required.',

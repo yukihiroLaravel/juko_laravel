@@ -153,6 +153,7 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
+     *  capacity: 'integer',
      * }
      */
     #[\Override]
@@ -162,7 +163,7 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'capacity' => 'integer'
+            'capacity' => 'integer',
         ];
     }
 }

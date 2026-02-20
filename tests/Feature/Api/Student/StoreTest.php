@@ -10,22 +10,14 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_仮生徒登録(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
-        // act
-        $response = $this->postJson('/api/v1/student', [
+        // Act
+        $response = $this->postJson(route('student.store'), [
             'nick_name' => 'test_nick',
             'last_name' => 'test_last',
             'first_name' => 'test_first',
@@ -37,18 +29,18 @@ class StoreTest extends TestCase
             'address' => '123 Test St',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
-        // act
-        $response = $this->postJson('/api/v1/student', [
+        // Act
+        $response = $this->postJson(route('student.store'), [
             'nick_name' => '',
             'last_name' => '',
             'first_name' => '',
@@ -60,22 +52,22 @@ class StoreTest extends TestCase
             'address' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
     }
 
     public function test_認証コード重複エラー(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
         $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
             $mock->shouldReceive('createCode')->andThrow(new \App\Exceptions\DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'));
         });
 
-        // act
-        $response = $this->postJson('/api/v1/student', [
+        // Act
+        $response = $this->postJson(route('student.store'), [
             'nick_name' => 'test_nick',
             'last_name' => 'test_last',
             'first_name' => 'test_first',
@@ -87,14 +79,14 @@ class StoreTest extends TestCase
             'address' => '123 Test St',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(400);
     }
 
     public function test_トークン重複エラー(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
         $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
@@ -102,8 +94,8 @@ class StoreTest extends TestCase
             $mock->shouldReceive('createToken')->andThrow(new \App\Exceptions\DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'));
         });
 
-        // act
-        $response = $this->postJson('/api/v1/student', [
+        // Act
+        $response = $this->postJson(route('student.store'), [
             'nick_name' => 'test_nick',
             'last_name' => 'test_last',
             'first_name' => 'test_first',
@@ -115,7 +107,7 @@ class StoreTest extends TestCase
             'address' => '123 Test St',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(400);
     }
 }

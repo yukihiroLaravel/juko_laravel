@@ -3,8 +3,10 @@
 namespace Tests\Feature\Api\Instructor\CourseDeadline;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Model\Course;
 use App\Model\CourseDeadline;
 use App\Model\Instructor;
+use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,34 +14,28 @@ class BulkUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_自分の講座の受講期限を固定日に変更_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [1],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
             'updated_count' => 1,
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'fixed_date' => '2026-12-31 00:00:00',
             'relative_days' => null,
         ]);
@@ -47,25 +43,26 @@ class BulkUpdateTest extends TestCase
 
     public function test_自分の講座の受講期限を相対日数に変更_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [1],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 30,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
             'updated_count' => 1,
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'fixed_date' => null,
             'relative_days' => 30,
         ]);
@@ -73,102 +70,113 @@ class BulkUpdateTest extends TestCase
 
     public function test_自分の講座の受講期限を削除_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange — 既存のCourseDeadlineレコードを作成
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course->id,
+            'fixed_date' => '2026-12-31',
+        ]);
+        $this->assertDatabaseHas('course_deadlines', [
+            'course_id' => $course->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // course_id=2 には既に CourseDeadline レコードが存在する
-        $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 2,
-        ]);
-
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [2],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
             'updated_count' => 1,
         ]);
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 2,
+            'course_id' => $course->id,
         ]);
     }
 
     public function test_複数講座の受講期限を一括変更_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act (course 1 と 5 は instructor_id=1)
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [1, 5],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$course1->id, $course2->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-06-30',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
             'updated_count' => 2,
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course1->id,
             'fixed_date' => '2026-06-30 00:00:00',
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 5,
+            'course_id' => $course2->id,
             'fixed_date' => '2026-06-30 00:00:00',
         ]);
     }
 
     public function test_マネージャーが配下の講師の講座を更新_成功(): void
     {
-        // arrange
-        // instructor_id=1 は manager で、instructor_id=2 を管理している
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーが配下の講師の講座を更新
+        $manager = Instructor::factory()->create();
+        $subordinate = Instructor::factory()->create(['type' => 'instructor']);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate->id,
+        ]);
+        $course = Course::factory()->create(['instructor_id' => $subordinate->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act (course 2 は instructor_id=2 の講座)
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [2],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 60,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
             'updated_count' => 1,
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 2,
+            'course_id' => $course->id,
             'relative_days' => 60,
         ]);
     }
 
     public function test_他の講師の講座を更新_失敗(): void
     {
-        // arrange
-        // instructor_id=2 は instructor_id=4 の講座を更新できない
-        $instructor = Instructor::find(2);
+        // Arrange — 配下でない講師の講座を更新しようとする
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $otherInstructor = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act (course 4 は instructor_id=4 の講座)
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [4],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$otherCourse->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -177,19 +185,21 @@ class BulkUpdateTest extends TestCase
 
     public function test_配下でない講師の講座を含めて更新_失敗(): void
     {
-        // arrange
-        // instructor_id=1 は instructor_id=4 を管理していない
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 自分の講座と配下でない講師の講座を混ぜて更新
+        $manager = Instructor::factory()->create();
+        $ownCourse = Course::factory()->create(['instructor_id' => $manager->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act (course 1 は自分の講座、course 4 は instructor_id=4 の講座)
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
-            'courses' => [1, 4],
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+            'courses' => [$ownCourse->id, $otherCourse->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -198,31 +208,31 @@ class BulkUpdateTest extends TestCase
 
     public function test_空のcoursesで更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
             'courses' => [],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['courses']);
     }
 
     public function test_未認証でアクセス_失敗(): void
     {
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/deadline', [
+        // Act
+        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
             'courses' => [1],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(401);
     }
 }

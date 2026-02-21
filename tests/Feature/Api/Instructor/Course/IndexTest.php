@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\Instructor\Course;
 
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,69 +12,69 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講座一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        Course::factory()->count(2)->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/index');
+        // Act
+        $response = $this->getJson(route('instructor.course.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data');
     }
 
     public function test_パラメータ指定_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $taggedCourse = Course::factory()->create(['instructor_id' => $manager->id]);
+        $taggedCourse->tags()->attach($tag->id);
+        Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/index?per_page=5&tag_id=1');
+        // Act
+        $response = $this->getJson(route('instructor.course.index', ['per_page' => 5, 'tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
     }
 
     public function test_タイトル検索_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
+        // Arrange
+        $manager = Instructor::factory()->create();
+        Course::factory()->create(['instructor_id' => $manager->id, 'title' => 'PHP入門講座']);
+        Course::factory()->create(['instructor_id' => $manager->id, 'title' => 'JavaScript入門講座']);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/index?search_word=PHP');
+        // Act
+        $response = $this->getJson(route('instructor.course.index', ['search_word' => 'PHP']));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
     }
 
     public function test_タグ名検索_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id, 'content' => 'バックエンド入門編']);
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $course->tags()->attach($tag->id);
+        Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/index?search_word=バックエンド入門編');
+        // Act
+        $response = $this->getJson(route('instructor.course.index', ['search_word' => 'バックエンド入門編']));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
     }

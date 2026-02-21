@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,50 +12,49 @@ class PatchStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_チャプターのステータス変更_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/status', [
-            'chapters' => [1, 2],
+        // Act
+        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course->id]), [
+            'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
         ]);
         $this->assertDatabaseHas('chapters', [
-            'id' => 1,
+            'id' => $chapter1->id,
             'status' => 'private',
         ]);
     }
 
     public function test_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/1/chapter/status', [
-            'chapters' => [1, 2],
+        // Act
+        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course->id]), [
+            'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -62,17 +63,21 @@ class PatchStatusTest extends TestCase
 
     public function test_講座が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — チャプターが属する講座と異なるcourse_idを指定
+        $instructor = Instructor::factory()->create();
+        $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course1->id]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course1->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/2/chapter/status', [
-            'chapters' => [1, 2],
+        // Act
+        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course2->id]), [
+            'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, invalid course_id.',
@@ -81,17 +86,17 @@ class PatchStatusTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->patchJson('/api/v1/instructor/course/aaa/chapter/status', [
+        // Act
+        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => 'aaa']), [
             'chapters' => 'string',
             'status' => 'string',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Tag;
 
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,45 +11,40 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
+    public function test_タグ更新_成功(): void
     {
-        parent::setUp();
-        $this->seed();
-    }
-
-    public function test_タグ_成功(): void
-    {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/tag/1', [
+        // Act
+        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => $tag->id]), [
             'content' => 'test',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('tags', [
-            'id' => 1,
+            'id' => $tag->id,
             'content' => 'test',
         ]);
     }
 
     public function test_許可がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別の講師が所有するタグには更新権限がない
+        $ownerInstructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/tag/1', [
+        // Act
+        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => $tag->id]), [
             'content' => 'test',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -57,14 +53,14 @@ class PutTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/tag/aaa', []);
+        // Act
+        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => 'aaa']), []);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
     }
 }

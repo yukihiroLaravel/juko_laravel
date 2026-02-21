@@ -12,7 +12,6 @@ use App\Http\Requests\Manager\Lesson\PutStatusRequest;
 use App\Http\Requests\Manager\Lesson\SortRequest;
 use App\Http\Requests\Manager\Lesson\StoreRequest;
 use App\Http\Requests\Manager\Lesson\UpdateStatusRequest;
-use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Lesson;
@@ -25,7 +24,6 @@ use App\Services\Lesson\SortLessonsService;
 use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
-use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -200,37 +198,7 @@ class LessonController extends Controller
             'result' => true,
         ]);
     }
-
-    /**
-     * レッスンタイトル変更API
-     */
-    public function updateTitle(UpdateTitleRequest $request, UpdateLessonTitleService $service): JsonResponse
-    {
-        // 指定されたレッスンを取得
-        /** @var Lesson $lesson */
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        // Policy による認可チェック
-        $this->authorize('update', $lesson);
-
-        if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            throw new ValidationErrorException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            throw new ValidationErrorException('Invalid chapter_id.');
-        }
-
-        $service(
-            lesson: $lesson,
-            title: $request->title,
-        );
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
+    
     /**
      * 選択済みレッスンステータス一括更新API
      */

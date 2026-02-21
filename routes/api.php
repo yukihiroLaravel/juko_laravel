@@ -221,7 +221,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                         Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put']);
                                         Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'delete']);
                                         Route::patch('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateStatus']);
-                                        Route::patch('title', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateTitle']);
                                     });
                                 });
                             });

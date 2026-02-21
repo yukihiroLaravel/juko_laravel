@@ -31,6 +31,8 @@ class CourseIndexResource extends JsonResource
             'course_deadline' => $this->resource->courseDeadline
                 ? new CourseDeadlineResource($this->resource->courseDeadline)
                 : null,
+            'capacity' => $this->resource->capacity,
+            'current_attendance_count' => $this->resource->current_attendance_count ?? 0,
         ];
     }
 }

@@ -54,7 +54,12 @@ class CourseController extends Controller
             }
         }
 
-        $query = Course::where('instructor_id', $instructorId)->withCount('attendances')
+        $query = Course::where('instructor_id', $instructorId)
+            ->withCount([
+                'attendances as current_attendance_count' => function ($query) {
+                    $query->where('attendance_deadline', '>=', now());
+                }
+            ])
             ->with(['tags', 'courseDeadline'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {
                 $query->where(function (Builder $query) use ($searchWord) {
@@ -72,7 +77,7 @@ class CourseController extends Controller
         $courses = $query->paginate((int) $perPage);
 
         $courses->getCollection()->map(function (Course $course) {
-            $course->has_active_students = $course->attendances_count > 0;
+            $course->has_active_students = $course->current_attendance_count > 0;
         });
 
         return CourseIndexResource::collection($courses);

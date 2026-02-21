@@ -65,7 +65,7 @@ class Student extends Authenticatable
     {
         return $this->hasMany(StudentLoginHistory::class);
     }
-    
+
     /**
      * 受講履歴を取得
      *

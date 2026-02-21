@@ -3,6 +3,8 @@
 namespace Tests\Feature\Api\Manager\CourseDeadline;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Model\Course;
+use App\Model\CourseDeadline;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -11,127 +13,164 @@ class ClearSelectedTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_選択した講座の受講期限をクリアできる(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $manager->id,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course->id,
+            'relative_days' => 30,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [2],
+            'courses' => [$course->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200)
             ->assertJson([
                 'result' => true,
             ]);
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 2,
+            'course_id' => $course->id,
         ]);
         $this->assertDatabaseHas('courses', [
-            'id' => 2,
+            'id' => $course->id,
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
     }
 
     public function test_選択していない講座の受講期限はクリアされない(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course1 = Course::factory()->create([
+            'instructor_id' => $manager->id,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course1->id,
+            'relative_days' => 30,
+        ]);
+        $course2 = Course::factory()->create([
+            'instructor_id' => $manager->id,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course2->id,
+            'relative_days' => 60,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act — course1のみクリア
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [2],
+            'courses' => [$course1->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
 
-        // 講座3はクリアされていない
+        // course2はクリアされていない
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 3,
+            'course_id' => $course2->id,
         ]);
         $this->assertDatabaseHas('courses', [
-            'id' => 3,
+            'id' => $course2->id,
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
         ]);
     }
 
     public function test_複数の講座を同時にクリアできる(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course1 = Course::factory()->create([
+            'instructor_id' => $manager->id,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course1->id,
+            'relative_days' => 30,
+        ]);
+        $course2 = Course::factory()->create([
+            'instructor_id' => $manager->id,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course2->id,
+            'relative_days' => 60,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [2, 3],
+            'courses' => [$course1->id, $course2->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200)
             ->assertJson([
                 'result' => true,
             ]);
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 2,
+            'course_id' => $course1->id,
         ]);
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 3,
+            'course_id' => $course2->id,
         ]);
         $this->assertDatabaseHas('courses', [
-            'id' => 2,
+            'id' => $course1->id,
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
         $this->assertDatabaseHas('courses', [
-            'id' => 3,
+            'id' => $course2->id,
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
     }
 
     public function test_他マネージャーの講座は対象外となる(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座を指定
+        $manager = Instructor::factory()->create();
+        $otherManager = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create([
+            'instructor_id' => $otherManager->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // 講座4はマネージャー4（instructor_id=4）の講座なのでマネージャー1は操作できない
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [4],
+            'courses' => [$otherCourse->id],
         ]);
 
-        // assert
-        // サービスは冪等性があるため成功を返すが、変更は行われない
+        // Assert — サービスは冪等性があるため成功を返すが、変更は行われない
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
-            'id' => 4,
+            'id' => $otherCourse->id,
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
     }
 
     public function test_マネージャーでない場合は403を返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [2],
+            'courses' => [$course->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',
@@ -140,81 +179,80 @@ class ClearSelectedTest extends TestCase
 
     public function test_coursesが空の場合はバリデーションエラーを返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
             'courses' => [],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
     }
 
     public function test_coursesが未指定の場合はバリデーションエラーを返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), []);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
     }
 
     public function test_存在しない講座_i_dの場合はバリデーションエラーを返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
             'courses' => [9999],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses.0']);
     }
 
     public function test_削除済み講座_i_dの場合はバリデーションエラーを返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $course->delete(); // 論理削除
+        $this->actingAs($manager, 'instructor');
 
-        // 講座2を論理削除
-        \App\Model\Course::find(2)->delete();
-
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
-            'courses' => [2],
+            'courses' => [$course->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses.0']);
     }
 
     public function test_整数以外の値が含まれる場合はバリデーションエラーを返す(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
+        // Act
         $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
             'courses' => ['invalid'],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses.0']);
     }

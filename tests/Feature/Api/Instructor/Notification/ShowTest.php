@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,36 +12,34 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_お知らせ取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/notification/2');
+        // Act
+        $response = $this->getJson(route('instructor.notification.show', ['notification_id' => $notification->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/notification/aaa');
+        // Act
+        $response = $this->getJson(route('instructor.notification.show', ['notification_id' => 'aaa']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'notification_id',

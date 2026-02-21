@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Course;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -11,52 +12,46 @@ class UpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_受講期限なし_講座更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/1', [
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
             'deadline_type' => 'none',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
-            'id' => 1,
+            'id' => $course->id,
             'title' => 'テスト講座',
             'status' => 'private',
         ]);
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course->id,
         ]);
     }
 
     public function test_固定受講期限あり_講座更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/1', [
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -64,29 +59,30 @@ class UpdateTest extends TestCase
             'fixed_date' => now()->addDays(30)->format('Y-m-d'),
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
-            'id' => 1,
+            'id' => $course->id,
             'title' => 'テスト講座',
             'status' => 'private',
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'fixed_date' => now()->addDays(30)->format('Y-m-d 00:00:00'),
         ]);
     }
 
     public function test_相対受講期限あり_講座更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/1', [
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -94,36 +90,37 @@ class UpdateTest extends TestCase
             'relative_days' => 30,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
-            'id' => 1,
+            'id' => $course->id,
             'title' => 'テスト講座',
             'status' => 'private',
         ]);
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'relative_days' => 30,
         ]);
     }
 
     public function test_マネージャー権限がない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
+        $this->actingAs($nonManager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/1', [
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
             'deadline_type' => 'none',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',
@@ -132,20 +129,23 @@ class UpdateTest extends TestCase
 
     public function test_配下の講師でない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座を更新しようとする
+        $otherManager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $otherManager->id]);
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
+
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/1', [
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
             'deadline_type' => 'none',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -154,19 +154,19 @@ class UpdateTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->post('/api/v1/manager/course/aaa', [
-            'title' => '', // 空のタイトル
-            'image' => null, // 画像なし
-            'status' => 'invalid_status', // 無効なステータス
+        // Act
+        $response = $this->post(route('manager.course.update', ['course_id' => 'aaa']), [
+            'title' => '',
+            'image' => null,
+            'status' => 'invalid_status',
             'deadline_type' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

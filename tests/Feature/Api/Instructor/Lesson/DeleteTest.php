@@ -2,7 +2,13 @@
 
 namespace Tests\Feature\Api\Instructor\Lesson;
 
+use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,63 +16,83 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_レッスン削除_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — 受講なしのレッスン
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/course/5/chapter/6/lesson/10');
+        // Act
+        $response = $this->deleteJson(route('instructor.lesson.delete', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
         ]);
-
-        // 論理削除されているか確認
         $this->assertSoftDeleted('lessons', [
-            'id' => 10,
+            'id' => $lesson->id,
             'order' => 0,
         ]);
     }
 
     public function test_受講済みレッスン削除_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — レッスンに受講がある場合
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $lesson->id,
+            'attendance_id' => $attendance->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/course/1/chapter/1/lesson/1');
+        // Act
+        $response = $this->deleteJson(route('instructor.lesson.delete', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, this lesson has attendance.',
         ]);
-
     }
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/course/5/chapter/6/lesson/10');
+        // Act
+        $response = $this->deleteJson(route('instructor.lesson.delete', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+            'lesson_id' => $lesson->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -75,14 +101,18 @@ class DeleteTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/course/aaa/chapter/bbb/lesson/ccc', []);
+        // Act
+        $response = $this->deleteJson(route('instructor.lesson.delete', [
+            'course_id' => 'aaa',
+            'chapter_id' => 'bbb',
+            'lesson_id' => 'ccc',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

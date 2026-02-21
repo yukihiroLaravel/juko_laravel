@@ -10,27 +10,19 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_生徒取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/student', [
+        // Act
+        $response = $this->postJson(route('instructor.student.store'), [
             'given_name_by_instructor' => 'John',
             'email' => 'john@example.com',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('students', [
             'given_name_by_instructor' => 'John',
@@ -40,14 +32,14 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/student', []);
+        // Act
+        $response = $this->postJson(route('instructor.student.store'), []);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'given_name_by_instructor',

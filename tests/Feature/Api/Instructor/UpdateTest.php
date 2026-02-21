@@ -11,24 +11,16 @@ class UpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講師更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create(['profile_image' => 'instructor/dummy.jpg']);
         $this->actingAs($instructor, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/instructor/update', [
+        // Act
+        $response = $this->post(route('instructor.update'), [
             'nick_name' => 'test',
             'last_name' => 'test',
             'first_name' => 'test',
@@ -36,10 +28,10 @@ class UpdateTest extends TestCase
             'profile_image' => $file,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('instructors', [
-            'id' => 1,
+            'id' => $instructor->id,
             'nick_name' => 'test',
             'last_name' => 'test',
             'first_name' => 'test',
@@ -49,12 +41,12 @@ class UpdateTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->post('/api/v1/instructor/update', [
+        // Act
+        $response = $this->post(route('instructor.update'), [
             'nick_name' => '',
             'last_name' => '',
             'first_name' => '',
@@ -62,7 +54,7 @@ class UpdateTest extends TestCase
             'profile_image' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'nick_name',

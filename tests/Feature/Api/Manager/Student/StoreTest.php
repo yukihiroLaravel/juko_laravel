@@ -10,27 +10,19 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_生徒取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/manager/student', [
+        // Act
+        $response = $this->postJson(route('manager.student.store'), [
             'given_name_by_instructor' => 'John',
             'email' => 'john@example.com',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('students', [
             'given_name_by_instructor' => 'John',
@@ -40,17 +32,17 @@ class StoreTest extends TestCase
 
     public function test_権限エラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/manager/student', [
+        // Act
+        $response = $this->postJson(route('manager.student.store'), [
             'given_name_by_instructor' => 'John',
             'email' => 'john@example.com',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',
@@ -59,14 +51,14 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/manager/student', []);
+        // Act
+        $response = $this->postJson(route('manager.student.store'), []);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'given_name_by_instructor',

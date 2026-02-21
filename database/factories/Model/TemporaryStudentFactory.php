@@ -29,6 +29,10 @@ class TemporaryStudentFactory extends Factory
             'last_name' => fake()->lastName(),
             'first_name' => fake()->firstName(),
             'email' => fake()->unique()->safeEmail(),
+            'occupation' => fake()->jobTitle(),
+            'purpose' => fake()->sentence(),
+            'birth_date' => fake()->date(),
+            'gender' => fake()->randomElement(['man', 'woman', 'unknown']),
         ];
     }
 }

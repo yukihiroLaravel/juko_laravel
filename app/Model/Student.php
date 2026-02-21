@@ -57,6 +57,16 @@ class Student extends Authenticatable
     }
 
     /**
+     * ログイン履歴を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function loginHistories()
+    {
+        return $this->hasMany(StudentLoginHistory::class);
+    }
+    
+    /**
      * 受講履歴を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

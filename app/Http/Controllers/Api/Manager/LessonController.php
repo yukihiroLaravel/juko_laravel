@@ -10,6 +10,7 @@ use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;

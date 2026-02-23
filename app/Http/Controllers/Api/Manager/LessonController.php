@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
-use App\Http\Requests\Manager\Lesson\DeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
-use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonTitleService;
 use Exception;
@@ -52,49 +50,6 @@ class LessonController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    /**
-     * レッスン削除API
-     */
-    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
-    {
-        DB::beginTransaction();
-        try {
-            // レッスン情報を取得
-            /** @var Lesson $lesson */
-            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
-
-            // 自分、または配下の講師の講座でないと削除できない
-            $this->authorize('delete', $lesson);
-
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-            if ((int) $request->chapter_id !== $lesson->chapter->id) {
-                throw new AuthorizationException('Invalid chapter_id.');
-            }
-
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-            if ((int) $request->course_id !== $lesson->chapter->course_id) {
-                throw new AuthorizationException('Invalid course_id.');
-            }
-
-            // 受講情報が登録されている場合は許可しない
-            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
-            }
-
-            $deleteLessonService($lesson);
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
     }
 
     /**

@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignIdFor(Student::class)->constrained();
             $table->dateTime('logged_in_at')->comment('ログイン日時');
             $table->index('logged_in_at');
-            $table->timestamps();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager\Notification;
+namespace App\Http\Requests\Instructor\Course;
 
-use App\Enums\Notification\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class PutStatusRequest extends FormRequest
+class BulkDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,12 +22,8 @@ class PutStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::enum(StatusEnum::class)],
-            'notifications' => ['required', 'array', 'min:1'],
-            'notifications.*' => [
-                'integer',
-                'exists:notifications,id,deleted_at,NULL',
-            ],
+            'courses' => ['required', 'array', 'min:1'],
+            'courses.*' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

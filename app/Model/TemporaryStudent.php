@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Student\Gender;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class TemporaryStudent extends Model
 {
+    use HasFactory;
+
     /**
      * モデルと関連しているテーブル
      *

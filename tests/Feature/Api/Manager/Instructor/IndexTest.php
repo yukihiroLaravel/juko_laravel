@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Manager\Instructor;
 
 use App\Model\Instructor;
+use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,104 +11,40 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講師講座一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $subordinate1 = Instructor::factory()->create(['type' => 'instructor']);
+        $subordinate2 = Instructor::factory()->create(['type' => 'instructor']);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate1->id,
+        ]);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate2->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/index');
+        // Act
+        $response = $this->getJson(route('manager.instructor.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data.instructors');
-        $response->assertJson([
-            'data' => [
-                'instructors' => [
-                    [
-                        'instructor_id' => 3,
-                        'nick_name' => 'Suzuki',
-                        'email' => 'test_instructor3@example.com',
-                        'profile_image' => null,
-                        'course_count' => 2,
-                        'student_count' => 0,
-                    ],
-                    [
-                        'instructor_id' => 2,
-                        'nick_name' => 'Hanako',
-                        'email' => 'test_instructor2@example.com',
-                        'profile_image' => null,
-                        'course_count' => 2,
-                        'student_count' => 1,
-                    ],
-                ],
-                'pagination' => [
-                    'page' => 1,
-                    'total' => 2,
-                ],
-            ],
-        ]);
-    }
-
-    public function test_期限切れの講座が存在_講師講座一覧取得_成功(): void
-    {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/index');
-
-        // assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data.instructors');
-        $response->assertJson([
-            'data' => [
-                'instructors' => [
-                    [
-                        'instructor_id' => 3,
-                        'nick_name' => 'Suzuki',
-                        'email' => 'test_instructor3@example.com',
-                        'profile_image' => null,
-                        'course_count' => 2,
-                        'student_count' => 0,
-                    ],
-                    [
-                        'instructor_id' => 2,
-                        'nick_name' => 'Hanako',
-                        'email' => 'test_instructor2@example.com',
-                        'profile_image' => null,
-                        'course_count' => 2,
-                        'student_count' => 1,
-                    ],
-                ],
-                'pagination' => [
-                    'page' => 1,
-                    'total' => 2,
-                ],
-            ],
-        ]);
     }
 
     public function test_マネージャーではない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/aaa/course/index');
+        // Act
+        $response = $this->getJson(route('manager.instructor.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',

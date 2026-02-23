@@ -9,21 +9,14 @@ use App\Http\Requests\Manager\Notification\DeleteRequest;
 use App\Http\Requests\Manager\Notification\IndexRequest;
 use App\Http\Requests\Manager\Notification\PutRequest;
 use App\Http\Requests\Manager\Notification\PutStatusAllRequest;
-use App\Http\Requests\Manager\Notification\PutStatusRequest;
-use App\Http\Requests\Manager\Notification\StoreRequest;
 use App\Http\Requests\Manager\Notification\UpdateTypeAllRequest;
-use App\Http\Requests\Manager\Notification\UpdateTypeRequest;
 use App\Http\Resources\Manager\NotificationIndexResource;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
-use App\Services\Notification\PutStatusService;
-use App\Services\Notification\StoreNotificationService;
 use App\Services\Notification\UpdateTypeAllService;
-use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -57,46 +50,6 @@ class NotificationController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
-    }
-
-    /**
-     * お知らせ詳細API
-     */
-
-
-    /**
-     * お知らせ登録API
-     */
-    public function store(StoreRequest $request, StoreNotificationService $service): JsonResponse
-    {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('store', [Notification::class, $course]);
-
-        $instructorId = Auth::guard('instructor')->user()->id;
-
-        DB::beginTransaction();
-        try {
-            $service(
-                course_id: $request->course_id,
-                instructor_id: $instructorId,
-                title: $request->title,
-                type: $request->type,
-                start_date: $request->start_date,
-                end_date: $request->end_date,
-                content: $request->content,
-                status: $request->status
-            );
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
     }
 
     /**
@@ -166,37 +119,6 @@ class NotificationController extends Controller
     }
 
     /**
-     * お知らせ種別一括更新API
-     */
-    public function updateType(UpdateTypeRequest $request, UpdateTypeService $service): JsonResponse
-    {
-        // 選択されたお知らせを取得
-        $notifications = Notification::whereIn('id', $request->notifications)->get();
-
-        // policyによる認可チェック
-        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-
-        DB::beginTransaction();
-        try {
-            // サービス呼び出し
-            $service(
-                notifications: $notifications,
-                type: $request->notification_type
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-
-    /**
      * お知らせ種別全更新API
      */
     public function updateTypeAll(UpdateTypeAllRequest $request, UpdateTypeAllService $service): JsonResponse
@@ -217,40 +139,6 @@ class NotificationController extends Controller
         return response()->json([
             'result' => true,
         ]);
-    }
-
-    
-
-    /**
-     * お知らせ一括公開・非公開API
-     */
-    public function putStatus(PutStatusRequest $request, PutStatusService $service): JsonResponse
-    {
-        $notificationIds = $request->input('notifications', []);
-        $status = $request->input('status');
-
-        $notifications = Notification::whereIn('id', $notificationIds)->get(['id', 'instructor_id', 'status']);
-
-        $this->authorize('bulkUpdate', [Notification::class, $notifications]);
-
-        DB::beginTransaction();
-
-        try {
-            $service(
-                notifications: $notifications,
-                status: $status
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
     }
 
     /**

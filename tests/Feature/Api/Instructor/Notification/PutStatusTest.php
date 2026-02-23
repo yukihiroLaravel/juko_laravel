@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,51 +12,54 @@ class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_お知らせ更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status'), [
             'notifications' => [
-                2,
+                $notification->id,
             ],
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'id' => 2,
+            'id' => $notification->id,
             'status' => 'private',
         ]);
     }
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 他の講師のお知らせのステータスを更新しようとする
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $ownerInstructor->id,
+            'course_id' => $course->id,
+        ]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status'), [
             'notifications' => [
-                1,
+                $notification->id,
             ],
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -63,12 +68,12 @@ class PutStatusTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/aaaa', [
+        // Act — PutTest(個別更新)のバリデーションエラーを検証
+        $response = $this->putJson(route('instructor.notification.put', ['notification_id' => 'aaaa']), [
             'title' => '',
             'type' => '',
             'start_date' => '',
@@ -76,7 +81,7 @@ class PutStatusTest extends TestCase
             'content' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'notification_id',

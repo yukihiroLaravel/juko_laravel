@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Api\Instructor\Student;
 
+use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,38 +13,34 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_受講生一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $student = Student::factory()->create();
+        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/index');
+        // Act
+        $response = $this->getJson(route('instructor.student.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_講座id指定_要件定義されている講座指定_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — 論理削除された講座を指定
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course->delete();
         $this->actingAs($instructor, 'instructor');
-        Course::find(5)->delete();
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/index?courses[]=5');
+        // Act
+        $response = $this->getJson(route('instructor.student.index').'?courses[]='.$course->id);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'courses.0',
@@ -51,14 +49,16 @@ class IndexTest extends TestCase
 
     public function test_講座id指定_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — 他の講師の講座を指定
+        $instructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/index?courses[]=2');
+        // Act
+        $response = $this->getJson(route('instructor.student.index').'?courses[]='.$otherCourse->id);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, invalid course_id.',
@@ -67,14 +67,14 @@ class IndexTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/student/index?courses[]=aaa');
+        // Act
+        $response = $this->getJson(route('instructor.student.index').'?courses[]=aaa');
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'courses.0',

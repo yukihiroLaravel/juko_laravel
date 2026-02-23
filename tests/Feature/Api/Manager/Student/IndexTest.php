@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Manager\Student;
 
+use App\Model\Attendance;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,50 +13,56 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_受講生一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $student = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/index');
+        // Act
+        $response = $this->getJson(route('manager.student.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_講座id指定_受講生一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $student = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/index?courses[]=1');
+        // Act
+        $response = $this->getJson(route('manager.student.index', ['courses' => [$course->id]]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_講座id指定_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座IDを指定
+        $manager = Instructor::factory()->create();
+        $otherManager = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create(['instructor_id' => $otherManager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/index?courses[]=4');
+        // Act
+        $response = $this->getJson(route('manager.student.index', ['courses' => [$otherCourse->id]]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, invalid course_id.',
@@ -62,14 +71,14 @@ class IndexTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/index?courses[]=aaa');
+        // Act
+        $response = $this->getJson(route('manager.student.index', ['courses' => ['aaa']]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'courses.0',

@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Tag;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,42 +12,39 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_タグ削除_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange — 講座に紐づかないタグ
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/5');
+        // Act
+        $response = $this->deleteJson(route('instructor.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
         ]);
         $this->assertDatabaseMissing('tags', [
-            'id' => 5,
+            'id' => $tag->id,
         ]);
     }
 
     public function test_タグに紐づく講座が存在_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange — 講座に紐づくタグ
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course->tags()->attach($tag->id);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/2');
+        // Act
+        $response = $this->deleteJson(route('instructor.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, this tag is linked to courses.',
@@ -54,14 +53,16 @@ class DeleteTest extends TestCase
 
     public function test_権限エラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別の講師が所有するタグ
+        $ownerInstructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/6');
+        // Act
+        $response = $this->deleteJson(route('instructor.tag.delete', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -70,14 +71,14 @@ class DeleteTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/tag/aaa');
+        // Act
+        $response = $this->deleteJson(route('instructor.tag.delete', ['tag_id' => 'aaa']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'tag_id',

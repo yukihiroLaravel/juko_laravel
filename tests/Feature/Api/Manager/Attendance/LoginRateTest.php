@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Attendance;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,50 +11,54 @@ class LoginRateTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_ログイン率取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1/attendance/week');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+            'course_id' => $course->id,
+            'period' => 'week',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座のログイン率を取得しようとする
+        $otherManager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $otherManager->id]);
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1/attendance/week');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+            'course_id' => $course->id,
+            'period' => 'week',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
     }
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/aaa/attendance/bbb');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+            'course_id' => 'aaa',
+            'period' => 'bbb',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

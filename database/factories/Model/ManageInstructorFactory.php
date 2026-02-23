@@ -2,16 +2,16 @@
 
 namespace Database\Factories\Model;
 
-use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\ManageInstructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\Course>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\ManageInstructor>
  */
-class CourseFactory extends Factory
+class ManageInstructorFactory extends Factory
 {
-    protected $model = Course::class;
+    protected $model = ManageInstructor::class;
 
     /**
      * Define the model's default state.
@@ -22,11 +22,8 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => fake()->sentence(3),
-            'status' => Course::STATUS_PUBLIC,
             'instructor_id' => Instructor::factory(),
-            'image' => 'course/default.png',
-            'capacity' => null,
+            'manager_id' => Instructor::factory(),
         ];
     }
 }

@@ -14,90 +14,69 @@ class VerifyCodeServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_認証コードが有効(): void
     {
+        // Arrange
         $service = new VerifyCodeService;
-        $temporaryInstructor = TemporaryInstructor::create([
+        $temporaryInstructor = TemporaryInstructor::factory()->create([
             'trial_count' => 0,
             'code' => '1234',
-            'token' => 'abcdefghij',
             'expire_at' => now()->addMinutes(10),
-            'nick_name' => 'test',
-            'last_name' => 'test',
-            'first_name' => 'test',
-            'email' => 'testtest@example.com',
-            'type' => 'instructor',
         ]);
 
+        // Act
         $result = $service($temporaryInstructor, CarbonImmutable::now(), '1234');
+
+        // Assert
         $this->assertTrue($result);
     }
 
     public function test_認証コードが無効_期限切れ(): void
     {
+        // Arrange
         $this->expectException(ExpiredAuthorizationCodeException::class);
 
         $service = new VerifyCodeService;
-        $temporaryInstructor = TemporaryInstructor::create([
+        $temporaryInstructor = TemporaryInstructor::factory()->create([
             'trial_count' => 0,
             'code' => '1234',
-            'token' => 'abcdefghij',
             'expire_at' => now()->subMinutes(10),
-            'nick_name' => 'test',
-            'last_name' => 'test',
-            'first_name' => 'test',
-            'email' => 'testtest@example.com',
-            'type' => 'instructor',
         ]);
 
+        // Act
         $service($temporaryInstructor, CarbonImmutable::now(), '1234');
     }
 
     public function test_認証コードが無効_試行回数超過(): void
     {
+        // Arrange
         $this->expectException(TryCountOverAuthorizationCodeException::class);
 
         $service = new VerifyCodeService;
-        $temporaryInstructor = TemporaryInstructor::create([
+        $temporaryInstructor = TemporaryInstructor::factory()->create([
             'trial_count' => 3,
             'code' => '1234',
-            'token' => 'abcdefghij',
             'expire_at' => now()->addMinutes(10),
-            'nick_name' => 'test',
-            'last_name' => 'test',
-            'first_name' => 'test',
-            'email' => 'test@example.com',
-            'type' => 'instructor',
         ]);
 
+        // Act
         $service($temporaryInstructor, CarbonImmutable::now(), '0000');
     }
 
     public function test_認証コードが無効_試行回数増加(): void
     {
+        // Arrange
         $service = new VerifyCodeService;
-        $temporaryInstructor = TemporaryInstructor::create([
+        $temporaryInstructor = TemporaryInstructor::factory()->create([
             'trial_count' => 0,
             'code' => '1234',
-            'token' => 'abcdefghij',
             'expire_at' => now()->addMinutes(10),
-            'nick_name' => 'test',
-            'last_name' => 'test',
-            'first_name' => 'test',
-            'email' => 'test@example.com',
-            'type' => 'instructor',
         ]);
 
+        // Act
         $result = $service($temporaryInstructor, CarbonImmutable::now(), '0000');
 
+        // Assert
         $this->assertFalse($result);
         $this->assertEquals(1, $temporaryInstructor->trial_count);
     }

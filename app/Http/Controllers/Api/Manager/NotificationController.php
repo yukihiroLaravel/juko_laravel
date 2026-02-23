@@ -16,7 +16,6 @@ use App\Model\Notification;
 use App\Services\Notification\DeleteService;
 use App\Services\Notification\PutNotificationService;
 use App\Services\Notification\PutStatusAllService;
-use App\Services\Notification\PutStatusService;
 use App\Services\Notification\UpdateTypeAllService;
 use Exception;
 use Illuminate\Http\JsonResponse;

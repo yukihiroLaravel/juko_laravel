@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,37 +12,40 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_チャプター取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/2/chapter/4');
+        // Act
+        $response = $this->getJson(route('instructor.chapter.show', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別の講師の講座のチャプター
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/1/chapter/1');
+        // Act
+        $response = $this->getJson(route('instructor.chapter.show', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -49,14 +54,20 @@ class ShowTest extends TestCase
 
     public function test_講座が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange — チャプターが属する講座と異なるcourse_idを指定
+        $instructor = Instructor::factory()->create();
+        $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course1->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/2/chapter/1');
+        // Act
+        $response = $this->getJson(route('instructor.chapter.show', [
+            'course_id' => $course2->id,
+            'chapter_id' => $chapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Invalid course_id.',
@@ -65,14 +76,17 @@ class ShowTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/aaa/chapter/bbb');
+        // Act
+        $response = $this->getJson(route('instructor.chapter.show', [
+            'course_id' => 'aaa',
+            'chapter_id' => 'bbb',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

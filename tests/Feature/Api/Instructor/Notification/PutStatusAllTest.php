@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,64 +12,68 @@ class PutStatusAllTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_お知らせ一括更新_public_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+            'status' => 'private',
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status-all'), [
             'status' => 'public',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'id' => 2,
+            'id' => $notification->id,
             'status' => 'public',
         ]);
     }
 
     public function test_お知らせ一括更新_private_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+            'status' => 'public',
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status-all'), [
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
-            'id' => 2,
+            'id' => $notification->id,
             'status' => 'private',
         ]);
     }
 
     public function test_ステータス空欄_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status-all'), [
             'status' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'status' => 'The status field is required.',
@@ -76,16 +82,16 @@ class PutStatusAllTest extends TestCase
 
     public function test_無効なステータス_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status-all'), [
             'status' => 'invalid_status',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'status' => 'The selected status is invalid.',
@@ -94,12 +100,12 @@ class PutStatusAllTest extends TestCase
 
     public function test_認証なし_失敗(): void
     {
-        // act
-        $response = $this->putJson('/api/v1/instructor/notification/status/all', [
+        // Act
+        $response = $this->putJson(route('instructor.notification.put-status-all'), [
             'status' => 'public',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(401);
     }
 }

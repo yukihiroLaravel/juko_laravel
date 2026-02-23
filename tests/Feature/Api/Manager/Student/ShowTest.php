@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Manager\Student;
 
+use App\Model\Attendance;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,37 +13,44 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_生徒取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーの講座に受講している生徒
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $student = Student::factory()->create([
+            'last_login_at' => now(),
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/1');
+        // Act
+        $response = $this->getJson(route('manager.student.show', ['student_id' => $student->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_許可がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座の生徒を取得しようとする
+        $ownerManager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerManager->id]);
+        $student = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $otherManager = Instructor::factory()->create();
+        $this->actingAs($otherManager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/1');
+        // Act
+        $response = $this->getJson(route('manager.student.show', ['student_id' => $student->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -49,14 +59,14 @@ class ShowTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/bbb');
+        // Act
+        $response = $this->getJson(route('manager.student.show', ['student_id' => 'bbb']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'student_id',
@@ -65,14 +75,14 @@ class ShowTest extends TestCase
 
     public function test_権限エラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/student/bbb');
+        // Act
+        $response = $this->getJson(route('manager.student.show', ['student_id' => 'bbb']));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Lesson;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,49 +12,52 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_レッスン登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/2/chapter/4/lesson', [
+        // Act
+        $response = $this->postJson(route('instructor.lesson.store', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+        ]), [
             'title' => 'title',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
             'lesson_id',
         ]);
         $this->assertDatabaseHas('lessons', [
-            'chapter_id' => 4,
+            'chapter_id' => $chapter->id,
             'title' => 'title',
         ]);
     }
 
     public function test_権限がない講師のレッスン登録_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/2/chapter/4/lesson', [
+        // Act
+        $response = $this->postJson(route('instructor.lesson.store', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+        ]), [
             'title' => 'title',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -61,14 +66,17 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/aaa/chapter/bbb/lesson', []);
+        // Act
+        $response = $this->postJson(route('instructor.lesson.store', [
+            'course_id' => 'aaa',
+            'chapter_id' => 'bbb',
+        ]), []);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

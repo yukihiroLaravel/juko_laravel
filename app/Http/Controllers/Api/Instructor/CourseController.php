@@ -58,7 +58,7 @@ class CourseController extends Controller
             ->withCount([
                 'attendances as current_attendance_count' => function ($query) {
                     $query->where('attendance_deadline', '>=', today());
-                }
+                },
             ])
             ->with(['tags', 'courseDeadline'])
             ->when($searchWord, function (Builder $query) use ($searchWord) {

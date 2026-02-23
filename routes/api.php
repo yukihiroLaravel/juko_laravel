@@ -237,7 +237,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put'])->name('put');
-                                    Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'delete'])->name('delete');
                                     Route::patch('title', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateTitle'])->name('update-title');
                                     Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
                                     Route::post('sort', [App\Http\Controllers\Api\Manager\LessonController::class, 'sort']);

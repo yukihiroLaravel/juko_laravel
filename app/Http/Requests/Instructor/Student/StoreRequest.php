@@ -26,6 +26,7 @@ class StoreRequest extends FormRequest
         return [
             'given_name_by_instructor' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:students'],
+            'course_id' => ['required', 'exists:courses,id'],
         ];
     }
 }

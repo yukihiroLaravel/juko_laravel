@@ -114,6 +114,7 @@ class StudentController extends Controller
         ($service)($request->only([
             'given_name_by_instructor',
             'email',
+            'course_id',
         ]));
 
         return response()->json([

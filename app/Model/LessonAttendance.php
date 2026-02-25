@@ -68,6 +68,7 @@ class LessonAttendance extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'completed_at' => 'datetime',
         ];
     }
 }

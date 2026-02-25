@@ -74,7 +74,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index']);
                 Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store']);
                 Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus']);
-                Route::delete('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'bulkDelete']);
                 Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index']);
                 Route::prefix('{course_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'show']);
@@ -86,7 +85,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('sort', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'sort']);
                         Route::put('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'putStatus']);
                         Route::patch('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'patchStatus']);
-                        Route::delete('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'bulkDelete']);
                         Route::delete('all', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'deleteAll']);
                         Route::prefix('{chapter_id}')->group(function () {
                             Route::get('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'show']);
@@ -96,7 +94,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::post('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'store']);
                                 Route::post('sort', [App\Http\Controllers\Api\Instructor\LessonController::class, 'sort']);
                                 Route::put('status', [App\Http\Controllers\Api\Instructor\LessonController::class, 'putStatus']);
-                                Route::delete('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'bulkDelete']);
                                 Route::delete('all', [App\Http\Controllers\Api\Instructor\LessonController::class, 'deleteAll']);
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', [App\Http\Controllers\Api\Instructor\LessonController::class, 'put']);
@@ -163,7 +160,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatus']);
                     Route::put('all', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'putStatusAll']);
                 });
-                Route::delete('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'bulkDelete']);
+                
                 Route::prefix('{notification_id}')->group(function () {
                     Route::get('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'show']);
                     Route::put('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'put']);
@@ -213,7 +210,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
                                 // マネージャー-講座-チャプター-レッスン
                                 Route::prefix('lesson')->group(function () {
-                                    Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete']);
+                                    
                                     Route::prefix('{lesson_id}')->group(function () {
                                         Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put']);
                                         Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'delete']);

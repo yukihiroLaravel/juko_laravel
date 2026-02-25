@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\Manager;
-
+use Illuminate\Http\Request;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
@@ -10,7 +10,6 @@ use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Http\Requests\Manager\Lesson\UpdateTitleRequest;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonTitleService;
@@ -54,48 +53,43 @@ class LessonController extends Controller
         ]);
     }
 
-    /**
-     * レッスン削除API
-     */
-    public function delete(DeleteRequest $request, DeleteLessonService $deleteLessonService): JsonResponse
-    {
-        DB::beginTransaction();
-        try {
-            // レッスン情報を取得
-            /** @var Lesson $lesson */
-            $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
 
-            // 自分、または配下の講師の講座でないと削除できない
-            $this->authorize('delete', $lesson);
-
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-            if ((int) $request->chapter_id !== $lesson->chapter->id) {
-                throw new AuthorizationException('Invalid chapter_id.');
-            }
-
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-            if ((int) $request->course_id !== $lesson->chapter->course_id) {
-                throw new AuthorizationException('Invalid course_id.');
-            }
-
-            // 受講情報が登録されている場合は許可しない
-            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                throw new AuthorizationException('Forbidden, not allowed to delete this lesson.');
-            }
-
-            $deleteLessonService($lesson);
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
+     public function delete(DeleteRequest $request, DeleteLessonService $service): JsonResponse
+     {
+         DB::beginTransaction();
+     
+         try {
+             /** @var Lesson $lesson */
+             $lesson = Lesson::with('chapter')->findOrFail($request->lesson_id);
+     
+             $this->authorize('delete', $lesson);
+     
+             if ((int) $request->chapter_id !== $lesson->chapter->id) {
+                 throw new AuthorizationException('Invalid chapter_id.');
+             }
+     
+             if ((int) $request->course_id !== $lesson->chapter->course_id) {
+                 throw new AuthorizationException('Invalid course_id.');
+             }
+     
+             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+                 throw new AuthorizationException('Forbidden.');
+             }
+     
+             $service($lesson);
+     
+             DB::commit();
+     
+             return response()->json([
+                 'result' => true,
+             ]);
+         } catch (\Throwable $e) {
+             DB::rollBack();
+             Log::error($e);
+             throw $e;
+         }
+     }
+    
 
     /**
      * レッスンタイトル変更API
@@ -127,54 +121,8 @@ class LessonController extends Controller
         ]);
     }
 
-    /**
-     * 選択済みレッスン削除API
-     */
-    public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
-    {
-        // リクエストからデータを取得
-        $lessonIds = $request->input('lessons');
-        $chapterId = $request->input('chapter_id');
-        $courseId = $request->input('course_id');
+   
+    
+    
+} 
 
-        // レッスン情報を取得
-        $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
-        DB::beginTransaction();
-
-        try {
-            // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
-            $this->authorize('bulkDelete', [Lesson::class, $lessons]);
-
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course->id) {
-                    throw new AuthorizationException('Invalid course_id.');
-                }
-                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ((int) $chapterId !== $lesson->chapter->id) {
-                    throw new AuthorizationException('Invalid chapter_id.');
-                }
-                // 受講情報が登録されている場合は許可しない
-                if ($lesson->lessonAttendances->isNotEmpty()) {
-                    throw new AuthorizationException('This lesson has attendance.');
-                }
-            });
-
-            // サービスクラスで対象レッスンの削除処理を実行
-            $service(
-                lessonIds: $lessons->pluck('id')->toArray(),
-                chapterId: $chapterId
-            );
-
-            DB::commit();
-
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
-    }
-}

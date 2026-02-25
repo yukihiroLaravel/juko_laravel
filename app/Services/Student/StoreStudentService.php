@@ -17,7 +17,7 @@ class StoreStudentService
             $course = Course::lockForUpdate()->findOrFail($data['course_id']);
 
             // 定員チェック
-            if ($course->attendances()->count() >= $course->capacity) {
+            if (!$course->hasCapacity()) {
                 throw ValidationException::withMessages([
                     'course_id' => [
                         'This course has already reached its capacity.'

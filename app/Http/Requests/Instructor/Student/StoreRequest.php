@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Instructor\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class StoreRequest extends FormRequest
         return [
             'given_name_by_instructor' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255', 'unique:students'],
-            'course_id' => ['required', 'exists:courses,id'],
+            'course_id' => ['required', Rule::exists('courses', 'id')->whereNull('deleted_at'),],
         ];
     }
 }

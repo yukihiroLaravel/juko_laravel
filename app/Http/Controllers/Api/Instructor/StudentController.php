@@ -111,11 +111,11 @@ class StudentController extends Controller
      */
     public function store(StoreRequest $request, StoreStudentService $service): JsonResponse
     {
-        ($service)($request->only([
-            'given_name_by_instructor',
-            'email',
-            'course_id',
-        ]));
+        $course = Course::findOrFail($request->course_id);
+
+        $this->authorize('update', $course);
+
+        $service($request->validated());
 
         return response()->json([
             'result' => true,

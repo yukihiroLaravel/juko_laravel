@@ -24,6 +24,7 @@ class LessonAttendance extends Model
         'lesson_id',
         'attendance_id',
         'status',
+        'completed_at'
     ];
 
     // ステータス定数
@@ -68,7 +69,7 @@ class LessonAttendance extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
-            'completed_at' => 'datetime',
+            'completed_at' => 'immutable_datetime',
         ];
     }
 }

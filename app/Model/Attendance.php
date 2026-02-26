@@ -27,6 +27,7 @@ class Attendance extends Model
         'student_id',
         'progress',
         'attendance_deadline',
+        'completed_at'
     ];
 
     // 受講状態初期値

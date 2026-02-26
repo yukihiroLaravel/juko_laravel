@@ -24,7 +24,7 @@ class LessonAttendance extends Model
         'lesson_id',
         'attendance_id',
         'status',
-        'completed_at'
+        'completed_at',
     ];
 
     // ステータス定数

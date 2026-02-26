@@ -2,11 +2,11 @@
 
 namespace App\Services\Student;
 
-use App\Model\Student;
-use App\Model\Course;
 use App\Model\Attendance;
-use Illuminate\Validation\ValidationException;
+use App\Model\Course;
+use App\Model\Student;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StoreStudentService
 {
@@ -17,10 +17,10 @@ class StoreStudentService
             $course = Course::lockForUpdate()->findOrFail($data['course_id']);
 
             // 定員チェック
-            if (!$course->hasCapacity()) {
+            if (! $course->hasCapacity()) {
                 throw ValidationException::withMessages([
                     'course_id' => [
-                        'This course has already reached its capacity.'
+                        'This course has already reached its capacity.',
                     ],
                 ]);
             }

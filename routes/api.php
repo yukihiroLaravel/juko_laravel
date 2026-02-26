@@ -260,7 +260,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::prefix('student')->name('student.')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\StudentController::class, 'index'])->name('index');
                     Route::get('{student_id}', [App\Http\Controllers\Api\Manager\StudentController::class, 'show'])->name('show');
-                    Route::post('/', [App\Http\Controllers\Api\Manager\StudentController::class, 'store'])->name('store');
                 });
                 // マネージャー-お知らせ
                 Route::prefix('notification')->name('notification.')->group(function () {

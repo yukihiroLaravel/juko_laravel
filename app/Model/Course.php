@@ -166,4 +166,19 @@ class Course extends Model
             'capacity' => 'integer',
         ];
     }
+
+    /**
+     * Determine whether the course still has available capacity.
+     *
+     * If capacity is null, the course is treated as unlimited.
+     */
+    public function hasCapacity(): bool
+    {
+        // 定員無制限（null）の場合
+        if ($this->capacity === null) {
+            return true;
+        }
+
+        return $this->attendances()->count() < $this->capacity;
+    }
 }

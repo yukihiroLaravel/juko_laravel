@@ -168,13 +168,11 @@ class Course extends Model
     }
 
     /**
-     * Determine whether the course still has available capacity.
-     *
-     * If capacity is null, the course is treated as unlimited.
+     * 定員に空きがあるか
      */
     public function hasCapacity(): bool
     {
-        // 定員無制限（null）の場合
+        // 定員無制限の場合
         if ($this->capacity === null) {
             return true;
         }

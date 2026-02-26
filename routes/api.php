@@ -234,16 +234,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             // マネージャー-講座-チャプター-レッスン
                             Route::prefix('lesson')->name('lesson.')->group(function () {
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete'])->name('bulk-delete');
-                                
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put'])->name('put');
-                                    Route::patch('title', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateTitle'])->name('update-title');
-                                    Route::post('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'store']);
-                                    Route::post('sort', [App\Http\Controllers\Api\Manager\LessonController::class, 'sort']);
-                                    Route::put('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'putStatus']);
-                                    Route::delete('all', [App\Http\Controllers\Api\Manager\LessonController::class, 'deleteAll']);
-                                    Route::patch('status', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateStatus']);
-                                    });
                                 });
                             });
                         });
@@ -283,7 +275,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             });
         });
     });
-
+});
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->name('student.')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\Student\StudentController::class, 'store'])->name('store');

@@ -150,6 +150,7 @@ class CourseController extends Controller
                 calculateDeadline: $calculateDeadline,
                 fixedDate: $fixedDate,
                 relativeDays: $relativeDays,
+                capacity: $request->capacity,
             );
 
             DB::commit();

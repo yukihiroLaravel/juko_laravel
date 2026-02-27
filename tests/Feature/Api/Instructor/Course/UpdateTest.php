@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Course;
 
+use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -148,5 +149,99 @@ class UpdateTest extends TestCase
         $response->assertJsonValidationErrors([
             'course_id', 'title', 'image', 'status', 'deadline_type',
         ]);
+    }
+
+    public function test_定員を指定して講座更新_成功(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+            'title' => 'テスト講座',
+            'status' => 'private',
+            'deadline_type' => 'none',
+            'capacity' => 20,
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'capacity' => 20,
+        ]);
+    }
+
+    public function test_定員をnullにして講座更新_成功(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'capacity' => 10,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+            'title' => 'テスト講座',
+            'status' => 'private',
+            'deadline_type' => 'none',
+            'capacity' => null,
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'capacity' => null,
+        ]);
+    }
+
+    public function test_定員が受講者数と同じ_講座更新_成功(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Attendance::factory()->count(3)->create(['course_id' => $course->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+            'title' => 'テスト講座',
+            'status' => 'private',
+            'deadline_type' => 'none',
+            'capacity' => 3,
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'capacity' => 3,
+        ]);
+    }
+
+    public function test_定員が受講者数を下回る_バリデーションエラー(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Attendance::factory()->count(5)->create(['course_id' => $course->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+            'title' => 'テスト講座',
+            'status' => 'private',
+            'deadline_type' => 'none',
+            'capacity' => 3,
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['capacity']);
     }
 }

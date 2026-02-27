@@ -65,7 +65,7 @@ class UpdateRequest extends FormRequest
             if ($attendanceCount > $capacity) {
                 $validator->errors()->add(
                     'capacity',
-                    'Capacity cannot be less than the current number of attendees (' . $attendanceCount . ').'
+                    'Capacity cannot be less than the current number of attendees ('.$attendanceCount.').'
                 );
             }
         });

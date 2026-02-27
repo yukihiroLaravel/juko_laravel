@@ -276,6 +276,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         });
     });
 });
+
 Route::prefix('v1')->group(function () {
     Route::prefix('student')->name('student.')->group(function () {
         Route::post('/', [App\Http\Controllers\Api\Student\StudentController::class, 'store'])->name('store');

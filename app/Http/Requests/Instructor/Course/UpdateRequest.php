@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Instructor\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Model\Course;
 use App\Rules\CourseStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -43,5 +44,30 @@ class UpdateRequest extends FormRequest
             'fixed_date' => ['required_if:deadline_type,fixed_date', 'date_format:Y-m-d', 'after_or_equal:today', 'nullable'],
             'relative_days' => ['required_if:deadline_type,relative_days', 'integer', 'min:1', 'nullable'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $capacity = $this->input('capacity');
+
+            if ($capacity === null) {
+                return;
+            }
+
+            $course = Course::find($this->input('course_id'));
+            if ($course === null) {
+                return;
+            }
+
+            $attendanceCount = $course->attendances()->count();
+
+            if ($attendanceCount > $capacity) {
+                $validator->errors()->add(
+                    'capacity',
+                    'Capacity cannot be less than the current number of attendees (' . $attendanceCount . ').'
+                );
+            }
+        });
     }
 }

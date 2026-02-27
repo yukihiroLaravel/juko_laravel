@@ -115,6 +115,7 @@ class Attendance extends Model
      *   attendance_deadline: 'immutable_date',
      *   created_at: 'immutable_datetime',
      *   updated_at: 'immutable_datetime',
+     *   completed_at: 'immutable_datetime',
      * }
      */
     #[\Override]

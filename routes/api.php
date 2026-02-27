@@ -218,7 +218,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'store'])->name('store');
                         Route::post('deadline/clear-selected', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearSelected'])->name('deadline.clear-selected');
                     });
-
                     Route::prefix('{course_id}')->group(function () {
                         Route::name('course.')->group(function () {
                             Route::get('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'show'])->name('show');
@@ -237,7 +236,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete'])->name('bulk-delete');
                                 Route::prefix('{lesson_id}')->group(function () {
                                     Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put'])->name('put');
-                                    Route::patch('title', [App\Http\Controllers\Api\Manager\LessonController::class, 'updateTitle'])->name('update-title');
                                 });
                             });
                         });

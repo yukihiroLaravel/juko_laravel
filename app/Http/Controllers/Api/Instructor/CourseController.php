@@ -109,6 +109,7 @@ class CourseController extends Controller
                 deadlineType: DeadlineTypeEnum::from($request->deadline_type),
                 fixedDate: $request->fixed_date,
                 relativeDays: $request->relative_days,
+                capacity: $request->capacity,
             );
 
             DB::commit();

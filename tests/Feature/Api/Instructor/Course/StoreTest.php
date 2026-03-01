@@ -134,6 +134,99 @@ class StoreTest extends TestCase
         ]);
     }
 
+    public function test_定員あり_講座登録_成功(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // Act
+        $response = $this->post(route('instructor.course.store'), [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => $tag->id,
+            'deadline_type' => 'none',
+            'capacity' => 30,
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'title' => 'テスト講座',
+            'capacity' => 30,
+        ]);
+    }
+
+    public function test_定員なし_講座登録_成功(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // Act
+        $response = $this->post(route('instructor.course.store'), [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => $tag->id,
+            'deadline_type' => 'none',
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'title' => 'テスト講座',
+            'capacity' => null,
+        ]);
+    }
+
+    public function test_定員が0以下_バリデーションエラー(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // Act
+        $response = $this->post(route('instructor.course.store'), [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => $tag->id,
+            'deadline_type' => 'none',
+            'capacity' => 0,
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['capacity']);
+    }
+
+    public function test_定員が上限超過_バリデーションエラー(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        $file = UploadedFile::fake()->image('test.jpg');
+
+        // Act
+        $response = $this->post(route('instructor.course.store'), [
+            'title' => 'テスト講座',
+            'image' => $file,
+            'tag_id' => $tag->id,
+            'deadline_type' => 'none',
+            'capacity' => 101,
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['capacity']);
+    }
+
     public function test_バリデーションエラー_失敗(): void
     {
         // Arrange

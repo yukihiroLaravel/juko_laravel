@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
-use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Manager\Lesson\PutRequest;

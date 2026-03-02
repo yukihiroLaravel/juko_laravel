@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Lesson\BulkDeleteRequest;
-use App\Http\Requests\Manager\Lesson\PutRequest;
 use App\Model\Lesson;
 use App\Services\Lesson\BulkDeleteLessonsService;
-use App\Services\Lesson\UpdateLessonService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -19,35 +17,6 @@ use Illuminate\Support\Facades\Log;
  */
 class LessonController extends Controller
 {
-    /**
-     * レッスン更新API
-     */
-    public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
-    {
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-        assert($lesson instanceof Lesson);
-
-        // Policy による認可チェック
-        $this->authorize('update', $lesson);
-
-        if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            // 講座IDが不正な場合は403エラー
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // チャプターIDが不正な場合は403エラー
-            throw new AuthorizationException('Invalid chapter_id.');
-        }
-
-        // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
-
-        return response()->json([
-            'result' => true,
-        ]);
-    }
-
     /**
      * 選択済みレッスン削除API
      */

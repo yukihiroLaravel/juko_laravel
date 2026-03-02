@@ -26,6 +26,7 @@ class CourseFactory extends Factory
             'status' => Course::STATUS_PUBLIC,
             'instructor_id' => Instructor::factory(),
             'image' => 'course/default.png',
+            'capacity' => null,
         ];
     }
 }

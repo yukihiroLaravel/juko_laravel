@@ -174,7 +174,7 @@ class CourseController extends Controller
         $courseIds = Course::whereIn('instructor_id', $managingIds)->pluck('id')->toArray();
 
         // 更新処理
-        $service(courseIds: $courseIds, status: $request->status, instructorId: $instructorId);
+        $service(courseIds: $courseIds, status: $request->status);
 
         return response()->json([
             'result' => 'true',

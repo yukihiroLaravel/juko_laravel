@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Attendance;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,50 +11,53 @@ class ShowStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_当日の出席状況を取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1/attendance/status/today');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_今月の出席状況を取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1/attendance/status/month');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.show-status', [
+            'course_id' => $course->id,
+            'period' => 'month',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_無効のパラメータ(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1000/attendance/status/invalid');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.show-status', [
+            'course_id' => 9999,
+            'period' => 'invalid',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',
@@ -63,27 +67,36 @@ class ShowStatusTest extends TestCase
 
     public function test_配下ではない講師の講座_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーの講座
+        $otherManager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $otherManager->id]);
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/4/attendance/status/today');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
     }
 
     public function test_マネージャーではない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/2/attendance/status/today');
+        // Act
+        $response = $this->getJson(route('manager.course.attendance.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
     }
 }

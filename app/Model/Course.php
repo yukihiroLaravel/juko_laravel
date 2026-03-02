@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property bool $has_active_students
  * @property int $progress_percentage
+ * @property int|null $capacity
  */
 class Course extends Model
 {
@@ -41,6 +42,7 @@ class Course extends Model
         'image',
         'status',
         'deadline_type',
+        'capacity',
     ];
 
     /**
@@ -151,6 +153,7 @@ class Course extends Model
      *  instructor_id: 'int',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
+     *  capacity: 'integer',
      * }
      */
     #[\Override]
@@ -160,6 +163,20 @@ class Course extends Model
             'instructor_id' => 'int',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'capacity' => 'integer',
         ];
+    }
+
+    /**
+     * 定員に空きがあるか
+     */
+    public function hasCapacity(): bool
+    {
+        // 定員無制限の場合
+        if ($this->capacity === null) {
+            return true;
+        }
+
+        return $this->attendances()->count() < $this->capacity;
     }
 }

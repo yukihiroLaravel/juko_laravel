@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Manager\Course;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
@@ -11,131 +13,131 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_受講期限なし_講座登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course', [
+        // Act
+        $response = $this->post(route('manager.course.store'), [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 1,
+            'tag_id' => $tag->id,
             'deadline_type' => 'none',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
         ]);
 
+        $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
-            'course_id' => 8,
-            'tag_id' => 1,
+            'course_id' => $course->id,
+            'tag_id' => $tag->id,
         ]);
 
         $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => 8,
+            'course_id' => $course->id,
         ]);
     }
 
     public function test_固定受講期限あり_講座登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course', [
+        // Act
+        $response = $this->post(route('manager.course.store'), [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 1,
+            'tag_id' => $tag->id,
             'deadline_type' => 'fixed_date',
             'fixed_date' => now()->addDays(30)->format('Y-m-d'),
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
         ]);
 
+        $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
-            'course_id' => 8,
-            'tag_id' => 1,
+            'course_id' => $course->id,
+            'tag_id' => $tag->id,
         ]);
 
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 8,
+            'course_id' => $course->id,
             'fixed_date' => now()->addDays(30)->format('Y-m-d 00:00:00'),
         ]);
     }
 
     public function test_相対受講期限あり_講座登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course', [
+        // Act
+        $response = $this->post(route('manager.course.store'), [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 1,
+            'tag_id' => $tag->id,
             'deadline_type' => 'relative_days',
             'relative_days' => 30,
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
         ]);
 
+        $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
-            'course_id' => 8,
-            'tag_id' => 1,
+            'course_id' => $course->id,
+            'tag_id' => $tag->id,
         ]);
 
         $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => 8,
+            'course_id' => $course->id,
             'relative_days' => 30,
         ]);
     }
 
     public function test_無効なタグの指定_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別のマネージャーが所有するタグを指定
+        $manager = Instructor::factory()->create();
+        $otherManager = Instructor::factory()->create();
+        $otherTag = Tag::factory()->create(['instructor_id' => $otherManager->id]);
+        $this->actingAs($manager, 'instructor');
 
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // act
-        $response = $this->post('/api/v1/manager/course', [
+        // Act
+        $response = $this->post(route('manager.course.store'), [
             'title' => 'テスト講座',
             'image' => $file,
-            'tag_id' => 2,
+            'tag_id' => $otherTag->id,
             'deadline_type' => 'none',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(404);
         $response->assertJson([
             'message' => 'Not Found Tag.',
@@ -144,19 +146,19 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->post('/api/v1/manager/course', [
+        // Act
+        $response = $this->post(route('manager.course.store'), [
             'title' => '',
             'image' => null,
             'tag_id' => '',
             'deadline_type' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'title' => 'The title field is required.',

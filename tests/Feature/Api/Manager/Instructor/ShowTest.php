@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Manager\Instructor;
 
 use App\Model\Instructor;
+use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,37 +11,35 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講師講座取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $subordinate = Instructor::factory()->create(['type' => 'instructor']);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/2');
+        // Act
+        $response = $this->getJson(route('manager.instructor.show', ['instructor_id' => $subordinate->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_権限がない_講師講座取得_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 配下ではない講師を閲覧しようとする
+        $manager = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/4');
+        // Act
+        $response = $this->getJson(route('manager.instructor.show', ['instructor_id' => $otherInstructor->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -49,14 +48,15 @@ class ShowTest extends TestCase
 
     public function test_マネージャーではない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/instructor/1');
+        // Act
+        $response = $this->getJson(route('manager.instructor.show', ['instructor_id' => $otherInstructor->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',

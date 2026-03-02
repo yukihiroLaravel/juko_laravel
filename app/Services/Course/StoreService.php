@@ -22,7 +22,8 @@ class StoreService
         int $instructorId,
         DeadlineTypeEnum $deadlineType,
         ?string $fixedDate = null,
-        ?int $relativeDays = null
+        ?int $relativeDays = null,
+        ?int $capacity = null
     ): Course {
         // ファイルパスを作成
         $extension = $image->getClientOriginalExtension();
@@ -38,6 +39,7 @@ class StoreService
             'image' => $filePath,
             'status' => Course::STATUS_PRIVATE,
             'deadline_type' => $deadlineType->value,
+            'capacity' => $capacity,
         ]);
 
         // course_deadlines に保存（どちらか一方）

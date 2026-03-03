@@ -19,6 +19,7 @@ class CourseResource extends JsonResource
             'title' => $this->resource->title,
             'image' => $this->resource->image,
             'status' => $this->resource->status,
+            'capacity' => $this->resource->capacity,
             'deadline_type' => $this->resource->deadline_type,
             'course_deadline' => $this->resource->courseDeadline
                 ? new CourseDeadlineResource($this->resource->courseDeadline)

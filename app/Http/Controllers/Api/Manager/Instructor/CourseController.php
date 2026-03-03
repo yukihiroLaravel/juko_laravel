@@ -39,6 +39,7 @@ class CourseController extends Controller
         }
 
         $courses = Course::with(['tags', 'courseDeadline'])
+            ->withCount('attendances') 
             ->where('instructor_id', $request->instructor_id)
             ->paginate($perPage, ['*'], 'page', $page);
 

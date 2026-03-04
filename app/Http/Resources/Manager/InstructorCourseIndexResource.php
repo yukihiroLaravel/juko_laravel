@@ -28,7 +28,7 @@ class InstructorCourseIndexResource extends JsonResource
             'capacity' => $this->resource->capacity,
             'current_attendance_count' => $this->resource->capacity !== null
                 ? ($this->resource->attendances_count ?? 0)
-                : null,            
+                : null,
         ];
     }
 }

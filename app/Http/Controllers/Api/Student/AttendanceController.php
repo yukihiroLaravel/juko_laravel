@@ -21,36 +21,53 @@ use App\Services\Student\Attendance\ShowService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 /**
  * @tags Student-Attendance
  */
 class AttendanceController extends Controller
 {
-    /**
+        /**
      * 受講一覧取得API
      */
     public function index(
-        IndexRequest $request,
-        IndexService $service
-    ): AnonymousResourceCollection {
-        $perPage = $request->input('per_page', 6);
-        $page = $request->input('page', 1);
-        $tagId = $request->input('tag_id');
+    IndexRequest $request,
+    IndexService $service
+    ): ResourceCollection { 
         $studentId = Auth::id();
-        $indexDto = new IndexDto($studentId, $request->search_word);
+        
+        $attendanceId = $request->attendance_id 
+            ?? Attendance::where('student_id', $studentId)->latest()->value('id');
 
-        return AttendanceIndexResource::collection(
-            $service(
-                indexDto: $indexDto,
-                perPage: $perPage,
-                page: $page,
-                tagId: $tagId
-            )
+        if (!$attendanceId) {
+            abort(404, 'データがありません');
+        }
+
+        $attendance = Attendance::with([
+            'course.chapters.lessons',
+            'lessonAttendances',
+        ])->findOrFail($attendanceId);
+
+        $this->authorize('viewStudent', $attendance);
+
+        $progressData = $this->getYoungestUnCompletedLesson($attendance);
+
+        $results = $service(
+            indexDto: new IndexDto($studentId, $request->search_word),
+            perPage: $request->input('per_page', 6),
+            page: $request->input('page', 1),
+            tagId: $request->input('tag_id')
         );
+
+        $results->getCollection()->transform(function ($item) use ($progressData) {
+            $item->progress_data = $progressData;
+            return $item;
+        });
+
+        return AttendanceIndexResource::collection($results);
     }
 
     /**

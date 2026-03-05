@@ -234,6 +234,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                             // マネージャー-講座-チャプター-レッスン
                             Route::prefix('lesson')->name('lesson.')->group(function () {
                                 Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete'])->name('bulk-delete');
+                                Route::prefix('{lesson_id}')->group(function () {
+                                    Route::put('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'put'])->name('put');
+                                });
                             });
                         });
 

@@ -3,8 +3,8 @@
 namespace App\Services\Student\Attendance;
 
 use App\Model\Attendance;
-use App\Model\LessonAttendance;
 use App\Model\Chapter;
+use App\Model\LessonAttendance;
 
 class StudentLearningHistoryService
 {
@@ -25,43 +25,43 @@ class StudentLearningHistoryService
 
         // 全レッスン数
         $totalLessons = LessonAttendance::whereHas('attendance', function ($query) use ($studentId) {
-                $query->where('student_id', $studentId);
-            })
+            $query->where('student_id', $studentId);
+        })
             ->count();
 
         // 30日以内に完了したレッスン数
         $completedLessons = LessonAttendance::whereHas('attendance', function ($query) use ($studentId) {
-                $query->where('student_id', $studentId);
-            })
+            $query->where('student_id', $studentId);
+        })
             ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$start, $end])
             ->count();
 
         // 全チャプター数
         $totalChapters = Chapter::whereHas('course.attendances', function ($query) use ($studentId) {
-            $query->where('student_id', $studentId);            
+            $query->where('student_id', $studentId);
         })
-        ->count();
+            ->count();
 
         // 30日以内に完了したチャプター数
         $completedChapters = Chapter::whereHas('course.attendances', function ($query) use ($studentId) {
             $query->where('student_id', $studentId);
         })
-        ->whereHas('lessons.lessonAttendances', function ($query) use ($studentId) {
-            $query->whereHas('attendance', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
-            });
-        })
-        ->whereDoesntHave('lessons.lessonAttendances', function ($query) use ($studentId, $start, $end) {
-            $query->whereHas('attendance', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
+            ->whereHas('lessons.lessonAttendances', function ($query) use ($studentId) {
+                $query->whereHas('attendance', function ($q) use ($studentId) {
+                    $q->where('student_id', $studentId);
+                });
             })
-            ->where(function ($q) use ($start, $end) {
-                $q->whereNull('completed_at')
-                  ->orWhereNotBetween('completed_at', [$start, $end]);
-            });
-        })
-        ->count();
+            ->whereDoesntHave('lessons.lessonAttendances', function ($query) use ($studentId, $start, $end) {
+                $query->whereHas('attendance', function ($q) use ($studentId) {
+                    $q->where('student_id', $studentId);
+                })
+                    ->where(function ($q) use ($start, $end) {
+                        $q->whereNull('completed_at')
+                            ->orWhereNotBetween('completed_at', [$start, $end]);
+                    });
+            })
+            ->count();
 
         return [
             'window' => [

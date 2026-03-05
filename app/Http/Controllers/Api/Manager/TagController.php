@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\Manager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Requests\Manager\Tag\IndexRequest;
-use App\Http\Requests\Manager\Tag\PutRequest;
 use App\Http\Requests\Manager\Tag\ShowRequest;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Http\Resources\Manager\TagIndexResource;
@@ -13,7 +12,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use App\Services\Tag\DeleteTagService;
-use App\Services\Tag\UpdateTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -66,24 +64,6 @@ class TagController extends Controller
         });
 
         return TagIndexResource::collection($query);
-    }
-
-    /**
-     * タグ更新API
-     */
-    public function put(PutRequest $request, UpdateTagService $service): JsonResponse
-    {
-        $tag = Tag::findOrFail($request->tag_id);
-
-        // 認可処理
-        $this->authorize('update', $tag);
-
-        ($service)(
-            tag: $tag,
-            content: $request->content
-        );
-
-        return response()->json(['result' => true]);
     }
 
     /**

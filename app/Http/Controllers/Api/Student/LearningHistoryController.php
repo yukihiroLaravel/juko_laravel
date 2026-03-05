@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
+use App\Services\Student\Attendance\StudentLearningHistoryService;
 
 class LearningHistoryController extends Controller
 {
-    public function index()
+    public function index(StudentLearningHistoryService $service)
     {
-        return response()->json([]);
+        $studentId = auth()->id();
+
+        $data = $service->getStatus($studentId);
+
+        return response()->json([
+            'data' => $data
+        ]);
     }
 }

@@ -38,23 +38,6 @@ class AttendanceController extends Controller
     IndexService $service
     ): ResourceCollection { 
         $studentId = Auth::id();
-        
-        $attendanceId = $request->attendance_id 
-            ?? Attendance::where('student_id', $studentId)->latest()->value('id');
-
-        if (!$attendanceId) {
-            abort(404, 'データがありません');
-        }
-
-        $attendance = Attendance::with([
-            'course.chapters.lessons',
-            'lessonAttendances',
-        ])->findOrFail($attendanceId);
-
-        $this->authorize('viewStudent', $attendance);
-
-        $progressData = $this->getYoungestUnCompletedLesson($attendance);
-
         $results = $service(
             indexDto: new IndexDto($studentId, $request->search_word),
             perPage: $request->input('per_page', 6),
@@ -62,9 +45,9 @@ class AttendanceController extends Controller
             tagId: $request->input('tag_id')
         );
 
-        $results->getCollection()->transform(function ($item) use ($progressData) {
-            $item->progress_data = $progressData;
-            return $item;
+        $results->getCollection()->transform(function ($attendance) {
+        $attendance->continue_from = $this->getContinueFrom($attendance);
+        return $attendance;
         });
 
         return AttendanceIndexResource::collection($results);
@@ -275,5 +258,35 @@ class AttendanceController extends Controller
         }
 
         return $youngestUnCompletedLesson;
+    }
+
+    /**
+     * 続きのレッスンIDとタイトル、それを含むチャプターIDとタイトルを取得する
+     *
+     * @param  Attendance  $attendance
+     * @return array | null
+     */
+    private function getContinueFrom($attendance)
+    {
+        foreach ($attendance->course->chapters as $chapter) {
+            $incompleteLesson = $chapter->lessons->first(function ($lesson) use ($attendance) {
+                $status = $attendance->lessonAttendances
+                    ->where('lesson_id', $lesson->id)
+                    ->first()?->status;
+
+                return $status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+            });
+
+            if ($incompleteLesson) {
+                return [
+                    'chapter_id'    => $chapter->id,
+                    'chapter_title' => $chapter->title,
+                    'lesson_id'     => $incompleteLesson->id,
+                    'lesson_title'  => $incompleteLesson->title,
+                ];
+            };
+        }
+        
+        return null;
     }
 }

@@ -20,7 +20,7 @@ class CourseResource extends JsonResource
             'image' => $this->resource->image,
             'status' => $this->resource->status,
             'deadline_type' => $this->resource->deadline_type,
-            'capacity' => $this->resource->capacity, // 定員人数を追記
+            'capacity' => $this->resource->capacity,
             'course_deadline' => $this->resource->courseDeadline
                 ? new CourseDeadlineResource($this->resource->courseDeadline)
                 : null,

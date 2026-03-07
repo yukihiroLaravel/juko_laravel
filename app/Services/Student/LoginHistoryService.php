@@ -4,23 +4,28 @@ namespace App\Services\Student;
 
 use App\Model\StudentLoginHistory;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class LoginHistoryService
 {
-    public function getLoginHistories(
+    public function __invoke(
         int $studentId,
-        Carbon $startDate,
-        Carbon $endDate
-    ): array {
+        ?Carbon $startDate,
+        ?Carbon $endDate
+    ): Collection {
 
-        $histories = StudentLoginHistory::where('student_id', $studentId)
-            ->whereBetween('logged_in_at', [$startDate, $endDate])
+        $query = StudentLoginHistory::where('student_id', $studentId);
+
+        if ($startDate) {
+            $query->where('logged_in_at', '>=', $startDate);
+        }
+
+        if ($endDate) {
+            $query->where('logged_in_at', '<=', $endDate);
+        }
+
+        return $query
             ->orderByDesc('logged_in_at')
             ->get();
-
-        return [
-            'count' => $histories->count(),
-            'histories' => $histories
-        ];
     }
 }

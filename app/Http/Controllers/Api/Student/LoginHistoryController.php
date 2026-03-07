@@ -18,25 +18,25 @@ class LoginHistoryController extends Controller
         LoginHistoryService $service
     ): JsonResponse {
 
-        $studentId = Auth::id(); 
+        $studentId = $request->user()->id;
 
         $startDate = $request->start_date
-        ? Carbon::parse($request->start_date)->startOfDay()
-        : now()->subMonth()->startOfDay();
+            ? Carbon::parse($request->start_date)->startOfDay()
+            : null;
 
         $endDate = $request->end_date
             ? Carbon::parse($request->end_date)->endOfDay()
-            : now()->endOfDay();
+            : null;
 
-        $result = $service->getLoginHistories(
+        $histories = $service(
             $studentId,
             $startDate,
             $endDate
         );
 
         return response()->json([
-            'login_count' => $result['count'],
-            'login_histories' => LoginHistoryResource::collection($result['histories']),
+            'login_count' => $histories->count(),
+            'login_histories' => LoginHistoryResource::collection($histories),
         ]);
     }
 }

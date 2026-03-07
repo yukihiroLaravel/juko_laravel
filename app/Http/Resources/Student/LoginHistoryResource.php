@@ -15,8 +15,8 @@ class LoginHistoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'logged_in_at' => $this->logged_in_at,
+            'student_login_history_id' => $this->resource->id,
+            'logged_in_at' => $this->resource->logged_in_at,
         ];
     }
 }

@@ -109,7 +109,6 @@ class AttendanceController extends Controller
         return new AttendanceShowResource([
             'attendance' => $attendance,
             'studentsCount' => $studentsCount,
-            'capacity' => $attendance->course->capacity,
         ]);
     }
 

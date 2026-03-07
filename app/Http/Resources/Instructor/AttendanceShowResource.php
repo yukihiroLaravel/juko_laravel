@@ -19,6 +19,7 @@ class AttendanceShowResource extends JsonResource
         return [
             ...(new AttendanceResource($this->resource['attendance']))->toArray($request),
             'students_count' => $this->resource['studentsCount'],
+            'capacity' => $this->resource['attendance']->course->capacity,
         ];
     }
 }

@@ -100,17 +100,4 @@ class TagController extends Controller
 
         return response()->json(['result' => true]);
     }
-
-    /**
-     * タグ詳細取得API
-     */
-    public function show(ShowRequest $request): TagResource
-    {
-        $tag = Tag::findOrFail($request->tag_id);
-
-        // 認可処理
-        $this->authorize('view', $tag);
-
-        return new TagResource($tag);
-    }
 }

@@ -3,15 +3,15 @@
 namespace App\Services\Student;
 
 use App\Model\StudentLoginHistory;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 
 class LoginHistoryService
 {
     public function __invoke(
         int $studentId,
-        ?Carbon $startDate,
-        ?Carbon $endDate
+        ?CarbonImmutable $startDate,
+        ?CarbonImmutable $endDate
     ): Collection {
 
         $query = StudentLoginHistory::where('student_id', $studentId);

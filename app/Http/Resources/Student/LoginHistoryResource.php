@@ -7,11 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class LoginHistoryResource extends JsonResource
 {
+    /** @var \App\Model\StudentLoginHistory */
+    public $resource;
+
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
+    #[\Override]
     public function toArray(Request $request): array
     {
         return [

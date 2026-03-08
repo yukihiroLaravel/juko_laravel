@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\LoginHistoryRequest;
 use App\Http\Resources\Student\LoginHistoryResource;
 use App\Services\Student\LoginHistoryService;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-
 
 class LoginHistoryController extends Controller
 {
@@ -21,11 +19,11 @@ class LoginHistoryController extends Controller
         $studentId = $request->user()->id;
 
         $startDate = $request->start_date
-            ? Carbon::parse($request->start_date)->startOfDay()
+            ? CarbonImmutable::parse($request->start_date)->startOfDay()
             : null;
 
         $endDate = $request->end_date
-            ? Carbon::parse($request->end_date)->endOfDay()
+            ? CarbonImmutable::parse($request->end_date)->endOfDay()
             : null;
 
         $histories = $service(

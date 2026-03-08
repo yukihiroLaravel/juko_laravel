@@ -15,7 +15,7 @@ class LearningHistoryController extends Controller
         $data = $service->getLearningHistoryStats($studentId);
 
         return response()->json([
-            'data' => $data
+            'data' => $data,
         ]);
     }
 }

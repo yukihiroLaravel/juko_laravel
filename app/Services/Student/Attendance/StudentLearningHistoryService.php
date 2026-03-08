@@ -3,9 +3,9 @@
 namespace App\Services\Student\Attendance;
 
 use App\Model\Attendance;
-use App\Model\LessonAttendance;
 use App\Model\Chapter;
 use Carbon\CarbonImmutable;
+use App\Model\LessonAttendance;
 
 class StudentLearningHistoryService
 {

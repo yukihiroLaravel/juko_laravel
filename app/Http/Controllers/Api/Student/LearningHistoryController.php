@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Services\Student\Attendance\StudentLearningHistoryService;
+use Illuminate\Http\Request;
 
 class LearningHistoryController extends Controller
 {
-    public function index(StudentLearningHistoryService $service)
+    public function index(Request $request, StudentLearningHistoryService $service)
     {
-        $studentId = auth()->id();
+        $studentId = $request->user()->id;
 
-        $data = $service->getStatus($studentId);
+        $data = $service->getLearningHistoryStats($studentId);
 
         return response()->json([
             'data' => $data

@@ -5,84 +5,81 @@ namespace App\Services\Student\Attendance;
 use App\Model\Attendance;
 use App\Model\LessonAttendance;
 use App\Model\Chapter;
+use Carbon\CarbonImmutable;
 
 class StudentLearningHistoryService
 {
-    public function getStatus(int $studentId): array
+    public function getLearningHistoryStats(int $studentId): array
     {
-        $now = now();
-        $start = $now->copy()->subDays(30);
-        $end = $now;
+        $end = CarbonImmutable::now();
+        $start = $end->subDays(30);
 
-        // 講座の全数
-        $totalCourses = Attendance::where('student_id', $studentId)->count();
-
-        // 30日以内に完了した講座
-        $completedCourses = Attendance::where('student_id', $studentId)
-            ->whereNotNull('completed_at')
-            ->whereBetween('completed_at', [$start, $end])
-            ->count();
-
-        // 全レッスン数
-        $totalLessons = LessonAttendance::whereHas('attendance', function ($query) use ($studentId) {
-                $query->where('student_id', $studentId);
-            })
-            ->count();
-
-        // 30日以内に完了したレッスン数
-        $completedLessons = LessonAttendance::whereHas('attendance', function ($query) use ($studentId) {
-                $query->where('student_id', $studentId);
-            })
-            ->whereNotNull('completed_at')
-            ->whereBetween('completed_at', [$start, $end])
-            ->count();
-
-        // 全チャプター数
-        $totalChapters = Chapter::whereHas('course.attendances', function ($query) use ($studentId) {
-            $query->where('student_id', $studentId);            
-        })
-        ->count();
-
-        // 30日以内に完了したチャプター数
-        $completedChapters = Chapter::whereHas('course.attendances', function ($query) use ($studentId) {
-            $query->where('student_id', $studentId);
-        })
-        ->whereHas('lessons.lessonAttendances', function ($query) use ($studentId) {
-            $query->whereHas('attendance', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
-            });
-        })
-        ->whereDoesntHave('lessons.lessonAttendances', function ($query) use ($studentId, $start, $end) {
-            $query->whereHas('attendance', function ($q) use ($studentId) {
-                $q->where('student_id', $studentId);
-            })
-            ->where(function ($q) use ($start, $end) {
-                $q->whereNull('completed_at')
-                  ->orWhereNotBetween('completed_at', [$start, $end]);
-            });
-        })
-        ->count();
-
-        return [
+         return [
             'window' => [
                 'type' => 'last_30_days',
                 'start' => $start->format('Y-m-d'),
                 'end' => $end->format('Y-m-d'),
             ],
             'stats' => [
-                'courses' => [
-                    'completed' => $completedCourses,
-                    'total' => $totalCourses,
-                ],
-                'lessons' => [
-                    'completed' => $completedLessons,
-                    'total' => $totalLessons,
-                ],
-                'chapters' => [
-                    'completed' => $completedChapters,
-                    'total' => $totalChapters,
-                ],
+                'courses' => $this->getCourseStats($studentId,$start,$end),
+                'lessons' => $this->getLessonStats($studentId,$start,$end),
+                'chapters' => $this->getChapterStats($studentId,$start,$end),
             ],
         ];
+    }
+
+        // 全コースが完了した数
+        private function getCourseStats(int $studentId, CarbonImmutable $start, CarbonImmutable $end): array
+        {
+            $query = Attendance::where('student_id', $studentId);
+
+            return [
+                'completed' => (clone $query)->whereBetween('completed_at', [$start, $end])->count(),
+                'total' => $query->count(),
+            ];
+        }
+        
+        // 全レッスンが完了した数
+        private function getLessonStats(int $studentId, CarbonImmutable $start, CarbonImmutable $end): array
+        {
+            $query = LessonAttendance::whereHas('attendance', function ($q) use ($studentId) {
+                $q->where('student_id', $studentId);
+            });
+
+            return [
+                'completed' => (clone $query)->whereBetween('completed_at', [$start, $end])->count(),
+                'total' => $query->count(),
+            ];
+        }
+        
+        private function getChapterStats(int $studentId, CarbonImmutable $start, CarbonImmutable $end): array
+        {
+            $baseQuery = Chapter::whereHas('course.attendances', function ($q) use ($studentId) {
+                $q->where('student_id', $studentId);
+            });
+
+            $total = (clone $baseQuery)->count();
+
+             // チャプター内の全レッスンが期間内に完了しているチャプターを数える
+            $completed = (clone $baseQuery)
+                ->withCount([
+                    'lessons',
+                    'lessons as completed_lessons_count' => function ($q) use ($studentId, $start, $end) {
+                        $q->whereHas('lessonAttendances', function ($q2) use ($studentId, $start, $end) {
+                            $q2->whereHas('attendance', function ($q3) use ($studentId) {
+                                $q3->where('student_id', $studentId);
+                            })->whereBetween('completed_at', [$start, $end]);
+                        });
+                    },
+                ])
+                ->get()
+                ->filter(fn (Chapter $chapter) => $chapter->lessons_count > 0
+                    && $chapter->lessons_count === $chapter->completed_lessons_count)
+                ->count();
+
+            return [
+                'completed' => $completed,
+                'total' => $total,
+            ];
     }
 }

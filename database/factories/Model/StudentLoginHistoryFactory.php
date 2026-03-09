@@ -1,0 +1,28 @@
+<?php
+
+namespace Database\Factories\Model;
+
+use App\Model\StudentLoginHistory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model>
+ */
+class StudentLoginHistoryFactory extends Factory
+{
+    protected $model = StudentLoginHistory::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    public function definition(): array
+    {
+        return [
+            'student_id' => \App\Model\Student::factory(),
+            'logged_in_at' => fake()->dateTimeBetween('-1 year', 'now'),
+        ];
+    }
+}

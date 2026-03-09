@@ -18,6 +18,7 @@ use App\Model\Chapter;
 use App\Model\LessonAttendance;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
+use App\Services\Student\Attendance\ContinueFromService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -35,7 +36,8 @@ class AttendanceController extends Controller
      */
     public function index(
     IndexRequest $request,
-    IndexService $service
+    IndexService $service,
+    ContinueFromService $continueFromService
     ): ResourceCollection { 
         $studentId = Auth::id();
         $results = $service(
@@ -45,9 +47,9 @@ class AttendanceController extends Controller
             tagId: $request->input('tag_id')
         );
 
-        $results->getCollection()->transform(function ($attendance) {
-        $attendance->continue_from = $this->getContinueFrom($attendance);
-        return $attendance;
+        $results->getCollection()->transform(function ($attendance) use ($continueFromService) {
+            $attendance->continue_from = $continueFromService($attendance);
+            return $attendance;
         });
 
         return AttendanceIndexResource::collection($results);
@@ -76,7 +78,10 @@ class AttendanceController extends Controller
     /**
      * 受講講座の進捗情報を取得
      */
-    public function progress(ProgressRequest $request): AttendanceCourseProgressResource
+    public function progress(
+        ProgressRequest $request,
+        ContinueFromService $continueFromService
+    ): AttendanceCourseProgressResource
     {
         $attendance = Attendance::with([
             'course.chapters.lessons',
@@ -91,7 +96,7 @@ class AttendanceController extends Controller
             'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
             'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance),
+            'youngestUnCompletedLesson' => $continueFromService($attendance),
         ];
 
         return new AttendanceCourseProgressResource([
@@ -219,74 +224,5 @@ class AttendanceController extends Controller
         }
 
         return $totalLessonsCount;
-    }
-
-    /**
-     * 続きのレッスンIDと、それを含むチャプターのIDを取得する
-     *
-     * @param  Attendance  $attendance
-     * @return array | null
-     */
-    private function getYoungestUnCompletedLesson($attendance)
-    {
-        // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
-        $youngestUnCompletedLesson = [
-            'chapter_id' => null,
-            'lesson_id' => null,
-        ];
-        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLesson) {
-            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
-                return;
-            }
-
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    if ($youngestUnCompletedLesson['lesson_id'] === null) {
-                        $youngestUnCompletedLesson = [
-                            'chapter_id' => $chapter->id,
-                            'lesson_id' => $lesson->id,
-                        ];
-
-                        return;
-                    }
-                }
-            });
-        });
-        if ($youngestUnCompletedLesson['lesson_id'] === null) {
-            return null;
-        }
-
-        return $youngestUnCompletedLesson;
-    }
-
-    /**
-     * 続きのレッスンIDとタイトル、それを含むチャプターIDとタイトルを取得する
-     *
-     * @param  Attendance  $attendance
-     * @return array | null
-     */
-    private function getContinueFrom($attendance)
-    {
-        foreach ($attendance->course->chapters as $chapter) {
-            $incompleteLesson = $chapter->lessons->first(function ($lesson) use ($attendance) {
-                $status = $attendance->lessonAttendances
-                    ->where('lesson_id', $lesson->id)
-                    ->first()?->status;
-
-                return $status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            });
-
-            if ($incompleteLesson) {
-                return [
-                    'chapter_id'    => $chapter->id,
-                    'chapter_title' => $chapter->title,
-                    'lesson_id'     => $incompleteLesson->id,
-                    'lesson_title'  => $incompleteLesson->title,
-                ];
-            };
-        }
-        
-        return null;
     }
 }

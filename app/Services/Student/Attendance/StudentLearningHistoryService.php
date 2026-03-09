@@ -9,7 +9,7 @@ use App\Model\LessonAttendance;
 
 class StudentLearningHistoryService
 {
-    public function getLearningHistoryStats(int $studentId): array
+    public function __invoke(int $studentId): array
     {
         $end = CarbonImmutable::now();
         $start = $end->subDays(30);

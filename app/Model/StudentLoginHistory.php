@@ -5,16 +5,11 @@ namespace App\Model;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Database\Factories\StudentLoginHistoryFactory;
 
 class StudentLoginHistory extends Model
 {
     use HasFactory;
-    // 追加
-    protected static function newFactory(): StudentLoginHistoryFactory
-    {
-        return StudentLoginHistoryFactory::new();
-    }
+
     /**
      * モデルと関連しているテーブル
      *

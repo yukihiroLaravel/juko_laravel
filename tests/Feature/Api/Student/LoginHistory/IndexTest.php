@@ -25,7 +25,7 @@ class IndexTest extends TestCase
             'logged_in_at' => '2026-01-01 10:00:00',
         ]);
 
-        $this->actingAs($student, 'sanctum'); // Sanctum認証
+        $this->actingAs($student, 'web'); // Sanctum認証
         
         // Act
         $response = $this->getJson(route('student.login_histories', [

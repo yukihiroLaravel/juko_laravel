@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Model;
 
 use App\Model\StudentLoginHistory;
 use Illuminate\Database\Eloquent\Factories\Factory;

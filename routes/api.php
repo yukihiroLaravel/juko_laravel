@@ -194,7 +194,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-タグ
                 Route::prefix('tag')->name('tag.')->group(function () {
                     Route::prefix('{tag_id}')->group(function () {
-                        Route::put('/', [App\Http\Controllers\Api\Manager\TagController::class, 'put'])->name('put');
                         Route::delete('/', [App\Http\Controllers\Api\Manager\TagController::class, 'delete'])->name('delete');
                         Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show'])->name('show');
                     });
@@ -255,7 +254,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-生徒
                 Route::prefix('student')->name('student.')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\StudentController::class, 'index'])->name('index');
-                    Route::get('{student_id}', [App\Http\Controllers\Api\Manager\StudentController::class, 'show'])->name('show');
                 });
                 // マネージャー-お知らせ
                 Route::prefix('notification')->name('notification.')->group(function () {

@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Student\IndexRequest;
-use App\Http\Requests\Manager\Student\ShowRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Student\QueryService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;

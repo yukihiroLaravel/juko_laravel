@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Instructor;
 
 use App\Http\Resources\Base\Instructor\AttendanceResource;
+use App\Http\Resources\Base\Instructor\CourseResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowResource extends JsonResource
@@ -18,8 +19,8 @@ class AttendanceShowResource extends JsonResource
     {
         return [
             ...(new AttendanceResource($this->resource['attendance']))->toArray($request),
+            'course' => new CourseResource($this->resource['attendance']->course),
             'students_count' => $this->resource['studentsCount'],
-            'capacity' => $this->resource['attendance']->course->capacity,
         ];
     }
 }

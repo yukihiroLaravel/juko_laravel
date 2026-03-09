@@ -28,7 +28,7 @@ class StudentLearningHistoryService
         ];
     }
 
-        // 全コースが完了した数
+        // 30日以内に完了したコース数
         private function getCourseStats(int $studentId, CarbonImmutable $start, CarbonImmutable $end): array
         {
             $query = Attendance::where('student_id', $studentId);
@@ -39,7 +39,7 @@ class StudentLearningHistoryService
             ];
         }
         
-        // 全レッスンが完了した数
+        // 30日以内に完了したレッスン数
         private function getLessonStats(int $studentId, CarbonImmutable $start, CarbonImmutable $end): array
         {
             $query = LessonAttendance::whereHas('attendance', function ($q) use ($studentId) {

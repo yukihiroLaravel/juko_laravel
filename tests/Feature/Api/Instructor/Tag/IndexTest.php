@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Tag;
 
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,24 +11,17 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_タグ一覧取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        Tag::factory()->count(3)->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/tag/index');
+        // Act
+        $response = $this->getJson(route('instructor.tag.index'));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(3, 'data');
     }

@@ -34,6 +34,7 @@ class Student extends Authenticatable
         'gender',
         'address',
         'profile_image',
+        'last_login_at',
     ];
 
     /**
@@ -54,6 +55,16 @@ class Student extends Authenticatable
     public function notifications()
     {
         return $this->belongsToMany(Notification::class, 'viewed_once_notifications', 'student_id', 'notification_id')->withTimestamps();
+    }
+
+    /**
+     * ログイン履歴を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function loginHistories()
+    {
+        return $this->hasMany(StudentLoginHistory::class);
     }
 
     /**

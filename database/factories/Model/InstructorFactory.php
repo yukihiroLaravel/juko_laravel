@@ -12,8 +12,13 @@ class InstructorFactory extends Factory
 {
     protected $model = Instructor::class;
 
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     #[\Override]
-    public function definition()
+    public function definition(): array
     {
         return [
             'nick_name' => fake()->firstName,

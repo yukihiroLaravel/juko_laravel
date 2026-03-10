@@ -27,6 +27,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @tags Instructor-Course
@@ -109,6 +110,7 @@ class CourseController extends Controller
                 deadlineType: DeadlineTypeEnum::from($request->deadline_type),
                 fixedDate: $request->fixed_date,
                 relativeDays: $request->relative_days,
+                capacity: $request->capacity,
             );
 
             DB::commit();
@@ -136,6 +138,17 @@ class CourseController extends Controller
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
+            // 定員が現在の受講者数を下回っていないかチェック
+            $capacity = $request->input('capacity');
+            if ($capacity !== null) {
+                $attendanceCount = $course->attendances()->count();
+                if ($attendanceCount > $capacity) {
+                    throw ValidationException::withMessages([
+                        'capacity' => '定員は現在の受講者数（'.$attendanceCount.'人）以上に設定してください。',
+                    ]);
+                }
+            }
+
             $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
             $fixedDate = $request->fixed_date;
             $relativeDays = $request->relative_days;
@@ -150,6 +163,7 @@ class CourseController extends Controller
                 calculateDeadline: $calculateDeadline,
                 fixedDate: $fixedDate,
                 relativeDays: $relativeDays,
+                capacity: $request->capacity,
             );
 
             DB::commit();

@@ -17,3 +17,7 @@ yarn-error.log
 /_ide_helper_models.php
 .vscode/launch.json
 .vscode/settings.json
+
+CLAUDE.md
+/.serena
+/.claude

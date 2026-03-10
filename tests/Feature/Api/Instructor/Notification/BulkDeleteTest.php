@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,47 +12,55 @@ class BulkDeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_お知らせ一括削除_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $notification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/notification', [
-            'notifications' => [2],
+        // Act
+        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
+            'notifications' => [$notification->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
         ]);
         $this->assertSoftDeleted('notifications', [
-            'id' => 2,
+            'id' => $notification->id,
         ]);
     }
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange — 自分のと他人のお知らせを混ぜて一括削除
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $ownNotification = Notification::factory()->create([
+            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+        ]);
+        $otherInstructor = Instructor::factory()->create();
+        $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
+        $otherNotification = Notification::factory()->create([
+            'instructor_id' => $otherInstructor->id,
+            'course_id' => $otherCourse->id,
+        ]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/notification', [
-            'notifications' => [1, 2],
+        // Act
+        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
+            'notifications' => [$otherNotification->id, $ownNotification->id],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -59,16 +69,16 @@ class BulkDeleteTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->deleteJson('/api/v1/instructor/notification', [
+        // Act
+        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
             'notifications' => [],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'notifications',

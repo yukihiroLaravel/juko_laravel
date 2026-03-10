@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,49 +11,44 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_チャプター登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/1/chapter', [
+        // Act
+        $response = $this->postJson(route('instructor.chapter.store', ['course_id' => $course->id]), [
             'title' => 'title',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
             'chapter_id',
         ]);
         $this->assertDatabaseHas('chapters', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'title' => 'title',
         ]);
     }
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別の講師の講座にチャプターを作成
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/1/chapter', [
+        // Act
+        $response = $this->postJson(route('instructor.chapter.store', ['course_id' => $course->id]), [
             'title' => 'title',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -61,16 +57,16 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/aaa/chapter', [
+        // Act
+        $response = $this->postJson(route('instructor.chapter.store', ['course_id' => 'aaa']), [
             'title' => '',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

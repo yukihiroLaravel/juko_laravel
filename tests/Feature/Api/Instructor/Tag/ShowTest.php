@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Tag;
 
 use App\Model\Instructor;
+use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,37 +11,30 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_タグ取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/tag/2');
+        // Act
+        $response = $this->getJson(route('instructor.tag.show', ['tag_id' => $tag->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/tag/aaa');
+        // Act
+        $response = $this->getJson(route('instructor.tag.show', ['tag_id' => 'aaa']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['tag_id']);
     }

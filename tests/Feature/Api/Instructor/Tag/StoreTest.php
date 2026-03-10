@@ -10,26 +10,18 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_タグ登録_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/tag', [
+        // Act
+        $response = $this->postJson(route('instructor.tag.store'), [
             'content' => 'test',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('tags', [
             'instructor_id' => $instructor->id,
@@ -39,14 +31,14 @@ class StoreTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/tag');
+        // Act
+        $response = $this->postJson(route('instructor.tag.store'));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'content',

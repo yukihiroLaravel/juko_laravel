@@ -16,41 +16,42 @@ use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;
+use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
-use App\Services\Student\Attendance\ContinueFromService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Resources\Json\ResourceCollection;
 
 /**
  * @tags Student-Attendance
  */
 class AttendanceController extends Controller
 {
-        /**
+    /**
      * 受講一覧取得API
      */
     public function index(
-    IndexRequest $request,
-    IndexService $service,
-    ContinueFromService $continueFromService
-    ): ResourceCollection { 
-        $studentId = Auth::id();
+        IndexRequest $request,
+        IndexService $service,
+        ContinueFromService $continueFromService
+    ): AnonymousResourceCollection {
+        $userId = $request->user()->id;
         $results = $service(
-            indexDto: new IndexDto($studentId, $request->search_word),
+            indexDto: new IndexDto($userId, $request->search_word),
             perPage: $request->input('per_page', 6),
             page: $request->input('page', 1),
             tagId: $request->input('tag_id')
         );
 
-        $results->getCollection()->transform(function ($attendance) use ($continueFromService) {
-            $attendance->continue_from = $continueFromService($attendance);
-            return $attendance;
-        });
+        $continueFromMap = [];
+        foreach ($results as $attendance) {
+            $continueFromMap[$attendance->id] = $continueFromService($attendance);
+        }
+
+        AttendanceIndexResource::withContinueFromMap($continueFromMap);
 
         return AttendanceIndexResource::collection($results);
     }
@@ -81,8 +82,7 @@ class AttendanceController extends Controller
     public function progress(
         ProgressRequest $request,
         ContinueFromService $continueFromService
-    ): AttendanceCourseProgressResource
-    {
+    ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
@@ -93,10 +93,13 @@ class AttendanceController extends Controller
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
-            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
+            'totalChaptersCount' => $attendance->course->chapters->count(),
+            'completedLessonsCount' => $attendance
+                ->lessonAttendances
+                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->count(),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'youngestUnCompletedLesson' => $continueFromService($attendance),
+            'continueFrom' => $continueFromService($attendance)?->toArray(),
         ];
 
         return new AttendanceCourseProgressResource([
@@ -185,28 +188,6 @@ class AttendanceController extends Controller
 
             return $isCompleted;
         })->count();
-    }
-
-    /**
-     * チャプター合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalChaptersCount($attendance)
-    {
-        return $attendance->course->chapters->count();
-    }
-
-    /**
-     * 完了済みのレッスン数を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getCompletedLessonsCount($attendance)
-    {
-        return $attendance->lessonAttendances->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
     }
 
     /**

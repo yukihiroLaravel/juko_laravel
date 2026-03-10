@@ -31,7 +31,7 @@ class AttendanceCourseProgressResource extends JsonResource
             'number_of_total_chapters' => $progressData['totalChaptersCount'],
             'number_of_completed_lessons' => $progressData['completedLessonsCount'],
             'number_of_total_lessons' => $progressData['totalLessonsCount'],
-            'continue_lesson' => $progressData['youngestUnCompletedLesson'],
+            'continue_from' => $progressData['continueFrom'],
         ];
     }
 }

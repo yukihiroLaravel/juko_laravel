@@ -11,6 +11,7 @@ use App\Http\Requests\Instructor\Course\PutStatusRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
+use App\Http\Requests\Instructor\Course\ClearCapacityRequest;
 use App\Http\Resources\Instructor\CourseIndexResource;
 use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
@@ -20,6 +21,7 @@ use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
+use App\Services\Course\ClearCapacityService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -251,5 +253,22 @@ class CourseController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+
+    /**
+     * 受講定員一括削除API
+     */
+    public function clearCapacity(ClearCapacityRequest $request, ClearCapacityService $service): JsonResponse
+    {
+        $courses = Course::whereIn('id', $request->input('courses', []))->get();
+
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        $updatedCount = $service($courses);
+
+        return response()->json([
+            'result' => true,
+            'updated_count' => $updatedCount,
+        ]);
     }
 }

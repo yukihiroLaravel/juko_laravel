@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use App\Services\Student\Attendance\StudentLearningHistoryService;
 use Illuminate\Http\Request;
+use App\Http\Resources\Student\LearningHistoryResource;
 
 class LearningHistoryController extends Controller
 {
@@ -14,8 +15,6 @@ class LearningHistoryController extends Controller
 
         $data = $service($studentId);
 
-        return response()->json([
-            'data' => $data,
-        ]);
+        return new LearningHistoryResource($data);
     }
 }

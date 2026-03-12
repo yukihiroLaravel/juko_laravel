@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager\Tag;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PutRequest extends FormRequest
+class LoginHistoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -12,14 +12,6 @@ class PutRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-    }
-
-    #[\Override]
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'tag_id' => $this->route('tag_id'),
-        ]);
     }
 
     /**
@@ -30,8 +22,8 @@ class PutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tag_id' => ['required', 'integer', 'exists:tags,id'],
-            'content' => ['required', 'string'],
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:start_date'],
         ];
     }
 }

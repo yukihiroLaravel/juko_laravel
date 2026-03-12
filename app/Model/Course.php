@@ -166,4 +166,17 @@ class Course extends Model
             'capacity' => 'integer',
         ];
     }
+
+    /**
+     * 定員に空きがあるか
+     */
+    public function hasCapacity(): bool
+    {
+        // 定員無制限の場合
+        if ($this->capacity === null) {
+            return true;
+        }
+
+        return $this->attendances()->count() < $this->capacity;
+    }
 }

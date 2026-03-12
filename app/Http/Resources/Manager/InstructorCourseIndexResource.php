@@ -25,6 +25,9 @@ class InstructorCourseIndexResource extends JsonResource
             ...(new CourseResource($this->resource))->toArray($request),
             'updated_at' => $this->resource->updated_at->format('Y/m/d H:i:s'),
             'tags' => TagResource::collection($this->resource->tags),
+            'current_attendance_count' => $this->resource->capacity !== null
+                ? ($this->resource->attendances_count ?? 0)
+                : null,
         ];
     }
 }

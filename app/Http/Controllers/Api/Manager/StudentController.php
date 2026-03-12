@@ -4,17 +4,11 @@ namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Student\IndexRequest;
-use App\Http\Requests\Manager\Student\ShowRequest;
-use App\Http\Requests\Manager\Student\StoreRequest;
 use App\Http\Resources\Manager\StudentIndexResource;
-use App\Http\Resources\Manager\StudentShowResource;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Services\Student\QueryService;
-use App\Services\Student\StoreStudentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -96,34 +90,5 @@ class StudentController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new StudentIndexResource($results);
-    }
-
-    /**
-     * 受講生詳細取得API
-     *
-     * @return StudentShowResource|\Illuminate\Http\JsonResponse
-     */
-    public function show(ShowRequest $request, QueryService $queryService)
-    {
-        $student = $queryService->getStudent($request->student_id);
-
-        $this->authorize('view', $student);
-
-        return new StudentShowResource($student);
-    }
-
-    /**
-     * 受講生登録API
-     */
-    public function store(StoreRequest $request, StoreStudentService $service): JsonResponse
-    {
-        ($service)($request->only([
-            'given_name_by_instructor',
-            'email',
-        ]));
-
-        return response()->json([
-            'result' => true,
-        ]);
     }
 }

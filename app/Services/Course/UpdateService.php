@@ -29,6 +29,7 @@ class UpdateService
         CalculateDeadlineService $calculateDeadline,
         ?string $fixedDate = null,
         ?int $relativeDays = null,
+        ?int $capacity = null,
     ): void {
         // 画像パスを取得
         $imagePath = $this->getImagePath($course, $imageFile);
@@ -38,6 +39,7 @@ class UpdateService
             'image' => $imagePath,
             'status' => $status,
             'deadline_type' => $deadlineType->value,
+            'capacity' => $capacity,
         ]);
 
         if (! CourseDeadline::hasDeadline($deadlineType)) {

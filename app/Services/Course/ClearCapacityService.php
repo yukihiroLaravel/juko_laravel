@@ -8,12 +8,15 @@ use Illuminate\Validation\ValidationException;
 
 class ClearCapacityService
 {
+    /**
+     * @param Collection<int, Course> $courses
+     */
     public function __invoke(Collection $courses): int
     {
         // 受講が存在する講座がある場合はエラー
-        $hasCourseWithAttendances = $courses->contains(
+        $hasCourseWithAttendances = $courses->filter(
             fn (Course $course) => $course->attendances()->exists()
-        );
+        )->isNotEmpty();
 
         if ($hasCourseWithAttendances) {
             throw ValidationException::withMessages([

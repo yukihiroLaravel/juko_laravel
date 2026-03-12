@@ -14,7 +14,7 @@ class ClearCapacityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courses'   => ['required', 'array', 'min:1'],
+            'courses' => ['required', 'array', 'min:1'],
             'courses.*' => ['required', 'integer', 'exists:courses,id'],
         ];
     }

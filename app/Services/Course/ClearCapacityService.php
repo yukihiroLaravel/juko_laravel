@@ -11,11 +11,11 @@ use Illuminate\Validation\ValidationException;
 class ClearCapacityService
 {
     /**
-     * @param Collection<int, Course> $courses
+     * @param  Collection<int, Course>  $courses
      */
     public function __invoke(Collection $courses): int
     {
-        return DB::transaction(function () use ($courses) {           
+        return DB::transaction(function () use ($courses) {
             $courseIds = $courses->pluck('id');
 
             // N+1を避けるため1クエリでチェック

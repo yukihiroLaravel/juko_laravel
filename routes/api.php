@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::prefix('student')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
+            Route::get('learning-history', [App\Http\Controllers\Api\Student\LearningHistoryController::class, 'index'])->name('learning-history.index');
             Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
         });
 

@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index'])->name('index');
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store'])->name('store');
                     Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus'])->name('put-status');
+                    Route::put('capacity', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putCapacity'])->name('put-capacity');
                     Route::delete('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'bulkDelete'])->name('bulk-delete');
                     Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index'])->name('tag.index');
                     Route::patch('deadline', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'bulkUpdate'])->name('deadline.bulk-update');

@@ -223,6 +223,16 @@ class CourseController extends Controller
     }
 
     /**
+     * 受講定員一括変更API
+     */
+    public function putCapacity(): JsonResponse
+    {
+        return response()->json([
+            'result' => true,
+        ]);
+    }
+
+    /**
      * 講座一括削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, DeleteService $service): JsonResponse

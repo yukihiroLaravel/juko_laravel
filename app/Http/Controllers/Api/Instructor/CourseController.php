@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Course\ClearCapacityRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
@@ -16,6 +17,7 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
+use App\Services\Course\ClearCapacityService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
@@ -251,5 +253,22 @@ class CourseController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+
+    /**
+     * 受講定員一括削除API
+     */
+    public function clearCapacity(ClearCapacityRequest $request, ClearCapacityService $service): JsonResponse
+    {
+        $courses = Course::whereIn('id', $request->input('courses', []))->get();
+
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        $updatedCount = $service($courses);
+
+        return response()->json([
+            'result' => true,
+            'updated_count' => $updatedCount,
+        ]);
     }
 }

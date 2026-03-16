@@ -19,16 +19,21 @@ class InstructorIndexResource extends JsonResource
     {
         /** @var LengthAwarePaginator $data */
         $data = $this->resource;
-
         return [
-            'instructors' => $data->getCollection()->map(fn (Instructor $instructor) => [
-                'instructor_id' => $instructor->id,
-                'nick_name' => $instructor->nick_name,
-                'email' => $instructor->email,
-                'profile_image' => $instructor->profile_image,
-                'course_count' => $instructor->courses()->count(),
-                'student_count' => $instructor->student_count ?? 0,
-            ]),
+           'instructors' => $data->getCollection()->map(function (Instructor $instructor){
+
+                $courses = $instructor->courses;
+                return [
+                    'instructor_id' => $instructor->id,
+                    'nick_name' => $instructor->nick_name,
+                    'email' => $instructor->email,
+                    'profile_image' => $instructor->profile_image,
+                    'course_count' => $instructor->courses()->count(),
+                    'student_count' => $instructor->student_count ?? 0,
+                    'capacity_total' => $instructor->capacity_total, // 追記
+                ];
+            }),
+
             'pagination' => [
                 'page' => $data->currentPage(),
                 'total' => $data->total(),

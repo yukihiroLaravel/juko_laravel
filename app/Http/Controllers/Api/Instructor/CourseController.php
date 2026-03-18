@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
@@ -18,6 +19,7 @@ use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
+use App\Services\Course\PutCapacityService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
 use Exception;
@@ -223,10 +225,34 @@ class CourseController extends Controller
     }
 
     /**
-     * 受講定員一括変更API
+     * 講座定員一括変更API
      */
-    public function putCapacity(): JsonResponse
+    public function putCapacity(Request $request, PutCapacityService $service): JsonResponse
     {
+        $courseIds = $request->input('courses', []);
+        $capacity = $request->input('capacity');
+
+        // 対象講座を取得
+        $courses = Course::whereIn('id', $courseIds)
+        ->withCount('attendances')
+        ->get();
+
+        // 認可チェック（CoursePolicy@bulkUpdate を利用）
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        // 定員が現在の受講者数を下回っていないかチェック
+        if ($capacity !== null) {
+            foreach ($courses as $course) {
+                if ($course->attendances_count > $capacity) {
+                    throw ValidationException::withMessages([
+                        'capacity' => '定員は現在の受講者数（'.$course->attendances_count.'人）以上に設定してください。',
+                    ]);
+                }
+            }
+        }
+
+        $service(courseIds: $courseIds, capacity: $capacity,);
+
         return response()->json([
             'result' => true,
         ]);

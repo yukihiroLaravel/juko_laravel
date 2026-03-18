@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
+use App\Http\Requests\Instructor\Attendance\FollowUpRequest;
 use App\Http\Requests\Instructor\Attendance\LoginRateRequest;
 use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
@@ -16,6 +17,7 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
+use App\Services\Attendance\FollowUpService;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -258,5 +260,18 @@ class AttendanceController extends Controller
         $this->authorize('view', $attendance->course);
 
         return new StatusResource($attendance);
+    }
+
+    /**
+     * 要フォロー受講生API
+     */
+    public function followUp(FollowUpRequest $request, FollowUpService $service): JsonResponse
+    {
+        $course = Course::findOrFail($request->course_id);
+        $this->authorize('view', $course);
+
+        $followUpStudents = $service->getFollowUpStudents($request->course_id, $request->days);
+
+        return response()->json($followUpStudents);
     }
 }

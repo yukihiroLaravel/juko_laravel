@@ -10,6 +10,7 @@ use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
+use App\Http\Resources\Instructor\Attendance\FollowUpResource;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
@@ -270,8 +271,10 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($request->course_id);
         $this->authorize('view', $course);
 
-        $followUpStudents = $service->getFollowUpStudents($request->course_id, $request->days);
+        $students = $service($request->course_id, $request->days);
 
-        return response()->json($followUpStudents);
+        return response()->json([
+            'students' => FollowUpResource::collection($students),
+        ]);
     }
 }

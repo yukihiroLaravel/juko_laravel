@@ -240,18 +240,7 @@ class CourseController extends Controller
         // 認可チェック（CoursePolicy@bulkUpdate を利用）
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
-        // 定員が現在の受講者数を下回っていないかチェック
-        if ($capacity !== null) {
-            foreach ($courses as $course) {
-                if ($course->attendances_count > $capacity) {
-                    throw ValidationException::withMessages([
-                        'capacity' => '定員は現在の受講者数（'.$course->attendances_count.'人）以上に設定してください。',
-                    ]);
-                }
-            }
-        }
-
-        $service(courseIds: $courseIds, capacity: $capacity,);
+        $service(courses: $courses, capacity: $capacity,);
 
         return response()->json([
             'result' => true,

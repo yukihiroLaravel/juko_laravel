@@ -31,15 +31,10 @@ final class FollowUpService
                     ->limit(1),
             ])
             ->having(
-                DB::raw('DATEDIFF(NOW(), (SELECT MAX(logged_in_at) FROM student_login_histories WHERE student_id = students.id))'),
+                DB::raw('IFNULL(DATEDIFF(NOW(), (SELECT MAX(logged_in_at) FROM student_login_histories WHERE student_id = students.id)), 99999)'),
                 '>=',
                 $days
             )
-            ->orWhereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('student_login_histories')
-                    ->whereColumn('student_id', 'students.id');
-            })
             ->orderByRaw('latest_login_at IS NULL DESC, latest_login_at ASC')
             ->get();
     }

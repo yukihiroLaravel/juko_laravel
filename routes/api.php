@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
         Route::prefix('student')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
+            Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
         });
 
         // 受講生-受講
@@ -193,7 +194,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-タグ
                 Route::prefix('tag')->name('tag.')->group(function () {
                     Route::prefix('{tag_id}')->group(function () {
-                        Route::put('/', [App\Http\Controllers\Api\Manager\TagController::class, 'put'])->name('put');
                         Route::delete('/', [App\Http\Controllers\Api\Manager\TagController::class, 'delete'])->name('delete');
                         Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show'])->name('show');
                     });
@@ -231,7 +231,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus'])->name('update-status');
                             });
 
-                        
+                            // マネージャー-講座-チャプター-レッスン
+                            Route::prefix('lesson')->name('lesson.')->group(function () {
+                            });
                         });
 
                         // マネージャー生徒学習状況
@@ -251,7 +253,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-生徒
                 Route::prefix('student')->name('student.')->group(function () {
                     Route::get('index', [App\Http\Controllers\Api\Manager\StudentController::class, 'index'])->name('index');
-                    Route::get('{student_id}', [App\Http\Controllers\Api\Manager\StudentController::class, 'show'])->name('show');
                 });
                 // マネージャー-お知らせ
                 Route::prefix('notification')->name('notification.')->group(function () {

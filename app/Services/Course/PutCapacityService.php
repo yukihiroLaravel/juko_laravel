@@ -12,7 +12,6 @@ class PutCapacityService
      * 選択した講座定員を一括更新する
      *
      * @param  Collection<int, Course>  $courses
-     * @param  int|null  $capacity
      */
     public function __invoke(Collection $courses, ?int $capacity): void
     {

@@ -5,7 +5,7 @@ namespace App\Services\Attendance;
 use App\Model\Student;
 use App\Model\StudentLoginHistory;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use Carbon\CarbonImmutable;
 
 final class FollowUpService
 {
@@ -17,7 +17,9 @@ final class FollowUpService
      */
     public function __invoke(int $course_id, int $days): Collection
     {
-        return Student::whereHas('attendances', fn($q) => $q->where('course_id', $course_id))
+        $threshold = CarbonImmutable::now()->subDays($days);
+
+        return Student::whereHas('attendances', fn ($q) => $q->where('course_id', $course_id))
             ->select([
                 'students.id',
                 'students.last_name',
@@ -30,11 +32,7 @@ final class FollowUpService
                     ->latest('logged_in_at')
                     ->limit(1),
             ])
-            ->having(
-                DB::raw('IFNULL(DATEDIFF(NOW(), (SELECT MAX(logged_in_at) FROM student_login_histories WHERE student_id = students.id)), 99999)'),
-                '>=',
-                $days
-            )
+            ->whereDoesntHave('loginHistories', fn ($q) => $q->where('logged_in_at', '>', $threshold))
             ->orderByRaw('latest_login_at IS NULL DESC, latest_login_at ASC')
             ->get();
     }

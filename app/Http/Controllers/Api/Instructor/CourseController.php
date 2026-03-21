@@ -17,6 +17,7 @@ use App\Model\Course;
 use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\DeleteService;
+use App\Services\Course\PutCapacityService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
@@ -24,6 +25,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -215,7 +217,7 @@ class CourseController extends Controller
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
         // 更新処理
-        $service(courseIds: $courseIds, status: $status);
+        $service(courses: $courses, status: $status);
 
         return response()->json([
             'result' => true,
@@ -223,10 +225,24 @@ class CourseController extends Controller
     }
 
     /**
-     * 受講定員一括変更API
+     * 講座定員一括変更API
      */
-    public function putCapacity(): JsonResponse
+    public function putCapacity(Request $request, PutCapacityService $service): JsonResponse
     {
+        $courseIds = $request->input('courses', []);
+        $capacity = $request->input('capacity');
+
+        // 対象講座を取得
+        $courses = Course::whereIn('id', $courseIds)
+            ->withCount('attendances')
+            ->get();
+
+        // 認可チェック（CoursePolicy@bulkUpdate を利用）
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        // 更新処理
+        $service(courses: $courses, capacity: $capacity);
+
         return response()->json([
             'result' => true,
         ]);

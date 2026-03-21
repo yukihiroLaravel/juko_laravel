@@ -35,22 +35,31 @@ class AttendanceController extends Controller
      */
     public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline): JsonResponse
     {
-        $course = Course::findOrFail($request->course_id);
-
-        // Policyによる認可チェック
-        $this->authorize('create', [Attendance::class, $course]);
-
-        if (Attendance::where('course_id', $request->course_id)
-            ->where('student_id', $request->student_id)
-            ->exists()
-        ) {
-            throw new AuthorizationException(
-                'Attendance record already exists.'
-            );
-        }
-
         DB::beginTransaction();
         try {
+
+            // 講座取得
+            $course = Course::where('id', $request->course_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Policyによる認可チェック
+            $this->authorize('create', [Attendance::class, $course]);
+
+            $studentsCount = Attendance::where('course_id', $course->id)->count();
+
+            // 講座定員チェック
+            if ($studentsCount >= $course->capacity) {
+                abort(422, 'The course is already full.');
+            }
+
+            if (Attendance::where('course_id', $course->id)
+                ->where('student_id', $request->student_id)
+                ->exists()
+            ) {
+               abort(422, 'Attendance record already exists.');
+            }
+
             $deadlineSetting = $course->courseDeadline;
             $deadlineType = $course->deadline_type;
 
@@ -62,13 +71,13 @@ class AttendanceController extends Controller
             );
 
             $attendance = Attendance::create([
-                'course_id' => $request->course_id,
+                'course_id' => $course->id,
                 'student_id' => $request->student_id,
                 'attendance_deadline' => $attendanceDeadline,
             ]);
 
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
-                $query->where('course_id', $request->course_id);
+            $lessons = Lesson::whereHas('chapter', function ($query) use ($course) {
+                $query->where('course_id', $course->id);
             })->get();
 
             foreach ($lessons as $lesson) {

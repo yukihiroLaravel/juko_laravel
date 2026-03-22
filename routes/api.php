@@ -34,8 +34,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::middleware('student')->name('student.')->group(function () {
         // 受講生
         Route::prefix('student')->group(function () {
+            Route::get('index', [App\Http\Controllers\Api\Instructor\StudentController::class, 'index'])->name('index');
             Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
+            Route::get('learning-history', [App\Http\Controllers\Api\Student\LearningHistoryController::class, 'index'])->name('learning-history.index');
+            Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
         });
 
         // 受講生-受講
@@ -163,7 +166,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
             // 講師-生徒
             Route::prefix('student')->name('student.')->group(function () {
-                Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
+                Route::get('index', [App\Http\Controllers\Api\Instructor\StudentController::class, 'index'])->name('index');
                 Route::get('{student_id}', [App\Http\Controllers\Api\Instructor\StudentController::class, 'show'])->name('show');
                 Route::post('/', [App\Http\Controllers\Api\Instructor\StudentController::class, 'store'])->name('store');
             });
@@ -249,7 +252,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 });
                 // マネージャー-生徒
                 Route::prefix('student')->name('student.')->group(function () {
-                    Route::get('index', [App\Http\Controllers\Api\Manager\StudentController::class, 'index'])->name('index');
+                    Route::get('index', [App\Http\Controllers\Api\Instructor\StudentController::class, 'index'])->name('index');
                     Route::get('{student_id}', [App\Http\Controllers\Api\Manager\StudentController::class, 'show'])->name('show');
                 });
                 // マネージャー-お知らせ

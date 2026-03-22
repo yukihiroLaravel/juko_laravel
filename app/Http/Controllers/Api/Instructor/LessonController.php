@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
@@ -19,6 +18,7 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
 use App\Services\Lesson\DeleteLessonService;
 use App\Services\Lesson\SortLessonsService;
@@ -141,7 +141,7 @@ class LessonController extends Controller
      * 複数のレッスン削除API
      */
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
-    { 
+    {
         // リクエストからデータを取得
         $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');

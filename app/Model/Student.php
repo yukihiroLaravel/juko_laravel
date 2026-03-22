@@ -7,6 +7,9 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+/**
+ * @property CarbonImmutable|null $latest_login_at
+ */
 class Student extends Authenticatable
 {
     use HasFactory;

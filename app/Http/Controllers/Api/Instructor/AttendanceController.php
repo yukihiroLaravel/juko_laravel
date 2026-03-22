@@ -23,6 +23,7 @@ use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -266,15 +267,13 @@ class AttendanceController extends Controller
     /**
      * 要フォロー受講生API
      */
-    public function followUp(FollowUpRequest $request, FollowUpService $service): JsonResponse
+    public function followUp(FollowUpRequest $request, FollowUpService $service): AnonymousResourceCollection
     {
         $course = Course::findOrFail($request->course_id);
         $this->authorize('view', $course);
 
         $students = $service($request->course_id, $request->days);
 
-        return response()->json([
-            'students' => FollowUpResource::collection($students),
-        ]);
+        return FollowUpResource::collection($students);
     }
 }

@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             // 講師-講座
             Route::prefix('course')->group(function () {
                 Route::name('course.')->group(function () {
+                    Route::patch('capacity/clear', [App\Http\Controllers\Api\Instructor\CourseController::class, 'clearCapacity'])->name('capacity.clear');
                     Route::get('index', [App\Http\Controllers\Api\Instructor\CourseController::class, 'index'])->name('index');
                     Route::post('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'store'])->name('store');
                     Route::put('status', [App\Http\Controllers\Api\Instructor\CourseController::class, 'putStatus'])->name('put-status');
@@ -162,7 +163,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
             // 講師-生徒
             Route::prefix('student')->name('student.')->group(function () {
-                Route::get('index', [App\Http\Controllers\Api\Instructor\StudentController::class, 'index'])->name('index');
+                Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
                 Route::get('{student_id}', [App\Http\Controllers\Api\Instructor\StudentController::class, 'show'])->name('show');
                 Route::post('/', [App\Http\Controllers\Api\Instructor\StudentController::class, 'store'])->name('store');
             });

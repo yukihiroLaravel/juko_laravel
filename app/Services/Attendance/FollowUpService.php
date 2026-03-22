@@ -4,16 +4,16 @@ namespace App\Services\Attendance;
 
 use App\Model\Student;
 use App\Model\StudentLoginHistory;
-use Illuminate\Support\Collection;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 
 final class FollowUpService
 {
     /**
      * 要フォロー受講生を取得する
      *
-     * @param int $course_id 講座ID
-     * @param int $days 最終ログインからの日数
+     * @param  int  $course_id  講座ID
+     * @param  int  $days  最終ログインからの日数
      */
     public function __invoke(int $course_id, int $days): Collection
     {

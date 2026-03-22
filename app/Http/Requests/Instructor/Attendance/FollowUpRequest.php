@@ -23,7 +23,7 @@ class FollowUpRequest extends FormRequest
     {
         return [
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'days'      => ['required', 'integer', 'min:1'],
+            'days' => ['required', 'integer', 'min:1'],
         ];
     }
 

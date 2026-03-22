@@ -2,6 +2,11 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
+use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,42 +15,59 @@ class CompleteAllLessonsTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_指定したチャプターのレッスンを全て完了_成功(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
         $this->actingAs($student);
 
-        // act
-        $response = $this->putJson('/api/v1/attendance/1/chapter/2/complete');
+        // Act
+        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+            'attendance_id' => $attendance->id,
+            'chapter_id' => $chapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('lesson_attendances', [
-            'attendance_id' => 2,
-            'lesson_id' => 2,
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
             'status' => 'completed_attendance',
         ]);
     }
 
     public function test_権限がない生徒_失敗(): void
     {
-        // arrange
-        $student = Student::find(2);
-        $this->actingAs($student);
+        // Arrange — 別の生徒のAttendanceにアクセス
+        $owner = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $owner->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $unauthorizedStudent = Student::factory()->create();
+        $this->actingAs($unauthorizedStudent);
 
-        // act
-        $response = $this->putJson('/api/v1/attendance/1/chapter/2/complete');
+        // Act
+        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+            'attendance_id' => $attendance->id,
+            'chapter_id' => $chapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -54,14 +76,24 @@ class CompleteAllLessonsTest extends TestCase
 
     public function test_権限がないチャプター_失敗(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange — 別の講座のチャプターを指定
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $otherCourse = Course::factory()->create();
+        $otherChapter = Chapter::factory()->create(['course_id' => $otherCourse->id]);
         $this->actingAs($student);
 
-        // act
-        $response = $this->putJson('/api/v1/attendance/1/chapter/4/complete');
+        // Act
+        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+            'attendance_id' => $attendance->id,
+            'chapter_id' => $otherChapter->id,
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, invalid chapter.',
@@ -70,14 +102,17 @@ class CompleteAllLessonsTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
-        // act
-        $response = $this->putJson('/api/v1/attendance/aaa/chapter/bbb/complete');
+        // Act
+        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+            'attendance_id' => 'aaa',
+            'chapter_id' => 'bbb',
+        ]));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'attendance_id',

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Enums\Notification\TypeEnum;
+use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,25 +13,19 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_お知らせ更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $notification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+            'instructor_id' => $manager->id,
         ]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
+        // Act
+        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
             'title' => 'update',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
@@ -39,7 +34,7 @@ class PutTest extends TestCase
             'status' => 'public',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'result' => true,
@@ -53,25 +48,26 @@ class PutTest extends TestCase
 
     public function test_お知らせ更新_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
-
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $notification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
+            'course_id' => $course->id,
+            'instructor_id' => $manager->id,
+        ]);
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
+            'title' => '',
+            'type' => '',
+            'start_date' => 'invalid-date',
+            'end_date' => '2025-01-01 18:00:00',
+            'content' => '',
+            'status' => 'aaaa',
         ]);
 
-        // act
-        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
-            'title' => '', // 空
-            'type' => '',  // 空
-            'start_date' => 'invalid-date', // 無効な日付
-            'end_date' => '2025-01-01 18:00:00', // 有効な日付
-            'content' => '', // 空
-            'status' => 'aaaa', // 有効なステータス
-        ]);
-
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'title',
@@ -85,16 +81,18 @@ class PutTest extends TestCase
 
     public function test_お知らせ更新_権限エラー(): void
     {
-        // arrange
-        $unauthorizedInstructor = Instructor::find(2);
-        $this->actingAs($unauthorizedInstructor, 'instructor');
-
+        // Arrange — マネージャーではない講師
+        $nonManager = Instructor::factory()->create(['type' => 'instructor']);
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $notification = Notification::factory()->create([
-            'instructor_id' => 1,
+            'course_id' => $course->id,
+            'instructor_id' => $manager->id,
         ]);
+        $this->actingAs($nonManager, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/manager/notification/'.$notification->id, [
+        // Act
+        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
             'title' => '権限なしテスト',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
@@ -103,7 +101,7 @@ class PutTest extends TestCase
             'status' => 'public',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'Forbidden, not allowed to use manager api.',

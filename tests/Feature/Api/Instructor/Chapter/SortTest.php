@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,59 +12,52 @@ class SortTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_チャプター並び替え_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2]);
+        $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/1/chapter/sort', [
+        // Act
+        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => $course->id]), [
             'chapters' => [
-                ['chapter_id' => 1, 'order' => 3],
-                ['chapter_id' => 2, 'order' => 2],
-                ['chapter_id' => 3, 'order' => 1],
+                ['chapter_id' => $chapter1->id, 'order' => 3],
+                ['chapter_id' => $chapter2->id, 'order' => 2],
+                ['chapter_id' => $chapter3->id, 'order' => 1],
             ],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
         ]);
-        collect([3, 2, 1])->each(function ($id, $index) {
-            $this->assertDatabaseHas('chapters', [
-                'id' => $id,
-                'course_id' => 1,
-                'order' => $index + 1,
-            ]);
-        });
+        $this->assertDatabaseHas('chapters', ['id' => $chapter3->id, 'order' => 1]);
+        $this->assertDatabaseHas('chapters', ['id' => $chapter2->id, 'order' => 2]);
+        $this->assertDatabaseHas('chapters', ['id' => $chapter1->id, 'order' => 3]);
     }
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/1/chapter/sort', [
+        // Act
+        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => $course->id]), [
             'chapters' => [
-                ['chapter_id' => 1, 'order' => 3],
-                ['chapter_id' => 2, 'order' => 2],
-                ['chapter_id' => 3, 'order' => 1],
+                ['chapter_id' => $chapter1->id, 'order' => 1],
             ],
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -71,13 +66,14 @@ class SortTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->postJson('/api/v1/instructor/course/aaa/chapter/sort', []);
-        // assert
+        // Act
+        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => 'aaa']), []);
+
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

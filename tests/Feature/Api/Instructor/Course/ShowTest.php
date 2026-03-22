@@ -2,7 +2,11 @@
 
 namespace Tests\Feature\Api\Instructor\Course;
 
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\CourseDeadline;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,24 +14,23 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講座取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(2);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => 'none',
+        ]);
+        CourseDeadline::factory()->create(['course_id' => $course->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/2');
+        // Act
+        $response = $this->getJson(route('instructor.course.show', ['course_id' => $course->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -64,14 +67,16 @@ class ShowTest extends TestCase
 
     public function test_権限がない講師_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(3);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange — 別の講師が所有する講座
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/instructor/course/2');
+        // Act
+        $response = $this->getJson(route('instructor.course.show', ['course_id' => $course->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',

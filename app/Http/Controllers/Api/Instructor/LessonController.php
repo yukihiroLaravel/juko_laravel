@@ -112,6 +112,11 @@ class LessonController extends Controller
                 throw new AuthorizationException('Invalid chapter_id.');
             }
 
+            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
+            if ((int) $request->course_id !== $lesson->chapter->course_id) {
+                throw new AuthorizationException('Invalid course_id.');
+            }
+
             // 受講情報が登録されている場合は削除を許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
                 throw new AuthorizationException('Forbidden, this lesson has attendance.');

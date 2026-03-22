@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Instructor;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
+use App\Http\Requests\Instructor\Course\ClearCapacityRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
@@ -16,6 +17,7 @@ use App\Http\Resources\Instructor\CourseShowResource;
 use App\Model\Course;
 use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
+use App\Services\Course\ClearCapacityService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
@@ -27,6 +29,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @tags Instructor-Course
@@ -109,6 +112,7 @@ class CourseController extends Controller
                 deadlineType: DeadlineTypeEnum::from($request->deadline_type),
                 fixedDate: $request->fixed_date,
                 relativeDays: $request->relative_days,
+                capacity: $request->capacity,
             );
 
             DB::commit();
@@ -136,6 +140,17 @@ class CourseController extends Controller
             // 認可チェック(policy 利用)
             $this->authorize('update', $course);
 
+            // 定員が現在の受講者数を下回っていないかチェック
+            $capacity = $request->input('capacity');
+            if ($capacity !== null) {
+                $attendanceCount = $course->attendances()->count();
+                if ($attendanceCount > $capacity) {
+                    throw ValidationException::withMessages([
+                        'capacity' => '定員は現在の受講者数（'.$attendanceCount.'人）以上に設定してください。',
+                    ]);
+                }
+            }
+
             $deadlineType = DeadlineTypeEnum::from($request->deadline_type);
             $fixedDate = $request->fixed_date;
             $relativeDays = $request->relative_days;
@@ -150,6 +165,7 @@ class CourseController extends Controller
                 calculateDeadline: $calculateDeadline,
                 fixedDate: $fixedDate,
                 relativeDays: $relativeDays,
+                capacity: $request->capacity,
             );
 
             DB::commit();
@@ -237,5 +253,22 @@ class CourseController extends Controller
             Log::error($e);
             throw $e;
         }
+    }
+
+    /**
+     * 受講定員一括削除API
+     */
+    public function clearCapacity(ClearCapacityRequest $request, ClearCapacityService $service): JsonResponse
+    {
+        $courses = Course::whereIn('id', $request->input('courses', []))->get();
+
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        $updatedCount = $service($courses);
+
+        return response()->json([
+            'result' => true,
+            'updated_count' => $updatedCount,
+        ]);
     }
 }

@@ -16,13 +16,13 @@ use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;
+use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -35,22 +35,25 @@ class AttendanceController extends Controller
      */
     public function index(
         IndexRequest $request,
-        IndexService $service
+        IndexService $service,
+        ContinueFromService $continueFromService
     ): AnonymousResourceCollection {
-        $perPage = $request->input('per_page', 6);
-        $page = $request->input('page', 1);
-        $tagId = $request->input('tag_id');
-        $studentId = Auth::id();
-        $indexDto = new IndexDto($studentId, $request->search_word);
-
-        return AttendanceIndexResource::collection(
-            $service(
-                indexDto: $indexDto,
-                perPage: $perPage,
-                page: $page,
-                tagId: $tagId
-            )
+        $userId = $request->user()->id;
+        $results = $service(
+            indexDto: new IndexDto($userId, $request->search_word),
+            perPage: $request->input('per_page', 6),
+            page: $request->input('page', 1),
+            tagId: $request->input('tag_id')
         );
+
+        $continueFromMap = [];
+        foreach ($results as $attendance) {
+            $continueFromMap[$attendance->id] = $continueFromService($attendance);
+        }
+
+        AttendanceIndexResource::withContinueFromMap($continueFromMap);
+
+        return AttendanceIndexResource::collection($results);
     }
 
     /**
@@ -76,8 +79,10 @@ class AttendanceController extends Controller
     /**
      * 受講講座の進捗情報を取得
      */
-    public function progress(ProgressRequest $request): AttendanceCourseProgressResource
-    {
+    public function progress(
+        ProgressRequest $request,
+        ContinueFromService $continueFromService
+    ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
             'course.chapters.lessons',
             'lessonAttendances',
@@ -88,10 +93,13 @@ class AttendanceController extends Controller
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
-            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
+            'totalChaptersCount' => $attendance->course->chapters->count(),
+            'completedLessonsCount' => $attendance
+                ->lessonAttendances
+                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->count(),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'youngestUnCompletedLesson' => $this->getYoungestUnCompletedLesson($attendance),
+            'continueFrom' => $continueFromService($attendance)?->toArray(),
         ];
 
         return new AttendanceCourseProgressResource([
@@ -183,28 +191,6 @@ class AttendanceController extends Controller
     }
 
     /**
-     * チャプター合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalChaptersCount($attendance)
-    {
-        return $attendance->course->chapters->count();
-    }
-
-    /**
-     * 完了済みのレッスン数を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getCompletedLessonsCount($attendance)
-    {
-        return $attendance->lessonAttendances->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
-    }
-
-    /**
      * レッスン合計を取得する
      *
      * @param  Attendance  $attendance
@@ -219,44 +205,5 @@ class AttendanceController extends Controller
         }
 
         return $totalLessonsCount;
-    }
-
-    /**
-     * 続きのレッスンIDと、それを含むチャプターのIDを取得する
-     *
-     * @param  Attendance  $attendance
-     * @return array | null
-     */
-    private function getYoungestUnCompletedLesson($attendance)
-    {
-        // IDが最も若い未完了のチャプターの内、IDが最も若い未完了のレッスン
-        $youngestUnCompletedLesson = [
-            'chapter_id' => null,
-            'lesson_id' => null,
-        ];
-        $attendance->course->chapters->each(function ($chapter) use ($attendance, &$youngestUnCompletedLesson) {
-            if ($youngestUnCompletedLesson['lesson_id'] !== null) {
-                return;
-            }
-
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$youngestUnCompletedLesson, $chapter) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    if ($youngestUnCompletedLesson['lesson_id'] === null) {
-                        $youngestUnCompletedLesson = [
-                            'chapter_id' => $chapter->id,
-                            'lesson_id' => $lesson->id,
-                        ];
-
-                        return;
-                    }
-                }
-            });
-        });
-        if ($youngestUnCompletedLesson['lesson_id'] === null) {
-            return null;
-        }
-
-        return $youngestUnCompletedLesson;
     }
 }

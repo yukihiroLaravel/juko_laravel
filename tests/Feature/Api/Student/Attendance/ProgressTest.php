@@ -3,6 +3,10 @@
 namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Model\Attendance;
+use App\Model\Chapter;
+use App\Model\Course;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -11,64 +15,78 @@ class ProgressTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_受講進捗を取得_成功(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+        ]);
         $this->actingAs($student);
 
-        // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        // Act
+        $response = $this->getJson(route('student.attendance.progress', ['attendance_id' => $attendance->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 
     public function test_受講進捗を取得_他の生徒の進捗を取得_失敗(): void
     {
-        // arrange
-        $student = Student::find(2);
-        $this->actingAs($student);
+        // Arrange — 別の生徒のAttendanceにアクセス
+        $owner = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $owner->id,
+            'course_id' => $course->id,
+        ]);
+        $otherStudent = Student::factory()->create();
+        $this->actingAs($otherStudent);
 
-        // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        // Act
+        $response = $this->getJson(route('student.attendance.progress', ['attendance_id' => $attendance->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
     }
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange
+        $student = Student::factory()->create();
         $this->actingAs($student);
 
-        // act
-        $response = $this->getJson('/api/v1/attendance/abc/progress');
+        // Act
+        $response = $this->getJson(route('student.attendance.progress', ['attendance_id' => 'abc']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
     }
 
     public function test_受講期限切れの受講進捗を取得_失敗(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange — 期限切れのAttendance
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => now()->subDays(1),
+        ]);
         $this->actingAs($student);
-        Attendance::find(1)->update(['attendance_deadline' => now()->subDays(1)]);
 
-        // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        // Act
+        $response = $this->getJson(route('student.attendance.progress', ['attendance_id' => $attendance->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -77,15 +95,26 @@ class ProgressTest extends TestCase
 
     public function test_受講期限当日は受講進捗を取得_成功(): void
     {
-        // arrange
-        $student = Student::find(1);
+        // Arrange — 期限が当日のAttendance
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => now(),
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+        ]);
         $this->actingAs($student);
-        Attendance::find(1)->update(['attendance_deadline' => now()]);
 
-        // act
-        $response = $this->getJson('/api/v1/attendance/1/progress');
+        // Act
+        $response = $this->getJson(route('student.attendance.progress', ['attendance_id' => $attendance->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
     }
 }

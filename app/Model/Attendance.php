@@ -27,6 +27,7 @@ class Attendance extends Model
         'student_id',
         'progress',
         'attendance_deadline',
+        'completed_at',
     ];
 
     // 受講状態初期値
@@ -114,6 +115,7 @@ class Attendance extends Model
      *   attendance_deadline: 'immutable_date',
      *   created_at: 'immutable_datetime',
      *   updated_at: 'immutable_datetime',
+     *   completed_at: 'immutable_datetime',
      * }
      */
     #[\Override]
@@ -126,6 +128,7 @@ class Attendance extends Model
             'attendance_deadline' => 'immutable_date',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'completed_at' => 'immutable_datetime',
         ];
     }
 

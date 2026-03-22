@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,48 +12,45 @@ class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_チャプターのステータス一括更新_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/course/1/chapter/status', [
+        // Act
+        $response = $this->putJson(route('instructor.chapter.put-status', ['course_id' => $course->id]), [
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'result',
         ]);
         $this->assertDatabaseHas('chapters', [
-            'course_id' => 1,
+            'course_id' => $course->id,
             'status' => 'private',
         ]);
     }
 
     public function test_講師が一致しない_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(4);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        Chapter::factory()->create(['course_id' => $course->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/course/1/chapter/status', [
+        // Act
+        $response = $this->putJson(route('instructor.chapter.put-status', ['course_id' => $course->id]), [
             'status' => 'private',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'This action is unauthorized.',
@@ -60,16 +59,16 @@ class PutStatusTest extends TestCase
 
     public function test_バリデーションエラー(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
+        // Arrange
+        $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // act
-        $response = $this->putJson('/api/v1/instructor/course/aaa/chapter/status', [
+        // Act
+        $response = $this->putJson(route('instructor.chapter.put-status', ['course_id' => 'aaa']), [
             'status' => 'string',
         ]);
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'course_id',

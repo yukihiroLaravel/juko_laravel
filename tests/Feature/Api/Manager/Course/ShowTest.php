@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Manager\Course;
 
+use App\Model\Chapter;
+use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -10,24 +13,19 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    // setup
-    #[\Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     public function test_講座取得_成功(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/1');
+        // Act
+        $response = $this->getJson(route('manager.course.show', ['course_id' => $course->id]));
 
-        // assert
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -60,14 +58,14 @@ class ShowTest extends TestCase
 
     public function test_バリデーションエラー_失敗(): void
     {
-        // arrange
-        $instructor = Instructor::find(1);
-        $this->actingAs($instructor, 'instructor');
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $this->actingAs($manager, 'instructor');
 
-        // act
-        $response = $this->getJson('/api/v1/manager/course/aaa');
+        // Act
+        $response = $this->getJson(route('manager.course.show', ['course_id' => 'aaa']));
 
-        // assert
+        // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['course_id']);
     }

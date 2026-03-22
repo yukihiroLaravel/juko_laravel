@@ -14,7 +14,7 @@ class AttendanceIndexTest extends TestCase
 
     public function test_attendance_index_is_paginated()
     {
-        // テスト用データ作成（1人の生徒が7つの講座を受講）
+        // Arrange — 1人の生徒が7つの講座を受講
         $student = Student::factory()->create();
         $courses = Course::factory()->count(7)->create();
 
@@ -25,11 +25,11 @@ class AttendanceIndexTest extends TestCase
             ]);
         });
 
-        // APIをリクエスト（1ページ目を取得）
-        $response = $this->actingAs($student)->getJson('/api/v1/attendance/index?per_page=6&page=1');
-        $response->assertStatus(200);
+        // Act
+        $response = $this->actingAs($student)->getJson(route('student.attendance.index', ['per_page' => 6, 'page' => 1]));
 
-        // JSONの構造をチェック
+        // Assert
+        $response->assertStatus(200);
         $response->assertJsonStructure([
             'data',
             'links' => [
@@ -44,14 +44,8 @@ class AttendanceIndexTest extends TestCase
                 'total',
             ],
         ]);
-
-        // 1ページのデータ件すが6件か確認
         $response->assertJsonCount(6, 'data');
-
-        // current_pageが1であることを確認
         $this->assertEquals(1, $response->json('meta.current_page'));
-
-        // last_pageが3であることを確認
         $this->assertEquals(2, $response->json('meta.last_page'));
     }
 }

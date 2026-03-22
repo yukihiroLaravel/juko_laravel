@@ -48,7 +48,7 @@ class AttendanceController extends Controller
             $this->authorize('create', [Attendance::class, $course]);
 
             // 講座定員チェック
-            if (!$course->hasCapacity()) {
+            if (! $course->hasCapacity()) {
                 throw ValidationException::withMessages([
                     'course_id' => 'The course is already full.',
                 ]);
@@ -60,7 +60,7 @@ class AttendanceController extends Controller
             ) {
                 throw ValidationException::withMessages([
                     'student_id' => 'Attendance record already exists.',
-               ]);
+                ]);
             }
 
             $deadlineSetting = $course->courseDeadline;

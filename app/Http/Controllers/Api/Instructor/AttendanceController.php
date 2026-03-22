@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @tags Instructor-Attendance
@@ -46,18 +47,20 @@ class AttendanceController extends Controller
             // Policyによる認可チェック
             $this->authorize('create', [Attendance::class, $course]);
 
-            $studentsCount = Attendance::where('course_id', $course->id)->count();
-
             // 講座定員チェック
-            if ($studentsCount >= $course->capacity) {
-                abort(422, 'The course is already full.');
+            if (!$course->hasCapacity()) {
+                throw ValidationException::withMessages([
+                    'course_id' => 'The course is already full.',
+                ]);
             }
 
             if (Attendance::where('course_id', $course->id)
                 ->where('student_id', $request->student_id)
                 ->exists()
             ) {
-               abort(422, 'Attendance record already exists.');
+                throw ValidationException::withMessages([
+                    'student_id' => 'Attendance record already exists.',
+               ]);
             }
 
             $deadlineSetting = $course->courseDeadline;

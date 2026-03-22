@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;

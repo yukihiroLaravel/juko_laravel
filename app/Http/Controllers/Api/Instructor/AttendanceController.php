@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
 use App\Http\Requests\Instructor\Attendance\FollowUpRequest;
 use App\Http\Requests\Instructor\Attendance\LoginRateRequest;
+use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
 use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
+use App\Http\Resources\Instructor\Attendance\ExpiringResource;
 use App\Http\Resources\Instructor\Attendance\FollowUpResource;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
@@ -18,6 +20,7 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
+use App\Services\Attendance\ExpiringService;
 use App\Services\Attendance\FollowUpService;
 use Carbon\CarbonImmutable;
 use Exception;
@@ -276,4 +279,18 @@ class AttendanceController extends Controller
 
         return FollowUpResource::collection($students);
     }
+
+    /**
+     * 近日期限切れ予定受講生API
+     */
+    public function expiring(ExpiringRequest $request, ExpiringService $service): AnonymousResourceCollection
+    {
+        $course = Course::findOrFail($request->course_id);
+        $this->authorize('view', $course);
+
+        $result = $service($request->course_id, $request->thresholds);
+
+        return ExpiringResource::collection($result);
+    }
+
 }

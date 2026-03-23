@@ -135,6 +135,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->name('course.attendance.')->group(function () {
                         Route::get('follow-up', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'followUp'])->name('follow-up');
+                        Route::get('expiring', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'expiring'])->name('expiring'); 
                         Route::prefix('status')->group(function () {
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus'])->name('show-status');
                         });

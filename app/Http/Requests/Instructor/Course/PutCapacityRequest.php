@@ -23,7 +23,7 @@ class PutCapacityRequest extends FormRequest
     {
         return [
             'courses' => ['required', 'array', 'min:1'],
-            'courses.*' => ['integer', 'exists:courses,id,deleted_at,NULL'],
+            'courses.*' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'capacity' => ['nullable', 'integer', 'min:1'],
         ];
     }

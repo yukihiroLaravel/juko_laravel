@@ -45,6 +45,7 @@ class IndexTest extends TestCase
                     'courses' => ['completed', 'total'],
                     'lessons' => ['completed', 'total'],
                     'chapters' => ['completed', 'total'],
+                    'login_count',
                 ],
             ],
         ]);

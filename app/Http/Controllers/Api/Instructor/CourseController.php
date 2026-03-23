@@ -8,6 +8,7 @@ use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
+use App\Http\Requests\Instructor\Course\PutCapacityRequest;
 use App\Http\Requests\Instructor\Course\ShowRequest;
 use App\Http\Requests\Instructor\Course\StoreRequest;
 use App\Http\Requests\Instructor\Course\UpdateRequest;
@@ -227,7 +228,7 @@ class CourseController extends Controller
     /**
      * 講座定員一括変更API
      */
-    public function putCapacity(Request $request, PutCapacityService $service): JsonResponse
+    public function putCapacity(PutCapacityRequest $request, PutCapacityService $service): JsonResponse
     {
         $courseIds = $request->input('courses', []);
         $capacity = $request->input('capacity');

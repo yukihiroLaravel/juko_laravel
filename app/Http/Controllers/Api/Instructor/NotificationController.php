@@ -48,12 +48,15 @@ class NotificationController extends Controller
         $page = $request->input('page', 1);
 
         $notifications = Notification::with(['course', 'course.tags', 'course.courseDeadline'])
+            ->with(['course' => function($query) {
+                $query->withCount('attendances'); 
+            }])
             ->where('instructor_id', $instructorId)
             ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }
-
+    
     /**
      * お知らせ詳細API
      */

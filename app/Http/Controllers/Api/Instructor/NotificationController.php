@@ -59,7 +59,7 @@ class NotificationController extends Controller
 
         return new NotificationIndexResource($notifications);
     }
-    
+
     /**
      * お知らせ詳細API
      */

@@ -6,11 +6,9 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Attendance\CalculateDeadlineService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
 
 class StoreAttendanceService
 {
@@ -19,7 +17,7 @@ class StoreAttendanceService
         int $studentId,
         CalculateDeadlineService $calculateDeadline
     ): void {
-        DB::transaction(function () use ( $courseId, $studentId, $calculateDeadline) {
+        DB::transaction(function () use ($courseId, $studentId, $calculateDeadline) {
 
             // 講座取得
             $course = Course::where('id', $courseId)
@@ -27,7 +25,7 @@ class StoreAttendanceService
                 ->firstOrFail();
 
             // 講座定員チェック
-            if (!$course->hasCapacity()) {
+            if (! $course->hasCapacity()) {
                 throw ValidationException::withMessages([
                     'course_id' => 'The course is already full.',
                 ]);
@@ -47,7 +45,7 @@ class StoreAttendanceService
 
             $attendanceDeadline = $calculateDeadline(
                 deadlineType: $deadlineType,
-                startAt: new CarbonImmutable(),
+                startAt: new CarbonImmutable,
                 fixedDate: $deadlineSetting?->fixed_date ? new CarbonImmutable($deadlineSetting->fixed_date) : null,
                 relativeDays: $deadlineSetting?->relative_days,
             );

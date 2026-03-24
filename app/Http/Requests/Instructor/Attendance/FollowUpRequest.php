@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Student;
+namespace App\Http\Requests\Instructor\Attendance;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginHistoryRequest extends FormRequest
+class FollowUpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,16 @@ class LoginHistoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'start_date' => ['nullable', 'date_format:Y-m-d'],
-            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:start_date'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'days' => ['required', 'integer', 'min:1'],
         ];
+    }
+
+    #[\Override]
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'course_id' => $this->route('course_id'),
+        ]);
     }
 }

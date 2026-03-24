@@ -5,6 +5,7 @@ namespace App\Services\Student\Attendance;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;
+use App\Model\StudentLoginHistory;
 use Carbon\CarbonImmutable;
 
 class StudentLearningHistoryService
@@ -24,6 +25,7 @@ class StudentLearningHistoryService
                 'courses' => $this->getCourseStats($studentId, $start, $end),
                 'lessons' => $this->getLessonStats($studentId, $start, $end),
                 'chapters' => $this->getChapterStats($studentId, $start, $end),
+                'login_count' => $this->getLoginCount($studentId, $start, $end),
             ],
         ];
     }
@@ -39,6 +41,16 @@ class StudentLearningHistoryService
             'completed' => (clone $query)->whereBetween('completed_at', [$start, $end])->count(),
             'total' => $query->count(),
         ];
+    }
+
+    /**
+     * 30日以内のログイン回数
+     */
+    private function getLoginCount(int $studentId, CarbonImmutable $start, CarbonImmutable $end): int
+    {
+        return StudentLoginHistory::where('student_id', $studentId)
+            ->whereBetween('logged_in_at', [$start, $end])
+            ->count();
     }
 
     /**

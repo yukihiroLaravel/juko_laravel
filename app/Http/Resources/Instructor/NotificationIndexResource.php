@@ -28,13 +28,10 @@ class NotificationIndexResource extends JsonResource
         return [
             'notifications' => $notifications->map(fn (Notification $notification) => [
                 ...(new NotificationResource($notification))->toArray($request),
-                'course' => array_merge(
-                (new CourseResource($notification->course))->toArray($request),
-                    [
-                        'student_inProgress' => $notification->course->attendances_count, 
-                        'student_limit'      => $notification->course->capacity,
-                    ]
-                ),
+                'course' => [
+                    ...(new CourseResource($notification->course))->toArray($request),
+                    'current_attendance_count' => $notification->course->attendances_count,
+                ],
                 'tags' => TagResource::collection($notification->course->tags),
             ]),
             'pagination' => [

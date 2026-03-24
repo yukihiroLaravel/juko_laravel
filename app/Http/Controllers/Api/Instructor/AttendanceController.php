@@ -16,7 +16,7 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
-use Carbon\CarbonImmutable;
+use App\Services\Attendance\StoreAttendanceService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +24,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 /**
  * @tags Instructor-Attendance
@@ -34,71 +33,20 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline, StoreAttendanceService $storeAttendanceService,): JsonResponse
     {
-        DB::beginTransaction();
-        try {
-
-            // 講座取得
-            $course = Course::where('id', $request->course_id)
-                ->lockForUpdate()
-                ->firstOrFail();
+            $course = Course::findOrFail($request->course_id);
 
             // Policyによる認可チェック
             $this->authorize('create', [Attendance::class, $course]);
 
-            // 講座定員チェック
-            if (! $course->hasCapacity()) {
-                throw ValidationException::withMessages([
-                    'course_id' => 'The course is already full.',
-                ]);
-            }
-
-            if (Attendance::where('course_id', $course->id)
-                ->where('student_id', $request->student_id)
-                ->exists()
-            ) {
-                throw ValidationException::withMessages([
-                    'student_id' => 'Attendance record already exists.',
-                ]);
-            }
-
-            $deadlineSetting = $course->courseDeadline;
-            $deadlineType = $course->deadline_type;
-
-            $attendanceDeadline = $calculateDeadline(
-                deadlineType: $deadlineType,
-                startAt: new CarbonImmutable,
-                fixedDate: $deadlineSetting?->fixed_date ? new CarbonImmutable($deadlineSetting->fixed_date) : null,
-                relativeDays: $deadlineSetting?->relative_days,
+            $storeAttendanceService(
+                $request->course_id,
+                $request->student_id,
+                $calculateDeadline
             );
 
-            $attendance = Attendance::create([
-                'course_id' => $course->id,
-                'student_id' => $request->student_id,
-                'attendance_deadline' => $attendanceDeadline,
-            ]);
-
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($course) {
-                $query->where('course_id', $course->id);
-            })->get();
-
-            foreach ($lessons as $lesson) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            }
-
-            DB::commit();
-
             return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
     }
 
     /**

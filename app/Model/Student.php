@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * @property CarbonImmutable|null $latest_login_at
+ * @property string|null $attendance_deadline
  */
 class Student extends Authenticatable
 {

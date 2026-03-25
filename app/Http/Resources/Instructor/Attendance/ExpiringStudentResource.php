@@ -15,15 +15,17 @@ class ExpiringStudentResource extends JsonResource
     #[\Override]
     public function toArray(Request $request): array
     {
+        $deadline = $this->resource->attendance_deadline
+            ? CarbonImmutable::parse($this->resource->attendance_deadline)
+            : null;
+
         return [
             'student_id' => $this->resource->id,
             'name' => $this->resource->last_name.' '.$this->resource->first_name,
             'email' => $this->resource->email,
-            'expires_at' => $this->resource->attendance_deadline
-                ? CarbonImmutable::parse($this->resource->attendance_deadline)->toDateTimeString()
-                : null,
-            'days_until_expiry' => $this->resource->attendance_deadline
-                ? (int) CarbonImmutable::now()->diffInDays(CarbonImmutable::parse($this->resource->attendance_deadline))
+            'expires_at' => $deadline?->format('Y-m-d'),
+            'days_until_expiry' => $deadline
+                ? (int) CarbonImmutable::now()->diffInDays($deadline)
                 : null,
         ];
     }

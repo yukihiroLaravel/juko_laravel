@@ -10,7 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class StoreAttendanceService
+class StoreService
 {
     public function __invoke(
         int $courseId,
@@ -24,19 +24,24 @@ class StoreAttendanceService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // 講座定員チェック
-            if (! $course->hasCapacity()) {
-                throw ValidationException::withMessages([
-                    'course_id' => 'The course is already full.',
-                ]);
-            }
-
+            // 重複登録チェック
             if (Attendance::where('course_id', $course->id)
                 ->where('student_id', $studentId)
                 ->exists()
             ) {
                 throw ValidationException::withMessages([
-                    'student_id' => 'Attendance record already exists.',
+                    'student_id' => [
+                        'Attendance record already exists.',
+                    ],
+                ]);
+            }
+
+            // 講座定員チェック
+            if (! $course->hasCapacity()) {
+                throw ValidationException::withMessages([
+                    'course_id' => [
+                        'This course has already reached its capacity.',
+                    ],
                 ]);
             }
 
@@ -56,16 +61,20 @@ class StoreAttendanceService
                 'attendance_deadline' => $attendanceDeadline,
             ]);
 
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($course) {
+            $lessonIds = Lesson::whereHas('chapter', function ($query) use ($course) {
                 $query->where('course_id', $course->id);
-            })->get();
+            })->pluck('id');
 
-            foreach ($lessons as $lesson) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
+            if ($lessonIds->isNotEmpty()) {
+                LessonAttendance::insert(
+                    $lessonIds->map(fn ($lessonId) => [
+                        'attendance_id' => $attendance->id,
+                        'lesson_id' => $lessonId,
+                        'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ])->all()
+                );
             }
         });
     }

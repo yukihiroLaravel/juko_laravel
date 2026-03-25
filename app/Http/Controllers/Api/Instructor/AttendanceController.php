@@ -18,7 +18,7 @@ use App\Model\Course;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\FollowUpService;
-use App\Services\Attendance\StoreAttendanceService;
+use App\Services\Attendance\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -36,14 +36,14 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline, StoreAttendanceService $storeAttendanceService): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline, StoreService $service): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
 
         // Policyによる認可チェック
         $this->authorize('create', [Attendance::class, $course]);
 
-        $storeAttendanceService(
+        $service(
             $request->course_id,
             $request->student_id,
             $calculateDeadline

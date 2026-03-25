@@ -3,15 +3,15 @@
 namespace App\Services\Instructor\CourseCapacity;
 
 use App\Model\Course;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 
 class ClearAllCapacityService
 {
     /**
-     * 講師の講座の定員をすべて削除
+     * 講座の定員をすべて削除
      */
-    public function __invoke(): void
+    public function __invoke(Collection $courses): void
     {
-        Course::where('instructor_id', Auth::id())->update(['capacity' => null]);
+        Course::whereIn('id', $courses->pluck('id'))->update(['capacity' => null]);
     }
 }

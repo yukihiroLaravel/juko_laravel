@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Instructor;
+namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
 use App\Model\Course;
@@ -11,17 +11,17 @@ use Illuminate\Support\Facades\Auth;
 class CourseCapacityController extends Controller
 {
     /**
-     * 受講定員一括削除API
+     * 受講定員一括削除（manager）
      */
     public function clearAll(ClearAllCapacityService $service): JsonResponse
     {
-        // 自分の講座を取得
+        // 講座取得
         $courses = Course::where('instructor_id', Auth::id())->get();
 
         // 認可
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
-        // Service実行
+        // 実行
         $service($courses);
 
         return response()->json([

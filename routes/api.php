@@ -218,6 +218,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::put('status', [App\Http\Controllers\Api\Manager\CourseController::class, 'putStatus'])->name('put-status');
                         Route::post('/', [App\Http\Controllers\Api\Manager\CourseController::class, 'store'])->name('store');
                         Route::post('deadline/clear-selected', [App\Http\Controllers\Api\Manager\CourseDeadlineController::class, 'clearSelected'])->name('deadline.clear-selected');
+                        Route::post('capacity/clear-all',[App\Http\Controllers\Api\Manager\CourseCapacityController::class, 'clearAll'])->name('capacity.clear-all');
                     });
                     Route::prefix('{course_id}')->group(function () {
                         Route::name('course.')->group(function () {

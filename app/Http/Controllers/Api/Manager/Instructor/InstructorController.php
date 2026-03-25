@@ -16,7 +16,7 @@ use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\StoreService;
-use App\Services\Instructor\InstructorCapacityService;//追記 
+use App\Services\Instructor\InstructorCourseCapacityService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,7 +37,7 @@ class InstructorController extends Controller
     /**
      * 講師一覧取得API
      */
-    public function index(IndexRequest $request, InstructorCapacityService $capacityService): InstructorIndexResource
+    public function index(IndexRequest $request, InstructorCourseCapacityService $capacityService): InstructorIndexResource
     {
         // デフォルト値を設定
         $perPage = $request->input('per_page', 20);
@@ -69,9 +69,9 @@ class InstructorController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
         
-        // InstructorCCapacityService.phpから受講者数を呼び出す。
+        // InstructorCapacityService.phpから受講者数を呼び出す。
        $instructors->getCollection()->transform(function ($instructor) use ($capacityService) {
-            $instructor->capacity_total = $capacityService->calculate($instructor);
+            $instructor->capacity_total = $capacityService($instructor);
             return $instructor;
         });
 

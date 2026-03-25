@@ -30,7 +30,7 @@ class InstructorIndexResource extends JsonResource
                     'profile_image' => $instructor->profile_image,
                     'course_count' => $instructor->courses()->count(),
                     'student_count' => $instructor->student_count ?? 0,
-                    'capacity_total' => $instructor->capacity_total, // 追記
+                    'capacity_total' => $instructor->capacity_total,
                 ];
             }),
 

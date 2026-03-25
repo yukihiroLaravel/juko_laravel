@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
+use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
 use App\Http\Requests\Instructor\Attendance\FollowUpRequest;
 use App\Http\Requests\Instructor\Attendance\LoginRateRequest;
-use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
 use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
@@ -292,5 +292,4 @@ class AttendanceController extends Controller
 
         return ExpiringResource::collection($result);
     }
-
 }

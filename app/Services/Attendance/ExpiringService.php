@@ -29,24 +29,24 @@ final class ExpiringService
 
             $students = Student::whereHas('attendances', fn ($q) => $q
                 ->where('course_id', $course_id)
-                ->where('attendance_deadline', '>', $from)  
-                ->where('attendance_deadline', '<=', $to)   
+                ->where('attendance_deadline', '>', $from)
+                ->where('attendance_deadline', '<=', $to)
             )
-            ->select([
-                'students.id',
-                'students.last_name',
-                'students.first_name',
-                'students.email',
-            ])
-            ->addSelect([
-                'attendance_deadline' => Attendance::select('attendance_deadline')
-                    ->whereColumn('student_id', 'students.id')
-                    ->where('course_id', $course_id)
-                    ->orderBy('attendance_deadline', 'asc')
-                    ->limit(1),
-            ])
-            ->orderByRaw('attendance_deadline ASC')
-            ->get();
+                ->select([
+                    'students.id',
+                    'students.last_name',
+                    'students.first_name',
+                    'students.email',
+                ])
+                ->addSelect([
+                    'attendance_deadline' => Attendance::select('attendance_deadline')
+                        ->whereColumn('student_id', 'students.id')
+                        ->where('course_id', $course_id)
+                        ->orderBy('attendance_deadline', 'asc')
+                        ->limit(1),
+                ])
+                ->orderByRaw('attendance_deadline ASC')
+                ->get();
 
             $result->push([
                 'days' => $days,

@@ -14,8 +14,8 @@ class ExpiringRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id'    => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'thresholds'   => ['required', 'array', 'min:1'],
+            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            'thresholds' => ['required', 'array', 'min:1'],
             'thresholds.*' => ['integer', 'min:1', 'max:365'],
         ];
     }

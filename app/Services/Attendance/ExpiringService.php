@@ -42,10 +42,11 @@ final class ExpiringService
                 'attendance_deadline' => Attendance::select('attendance_deadline')
                     ->whereColumn('student_id', 'students.id')
                     ->where('course_id', $course_id)
+                    ->whereNull('deleted_at') 
                     ->orderBy('attendance_deadline', 'asc')
                     ->limit(1),
             ])
-            ->orderByRaw('attendance_deadline ASC')
+            ->orderBy('attendance_deadline', 'asc')
             ->get();
 
             $result->push([

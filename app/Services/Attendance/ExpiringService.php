@@ -19,13 +19,13 @@ final class ExpiringService
     {
         sort($thresholds);
 
-        $now = CarbonImmutable::now();
+        $today = CarbonImmutable::today();
         $result = collect();
         $previousDays = 0;
 
         foreach ($thresholds as $days) {
-            $from = $now->addDays($previousDays);
-            $to = $now->addDays($days);
+            $from = $today->addDays($previousDays);
+            $to = $today->addDays($days);
 
             $students = Student::whereHas('attendances', fn ($q) => $q
                 ->where('course_id', $course_id)
@@ -47,7 +47,18 @@ final class ExpiringService
                         ->limit(1),
                 ])
                 ->orderBy('attendance_deadline', 'asc')
-                ->get();
+                ->get()
+                ->map(function (Student $student) use ($today) {
+                    $deadline = $student->attendance_deadline
+                        ? CarbonImmutable::parse($student->attendance_deadline)
+                        : null;
+                    $student->setAttribute('expires_at', $deadline?->format('Y-m-d'));
+                    $student->setAttribute('days_until_expiry', $deadline
+                        ? (int) $today->diffInDays($deadline)
+                        : null);
+
+                    return $student;
+                });
 
             $result->push([
                 'days' => $days,

@@ -24,7 +24,7 @@ class AttendanceResource extends JsonResource
         return [
             'attendance_id' => $this->resource->id,
             'attendance_deadline' => $deadline?->format('Y-m-d'),
-            'days_until_deadline' => $this->resource->getDaysUntilDeadlineLabel(),
+            'days_until_deadline' => $this->resource->getDaysUntilDeadline(),
         ];
     }
 }

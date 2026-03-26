@@ -152,28 +152,14 @@ class Attendance extends Model
     }
 
     /**
-     * 受講期限まで何日かを返す。期限なしなら null。
+     * 受講期限まで何日かを返す。期限なし・期限切れなら null。
      */
-    public function getDaysUntilDeadlineLabel(): ?string
+    public function getDaysUntilDeadline(): ?int
     {
-        if ($this->attendance_deadline === null) {
+        if ($this->attendance_deadline === null || $this->isExpired()) {
             return null;
         }
 
-        $today = CarbonImmutable::today();
-        $totalDays = $today->diffInDays($this->attendance_deadline);
-
-        if ($totalDays <= 30) {
-            return "{$totalDays}日";
-        }
-
-        $months = (int) $today->diffInMonths($this->attendance_deadline);
-        $remainingDays = $today->addMonths($months)->diffInDays($this->attendance_deadline);
-
-        if ($remainingDays === 0) {
-            return "{$months}ヶ月";
-        }
-
-        return "{$months}ヶ月と{$remainingDays}日";
+        return (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline);
     }
 }

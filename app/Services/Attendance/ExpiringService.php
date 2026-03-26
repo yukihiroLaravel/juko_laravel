@@ -29,8 +29,8 @@ final class ExpiringService
 
             $students = Student::whereHas('attendances', fn ($q) => $q
                 ->where('course_id', $course_id)
-                ->where('attendance_deadline', '>', $from)  
-                ->where('attendance_deadline', '<=', $to)   
+                ->where('attendance_deadline', '>', $from)
+                ->where('attendance_deadline', '<=', $to)
             )
             ->select([
                 'students.id',

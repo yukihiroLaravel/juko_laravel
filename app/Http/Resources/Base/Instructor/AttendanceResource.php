@@ -19,11 +19,9 @@ class AttendanceResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
-        $deadline = $this->resource->attendance_deadline;
-
         return [
             'attendance_id' => $this->resource->id,
-            'attendance_deadline' => $deadline?->format('Y-m-d'),
+            'attendance_deadline' => $this->resource->attendance_deadline?->format('Y-m-d'),
             'days_until_deadline' => $this->resource->getDaysUntilDeadline(),
         ];
     }

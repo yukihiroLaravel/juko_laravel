@@ -160,6 +160,6 @@ class Attendance extends Model
             return null;
         }
 
-        return (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline);
+        return max(0, (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline, false));
     }
 }

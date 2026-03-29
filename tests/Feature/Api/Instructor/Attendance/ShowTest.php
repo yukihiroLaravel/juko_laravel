@@ -29,7 +29,7 @@ class ShowTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -70,7 +70,7 @@ class ShowTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -106,7 +106,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -145,7 +145,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -179,7 +179,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -208,7 +208,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $firstAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $firstAttendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -233,7 +233,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -253,7 +253,7 @@ class ShowTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -276,7 +276,7 @@ class ShowTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -297,7 +297,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendanceId]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendanceId]));
 
         // Assert
         $response->assertStatus(422);
@@ -311,7 +311,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => 99999]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => 99999]));
 
         // Assert
         $response->assertStatus(422);
@@ -325,7 +325,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => 'aaa']));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);
@@ -354,7 +354,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);

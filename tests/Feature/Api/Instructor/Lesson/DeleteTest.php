@@ -26,9 +26,7 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.lesson.delete', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->deleteJson(route('instructor.lessons.delete', [
             'lesson_id' => $lesson->id,
         ]));
 
@@ -62,9 +60,7 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.lesson.delete', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->deleteJson(route('instructor.lessons.delete', [
             'lesson_id' => $lesson->id,
         ]));
 
@@ -86,9 +82,7 @@ class DeleteTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.lesson.delete', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->deleteJson(route('instructor.lessons.delete', [
             'lesson_id' => $lesson->id,
         ]));
 
@@ -106,17 +100,13 @@ class DeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.lesson.delete', [
-            'course_id' => 'aaa',
-            'chapter_id' => 'bbb',
+        $response = $this->deleteJson(route('instructor.lessons.delete', [
             'lesson_id' => 'ccc',
         ]));
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
-            'chapter_id',
             'lesson_id',
         ]);
     }

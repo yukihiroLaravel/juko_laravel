@@ -48,7 +48,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [3, 7, 30],
         ]));
@@ -94,7 +94,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -126,7 +126,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -158,7 +158,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [3],
         ]));
@@ -190,7 +190,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [3],
         ]));
@@ -223,7 +223,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -265,7 +265,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -307,7 +307,7 @@ class ExpiringTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -330,7 +330,7 @@ class ExpiringTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [30],
         ]));
@@ -347,7 +347,7 @@ class ExpiringTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
         ]));
 
@@ -364,7 +364,7 @@ class ExpiringTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
             'thresholds' => [0],
         ]));
@@ -381,7 +381,7 @@ class ExpiringTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.expiring', [
+        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => 99999,
             'thresholds' => [30],
         ]));

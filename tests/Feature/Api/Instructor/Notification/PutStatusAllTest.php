@@ -25,7 +25,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status-all'), [
+        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
             'status' => 'public',
         ]);
 
@@ -50,7 +50,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status-all'), [
+        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
             'status' => 'private',
         ]);
 
@@ -69,7 +69,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status-all'), [
+        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
             'status' => '',
         ]);
 
@@ -87,7 +87,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status-all'), [
+        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
             'status' => 'invalid_status',
         ]);
 
@@ -101,7 +101,7 @@ class PutStatusAllTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status-all'), [
+        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
             'status' => 'public',
         ]);
 

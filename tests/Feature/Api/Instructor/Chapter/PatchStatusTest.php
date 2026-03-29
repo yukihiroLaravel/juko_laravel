@@ -22,7 +22,7 @@ class PatchStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course->id]), [
+        $response = $this->patchJson(route('instructor.chapters.patch-status', ['course_id' => $course->id]), [
             'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
@@ -49,7 +49,7 @@ class PatchStatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course->id]), [
+        $response = $this->patchJson(route('instructor.chapters.patch-status', ['course_id' => $course->id]), [
             'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
@@ -72,7 +72,7 @@ class PatchStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course2->id]), [
+        $response = $this->patchJson(route('instructor.chapters.patch-status', ['course_id' => $course2->id]), [
             'chapters' => [$chapter1->id, $chapter2->id],
             'status' => 'private',
         ]);
@@ -91,7 +91,7 @@ class PatchStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => 'aaa']), [
+        $response = $this->patchJson(route('instructor.chapters.patch-status', ['course_id' => 'aaa']), [
             'chapters' => 'string',
             'status' => 'string',
         ]);

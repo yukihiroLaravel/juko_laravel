@@ -21,8 +21,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.store', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.store', [
             'chapter_id' => $chapter->id,
         ]), [
             'title' => 'title',
@@ -50,8 +49,7 @@ class StoreTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.store', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.store', [
             'chapter_id' => $chapter->id,
         ]), [
             'title' => 'title',
@@ -71,15 +69,13 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.store', [
-            'course_id' => 'aaa',
+        $response = $this->postJson(route('instructor.chapters.lessons.store', [
             'chapter_id' => 'bbb',
         ]), []);
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
             'chapter_id',
             'title',
         ]);

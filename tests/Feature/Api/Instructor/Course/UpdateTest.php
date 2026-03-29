@@ -22,7 +22,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -51,7 +51,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'public',
@@ -83,7 +83,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'public',
@@ -116,7 +116,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -137,7 +137,7 @@ class UpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => 'aaa']), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => 'aaa']), [
             'title' => '',
             'image' => null,
             'status' => 'invalid_status',
@@ -159,7 +159,7 @@ class UpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'status' => 'private',
             'deadline_type' => 'none',
@@ -185,7 +185,7 @@ class UpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'status' => 'private',
             'deadline_type' => 'none',
@@ -209,7 +209,7 @@ class UpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'status' => 'private',
             'deadline_type' => 'none',
@@ -233,7 +233,7 @@ class UpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'status' => 'private',
             'deadline_type' => 'none',

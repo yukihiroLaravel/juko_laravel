@@ -19,7 +19,7 @@ class ShowStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.show-status', [
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'today',
         ]));
@@ -36,7 +36,7 @@ class ShowStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.show-status', [
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'month',
         ]));
@@ -52,7 +52,7 @@ class ShowStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.show-status', [
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => 99999,
             'period' => 'invalid',
         ]));
@@ -74,7 +74,7 @@ class ShowStatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.show-status', [
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'today',
         ]));

@@ -19,7 +19,7 @@ class IndexTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.tag.index'));
+        $response = $this->getJson(route('instructor.tags.index'));
 
         // Assert
         $response->assertStatus(200);

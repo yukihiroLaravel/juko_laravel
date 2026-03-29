@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Manager\Chapter;
 
+use App\Model\Chapter;
 use App\Rules\ChapterStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,9 +21,10 @@ class UpdateStatusRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation()
     {
+        $chapter = Chapter::find($this->route('chapter_id'));
         $this->merge([
-            'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'course_id' => $chapter?->course_id,
         ]);
     }
 

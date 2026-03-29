@@ -34,7 +34,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
             'attendance_id' => $attendance->id,
             'chapter_id' => $chapter->id,
         ]));
@@ -62,7 +62,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->actingAs($unauthorizedStudent);
 
         // Act
-        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
             'attendance_id' => $attendance->id,
             'chapter_id' => $chapter->id,
         ]));
@@ -88,7 +88,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
             'attendance_id' => $attendance->id,
             'chapter_id' => $otherChapter->id,
         ]));
@@ -107,7 +107,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->putJson(route('student.attendance.complete-all-lessons', [
+        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
             'attendance_id' => 'aaa',
             'chapter_id' => 'bbb',
         ]));

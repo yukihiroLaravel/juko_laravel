@@ -25,7 +25,6 @@ class LessonController extends Controller
         // リクエストからデータを取得
         $lessonIds = $request->input('lessons');
         $chapterId = $request->input('chapter_id');
-        $courseId = $request->input('course_id');
 
         // レッスン情報を取得
         $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
@@ -35,11 +34,7 @@ class LessonController extends Controller
             // 自身もしくは配下の講師の講座・チャプターに紐づくレッスンでない場合は許可しない
             $this->authorize('bulkDelete', [Lesson::class, $lessons]);
 
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course->id) {
-                    throw new AuthorizationException('Invalid course_id.');
-                }
+            $lessons->each(function (Lesson $lesson) use ($chapterId) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter->id) {
                     throw new AuthorizationException('Invalid chapter_id.');

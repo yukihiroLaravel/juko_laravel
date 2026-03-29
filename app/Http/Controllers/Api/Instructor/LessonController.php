@@ -80,14 +80,6 @@ class LessonController extends Controller
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 
-        if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            throw new AuthorizationException('Forbidden, invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            throw new AuthorizationException('Forbidden, invalid chapter_id.');
-        }
-
         // UpdateLessonServiceを呼び出し更新処理
         $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
 
@@ -107,16 +99,6 @@ class LessonController extends Controller
 
             // ログイン講師のidと削除レッスンの講師IDが一致しないと削除できない
             $this->authorize('delete', $lesson);
-
-            if ((int) $request->chapter_id !== $lesson->chapter->id) {
-                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-                throw new AuthorizationException('Invalid chapter_id.');
-            }
-
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-            if ((int) $request->course_id !== $lesson->chapter->course_id) {
-                throw new AuthorizationException('Invalid course_id.');
-            }
 
             // 受講情報が登録されている場合は削除を許可しない
             if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
@@ -143,7 +125,6 @@ class LessonController extends Controller
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteLessonsService $service): JsonResponse
     {
         // リクエストからデータを取得
-        $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
 
@@ -155,14 +136,10 @@ class LessonController extends Controller
             // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
             $this->authorize('bulkDelete', [Lesson::class, $lessons]);
 
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
+            $lessons->each(function (Lesson $lesson) use ($chapterId) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter.');
-                }
-                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course_id) {
-                    throw new AuthorizationException('Invalid course.');
                 }
                 // 受講情報が登録されている場合は許可しない
                 if ($lesson->lessonAttendances->isNotEmpty()) {
@@ -198,16 +175,6 @@ class LessonController extends Controller
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 
-        if ((int) $request->course_id !== $lesson->chapter->course->id) {
-            // 指定した講座IDがレッスンの講座IDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は更新を許可しない
-            throw new AuthorizationException('Invalid chapter_id.');
-        }
-
         // サービスの呼び出し（関数のように使える）
         $updateLessonStatusService($lesson, $request->status);
 
@@ -225,14 +192,6 @@ class LessonController extends Controller
 
         // Policy による認可チェック
         $this->authorize('update', $lesson);
-
-        if ((int) $request->course_id !== $lesson->chapter->course_id) {
-            throw new AuthorizationException('Invalid course_id.');
-        }
-
-        if ((int) $request->chapter_id !== $lesson->chapter->id) {
-            throw new AuthorizationException('Invalid chapter_id.');
-        }
 
         $service(
             lesson: $lesson,
@@ -255,11 +214,6 @@ class LessonController extends Controller
 
         // 現在の講師がチャプターの講座の作成者であるか確認
         $this->authorize('delete', $lesson);
-
-        // 指定された course_id がチャプターに関連付けられている course_id と一致するか確認
-        if ((int) $request->course_id !== $chapter->course->id) {
-            throw new AuthorizationException('Invalid course_id.');
-        }
 
         DB::beginTransaction();
 
@@ -313,7 +267,6 @@ class LessonController extends Controller
     public function putStatus(PutStatusRequest $request, BulkUpdateLessonStatusService $service): JsonResponse
     {
         // リクエストからデータを取得
-        $courseId = $request->input('course_id');
         $chapterId = $request->input('chapter_id');
         $lessonIds = $request->input('lessons');
         $status = $request->input('status');
@@ -326,11 +279,7 @@ class LessonController extends Controller
 
         try {
             // 認可
-            $lessons->each(function (Lesson $lesson) use ($chapterId, $courseId) {
-                // 指定した講座IDがレッスンの講座IDと一致しない場合は許可しない
-                if ((int) $courseId !== $lesson->chapter->course_id) {
-                    throw new AuthorizationException('Invalid course_id.');
-                }
+            $lessons->each(function (Lesson $lesson) use ($chapterId) {
                 // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
                 if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter_id.');

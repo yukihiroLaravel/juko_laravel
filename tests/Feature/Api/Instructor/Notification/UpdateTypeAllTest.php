@@ -25,7 +25,7 @@ class UpdateTypeAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.update-type-all'), [
+        $response = $this->putJson(route('instructor.notifications.update-type-all'), [
             'notification_type' => 'once',
         ]);
 
@@ -44,7 +44,7 @@ class UpdateTypeAllTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.update-type-all'), [
+        $response = $this->putJson(route('instructor.notifications.update-type-all'), [
             'notification_type' => 'action',
         ]);
 

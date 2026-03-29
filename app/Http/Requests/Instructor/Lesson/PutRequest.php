@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
+use App\Model\Lesson;
 use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,10 +21,11 @@ class PutRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation()
     {
+        $lesson = Lesson::with('chapter')->find($this->route('lesson_id'));
         $this->merge([
             'lesson_id' => $this->route('lesson_id'),
-            'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
+            'chapter_id' => $lesson?->chapter_id,
+            'course_id' => $lesson?->chapter?->course_id,
         ]);
     }
 

@@ -35,7 +35,7 @@ class PatchStatusTest extends TestCase
 
         // Act
         $response = $this->patchJson(
-            route('student.lesson-attendance.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
             ['status' => 'before_attendance']
         );
 
@@ -67,7 +67,7 @@ class PatchStatusTest extends TestCase
 
         // Act
         $response = $this->patchJson(
-            route('student.lesson-attendance.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
             ['status' => 'before_attendance']
         );
 
@@ -83,7 +83,7 @@ class PatchStatusTest extends TestCase
 
         // Act
         $response = $this->patchJson(
-            route('student.lesson-attendance.patch-status', ['lesson_attendance_id' => 'abc']),
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => 'abc']),
             ['status' => 'aaa']
         );
 

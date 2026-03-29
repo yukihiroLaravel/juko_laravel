@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
+use App\Model\Chapter;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRequest extends FormRequest
@@ -19,9 +20,10 @@ class StoreRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation()
     {
+        $chapter = Chapter::find($this->route('chapter_id'));
         $this->merge([
             'chapter_id' => $this->route('chapter_id'),
-            'course_id' => $this->route('course_id'),
+            'course_id' => $chapter?->course_id,
         ]);
     }
 

@@ -23,7 +23,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), [
+        $response = $this->postJson(route('instructor.students.store'), [
             'given_name_by_instructor' => 'John',
             'email' => 'john@example.com',
             'course_id' => $course->id,
@@ -52,7 +52,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), [
+        $response = $this->postJson(route('instructor.students.store'), [
             'given_name_by_instructor' => 'Jane',
             'email' => 'jane@example.com',
             'course_id' => $course->id,
@@ -81,7 +81,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), [
+        $response = $this->postJson(route('instructor.students.store'), [
             'given_name_by_instructor' => 'Over',
             'email' => 'over@example.com',
             'course_id' => $course->id,
@@ -101,7 +101,7 @@ class StoreTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), [
+        $response = $this->postJson(route('instructor.students.store'), [
             'given_name_by_instructor' => 'Unauthorized',
             'email' => 'unauthorized@example.com',
             'course_id' => $course->id,
@@ -120,7 +120,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), [
+        $response = $this->postJson(route('instructor.students.store'), [
             'given_name_by_instructor' => 'Deleted',
             'email' => 'deleted@example.com',
             'course_id' => $course->id,
@@ -138,7 +138,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.student.store'), []);
+        $response = $this->postJson(route('instructor.students.store'), []);
 
         // Assert
         $response->assertStatus(422);

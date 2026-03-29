@@ -28,7 +28,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$course->id],
         ]);
 
@@ -69,7 +69,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act — course1のみクリア
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$course1->id],
         ]);
 
@@ -109,7 +109,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$course1->id, $course2->id],
         ]);
 
@@ -146,7 +146,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$otherCourse->id],
         ]);
 
@@ -166,7 +166,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$course->id],
         ]);
 
@@ -184,7 +184,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [],
         ]);
 
@@ -200,7 +200,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), []);
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), []);
 
         // Assert
         $response->assertStatus(422);
@@ -214,7 +214,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [9999],
         ]);
 
@@ -232,7 +232,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => [$course->id],
         ]);
 
@@ -248,7 +248,7 @@ class ClearSelectedTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->postJson(route('manager.course.deadline.clear-selected'), [
+        $response = $this->postJson(route('manager.courses.deadline.clear-selected'), [
             'courses' => ['invalid'],
         ]);
 

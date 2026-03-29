@@ -24,7 +24,7 @@ class ShowTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('student.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -43,7 +43,7 @@ class ShowTest extends TestCase
         $this->actingAs($unauthorizedStudent);
 
         // Act
-        $response = $this->getJson(route('student.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('student.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -56,7 +56,7 @@ class ShowTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.show', ['attendance_id' => 'aaa']));
+        $response = $this->getJson(route('student.attendances.show', ['attendance_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);

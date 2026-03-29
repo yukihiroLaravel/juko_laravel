@@ -23,9 +23,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-status', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->patchJson(route('instructor.lessons.update-status', [
             'lesson_id' => $lesson->id,
         ]), [
             'status' => 'private',
@@ -53,9 +51,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-status', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->patchJson(route('instructor.lessons.update-status', [
             'lesson_id' => $lesson->id,
         ]), [
             'status' => 'private',
@@ -75,9 +71,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-status', [
-            'course_id' => 'aaa',
-            'chapter_id' => 'bbb',
+        $response = $this->patchJson(route('instructor.lessons.update-status', [
             'lesson_id' => 'ccc',
         ]), [
             'status' => '',
@@ -87,8 +81,6 @@ class UpdateStatusTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'status' => 'The status field is required.',
-            'course_id' => 'The course id must be an integer.',
-            'chapter_id' => 'The chapter id must be an integer.',
             'lesson_id' => 'The lesson id must be an integer.',
         ]);
     }

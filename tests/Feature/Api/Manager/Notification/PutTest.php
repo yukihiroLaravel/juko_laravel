@@ -25,7 +25,7 @@ class PutTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
+        $response = $this->putJson(route('manager.notifications.put', ['notification_id' => $notification->id]), [
             'title' => 'update',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',
@@ -58,7 +58,7 @@ class PutTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
+        $response = $this->putJson(route('manager.notifications.put', ['notification_id' => $notification->id]), [
             'title' => '',
             'type' => '',
             'start_date' => 'invalid-date',
@@ -92,7 +92,7 @@ class PutTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put', ['notification_id' => $notification->id]), [
+        $response = $this->putJson(route('manager.notifications.put', ['notification_id' => $notification->id]), [
             'title' => '権限なしテスト',
             'type' => 'once',
             'start_date' => '2025-01-01 10:00:00',

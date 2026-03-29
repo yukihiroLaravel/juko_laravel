@@ -20,7 +20,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
+        $response = $this->deleteJson(route('manager.tags.delete', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -42,7 +42,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
+        $response = $this->deleteJson(route('manager.tags.delete', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -60,7 +60,7 @@ class DeleteTest extends TestCase
         $this->actingAs($otherManager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
+        $response = $this->deleteJson(route('manager.tags.delete', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -77,7 +77,7 @@ class DeleteTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => $tag->id]));
+        $response = $this->deleteJson(route('manager.tags.delete', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -93,7 +93,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.tag.delete', ['tag_id' => 'aaa']));
+        $response = $this->deleteJson(route('manager.tags.delete', ['tag_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);

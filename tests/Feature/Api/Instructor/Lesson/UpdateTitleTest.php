@@ -23,9 +23,7 @@ class UpdateTitleTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-title', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->patchJson(route('instructor.lessons.update-title', [
             'lesson_id' => $lesson->id,
         ]), [
             'title' => '新しいタイトル',
@@ -53,9 +51,7 @@ class UpdateTitleTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-title', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->patchJson(route('instructor.lessons.update-title', [
             'lesson_id' => $lesson->id,
         ]), [
             'title' => '新しいタイトル',
@@ -75,9 +71,7 @@ class UpdateTitleTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.lesson.update-title', [
-            'course_id' => 'aaa',
-            'chapter_id' => 'bbb',
+        $response = $this->patchJson(route('instructor.lessons.update-title', [
             'lesson_id' => 'ccc',
         ]), [
             'title' => '',
@@ -87,8 +81,6 @@ class UpdateTitleTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'title' => 'The title field is required.',
-            'course_id' => 'The course id must be an integer.',
-            'chapter_id' => 'The chapter id must be an integer.',
             'lesson_id' => 'The lesson id must be an integer.',
         ]);
     }

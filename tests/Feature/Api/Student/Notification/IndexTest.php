@@ -41,7 +41,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index'));
+        $response = $this->getJson(route('student.notifications.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -73,7 +73,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index'));
+        $response = $this->getJson(route('student.notifications.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -105,7 +105,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index'));
+        $response = $this->getJson(route('student.notifications.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -136,7 +136,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index'));
+        $response = $this->getJson(route('student.notifications.index'));
 
         // Assert
         $response->assertStatus(200);

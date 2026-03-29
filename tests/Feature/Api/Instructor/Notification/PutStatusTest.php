@@ -24,7 +24,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status'), [
+        $response = $this->putJson(route('instructor.notifications.put-status'), [
             'notifications' => [
                 $notification->id,
             ],
@@ -52,7 +52,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put-status'), [
+        $response = $this->putJson(route('instructor.notifications.put-status'), [
             'notifications' => [
                 $notification->id,
             ],
@@ -73,7 +73,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act — PutTest(個別更新)のバリデーションエラーを検証
-        $response = $this->putJson(route('instructor.notification.put', ['notification_id' => 'aaaa']), [
+        $response = $this->putJson(route('instructor.notifications.put', ['notification_id' => 'aaaa']), [
             'title' => '',
             'type' => '',
             'start_date' => '',

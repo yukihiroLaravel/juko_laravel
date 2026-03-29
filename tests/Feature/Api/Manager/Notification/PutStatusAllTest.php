@@ -30,7 +30,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => 'public',
         ]);
 
@@ -67,7 +67,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => 'private',
         ]);
 
@@ -93,7 +93,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => '',
         ]);
 
@@ -111,7 +111,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => 'invalid_status',
         ]);
 
@@ -129,7 +129,7 @@ class PutStatusAllTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => 'public',
         ]);
 
@@ -143,7 +143,7 @@ class PutStatusAllTest extends TestCase
     public function test_認証なし_失敗(): void
     {
         // Act
-        $response = $this->putJson(route('manager.notification.put-status-all'), [
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
             'status' => 'public',
         ]);
 

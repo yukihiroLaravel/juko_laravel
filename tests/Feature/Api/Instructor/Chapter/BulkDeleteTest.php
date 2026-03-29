@@ -26,7 +26,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.chapter.bulk-delete', ['course_id' => $course->id]), [
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => $course->id]), [
             'chapters' => [$chapter->id],
         ]);
 
@@ -53,7 +53,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.chapter.bulk-delete', ['course_id' => $course->id]), [
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => $course->id]), [
             'chapters' => [$chapter->id],
         ]);
 
@@ -74,7 +74,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.chapter.bulk-delete', ['course_id' => $course2->id]), [
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => $course2->id]), [
             'chapters' => [$chapter->id],
         ]);
 
@@ -104,7 +104,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.chapter.bulk-delete', ['course_id' => $course->id]), [
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => $course->id]), [
             'chapters' => [$chapter->id],
         ]);
 
@@ -122,7 +122,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.chapter.bulk-delete', ['course_id' => 'aaa']), [
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => 'aaa']), [
             'chapters' => [],
         ]);
 

@@ -25,7 +25,7 @@ class UpdateTypeAllTest extends TestCase
 
         // Act
         $notificationType = 'once';
-        $response = $this->putJson(route('manager.notification.update-type-all'), [
+        $response = $this->putJson(route('manager.notifications.update-type-all'), [
             'notification_type' => $notificationType,
         ]);
 
@@ -45,7 +45,7 @@ class UpdateTypeAllTest extends TestCase
 
         // Act
         $notificationType = 'action';
-        $response = $this->putJson(route('manager.notification.update-type-all'), [
+        $response = $this->putJson(route('manager.notifications.update-type-all'), [
             'notification_type' => $notificationType,
         ]);
 
@@ -64,7 +64,7 @@ class UpdateTypeAllTest extends TestCase
 
         // Act
         $notificationType = 'once';
-        $response = $this->putJson(route('manager.notification.update-type-all'), [
+        $response = $this->putJson(route('manager.notifications.update-type-all'), [
             'notification_type' => $notificationType,
         ]);
 

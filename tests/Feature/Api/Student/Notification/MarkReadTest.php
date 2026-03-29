@@ -38,7 +38,7 @@ class MarkReadTest extends TestCase
 
         // Act
         $response = $this->postJson(
-            route('student.notification.mark-read'),
+            route('student.notifications.mark-read'),
             ['notification_id' => $notification->id]
         );
 
@@ -76,7 +76,7 @@ class MarkReadTest extends TestCase
 
         // Act
         $response = $this->postJson(
-            route('student.notification.mark-read'),
+            route('student.notifications.mark-read'),
             ['notification_id' => $notification->id]
         );
 

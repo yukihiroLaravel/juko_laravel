@@ -25,7 +25,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -48,7 +48,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -82,7 +82,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -107,7 +107,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -135,7 +135,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -157,7 +157,7 @@ class StoreTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), [
+        $response = $this->postJson(route('instructor.attendances.store'), [
             'course_id' => $course->id,
             'student_id' => $student->id,
         ]);
@@ -176,7 +176,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.attendance.store'), []);
+        $response = $this->postJson(route('instructor.attendances.store'), []);
 
         // Assert
         $response->assertStatus(422);

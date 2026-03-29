@@ -22,7 +22,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 
@@ -50,7 +50,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 
@@ -80,7 +80,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course1->id, $course2->id, $course3->id],
         ]);
 
@@ -104,7 +104,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course1->id, $course2->id],
         ]);
 
@@ -127,7 +127,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 
@@ -147,7 +147,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 
@@ -168,7 +168,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$ownCourse->id, $otherCourse->id],
         ]);
 
@@ -196,7 +196,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 
@@ -221,7 +221,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$courseWithoutStudents->id, $courseWithStudents->id],
         ]);
 
@@ -243,7 +243,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), []);
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), []);
 
         // Assert
         $response->assertStatus(422);
@@ -257,7 +257,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [],
         ]);
 
@@ -273,7 +273,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => 'abc',
         ]);
 
@@ -289,7 +289,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => ['abc'],
         ]);
 
@@ -305,7 +305,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [99999],
         ]);
 
@@ -323,7 +323,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.course.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.courses.bulk-delete'), [
             'courses' => [$course->id],
         ]);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
+use App\Model\Chapter;
 use App\Model\Lesson;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -85,9 +86,10 @@ class SortRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation()
     {
+        $chapter = Chapter::find($this->route('chapter_id'));
         $this->merge([
-            'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
+            'course_id' => $chapter?->course_id,
         ]);
     }
 }

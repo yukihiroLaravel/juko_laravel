@@ -23,9 +23,7 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->putJson(route('instructor.lessons.put', [
             'lesson_id' => $lesson->id,
         ]), [
             'title' => 'title',
@@ -57,9 +55,7 @@ class PutTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put', [
-            'course_id' => $course->id,
-            'chapter_id' => $chapter->id,
+        $response = $this->putJson(route('instructor.lessons.put', [
             'lesson_id' => $lesson->id,
         ]), [
             'title' => 'title',
@@ -82,17 +78,13 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put', [
-            'course_id' => 'aaa',
-            'chapter_id' => 'bbb',
+        $response = $this->putJson(route('instructor.lessons.put', [
             'lesson_id' => 'ccc',
         ]), []);
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
-            'chapter_id',
             'lesson_id',
             'title',
             'url',

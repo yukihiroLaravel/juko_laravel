@@ -53,7 +53,7 @@ final class FollowUpService
             $attendance = $attendances->firstWhere('student_id', $student->id);
 
             if (! $attendance) {
-                $student->incomplete_chapter_name = null;
+                $student->setAttribute('incomplete_chapter_name', null);
                 continue;
             }
 
@@ -71,7 +71,7 @@ final class FollowUpService
                 return $lessonIds->diff($completedLessonIds)->isNotEmpty();
             });
 
-            $student->incomplete_chapter_name = $incompleteChapter?->title;
+            $student->setAttribute('incomplete_chapter_name', $incompleteChapter?->title);
         }
 
         return $students;

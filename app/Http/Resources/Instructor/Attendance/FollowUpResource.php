@@ -30,6 +30,7 @@ class FollowUpResource extends JsonResource
             'days_since_login' => $this->resource->latest_login_at
                 ? (int) CarbonImmutable::parse($this->resource->latest_login_at)->diffInDays(CarbonImmutable::now())
                 : null,
+            'incomplete_chapter_name' => $this->resource->incomplete_chapter_name,
         ];
     }
 }

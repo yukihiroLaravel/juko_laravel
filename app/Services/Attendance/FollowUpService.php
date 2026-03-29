@@ -2,6 +2,9 @@
 
 namespace App\Services\Attendance;
 
+use App\Model\Attendance;
+use App\Model\Course;
+use App\Model\LessonAttendance;
 use App\Model\Student;
 use App\Model\StudentLoginHistory;
 use Carbon\CarbonImmutable;
@@ -19,7 +22,7 @@ final class FollowUpService
     {
         $threshold = CarbonImmutable::now()->subDays($days);
 
-        return Student::whereHas('attendances', fn ($q) => $q->where('course_id', $course_id))
+        $students = Student::whereHas('attendances', fn ($q) => $q->where('course_id', $course_id))
             ->select([
                 'students.id',
                 'students.last_name',
@@ -35,5 +38,42 @@ final class FollowUpService
             ->whereDoesntHave('loginHistories', fn ($q) => $q->where('logged_in_at', '>', $threshold))
             ->orderByRaw('latest_login_at IS NULL DESC, latest_login_at ASC')
             ->get();
+
+        $course = Course::with([
+            'chapters' => fn ($q) => $q->orderBy('order'),
+            'chapters.lessons',
+        ])->findOrFail($course_id);
+
+        $attendances = Attendance::with('lessonAttendances')
+            ->where('course_id', $course_id)
+            ->whereIn('student_id', $students->pluck('id'))
+            ->get();
+
+        foreach ($students as $student) {
+            $attendance = $attendances->firstWhere('student_id', $student->id);
+
+            if (! $attendance) {
+                $student->incomplete_chapter_name = null;
+                continue;
+            }
+
+            $completedLessonIds = $attendance->lessonAttendances
+                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->pluck('lesson_id');
+
+            $incompleteChapter = $course->chapters->first(function ($chapter) use ($completedLessonIds) {
+                $lessonIds = $chapter->lessons->pluck('id');
+
+                if ($lessonIds->isEmpty()) {
+                    return false;
+                }
+
+                return $lessonIds->diff($completedLessonIds)->isNotEmpty();
+            });
+
+            $student->incomplete_chapter_name = $incompleteChapter?->title;
+        }
+
+        return $students;
     }
 }

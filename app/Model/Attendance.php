@@ -27,6 +27,7 @@ class Attendance extends Model
         'student_id',
         'progress',
         'attendance_deadline',
+        'completed_at',
     ];
 
     // 受講状態初期値
@@ -114,6 +115,7 @@ class Attendance extends Model
      *   attendance_deadline: 'immutable_date',
      *   created_at: 'immutable_datetime',
      *   updated_at: 'immutable_datetime',
+     *   completed_at: 'immutable_datetime',
      * }
      */
     #[\Override]
@@ -126,6 +128,7 @@ class Attendance extends Model
             'attendance_deadline' => 'immutable_date',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'completed_at' => 'immutable_datetime',
         ];
     }
 
@@ -146,5 +149,17 @@ class Attendance extends Model
     public function isExpired(): bool
     {
         return $this->attendance_deadline !== null && CarbonImmutable::now()->gte($this->attendance_deadline_end);
+    }
+
+    /**
+     * 受講期限まで何日かを返す。期限なし・期限切れなら null。
+     */
+    public function getDaysUntilDeadline(): ?int
+    {
+        if ($this->attendance_deadline === null || $this->isExpired()) {
+            return null;
+        }
+
+        return max(0, (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline, false));
     }
 }

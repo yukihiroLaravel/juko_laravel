@@ -4,23 +4,28 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
+use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
+use App\Http\Requests\Instructor\Attendance\FollowUpRequest;
 use App\Http\Requests\Instructor\Attendance\LoginRateRequest;
 use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
+use App\Http\Resources\Instructor\Attendance\ExpiringResource;
+use App\Http\Resources\Instructor\Attendance\FollowUpResource;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
-use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
-use Carbon\CarbonImmutable;
+use App\Services\Attendance\ExpiringService;
+use App\Services\Attendance\FollowUpService;
+use App\Services\Attendance\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,60 +39,20 @@ class AttendanceController extends Controller
     /**
      * 受講状況登録API
      */
-    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline): JsonResponse
+    public function store(StoreRequest $request, CalculateDeadlineService $calculateDeadline, StoreService $service): JsonResponse
     {
         $course = Course::findOrFail($request->course_id);
 
         // Policyによる認可チェック
         $this->authorize('create', [Attendance::class, $course]);
 
-        if (Attendance::where('course_id', $request->course_id)
-            ->where('student_id', $request->student_id)
-            ->exists()
-        ) {
-            throw new AuthorizationException(
-                'Attendance record already exists.'
-            );
-        }
+        $service(
+            $request->course_id,
+            $request->student_id,
+            $calculateDeadline
+        );
 
-        DB::beginTransaction();
-        try {
-            $deadlineSetting = $course->courseDeadline;
-            $deadlineType = $course->deadline_type;
-
-            $attendanceDeadline = $calculateDeadline(
-                deadlineType: $deadlineType,
-                startAt: new CarbonImmutable,
-                fixedDate: $deadlineSetting?->fixed_date ? new CarbonImmutable($deadlineSetting->fixed_date) : null,
-                relativeDays: $deadlineSetting?->relative_days,
-            );
-
-            $attendance = Attendance::create([
-                'course_id' => $request->course_id,
-                'student_id' => $request->student_id,
-                'attendance_deadline' => $attendanceDeadline,
-            ]);
-
-            $lessons = Lesson::whereHas('chapter', function ($query) use ($request) {
-                $query->where('course_id', $request->course_id);
-            })->get();
-
-            foreach ($lessons as $lesson) {
-                LessonAttendance::create([
-                    'attendance_id' => $attendance->id,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json(['result' => true]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json(['result' => true]);
     }
 
     /**
@@ -95,13 +60,9 @@ class AttendanceController extends Controller
      */
     public function show(ShowRequest $request): AttendanceShowResource
     {
-        $attendance = Attendance::with('course.tags')->findOrFail($request->attendance_id);
+        $attendance = Attendance::with(['course.tags', 'course.courseDeadline'])->findOrFail($request->attendance_id);
 
         $this->authorize('view', [Attendance::class, $attendance]);
-
-        Chapter::with([
-            'lessons.lessonAttendances',
-        ])->where('course_id', $attendance->course_id)->get();
 
         /** @var int */
         $studentsCount = Attendance::where('course_id', $attendance->course_id)->count();
@@ -263,5 +224,31 @@ class AttendanceController extends Controller
         $this->authorize('view', $attendance->course);
 
         return new StatusResource($attendance);
+    }
+
+    /**
+     * 要フォロー受講生API
+     */
+    public function followUp(FollowUpRequest $request, FollowUpService $service): AnonymousResourceCollection
+    {
+        $course = Course::findOrFail($request->course_id);
+        $this->authorize('view', $course);
+
+        $students = $service($request->course_id, $request->days);
+
+        return FollowUpResource::collection($students);
+    }
+
+    /**
+     * 近日期限切れ予定受講生API
+     */
+    public function expiring(ExpiringRequest $request, ExpiringService $service): AnonymousResourceCollection
+    {
+        $course = Course::findOrFail($request->course_id);
+        $this->authorize('view', $course);
+
+        $result = $service($request->course_id, $request->thresholds);
+
+        return ExpiringResource::collection($result);
     }
 }

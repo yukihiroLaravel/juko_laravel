@@ -271,3 +271,4 @@ class CourseController extends Controller
             'updated_count' => $updatedCount,
         ]);
     }
+}

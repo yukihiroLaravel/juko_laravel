@@ -22,7 +22,6 @@ class CreateLessonAttendancesTable extends Migration
             $table->string('status', 30)->comment('レッスン受講状態');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
-            $table->dateTime('completed_at')->nullable()->comment('レッスン完了日時');
             $table->softDeletes();
         });
     }

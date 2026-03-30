@@ -22,7 +22,6 @@ class CreateAttendancesTable extends Migration
             $table->date('attendance_deadline')->nullable()->comment('受講期限日（計算済み）');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
-            $table->dateTime('completed_at')->nullable()->comment('講座完了日時');
             $table->softDeletes();
         });
     }

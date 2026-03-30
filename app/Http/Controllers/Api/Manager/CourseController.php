@@ -170,15 +170,15 @@ class CourseController extends Controller
         $managingIds = $instructor->managings->pluck('id')->toArray();
         $managingIds[] = $instructorId;
 
-        // 更新対象の講座を取得
-        $courses = Course::whereIn('instructor_id', $managingIds)->get();
+        // 更新対象の講座IDを抽出
+        $courseIds = Course::whereIn('instructor_id', $managingIds)->pluck('id')->toArray();
 
         // 更新処理
-        $service(courses: $courses, status: $request->status);
+        $service(courseIds: $courseIds, status: $request->status);
 
         return response()->json([
             'result' => 'true',
-            'updated_ids' => $courses->pluck('id')->toArray(),
+            'updated_ids' => $courseIds,
         ]);
     }
 }

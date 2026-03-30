@@ -285,22 +285,22 @@ class CourseController extends Controller
      * 受講定員一括削除API
      */
     public function clearCapacity(ClearCapacityRequest $request, ClearCapacityService $service): JsonResponse
-{
-    if ($request->boolean('all')) {
-        //（全講座）
-        $courses = Course::where('instructor_id', Auth::guard('instructor')->id())->get();
-    } else {
-        // （指定講座）
-        $courses = Course::whereIn('id', $request->input('courses', []))->get();
+    {
+        if ($request->boolean('all')) {
+            // （全講座）
+            $courses = Course::where('instructor_id', Auth::guard('instructor')->id())->get();
+        } else {
+            // （指定講座）
+            $courses = Course::whereIn('id', $request->input('courses', []))->get();
+        }
+
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        $updatedCount = $service($courses);
+
+        return response()->json([
+            'result' => true,
+            'updated_count' => $updatedCount,
+        ]);
     }
-
-    $this->authorize('bulkUpdate', [Course::class, $courses]);
-
-    $updatedCount = $service($courses);
-
-    return response()->json([
-        'result' => true,
-        'updated_count' => $updatedCount,
-    ]);
-}
 }

@@ -4,7 +4,6 @@ namespace App\Services\Attendance;
 
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\LessonAttendance;
 use App\Model\Student;
 use App\Model\StudentLoginHistory;
 use Carbon\CarbonImmutable;
@@ -15,14 +14,14 @@ final class FollowUpService
     /**
      * 要フォロー受講生を取得する
      *
-     * @param  int  $course_id  講座ID
+     * @param  Course  $course  講座
      * @param  int  $days  最終ログインからの日数
      */
-    public function __invoke(int $course_id, int $days): Collection
+    public function __invoke(Course $course, int $days): Collection
     {
         $threshold = CarbonImmutable::now()->subDays($days);
 
-        $students = Student::whereHas('attendances', fn ($q) => $q->where('course_id', $course_id))
+        $students = Student::whereHas('attendances', fn ($q) => $q->where('course_id', $course->id))
             ->select([
                 'students.id',
                 'students.last_name',
@@ -39,13 +38,22 @@ final class FollowUpService
             ->orderByRaw('latest_login_at IS NULL DESC, latest_login_at ASC')
             ->get();
 
-        $course = Course::with([
+        $course->load([
             'chapters' => fn ($q) => $q->orderBy('order'),
             'chapters.lessons',
-        ])->findOrFail($course_id);
+        ]);
 
-        $attendances = Attendance::with('lessonAttendances')
-            ->where('course_id', $course_id)
+        $this->resolveIncompleteChapterNames($students, $course);
+
+        return $students;
+    }
+
+    private function resolveIncompleteChapterNames(Collection $students, Course $course): void
+    {
+        $attendances = Attendance::with([
+            'lessonAttendances' => fn ($q) => $q->whereNotNull('completed_at'),
+        ])
+            ->where('course_id', $course->id)
             ->whereIn('student_id', $students->pluck('id'))
             ->get();
 
@@ -58,7 +66,6 @@ final class FollowUpService
             }
 
             $completedLessonIds = $attendance->lessonAttendances
-                ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                 ->pluck('lesson_id');
 
             $incompleteChapter = $course->chapters->first(function ($chapter) use ($completedLessonIds) {
@@ -73,7 +80,5 @@ final class FollowUpService
 
             $student->setAttribute('incomplete_chapter_name', $incompleteChapter?->title);
         }
-
-        return $students;
     }
 }

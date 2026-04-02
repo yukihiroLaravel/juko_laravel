@@ -80,11 +80,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::delete('/', [App\Http\Controllers\Api\Instructor\CourseController::class, 'bulkDelete'])->name('bulk-delete');
                     Route::get('tag/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index'])->name('tag.index');
                     Route::patch('deadline', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'bulkUpdate'])->name('deadline.bulk-update');
-<<<<<<< HEAD
                     Route::patch('capacity/clear', [App\Http\Controllers\Api\Instructor\CourseController::class, 'clearCapacity'])->name('capacity.clear');
-=======
                     Route::post('capacity/clear-all', [App\Http\Controllers\Api\Instructor\CourseCapacityController::class, 'clearAll'])->name('capacity.clear-all');
->>>>>>> d9fe9828 (Merge pull request #1174 from yukihiroLaravel/feature/naomichi/JKA-1698/create-bulk-delete-api)
                 });
 
                 Route::prefix('{course_id}')->group(function () {

@@ -8,6 +8,7 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
+use App\Model\StudentLoginHistory;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -45,6 +46,7 @@ class IndexTest extends TestCase
                     'courses' => ['completed', 'total'],
                     'lessons' => ['completed', 'total'],
                     'chapters' => ['completed', 'total'],
+                    'login_count',
                 ],
             ],
         ]);
@@ -209,6 +211,43 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.chapters.completed', 1);
         $response->assertJsonPath('data.stats.chapters.total', 2);
+
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_学習履歴取得_期間内のログイン回数のみカウントされる(): void
+    {
+        // Arrange
+        $now = CarbonImmutable::create(2026, 3, 12);
+        CarbonImmutable::setTestNow($now);
+
+        $student = Student::factory()->create();
+        $otherStudent = Student::factory()->create();
+
+        // 期間内（10日前）のログイン3件
+        StudentLoginHistory::factory()->count(3)->create([
+            'student_id' => $student->id,
+            'logged_in_at' => $now->subDays(10),
+        ]);
+        // 期間外（40日前）のログイン2件
+        StudentLoginHistory::factory()->count(2)->create([
+            'student_id' => $student->id,
+            'logged_in_at' => $now->subDays(40),
+        ]);
+        // 他の受講生のログイン（カウントされないこと）
+        StudentLoginHistory::factory()->count(4)->create([
+            'student_id' => $otherStudent->id,
+            'logged_in_at' => $now->subDays(5),
+        ]);
+
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.learning-history.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.stats.login_count', 3);
 
         CarbonImmutable::setTestNow();
     }

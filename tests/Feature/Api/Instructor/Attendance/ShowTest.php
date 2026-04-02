@@ -37,6 +37,7 @@ class ShowTest extends TestCase
             'data' => [
                 'attendance_id',
                 'attendance_deadline',
+                'days_until_deadline',
                 'course' => [
                     'course_id',
                     'title',
@@ -77,6 +78,7 @@ class ShowTest extends TestCase
             'data' => [
                 'attendance_id',
                 'attendance_deadline',
+                'days_until_deadline',
                 'course' => [
                     'course_id',
                     'title',
@@ -112,6 +114,7 @@ class ShowTest extends TestCase
             'data' => [
                 'attendance_id',
                 'attendance_deadline',
+                'days_until_deadline',
                 'course' => [
                     'course_id',
                     'title',

@@ -150,4 +150,16 @@ class Attendance extends Model
     {
         return $this->attendance_deadline !== null && CarbonImmutable::now()->gte($this->attendance_deadline_end);
     }
+
+    /**
+     * 受講期限まで何日かを返す。期限なし・期限切れなら null。
+     */
+    public function getDaysUntilDeadline(): ?int
+    {
+        if ($this->attendance_deadline === null || $this->isExpired()) {
+            return null;
+        }
+
+        return max(0, (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline, false));
+    }
 }

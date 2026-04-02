@@ -37,7 +37,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
             Route::get('learning-history', [App\Http\Controllers\Api\Student\LearningHistoryController::class, 'index'])->name('learning-history.index');
-            Route::get('login-histories', [App\Http\Controllers\Api\Student\LoginHistoryController::class, 'index'])->name('login_histories');
         });
 
         // 受講生-受講
@@ -136,6 +135,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     // 講師-講座-受講
                     Route::prefix('attendance')->name('course.attendance.')->group(function () {
                         Route::get('follow-up', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'followUp'])->name('follow-up');
+                        Route::get('expiring', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'expiring'])->name('expiring');
                         Route::prefix('status')->group(function () {
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus'])->name('show-status');
                         });

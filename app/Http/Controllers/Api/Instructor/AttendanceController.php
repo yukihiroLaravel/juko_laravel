@@ -234,7 +234,7 @@ class AttendanceController extends Controller
         $course = Course::findOrFail($request->course_id);
         $this->authorize('view', $course);
 
-        $students = $service($request->course_id, $request->days);
+        $students = $service($course, $request->days);
 
         return FollowUpResource::collection($students);
     }

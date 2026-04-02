@@ -2,14 +2,14 @@
 
 namespace App\Http\Resources\Instructor\Attendance;
 
-use App\Model\Student;
+use App\Dto\Instructor\Attendance\FollowUpStudentDto;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class FollowUpResource extends JsonResource
 {
-    /** @var Student */
+    /** @var FollowUpStudentDto */
     public $resource;
 
     /**
@@ -21,16 +21,19 @@ class FollowUpResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'student_id' => $this->resource->id,
-            'name' => $this->resource->last_name.' '.$this->resource->first_name,
+            'student_id' => $this->resource->studentId,
+            'name' => $this->resource->lastName.' '.$this->resource->firstName,
             'email' => $this->resource->email,
-            'last_login_at' => $this->resource->latest_login_at
-                ? CarbonImmutable::parse($this->resource->latest_login_at)->toDateTimeString()
+            'last_login_at' => $this->resource->latestLoginAt,
+            'days_since_login' => $this->resource->latestLoginAt
+                ? (int) CarbonImmutable::parse($this->resource->latestLoginAt)->diffInDays(CarbonImmutable::now())
                 : null,
-            'days_since_login' => $this->resource->latest_login_at
-                ? (int) CarbonImmutable::parse($this->resource->latest_login_at)->diffInDays(CarbonImmutable::now())
+            'incomplete_chapter' => $this->resource->incompleteChapterId !== null
+                ? [
+                    'id' => $this->resource->incompleteChapterId,
+                    'title' => $this->resource->incompleteChapterTitle,
+                ]
                 : null,
-            'incomplete_chapter_name' => $this->resource->incomplete_chapter_name,
         ];
     }
 }

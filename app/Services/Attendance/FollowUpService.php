@@ -2,6 +2,7 @@
 
 namespace App\Services\Attendance;
 
+use App\Dto\Instructor\Attendance\FollowUpStudentDto;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Student;
@@ -43,12 +44,10 @@ final class FollowUpService
             'chapters.lessons',
         ]);
 
-        $this->resolveIncompleteChapterNames($students, $course);
-
-        return $students;
+        return $this->buildFollowUpStudentDtos($students, $course);
     }
 
-    private function resolveIncompleteChapterNames(Collection $students, Course $course): void
+    private function buildFollowUpStudentDtos(Collection $students, Course $course): Collection
     {
         $attendances = Attendance::with([
             'lessonAttendances' => fn ($q) => $q->whereNotNull('completed_at'),
@@ -57,12 +56,22 @@ final class FollowUpService
             ->whereIn('student_id', $students->pluck('id'))
             ->get();
 
-        foreach ($students as $student) {
+        return $students->map(function (Student $student) use ($attendances, $course) {
+            /** @var Attendance|null $attendance */
             $attendance = $attendances->firstWhere('student_id', $student->id);
 
             if (! $attendance) {
-                $student->setAttribute('incomplete_chapter_name', null);
-                continue;
+                return new FollowUpStudentDto(
+                    studentId: $student->id,
+                    lastName: $student->last_name,
+                    firstName: $student->first_name,
+                    email: $student->email,
+                    latestLoginAt: $student->latest_login_at
+                        ? CarbonImmutable::parse($student->latest_login_at)->toDateTimeString()
+                        : null,
+                    incompleteChapterId: null,
+                    incompleteChapterTitle: null,
+                );
             }
 
             $completedLessonIds = $attendance->lessonAttendances
@@ -78,7 +87,17 @@ final class FollowUpService
                 return $lessonIds->diff($completedLessonIds)->isNotEmpty();
             });
 
-            $student->setAttribute('incomplete_chapter_name', $incompleteChapter?->title);
-        }
+            return new FollowUpStudentDto(
+                studentId: $student->id,
+                lastName: $student->last_name,
+                firstName: $student->first_name,
+                email: $student->email,
+                latestLoginAt: $student->latest_login_at
+                    ? CarbonImmutable::parse($student->latest_login_at)->toDateTimeString()
+                    : null,
+                incompleteChapterId: $incompleteChapter?->id,
+                incompleteChapterTitle: $incompleteChapter?->title,
+            );
+        });
     }
 }

@@ -14,9 +14,6 @@ final class FollowUpService
 {
     /**
      * 要フォロー受講生を取得する
-     *
-     * @param  Course  $course  講座
-     * @param  int  $days  最終ログインからの日数
      */
     public function __invoke(Course $course, int $days): Collection
     {

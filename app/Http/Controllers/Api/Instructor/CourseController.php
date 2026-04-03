@@ -28,6 +28,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -287,6 +288,23 @@ class CourseController extends Controller
     public function clearCapacity(ClearCapacityRequest $request, ClearCapacityService $service): JsonResponse
     {
         $courses = Course::whereIn('id', $request->input('courses', []))->get();
+
+        $this->authorize('bulkUpdate', [Course::class, $courses]);
+
+        $updatedCount = $service($courses);
+
+        return response()->json([
+            'result' => true,
+            'updated_count' => $updatedCount,
+        ]);
+    }
+
+    /**
+     * 受講定員全件削除API
+     */
+    public function clearAllCapacity(Request $request, ClearCapacityService $service): JsonResponse
+    {
+        $courses = Course::where('instructor_id', $request->user('instructor')->id)->get();
 
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 

@@ -3,8 +3,11 @@
 namespace Tests\Feature\Api\Instructor\Attendance;
 
 use App\Model\Attendance;
+use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Lesson;
+use App\Model\LessonAttendance;
 use App\Model\Student;
 use App\Model\StudentLoginHistory;
 use Carbon\CarbonImmutable;
@@ -20,11 +23,26 @@ class FollowUpTest extends TestCase
         // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => 'チャプター1']);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => 'チャプター2']);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
         $this->actingAs($instructor, 'instructor');
 
-        // 15日前にログインした受講生（対象）
+        // 15日前にログインした受講生（対象）— チャプター1完了、チャプター2未完了
         $studentOld = Student::factory()->create();
-        Attendance::factory()->create(['student_id' => $studentOld->id, 'course_id' => $course->id]);
+        $attendance = Attendance::factory()->create(['student_id' => $studentOld->id, 'course_id' => $course->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson1->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now()->subDays(20),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson2->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
         StudentLoginHistory::factory()->create([
             'student_id' => $studentOld->id,
             'logged_in_at' => CarbonImmutable::now()->subDays(15),
@@ -47,7 +65,13 @@ class FollowUpTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['student_id' => $studentOld->id]);
+        $response->assertJsonFragment([
+            'student_id' => $studentOld->id,
+            'incomplete_chapter' => [
+                'id' => $chapter2->id,
+                'title' => 'チャプター2',
+            ],
+        ]);
         $response->assertJsonMissing(['student_id' => $studentRecent->id]);
     }
 
@@ -289,5 +313,125 @@ class FollowUpTest extends TestCase
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['course_id']);
+    }
+
+    public function test_全レッスン完了済みの場合_incomplete_chapterがnull(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
+        $this->actingAs($instructor, 'instructor');
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now()->subDays(5),
+        ]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => null,
+        ]);
+    }
+
+    public function test_並び順で最初の未完了チャプターが返る(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => '第1章']);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '第2章']);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'title' => '第3章']);
+        $lesson3 = Lesson::factory()->create(['chapter_id' => $chapter3->id, 'order' => 1]);
+        $this->actingAs($instructor, 'instructor');
+
+        // チャプター1のみ完了、チャプター2・3は未完了 → 第2章が返る
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson1->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now()->subDays(10),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson2->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson3->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert — 並び順で最初の未完了チャプター（第2章）が返る
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => [
+                'id' => $chapter2->id,
+                'title' => '第2章',
+            ],
+        ]);
+    }
+
+    public function test_チャプターがない講座の場合_incomplete_chapterがnull(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        $student = Student::factory()->create();
+        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => null,
+        ]);
     }
 }

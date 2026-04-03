@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                     Route::get('tags/index', [App\Http\Controllers\Api\Instructor\Course\TagController::class, 'index'])->name('tags.index');
                     Route::patch('deadline', [App\Http\Controllers\Api\Instructor\CourseDeadlineController::class, 'bulkUpdate'])->name('deadline.bulk-update');
                     Route::patch('capacity/clear', [App\Http\Controllers\Api\Instructor\CourseController::class, 'clearCapacity'])->name('capacity.clear');
+                    Route::patch('capacity/clear-all', [App\Http\Controllers\Api\Instructor\CourseController::class, 'clearAllCapacity'])->name('capacity.clear-all');
                 });
 
                 // 講師-講座（個別操作）

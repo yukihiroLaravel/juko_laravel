@@ -338,7 +338,7 @@ class FollowUpTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
             'course_id' => $course->id,
             'days' => 10,
         ]));
@@ -390,7 +390,7 @@ class FollowUpTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
             'course_id' => $course->id,
             'days' => 10,
         ]));
@@ -421,7 +421,7 @@ class FollowUpTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.follow-up', [
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
             'course_id' => $course->id,
             'days' => 10,
         ]));

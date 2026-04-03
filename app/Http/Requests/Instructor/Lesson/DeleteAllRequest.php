@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
-use App\Model\Chapter;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DeleteAllRequest extends FormRequest
@@ -18,10 +17,8 @@ class DeleteAllRequest extends FormRequest
     #[\Override]
     protected function prepareForValidation(): void
     {
-        $chapter = Chapter::find($this->route('chapter_id'));
         $this->merge([
             'chapter_id' => $this->route('chapter_id'),
-            'course_id' => $chapter?->course_id,
         ]);
     }
 
@@ -31,7 +28,6 @@ class DeleteAllRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

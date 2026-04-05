@@ -55,11 +55,11 @@ class NotificationController extends Controller
                     },
                 ]);
             },
-            'course.tags', 
+            'course.tags',
             'course.courseDeadline',
         ])
-        ->where('instructor_id', $instructorId)
-        ->paginate($perPage, ['*'], 'page', $page);
+            ->where('instructor_id', $instructorId)
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return new NotificationIndexResource($notifications);
     }

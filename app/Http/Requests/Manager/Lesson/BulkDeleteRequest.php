@@ -32,6 +32,7 @@ class BulkDeleteRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
             'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],

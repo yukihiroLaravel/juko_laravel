@@ -25,6 +25,7 @@ class StoreRequest extends FormRequest
     {
         return [
             'title' => ['required'],
+            /** @ignoreParam */
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }

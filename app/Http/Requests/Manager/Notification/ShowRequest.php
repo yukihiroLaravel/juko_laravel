@@ -32,6 +32,7 @@ class ShowRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'notification_id' => [
                 'required',
                 'integer',

@@ -30,6 +30,7 @@ class CompleteAllChaptersRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];
     }

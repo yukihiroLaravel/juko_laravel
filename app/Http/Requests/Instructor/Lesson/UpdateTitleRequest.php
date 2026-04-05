@@ -32,6 +32,7 @@ class UpdateTitleRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'title' => ['required', 'string', 'max:50'],
         ];

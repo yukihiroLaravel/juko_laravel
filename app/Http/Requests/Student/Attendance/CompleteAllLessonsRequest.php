@@ -33,7 +33,9 @@ class CompleteAllLessonsRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

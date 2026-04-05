@@ -33,6 +33,7 @@ class UpdateStatusRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'status' => ['required', 'string', new LessonStatusRule],
         ];

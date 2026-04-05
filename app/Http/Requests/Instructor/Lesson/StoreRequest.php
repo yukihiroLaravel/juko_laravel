@@ -35,7 +35,9 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'title' => ['required', 'string', 'max:50'],
         ];

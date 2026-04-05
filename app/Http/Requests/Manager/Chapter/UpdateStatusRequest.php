@@ -33,6 +33,8 @@ class UpdateStatusRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
+            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'chapters' => ['required', 'array'],
             'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'status' => ['required', 'string', new ChapterStatusRule],

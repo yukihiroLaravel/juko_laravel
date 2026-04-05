@@ -35,6 +35,7 @@ class PutRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
             'status' => ['required', Rule::enum(StatusEnum::class)],
             'type' => ['required', Rule::enum(TypeEnum::class)],

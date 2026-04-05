@@ -24,6 +24,7 @@ class DeleteRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

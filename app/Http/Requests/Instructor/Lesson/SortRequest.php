@@ -27,7 +27,9 @@ class SortRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
             'lessons' => ['required', 'array'],
             'lessons.*' => ['required', 'integer'],

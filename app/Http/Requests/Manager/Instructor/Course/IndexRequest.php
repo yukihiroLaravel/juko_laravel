@@ -32,6 +32,7 @@ class IndexRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],

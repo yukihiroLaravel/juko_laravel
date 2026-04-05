@@ -36,6 +36,7 @@ class PutStatusRequest extends FormRequest
             'lessons' => ['required', 'array'],
             'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'status' => ['required', 'string', new LessonStatusRule],
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

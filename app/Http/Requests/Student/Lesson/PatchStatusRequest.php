@@ -33,6 +33,7 @@ class PatchStatusRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id,deleted_at,NULL'],
             'status' => ['required', new LessonAttendanceStatusRule],
         ];

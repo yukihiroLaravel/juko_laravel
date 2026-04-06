@@ -50,7 +50,7 @@ class NotificationController extends Controller
         $notifications = Notification::with([
             'course' => function ($query) {
                 $query->withCount([
-                    'attendances as current_attendance_count' 
+                    'attendances as current_attendance_count',
                 ]);
             },
             'course.tags',

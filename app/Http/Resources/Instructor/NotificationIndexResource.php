@@ -34,6 +34,7 @@ class NotificationIndexResource extends JsonResource
                 if ($notification->course->capacity === null) {
                     unset($course['capacity']);
                 }
+
                 return [
                     ...(new NotificationResource($notification))->toArray($request),
                     'course' => $course,

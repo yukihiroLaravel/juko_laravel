@@ -26,11 +26,20 @@ class NotificationIndexResource extends JsonResource
         $notifications = $this->resource;
 
         return [
-            'notifications' => $notifications->map(fn (Notification $notification) => [
-                ...(new NotificationResource($notification))->toArray($request),
-                'course' => new CourseResource($notification->course),
-                'tags' => TagResource::collection($notification->course->tags),
-            ]),
+            'notifications' => $notifications->map(function (Notification $notification) use ($request) {
+                $course = (new CourseResource($notification->course))->toArray($request);
+
+                $course['current_attendance_count'] = $notification->course->current_attendance_count ?? 0;
+
+                if ($notification->course->capacity === null) {
+                    unset($course['capacity']);
+                }
+                return [
+                    ...(new NotificationResource($notification))->toArray($request),
+                    'course' => $course,
+                    'tags' => TagResource::collection($notification->course->tags),
+                ];
+            }),
             'pagination' => [
                 'page' => $notifications->currentPage(),
                 'total' => $notifications->total(),

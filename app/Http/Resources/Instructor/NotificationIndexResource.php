@@ -30,7 +30,9 @@ class NotificationIndexResource extends JsonResource
                 ...(new NotificationResource($notification))->toArray($request),
                 'course' => [
                     ...(new CourseResource($notification->course))->toArray($request),
-                    'current_attendance_count' => $notification->course->current_attendance_count,
+                    'current_attendance_count' => $notification->course->capacity !== null
+                        ? ($notification->course->current_attendance_count ?? 0)
+                        : null,
                 ],
                 'tags' => TagResource::collection($notification->course->tags),
             ]),

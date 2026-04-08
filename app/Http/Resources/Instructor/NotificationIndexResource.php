@@ -7,11 +7,10 @@ use App\Http\Resources\Base\Instructor\NotificationResource;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Notification;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationIndexResource extends JsonResource
 {
-    /** @var LengthAwarePaginator */
+    /** @var Notification */
     public $resource;
 
     /**
@@ -23,18 +22,15 @@ class NotificationIndexResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
-        $notifications = $this->resource;
-
         return [
-            'notifications' => $notifications->map(fn (Notification $notification) => [
-                ...(new NotificationResource($notification))->toArray($request),
-                'course' => new CourseResource($notification->course),
-                'tags' => TagResource::collection($notification->course->tags),
-            ]),
-            'pagination' => [
-                'page' => $notifications->currentPage(),
-                'total' => $notifications->total(),
+            ...(new NotificationResource($this->resource))->toArray($request),
+            'course' => [
+                ...(new CourseResource($this->resource->course))->toArray($request),
+                'current_attendance_count' => $this->resource->course->capacity !== null
+                    ? ($this->resource->course->current_attendance_count ?? 0)
+                    : null,
             ],
+            'tags' => TagResource::collection($this->resource->course->tags),
         ];
     }
 }

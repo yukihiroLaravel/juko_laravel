@@ -29,6 +29,7 @@ use App\Services\Notification\UpdateTypeAllService;
 use App\Services\Notification\UpdateTypeService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -41,7 +42,7 @@ class NotificationController extends Controller
     /**
      * お知らせ一覧取得API
      */
-    public function index(IndexRequest $request): NotificationIndexResource
+    public function index(IndexRequest $request): AnonymousResourceCollection
     {
         $instructorId = Auth::guard('instructor')->user()->id;
         $perPage = $request->input('per_page', 20);
@@ -61,7 +62,7 @@ class NotificationController extends Controller
             ->where('instructor_id', $instructorId)
             ->paginate($perPage, ['*'], 'page', $page);
 
-        return new NotificationIndexResource($notifications);
+        return NotificationIndexResource::collection($notifications);
     }
 
     /**

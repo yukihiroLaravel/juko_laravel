@@ -63,7 +63,11 @@ class InstructorController extends Controller
                         })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
                 },
+                'courses as fixed_capacity_count' => function (Builder $query) {
+                    $query->whereNotNull('capacity');
+                },
             ])
+            ->withSum('courses as capacity_sum', 'capacity')
             ->orderBy($sortBy, $order)
             ->paginate($perPage, ['*'], 'page', $page);
 

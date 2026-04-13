@@ -130,4 +130,42 @@ class Student extends Authenticatable
             'gender' => Gender::class,
         ];
     }
+
+    /**
+     * 連続ログイン日数を取得
+     *
+     * 連続ログインしていない場合は null を返す
+     */
+    public function getLoginStreakDays(): ?int
+    {
+        $loginDates = $this->loginHistories()
+            ->orderByDesc('logged_in_at')
+            ->get(['logged_in_at'])
+            ->pluck('logged_in_at')
+            ->map(fn ($loggedInAt) => $loggedInAt->toDateString())
+            ->unique()
+            ->values();
+
+        if ($loginDates->isEmpty()) {
+            return null;
+        }
+
+        $today = CarbonImmutable::today()->toDateString();
+        
+         if ($loginDates[0] !== $today) {
+            return null;
+        }
+
+        $streakDays = 1;
+        $baseDate = CarbonImmutable::parse($loginDates[0]);
+
+        for ($i = 1; $i < $loginDates->count(); $i++) {
+            if ($loginDates[$i] !== $baseDate->subDays($i)->toDateString()) {
+                break;
+            }
+            $streakDays++;
+        }
+
+        return $streakDays;
+    }
 }

@@ -55,6 +55,7 @@ class InstructorController extends Controller
         // 講師情報を取得
         $instructors = Instructor::whereIn('id', $instructorIds)
             ->withCount([
+                'courses',
                 'courses as student_count' => function (Builder $query) {
                     $query->join('attendances', 'courses.id', '=', 'attendances.course_id')
                         ->where(function ($query) {
@@ -63,7 +64,7 @@ class InstructorController extends Controller
                         })
                         ->select(DB::raw('COUNT(DISTINCT attendances.student_id)'));
                 },
-                'courses as fixed_capacity_count' => function (Builder $query) {
+                'courses as courses_with_capacity_count' => function (Builder $query) {
                     $query->whereNotNull('capacity');
                 },
             ])

@@ -29,8 +29,8 @@ class InstructorIndexResource extends JsonResource
                 'course_count' => $instructor->courses_count ?? 0,
                 'student_count' => $instructor->student_count ?? 0,
                 'capacity_count' => ($instructor->courses_count ?? 0) === ($instructor->courses_with_capacity_count ?? 0)
-                ? $instructor->capacity_sum
-                : null,
+                    ? $instructor->capacity_sum
+                    : null,
             ]),
             'pagination' => [
                 'page' => $data->currentPage(),

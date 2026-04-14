@@ -18,7 +18,7 @@ class LoginController extends Controller
 
         return response()->json([
             'data' => [
-                'login_streak_days' => $student?->getLoginStreakDays(),
+                'login_streak_days' => $student->getLoginStreakDays(),
             ],
         ]);
     }

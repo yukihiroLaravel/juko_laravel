@@ -139,12 +139,10 @@ class Student extends Authenticatable
     public function getLoginStreakDays(): ?int
     {
         $loginDates = $this->loginHistories()
-            ->orderByDesc('logged_in_at')
-            ->get(['logged_in_at'])
-            ->pluck('logged_in_at')
-            ->map(fn ($loggedInAt) => $loggedInAt->toDateString())
-            ->unique()
-            ->values();
+            ->selectRaw('DATE(logged_in_at) as login_date')
+            ->groupBy('login_date')
+            ->orderByDesc('login_date')
+            ->pluck('login_date');
 
         if ($loginDates->isEmpty()) {
             return null;

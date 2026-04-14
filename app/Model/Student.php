@@ -149,8 +149,8 @@ class Student extends Authenticatable
         }
 
         $today = CarbonImmutable::today()->toDateString();
-        
-         if ($loginDates[0] !== $today) {
+
+        if ($loginDates[0] !== $today) {
             return null;
         }
 

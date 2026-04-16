@@ -16,7 +16,8 @@ class LoginStreakService
             ->selectRaw('DATE(logged_in_at) as login_date')
             ->groupBy('login_date')
             ->orderByDesc('login_date')
-            ->pluck('login_date');
+            ->pluck('login_date')
+            ->map(fn (string $date) => CarbonImmutable::parse($date));
 
         if ($loginDates->isEmpty()) {
             return null;
@@ -25,16 +26,15 @@ class LoginStreakService
         $today = CarbonImmutable::today();
 
         // 今日ログインしていない場合
-        if ($loginDates[0] !== $today->toDateString()) {
+        if (! $loginDates[0]->isSameDay($today)) {
             return null;
         }
 
         $streakDays = $loginDates
             ->values()
-            ->takeWhile(fn (string $date, int $i) => $date === $today->subDays($i)->toDateString()
-            )
+            ->takeWhile(fn (CarbonImmutable $date, int $i) => $date->isSameDay($today->subDays($i)))
             ->count();
 
-        return $streakDays > 0 ? $streakDays : null;
+        return $streakDays;
     }
 }

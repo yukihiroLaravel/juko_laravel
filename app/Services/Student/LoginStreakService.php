@@ -30,11 +30,9 @@ class LoginStreakService
             return null;
         }
 
-        $streakDays = $loginDates
+        return $loginDates
             ->values()
             ->takeWhile(fn (CarbonImmutable $date, int $i) => $date->isSameDay($today->subDays($i)))
             ->count();
-
-        return $streakDays;
     }
 }

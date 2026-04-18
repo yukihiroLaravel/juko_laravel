@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
             Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
             Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
             Route::get('learning-history', [App\Http\Controllers\Api\Student\LearningHistoryController::class, 'index'])->name('learning-history.index');
+            Route::get('login-streak', [App\Http\Controllers\Api\Student\LoginController::class, 'loginStreak'])->name('login-streak');
         });
 
         // 受講生-受講

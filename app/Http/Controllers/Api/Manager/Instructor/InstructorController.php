@@ -8,10 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Instructor\IndexRequest;
 use App\Http\Requests\Manager\Instructor\ShowRequest;
 use App\Http\Requests\Manager\Instructor\StoreRequest;
+use App\Http\Requests\Manager\Instructor\TotalCurrentAttendanceCountRequest;
 use App\Http\Requests\Manager\Instructor\UpdateRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
+use App\Http\Resources\Manager\InstructorTotalCurrentAttendanceCountResource;
 use App\Mail\AuthenticationConfirmationMail;
+use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
@@ -86,6 +89,34 @@ class InstructorController extends Controller
         $this->authorize('view', $instructor);
 
         return new InstructorShowResource($instructor);
+    }
+
+    /**
+     * 講師-トータル受講中受講生数取得API
+     */
+    public function totalCurrentAttendanceCount(TotalCurrentAttendanceCountRequest $request): InstructorTotalCurrentAttendanceCountResource {
+        $managerId = Auth::guard('instructor')->user()->id;
+
+        /** @var Instructor $manager */
+        $manager = Instructor::with('managings')->findOrFail($managerId);
+
+        $instructorIds = $manager->managings->pluck('id')->toArray();
+        $instructorIds[] = $manager->id;
+
+        // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
+        if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
+            throw new AuthorizationException('Forbidden, invalid instructor_id.');
+        }
+
+        $totalCurrentAttendanceCount = Attendance::whereNull('completed_at')
+            ->whereHas('course', function ($query) use ($request) {
+                $query->where('instructor_id', $request->instructor_id);
+            })
+            ->count();
+
+        return new InstructorTotalCurrentAttendanceCountResource([
+            'total_current_attendance_count' => $totalCurrentAttendanceCount,
+        ]);
     }
 
     /**

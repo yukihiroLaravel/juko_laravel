@@ -211,7 +211,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::get('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'show'])->name('show');
                         Route::post('/', [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'update'])->name('update');
                         Route::get('total-current-attendance-count',
-                        [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'totalCurrentAttendanceCount'])->name('total-current-attendance-count');
+                            [App\Http\Controllers\Api\Manager\Instructor\InstructorController::class, 'totalCurrentAttendanceCount'])->name('total-current-attendance-count');
                         Route::prefix('course')->name('course.')->group(function () {
                             Route::get('index', [App\Http\Controllers\Api\Manager\Instructor\CourseController::class, 'index'])->name('index');
                         });

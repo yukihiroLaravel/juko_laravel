@@ -95,7 +95,7 @@ class InstructorController extends Controller
      * 講師-トータル受講中受講生数取得API
      */
     public function totalCurrentAttendanceCount(
-        TotalCurrentAttendanceCountRequest $request, 
+        TotalCurrentAttendanceCountRequest $request,
         TotalCurrentAttendanceCountService $service
     ): InstructorTotalCurrentAttendanceCountResource {
 

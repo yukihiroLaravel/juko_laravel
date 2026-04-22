@@ -14,11 +14,11 @@ use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
 use App\Http\Resources\Manager\InstructorTotalCurrentAttendanceCountResource;
 use App\Mail\AuthenticationConfirmationMail;
-use App\Model\Attendance;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\StoreService;
+use App\Services\Instructor\TotalCurrentAttendanceCountService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
@@ -94,25 +94,17 @@ class InstructorController extends Controller
     /**
      * 講師-トータル受講中受講生数取得API
      */
-    public function totalCurrentAttendanceCount(TotalCurrentAttendanceCountRequest $request): InstructorTotalCurrentAttendanceCountResource {
-        $managerId = Auth::guard('instructor')->user()->id;
+    public function totalCurrentAttendanceCount(
+        TotalCurrentAttendanceCountRequest $request, 
+        TotalCurrentAttendanceCountService $service
+    ): InstructorTotalCurrentAttendanceCountResource {
 
-        /** @var Instructor $manager */
-        $manager = Instructor::with('managings')->findOrFail($managerId);
+        /** @var Instructor $instructor */
+        $instructor = Instructor::findOrFail($request->instructor_id);
 
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $manager->id;
+        $this->authorize('view', $instructor);
 
-        // 指定した講師IDが自分と配下の講師IDと一致しない場合は許可しない
-        if (! in_array((int) $request->instructor_id, $instructorIds, true)) {
-            throw new AuthorizationException('Forbidden, invalid instructor_id.');
-        }
-
-        $totalCurrentAttendanceCount = Attendance::whereNull('completed_at')
-            ->whereHas('course', function ($query) use ($request) {
-                $query->where('instructor_id', $request->instructor_id);
-            })
-            ->count();
+        $totalCurrentAttendanceCount = $service($instructor->id);
 
         return new InstructorTotalCurrentAttendanceCountResource([
             'total_current_attendance_count' => $totalCurrentAttendanceCount,

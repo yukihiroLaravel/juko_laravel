@@ -11,10 +11,8 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
-use App\Services\Tag\DeleteTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 /**

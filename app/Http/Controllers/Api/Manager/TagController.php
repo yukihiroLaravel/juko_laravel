@@ -67,21 +67,6 @@ class TagController extends Controller
     }
 
     /**
-     * タグ削除API
-     */
-    public function delete(DeleteRequest $request, DeleteTagService $service): JsonResponse
-    {
-        $tag = Tag::findOrFail($request->tag_id);
-
-        // 認可処理
-        $this->authorize('delete', $tag);
-
-        $service(tag: $tag);
-
-        return response()->json(['result' => true]);
-    }
-
-    /**
      * タグ詳細取得API
      */
     public function show(ShowRequest $request): TagResource

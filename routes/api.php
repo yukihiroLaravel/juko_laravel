@@ -200,7 +200,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 // マネージャー-タグ
                 Route::prefix('tag')->name('tag.')->group(function () {
                     Route::prefix('{tag_id}')->group(function () {
-                        Route::delete('/', [App\Http\Controllers\Api\Manager\TagController::class, 'delete'])->name('delete');
                         Route::get('/', [App\Http\Controllers\Api\Manager\TagController::class, 'show'])->name('show');
                     });
                 });

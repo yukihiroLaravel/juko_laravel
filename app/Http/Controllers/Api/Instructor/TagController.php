@@ -7,7 +7,7 @@ use App\Http\Requests\Instructor\Tag\IndexRequest;
 use App\Http\Requests\Instructor\Tag\PutRequest;
 use App\Http\Requests\Instructor\Tag\ShowRequest;
 use App\Http\Requests\Instructor\Tag\StoreRequest;
-use App\Http\Requests\Manager\Tag\DeleteRequest;
+use App\Http\Requests\Instructor\Tag\DeleteRequest;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Instructor;

@@ -8,14 +8,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Instructor\IndexRequest;
 use App\Http\Requests\Manager\Instructor\ShowRequest;
 use App\Http\Requests\Manager\Instructor\StoreRequest;
+use App\Http\Requests\Manager\Instructor\TotalCurrentAttendanceCountRequest;
 use App\Http\Requests\Manager\Instructor\UpdateRequest;
 use App\Http\Resources\Manager\InstructorIndexResource;
 use App\Http\Resources\Manager\InstructorShowResource;
+use App\Http\Resources\Manager\InstructorTotalCurrentAttendanceCountResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
 use App\Services\Auth\CredentialGeneratorService;
 use App\Services\Instructor\StoreService;
+use App\Services\Instructor\TotalCurrentAttendanceCountService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
@@ -86,6 +89,26 @@ class InstructorController extends Controller
         $this->authorize('view', $instructor);
 
         return new InstructorShowResource($instructor);
+    }
+
+    /**
+     * 講師-トータル受講中受講生数取得API
+     */
+    public function totalCurrentAttendanceCount(
+        TotalCurrentAttendanceCountRequest $request,
+        TotalCurrentAttendanceCountService $service
+    ): InstructorTotalCurrentAttendanceCountResource {
+
+        /** @var Instructor $instructor */
+        $instructor = Instructor::findOrFail($request->instructor_id);
+
+        $this->authorize('view', $instructor);
+
+        $totalCurrentAttendanceCount = $service($instructor->id);
+
+        return new InstructorTotalCurrentAttendanceCountResource([
+            'total_current_attendance_count' => $totalCurrentAttendanceCount,
+        ]);
     }
 
     /**

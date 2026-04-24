@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Manager\Tag\DeleteRequest;
 use App\Http\Requests\Manager\Tag\IndexRequest;
 use App\Http\Requests\Manager\Tag\ShowRequest;
 use App\Http\Resources\Base\Instructor\TagResource;
@@ -11,10 +10,8 @@ use App\Http\Resources\Manager\TagIndexResource;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
-use App\Services\Tag\DeleteTagService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -64,21 +61,6 @@ class TagController extends Controller
         });
 
         return TagIndexResource::collection($query);
-    }
-
-    /**
-     * タグ削除API
-     */
-    public function delete(DeleteRequest $request, DeleteTagService $service): JsonResponse
-    {
-        $tag = Tag::findOrFail($request->tag_id);
-
-        // 認可処理
-        $this->authorize('delete', $tag);
-
-        $service(tag: $tag);
-
-        return response()->json(['result' => true]);
     }
 
     /**

@@ -63,7 +63,6 @@ class StudentLearningHistoryService
         });
 
         $completedQuery = (clone $query)
-            ->whereNotNull('completed_at')
             ->whereBetween('completed_at', [$start, $end]);
 
         return [

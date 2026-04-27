@@ -44,7 +44,7 @@ class IndexTest extends TestCase
                 'window' => ['type', 'start', 'end'],
                 'stats' => [
                     'courses' => ['completed', 'total'],
-                    'lessons' => ['completed', 'total'],
+                    'lessons' => ['completed', 'total', 'last_completed_at'],
                     'chapters' => ['completed', 'total'],
                     'login_count',
                 ],
@@ -70,6 +70,7 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.stats.courses.total', 0);
         $response->assertJsonPath('data.stats.lessons.completed', 0);
         $response->assertJsonPath('data.stats.lessons.total', 0);
+        $response->assertJsonPath('data.stats.lessons.last_completed_at', null);
         $response->assertJsonPath('data.stats.chapters.completed', 0);
         $response->assertJsonPath('data.stats.chapters.total', 0);
     }
@@ -148,6 +149,91 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.lessons.completed', 1);
         $response->assertJsonPath('data.stats.lessons.total', 2);
+
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_学習履歴取得_期間内の最新レッスン完了日時が返却される(): void
+    {
+        // Arrange
+        $now = CarbonImmutable::create(2026, 3, 12);
+        CarbonImmutable::setTestNow($now);
+
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lesson3 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        $latestCompletedAt = $now->subDays(2);
+
+        // 期間内に完了したレッスン（複数）
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson1->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $now->subDays(15),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson2->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $latestCompletedAt,
+        ]);
+        // 期間外に完了したレッスン（除外されること）
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson3->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $now->subDays(40),
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.learning-history.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.stats.lessons.last_completed_at', $latestCompletedAt->format('Y-m-d H:i:s'));
+
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_学習履歴取得_期間内に完了レッスンがない場合は最新レッスン完了日時がnull(): void
+    {
+        // Arrange
+        $now = CarbonImmutable::create(2026, 3, 12);
+        CarbonImmutable::setTestNow($now);
+
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        // 期間外（40日前）に完了したレッスンのみ
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $now->subDays(40),
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.learning-history.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.stats.lessons.last_completed_at', null);
 
         CarbonImmutable::setTestNow();
     }

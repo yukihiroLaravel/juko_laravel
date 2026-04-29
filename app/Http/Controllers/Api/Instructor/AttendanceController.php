@@ -150,7 +150,7 @@ class AttendanceController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
         $course = Course::findOrFail($courseId);
-        
+
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
@@ -167,7 +167,7 @@ class AttendanceController extends Controller
             ->withCount('lessons')
             ->get()
             ->sum('lessons_count');
-        
+
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得
@@ -179,6 +179,7 @@ class AttendanceController extends Controller
             } else {
                 throw new Exception('Invalid period');
             }
+
             return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
         }))->count();
 

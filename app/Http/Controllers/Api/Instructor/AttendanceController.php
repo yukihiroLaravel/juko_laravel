@@ -150,7 +150,7 @@ class AttendanceController extends Controller
         $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
         $course = Course::findOrFail($courseId);
-
+        
         if ($course->instructor_id !== $instructorId) {
             // ログインしている講師の講座でない場合はエラーを返す
             throw new AuthorizationException('Forbidden, invalid instructor_id.');
@@ -160,6 +160,14 @@ class AttendanceController extends Controller
             'lessonAttendances.lesson.chapter.course',
             'lessonAttendances.lesson.chapter.lessons',
         ])->where('course_id', $courseId)->get();
+
+        $studentsCount = $attendances->count();
+
+        $totalLessonsCount = $course->chapters()
+            ->withCount('lessons')
+            ->get()
+            ->sum('lessons_count');
+        
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得
@@ -171,9 +179,12 @@ class AttendanceController extends Controller
             } else {
                 throw new Exception('Invalid period');
             }
-
             return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
         }))->count();
+
+        $averageProgressRate = ($studentsCount === 0 || $totalLessonsCount === 0)
+            ? 0
+            : round(($completedLessonsCount / ($studentsCount * $totalLessonsCount)) * 100);
 
         // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
@@ -207,6 +218,7 @@ class AttendanceController extends Controller
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount,
+            'average_progress_rate' => $averageProgressRate,
         ]);
     }
 

@@ -164,7 +164,7 @@ class AttendanceController extends Controller
         $studentsCount = $attendances->count();
 
         $totalLessonsCount = $attendances->first()?->lessonAttendances->count() ?? 0;
-        
+
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得

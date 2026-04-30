@@ -163,11 +163,8 @@ class AttendanceController extends Controller
 
         $studentsCount = $attendances->count();
 
-        $totalLessonsCount = $course->chapters()
-            ->withCount('lessons')
-            ->get()
-            ->sum('lessons_count');
-
+        $totalLessonsCount = $attendances->first()?->lessonAttendances->count() ?? 0;
+        
         $period = $request->period;
 
         // 指定期間内に完了したレッスンの個数を取得
@@ -183,9 +180,12 @@ class AttendanceController extends Controller
             return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
         }))->count();
 
-        $averageProgressRate = ($studentsCount === 0 || $totalLessonsCount === 0)
-            ? 0
-            : round(($completedLessonsCount / ($studentsCount * $totalLessonsCount)) * 100);
+        // 指定期間内に完了したレッスン数をもとに平均進捗率を取得
+        $averageProgressRate = Attendance::calcAverageProgressRate(
+            $completedLessonsCount,
+            $studentsCount,
+            $totalLessonsCount,
+        );
 
         // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))

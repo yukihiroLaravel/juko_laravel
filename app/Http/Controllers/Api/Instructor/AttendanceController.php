@@ -163,7 +163,7 @@ class AttendanceController extends Controller
 
         $studentsCount = $attendances->count();
 
-        $totalLessonsCount = $attendances->first()?->lessonAttendances->count() ?? 0;
+        $totalLessonsCount = $course->chapters()->withCount('lessons')->get()->sum('lessons_count');
 
         $period = $request->period;
 

@@ -86,6 +86,20 @@ class Attendance extends Model
         return floor($percent);
     }
 
+    /**
+     * 平均進捗率計算
+     */
+    public static function calcAverageProgressRate(int $completedLessonsCount, int $studentsCount, int $totalLessonsCount): float
+    {
+        if ($studentsCount === 0 || $totalLessonsCount === 0) {
+            return 0;
+        }
+
+        $percent = ($completedLessonsCount / ($studentsCount * $totalLessonsCount)) * 100;
+
+        return floor($percent);
+    }
+
     public static function hasActiveStudents(int $courseId): bool
     {
         return self::where('course_id', $courseId)->exists();

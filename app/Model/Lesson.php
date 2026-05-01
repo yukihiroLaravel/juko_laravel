@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -72,5 +73,13 @@ class Lesson extends Model
     public function getCompletedLessonsCountAttribute()
     {
         return $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
+    }
+
+    /**
+     * 公開済みのレッスンに絞り込む
+     */
+    public function scopePublic(Builder $query): void
+    {
+        $query->where('status', self::STATUS_PUBLIC);
     }
 }

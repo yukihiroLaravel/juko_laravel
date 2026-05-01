@@ -88,7 +88,7 @@ class ShowStatusTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_受講生がいない場合_average_progress_rateは0(): void
+    public function test_受講生がいない場合_平均進捗率は0(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -108,7 +108,7 @@ class ShowStatusTest extends TestCase
         $response->assertJson(['average_progress_rate' => 0]);
     }
 
-    public function test_レッスンが0件の場合_average_progress_rateは0(): void
+    public function test_レッスンが0件の場合_平均進捗率は0(): void
     {
         // Arrange — 講座にチャプター/レッスンが無く、受講生のみ存在
         $instructor = Instructor::factory()->create();

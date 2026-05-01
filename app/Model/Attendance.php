@@ -86,6 +86,9 @@ class Attendance extends Model
         return floor($percent);
     }
 
+    /**
+     * 平均進捗率計算
+     */
     public static function calcAverageProgressRate(int $completedLessonsCount, int $studentsCount, int $totalLessonsCount): float
     {
         if ($studentsCount === 0 || $totalLessonsCount === 0) {

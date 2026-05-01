@@ -17,6 +17,7 @@ use App\Http\Resources\Instructor\Attendance\StatusResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\ExpiringService;
@@ -163,12 +164,18 @@ class AttendanceController extends Controller
 
         $studentsCount = $attendances->count();
 
-        $totalLessonsCount = $course->chapters()->withCount('lessons')->get()->sum('lessons_count');
+        $totalLessonsCount = $course->chapters()
+            ->withCount(['lessons' => fn ($query) => $query->public()])
+            ->get()
+            ->sum('lessons_count');
 
         $period = $request->period;
 
-        // 指定期間内に完了したレッスンの個数を取得
+        // 指定期間内に完了した公開レッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+            if ($lessonAttendance->lesson->status !== Lesson::STATUS_PUBLIC) {
+                return false;
+            }
             if ($period === LessonAttendance::PERIOD_TODAY) {
                 $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
             } elseif ($period === LessonAttendance::PERIOD_MONTH) {

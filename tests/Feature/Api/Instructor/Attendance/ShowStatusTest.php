@@ -128,6 +128,59 @@ class ShowStatusTest extends TestCase
         $response->assertJson(['average_progress_rate' => 0]);
     }
 
+    public function test_非公開レッスンは平均進捗率の計算に含まれない(): void
+    {
+        // Arrange — 公開2本 + 非公開2本、受講生1名が公開レッスン2本を完了
+        // 母数 = 公開Lesson 2本 × 受講生1名 = 2、完了 = 2 → 100%
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+
+        $publicLessons = Lesson::factory()->count(2)->create([
+            'chapter_id' => $chapter->id,
+            'status' => Lesson::STATUS_PUBLIC,
+        ]);
+        $privateLessons = Lesson::factory()->count(2)->create([
+            'chapter_id' => $chapter->id,
+            'status' => Lesson::STATUS_PRIVATE,
+        ]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        // 公開Lesson 2件を完了
+        foreach ($publicLessons as $lesson) {
+            LessonAttendance::factory()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            ]);
+        }
+        // 非公開Lesson はステータス遷移しないものの、レコード自体は存在する想定
+        foreach ($privateLessons as $lesson) {
+            LessonAttendance::factory()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            ]);
+        }
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert — 非公開Lessonは母数・分子から除外され、completed: 2 / (1 × 2) × 100 = 100
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_lessons_count' => 2,
+            'average_progress_rate' => 100,
+        ]);
+    }
+
     public function test_平均進捗率の計算が正しい(): void
     {
         // Arrange — 受講生2名 × レッスン4本、当日完了が5件 → floor(5 / (2 * 4) * 100) = 62

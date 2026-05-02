@@ -367,4 +367,97 @@ class ShowTest extends TestCase
         ]);
         $response->assertJsonPath('data.course.course_deadline.fixed_date', '2026-12-31');
     }
+
+    public function test_期限切れの受講者は受講人数から除外される(): void
+    {
+        // Arrange — 期限内の受講者と期限切れの受講者を作成し、期限内の受講で取得
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $activeStudent = Student::factory()->create();
+        $activeAttendance = Attendance::factory()->create([
+            'student_id' => $activeStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::tomorrow(),
+        ]);
+        $expiredStudent = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $expiredStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::yesterday(),
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $activeAttendance->id]));
+
+        // Assert — 期限切れの受講者は除外されてカウントされる
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                'students_count' => 1,
+            ],
+        ]);
+    }
+
+    public function test_当日が期限の受講者は受講人数に含まれる(): void
+    {
+        // Arrange — 当日が期限の受講者と期限内の受講者を作成
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $todayDeadlineStudent = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $todayDeadlineStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::today(),
+        ]);
+        $futureDeadlineStudent = Student::factory()->create();
+        $futureAttendance = Attendance::factory()->create([
+            'student_id' => $futureDeadlineStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::tomorrow(),
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $futureAttendance->id]));
+
+        // Assert — 当日が期限の受講者も含めてカウントされる（>= の境界）
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                'students_count' => 2,
+            ],
+        ]);
+    }
+
+    public function test_受講期限なしの受講者は受講人数に含まれる(): void
+    {
+        // Arrange — 期限なしの受講者と期限内の受講者を作成
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $noDeadlineStudent = Student::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $noDeadlineStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => null,
+        ]);
+        $activeStudent = Student::factory()->create();
+        $activeAttendance = Attendance::factory()->create([
+            'student_id' => $activeStudent->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::tomorrow(),
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $activeAttendance->id]));
+
+        // Assert — 期限なしの受講者も含めてカウントされる
+        $response->assertStatus(200);
+        $response->assertJson([
+            'data' => [
+                'students_count' => 2,
+            ],
+        ]);
+    }
 }

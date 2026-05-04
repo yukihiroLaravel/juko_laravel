@@ -238,10 +238,6 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                                 Route::patch('status', [App\Http\Controllers\Api\Manager\ChapterController::class, 'updateStatus'])->name('update-status');
                             });
 
-                            // マネージャー-講座-チャプター-レッスン
-                            Route::prefix('lesson')->name('lesson.')->group(function () {
-                                Route::delete('/', [App\Http\Controllers\Api\Manager\LessonController::class, 'bulkDelete'])->name('bulk-delete');
-                            });
                         });
 
                         // マネージャー生徒学習状況

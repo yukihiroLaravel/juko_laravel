@@ -18,7 +18,7 @@ final class ShowService
      *     studentsCount: int,
      *     chapters: Collection<int, array{
      *         chapter: Chapter,
-     *         completedStudentsCount: int|null
+     *         completedStudentsCount: int
      *     }>
      *  }
      */
@@ -41,14 +41,14 @@ final class ShowService
             if($totalLessonsCount === 0) {
                 return [
                     'chapter' => $chapter,
-                    'completedStudentsCount' => null,
+                    'completedStudentsCount' => 0,
                 ];
             }
 
             $completedStudentsCount = $validAttendances->filter(function (Attendance $attendance) use ($allLessonIds, $totalLessonsCount) {
                 $completedLessonsCount = $attendance->lessonAttendances
                     ->whereIn('lesson_id', $allLessonIds)
-                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->whereNotNull('completed_at')
                     ->count();
 
                 return $totalLessonsCount === $completedLessonsCount;

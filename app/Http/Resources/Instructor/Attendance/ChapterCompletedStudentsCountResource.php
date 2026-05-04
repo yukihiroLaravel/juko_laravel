@@ -3,19 +3,17 @@
 namespace App\Http\Resources\Instructor\Attendance;
 
 use App\Http\Resources\Base\Instructor\ChapterResource;
+use App\Model\Chapter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property array{chapter: Chapter, completedStudentsCount: int} $resource
+ */
 class ChapterCompletedStudentsCountResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
     #[\Override]
-    public function toArray($request): array
+    public function toArray(Request $request): array
     {
         return [
             ...(new ChapterResource($this->resource['chapter']))->toArray($request),

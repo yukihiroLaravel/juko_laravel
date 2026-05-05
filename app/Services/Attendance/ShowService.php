@@ -5,7 +5,6 @@ namespace App\Services\Attendance;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\LessonAttendance;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
@@ -25,7 +24,7 @@ final class ShowService
     public function __invoke(Course $course): array
     {
         $course->loadMissing([
-            'chapters.lessons'
+            'chapters.lessons',
         ]);
 
         $validAttendances = Attendance::with('lessonAttendances')
@@ -38,7 +37,7 @@ final class ShowService
 
         $studentsCount = $validAttendances->count();
 
-        $chapters = $course->chapters->map(function (Chapter $chapter) use ($validAttendances){
+        $chapters = $course->chapters->map(function (Chapter $chapter) use ($validAttendances) {
             $allLessonIds = $chapter->lessons->pluck('id');
             $totalLessonsCount = $allLessonIds->count();
 

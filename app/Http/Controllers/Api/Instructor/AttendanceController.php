@@ -11,9 +11,11 @@ use App\Http\Requests\Instructor\Attendance\ShowRequest;
 use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
+use App\Http\Requests\Instructor\Attendance\StuckPointsRequest;
 use App\Http\Resources\Instructor\Attendance\ExpiringResource;
 use App\Http\Resources\Instructor\Attendance\FollowUpResource;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
+use App\Http\Resources\Instructor\Attendance\StuckPointsResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -23,6 +25,7 @@ use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\ExpiringService;
 use App\Services\Attendance\FollowUpService;
 use App\Services\Attendance\StoreService;
+use App\Services\Attendance\StuckPointsService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -270,5 +273,25 @@ class AttendanceController extends Controller
         $result = $service($request->course_id, $request->thresholds);
 
         return ExpiringResource::collection($result);
+    }
+
+    /**
+     * 受講生の止まっている箇所取得API
+     */
+    public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection|JsonResponse
+    {
+        $courseId = $request->course_id;
+
+        // Policyによる認可チェック
+        $course = Course::findOrFail($courseId);
+        $this->authorize('view', $course);
+
+        $result = $service($courseId);
+
+        if ($result === null) {
+            return response()->json([]);
+        }
+
+        return StuckPointsResource::collection($result);
     }
 }

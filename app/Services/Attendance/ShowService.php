@@ -4,11 +4,8 @@ namespace App\Services\Attendance;
 
 use App\Model\Attendance;
 use App\Model\Chapter;
-<<<<<<< HEAD
-=======
 use App\Model\Course;
 use App\Model\LessonAttendance;
->>>>>>> 8c9f96c7 (feature/endo/JKA-1749/Add_Completed_Students_Count_To_Response_Per_Chapter(修正２回目))
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 

@@ -100,6 +100,20 @@ class Attendance extends Model
         return floor($percent);
     }
 
+    /**
+     * 修了率計算
+     */
+    public static function calcCompletionRate(int $completedStudentsCount, int $studentsCount): float
+    {
+        if ($studentsCount === 0) {
+            return 0;
+        }
+
+        $percent = ($completedStudentsCount / $studentsCount) * 100;
+
+        return floor($percent);
+    }
+
     public static function hasActiveStudents(int $courseId): bool
     {
         return self::where('course_id', $courseId)->exists();

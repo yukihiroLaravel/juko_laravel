@@ -198,8 +198,7 @@ class AttendanceController extends Controller
         $completedStudentsCount = $attendances->filter(function (Attendance $attendance) use ($totalLessonsCount) {
 
             $completedCount = $attendance->lessonAttendances
-                ->filter(fn (LessonAttendance $lessonAttendance) =>
-                    $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
+                ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
                     && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE
                 )
                 ->count();

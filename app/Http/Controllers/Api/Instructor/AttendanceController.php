@@ -65,9 +65,13 @@ class AttendanceController extends Controller
 
         $this->authorize('view', [Attendance::class, $attendance]);
 
-        $result = $service($attendance);
+        $result = $service($attendance->course);
 
-        return new AttendanceShowResource($result);
+        return new AttendanceShowResource([
+            'attendance' => $attendance,
+            'studentsCount' => $result['studentsCount'],
+            'chapters' => $result['chapters'],
+        ]);
     }
 
     /**

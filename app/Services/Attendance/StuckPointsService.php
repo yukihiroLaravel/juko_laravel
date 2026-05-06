@@ -14,13 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 final class StuckPointsService
 {
-    private const MINIMUM_STUDENT_COUNT = 1;
+    private const int MINIMUM_STUDENT_COUNT = 1;
 
     /**
      * 止まっている箇所を取得する
      *
-     * @param int $courseId
-     * @return Collection<StuckPointDto>|null 
+     * @return Collection<StuckPointDto>|null
      */
     public function __invoke(int $courseId): ?Collection
     {

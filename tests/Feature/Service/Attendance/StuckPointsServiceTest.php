@@ -23,12 +23,14 @@ class StuckPointsServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
         CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-05-01'));
     }
 
+    #[\Override]
     protected function tearDown(): void
     {
         CarbonImmutable::setTestNow();

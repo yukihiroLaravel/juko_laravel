@@ -56,7 +56,7 @@ final class StuckPointsService
             ->get();
         // 受講生が1人の場合は空配列を返す
         if ($attendances->pluck('student_id')->unique()
-                ->count() <= self::MINIMUM_STUDENT_COUNT) {
+            ->count() <= self::MINIMUM_STUDENT_COUNT) {
             return null;
         }
 
@@ -122,7 +122,7 @@ final class StuckPointsService
 
         // 最終レッスン以外の受講済み最多数のレッスンの次の公開レッスンとチャプターを取得
         return $maxCompletedLessons
-            ->map(function (array $maxCompletedLesson) use ($publicLessons, $publicChapters,) {
+            ->map(function (array $maxCompletedLesson) use ($publicLessons, $publicChapters) {
                 $lesson = $publicLessons->where('id', $maxCompletedLesson['lesson_id'])->first();
                 $stuckLesson = $publicLessons
                     ->where('chapter_id', $lesson->chapter_id)
@@ -142,6 +142,7 @@ final class StuckPointsService
                         ->sortBy('order')
                         ->first();
                 }
+
                 return new StuckPointDto(
                     id: $stuckChapter->id,
                     title: $stuckChapter->title,
@@ -157,6 +158,7 @@ final class StuckPointsService
             ->groupBy('id')
             ->map(function ($items) {
                 $first = $items->first();
+
                 return new StuckPointDto(
                     id: $first->id,
                     title: $first->title,

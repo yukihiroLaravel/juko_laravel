@@ -62,7 +62,7 @@ final class StuckPointsService
         }
 
         // 受講済みのレッスンを集計
-        $stuckPoints = DB::table('lesson_attendances')
+        $completedLessonCounts = DB::table('lesson_attendances')
             ->selectRaw('lesson_id, COUNT(*) as count')
             ->whereIn('attendance_id', $attendances->pluck('id'))
             ->whereIn('lesson_id', $publicLessons->pluck('id'))
@@ -75,11 +75,11 @@ final class StuckPointsService
                 'count' => (int) $stuckPoint->count,
             ]);
 
-        $maxCount = $stuckPoints->max('count');
+        $maxCount = $completedLessonCounts->max('count');
 
         // 受講済みのレッスンがない、または、受講済みの最多数が1人の場合は
         // 受講可能な最初の公開レッスンとチャプターを返す
-        if ($stuckPoints->isEmpty() || (int) $maxCount === self::MINIMUM_STUDENT_COUNT) {
+        if ($completedLessonCounts->isEmpty() || (int) $maxCount === self::MINIMUM_STUDENT_COUNT) {
             $chapters = $publicChapters->sortBy('order');
             foreach ($chapters as $chapter) {
                 $lesson = $publicLessons->where('chapter_id', $chapter->id)->sortBy('order')->first();
@@ -112,29 +112,44 @@ final class StuckPointsService
         }
 
         // 受講済みの最多数のレッスンを取得し、最終レッスンの有無を確認
-        $maxStuckPoints = $stuckPoints->where('count', $maxCount);
-        $maxLastLesson = $maxStuckPoints->where('lesson_id', $lastLesson->id);
-        $maxStuckLessons = $maxStuckPoints->where('lesson_id', '!=', $lastLesson->id);
+        $maxCompletedLessonCounts = $completedLessonCounts->where('count', $maxCount);
+        $maxLastLesson = $maxCompletedLessonCounts->where('lesson_id', $lastLesson->id);
+        $maxCompletedLessons = $maxCompletedLessonCounts->where('lesson_id', '!=', $lastLesson->id);
 
         // 受講済み最多数のレッスンが最終レッスンのみの場合、空配列を返す
-        if ($maxLastLesson->isNotEmpty() && $maxStuckLessons->isEmpty()) {
+        if ($maxLastLesson->isNotEmpty() && $maxCompletedLessons->isEmpty()) {
             return null;
         }
 
-        // 最終レッスン以外の受講済み最多数のレッスンとチャプターを取得（ループ処理）
-        $publicLessonsById = $publicLessons->keyBy('id');
-        $publicChaptersById = $publicChapters->keyBy('id');
-        return $maxStuckLessons
-            ->map(function (array $maxStuckLesson) use ($publicLessonsById, $publicChaptersById) {
-                $lesson = $publicLessonsById->get($maxStuckLesson['lesson_id']);
-                $chapter = $publicChaptersById->get($lesson->chapter_id);
+        // 最終レッスン以外の受講済み最多数のレッスンの次の公開レッスンとチャプターを取得
+        return $maxCompletedLessons
+            ->map(function (array $maxCompletedLesson) use ($publicLessons, $publicChapters,) {
+                $lesson = $publicLessons->where('id', $maxCompletedLesson['lesson_id'])->first();
+                $stuckLesson = $publicLessons
+                    ->where('chapter_id', $lesson->chapter_id)
+                    ->where('order', '>', $lesson->order)
+                    ->sortBy('order')
+                    ->first();
+                if ($stuckLesson) {
+                    $stuckChapter = $publicChapters->where('id', $stuckLesson->chapter_id)->first();
+                } else {
+                    $chapter = $publicChapters->where('id', $lesson->chapter_id)->first();
+                    $stuckChapter = $publicChapters
+                        ->where('order', '>', $chapter->order)
+                        ->sortBy('order')
+                        ->first();
+                    $stuckLesson = $publicLessons
+                        ->where('chapter_id', $stuckChapter->id)
+                        ->sortBy('order')
+                        ->first();
+                }
                 return new StuckPointDto(
-                    id: $chapter->id,
-                    title: $chapter->title,
+                    id: $stuckChapter->id,
+                    title: $stuckChapter->title,
                     lessons: collect([
                         new StuckLessonDto(
-                            id: $lesson->id,
-                            title: $lesson->title,
+                            id: $stuckLesson->id,
+                            title: $stuckLesson->title,
                         ),
                     ]),
                 );

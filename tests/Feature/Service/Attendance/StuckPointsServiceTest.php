@@ -8,7 +8,6 @@ use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\CourseDeadline;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -37,28 +36,7 @@ class StuckPointsServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_受講期限が切れている場合_nullを返す(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::FIXED_DATE,
-        ]);
-        CourseDeadline::factory()->create([
-            'course_id' => $course->id,
-            'fixed_date' => CarbonImmutable::parse('2026-04-30'),
-        ]);
-        $service = new StuckPointsService;
-
-        // Act
-        $result = $service($course->id);
-
-        // Assert
-        $this->assertNull($result);
-    }
-
-    public function test_公開チャプターが1件も存在しない場合_nullを返す(): void
+    public function test_公開チャプターが1件も存在しない場合_空コレクションを返す(): void
     {
         // Arrange
         $course = $this->createCourseWithDeadline();
@@ -72,10 +50,11 @@ class StuckPointsServiceTest extends TestCase
         $result = $service($course->id);
 
         // Assert
-        $this->assertNull($result);
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertTrue($result->isEmpty());
     }
 
-    public function test_公開レッスンが1件も存在しない場合_nullを返す(): void
+    public function test_公開レッスンが1件も存在しない場合_空コレクションを返す(): void
     {
         // Arrange
         $course = $this->createCourseWithDeadline();
@@ -92,22 +71,42 @@ class StuckPointsServiceTest extends TestCase
         $result = $service($course->id);
 
         // Assert
-        $this->assertNull($result);
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertTrue($result->isEmpty());
     }
 
-    public function test_受講生が1人の場合_nullを返す(): void
+    public function test_受講期限が切れている場合_空コレクションを返す(): void
     {
         // Arrange
-        $course = $this->createCourseWithDeadline();
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-        ]);
-        Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::FIXED_DATE,
         ]);
         Attendance::factory()->create([
             'course_id' => $course->id,
-            'student_id' => Student::factory()->create()->id,
+            'attendance_deadline' => CarbonImmutable::parse('2026-04-30'),
+        ]);
+        $service = new StuckPointsService;
+
+        // Act
+        $result = $service($course->id);
+
+        // Assert
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertTrue($result->isEmpty());
+    }
+
+    public function test_受講生が1人の場合_空コレクションを返す(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::FIXED_DATE,
+        ]);
+        Attendance::factory()->create([
+            'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
         $service = new StuckPointsService;
@@ -116,7 +115,8 @@ class StuckPointsServiceTest extends TestCase
         $result = $service($course->id);
 
         // Assert
-        $this->assertNull($result);
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertTrue($result->isEmpty());
     }
 
     public function test_受講済みのレッスンがない場合_最初の公開レッスンを返す(): void
@@ -148,7 +148,7 @@ class StuckPointsServiceTest extends TestCase
         $this->assertSingleStuckPoint($result, $chapter, $firstLesson);
     }
 
-    public function test_受講済み最多数のレッスンが最終レッスンのみの場合_nullを返す(): void
+    public function test_受講済み最多数のレッスンが最終レッスンのみの場合_空コレクションを返す(): void
     {
         // Arrange
         $course = $this->createCourseWithDeadline();
@@ -188,7 +188,8 @@ class StuckPointsServiceTest extends TestCase
         $result = $service($course->id);
 
         // Assert
-        $this->assertNull($result);
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertTrue($result->isEmpty());
     }
 
     public function test_受講済み最多数のレッスンが最終レッスン以外の場合_同一チャプターの次のレッスンを返す(): void
@@ -305,9 +306,8 @@ class StuckPointsServiceTest extends TestCase
         $this->assertSingleStuckPoint($result, $chapter2, $chapter2FirstLesson);
     }
 
-    private function assertSingleStuckPoint(?Collection $result, Chapter $expectedChapter, Lesson $expectedLesson): void
+    private function assertSingleStuckPoint(Collection $result, Chapter $expectedChapter, Lesson $expectedLesson): void
     {
-        $this->assertNotNull($result);
         $this->assertCount(1, $result);
         $this->assertInstanceOf(StuckPointDto::class, $result->first());
 
@@ -326,9 +326,9 @@ class StuckPointsServiceTest extends TestCase
     {
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        CourseDeadline::factory()->create([
+        Attendance::factory()->create([
             'course_id' => $course->id,
-            'fixed_date' => CarbonImmutable::parse('2026-05-31'),
+            'attendance_deadline' => CarbonImmutable::parse('2026-05-31'),
         ]);
 
         return $course;

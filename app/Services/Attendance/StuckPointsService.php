@@ -6,11 +6,10 @@ use App\Dto\Instructor\Attendance\StuckLessonDto;
 use App\Dto\Instructor\Attendance\StuckPointDto;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\CourseDeadline;
 use App\Model\Lesson;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 final class StuckPointsService
 {
@@ -19,111 +18,193 @@ final class StuckPointsService
     /**
      * 止まっている箇所を取得する
      *
-     * @return Collection<StuckPointDto>|null
+     * @return Collection<StuckPointDto>
      */
-    public function __invoke(int $courseId): ?Collection
+    public function __invoke(int $courseId): Collection
     {
-        // 当該講座の受講期限を確認
-        $hasCourseDeadline = CourseDeadline::where('course_id', $courseId)
-            ->whereDate('fixed_date', '>=', CarbonImmutable::today())
-            ->exists();
-        // 受講期限が切れている場合は空配列を返す
-        if (! $hasCourseDeadline) {
-            return null;
-        }
 
-        // 公開チャプターを取得
-        $publicChapters = Chapter::where('course_id', $courseId)
-            ->where('status', Chapter::STATUS_PUBLIC)
-            ->get();
-        // 公開チャプターが1件も存在しない場合は空配列を返す
-        if ($publicChapters->isEmpty()) {
-            return null;
-        }
+        $publicChapters = $this->getPublicChapters($courseId);
+        $publicLessons = $this->getPublicLessons($publicChapters);
+        $attendances = $this->getActiveAttendances($courseId);
 
-        // 公開レッスンを取得
-        $publicLessons = Lesson::whereIn('chapter_id', $publicChapters->pluck('id'))
-            ->where('status', Lesson::STATUS_PUBLIC)
-            ->get();
-        // 公開レッスンが1件も存在しない場合は空配列を返す
-        if ($publicLessons->isEmpty()) {
-            return null;
-        }
-
-        // 講座の受講期限が切れていない受講を取得
-        $attendances = Attendance::where('course_id', $courseId)
-            ->whereDate('attendance_deadline', '>=', CarbonImmutable::today())
-            ->get();
-        // 受講生が1人の場合は空配列を返す
-        if ($attendances->pluck('student_id')->unique()
-            ->count() <= self::MINIMUM_STUDENT_COUNT) {
-            return null;
+        // 集計対象の講座、チャプター、レッスンがない場合は、空のコレクションを返す
+        if (! $this->isEligible($publicChapters, $publicLessons, $attendances)) {
+            return collect();
         }
 
         // 受講済みのレッスンを集計
-        $completedLessonCounts = DB::table('lesson_attendances')
-            ->selectRaw('lesson_id, COUNT(*) as count')
-            ->whereIn('attendance_id', $attendances->pluck('id'))
-            ->whereIn('lesson_id', $publicLessons->pluck('id'))
-            ->whereNotNull('completed_at')
-            ->whereNull('deleted_at')
-            ->groupBy('lesson_id')
-            ->get()
-            ->map(fn ($stuckPoint) => [
-                'lesson_id' => (int) $stuckPoint->lesson_id,
-                'count' => (int) $stuckPoint->count,
-            ]);
+        $completedLessonCounts = $this->countCompletedLessons($attendances, $publicLessons);
 
-        $maxCount = $completedLessonCounts->max('count');
+        // 受講済みの人数が最多のレッスンを取得
+        $maxCount = $completedLessonCounts->max('lesson_attendances_count');
+        $maxCompletedLessons = $completedLessonCounts
+            ->where('lesson_attendances_count', '>', self::MINIMUM_STUDENT_COUNT)
+            ->where('lesson_attendances_count', $maxCount);
 
         // 受講済みのレッスンがない、または、受講済みの最多数が1人の場合は
         // 受講可能な最初の公開レッスンとチャプターを返す
-        if ($completedLessonCounts->isEmpty() || (int) $maxCount === self::MINIMUM_STUDENT_COUNT) {
-            $chapters = $publicChapters->sortBy('order');
-            foreach ($chapters as $chapter) {
-                $lesson = $publicLessons->where('chapter_id', $chapter->id)->sortBy('order')->first();
-                if ($lesson) {
-                    return collect([
-                        new StuckPointDto(
-                            id: $chapter->id,
-                            title: $chapter->title,
-                            lessons: collect([
-                                new StuckLessonDto(
-                                    id: $lesson->id,
-                                    title: $lesson->title,
-                                ),
-                            ]),
-                        ),
-                    ]);
-                }
-            }
+        if ($maxCompletedLessons->isEmpty()) {
+            return $this->getFirstLesson($publicChapters, $publicLessons);
         }
 
         // 最終レッスンの取得
-        $chapters = $publicChapters->sortByDesc('order');
-        $lastLesson = null;
-        foreach ($chapters as $chapter) {
-            $lesson = $publicLessons->where('chapter_id', $chapter->id)->sortByDesc('order')->first();
-            if ($lesson) {
-                $lastLesson = $lesson;
-                break;
-            }
-        }
+        $lastLesson = $this->getLastLesson($publicChapters, $publicLessons);
 
-        // 受講済みの最多数のレッスンを取得し、最終レッスンの有無を確認
-        $maxCompletedLessonCounts = $completedLessonCounts->where('count', $maxCount);
-        $maxLastLesson = $maxCompletedLessonCounts->where('lesson_id', $lastLesson->id);
-        $maxCompletedLessons = $maxCompletedLessonCounts->where('lesson_id', '!=', $lastLesson->id);
+        // 受講済みの最多数のレッスンの中で、最終レッスンの有無を確認
+        $maxLastLesson = $maxCompletedLessons->where('id', $lastLesson->id);
+        $maxCompletedLessons = $maxCompletedLessons->where('id', '!=', $lastLesson->id);
 
         // 受講済み最多数のレッスンが最終レッスンのみの場合、空配列を返す
         if ($maxLastLesson->isNotEmpty() && $maxCompletedLessons->isEmpty()) {
-            return null;
+            return collect();
         }
 
         // 最終レッスン以外の受講済み最多数のレッスンの次の公開レッスンとチャプターを取得
+        return $this->getNextLesson($maxCompletedLessons, $publicLessons, $publicChapters);
+    }
+
+    /**
+     * 公開チャプターを取得
+     *
+     * @return Collection<Chapter>
+     */
+    private function getPublicChapters(int $courseId): Collection
+    {
+        return Chapter::where('course_id', $courseId)
+            ->where('status', Chapter::STATUS_PUBLIC)
+            ->get();
+    }
+
+    /**
+     * 公開レッスンを取得
+     *
+     * @param  Collection<Chapter>  $publicChapters
+     * @return Collection<Lesson>
+     */
+    private function getPublicLessons(Collection $publicChapters): Collection
+    {
+        return Lesson::whereIn('chapter_id', $publicChapters->pluck('id'))
+            ->where('status', Lesson::STATUS_PUBLIC)
+            ->get();
+    }
+
+    /**
+     * 講座の受講期限が切れていない受講を取得
+     *
+     * @return Collection<Attendance>
+     */
+    private function getActiveAttendances(int $courseId): Collection
+    {
+        return Attendance::where('course_id', $courseId)
+            ->where(function ($q) {
+                $q->whereDate('attendance_deadline', '>=', CarbonImmutable::today())
+                    ->orWhereNull('attendance_deadline'); // 無期限受講も含める
+            })
+            ->get();
+    }
+
+    /**
+     * 集計対象として有効かを判定
+     *
+     * @param  Collection<Chapter>  $publicChapters
+     * @param  Collection<Lesson>  $publicLessons
+     * @param  Collection<Attendance>  $attendances
+     */
+    private function isEligible(Collection $publicChapters, Collection $publicLessons, Collection $attendances): bool
+    {
+        if ($publicChapters->isEmpty() || $publicLessons->isEmpty()) {
+            return false;
+        }
+        return $attendances->pluck('student_id')
+            ->unique()
+            ->count() > self::MINIMUM_STUDENT_COUNT;
+    }
+
+    /**
+     * 受講済みレッスン数を集計
+     *
+     * @param  Collection<Attendance>  $attendances
+     * @param  Collection<Lesson>  $publicLessons
+     * @return Collection<int, Lesson>
+     */
+    private function countCompletedLessons(Collection $attendances, Collection $publicLessons): Collection
+    {
+        return Lesson::query()
+            ->whereIn('id', $publicLessons->pluck('id'))
+            ->withCount(['lessonAttendances' => fn ($q) => $q
+                ->whereIn('attendance_id', $attendances->pluck('id'))
+                ->whereNotNull('completed_at')
+            ])
+            ->get();
+    }
+
+    /**
+     * 受講可能な最初の公開レッスンとチャプターを取得
+     *
+     * @param  Collection<Chapter>  $publicChapters
+     * @param  Collection<Lesson>  $publicLessons
+     * @return Collection<StuckPointDto>
+     */
+    private function getFirstLesson(Collection $publicChapters, Collection $publicLessons): Collection
+    {
+        $chapters = $publicChapters->sortBy('order');
+        foreach ($chapters as $chapter) {
+            $lesson = $publicLessons->where('chapter_id', $chapter->id)
+                ->sortBy('order')
+                ->first();
+            if ($lesson) {
+                return collect([
+                    new StuckPointDto(
+                        id: $chapter->id,
+                        title: $chapter->title,
+                        lessons: collect([
+                            new StuckLessonDto(
+                                id: $lesson->id,
+                                title: $lesson->title,
+                            ),
+                        ]),
+                    ),
+                ]);
+            }
+        }
+
+        // 到達しないはずだが、念のため例外を返す
+        throw new RuntimeException('The first public lesson is not existed.');
+    }
+
+    /**
+     * 受講可能な最終の公開レッスンを取得
+     *
+     * @param  Collection<Chapter>  $publicChapters
+     * @param  Collection<Lesson>  $publicLessons
+     */
+    private function getLastLesson(Collection $publicChapters, Collection $publicLessons): Lesson
+    {
+        $chapters = $publicChapters->sortByDesc('order');
+        foreach ($chapters as $chapter) {
+            $lesson = $publicLessons->where('chapter_id', $chapter->id)->sortByDesc('order')->first();
+            if ($lesson) {
+                return $lesson;
+            }
+        }
+
+        // 到達しないはずだが、念のため例外を返す
+        throw new RuntimeException('The last public lesson is not existed.');
+    }
+
+    /**
+     * 次に受講すべき公開レッスンとチャプターを取得
+     *
+     * @param  Collection<Lesson>  $maxCompletedLessons
+     * @param  Collection<Lesson>  $publicLessons
+     * @param  Collection<Chapter>  $publicChapters
+     * @return Collection<StuckPointDto>
+     */
+    private function getNextLesson(Collection $maxCompletedLessons, Collection $publicLessons, Collection $publicChapters): Collection
+    {
         return $maxCompletedLessons
-            ->map(function (array $maxCompletedLesson) use ($publicLessons, $publicChapters) {
-                $lesson = $publicLessons->where('id', $maxCompletedLesson['lesson_id'])->first();
+            ->map(function (Lesson $maxCompletedLesson) use ($publicLessons, $publicChapters) {
+                $lesson = $publicLessons->where('id', $maxCompletedLesson->id)->first();
                 $stuckLesson = $publicLessons
                     ->where('chapter_id', $lesson->chapter_id)
                     ->where('order', '>', $lesson->order)
@@ -142,7 +223,6 @@ final class StuckPointsService
                         ->sortBy('order')
                         ->first();
                 }
-
                 return new StuckPointDto(
                     id: $stuckChapter->id,
                     title: $stuckChapter->title,
@@ -154,11 +234,21 @@ final class StuckPointsService
                     ]),
                 );
             })
-            // 重複チャプターをまとめる
+            ->pipe(fn (Collection $stuckPoints) => $this->mergeDuplicatedChapters($stuckPoints));
+    }
+
+    /**
+     * 重複するチャプターをまとめる
+     *
+     * @param  Collection<StuckPointDto>  $stuckPoints
+     * @return Collection<StuckPointDto>
+     */
+    private function mergeDuplicatedChapters(Collection $stuckPoints): Collection
+    {
+        return $stuckPoints
             ->groupBy('id')
             ->map(function ($items) {
                 $first = $items->first();
-
                 return new StuckPointDto(
                     id: $first->id,
                     title: $first->title,

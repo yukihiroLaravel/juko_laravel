@@ -288,7 +288,7 @@ class AttendanceController extends Controller
 
         $result = $service($courseId);
 
-        if ($result === null) {
+        if ($result->isEmpty()) {
             return response()->json([]);
         }
 

@@ -115,6 +115,7 @@ final class StuckPointsService
         if ($publicChapters->isEmpty() || $publicLessons->isEmpty()) {
             return false;
         }
+
         return $attendances->pluck('student_id')
             ->unique()
             ->count() > self::MINIMUM_STUDENT_COUNT;
@@ -133,7 +134,7 @@ final class StuckPointsService
             ->whereIn('id', $publicLessons->pluck('id'))
             ->withCount(['lessonAttendances' => fn ($q) => $q
                 ->whereIn('attendance_id', $attendances->pluck('id'))
-                ->whereNotNull('completed_at')
+                ->whereNotNull('completed_at'),
             ])
             ->get();
     }
@@ -223,6 +224,7 @@ final class StuckPointsService
                         ->sortBy('order')
                         ->first();
                 }
+
                 return new StuckPointDto(
                     id: $stuckChapter->id,
                     title: $stuckChapter->title,
@@ -249,6 +251,7 @@ final class StuckPointsService
             ->groupBy('id')
             ->map(function ($items) {
                 $first = $items->first();
+
                 return new StuckPointDto(
                     id: $first->id,
                     title: $first->title,

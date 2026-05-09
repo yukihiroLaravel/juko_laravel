@@ -196,8 +196,7 @@ class AttendanceController extends Controller
 
         // 全公開レッスンを完了している受講生数を取得
         $completedStudentsCount = $attendances
-            ->filter(fn (Attendance $attendance) =>
-                $attendance->isAllPublicLessonsCompleted($totalLessonsCount)
+            ->filter(fn (Attendance $attendance) => $attendance->isAllPublicLessonsCompleted($totalLessonsCount)
             )
             ->count();
 

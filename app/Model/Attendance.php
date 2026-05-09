@@ -103,7 +103,7 @@ class Attendance extends Model
     /**
      * 全公開レッスンを完了しているか判定する
      *
-     * @param int $totalPublicLessonsCount 公開レッスン総数
+     * @param  int  $totalPublicLessonsCount  公開レッスン総数
      */
     public function isAllPublicLessonsCompleted(int $totalPublicLessonsCount): bool
     {
@@ -112,8 +112,7 @@ class Attendance extends Model
         }
 
         $completedCount = $this->lessonAttendances
-            ->filter(fn (LessonAttendance $lessonAttendance) =>
-                $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
+            ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
                 && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE
             )
             ->count();
@@ -126,8 +125,8 @@ class Attendance extends Model
      *
      * 全公開レッスンを完了している受講生の割合（%）を算出する。
      *
-     * @param int $completedStudentsCount 全公開レッスンを完了している受講生数
-     * @param int $studentsCount 全受講生数
+     * @param  int  $completedStudentsCount  全公開レッスンを完了している受講生数
+     * @param  int  $studentsCount  全受講生数
      * @return float 修了率（%）。受講生が0人の場合は0を返す。
      */
     public static function calcCompletionRate(int $completedStudentsCount, int $studentsCount): float

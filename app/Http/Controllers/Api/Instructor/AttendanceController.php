@@ -22,6 +22,7 @@ use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\ExpiringService;
 use App\Services\Attendance\FollowUpService;
+use App\Services\Attendance\ShowService;
 use App\Services\Attendance\StoreService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -59,18 +60,18 @@ class AttendanceController extends Controller
     /**
      * 受講状況取得API
      */
-    public function show(ShowRequest $request): AttendanceShowResource
+    public function show(ShowRequest $request, ShowService $service): AttendanceShowResource
     {
         $attendance = Attendance::with(['course.tags', 'course.courseDeadline'])->findOrFail($request->attendance_id);
 
         $this->authorize('view', [Attendance::class, $attendance]);
 
-        /** @var int */
-        $studentsCount = Attendance::where('course_id', $attendance->course_id)->count();
+        $result = $service($attendance->course);
 
         return new AttendanceShowResource([
             'attendance' => $attendance,
-            'studentsCount' => $studentsCount,
+            'studentsCount' => $result['studentsCount'],
+            'chapters' => $result['chapters'],
         ]);
     }
 

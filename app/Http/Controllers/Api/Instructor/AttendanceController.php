@@ -194,17 +194,12 @@ class AttendanceController extends Controller
             $totalLessonsCount,
         );
 
-        // 全レッスンを完了している受講生数を取得
-        $completedStudentsCount = $attendances->filter(function (Attendance $attendance) use ($totalLessonsCount) {
-
-            $completedCount = $attendance->lessonAttendances
-                ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
-                    && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE
-                )
-                ->count();
-
-            return $totalLessonsCount > 0 && $completedCount === $totalLessonsCount;
-        })->count();
+        // 全公開レッスンを完了している受講生数を取得
+        $completedStudentsCount = $attendances
+            ->filter(fn (Attendance $attendance) =>
+                $attendance->isAllPublicLessonsCompleted($totalLessonsCount)
+            )
+            ->count();
 
         // 修了率を取得
         $completionRate = Attendance::calcCompletionRate(

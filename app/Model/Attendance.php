@@ -112,8 +112,9 @@ class Attendance extends Model
         }
 
         $completedCount = $this->lessonAttendances
-            ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
-                && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE
+            ->filter(fn (LessonAttendance $lessonAttendance) =>
+                $lessonAttendance->lesson->status === Lesson::STATUS_PUBLIC
+                && $lessonAttendance->completed_at !== null
             )
             ->count();
 

@@ -195,6 +195,18 @@ class AttendanceController extends Controller
             $totalLessonsCount,
         );
 
+        // 全公開レッスンを完了している受講生数を取得
+        $completedStudentsCount = $attendances
+            ->filter(fn (Attendance $attendance) => $attendance->isAllPublicLessonsCompleted($totalLessonsCount)
+            )
+            ->count();
+
+        // 修了率を取得
+        $completionRate = Attendance::calcCompletionRate(
+            $completedStudentsCount,
+            $studentsCount,
+        );
+
         // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
@@ -228,6 +240,7 @@ class AttendanceController extends Controller
             'completed_lessons_count' => $completedLessonsCount,
             'completed_chapters_count' => $completedChaptersCount,
             'average_progress_rate' => $averageProgressRate,
+            'completion_rate' => $completionRate,
         ]);
     }
 

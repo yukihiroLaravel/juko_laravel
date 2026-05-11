@@ -124,6 +124,57 @@ class StuckPointsServiceTest extends TestCase
         // Arrange
         $course = $this->createCourseWithDeadline();
 
+        $chapter1 = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'order' => 1,
+        ]);
+        $firstLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter1->id,
+            'order' => 1,
+        ]);
+        Lesson::factory()->create([
+            'chapter_id' => $chapter1->id,
+            'order' => 2,
+        ]);
+
+        $chapter2 = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'order' => 2,
+        ]);
+        Lesson::factory()->create([
+            'chapter_id' => $chapter2->id,
+            'order' => 1,
+        ]);
+
+        [$attendance1, $attendance2] = $this->createTwoAttendances($course);
+
+        LessonAttendance::factory()->create([
+            'lesson_id' => $firstLesson->id,
+            'attendance_id' => $attendance1->id,
+            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $firstLesson->id,
+            'attendance_id' => $attendance2->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+
+        $service = new StuckPointsService;
+
+        // Act
+        $result = $service($course->id);
+
+        // Assert
+        $this->assertSingleStuckPoint($result, $chapter1, $firstLesson);
+    }
+    
+    public function test_最多数が必要受講生数未満の場合_最初の公開レッスンを返す(): void
+    {
+        // Arrange
+        $course = $this->createCourseWithDeadline();
+
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,

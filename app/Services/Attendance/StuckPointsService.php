@@ -13,7 +13,7 @@ use RuntimeException;
 
 final class StuckPointsService
 {
-    private const int MINIMUM_STUDENT_COUNT = 1;
+    private const int MINIMUM_REQUIRED_STUDENTS = 2;
 
     /**
      * 止まっている箇所を取得する
@@ -37,15 +37,15 @@ final class StuckPointsService
 
         // 受講済みの人数が最多のレッスンを取得
         $maxCount = $completedLessonCounts->max('lesson_attendances_count');
-        $maxCompletedLessons = $completedLessonCounts
-            ->where('lesson_attendances_count', '>', self::MINIMUM_STUDENT_COUNT)
-            ->where('lesson_attendances_count', $maxCount);
-
-        // 受講済みのレッスンがない、または、受講済みの最多数が1人の場合は
-        // 受講可能な最初の公開レッスンとチャプターを返す
-        if ($maxCompletedLessons->isEmpty()) {
+        
+        // 最多数が必要受講生数未満の場合は、受講可能な最初の公開レッスンとチャプターを返す
+        if ($maxCount < self::MINIMUM_REQUIRED_STUDENTS) {
             return $this->getFirstLesson($publicChapters, $publicLessons);
         }
+        
+        // 最多数のレッスンを取得
+        $maxCompletedLessons = $completedLessonCounts
+            ->where('lesson_attendances_count', $maxCount);
 
         // 最終レッスンの取得
         $lastLesson = $this->getLastLesson($publicChapters, $publicLessons);
@@ -71,7 +71,7 @@ final class StuckPointsService
     private function getPublicChapters(int $courseId): Collection
     {
         return Chapter::where('course_id', $courseId)
-            ->where('status', Chapter::STATUS_PUBLIC)
+            ->public()
             ->get();
     }
 
@@ -84,7 +84,7 @@ final class StuckPointsService
     private function getPublicLessons(Collection $publicChapters): Collection
     {
         return Lesson::whereIn('chapter_id', $publicChapters->pluck('id'))
-            ->where('status', Lesson::STATUS_PUBLIC)
+            ->public()
             ->get();
     }
 
@@ -118,7 +118,7 @@ final class StuckPointsService
 
         return $attendances->pluck('student_id')
             ->unique()
-            ->count() > self::MINIMUM_STUDENT_COUNT;
+            ->count() >= self::MINIMUM_REQUIRED_STUDENTS;
     }
 
     /**

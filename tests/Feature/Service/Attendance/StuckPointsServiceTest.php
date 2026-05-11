@@ -169,7 +169,7 @@ class StuckPointsServiceTest extends TestCase
         // Assert
         $this->assertSingleStuckPoint($result, $chapter1, $firstLesson);
     }
-    
+
     public function test_最多数が必要受講生数未満の場合_最初の公開レッスンを返す(): void
     {
         // Arrange

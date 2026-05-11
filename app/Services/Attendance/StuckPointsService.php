@@ -37,12 +37,12 @@ final class StuckPointsService
 
         // 受講済みの人数が最多のレッスンを取得
         $maxCount = $completedLessonCounts->max('lesson_attendances_count');
-        
+
         // 最多数が必要受講生数未満の場合は、受講可能な最初の公開レッスンとチャプターを返す
         if ($maxCount < self::MINIMUM_REQUIRED_STUDENTS) {
             return $this->getFirstLesson($publicChapters, $publicLessons);
         }
-        
+
         // 最多数のレッスンを取得
         $maxCompletedLessons = $completedLessonCounts
             ->where('lesson_attendances_count', $maxCount);

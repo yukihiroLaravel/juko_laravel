@@ -5,9 +5,9 @@ namespace Tests\Feature\Api\Instructor\Attendance;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\CourseDeadline;
 use App\Model\Instructor;
 use App\Model\Lesson;
+use App\Model\LessonAttendance;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,24 +17,21 @@ class StuckPointsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_権限のない講師_失敗(): void
+    #[\Override]
+    protected function setUp(): void
     {
-        // Arrange
-        $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
-        $this->actingAs($otherInstructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
-        ]));
-
-        // Assert
-        $response->assertStatus(403);
+        parent::setUp();
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-05-01'));
     }
 
-    public function test_空配列を返す_成功(): void  // 受講期限がない場合を想定
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
+
+    public function test_受講登録がない場合_空配列を返す(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -51,41 +48,35 @@ class StuckPointsTest extends TestCase
         $response->assertExactJson([]);
     }
 
-    public function test_受講生の止まっている箇所を返す_成功(): void    // 完了済みレッスンがない場合を想定（最初の公開レッスンを返す）
+    public function test_受講済みのレッスンがない場合_最初の公開レッスンを返す(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-05-01'));
-
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        CourseDeadline::factory()->create([
-            'course_id' => $course->id,
-            'fixed_date' => CarbonImmutable::parse('2026-05-31'),
-        ]);
-
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,
+            'title' => 'チャプター1',
         ]);
-
         $firstLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'order' => 1,
+            'title' => 'レッスン1',
         ]);
         Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'order' => 2,
         ]);
+        $this->actingAs($instructor, 'instructor');
 
+        // 受講生2人を期限内で登録
         $student1 = Student::factory()->create();
-        $student2 = Student::factory()->create();
         Attendance::factory()->create([
             'course_id' => $course->id,
             'student_id' => $student1->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
+        $student2 = Student::factory()->create();
         Attendance::factory()->create([
             'course_id' => $course->id,
             'student_id' => $student2->id,
@@ -99,10 +90,101 @@ class StuckPointsTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertJsonPath('data.0.chapter_id', $chapter->id);
-        $response->assertJsonPath('data.0.chapter_title', $chapter->title);
-        $response->assertJsonPath('data.0.lessons.0.lesson_id', $firstLesson->id);
-        $response->assertJsonPath('data.0.lessons.0.lesson_title', $firstLesson->title);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment([
+            'chapter_id' => $chapter->id,
+            'chapter_title' => 'チャプター1',
+        ]);
+        $response->assertJsonFragment([
+            'lesson_id' => $firstLesson->id,
+            'lesson_title' => 'レッスン1',
+        ]);
+    }
+
+    public function test_受講済み最多数のレッスンが最終レッスン以外の場合_次のレッスンを返す(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'order' => 1,
+            'title' => 'チャプター1',
+        ]);
+        Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'order' => 1,
+        ]);
+        $targetLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'order' => 2,
+        ]);
+        $nextLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'order' => 3,
+            'title' => '次のレッスン',
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // 受講生2人がともに targetLesson まで完了
+        $student1 = Student::factory()->create();
+        $attendance1 = Attendance::factory()->create([
+            'course_id' => $course->id,
+            'student_id' => $student1->id,
+            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
+        ]);
+        $student2 = Student::factory()->create();
+        $attendance2 = Attendance::factory()->create([
+            'course_id' => $course->id,
+            'student_id' => $student2->id,
+            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $targetLesson->id,
+            'attendance_id' => $attendance1->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::parse('2026-05-02'),
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $targetLesson->id,
+            'attendance_id' => $attendance2->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::parse('2026-05-03'),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
+            'course_id' => $course->id,
+        ]));
+
+        // Assert — targetLesson の次の nextLesson が返る
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment([
+            'chapter_id' => $chapter->id,
+            'chapter_title' => 'チャプター1',
+        ]);
+        $response->assertJsonFragment([
+            'lesson_id' => $nextLesson->id,
+            'lesson_title' => '次のレッスン',
+        ]);
+    }
+
+    public function test_権限のない講師_失敗(): void
+    {
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create();
+        $this->actingAs($otherInstructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
+            'course_id' => $course->id,
+        ]));
+
+        // Assert
+        $response->assertStatus(403);
     }
 
     public function test_バリデーションエラー_講座idが文字列(): void

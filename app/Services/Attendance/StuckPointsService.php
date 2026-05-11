@@ -22,7 +22,6 @@ final class StuckPointsService
      */
     public function __invoke(int $courseId): Collection
     {
-
         $publicChapters = $this->getPublicChapters($courseId);
         $publicLessons = $this->getPublicLessons($publicChapters);
         $attendances = $this->getActiveAttendances($courseId);
@@ -43,24 +42,24 @@ final class StuckPointsService
             return $this->getFirstLesson($publicChapters, $publicLessons);
         }
 
-        // 最多数のレッスンを取得
+        // 最多数のレッスン群
         $maxCompletedLessons = $completedLessonCounts
             ->where('lesson_attendances_count', $maxCount);
 
         // 最終レッスンの取得
         $lastLesson = $this->getLastLesson($publicChapters, $publicLessons);
 
-        // 受講済みの最多数のレッスンの中で、最終レッスンの有無を確認
-        $maxLastLesson = $maxCompletedLessons->where('id', $lastLesson->id);
-        $maxCompletedLessons = $maxCompletedLessons->where('id', '!=', $lastLesson->id);
-
-        // 受講済み最多数のレッスンが最終レッスンのみの場合、空配列を返す
-        if ($maxLastLesson->isNotEmpty() && $maxCompletedLessons->isEmpty()) {
+        // 受講済み最多数のレッスンが最終レッスンのみの場合は、空コレクションを返す
+        $isOnlyLastLesson = $maxCompletedLessons->count() === 1
+            && $maxCompletedLessons->first()->id === $lastLesson->id;
+        if ($isOnlyLastLesson) {
             return collect();
         }
 
-        // 最終レッスン以外の受講済み最多数のレッスンの次の公開レッスンとチャプターを取得
-        return $this->getNextLesson($maxCompletedLessons, $publicLessons, $publicChapters);
+        // 最終レッスンを除いた最多数のレッスンの次の公開レッスンとチャプターを取得
+        $targetLessons = $maxCompletedLessons->where('id', '!=', $lastLesson->id);
+
+        return $this->getNextLesson($targetLessons, $publicLessons, $publicChapters);
     }
 
     /**
@@ -170,7 +169,7 @@ final class StuckPointsService
         }
 
         // 到達しないはずだが、念のため例外を返す
-        throw new RuntimeException('The first public lesson is not existed.');
+        throw new RuntimeException('The first public lesson does not exist.');
     }
 
     /**
@@ -190,7 +189,7 @@ final class StuckPointsService
         }
 
         // 到達しないはずだが、念のため例外を返す
-        throw new RuntimeException('The last public lesson is not existed.');
+        throw new RuntimeException('The last public lesson does not exist.');
     }
 
     /**
@@ -205,18 +204,17 @@ final class StuckPointsService
     {
         return $maxCompletedLessons
             ->map(function (Lesson $maxCompletedLesson) use ($publicLessons, $publicChapters) {
-                $lesson = $publicLessons->where('id', $maxCompletedLesson->id)->first();
                 $stuckLesson = $publicLessons
-                    ->where('chapter_id', $lesson->chapter_id)
-                    ->where('order', '>', $lesson->order)
+                    ->where('chapter_id', $maxCompletedLesson->chapter_id)
+                    ->where('order', '>', $maxCompletedLesson->order)
                     ->sortBy('order')
                     ->first();
                 if ($stuckLesson) {
                     $stuckChapter = $publicChapters->where('id', $stuckLesson->chapter_id)->first();
                 } else {
-                    $chapter = $publicChapters->where('id', $lesson->chapter_id)->first();
+                    $currentChapter = $publicChapters->where('id', $maxCompletedLesson->chapter_id)->first();
                     $stuckChapter = $publicChapters
-                        ->where('order', '>', $chapter->order)
+                        ->where('order', '>', $currentChapter->order)
                         ->sortBy('order')
                         ->first();
                     $stuckLesson = $publicLessons

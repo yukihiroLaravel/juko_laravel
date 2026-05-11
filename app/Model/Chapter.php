@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -114,5 +115,13 @@ class Chapter extends Model
     public function getCompletedCountAttribute(): int
     {
         return $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count();
+    }
+
+    /**
+     * 公開中のチャプターに絞り込む
+     */
+    public function scopePublic(Builder $query): void
+    {
+        $query->where('status', self::STATUS_PUBLIC);
     }
 }

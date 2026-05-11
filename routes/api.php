@@ -141,6 +141,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                         Route::prefix('status')->group(function () {
                             Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'showStatus'])->name('show-status');
                         });
+                        Route::get('stuck-points', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'stuckPoints'])->name('stuck-points');
                         Route::get('{period}', [App\Http\Controllers\Api\Instructor\AttendanceController::class, 'loginRate'])->name('login-rate');
                     });
                 });

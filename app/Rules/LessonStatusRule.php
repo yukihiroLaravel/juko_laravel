@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Model\Lesson;
+use App\Enums\Lesson\StatusEnum;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,16 +14,7 @@ class LessonStatusRule implements ValidationRule
     #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (
-            ! in_array(
-                $value,
-                [
-                    Lesson::STATUS_PRIVATE,
-                    Lesson::STATUS_PUBLIC,
-                ],
-                true
-            )
-        ) {
+        if (StatusEnum::tryFrom($value) === null) {
             // エラーを返す
             $fail('The :attribute must be a valid status.');
         }

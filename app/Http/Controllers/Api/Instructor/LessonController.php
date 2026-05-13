@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
@@ -53,7 +54,7 @@ class LessonController extends Controller
                 courseId: $request->course_id,
                 chapterId: $request->chapter_id,
                 title: $request->title,
-                status: Lesson::STATUS_PRIVATE
+                status: LessonStatusEnum::PRIVATE->value
             );
 
             DB::commit();

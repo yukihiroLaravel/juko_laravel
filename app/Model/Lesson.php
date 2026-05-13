@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Lesson\StatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,11 +19,6 @@ class Lesson extends Model
      */
     protected $table = 'lessons';
 
-    // ステータス定数
-    const STATUS_PUBLIC = 'public';
-
-    const STATUS_PRIVATE = 'private';
-
     /**
      * @var array<int, string>
      */
@@ -34,6 +30,19 @@ class Lesson extends Model
         'status',
         'order',
     ];
+
+    /**
+     * @return array{
+     *  status: 'App\Enums\Lesson\StatusEnum'
+     * }
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
+    }
 
     /**
      * チャプターを取得
@@ -80,6 +89,6 @@ class Lesson extends Model
      */
     public function scopePublic(Builder $query): void
     {
-        $query->where('status', self::STATUS_PUBLIC);
+        $query->where('status', StatusEnum::PUBLIC->value);
     }
 }

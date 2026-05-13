@@ -4,6 +4,8 @@ namespace Tests\Feature\Service\Attendance;
 
 use App\Dto\Instructor\Attendance\StuckLessonDto;
 use App\Dto\Instructor\Attendance\StuckPointDto;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -42,7 +44,7 @@ class StuckPointsServiceTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         Chapter::factory()->create([
             'course_id' => $course->id,
-            'status' => Chapter::STATUS_PRIVATE,
+            'status' => ChapterStatusEnum::PRIVATE->value,
         ]);
 
         // 受講生2人を期限内で登録
@@ -78,7 +80,7 @@ class StuckPointsServiceTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         Lesson::factory()->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PRIVATE,
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         // 受講生2人を期限内で登録

@@ -2,6 +2,8 @@
 
 namespace App\Model;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,11 +30,6 @@ class Course extends Model
      * @var string
      */
     protected $table = 'courses';
-
-    // ステータス定数
-    const STATUS_PUBLIC = 'public';
-
-    const STATUS_PRIVATE = 'private';
 
     /**
      * @var array<int, string>
@@ -115,7 +112,7 @@ class Course extends Model
      */
     public function publicChapters(): HasMany
     {
-        return $this->chapters()->where('status', Chapter::STATUS_PUBLIC);
+        return $this->chapters()->where('status', ChapterStatusEnum::PUBLIC->value);
     }
 
     /**
@@ -155,6 +152,7 @@ class Course extends Model
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
      *  capacity: 'integer',
+     *  status: 'App\Enums\Course\StatusEnum'
      * }
      */
     #[\Override]
@@ -165,6 +163,7 @@ class Course extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
             'capacity' => 'integer',
+            'status' => StatusEnum::class,
         ];
     }
 

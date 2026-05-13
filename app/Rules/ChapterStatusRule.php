@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Model\Chapter;
+use App\Enums\Chapter\StatusEnum;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,17 +14,7 @@ class ChapterStatusRule implements ValidationRule
     #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (
-            ! in_array(
-                $value,
-                [
-                    Chapter::STATUS_PRIVATE,
-                    Chapter::STATUS_PUBLIC,
-                ],
-                true
-            )
-        ) {
-            // エラーを返す
+        if (StatusEnum::tryFrom($value) === null) {
             $fail('The :attribute must be a valid status.');
         }
     }

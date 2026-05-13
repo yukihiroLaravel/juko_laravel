@@ -158,7 +158,7 @@ class ShowTest extends TestCase
                 'course' => [
                     'course_id' => $course->id,
                     'title' => $course->title,
-                    'status' => $course->status,
+                    'status' => $course->status->value,
                     'capacity' => 30,
                 ],
                 'students_count' => 1,

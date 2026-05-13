@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -138,11 +139,11 @@ class ShowStatusTest extends TestCase
 
         $publicLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
         $privateLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PRIVATE,
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         $student = Student::factory()->create();
@@ -259,7 +260,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $studentA = Student::factory()->create();
@@ -298,7 +299,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         // 受講生A: 全公開レッスンを完了
@@ -348,7 +349,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $studentA = Student::factory()->create();
@@ -389,11 +390,11 @@ class ShowStatusTest extends TestCase
 
         $publicLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
         $privateLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PRIVATE,
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         $student = Student::factory()->create();
@@ -437,7 +438,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $student = Student::factory()->create();

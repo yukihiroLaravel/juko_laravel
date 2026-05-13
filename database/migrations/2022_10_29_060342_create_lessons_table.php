@@ -20,7 +20,7 @@ class CreateLessonsTable extends Migration
             $table->text('url')->nullable()->comment('URL');
             $table->string('title', 50)->comment('タイトル');
             $table->text('remarks')->nullable()->comment('備考');
-            $table->string('status', 30)->comment('レッスン受講状態');
+            $table->string('status', 30)->comment('ステータス(draft / public / private)');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
             $table->unsignedTinyInteger('order')->comment('順番');

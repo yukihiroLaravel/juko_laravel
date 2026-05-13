@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
 use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
@@ -19,7 +20,6 @@ use App\Http\Resources\Instructor\Attendance\StuckPointsResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\ExpiringService;
@@ -177,7 +177,7 @@ class AttendanceController extends Controller
 
         // 指定期間内に完了した公開レッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-            if ($lessonAttendance->lesson->status !== Lesson::STATUS_PUBLIC) {
+            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC) {
                 return false;
             }
             if ($period === LessonAttendance::PERIOD_TODAY) {

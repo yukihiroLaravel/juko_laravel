@@ -2,6 +2,7 @@
 
 namespace App\Services\Chapter;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Model\Chapter;
 use App\Model\Course;
 
@@ -20,7 +21,7 @@ class CreateChapterService
             'course_id' => $course->id,
             'title' => $title,
             'order' => $newOrder,
-            'status' => Chapter::STATUS_PUBLIC,
+            'status' => ChapterStatusEnum::PUBLIC->value,
         ]);
     }
 }

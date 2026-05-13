@@ -19,7 +19,7 @@ class CreateChaptersTable extends Migration
             $table->foreignIdFor(Course::class, 'course_id')->constrained()->comment('講座ID');
             $table->integer('order')->unsigned();
             $table->string('title', 50)->comment('タイトル');
-            $table->string('status', 30)->comment('ステータス');
+            $table->string('status', 30)->comment('ステータス(draft / public / private)');
             $table->datetime('created_at');
             $table->datetime('updated_at');
             $table->softDeletes();

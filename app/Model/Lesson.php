@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\Lesson\StatusEnum;
 
 class Lesson extends Model
 {
@@ -18,11 +19,6 @@ class Lesson extends Model
      */
     protected $table = 'lessons';
 
-    // ステータス定数
-    const STATUS_PUBLIC = 'public';
-
-    const STATUS_PRIVATE = 'private';
-
     /**
      * @var array<int, string>
      */
@@ -34,6 +30,14 @@ class Lesson extends Model
         'status',
         'order',
     ];
+
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
+    }
 
     /**
      * チャプターを取得
@@ -80,6 +84,6 @@ class Lesson extends Model
      */
     public function scopePublic(Builder $query): void
     {
-        $query->where('status', self::STATUS_PUBLIC);
+        $query->where('status', StatusEnum::PUBLIC->value);
     }
 }

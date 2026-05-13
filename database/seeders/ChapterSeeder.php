@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Model\Chapter;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -20,7 +21,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 1,
                 'order' => 1,
                 'title' => 'PHPとは？',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -28,7 +29,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 1,
                 'order' => 2,
                 'title' => 'PHPの基礎を学ぼう',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -36,7 +37,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 1,
                 'order' => 3,
                 'title' => 'PHPの応用にチャレンジしよう',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -44,7 +45,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 2,
                 'order' => 1,
                 'title' => 'Laravelとは？',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -52,7 +53,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 2,
                 'order' => 2,
                 'title' => 'Laravelの基礎を学ぼう',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
@@ -60,7 +61,7 @@ class ChapterSeeder extends Seeder
                 'course_id' => 5,
                 'order' => 1,
                 'title' => 'Pythonとは？',
-                'status' => Chapter::STATUS_PUBLIC,
+                'status' => ChapterStatusEnum::PUBLIC->value,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

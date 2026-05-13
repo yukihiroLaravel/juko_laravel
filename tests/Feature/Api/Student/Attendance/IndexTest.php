@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -20,7 +21,7 @@ class IndexTest extends TestCase
     {
         // Arrange — 3つの公開講座にチャプター・レッスン・レッスン受講を含む受講を作成
         $student = Student::factory()->create();
-        $courses = Course::factory()->count(3)->create(['status' => Course::STATUS_PUBLIC]);
+        $courses = Course::factory()->count(3)->create(['status' => CourseStatusEnum::PUBLIC->value]);
         foreach ($courses as $course) {
             $chapter = Chapter::factory()->create(['course_id' => $course->id]);
             $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
@@ -69,9 +70,9 @@ class IndexTest extends TestCase
         // Arrange — 1つの講座にタグを紐付け、もう1つはタグなし
         $student = Student::factory()->create();
         $tag = Tag::factory()->create();
-        $courseWithTag = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $courseWithTag = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $courseWithTag->tags()->attach($tag->id);
-        $courseWithoutTag = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $courseWithoutTag = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $courseWithTag->id]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $courseWithoutTag->id]);
         $this->actingAs($student);
@@ -89,11 +90,11 @@ class IndexTest extends TestCase
         // Arrange — タグ「バックエンド」を持つ講座2つ、持たない講座1つ
         $student = Student::factory()->create();
         $tag = Tag::factory()->create(['content' => 'バックエンド']);
-        $course1 = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course1 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $course1->tags()->attach($tag->id);
-        $course2 = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course2 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $course2->tags()->attach($tag->id);
-        $course3 = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course3 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         foreach ([$course1, $course2, $course3] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -111,9 +112,9 @@ class IndexTest extends TestCase
     {
         // Arrange — 「Vue入門」という講座1つ、他の講座2つ
         $student = Student::factory()->create();
-        $courseVue = Course::factory()->create(['title' => 'Vue入門', 'status' => Course::STATUS_PUBLIC]);
-        $courseOther1 = Course::factory()->create(['title' => 'Laravel基礎', 'status' => Course::STATUS_PUBLIC]);
-        $courseOther2 = Course::factory()->create(['title' => 'React実践', 'status' => Course::STATUS_PUBLIC]);
+        $courseVue = Course::factory()->create(['title' => 'Vue入門', 'status' => CourseStatusEnum::PUBLIC->value]);
+        $courseOther1 = Course::factory()->create(['title' => 'Laravel基礎', 'status' => CourseStatusEnum::PUBLIC->value]);
+        $courseOther2 = Course::factory()->create(['title' => 'React実践', 'status' => CourseStatusEnum::PUBLIC->value]);
         foreach ([$courseVue, $courseOther1, $courseOther2] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -141,8 +142,8 @@ class IndexTest extends TestCase
         // Arrange — 2人の生徒がそれぞれ受講を持つ
         $student1 = Student::factory()->create();
         $student2 = Student::factory()->create();
-        $course1 = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
-        $course2 = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course1 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course2 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         Attendance::factory()->create(['student_id' => $student1->id, 'course_id' => $course1->id]);
         Attendance::factory()->create(['student_id' => $student2->id, 'course_id' => $course2->id]);
         $this->actingAs($student1);
@@ -159,8 +160,8 @@ class IndexTest extends TestCase
     {
         // Arrange — 公開1つ、非公開1つ
         $student = Student::factory()->create();
-        $publicCourse = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
-        $privateCourse = Course::factory()->create(['status' => Course::STATUS_PRIVATE]);
+        $publicCourse = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $privateCourse = Course::factory()->create(['status' => CourseStatusEnum::PRIVATE->value]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $publicCourse->id]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $privateCourse->id]);
         $this->actingAs($student);
@@ -191,7 +192,7 @@ class IndexTest extends TestCase
     {
         // Arrange — 5つの受講を作成し、per_page=2で取得
         $student = Student::factory()->create();
-        $courses = Course::factory()->count(5)->create(['status' => Course::STATUS_PUBLIC]);
+        $courses = Course::factory()->count(5)->create(['status' => CourseStatusEnum::PUBLIC->value]);
         foreach ($courses as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -232,7 +233,7 @@ class IndexTest extends TestCase
     {
         // Arrange
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
@@ -264,7 +265,7 @@ class IndexTest extends TestCase
     {
         // Arrange
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
@@ -287,7 +288,7 @@ class IndexTest extends TestCase
     {
         // Arrange — 1つ目のチャプターは完了、2つ目のチャプターに未完了レッスンがある
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
@@ -318,7 +319,7 @@ class IndexTest extends TestCase
     {
         // Arrange — チャプターはあるがレッスンがない講座
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => Course::STATUS_PUBLIC]);
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
         Chapter::factory()->create(['course_id' => $course->id]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         $this->actingAs($student);
@@ -336,9 +337,9 @@ class IndexTest extends TestCase
         // Arrange — タグ付き講座2つのうち、講座名が一致するのは1つだけ
         $student = Student::factory()->create();
         $tag = Tag::factory()->create(['content' => 'プログラミング']);
-        $courseMatch = Course::factory()->create(['title' => 'PHP入門', 'status' => Course::STATUS_PUBLIC]);
+        $courseMatch = Course::factory()->create(['title' => 'PHP入門', 'status' => CourseStatusEnum::PUBLIC->value]);
         $courseMatch->tags()->attach($tag->id);
-        $courseNoMatch = Course::factory()->create(['title' => 'デザイン基礎', 'status' => Course::STATUS_PUBLIC]);
+        $courseNoMatch = Course::factory()->create(['title' => 'デザイン基礎', 'status' => CourseStatusEnum::PUBLIC->value]);
         $courseNoMatch->tags()->attach($tag->id);
         foreach ([$courseMatch, $courseNoMatch] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);

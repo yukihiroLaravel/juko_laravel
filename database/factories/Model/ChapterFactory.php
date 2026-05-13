@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Model;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Model\Chapter;
 use App\Model\Course;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,7 +26,7 @@ class ChapterFactory extends Factory
             'course_id' => Course::factory(),
             'order' => fake()->numberBetween(1, 10),
             'title' => fake()->text(50),
-            'status' => Chapter::STATUS_PUBLIC,
+            'status' => ChapterStatusEnum::PUBLIC->value,
         ];
     }
 }

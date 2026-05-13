@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enums\Chapter\StatusEnum;
 
 class Chapter extends Model
 {
@@ -17,11 +18,6 @@ class Chapter extends Model
      * @var string
      */
     protected $table = 'chapters';
-
-    // ステータス定数
-    const STATUS_PUBLIC = 'public';
-
-    const STATUS_PRIVATE = 'private';
 
     /**
      * @var array<int, string>
@@ -48,13 +44,14 @@ class Chapter extends Model
         static::deleting(function (Chapter $chapter) {
             $chapter->lessons()->delete();
         });
-
-        // チャプター更新時に紐づくレッスンも更新（ステータスが非公開の場合）
-        static::updating(function (Chapter $chapter) {
-            if ($chapter->status === Chapter::STATUS_PRIVATE) {
-                $chapter->lessons()->update(['status' => Lesson::STATUS_PRIVATE]);
-            }
-        });
+    }
+    
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'status' => StatusEnum::class,
+        ];
     }
 
     /**
@@ -85,7 +82,7 @@ class Chapter extends Model
      */
     public static function extractPublicChapter($chapters)
     {
-        return $chapters->filter(fn ($chapter) => $chapter->status === Chapter::STATUS_PUBLIC);
+        return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
     /**
@@ -122,6 +119,6 @@ class Chapter extends Model
      */
     public function scopePublic(Builder $query): void
     {
-        $query->where('status', self::STATUS_PUBLIC);
+        $query->where('status', StatusEnum::PUBLIC->value);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Model;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +24,7 @@ class CourseFactory extends Factory
     {
         return [
             'title' => fake()->sentence(3),
-            'status' => Course::STATUS_PUBLIC,
+            'status' => CourseStatusEnum::PUBLIC->value,
             'instructor_id' => Instructor::factory(),
             'image' => 'course/default.png',
             'capacity' => null,

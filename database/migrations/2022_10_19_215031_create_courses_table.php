@@ -19,7 +19,7 @@ class CreateCoursesTable extends Migration
             $table->foreignIdFor(Instructor::class, 'instructor_id')->constrained()->comment('講師ID');
             $table->string('title', 50)->comment('タイトル');
             $table->text('image')->comment('サムネイルファイルパス');
-            $table->string('status', 30)->comment('ステータス');
+            $table->string('status', 30)->comment('ステータス(draft / public / private)');
             $table->string('deadline_type', 50)->default('none')->comment('期限タイプ（none, fixed_date, relative_days）');
             $table->unsignedInteger('capacity')->nullable()->comment('定員');
             $table->dateTime('created_at');

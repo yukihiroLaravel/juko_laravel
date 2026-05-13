@@ -2,11 +2,11 @@
 
 namespace App\Model;
 
+use App\Enums\Lesson\StatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Enums\Lesson\StatusEnum;
 
 class Lesson extends Model
 {

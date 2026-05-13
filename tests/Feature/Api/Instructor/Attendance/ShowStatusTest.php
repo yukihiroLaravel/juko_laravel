@@ -139,11 +139,11 @@ class ShowStatusTest extends TestCase
 
         $publicLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
         $privateLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PRIVATE->value
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         $student = Student::factory()->create();
@@ -260,7 +260,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $studentA = Student::factory()->create();
@@ -299,7 +299,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         // 受講生A: 全公開レッスンを完了
@@ -349,7 +349,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $studentA = Student::factory()->create();
@@ -390,11 +390,11 @@ class ShowStatusTest extends TestCase
 
         $publicLessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
         $privateLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PRIVATE->value
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         $student = Student::factory()->create();
@@ -438,7 +438,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
         $student = Student::factory()->create();

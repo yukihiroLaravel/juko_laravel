@@ -2,8 +2,8 @@
 
 namespace App\Model;
 
-use App\Enums\Course\StatusEnum;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

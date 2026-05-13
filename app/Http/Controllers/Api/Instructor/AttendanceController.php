@@ -20,7 +20,6 @@ use App\Http\Resources\Instructor\Attendance\StuckPointsResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Attendance\ExpiringService;

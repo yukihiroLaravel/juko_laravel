@@ -46,6 +46,11 @@ class Chapter extends Model
         });
     }
 
+    /**
+     * @return array{
+     *  status: 'App\Enums\Chapter\StatusEnum'
+     * }
+     */
     #[\Override]
     protected function casts(): array
     {

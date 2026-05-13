@@ -152,6 +152,7 @@ class Course extends Model
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
      *  capacity: 'integer',
+     *  status: 'App\Enums\Course\StatusEnum'
      * }
      */
     #[\Override]

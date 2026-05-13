@@ -31,6 +31,11 @@ class Lesson extends Model
         'order',
     ];
 
+    /**
+     * @return array{
+     *  status: 'App\Enums\Lesson\StatusEnum'
+     * }
+     */
     #[\Override]
     protected function casts(): array
     {

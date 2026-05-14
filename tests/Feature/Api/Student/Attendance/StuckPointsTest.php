@@ -1,11 +1,10 @@
 <?php
 
-namespace Tests\Feature\Api\Instructor\Attendance;
+namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
@@ -34,13 +33,12 @@ class StuckPointsTest extends TestCase
     public function test_講座の期限内の受講が2人未満の場合_空のコレクションを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
+        $attendance = Attendance::factory()->create();
+        $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => $attendance->id,
         ]));
 
         // Assert
@@ -51,10 +49,9 @@ class StuckPointsTest extends TestCase
     public function test_受講済みのレッスンがない場合_最初の公開レッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $attendance = Attendance::factory()->create();
         $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'order' => 1,
             'title' => 'チャプター1',
         ]);
@@ -67,25 +64,25 @@ class StuckPointsTest extends TestCase
             'chapter_id' => $chapter->id,
             'order' => 2,
         ]);
-        $this->actingAs($instructor, 'instructor');
+        $this->actingAs($attendance->student);
 
         // 受講生2人を期限内で登録
         $student1 = Student::factory()->create();
         Attendance::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'student_id' => $student1->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
         $student2 = Student::factory()->create();
         Attendance::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'student_id' => $student2->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => $attendance->id,
         ]));
 
         // Assert
@@ -104,10 +101,9 @@ class StuckPointsTest extends TestCase
     public function test_受講済み最多数のレッスンが最終レッスン以外の場合_次のレッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $attendance = Attendance::factory()->create();
         $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'order' => 1,
             'title' => 'チャプター1',
         ]);
@@ -124,18 +120,18 @@ class StuckPointsTest extends TestCase
             'order' => 3,
             'title' => '次のレッスン',
         ]);
-        $this->actingAs($instructor, 'instructor');
+        $this->actingAs($attendance->student);
 
         // 受講生2人がともに targetLesson まで完了
         $student1 = Student::factory()->create();
         $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'student_id' => $student1->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
         $student2 = Student::factory()->create();
         $attendance2 = Attendance::factory()->create([
-            'course_id' => $course->id,
+            'course_id' => $attendance->course->id,
             'student_id' => $student2->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
@@ -153,8 +149,8 @@ class StuckPointsTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => $attendance->id,
         ]));
 
         // Assert — targetLesson の次の nextLesson が返る
@@ -170,70 +166,71 @@ class StuckPointsTest extends TestCase
         ]);
     }
 
-    public function test_権限のない講師_失敗(): void
+    public function test_権限のない生徒_失敗(): void
     {
         // Arrange
-        $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
-        $this->actingAs($otherInstructor, 'instructor');
+        $owner = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $owner->id,
+        ]);
+        $otherStudent = Student::factory()->create();
+        $this->actingAs($otherStudent);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => $attendance->id,
         ]));
 
         // Assert
         $response->assertStatus(403);
     }
 
-    public function test_バリデーションエラー_講座idが文字列(): void
+    public function test_バリデーションエラー_受講idが文字列(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
+        $attendance = Attendance::factory()->create();
+        $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => 'aaa',
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => 'aaa',
         ]));
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['course_id']);
+        $response->assertJsonValidationErrors(['attendance_id']);
     }
 
-    public function test_バリデーションエラー_存在しない講座id(): void
+    public function test_バリデーションエラー_存在しない受講id(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
+        $attendance = Attendance::factory()->create();
+        $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => 99999,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => 99999,
         ]));
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['course_id']);
+        $response->assertJsonValidationErrors(['attendance_id']);
     }
 
-    public function test_バリデーションエラー_論理削除された講座id(): void
+    public function test_バリデーションエラー_論理削除された受講id(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $course->delete();
-        $this->actingAs($instructor, 'instructor');
+        $attendance = Attendance::factory()->create();
+        $attendance->delete();
+        $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('instructor.course.attendance.stuck-points', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('student.attendance.stuck-points', [
+            'attendance_id' => $attendance->id,
         ]));
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['course_id']);
+        $response->assertJsonValidationErrors(['attendance_id']);
     }
 }

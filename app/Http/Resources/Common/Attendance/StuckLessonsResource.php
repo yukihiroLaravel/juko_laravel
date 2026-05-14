@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Resources\Instructor\Attendance;
+namespace App\Http\Resources\Common\Attendance;
 
-use App\Dto\Instructor\Attendance\StuckLessonDto;
+use App\Dto\Common\Attendance\StuckLessonDto;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +16,7 @@ class StuckLessonsResource extends JsonResource
     {
         return [
             'lesson_id' => $this->resource->id,
-            'lesson_title' => $this->resource->title,
+            'title' => $this->resource->title,
         ];
     }
 }

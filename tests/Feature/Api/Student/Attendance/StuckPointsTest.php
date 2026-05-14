@@ -4,7 +4,6 @@ namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;

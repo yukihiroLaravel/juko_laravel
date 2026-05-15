@@ -15,7 +15,7 @@ class StuckPointsRequest extends FormRequest
     }
 
     #[\Override]
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
             'attendance_id' => $this->route('attendance_id'),
@@ -24,10 +24,8 @@ class StuckPointsRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],

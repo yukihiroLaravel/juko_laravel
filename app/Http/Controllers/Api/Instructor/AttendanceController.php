@@ -13,10 +13,10 @@ use App\Http\Requests\Instructor\Attendance\ShowStatusRequest;
 use App\Http\Requests\Instructor\Attendance\StatusRequest;
 use App\Http\Requests\Instructor\Attendance\StoreRequest;
 use App\Http\Requests\Instructor\Attendance\StuckPointsRequest;
+use App\Http\Resources\Common\Attendance\StuckPointsResource;
 use App\Http\Resources\Instructor\Attendance\ExpiringResource;
 use App\Http\Resources\Instructor\Attendance\FollowUpResource;
 use App\Http\Resources\Instructor\Attendance\StatusResource;
-use App\Http\Resources\Instructor\Attendance\StuckPointsResource;
 use App\Http\Resources\Instructor\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Course;
@@ -292,7 +292,7 @@ class AttendanceController extends Controller
     /**
      * 受講生の止まっている箇所取得API
      */
-    public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection|JsonResponse
+    public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection
     {
         $courseId = $request->course_id;
 
@@ -301,10 +301,6 @@ class AttendanceController extends Controller
         $this->authorize('view', $course);
 
         $result = $service($courseId);
-
-        if ($result->isEmpty()) {
-            return response()->json([]);
-        }
 
         return StuckPointsResource::collection($result);
     }

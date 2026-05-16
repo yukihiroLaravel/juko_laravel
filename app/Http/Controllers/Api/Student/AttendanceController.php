@@ -10,12 +10,15 @@ use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
 use App\Http\Requests\Student\Attendance\IndexRequest;
 use App\Http\Requests\Student\Attendance\ProgressRequest;
 use App\Http\Requests\Student\Attendance\ShowRequest;
+use App\Http\Requests\Student\Attendance\StuckPointsRequest;
+use App\Http\Resources\Common\Attendance\StuckPointsResource;
 use App\Http\Resources\Student\AttendanceCourseProgressResource;
 use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\LessonAttendance;
+use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
@@ -163,6 +166,20 @@ class AttendanceController extends Controller
         return response()->json([
             'result' => true,
         ]);
+    }
+
+    /**
+     * つまずき注意箇所取得API
+     */
+    public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection
+    {
+        // Policyによる認可チェック
+        $attendance = Attendance::findOrFail($request->attendance_id);
+        $this->authorize('viewStudent', $attendance);
+
+        $result = $service($attendance->course_id);
+
+        return StuckPointsResource::collection($result);
     }
 
     /**

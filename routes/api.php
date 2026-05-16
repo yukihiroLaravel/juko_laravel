@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
                 Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress'])->name('progress');
                 Route::PUT('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters'])->name('complete-all-chapters');
                 Route::put('chapter/{chapter_id}/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllLessons'])->name('complete-all-lessons');
+                Route::get('stuck-points', [App\Http\Controllers\Api\Student\AttendanceController::class, 'stuckPoints'])->name('stuck-points');
             });
         });
 

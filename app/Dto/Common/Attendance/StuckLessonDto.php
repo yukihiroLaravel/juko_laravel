@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Instructor\Attendance;
+namespace App\Dto\Common\Attendance;
 
 readonly class StuckLessonDto
 {

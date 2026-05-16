@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Service\Attendance;
 
-use App\Dto\Instructor\Attendance\StuckLessonDto;
-use App\Dto\Instructor\Attendance\StuckPointDto;
+use App\Dto\Common\Attendance\StuckLessonDto;
+use App\Dto\Common\Attendance\StuckPointDto;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;

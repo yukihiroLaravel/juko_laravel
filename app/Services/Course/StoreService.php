@@ -38,7 +38,7 @@ class StoreService
             'instructor_id' => $instructorId,
             'title' => $title,
             'image' => $filePath,
-            'status' => CourseStatusEnum::PRIVATE->value,
+            'status' => CourseStatusEnum::DRAFT->value,
             'deadline_type' => $deadlineType->value,
             'capacity' => $capacity,
         ]);

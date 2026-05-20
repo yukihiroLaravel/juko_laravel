@@ -25,7 +25,7 @@ class PutStatusTest extends TestCase
             'instructor_id' => $manager->id,
             'status' => CourseStatusEnum::PRIVATE->value,
         ]);
-        $course3 = Course::factory()->create([
+        Course::factory()->create([
             'instructor_id' => $manager->id,
             'status' => CourseStatusEnum::DRAFT->value,
         ]);

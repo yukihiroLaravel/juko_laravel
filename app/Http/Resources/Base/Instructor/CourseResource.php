@@ -18,7 +18,7 @@ class CourseResource extends JsonResource
             'course_id' => $this->resource->id,
             'title' => $this->resource->title,
             'image' => $this->resource->image,
-            'status' => $this->resource->status,
+            'status' => $this->resource->status->value,
             'capacity' => $this->resource->capacity,
             'deadline_type' => $this->resource->deadline_type,
             'course_deadline' => $this->resource->courseDeadline

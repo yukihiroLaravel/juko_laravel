@@ -4,8 +4,8 @@ namespace App\Services\Course;
 
 use App\Enums\Course\StatusEnum;
 use App\Model\Course;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class PutStatusService
 {

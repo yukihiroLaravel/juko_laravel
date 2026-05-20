@@ -88,7 +88,7 @@ class PutStatusTest extends TestCase
             'id' => $subordinateCourse->id,
             'status' => CourseStatusEnum::PRIVATE->value,
         ]);
-    }    
+    }
 
     public function test_権限がないマネージャーが講座ステータス一括更新_失敗(): void
     {

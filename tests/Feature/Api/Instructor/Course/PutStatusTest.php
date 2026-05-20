@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Instructor\Course;
 
-use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;

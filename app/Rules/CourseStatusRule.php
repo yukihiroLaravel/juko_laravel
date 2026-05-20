@@ -15,7 +15,7 @@ class CourseStatusRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            !in_array($value, [
+            ! in_array($value, [
                 StatusEnum::PUBLIC->value,
                 StatusEnum::PRIVATE->value,
             ], true)

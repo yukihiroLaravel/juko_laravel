@@ -45,7 +45,7 @@ class PutStatusServiceTest extends TestCase
     public function test_講座ステータス一括更新_許容する組み合わせ_成功(string $currentStatus, string $targetStatus): void
     {
         // Arrange
-        $service = new PutStatusService();
+        $service = new PutStatusService;
         $course = Course::factory()->create([
             'status' => $currentStatus,
         ]);
@@ -64,7 +64,7 @@ class PutStatusServiceTest extends TestCase
     public function test_講座ステータス一括更新_許容しない組み合わせ_失敗(string $currentStatus, string $targetStatus): void
     {
         // Arrange
-        $service = new PutStatusService();
+        $service = new PutStatusService;
         $course = Course::factory()->create([
             'status' => $currentStatus,
         ]);

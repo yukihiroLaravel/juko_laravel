@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Instructor\Course;
 
 use App\Enums\Course\StatusEnum;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PutStatusRequest extends FormRequest
 {

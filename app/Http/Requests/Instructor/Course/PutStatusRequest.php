@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Instructor\Course;
 
-use App\Rules\CourseStatusRule;
+use App\Enums\Course\StatusEnum;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PutStatusRequest extends FormRequest
@@ -27,7 +28,7 @@ class PutStatusRequest extends FormRequest
         return [
             'courses' => ['required', 'array', 'min:1'],
             'courses.*' => ['integer', 'exists:courses,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new CourseStatusRule],
+            'status' => ['required', 'string', Rule::in(StatusEnum::switchableStatuses())],
         ];
     }
 }

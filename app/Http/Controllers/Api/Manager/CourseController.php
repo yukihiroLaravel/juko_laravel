@@ -173,7 +173,7 @@ class CourseController extends Controller
 
         // 更新対象の講座を取得
         $courses = Course::whereIn('instructor_id', $managingIds)
-            ->whereIn('status', [StatusEnum::PUBLIC->value, StatusEnum::PRIVATE->value])
+            ->whereIn('status', StatusEnum::switchableStatuses())
             ->get();
 
         // 更新処理

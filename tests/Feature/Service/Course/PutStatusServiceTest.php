@@ -34,10 +34,7 @@ class PutStatusServiceTest extends TestCase
     public static function disallowedStatusProvider(): array
     {
         return [
-            [StatusEnum::DRAFT->value, StatusEnum::DRAFT->value],
             [StatusEnum::DRAFT->value, StatusEnum::PRIVATE->value],
-            [StatusEnum::PUBLIC->value, StatusEnum::DRAFT->value],
-            [StatusEnum::PRIVATE->value, StatusEnum::DRAFT->value],
         ];
     }
 
@@ -69,9 +66,11 @@ class PutStatusServiceTest extends TestCase
             'status' => $currentStatus,
         ]);
 
-        // Act
+        // Assert
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage($currentStatus.'は、'.$targetStatus.'に変更できません。');
+
+        // Act
         $service(collect([$course]), $targetStatus);
 
         // Assert

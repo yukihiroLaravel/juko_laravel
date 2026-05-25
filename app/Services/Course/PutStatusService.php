@@ -10,8 +10,7 @@ class PutStatusService
 {
     public function __construct(
         private readonly StatusTransitionService $statusTransition,
-    ) {
-    }
+    ) {}
 
     /**
      * 選択した講座のステータスを更新する

@@ -21,6 +21,7 @@ class NotificationSortByRule implements ValidationRule
                     Notification::SORT_BY_TITLE,
                     Notification::SORT_BY_COURSE_ID,
                     Notification::SORT_BY_START_DATE,
+                    Notification::SORT_BY_INSTRUCTOR_NICK_NAME
                 ],
                 true
             )

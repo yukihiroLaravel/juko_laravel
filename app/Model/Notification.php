@@ -41,6 +41,8 @@ class Notification extends Model
 
     const SORT_BY_START_DATE = 'start_date';
 
+    const SORT_BY_INSTRUCTOR_NICK_NAME = 'instructor_nick_name';
+
     /**
      * 受講生を取得
      *

@@ -28,6 +28,7 @@ class NotificationResource extends JsonResource
             'course_title' => $notification->course->title,
             'title' => $notification->title,
             'content' => $notification->content,
+            'instructor_nick_name' => $notification->instructor?->nick_name,
             'start_date' => $notification->start_date,
             'end_date' => $notification->end_date,
             'attendance_deadline' => $this->resource['attendance_deadline'] ?? null,

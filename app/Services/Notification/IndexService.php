@@ -23,7 +23,7 @@ class IndexService
         $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
 
         // お知らせ取得
-        $query = Notification::with('students', 'course')
+        $query = Notification::with('students', 'course', 'instructor')
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
@@ -41,6 +41,14 @@ class IndexService
                 });
             });
 
+        // ソート条件とページネーションを適用して結果を返却
+        if ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
+            return $query
+                ->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')
+                ->select('notifications.*')
+                ->orderBy('instructors.nick_name', $dto->order)
+                ->paginate($dto->perPage, ['*'], 'page', $dto->page);
+            }
         // ソート条件とページネーションを適用して結果を返却
         return $query->orderBy($dto->sortBy, $dto->order)
             ->paginate($dto->perPage, ['*'], 'page', $dto->page);

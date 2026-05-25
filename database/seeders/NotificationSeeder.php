@@ -56,7 +56,7 @@ class NotificationSeeder extends Seeder
             ],
             [
                 'course_id' => 1,
-                'instructor_id' => 1,
+                'instructor_id' => 2,
                 'title' => 'Student Notification ReadMark Test',
                 'type' => TypeEnum::ONCE,
                 'status' => StatusEnum::PUBLIC,

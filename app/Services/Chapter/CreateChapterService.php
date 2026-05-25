@@ -21,7 +21,7 @@ class CreateChapterService
             'course_id' => $course->id,
             'title' => $title,
             'order' => $newOrder,
-            'status' => ChapterStatusEnum::PUBLIC->value,
+            'status' => ChapterStatusEnum::DRAFT->value,
         ]);
     }
 }

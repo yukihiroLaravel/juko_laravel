@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Enums\Course\StatusEnum;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\CourseDeadline;
@@ -17,6 +18,10 @@ use RuntimeException;
 
 class UpdateService
 {
+    public function __construct(
+        private readonly StatusTransitionService $statusTransition,
+    ) {}
+
     /**
      * 講座登録サービス
      */
@@ -31,13 +36,20 @@ class UpdateService
         ?int $relativeDays = null,
         ?int $capacity = null,
     ): void {
+        $newStatus = StatusEnum::from($status);
+
+        ($this->statusTransition)(
+            $course->status,
+            $newStatus,
+        );
+
         // 画像パスを取得
         $imagePath = $this->getImagePath($course, $imageFile);
         // 講座を更新
         $course->update([
             'title' => $title,
             'image' => $imagePath,
-            'status' => $status,
+            'status' => $newStatus->value,
             'deadline_type' => $deadlineType->value,
             'capacity' => $capacity,
         ]);

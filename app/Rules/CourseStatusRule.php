@@ -14,9 +14,14 @@ class CourseStatusRule implements ValidationRule
     #[\Override]
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (StatusEnum::tryFrom($value) === null) {
+        if (
+            ! in_array($value, [
+                StatusEnum::PUBLIC->value,
+                StatusEnum::PRIVATE->value,
+            ], true)
+        ) {
             // エラーを返す
-            $fail('The :attribute must be a valid status.');
+            $fail('The :attribute must be public or private.');
         }
     }
 }

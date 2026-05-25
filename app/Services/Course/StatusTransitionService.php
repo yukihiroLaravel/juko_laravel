@@ -16,21 +16,16 @@ class StatusTransitionService
             return;
         }
 
-        $allowedTransitions = [
-            StatusEnum::DRAFT->value => [
-                StatusEnum::PUBLIC,
-            ],
-            StatusEnum::PUBLIC->value => [
-                StatusEnum::PRIVATE,
-            ],
-            StatusEnum::PRIVATE->value => [
-                StatusEnum::PUBLIC,
-            ],
-        ];
+        // 許可遷移: draft → public、public ⇔ private
+        $allowed = match ($currentStatus) {
+            StatusEnum::DRAFT => $newStatus === StatusEnum::PUBLIC,
+            StatusEnum::PUBLIC => $newStatus === StatusEnum::PRIVATE,
+            StatusEnum::PRIVATE => $newStatus === StatusEnum::PUBLIC,
+        };
 
-        if (! in_array($newStatus, $allowedTransitions[$currentStatus->value] ?? [], true)) {
+        if (! $allowed) {
             throw ValidationException::withMessages([
-                'status' => ['The selected status transition is invalid.'],
+                'status' => ['ステータスを「'.$currentStatus->value.'」から「'.$newStatus->value.'」へ変更することはできません。'],
             ]);
         }
     }

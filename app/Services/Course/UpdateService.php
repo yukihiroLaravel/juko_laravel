@@ -18,6 +18,11 @@ use RuntimeException;
 
 class UpdateService
 {
+    public function __construct(
+        private readonly StatusTransitionService $statusTransition,
+    ) {
+    }
+    
     /**
      * 講座登録サービス
      */
@@ -32,9 +37,7 @@ class UpdateService
         ?int $relativeDays = null,
         ?int $capacity = null,
     ): void {
-        $statusTransition = new StatusTransitionService();
-
-        $statusTransition(
+        ($this->statusTransition)(
             $course->status,
             StatusEnum::from($status),
         );

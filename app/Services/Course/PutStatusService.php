@@ -8,6 +8,11 @@ use Illuminate\Support\Collection;
 
 class PutStatusService
 {
+    public function __construct(
+        private readonly StatusTransitionService $statusTransition,
+    ) {
+    }
+
     /**
      * 選択した講座のステータスを更新する
      *
@@ -17,10 +22,9 @@ class PutStatusService
     public function __invoke(Collection $courses, string $status): void
     {
         $newStatus = StatusEnum::from($status);
-        $statusTransition = new StatusTransitionService();
 
-        $courses->each(function (Course $course) use ($newStatus, $statusTransition) {
-            $statusTransition($course->status, $newStatus);
+        $courses->each(function (Course $course) use ($newStatus) {
+            ($this->statusTransition)($course->status, $newStatus);
         });
 
         // 講座のステータスを一括更新

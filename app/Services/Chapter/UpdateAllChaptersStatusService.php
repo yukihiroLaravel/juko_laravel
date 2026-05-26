@@ -4,7 +4,6 @@ namespace App\Services\Chapter;
 
 use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
-use App\Services\Chapter\StatusTransitionService;
 
 class UpdateAllChaptersStatusService
 {
@@ -19,7 +18,7 @@ class UpdateAllChaptersStatusService
 
         $statusTransitionService = new StatusTransitionService;
         $statusTransitionService($chapters, StatusEnum::from($status));
-        
+
         Chapter::where('course_id', $courseId)
             ->whereIn('status', StatusEnum::switchableStatuses())
             ->update(['status' => $status]);

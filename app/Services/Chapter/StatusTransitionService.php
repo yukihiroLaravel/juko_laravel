@@ -4,8 +4,8 @@ namespace App\Services\Chapter;
 
 use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class StatusTransitionService
 {

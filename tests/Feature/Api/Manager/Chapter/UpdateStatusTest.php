@@ -6,7 +6,6 @@ use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +17,7 @@ class UpdateStatusTest extends TestCase
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);  
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'status' => StatusEnum::PUBLIC->value,
@@ -47,7 +46,7 @@ class UpdateStatusTest extends TestCase
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);  
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'status' => StatusEnum::DRAFT->value,

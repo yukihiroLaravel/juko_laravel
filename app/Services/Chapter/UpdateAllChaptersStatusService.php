@@ -2,7 +2,9 @@
 
 namespace App\Services\Chapter;
 
+use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
+use App\Services\Chapter\StatusTransitionService;
 
 class UpdateAllChaptersStatusService
 {
@@ -13,6 +15,13 @@ class UpdateAllChaptersStatusService
      */
     public function __invoke(int $courseId, string $status): void
     {
-        Chapter::where('course_id', $courseId)->update(['status' => $status]);
+        $chapters = Chapter::where('course_id', $courseId)->get();
+
+        $statusTransitionService = new StatusTransitionService;
+        $statusTransitionService($chapters, StatusEnum::from($status));
+        
+        Chapter::where('course_id', $courseId)
+            ->whereIn('status', StatusEnum::switchableStatuses())
+            ->update(['status' => $status]);
     }
 }

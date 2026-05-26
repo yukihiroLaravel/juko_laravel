@@ -20,7 +20,7 @@ class BulkDeleteChapterService
     {
         $lessonIds = $chapters->pluck('lessons.*.id')->flatten();
         if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-            throw new AuthorizationException('Forbidden, this lesson has attendance.');
+            throw new AuthorizationException('Forbidden, this chapter has lessons with attendance.');
         }
         // チャプターに紐づくレッスンを削除
         Lesson::whereIn('chapter_id', $chapterIds)->delete();

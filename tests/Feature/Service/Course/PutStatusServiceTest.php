@@ -5,6 +5,7 @@ namespace Tests\Feature\Service\Course;
 use App\Enums\Course\StatusEnum;
 use App\Model\Course;
 use App\Services\Course\PutStatusService;
+use App\Services\Course\StatusTransitionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -42,7 +43,7 @@ class PutStatusServiceTest extends TestCase
     public function test_講座ステータス一括更新_許容する組み合わせ_成功(string $currentStatus, string $targetStatus): void
     {
         // Arrange
-        $service = new PutStatusService;
+        $service = new PutStatusService(new StatusTransitionService);
         $course = Course::factory()->create([
             'status' => $currentStatus,
         ]);
@@ -61,14 +62,14 @@ class PutStatusServiceTest extends TestCase
     public function test_講座ステータス一括更新_許容しない組み合わせ_失敗(string $currentStatus, string $targetStatus): void
     {
         // Arrange
-        $service = new PutStatusService;
+        $service = new PutStatusService(new StatusTransitionService);
         $course = Course::factory()->create([
             'status' => $currentStatus,
         ]);
 
         // Assert
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage($currentStatus.'は、'.$targetStatus.'に変更できません。');
+        $this->expectExceptionMessage('ステータスを「'.$currentStatus.'」から「'.$targetStatus.'」へ変更することはできません。');
 
         // Act
         $service(collect([$course]), $targetStatus);

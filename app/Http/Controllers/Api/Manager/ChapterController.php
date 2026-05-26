@@ -9,6 +9,7 @@ use App\Http\Requests\Manager\Chapter\DeleteRequest;
 use App\Http\Requests\Manager\Chapter\UpdateStatusRequest;
 use App\Model\Chapter;
 use App\Model\Instructor;
+use App\Services\Chapter\DeleteChapterService;
 use App\Services\Chapter\StatusTransitionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +24,7 @@ class ChapterController extends Controller
     /**
      * チャプター削除API(単一)
      */
-    public function delete(DeleteRequest $request): JsonResponse
+    public function delete(DeleteRequest $request, DeleteChapterService $deleteChapterService): JsonResponse
     {
         // ログイン中の講師IDを取得
         $managerId = Auth::guard('instructor')->user()->id;
@@ -46,13 +47,8 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, invalid course_id.');
         }
 
-        // チャプター内に受講中のレッスンがあるか確認
-        if ($chapter->lessons()->whereHas('lessonAttendances')->exists()) {
-            // 指定したチャプター内に受講中のレッスンがあればエラー応答
-            throw new AuthorizationException('Forbidden, this lesson has attendance.');
-        }
-
-        $chapter->delete();
+        // チャプター削除
+        $deleteChapterService($chapter);
 
         return response()->json([
             'result' => true,

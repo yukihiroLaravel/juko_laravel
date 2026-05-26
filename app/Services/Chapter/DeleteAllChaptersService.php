@@ -11,7 +11,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 class DeleteAllChaptersService
 {
     /**
-     * 指定された講座の全チャプターと、それに紐づくレッスン・出席を削除する
+     * 指定された講座の全チャプターと、それに紐づくレッスンを削除する
+     *
+     * レッスンに紐づく受講が存在する場合は削除せず、例外を投げる
      *
      * @throws AuthorizationException
      */

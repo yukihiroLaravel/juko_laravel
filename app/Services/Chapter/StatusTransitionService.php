@@ -4,7 +4,6 @@ namespace App\Services\Chapter;
 
 use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 class StatusTransitionService
@@ -12,26 +11,23 @@ class StatusTransitionService
     /**
      * ステータスの変更が許可されるかどうかを検証する
      *
-     * @param  Collection<int, Chapter>  $chapters
      */
-    public function __invoke(Collection $chapters, StatusEnum $target): void
+    public function __invoke(StatusEnum $current, StatusEnum $target): void
     {
-
-        foreach ($chapters as $chapter) {
-            $current = $chapter->status;
-
-            // 許容する組み合わせの検証
-            $allowed = ($current === StatusEnum::DRAFT && $target === StatusEnum::PUBLIC)
-                || ($current === StatusEnum::PUBLIC && $target === StatusEnum::PRIVATE)
-                || ($current === StatusEnum::PRIVATE && $target === StatusEnum::PUBLIC)
-                || ($current === StatusEnum::PUBLIC && $target === StatusEnum::PUBLIC)
-                || ($current === StatusEnum::PRIVATE && $target === StatusEnum::PRIVATE);
-
-            if (! $allowed) {
-                throw ValidationException::withMessages([
-                    'status' => $current->value.'は、'.$target->value.'に変更できません。',
-                ]);
-            }
+        if ($current === $target) {
+            return;
+        }
+    
+        $allowed = match ($current) {
+            StatusEnum::DRAFT => $target === StatusEnum::PUBLIC,
+            StatusEnum::PUBLIC => $target === StatusEnum::PRIVATE,
+            StatusEnum::PRIVATE => $target === StatusEnum::PUBLIC,
+        };
+    
+        if (! $allowed) {
+            throw ValidationException::withMessages([
+                'status' => ['ステータスを「'.$current->value.'」から「'.$target->value.'」へ変更することはできません。'],
+            ]);
         }
     }
 }

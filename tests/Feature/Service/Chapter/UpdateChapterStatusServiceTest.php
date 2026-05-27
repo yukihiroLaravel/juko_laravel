@@ -4,6 +4,7 @@ namespace Tests\Feature\Service\Chapter;
 
 use App\Enums\Chapter\StatusEnum;
 use App\Model\Chapter;
+use App\Services\Chapter\StatusTransitionService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -17,13 +18,14 @@ class UpdateChapterStatusServiceTest extends TestCase
     {
         // Arrange
         $service = new UpdateChapterStatusService;
+        $statusTransitionService = new StatusTransitionService;
 
         $chapters = Chapter::factory()->create([
             'status' => StatusEnum::PUBLIC->value,
         ]);
 
         // Act
-        $service(collect($chapters), 'private');
+        $service(collect([$chapters->id]), 'private', $statusTransitionService);
 
         // Assert
         $this->assertDatabaseHas('chapters', [
@@ -36,6 +38,7 @@ class UpdateChapterStatusServiceTest extends TestCase
     {
         // Arrange
         $service = new UpdateChapterStatusService;
+        $statusTransitionService = new StatusTransitionService;
 
         $chapters = Chapter::factory()->create([
             'status' => StatusEnum::DRAFT->value,
@@ -43,11 +46,11 @@ class UpdateChapterStatusServiceTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage(
-            StatusEnum::DRAFT->value.'は、'.StatusEnum::PRIVATE->value.'に変更できません。'
+            'ステータスを「'.StatusEnum::DRAFT->value.'」から「'.StatusEnum::PRIVATE->value.'」へ変更することはできません。'
         );
 
         // Act
-        $service(collect($chapters), 'private');
+        $service(collect([$chapters->id]), 'private', $statusTransitionService);
 
         // Assert
         $this->assertDatabaseHas('chapters', [

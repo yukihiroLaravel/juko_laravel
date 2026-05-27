@@ -20,6 +20,7 @@ use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\DeleteAllChaptersService;
 use App\Services\Chapter\QueryService;
 use App\Services\Chapter\SortChaptersService;
+use App\Services\Chapter\StatusTransitionService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
@@ -116,7 +117,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開/非公開API
      */
-    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
+    public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService, StatusTransitionService $statusTransitionService): JsonResponse
     {
         $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
         $courseId = $request->course_id;
@@ -132,7 +133,8 @@ class ChapterController extends Controller
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),
-            status: $request->status
+            status: $request->status,
+            service: $statusTransitionService,
         );
 
         return response()->json([
@@ -240,7 +242,7 @@ class ChapterController extends Controller
     /**
      * チャプター一括更新API
      */
-    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service): JsonResponse
+    public function putStatus(PutStatusRequest $request, UpdateAllChaptersStatusService $service, StatusTransitionService $statusTransitionService): JsonResponse
     {
 
         $course = Course::findOrFail($request->course_id);
@@ -253,7 +255,8 @@ class ChapterController extends Controller
 
         $service(
             courseId: $request->course_id,
-            status: $request->status
+            status: $request->status,
+            service: $statusTransitionService,
         );
 
         return response()->json([

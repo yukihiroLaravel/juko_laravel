@@ -13,7 +13,6 @@ use App\Services\Chapter\DeleteChapterService;
 use App\Services\Chapter\StatusTransitionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -58,7 +57,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開状態を更新するAPI
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, StatusTransitionService $service): JsonResponse
     {
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
@@ -74,10 +73,7 @@ class ChapterController extends Controller
         $targetStatus = StatusEnum::from($request->status);
 
         // ステータスの変更が許可されるかどうかを検証
-        /** @var Collection<int, Chapter> $chapters */
-        $chapters = new Collection([$chapter]);
-        $service = new StatusTransitionService;
-        $service($chapters, $targetStatus);
+        $chapter->each(fn (Chapter $c) => $service($c->status, $targetStatus));
 
         // チャプターのステータスを更新
         $chapter->update([

@@ -48,7 +48,7 @@ class StatusTransitionServiceTest extends TestCase
         ]);
 
         // Act
-        $service(collect([$chapters]), $targetStatus);
+        $service($currentStatus, $targetStatus);
 
         // Assert
         $this->assertTrue(true);
@@ -65,10 +65,12 @@ class StatusTransitionServiceTest extends TestCase
 
         // Assert
         $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage($currentStatus->value.'は、'.$targetStatus->value.'に変更できません。');
+        $this->expectExceptionMessage(
+            'ステータスを「'.$currentStatus->value.'」から「'.$targetStatus->value.'」へ変更することはできません。'
+        );
 
         // Act
-        $service(collect([$chapters]), $targetStatus);
+        $service($currentStatus, $targetStatus);
 
         // Assert
         $this->assertFalse(true);

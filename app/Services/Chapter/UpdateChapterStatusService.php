@@ -12,15 +12,15 @@ class UpdateChapterStatusService
      * @param  Collection<int>  $chapterIds
      * @param  'private'|'public'  $status
      */
-    public function __invoke(Collection $chapterIds, string $status): void
+    public function __invoke(Collection $chapterIds, string $status, StatusTransitionService $service): void
     {
         $chapters = Chapter::whereIn('id', $chapterIds)->get();
 
-        $statusTransitionService = new StatusTransitionService;
-        $statusTransitionService($chapters, StatusEnum::from($status));
+        $targetStatus = StatusEnum::from($status);
+        $chapters->each(fn (Chapter $c) => $service($c->status, $targetStatus));
 
         Chapter::whereIn('id', $chapterIds)->update([
-            'status' => $status,
+            'status' => $targetStatus->value,
         ]);
     }
 }

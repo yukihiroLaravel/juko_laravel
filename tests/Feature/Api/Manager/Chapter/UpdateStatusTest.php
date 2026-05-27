@@ -64,10 +64,9 @@ class UpdateStatusTest extends TestCase
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
-        $response->assertJsonFragment([
-            'status' => [StatusEnum::DRAFT->value.'は、'.StatusEnum::PRIVATE->value.'に変更できません。'],
-        ]);
+        $response->assertJsonFragment(['status' => [
+            'ステータスを「'.StatusEnum::DRAFT->value.'」から「'.StatusEnum::PRIVATE->value.'」へ変更することはできません。'
+        ]]);
         $this->assertDatabaseHas('chapters', [
             'id' => $chapter->id,
             'status' => StatusEnum::DRAFT->value,

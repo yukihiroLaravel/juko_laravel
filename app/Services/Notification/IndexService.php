@@ -43,17 +43,15 @@ class IndexService
 
         // ソート条件とページネーションを適用して結果を返却
         if ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
-        $query->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')
-            ->select('notifications.*')
-            ->orderBy('instructors.nick_name', $dto->order)
-            ->orderBy('notifications.id', 'asc')
-            }
-
-        else{
+            $query->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')
+                ->select('notifications.*')
+                ->orderBy('instructors.nick_name', $dto->order)
+                ->orderBy('notifications.id', 'asc');
+        }else{
             $query->orderBy($dto->sortBy, $dto->order);
-            }
+        }
 
 // ソート条件とページネーションを適用して結果を返却
-return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
+        return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
     }
 }

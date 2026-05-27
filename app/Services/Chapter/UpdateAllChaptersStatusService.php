@@ -19,8 +19,8 @@ class UpdateAllChaptersStatusService
             ->get();
 
         $targetStatus = StatusEnum::from($status);
-        $chapters->each(fn (Chapter $c) => $service($c->status, $targetStatus)); 
-        
+        $chapters->each(fn (Chapter $c) => $service($c->status, $targetStatus));
+
         Chapter::where('course_id', $courseId)
             ->whereIn('status', StatusEnum::switchableStatuses())
             ->update(['status' => $targetStatus->value]);

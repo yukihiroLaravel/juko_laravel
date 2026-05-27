@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Services\Chapter\StatusTransitionService;
 use App\Services\Chapter\UpdateAllChaptersStatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class UpdateAllChaptersStatusServiceTest extends TestCase

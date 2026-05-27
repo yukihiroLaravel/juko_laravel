@@ -43,7 +43,7 @@ class StatusTransitionServiceTest extends TestCase
     {
         // Arrange
         $service = new StatusTransitionService;
-        $chapters = Chapter::factory()->create([
+        Chapter::factory()->create([
             'status' => $currentStatus->value,
         ]);
 
@@ -59,7 +59,7 @@ class StatusTransitionServiceTest extends TestCase
     {
         // Arrange
         $service = new StatusTransitionService;
-        $chapters = Chapter::factory()->create([
+        Chapter::factory()->create([
             'status' => $currentStatus->value,
         ]);
 

@@ -51,7 +51,7 @@ class IndexService
             $query->orderBy($dto->sortBy, $dto->order);
         }
 
-// ソート条件とページネーションを適用して結果を返却
+        // ソート条件とページネーションを適用して結果を返却
         return $query->paginate($dto->perPage, ['*'], 'page', $dto->page);
     }
 }

@@ -73,7 +73,7 @@ class ChapterController extends Controller
         $targetStatus = StatusEnum::from($request->status);
 
         // ステータスの変更が許可されるかどうかを検証
-        $chapter->each(fn (Chapter $c) => $service($c->status, $targetStatus));
+        $service(current: $chapter->status, target: $targetStatus);
 
         // チャプターのステータスを更新
         $chapter->update([

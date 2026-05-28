@@ -29,7 +29,6 @@ class UpdateStatusTest extends TestCase
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
-            'chapters' => [$chapter->id],
             'status' => 'private',
         ]);
 
@@ -58,7 +57,6 @@ class UpdateStatusTest extends TestCase
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
-            'chapters' => [$chapter->id],
             'status' => 'private',
         ]);
 
@@ -86,7 +84,6 @@ class UpdateStatusTest extends TestCase
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
-            'chapters' => [$chapter->id],
             'status' => StatusEnum::DRAFT->value,
         ]);
 
@@ -108,12 +105,54 @@ class UpdateStatusTest extends TestCase
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
-            'chapters' => [$chapter->id],
             'status' => 'invalid_status',
         ]);
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['status']);
+    }
+
+    public function test_バリデーションエラー_chapter_idが文字列(): void
+    {
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        Chapter::factory()->create(['course_id' => $course->id]);
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->patchJson(route('manager.chapter.update-status', [
+            'course_id' => $course->id,
+            'chapter_id' => 'aaa',
+        ]), [
+            'status' => 'public',
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['chapter_id']);
+    }
+
+    public function test_バリデーションエラー_chapter_idのチャプターが削除済み(): void
+    {
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $chapter->delete();
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->patchJson(route('manager.chapter.update-status', [
+            'course_id' => $course->id,
+            'chapter_id' => $chapter->id,
+        ]), [
+            'status' => 'public',
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['chapter_id']);
     }
 }

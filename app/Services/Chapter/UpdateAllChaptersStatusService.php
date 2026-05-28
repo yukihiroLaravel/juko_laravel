@@ -7,19 +7,25 @@ use App\Model\Chapter;
 
 class UpdateAllChaptersStatusService
 {
+    public function __construct(
+        private readonly StatusTransitionService $service,
+    ) {}
+    
     /**
      * 対象の講義の全チャプターのステータスを一括更新
      *
      * @param  'public'|'private'  $status
      */
-    public function __invoke(int $courseId, string $status, StatusTransitionService $service): void
+    public function __invoke(int $courseId, string $status): void
     {
         $chapters = Chapter::where('course_id', $courseId)
             ->whereIn('status', StatusEnum::switchableStatuses())
             ->get();
 
         $targetStatus = StatusEnum::from($status);
-        $chapters->each(fn (Chapter $c) => $service($c->status, $targetStatus));
+        $chapters->each(function (Chapter $c) use ($targetStatus) {
+            ($this->service)($c->status, $targetStatus);
+        });
 
         Chapter::where('course_id', $courseId)
             ->whereIn('status', StatusEnum::switchableStatuses())

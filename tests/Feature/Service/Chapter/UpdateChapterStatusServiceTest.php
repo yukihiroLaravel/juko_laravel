@@ -17,15 +17,15 @@ class UpdateChapterStatusServiceTest extends TestCase
     public function test_チャプターの公開状態を更新_成功(): void
     {
         // Arrange
-        $service = new UpdateChapterStatusService;
-        $statusTransitionService = new StatusTransitionService;
+        $statusTransitionService = new StatusTransitionService();
+        $service = new UpdateChapterStatusService($statusTransitionService);
 
         $chapters = Chapter::factory()->create([
             'status' => StatusEnum::PUBLIC->value,
         ]);
 
         // Act
-        $service(collect([$chapters->id]), 'private', $statusTransitionService);
+        $service(collect([$chapters->id]), 'private');
 
         // Assert
         $this->assertDatabaseHas('chapters', [
@@ -37,8 +37,8 @@ class UpdateChapterStatusServiceTest extends TestCase
     public function test_チャプターの公開状態を更新_失敗(): void
     {
         // Arrange
-        $service = new UpdateChapterStatusService;
-        $statusTransitionService = new StatusTransitionService;
+        $statusTransitionService = new StatusTransitionService();
+        $service = new UpdateChapterStatusService($statusTransitionService);
 
         $chapters = Chapter::factory()->create([
             'status' => StatusEnum::DRAFT->value,
@@ -50,7 +50,7 @@ class UpdateChapterStatusServiceTest extends TestCase
         );
 
         // Act
-        $service(collect([$chapters->id]), 'private', $statusTransitionService);
+        $service(collect([$chapters->id]), 'private');
 
         // Assert
         $this->assertDatabaseHas('chapters', [

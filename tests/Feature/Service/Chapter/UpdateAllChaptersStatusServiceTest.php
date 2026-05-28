@@ -17,8 +17,8 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
     public function test_全チャプターの公開状態を更新_成功(): void
     {
         // Arrange
-        $service = new UpdateAllChaptersStatusService;
-        $statusTransitionService = new StatusTransitionService;
+        $statusTransitionService = new StatusTransitionService();
+        $service = new UpdateAllChaptersStatusService($statusTransitionService);
 
         $course = Course::factory()->create();
         $chapters = Chapter::factory()->create([
@@ -27,7 +27,7 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
         ]);
 
         // Act
-        $service($course->id, 'private', $statusTransitionService);
+        $service($course->id, 'private');
 
         // Assert
         $this->assertDatabaseHas('chapters', [

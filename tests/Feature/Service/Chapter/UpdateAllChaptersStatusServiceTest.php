@@ -17,7 +17,7 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
     public function test_全チャプターの公開状態を更新_成功(): void
     {
         // Arrange
-        $statusTransitionService = new StatusTransitionService();
+        $statusTransitionService = new StatusTransitionService;
         $service = new UpdateAllChaptersStatusService($statusTransitionService);
 
         $course = Course::factory()->create();

@@ -10,7 +10,7 @@ class UpdateAllChaptersStatusService
     public function __construct(
         private readonly StatusTransitionService $service,
     ) {}
-    
+
     /**
      * 対象の講義の全チャプターのステータスを一括更新
      *

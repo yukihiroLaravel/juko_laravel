@@ -17,7 +17,7 @@ class UpdateChapterStatusServiceTest extends TestCase
     public function test_チャプターの公開状態を更新_成功(): void
     {
         // Arrange
-        $statusTransitionService = new StatusTransitionService();
+        $statusTransitionService = new StatusTransitionService;
         $service = new UpdateChapterStatusService($statusTransitionService);
 
         $chapters = Chapter::factory()->create([
@@ -37,7 +37,7 @@ class UpdateChapterStatusServiceTest extends TestCase
     public function test_チャプターの公開状態を更新_失敗(): void
     {
         // Arrange
-        $statusTransitionService = new StatusTransitionService();
+        $statusTransitionService = new StatusTransitionService;
         $service = new UpdateChapterStatusService($statusTransitionService);
 
         $chapters = Chapter::factory()->create([

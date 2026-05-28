@@ -18,7 +18,7 @@ class ShowService
     {
         /** @var Notification $notification */
         $notification = Notification::public()
-            ->with('course') // 不要なら外してOK
+            ->with('course', 'instructor')
             ->findOrFail($notificationId);
 
         /** @var Attendance $attendance */

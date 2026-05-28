@@ -47,7 +47,7 @@ class IndexService
                 ->select('notifications.*')
                 ->orderBy('instructors.nick_name', $dto->order)
                 ->orderBy('notifications.id', 'asc');
-        }else{
+        } else {
             $query->orderBy($dto->sortBy, $dto->order);
         }
 

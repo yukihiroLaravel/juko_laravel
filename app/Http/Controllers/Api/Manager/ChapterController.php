@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\Chapter\StatusEnum;
 use App\Exceptions\ValidationErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Chapter\DeleteRequest;
@@ -9,6 +10,7 @@ use App\Http\Requests\Manager\Chapter\UpdateStatusRequest;
 use App\Model\Chapter;
 use App\Model\Instructor;
 use App\Services\Chapter\DeleteChapterService;
+use App\Services\Chapter\StatusTransitionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -55,7 +57,7 @@ class ChapterController extends Controller
     /**
      * チャプターの公開状態を更新するAPI
      */
-    public function updateStatus(UpdateStatusRequest $request): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, StatusTransitionService $service): JsonResponse
     {
         $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
@@ -68,9 +70,14 @@ class ChapterController extends Controller
         // Policyによる認可処理
         $this->authorize('update', $chapter);
 
+        $targetStatus = StatusEnum::from($request->status);
+
+        // ステータスの変更が許可されるかどうかを検証
+        $service(current: $chapter->status, target: $targetStatus);
+
         // チャプターのステータスを更新
         $chapter->update([
-            'status' => $request->status,
+            'status' => $targetStatus->value,
         ]);
 
         return response()->json([

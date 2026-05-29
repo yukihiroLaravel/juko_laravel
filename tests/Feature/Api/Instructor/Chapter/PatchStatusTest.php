@@ -104,4 +104,23 @@ class PatchStatusTest extends TestCase
             'status',
         ]);
     }
+
+    public function test_バリデーションエラー_statusが下書き(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->patchJson(route('instructor.chapter.patch-status', ['course_id' => $course->id]), [
+            'chapters' => [$chapter1->id],
+            'status' => 'draft',
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['status']);
+    }
 }

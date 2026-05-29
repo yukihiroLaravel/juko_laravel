@@ -132,7 +132,7 @@ class ChapterController extends Controller
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),
-            status: $request->status
+            status: $request->status,
         );
 
         return response()->json([
@@ -253,7 +253,7 @@ class ChapterController extends Controller
 
         $service(
             courseId: $request->course_id,
-            status: $request->status
+            status: $request->status,
         );
 
         return response()->json([

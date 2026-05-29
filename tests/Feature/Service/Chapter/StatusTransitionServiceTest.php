@@ -3,76 +3,70 @@
 namespace Tests\Feature\Service\Chapter;
 
 use App\Enums\Chapter\StatusEnum;
-use App\Model\Chapter;
 use App\Services\Chapter\StatusTransitionService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StatusTransitionServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    private StatusTransitionService $service;
+
+    #[\Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->service = new StatusTransitionService;
+    }
 
     /**
-     * @return array<int, array{0: StatusEnum, 1: StatusEnum}>
+     * 許容される遷移の組み合わせ
+     *
+     * @return array<string, array{StatusEnum, StatusEnum}>
      */
-    public static function allowedStatusProvider(): array
+    public static function allowedTransitions(): array
     {
         return [
-            [StatusEnum::DRAFT, StatusEnum::PUBLIC],
-            [StatusEnum::PUBLIC, StatusEnum::PRIVATE],
-            [StatusEnum::PRIVATE, StatusEnum::PUBLIC],
-            [StatusEnum::PUBLIC, StatusEnum::PUBLIC],
-            [StatusEnum::PRIVATE, StatusEnum::PRIVATE],
+            '下書きから公開' => [StatusEnum::DRAFT, StatusEnum::PUBLIC],
+            '公開から非公開' => [StatusEnum::PUBLIC, StatusEnum::PRIVATE],
+            '非公開から公開' => [StatusEnum::PRIVATE, StatusEnum::PUBLIC],
+            '公開から公開（変更なし）' => [StatusEnum::PUBLIC, StatusEnum::PUBLIC],
+            '非公開から非公開（変更なし）' => [StatusEnum::PRIVATE, StatusEnum::PRIVATE],
+            '下書きから下書き（変更なし）' => [StatusEnum::DRAFT, StatusEnum::DRAFT],
         ];
     }
 
     /**
-     * @return array<int, array{0: StatusEnum, 1: StatusEnum}>
+     * 許容されない遷移の組み合わせ
+     *
+     * @return array<string, array{StatusEnum, StatusEnum}>
      */
-    public static function disallowedStatusProvider(): array
+    public static function disallowedTransitions(): array
     {
         return [
-            [StatusEnum::DRAFT, StatusEnum::PRIVATE],
+            '下書きから非公開' => [StatusEnum::DRAFT, StatusEnum::PRIVATE],
+            '公開から下書き' => [StatusEnum::PUBLIC, StatusEnum::DRAFT],
+            '非公開から下書き' => [StatusEnum::PRIVATE, StatusEnum::DRAFT],
         ];
     }
 
-    #[DataProvider('allowedStatusProvider')]
-    public function test_変更するチャプターのステータス検証_許容する組み合わせ_成功(StatusEnum $currentStatus, StatusEnum $targetStatus): void
+    #[DataProvider('allowedTransitions')]
+    public function test_許容される遷移は例外を発生させない(StatusEnum $current, StatusEnum $target): void
     {
-        // Arrange
-        $service = new StatusTransitionService;
-        Chapter::factory()->create([
-            'status' => $currentStatus->value,
-        ]);
+        $this->expectNotToPerformAssertions();
 
-        // Act
-        $service($currentStatus, $targetStatus);
-
-        // Assert
-        $this->assertTrue(true);
+        ($this->service)($current, $target);
     }
 
-    #[DataProvider('disallowedStatusProvider')]
-    public function test_変更するチャプターのステータス検証_許容しない組み合わせ_失敗(StatusEnum $currentStatus, StatusEnum $targetStatus): void
+    #[DataProvider('disallowedTransitions')]
+    public function test_許容されない遷移は例外を発生させる(StatusEnum $current, StatusEnum $target): void
     {
-        // Arrange
-        $service = new StatusTransitionService;
-        Chapter::factory()->create([
-            'status' => $currentStatus->value,
-        ]);
-
-        // Assert
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage(
-            'ステータスを「'.$currentStatus->value.'」から「'.$targetStatus->value.'」へ変更することはできません。'
+            'ステータスを「'.$current->value.'」から「'.$target->value.'」へ変更することはできません。'
         );
 
-        // Act
-        $service($currentStatus, $targetStatus);
-
-        // Assert
-        $this->assertFalse(true);
+        ($this->service)($current, $target);
     }
 }

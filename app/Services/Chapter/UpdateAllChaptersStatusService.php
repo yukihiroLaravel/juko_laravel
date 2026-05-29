@@ -12,23 +12,18 @@ class UpdateAllChaptersStatusService
     ) {}
 
     /**
-     * 対象の講義の全チャプターのステータスを一括更新
+     * 対象の講座の全チャプターのステータスを一括更新
      *
      * @param  'public'|'private'  $status
      */
     public function __invoke(int $courseId, string $status): void
     {
-        $chapters = Chapter::where('course_id', $courseId)
-            ->whereIn('status', StatusEnum::switchableStatuses())
-            ->get();
-
         $targetStatus = StatusEnum::from($status);
-        $chapters->each(function (Chapter $c) use ($targetStatus) {
-            ($this->service)($c->status, $targetStatus);
-        });
+        $chapters = Chapter::where('course_id', $courseId)->get();
 
-        Chapter::where('course_id', $courseId)
-            ->whereIn('status', StatusEnum::switchableStatuses())
-            ->update(['status' => $targetStatus->value]);
+        // 全チャプターの遷移可否を検証する（1件でも不可なら例外で中断し、更新は行わない）
+        $chapters->each(fn (Chapter $chapter) => ($this->service)($chapter->status, $targetStatus));
+
+        Chapter::whereIn('id', $chapters->modelKeys())->update(['status' => $targetStatus->value]);
     }
 }

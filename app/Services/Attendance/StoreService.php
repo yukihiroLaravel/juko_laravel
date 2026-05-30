@@ -2,6 +2,7 @@
 
 namespace App\Services\Attendance;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Lesson;
@@ -63,7 +64,12 @@ class StoreService
 
             $lessonIds = Lesson::whereHas('chapter', function ($query) use ($course) {
                 $query->where('course_id', $course->id);
-            })->pluck('id');
+            })
+                ->whereIn('status', [
+                    LessonStatusEnum::PUBLIC->value,
+                    LessonStatusEnum::PRIVATE->value,
+                ])
+                ->pluck('id');
 
             if ($lessonIds->isNotEmpty()) {
                 LessonAttendance::insert(

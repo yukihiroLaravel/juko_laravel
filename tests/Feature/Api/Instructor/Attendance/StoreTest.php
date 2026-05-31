@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -67,6 +68,82 @@ class StoreTest extends TestCase
                 'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
             ]);
         }
+    }
+
+    public function test_受講登録_下書きレッスンには受講状況が作成されない(): void
+    {
+        // Arrange — 公開中・限定公開・下書きのレッスンを混在させる
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        $privateLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+        $draftLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::DRAFT->value,
+        ]);
+        $student = Student::factory()->create();
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->postJson(route('instructor.attendance.store'), [
+            'course_id' => $course->id,
+            'student_id' => $student->id,
+        ]);
+
+        // Assert — 下書きではないレッスンの分のみ受講状況が作成される
+        $response->assertStatus(200);
+        $attendance = Attendance::where('course_id', $course->id)
+            ->where('student_id', $student->id)
+            ->first();
+        $this->assertNotNull($attendance);
+        $this->assertCount(2, LessonAttendance::where('attendance_id', $attendance->id)->get());
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $publicLesson->id,
+        ]);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $privateLesson->id,
+        ]);
+        $this->assertDatabaseMissing('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $draftLesson->id,
+        ]);
+    }
+
+    public function test_受講登録_全レッスンが下書きの場合は受講状況が作成されない(): void
+    {
+        // Arrange — 講座内の全レッスンが下書き
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        Lesson::factory()->count(3)->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::DRAFT->value,
+        ]);
+        $student = Student::factory()->create();
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->postJson(route('instructor.attendance.store'), [
+            'course_id' => $course->id,
+            'student_id' => $student->id,
+        ]);
+
+        // Assert — 受講登録は成立するが、受講状況は1件も作成されない
+        $response->assertStatus(200);
+        $attendance = Attendance::where('course_id', $course->id)
+            ->where('student_id', $student->id)
+            ->first();
+        $this->assertNotNull($attendance);
+        $this->assertCount(0, LessonAttendance::where('attendance_id', $attendance->id)->get());
     }
 
     public function test_定員オーバー_失敗(): void

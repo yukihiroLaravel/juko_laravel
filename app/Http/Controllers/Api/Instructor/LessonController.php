@@ -54,7 +54,6 @@ class LessonController extends Controller
                 courseId: $request->course_id,
                 chapterId: $request->chapter_id,
                 title: $request->title,
-                status: LessonStatusEnum::PRIVATE->value
             );
 
             DB::commit();

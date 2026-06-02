@@ -10,7 +10,6 @@ use App\Model\LessonAttendance;
 class StoreLessonService
 {
     public function __invoke(
-        int $courseId,
         int $chapterId,
         string $title,
     ): Lesson {

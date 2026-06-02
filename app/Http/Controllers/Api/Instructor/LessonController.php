@@ -51,7 +51,6 @@ class LessonController extends Controller
         DB::beginTransaction();
         try {
             $lesson = $service(
-                courseId: $request->course_id,
                 chapterId: $request->chapter_id,
                 title: $request->title,
             );

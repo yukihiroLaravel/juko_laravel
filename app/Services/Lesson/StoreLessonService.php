@@ -3,9 +3,7 @@
 namespace App\Services\Lesson;
 
 use App\Enums\Lesson\StatusEnum;
-use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 
 class StoreLessonService
 {

@@ -21,8 +21,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.chapter.show', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('instructor.chapters.show', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -40,8 +39,7 @@ class ShowTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.chapter.show', [
-            'course_id' => $course->id,
+        $response = $this->getJson(route('instructor.chapters.show', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -52,28 +50,6 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_講座が一致しない_失敗(): void
-    {
-        // Arrange — チャプターが属する講座と異なるcourse_idを指定
-        $instructor = Instructor::factory()->create();
-        $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $chapter = Chapter::factory()->create(['course_id' => $course1->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.chapter.show', [
-            'course_id' => $course2->id,
-            'chapter_id' => $chapter->id,
-        ]));
-
-        // Assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'Invalid course_id.',
-        ]);
-    }
-
     public function test_バリデーションエラー(): void
     {
         // Arrange
@@ -81,15 +57,13 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.chapter.show', [
-            'course_id' => 'aaa',
+        $response = $this->getJson(route('instructor.chapters.show', [
             'chapter_id' => 'bbb',
         ]));
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
             'chapter_id',
         ]);
     }

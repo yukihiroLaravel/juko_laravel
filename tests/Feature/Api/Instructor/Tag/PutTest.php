@@ -19,7 +19,7 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => $tag->id]), [
+        $response = $this->putJson(route('instructor.tags.put', ['tag_id' => $tag->id]), [
             'content' => 'test',
         ]);
 
@@ -40,7 +40,7 @@ class PutTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => $tag->id]), [
+        $response = $this->putJson(route('instructor.tags.put', ['tag_id' => $tag->id]), [
             'content' => 'test',
         ]);
 
@@ -58,7 +58,7 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.tag.put', ['tag_id' => 'aaa']), []);
+        $response = $this->putJson(route('instructor.tags.put', ['tag_id' => 'aaa']), []);
 
         // Assert
         $response->assertStatus(422);

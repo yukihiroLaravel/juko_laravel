@@ -10,7 +10,6 @@ class ShowRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
@@ -33,8 +32,8 @@ class ShowRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
         ];
     }
 }

@@ -27,8 +27,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => $course->id,
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -57,8 +56,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => $course->id,
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -92,15 +90,14 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => $course->id,
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => $chapter->id,
         ]));
 
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, this chapter has lessons with attendance.',
+            'message' => 'Forbidden, this lesson has attendance.',
         ]);
     }
 
@@ -114,8 +111,7 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => $course->id,
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -135,8 +131,7 @@ class DeleteTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => $course->id,
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => $chapter->id,
         ]));
 
@@ -154,15 +149,13 @@ class DeleteTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.chapter.delete', [
-            'course_id' => 'aaa',
+        $response = $this->deleteJson(route('manager.chapters.delete', [
             'chapter_id' => 'bbb',
         ]));
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
             'chapter_id',
         ]);
     }

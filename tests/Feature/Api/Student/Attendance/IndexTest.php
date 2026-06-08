@@ -38,7 +38,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -78,7 +78,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index', ['tag_id' => $tag->id]));
+        $response = $this->getJson(route('student.attendances.index', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -101,7 +101,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index', ['search_word' => 'バックエンド']));
+        $response = $this->getJson(route('student.attendances.index', ['search_word' => 'バックエンド']));
 
         // Assert
         $response->assertStatus(200);
@@ -121,7 +121,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index', ['search_word' => 'Vue']));
+        $response = $this->getJson(route('student.attendances.index', ['search_word' => 'Vue']));
 
         // Assert
         $response->assertStatus(200);
@@ -131,7 +131,7 @@ class IndexTest extends TestCase
     public function test_未ログインの場合はエラーを返す(): void
     {
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(401);
@@ -149,7 +149,7 @@ class IndexTest extends TestCase
         $this->actingAs($student1);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -167,7 +167,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -181,7 +181,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -199,7 +199,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act — 1ページ目
-        $response = $this->getJson(route('student.attendance.index', ['per_page' => 2, 'page' => 1]));
+        $response = $this->getJson(route('student.attendances.index', ['per_page' => 2, 'page' => 1]));
 
         // Assert
         $response->assertStatus(200);
@@ -208,7 +208,7 @@ class IndexTest extends TestCase
         $response->assertJsonPath('meta.last_page', 3);
 
         // Act — 3ページ目（残り1件）
-        $response = $this->getJson(route('student.attendance.index', ['per_page' => 2, 'page' => 3]));
+        $response = $this->getJson(route('student.attendances.index', ['per_page' => 2, 'page' => 3]));
 
         // Assert
         $response->assertStatus(200);
@@ -222,7 +222,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index', ['tag_id' => 99999]));
+        $response = $this->getJson(route('student.attendances.index', ['tag_id' => 99999]));
 
         // Assert
         $response->assertStatus(422);
@@ -251,7 +251,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -277,7 +277,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -307,7 +307,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -325,7 +325,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.index'));
+        $response = $this->getJson(route('student.attendances.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -347,7 +347,7 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act — tag_idとsearch_wordを併用
-        $response = $this->getJson(route('student.attendance.index', [
+        $response = $this->getJson(route('student.attendances.index', [
             'tag_id' => $tag->id,
             'search_word' => 'PHP',
         ]));

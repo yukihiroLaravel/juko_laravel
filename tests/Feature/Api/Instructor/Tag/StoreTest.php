@@ -17,7 +17,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.tag.store'), [
+        $response = $this->postJson(route('instructor.tags.store'), [
             'content' => 'test',
         ]);
 
@@ -36,7 +36,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.tag.store'));
+        $response = $this->postJson(route('instructor.tags.store'));
 
         // Assert
         $response->assertStatus(422);

@@ -20,7 +20,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.course.notification.store', ['course_id' => $course->id]), [
+        $response = $this->postJson(route('instructor.courses.notifications.store', ['course_id' => $course->id]), [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',
@@ -51,7 +51,7 @@ class StoreTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.course.notification.store', ['course_id' => $course->id]), [
+        $response = $this->postJson(route('instructor.courses.notifications.store', ['course_id' => $course->id]), [
             'title' => 'title',
             'type' => 'always',
             'start_date' => '2022-01-01 00:00:00',
@@ -74,7 +74,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.course.notification.store', ['course_id' => 'aaa']), [
+        $response = $this->postJson(route('instructor.courses.notifications.store', ['course_id' => 'aaa']), [
             'title' => '',
             'type' => '',
             'start_date' => '',

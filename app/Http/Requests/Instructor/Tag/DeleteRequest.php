@@ -33,6 +33,7 @@ class DeleteRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /** @ignoreParam */
             'tag_id' => ['required', 'integer', 'exists:tags,id'],
         ];
     }

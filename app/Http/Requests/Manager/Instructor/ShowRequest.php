@@ -32,6 +32,7 @@ class ShowRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
         ];
     }

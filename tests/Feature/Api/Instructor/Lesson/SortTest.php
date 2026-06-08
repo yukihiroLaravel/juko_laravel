@@ -26,8 +26,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act — 逆順に並び替え
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [
@@ -60,8 +59,7 @@ class SortTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [
@@ -83,15 +81,13 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => 'aaa',
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => 'bbb',
         ]));
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'course_id',
             'chapter_id',
             'lessons',
         ]);
@@ -110,8 +106,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [
@@ -141,8 +136,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => $chapter1->id,
         ]), [
             'lessons' => [
@@ -170,8 +164,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.lesson.sort', [
-            'course_id' => $course->id,
+        $response = $this->postJson(route('instructor.chapters.lessons.sort', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [

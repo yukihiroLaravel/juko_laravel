@@ -22,6 +22,7 @@ class FollowUpRequest extends FormRequest
     public function rules(): array
     {
         return [
+            /** @ignoreParam */
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'days' => ['required', 'integer', 'min:1'],
         ];

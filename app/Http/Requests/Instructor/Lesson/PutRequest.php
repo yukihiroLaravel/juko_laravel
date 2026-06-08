@@ -22,8 +22,6 @@ class PutRequest extends FormRequest
     {
         $this->merge([
             'lesson_id' => $this->route('lesson_id'),
-            'course_id' => $this->route('course_id'),
-            'chapter_id' => $this->route('chapter_id'),
         ]);
     }
 
@@ -35,8 +33,7 @@ class PutRequest extends FormRequest
     public function rules()
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'lesson_id' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'title' => ['required', 'string', 'max:50'],
             'url' => ['required', 'string'],

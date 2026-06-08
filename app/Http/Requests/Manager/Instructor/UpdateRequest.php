@@ -40,6 +40,7 @@ class UpdateRequest extends FormRequest
             'last_name' => ['required', 'string', 'max:50'],
             'first_name' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', new InstructorUniqueEmailRule($instructor?->email), 'max:255'],
+            /** @ignoreParam */
             'instructor_id' => ['required', 'integer', 'exists:instructors,id,deleted_at,NULL'],
             'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];

@@ -32,6 +32,7 @@ class DeleteRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'notification_id' => ['required', 'integer', 'exists:notifications,id,deleted_at,NULL'],
         ];
     }

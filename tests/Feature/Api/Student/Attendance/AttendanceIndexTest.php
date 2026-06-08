@@ -26,7 +26,7 @@ class AttendanceIndexTest extends TestCase
         });
 
         // Act
-        $response = $this->actingAs($student)->getJson(route('student.attendance.index', ['per_page' => 6, 'page' => 1]));
+        $response = $this->actingAs($student)->getJson(route('student.attendances.index', ['per_page' => 6, 'page' => 1]));
 
         // Assert
         $response->assertStatus(200);

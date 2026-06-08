@@ -23,7 +23,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -55,7 +55,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -89,7 +89,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -124,7 +124,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $otherTag->id,
@@ -147,7 +147,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -173,7 +173,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -198,7 +198,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -220,7 +220,7 @@ class StoreTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => 'テスト講座',
             'image' => $file,
             'tag_id' => $tag->id,
@@ -240,7 +240,7 @@ class StoreTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->post(route('instructor.course.store'), [
+        $response = $this->post(route('instructor.courses.store'), [
             'title' => '',
             'image' => null,
             'tag_id' => '',

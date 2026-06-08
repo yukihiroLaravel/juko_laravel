@@ -27,7 +27,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.index'));
+        $response = $this->getJson(route('manager.courses.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -42,7 +42,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.index', ['per_page' => 3]));
+        $response = $this->getJson(route('manager.courses.index', ['per_page' => 3]));
 
         // Assert
         $response->assertStatus(200);
@@ -60,7 +60,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.index', ['tag_id' => $tag->id]));
+        $response = $this->getJson(route('manager.courses.index', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(200);

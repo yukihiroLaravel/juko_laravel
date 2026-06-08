@@ -23,7 +23,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => $course->id]), [
+        $response = $this->postJson(route('instructor.chapters.sort', ['course_id' => $course->id]), [
             'chapters' => [
                 ['chapter_id' => $chapter1->id, 'order' => 3],
                 ['chapter_id' => $chapter2->id, 'order' => 2],
@@ -51,7 +51,7 @@ class SortTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => $course->id]), [
+        $response = $this->postJson(route('instructor.chapters.sort', ['course_id' => $course->id]), [
             'chapters' => [
                 ['chapter_id' => $chapter1->id, 'order' => 1],
             ],
@@ -71,7 +71,7 @@ class SortTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->postJson(route('instructor.chapter.sort', ['course_id' => 'aaa']), []);
+        $response = $this->postJson(route('instructor.chapters.sort', ['course_id' => 'aaa']), []);
 
         // Assert
         $response->assertStatus(422);

@@ -35,6 +35,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
+            /** @ignoreParam */
             'course_id' => ['required', 'exists:courses,id', 'integer'],
             'title' => ['required', 'string', 'max:50'],
             'type' => ['required', Rule::enum(TypeEnum::class)],

@@ -23,7 +23,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course1->id, $course2->id],
             'capacity' => 50,
         ]);
@@ -43,7 +43,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => null,
         ]);
@@ -67,7 +67,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 30,
         ]);
@@ -93,7 +93,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 3,
         ]);
@@ -112,7 +112,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 50,
         ]);
@@ -133,7 +133,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 50,
         ]);
@@ -155,7 +155,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$ownCourse->id, $otherCourse->id],
             'capacity' => 50,
         ]);
@@ -175,7 +175,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), []);
+        $response = $this->putJson(route('instructor.courses.put-capacity'), []);
 
         // Assert
         $response->assertStatus(422);
@@ -189,7 +189,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [],
         ]);
 
@@ -205,7 +205,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => 'abc',
             'capacity' => 10,
         ]);
@@ -222,7 +222,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => ['abc'],
             'capacity' => 10,
         ]);
@@ -239,7 +239,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [99999],
             'capacity' => 10,
         ]);
@@ -258,7 +258,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 10,
         ]);
@@ -276,7 +276,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 0,
         ]);
@@ -294,7 +294,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => -1,
         ]);
@@ -312,7 +312,7 @@ class PutCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-capacity'), [
+        $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
             'capacity' => 'abc',
         ]);

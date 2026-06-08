@@ -21,7 +21,6 @@ class PutStatusRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
@@ -37,7 +36,7 @@ class PutStatusRequest extends FormRequest
             'lessons' => ['required', 'array'],
             'lessons.*' => ['required', 'integer', 'exists:lessons,id,deleted_at,NULL'],
             'status' => ['required', 'string', new LessonStatusRule],
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

@@ -33,6 +33,7 @@ class UserAuthenticationRequest extends FormRequest
     {
         return [
             'code' => ['required', 'string', 'min:4', 'max:4'],
+            /** @ignoreParam */
             'token' => ['required', 'string', 'min:10', 'max:10'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];

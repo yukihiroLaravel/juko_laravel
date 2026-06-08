@@ -28,7 +28,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course1->id, $course2->id],
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -62,7 +62,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::PRIVATE->value,
         ]);
@@ -87,7 +87,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::PRIVATE->value,
         ]);
@@ -113,7 +113,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::PRIVATE->value,
         ]);
@@ -141,7 +141,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::PRIVATE->value,
         ]);
@@ -169,7 +169,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$ownCourse->id, $otherCourse->id],
             'status' => StatusEnum::PRIVATE->value,
         ]);
@@ -192,7 +192,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'status' => StatusEnum::PUBLIC->value,
         ]);
 
@@ -208,7 +208,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [],
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -225,7 +225,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => 'abc',
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -242,7 +242,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => ['abc'],
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -259,7 +259,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [99999],
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -281,7 +281,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::PUBLIC->value,
         ]);
@@ -302,7 +302,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
         ]);
 
@@ -322,7 +322,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => 123,
         ]);
@@ -343,7 +343,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.course.put-status'), [
+        $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
             'status' => StatusEnum::DRAFT->value,
         ]);

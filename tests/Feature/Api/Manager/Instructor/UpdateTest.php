@@ -29,7 +29,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.instructor.update', ['instructor_id' => $subordinate->id]), [
+        $response = $this->post(route('manager.instructors.update', ['instructor_id' => $subordinate->id]), [
             'nick_name' => 'test',
             'last_name' => 'test',
             'first_name' => 'test',
@@ -55,7 +55,7 @@ class UpdateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->post(route('manager.instructor.update', ['instructor_id' => $manager->id]), [
+        $response = $this->post(route('manager.instructors.update', ['instructor_id' => $manager->id]), [
             'nick_name' => '',
             'last_name' => '',
             'first_name' => '',

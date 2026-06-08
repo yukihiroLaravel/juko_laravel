@@ -25,7 +25,7 @@ class UpdateTypeTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.update-type'), [
+        $response = $this->putJson(route('instructor.notifications.update-type'), [
             'notification_type' => 'once',
             'notifications' => [$notification->id],
         ]);
@@ -51,7 +51,7 @@ class UpdateTypeTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.update-type'), [
+        $response = $this->putJson(route('instructor.notifications.update-type'), [
             'notification_type' => 'once',
             'notifications' => [$notification->id],
         ]);
@@ -70,7 +70,7 @@ class UpdateTypeTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.update-type'), [
+        $response = $this->putJson(route('instructor.notifications.update-type'), [
             'notification_type' => 'action',
             'notifications' => [],
         ]);

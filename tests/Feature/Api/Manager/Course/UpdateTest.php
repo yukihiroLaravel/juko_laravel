@@ -22,7 +22,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -51,7 +51,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -82,7 +82,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -113,7 +113,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -138,7 +138,7 @@ class UpdateTest extends TestCase
         $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => $course->id]), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
             'image' => $file,
             'status' => 'private',
@@ -159,7 +159,7 @@ class UpdateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->post(route('manager.course.update', ['course_id' => 'aaa']), [
+        $response = $this->post(route('manager.courses.update', ['course_id' => 'aaa']), [
             'title' => '',
             'image' => null,
             'status' => 'invalid_status',

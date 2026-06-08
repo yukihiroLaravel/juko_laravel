@@ -19,7 +19,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.tag.show', ['tag_id' => $tag->id]));
+        $response = $this->getJson(route('instructor.tags.show', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -32,7 +32,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.tag.show', ['tag_id' => 'aaa']));
+        $response = $this->getJson(route('instructor.tags.show', ['tag_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);

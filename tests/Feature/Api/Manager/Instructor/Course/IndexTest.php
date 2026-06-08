@@ -26,7 +26,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.course.index', ['instructor_id' => $subordinate->id]));
+        $response = $this->getJson(route('manager.instructors.courses.index', ['instructor_id' => $subordinate->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -40,7 +40,7 @@ class IndexTest extends TestCase
         $this->actingAs($otherManager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.course.index', ['instructor_id' => $instructor->id]));
+        $response = $this->getJson(route('manager.instructors.courses.index', ['instructor_id' => $instructor->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -66,7 +66,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.course.index', ['instructor_id' => $subordinate->id]));
+        $response = $this->getJson(route('manager.instructors.courses.index', ['instructor_id' => $subordinate->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -90,7 +90,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.course.index', ['instructor_id' => $subordinate->id]));
+        $response = $this->getJson(route('manager.instructors.courses.index', ['instructor_id' => $subordinate->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -105,7 +105,7 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.course.index', ['instructor_id' => 'aaa']));
+        $response = $this->getJson(route('manager.instructors.courses.index', ['instructor_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);

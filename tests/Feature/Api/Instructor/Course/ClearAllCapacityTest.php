@@ -29,7 +29,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(200);
@@ -66,7 +66,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(200);
@@ -86,7 +86,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(200);
@@ -116,7 +116,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(422);
@@ -155,7 +155,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(422);
@@ -194,7 +194,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(200);
@@ -227,7 +227,7 @@ class ClearAllCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(200);
@@ -248,7 +248,7 @@ class ClearAllCapacityTest extends TestCase
     public function test_未認証の場合はエラーになること(): void
     {
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear-all'));
+        $response = $this->patchJson(route('instructor.courses.capacity.clear-all'));
 
         // Assert
         $response->assertStatus(401);

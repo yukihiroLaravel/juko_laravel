@@ -86,7 +86,7 @@ class AttendanceController extends Controller
         DB::beginTransaction();
 
         try {
-            $attendanceId = $request->route('attendance_id');
+            $attendanceId = $request->attendance_id;
             $attendance = Attendance::with('course.instructor')->findOrFail($attendanceId);
 
             $this->authorize('delete', $attendance);

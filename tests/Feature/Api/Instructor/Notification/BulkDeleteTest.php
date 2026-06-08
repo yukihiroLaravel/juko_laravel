@@ -24,7 +24,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.notifications.bulk-delete'), [
             'notifications' => [$notification->id],
         ]);
 
@@ -56,7 +56,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.notifications.bulk-delete'), [
             'notifications' => [$otherNotification->id, $ownNotification->id],
         ]);
 
@@ -74,7 +74,7 @@ class BulkDeleteTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('instructor.notification.bulk-delete'), [
+        $response = $this->deleteJson(route('instructor.notifications.bulk-delete'), [
             'notifications' => [],
         ]);
 

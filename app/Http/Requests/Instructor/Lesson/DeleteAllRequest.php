@@ -18,7 +18,6 @@ class DeleteAllRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'course_id' => $this->route('course_id'),
             'chapter_id' => $this->route('chapter_id'),
         ]);
     }
@@ -29,7 +28,7 @@ class DeleteAllRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
+            /** @ignoreParam */
             'chapter_id' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
         ];
     }

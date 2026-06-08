@@ -22,7 +22,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
@@ -49,7 +49,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 30,
@@ -83,7 +83,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
@@ -108,7 +108,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$course1->id, $course2->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-06-30',
@@ -143,7 +143,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$course->id],
             'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
             'relative_days' => 60,
@@ -170,7 +170,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$otherCourse->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
@@ -193,7 +193,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [$ownCourse->id, $otherCourse->id],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',
@@ -213,7 +213,7 @@ class BulkUpdateTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [],
             'deadline_type' => DeadlineTypeEnum::NONE->value,
         ]);
@@ -226,7 +226,7 @@ class BulkUpdateTest extends TestCase
     public function test_未認証でアクセス_失敗(): void
     {
         // Act
-        $response = $this->patchJson(route('instructor.course.deadline.bulk-update'), [
+        $response = $this->patchJson(route('instructor.courses.deadline.bulk-update'), [
             'courses' => [1],
             'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
             'fixed_date' => '2026-12-31',

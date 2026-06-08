@@ -25,7 +25,7 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put', ['notification_id' => $notification->id]), [
+        $response = $this->putJson(route('instructor.notifications.put', ['notification_id' => $notification->id]), [
             'title' => 'title',
             'type' => 'once',
             'start_date' => '2024-01-01 00:00:00',
@@ -60,7 +60,7 @@ class PutTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put', ['notification_id' => $notification->id]), [
+        $response = $this->putJson(route('instructor.notifications.put', ['notification_id' => $notification->id]), [
             'title' => 'title',
             'type' => 'once',
             'start_date' => '2024-01-01 00:00:00',
@@ -83,7 +83,7 @@ class PutTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.notification.put', ['notification_id' => 'aaaa']), [
+        $response = $this->putJson(route('instructor.notifications.put', ['notification_id' => 'aaaa']), [
             'title' => '',
             'type' => '',
             'start_date' => '',

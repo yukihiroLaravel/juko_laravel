@@ -37,7 +37,7 @@ class ShowTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.show', ['notification_id' => $notification->id]));
+        $response = $this->getJson(route('student.notifications.show', ['notification_id' => $notification->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -64,7 +64,7 @@ class ShowTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.show', ['notification_id' => $notification->id]));
+        $response = $this->getJson(route('student.notifications.show', ['notification_id' => $notification->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -93,7 +93,7 @@ class ShowTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.show', ['notification_id' => $notification->id]));
+        $response = $this->getJson(route('student.notifications.show', ['notification_id' => $notification->id]));
 
         // Assert
         $response->assertStatus(403);

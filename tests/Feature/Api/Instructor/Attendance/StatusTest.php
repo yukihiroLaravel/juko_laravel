@@ -26,7 +26,7 @@ class StatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.status', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.status', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -46,7 +46,7 @@ class StatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.status', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.status', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(403);
@@ -59,7 +59,7 @@ class StatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.status', ['attendance_id' => 'aaa']));
+        $response = $this->getJson(route('instructor.attendances.status', ['attendance_id' => 'aaa']));
 
         // Assert
         $response->assertStatus(422);

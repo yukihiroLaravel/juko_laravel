@@ -19,7 +19,7 @@ class LoginRateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+        $response = $this->getJson(route('manager.courses.attendances.login-rate', [
             'course_id' => $course->id,
             'period' => 'week',
         ]));
@@ -37,7 +37,7 @@ class LoginRateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+        $response = $this->getJson(route('manager.courses.attendances.login-rate', [
             'course_id' => $course->id,
             'period' => 'week',
         ]));
@@ -53,7 +53,7 @@ class LoginRateTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.course.attendance.login-rate', [
+        $response = $this->getJson(route('manager.courses.attendances.login-rate', [
             'course_id' => 'aaa',
             'period' => 'bbb',
         ]));

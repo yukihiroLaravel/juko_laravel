@@ -24,8 +24,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put-status', [
-            'course_id' => $course->id,
+        $response = $this->putJson(route('instructor.chapters.lessons.put-status', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [
@@ -62,8 +61,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put-status', [
-            'course_id' => $course->id,
+        $response = $this->putJson(route('instructor.chapters.lessons.put-status', [
             'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [
@@ -87,8 +85,7 @@ class PutStatusTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.lesson.put-status', [
-            'course_id' => 'aaa',
+        $response = $this->putJson(route('instructor.chapters.lessons.put-status', [
             'chapter_id' => 'bbb',
         ]), [
             'lessons' => [],

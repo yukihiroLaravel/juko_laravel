@@ -30,7 +30,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => $courses->pluck('id')->toArray(),
         ]);
 
@@ -71,7 +71,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -112,7 +112,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$courseWithoutStudents->id, $courseWithStudents->id],
         ]);
 
@@ -146,7 +146,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -183,7 +183,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -216,7 +216,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -244,7 +244,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -275,7 +275,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$ownCourse->id, $otherCourse->id],
         ]);
 
@@ -303,7 +303,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [],
         ]);
 
@@ -323,7 +323,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), []);
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), []);
 
         // Assert
         $response->assertStatus(422);
@@ -341,7 +341,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => 'abc',
         ]);
 
@@ -361,7 +361,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => ['abc'],
         ]);
 
@@ -381,7 +381,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [99999],
         ]);
 
@@ -406,7 +406,7 @@ class ClearCapacityTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 
@@ -424,7 +424,7 @@ class ClearCapacityTest extends TestCase
         $course = Course::factory()->create(['capacity' => 10]);
 
         // Act
-        $response = $this->patchJson(route('instructor.course.capacity.clear'), [
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
             'courses' => [$course->id],
         ]);
 

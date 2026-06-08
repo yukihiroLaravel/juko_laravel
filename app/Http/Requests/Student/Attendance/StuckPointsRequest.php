@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Manager\Tag;
+namespace App\Http\Requests\Student\Attendance;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DeleteRequest extends FormRequest
+class StuckPointsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,23 +15,20 @@ class DeleteRequest extends FormRequest
     }
 
     #[\Override]
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
-            'tag_id' => $this->route('tag_id'),
+            'attendance_id' => $this->route('attendance_id'),
         ]);
     }
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            /** @ignoreParam */
-            'tag_id' => ['required', 'integer', 'exists:tags,id'],
+            'attendance_id' => ['required', 'integer', 'exists:attendances,id,deleted_at,NULL'],
         ];
     }
 }

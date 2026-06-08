@@ -62,9 +62,13 @@ class StudentLearningHistoryService
             $q->where('student_id', $studentId);
         });
 
+        $completedQuery = (clone $query)
+            ->whereBetween('completed_at', [$start, $end]);
+
         return [
-            'completed' => (clone $query)->whereBetween('completed_at', [$start, $end])->count(),
+            'completed' => (clone $completedQuery)->count(),
             'total' => $query->count(),
+            'last_completed_at' => (clone $completedQuery)->max('completed_at'),
         ];
     }
 

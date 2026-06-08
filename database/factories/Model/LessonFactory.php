@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Model;
 
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Chapter;
 use App\Model\Lesson;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,7 +27,7 @@ class LessonFactory extends Factory
             'title' => fake()->text(50),
             'url' => fake()->url(),
             'remarks' => fake()->sentence(),
-            'status' => Lesson::STATUS_PUBLIC,
+            'status' => LessonStatusEnum::PUBLIC->value,
             'order' => fake()->numberBetween(1, 10),
         ];
     }

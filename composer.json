@@ -29,6 +29,7 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
+        "process-timeout": 600,
         "sort-packages": true
     },
     "extra": {

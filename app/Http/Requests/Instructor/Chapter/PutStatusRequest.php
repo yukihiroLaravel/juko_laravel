@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Instructor\Chapter;
 
-use App\Rules\ChapterStatusRule;
+use App\Enums\Chapter\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PutStatusRequest extends FormRequest
 {
@@ -35,7 +36,7 @@ class PutStatusRequest extends FormRequest
         return [
             /** @ignoreParam */
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule],
+            'status' => ['required', 'string', Rule::in(StatusEnum::switchableStatuses())],
         ];
     }
 }

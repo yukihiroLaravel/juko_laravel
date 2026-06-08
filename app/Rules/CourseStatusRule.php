@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Model\Course;
+use App\Enums\Course\StatusEnum;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -15,17 +15,13 @@ class CourseStatusRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (
-            ! in_array(
-                $value,
-                [
-                    Course::STATUS_PRIVATE,
-                    Course::STATUS_PUBLIC,
-                ],
-                true
-            )
+            ! in_array($value, [
+                StatusEnum::PUBLIC->value,
+                StatusEnum::PRIVATE->value,
+            ], true)
         ) {
             // エラーを返す
-            $fail('The :attribute must be a valid status.');
+            $fail('The :attribute must be public or private.');
         }
     }
 }

@@ -111,7 +111,7 @@ class BulkDeleteTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, this lesson has attendance.',
+            'message' => 'Forbidden, this chapter has lessons with attendance.',
         ]);
     }
 

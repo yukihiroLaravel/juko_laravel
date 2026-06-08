@@ -75,4 +75,21 @@ class PutStatusTest extends TestCase
             'status',
         ]);
     }
+
+    public function test_バリデーションエラー_statusが下書き(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->putJson(route('instructor.chapter.put-status', ['course_id' => $course->id]), [
+            'status' => 'draft',
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['status']);
+    }
 }

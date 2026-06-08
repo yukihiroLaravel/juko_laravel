@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Instructor\Chapter;
 
-use App\Rules\ChapterStatusRule;
+use App\Enums\Chapter\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PatchStatusRequest extends FormRequest
 {
@@ -37,7 +38,7 @@ class PatchStatusRequest extends FormRequest
             'course_id' => ['required', 'integer', 'exists:courses,id,deleted_at,NULL'],
             'chapters' => ['required', 'array'],
             'chapters.*' => ['required', 'integer', 'exists:chapters,id,deleted_at,NULL'],
-            'status' => ['required', 'string', new ChapterStatusRule],
+            'status' => ['required', 'string', Rule::in(StatusEnum::switchableStatuses())],
         ];
     }
 }

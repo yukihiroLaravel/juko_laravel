@@ -142,4 +142,155 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data.notifications');
     }
+
+    public function test_お知らせ一覧に講師名が含まれる(): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $instructor = Instructor::factory()->create(['nick_name' => 'Alice']);
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notification.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Alice');
+    }
+
+    public function test_講師名昇順でソートできる(): void
+    {
+        // Arrange — 講師2名のお知らせを作成
+        $student = Student::factory()->create();
+        $instructorB = Instructor::factory()->create(['nick_name' => 'Bob']);
+        $instructorA = Instructor::factory()->create(['nick_name' => 'Alice']);
+        $courseB = Course::factory()->create([
+            'instructor_id' => $instructorB->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        $courseA = Course::factory()->create([
+            'instructor_id' => $instructorA->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $courseB->id,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $courseA->id,
+        ]);
+        Notification::factory()->create([
+            'course_id' => $courseB->id,
+            'instructor_id' => $instructorB->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        Notification::factory()->create([
+            'course_id' => $courseA->id,
+            'instructor_id' => $instructorA->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notification.index', [
+            'sort_by' => 'instructor_nick_name',
+            'order' => 'asc',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Alice');
+        $response->assertJsonPath('data.notifications.1.instructor_nick_name', 'Bob');
+    }
+
+    public function test_講師名降順でソートできる(): void
+    {
+        // Arrange — 講師2名のお知らせを作成
+        $student = Student::factory()->create();
+        $instructorA = Instructor::factory()->create(['nick_name' => 'Alice']);
+        $instructorB = Instructor::factory()->create(['nick_name' => 'Bob']);
+        $courseA = Course::factory()->create([
+            'instructor_id' => $instructorA->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        $courseB = Course::factory()->create([
+            'instructor_id' => $instructorB->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $courseA->id,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $courseB->id,
+        ]);
+        Notification::factory()->create([
+            'course_id' => $courseA->id,
+            'instructor_id' => $instructorA->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        Notification::factory()->create([
+            'course_id' => $courseB->id,
+            'instructor_id' => $instructorB->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notification.index', [
+            'sort_by' => 'instructor_nick_name',
+            'order' => 'desc',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Bob');
+        $response->assertJsonPath('data.notifications.1.instructor_nick_name', 'Alice');
+    }
+
+    public function test_不正なソート項目はバリデーションエラーになる(): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notification.index', [
+            'sort_by' => 'invalid_sort_key',
+        ]));
+
+        // Assert
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['sort_by']);
+    }
 }

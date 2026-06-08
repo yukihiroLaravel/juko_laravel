@@ -2,11 +2,16 @@
 
 namespace App\Services\Course;
 
+use App\Enums\Course\StatusEnum;
 use App\Model\Course;
 use Illuminate\Support\Collection;
 
 class PutStatusService
 {
+    public function __construct(
+        private readonly StatusTransitionService $statusTransition,
+    ) {}
+
     /**
      * 選択した講座のステータスを更新する
      *
@@ -15,7 +20,13 @@ class PutStatusService
      */
     public function __invoke(Collection $courses, string $status): void
     {
+        $newStatus = StatusEnum::from($status);
+
+        $courses->each(function (Course $course) use ($newStatus) {
+            ($this->statusTransition)($course->status, $newStatus);
+        });
+
         // 講座のステータスを一括更新
-        Course::whereIn('id', $courses->pluck('id'))->update(['status' => $status]);
+        Course::whereIn('id', $courses->pluck('id'))->update(['status' => $newStatus->value]);
     }
 }

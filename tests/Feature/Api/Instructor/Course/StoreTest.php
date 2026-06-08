@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Course;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
@@ -33,6 +34,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
+            'status' => CourseStatusEnum::DRAFT->value,
         ]);
         $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
@@ -65,6 +67,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
+            'status' => CourseStatusEnum::DRAFT->value,
         ]);
         $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
@@ -98,6 +101,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
+            'status' => CourseStatusEnum::DRAFT->value,
         ]);
         $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
@@ -155,6 +159,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
+            'status' => CourseStatusEnum::DRAFT->value,
             'capacity' => 30,
         ]);
     }
@@ -179,6 +184,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
+            'status' => CourseStatusEnum::DRAFT->value,
             'capacity' => null,
         ]);
     }

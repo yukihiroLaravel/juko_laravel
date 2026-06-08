@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Chapter;
 
+use App\Enums\Chapter\StatusEnum;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +33,7 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('chapters', [
             'course_id' => $course->id,
             'title' => 'title',
+            'status' => StatusEnum::DRAFT->value,
         ]);
     }
 

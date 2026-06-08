@@ -15,7 +15,6 @@ use App\Http\Resources\Instructor\ChapterShowResource;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\LessonAttendance;
 use App\Services\Chapter\BulkDeleteChapterService;
 use App\Services\Chapter\CreateChapterService;
 use App\Services\Chapter\DeleteAllChaptersService;
@@ -123,7 +122,7 @@ class ChapterController extends Controller
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),
-            status: $request->status
+            status: $request->status,
         );
 
         return response()->json([
@@ -180,18 +179,11 @@ class ChapterController extends Controller
 
             $this->authorize('delete', $course->chapters->first());
 
-            // チャプターに紐づく全レッスンIDを取得
-            $lessonIds = $course->chapters->pluck('lessons')->flatten()->pluck('id')->toArray();
-            if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-                // 受講中のレッスンがあれば、エラー応答
-                throw new AuthorizationException('This lesson has attendance.');
-            }
-
-            DB::commit();
-
             $service(
                 courseId: $courseId
             );
+
+            DB::commit();
 
             return response()->json([
                 'result' => true,
@@ -251,7 +243,7 @@ class ChapterController extends Controller
 
         $service(
             courseId: $request->course_id,
-            status: $request->status
+            status: $request->status,
         );
 
         return response()->json([

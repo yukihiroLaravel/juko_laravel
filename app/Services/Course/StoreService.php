@@ -3,6 +3,7 @@
 namespace App\Services\Course;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Course;
 use App\Model\Tag;
 use Illuminate\Http\UploadedFile;
@@ -37,7 +38,7 @@ class StoreService
             'instructor_id' => $instructorId,
             'title' => $title,
             'image' => $filePath,
-            'status' => Course::STATUS_PRIVATE,
+            'status' => CourseStatusEnum::DRAFT->value,
             'deadline_type' => $deadlineType->value,
             'capacity' => $capacity,
         ]);

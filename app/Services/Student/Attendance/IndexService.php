@@ -3,9 +3,9 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,13 +30,13 @@ class IndexService
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
                 $query->when(! $indexDto->getSearchWord(), function (Builder $query) {
-                    $query->where('status', Course::STATUS_PUBLIC);
+                    $query->where('status', CourseStatusEnum::PUBLIC->value);
                 })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
                     $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
                         ->orWhereHas('tags', function (Builder $query) use ($indexDto) {
                             $query->where('content', 'like', "%{$indexDto->getSearchWord()}%");
                         })
-                        ->where('status', Course::STATUS_PUBLIC);
+                        ->where('status', CourseStatusEnum::PUBLIC->value);
                 });
             })
             ->when($tagId, function (Builder $query) use ($tagId) {

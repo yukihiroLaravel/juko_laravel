@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Manager;
 
 use App\Enums\Course\DeadlineTypeEnum;
+use App\Enums\Course\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Course\IndexRequest;
 use App\Http\Requests\Manager\Course\ShowRequest;
@@ -171,7 +172,9 @@ class CourseController extends Controller
         $managingIds[] = $instructorId;
 
         // 更新対象の講座を取得
-        $courses = Course::whereIn('instructor_id', $managingIds)->get();
+        $courses = Course::whereIn('instructor_id', $managingIds)
+            ->whereIn('status', StatusEnum::switchableStatuses())
+            ->get();
 
         // 更新処理
         $service(courses: $courses, status: $request->status);

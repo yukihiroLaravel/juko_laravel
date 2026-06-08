@@ -29,7 +29,7 @@ class IndexRequest extends FormRequest
         return [
             'per_page' => ['integer', 'min:1'],
             'page' => ['integer', 'min:1'],
-            'sortBy' => ['string', new NotificationSortByRule],
+            'sort_by' => ['string', new NotificationSortByRule],
             'order' => ['string', 'in:asc,desc'],
             'filter' => ['string', Rule::Enum(FilterEnum::class)],
         ];

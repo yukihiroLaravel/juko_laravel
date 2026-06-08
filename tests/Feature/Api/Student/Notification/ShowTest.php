@@ -43,6 +43,34 @@ class ShowTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_お知らせ詳細に講師名が含まれる(): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $instructor = Instructor::factory()->create(['nick_name' => 'Alice']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $notification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notification.show', ['notification_id' => $notification->id]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.instructor_nick_name', 'Alice');
+    }
+
     public function test_講座の期限切れは403になる(): void
     {
         // Arrange — 期限切れの受講

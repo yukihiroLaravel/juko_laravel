@@ -33,7 +33,7 @@ Route::prefix('attendances')->name('attendances.')->group(function () {
 });
 
 // 受講生-レッスン受講
-Route::patch('lesson_attendances/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
+Route::patch('lesson-attendances/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
 
 // 受講生-お知らせ
 Route::prefix('notifications')->name('notifications.')->group(function () {

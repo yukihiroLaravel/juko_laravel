@@ -40,14 +40,7 @@ class ChapterController extends Controller
             throw new AuthorizationException('Forbidden, not allowed to delete this chapter.');
         }
 
-        // チャプター内に受講中のレッスンがあるか確認
-        if ($chapter->lessons()->whereHas('lessonAttendances')->exists()) {
-            // 指定したチャプター内に受講中のレッスンがあればエラー応答
-            throw new AuthorizationException('Forbidden, this lesson has attendance.');
-        }
-
-        $chapter->delete();
-        // チャプター削除
+        // チャプター削除（受講中レッスンの有無チェックはサービス内で実施）
         $deleteChapterService($chapter);
 
         return response()->json([

@@ -9,14 +9,21 @@
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "// 環境変数からXSRF-TOKENを読み取りヘッダーに設定（HTTP通信なし）",
-                    "const xsrfToken = pm.environment.get('XSRF-TOKEN');",
-                    "if (xsrfToken) {",
-                    "    pm.request.headers.upsert({",
-                    "        key: 'X-XSRF-TOKEN',",
-                    "        value: xsrfToken",
-                    "    });",
-                    "}"
+                    "// 毎回 /sanctum/csrf-cookie から XSRF-TOKEN を取得して X-XSRF-TOKEN ヘッダーへ設定",
+                    "pm.sendRequest({",
+                    "    url: pm.variables.get('APP_URL') + '/sanctum/csrf-cookie',",
+                    "    method: 'GET'",
+                    "}, function (err, res, { cookies }) {",
+                    "    if (!err && cookies) {",
+                    "        const c = cookies.one('XSRF-TOKEN');",
+                    "        if (c) {",
+                    "            pm.request.headers.upsert({",
+                    "                key: 'X-XSRF-TOKEN',",
+                    "                value: decodeURIComponent(c.value)",
+                    "            });",
+                    "        }",
+                    "    }",
+                    "});"
                 ]
             }
         }
@@ -33,31 +40,6 @@
             "item": [
                 {
                     "name": "生徒ログイン",
-                    "event": [
-                        {
-                            "listen": "prerequest",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "// ログイン前にCSRFクッキーを取得してXSRF-TOKENを環境変数に保存",
-                                    "pm.sendRequest({",
-                                    "    url: 'http://localhost:8080/sanctum/csrf-cookie',",
-                                    "    method: 'GET'",
-                                    "}, function (error, response, { cookies }) {",
-                                    "    let xsrfCookie = cookies.one('XSRF-TOKEN');",
-                                    "    if (xsrfCookie) {",
-                                    "        let xsrfToken = decodeURIComponent(xsrfCookie['value']);",
-                                    "        pm.request.headers.upsert({",
-                                    "            key: 'X-XSRF-TOKEN',",
-                                    "            value: xsrfToken",
-                                    "        });",
-                                    "        pm.environment.set('XSRF-TOKEN', xsrfToken);",
-                                    "    }",
-                                    "});"
-                                ]
-                            }
-                        }
-                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -113,31 +95,6 @@
                 },
                 {
                     "name": "講師ログイン",
-                    "event": [
-                        {
-                            "listen": "prerequest",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "// ログイン前にCSRFクッキーを取得してXSRF-TOKENを環境変数に保存",
-                                    "pm.sendRequest({",
-                                    "    url: 'http://localhost:8080/sanctum/csrf-cookie',",
-                                    "    method: 'GET'",
-                                    "}, function (error, response, { cookies }) {",
-                                    "    let xsrfCookie = cookies.one('XSRF-TOKEN');",
-                                    "    if (xsrfCookie) {",
-                                    "        let xsrfToken = decodeURIComponent(xsrfCookie['value']);",
-                                    "        pm.request.headers.upsert({",
-                                    "            key: 'X-XSRF-TOKEN',",
-                                    "            value: xsrfToken",
-                                    "        });",
-                                    "        pm.environment.set('XSRF-TOKEN', xsrfToken);",
-                                    "    }",
-                                    "});"
-                                ]
-                            }
-                        }
-                    ],
                     "request": {
                         "method": "POST",
                         "header": [

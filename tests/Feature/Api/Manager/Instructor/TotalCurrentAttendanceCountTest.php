@@ -55,7 +55,7 @@ class TotalCurrentAttendanceCountTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.total-current-attendance-count', [
+        $response = $this->getJson(route('manager.instructors.total-current-attendance-count', [
             'instructor_id' => $subordinate->id,
         ]));
 
@@ -97,7 +97,7 @@ class TotalCurrentAttendanceCountTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.total-current-attendance-count', [
+        $response = $this->getJson(route('manager.instructors.total-current-attendance-count', [
             'instructor_id' => $subordinate->id,
         ]));
 
@@ -114,7 +114,7 @@ class TotalCurrentAttendanceCountTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.total-current-attendance-count', [
+        $response = $this->getJson(route('manager.instructors.total-current-attendance-count', [
             'instructor_id' => $otherInstructor->id,
         ]));
 
@@ -133,7 +133,7 @@ class TotalCurrentAttendanceCountTest extends TestCase
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructor.total-current-attendance-count', [
+        $response = $this->getJson(route('manager.instructors.total-current-attendance-count', [
             'instructor_id' => $otherInstructor->id,
         ]));
 
@@ -151,7 +151,7 @@ class TotalCurrentAttendanceCountTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act — 存在しないinstructor_idを指定
-        $response = $this->getJson(route('manager.instructor.total-current-attendance-count', [
+        $response = $this->getJson(route('manager.instructors.total-current-attendance-count', [
             'instructor_id' => 99999,
         ]));
 

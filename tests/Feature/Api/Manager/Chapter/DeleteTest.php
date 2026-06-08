@@ -97,7 +97,7 @@ class DeleteTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, this chapter has lessons with attendance.',
+            'message' => 'Forbidden, this lesson has attendance.',
         ]);
     }
 

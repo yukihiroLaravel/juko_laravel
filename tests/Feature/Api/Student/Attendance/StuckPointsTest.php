@@ -36,7 +36,7 @@ class StuckPointsTest extends TestCase
         $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => $attendance->id,
         ]));
 
@@ -80,7 +80,7 @@ class StuckPointsTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => $attendance->id,
         ]));
 
@@ -148,7 +148,7 @@ class StuckPointsTest extends TestCase
         ]);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => $attendance->id,
         ]));
 
@@ -176,7 +176,7 @@ class StuckPointsTest extends TestCase
         $this->actingAs($otherStudent);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => $attendance->id,
         ]));
 
@@ -191,7 +191,7 @@ class StuckPointsTest extends TestCase
         $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => 'aaa',
         ]));
 
@@ -207,7 +207,7 @@ class StuckPointsTest extends TestCase
         $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => 99999,
         ]));
 
@@ -224,7 +224,7 @@ class StuckPointsTest extends TestCase
         $this->actingAs($attendance->student);
 
         // Act
-        $response = $this->getJson(route('student.attendance.stuck-points', [
+        $response = $this->getJson(route('student.attendances.stuck-points', [
             'attendance_id' => $attendance->id,
         ]));
 

@@ -25,7 +25,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
@@ -53,7 +53,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
@@ -80,7 +80,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
@@ -101,7 +101,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
@@ -122,7 +122,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => 'aaa',
         ]), [
@@ -144,7 +144,7 @@ class UpdateStatusTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('manager.chapter.update-status', [
+        $response = $this->patchJson(route('manager.chapters.update-status', [
             'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [

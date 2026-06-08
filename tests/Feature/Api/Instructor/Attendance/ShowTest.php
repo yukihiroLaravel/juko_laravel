@@ -391,7 +391,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $activeAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
         // Assert — 期限切れの受講者は除外されてカウントされる
         $response->assertStatus(200);
@@ -422,7 +422,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $futureAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $futureAttendance->id]));
 
         // Assert — 当日が期限の受講者も含めてカウントされる（>= の境界）
         $response->assertStatus(200);
@@ -453,7 +453,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $activeAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
         // Assert — 期限なしの受講者も含めてカウントされる
         $response->assertStatus(200);
@@ -479,7 +479,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert — chapters キー配下に各チャプター情報と完了人数が含まれる
         $response->assertStatus(200);
@@ -526,7 +526,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -561,7 +561,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -604,7 +604,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $activeAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
         // Assert — 期限切れの受講者は除外され、期限内の1名のみカウントされる
         $response->assertStatus(200);
@@ -625,7 +625,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert — レッスン0個のチャプターは判定対象がないため0が返る
         $response->assertStatus(200);
@@ -661,7 +661,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert — chapter1 は全レッスン完了で1、chapter2 は未完了で0
         $response->assertStatus(200);
@@ -692,7 +692,7 @@ class ShowTest extends TestCase
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendance.show', ['attendance_id' => $attendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert — completed_at が null なら status に関わらずカウントされない
         $response->assertStatus(200);

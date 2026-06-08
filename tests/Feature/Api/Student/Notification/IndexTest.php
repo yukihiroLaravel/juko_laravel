@@ -167,7 +167,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index'));
+        $response = $this->getJson(route('student.notifications.index'));
 
         // Assert
         $response->assertStatus(200);
@@ -215,7 +215,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index', [
+        $response = $this->getJson(route('student.notifications.index', [
             'sort_by' => 'instructor_nick_name',
             'order' => 'asc',
         ]));
@@ -267,7 +267,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index', [
+        $response = $this->getJson(route('student.notifications.index', [
             'sort_by' => 'instructor_nick_name',
             'order' => 'desc',
         ]));
@@ -285,7 +285,7 @@ class IndexTest extends TestCase
         $this->actingAs($student, 'web');
 
         // Act
-        $response = $this->getJson(route('student.notification.index', [
+        $response = $this->getJson(route('student.notifications.index', [
             'sort_by' => 'invalid_sort_key',
         ]));
 

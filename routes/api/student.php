@@ -26,14 +26,14 @@ Route::prefix('attendances')->name('attendances.')->group(function () {
     Route::prefix('{attendance_id}')->group(function () {
         Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show'])->name('show');
         Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress'])->name('progress');
-        Route::PUT('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters'])->name('complete-all-chapters');
+        Route::put('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters'])->name('complete-all-chapters');
         Route::put('chapters/{chapter_id}/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllLessons'])->name('complete-all-lessons');
         Route::get('stuck-points', [App\Http\Controllers\Api\Student\AttendanceController::class, 'stuckPoints'])->name('stuck-points');
     });
 });
 
 // 受講生-レッスン受講
-Route::patch('lesson_attendances/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
+Route::patch('lesson-attendances/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
 
 // 受講生-お知らせ
 Route::prefix('notifications')->name('notifications.')->group(function () {

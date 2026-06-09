@@ -51,7 +51,9 @@ Route::prefix('courses')->group(function () {
         });
 
         // 講師-講座-お知らせ
-        Route::post('notifications', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'store'])->name('courses.notifications.store');
+        Route::prefix('notifications')->name('courses.notifications.')->group(function () {
+            Route::post('/', [App\Http\Controllers\Api\Instructor\NotificationController::class, 'store'])->name('store');
+        });
 
         // 講師-講座-受講
         Route::prefix('attendances')->name('courses.attendances.')->group(function () {

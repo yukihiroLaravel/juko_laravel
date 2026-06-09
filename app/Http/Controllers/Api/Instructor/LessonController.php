@@ -13,7 +13,6 @@ use App\Http\Requests\Instructor\Lesson\StoreRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -42,15 +41,15 @@ class LessonController extends Controller
      */
     public function store(StoreRequest $request, StoreLessonService $service): JsonResponse
     {
-        $course = Course::findOrFail($request->course_id);
+        $chapter = Chapter::with('course')->findOrFail($request->chapter_id);
 
         // Policyパターンによる認可チェック
-        $this->authorize('create', [Lesson::class, $course]);
+        $this->authorize('create', [Lesson::class, $chapter->course]);
 
         DB::beginTransaction();
         try {
             $lesson = $service(
-                chapterId: $request->chapter_id,
+                chapterId: $chapter->id,
                 title: $request->title,
             );
 

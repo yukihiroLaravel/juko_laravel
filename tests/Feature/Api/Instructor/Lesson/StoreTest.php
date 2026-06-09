@@ -58,7 +58,6 @@ class StoreTest extends TestCase
 
         // Act
         $response = $this->postJson(route('instructor.chapters.lessons.store', [
-            'course_id' => $course->id,
             'chapter_id' => $chapter->id,
         ]), [
             'title' => 'title',

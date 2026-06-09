@@ -9,14 +9,21 @@
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "// 環境変数からXSRF-TOKENを読み取りヘッダーに設定（HTTP通信なし）",
-                    "const xsrfToken = pm.environment.get('XSRF-TOKEN');",
-                    "if (xsrfToken) {",
-                    "    pm.request.headers.upsert({",
-                    "        key: 'X-XSRF-TOKEN',",
-                    "        value: xsrfToken",
-                    "    });",
-                    "}"
+                    "// 毎回 /sanctum/csrf-cookie から XSRF-TOKEN を取得して X-XSRF-TOKEN ヘッダーへ設定",
+                    "pm.sendRequest({",
+                    "    url: pm.variables.get('APP_URL') + '/sanctum/csrf-cookie',",
+                    "    method: 'GET'",
+                    "}, function (err, res, { cookies }) {",
+                    "    if (!err && cookies) {",
+                    "        const c = cookies.one('XSRF-TOKEN');",
+                    "        if (c) {",
+                    "            pm.request.headers.upsert({",
+                    "                key: 'X-XSRF-TOKEN',",
+                    "                value: decodeURIComponent(c.value)",
+                    "            });",
+                    "        }",
+                    "    }",
+                    "});"
                 ]
             }
         }
@@ -33,31 +40,6 @@
             "item": [
                 {
                     "name": "生徒ログイン",
-                    "event": [
-                        {
-                            "listen": "prerequest",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "// ログイン前にCSRFクッキーを取得してXSRF-TOKENを環境変数に保存",
-                                    "pm.sendRequest({",
-                                    "    url: 'http://localhost:8080/sanctum/csrf-cookie',",
-                                    "    method: 'GET'",
-                                    "}, function (error, response, { cookies }) {",
-                                    "    let xsrfCookie = cookies.one('XSRF-TOKEN');",
-                                    "    if (xsrfCookie) {",
-                                    "        let xsrfToken = decodeURIComponent(xsrfCookie['value']);",
-                                    "        pm.request.headers.upsert({",
-                                    "            key: 'X-XSRF-TOKEN',",
-                                    "            value: xsrfToken",
-                                    "        });",
-                                    "        pm.environment.set('XSRF-TOKEN', xsrfToken);",
-                                    "    }",
-                                    "});"
-                                ]
-                            }
-                        }
-                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -113,31 +95,6 @@
                 },
                 {
                     "name": "講師ログイン",
-                    "event": [
-                        {
-                            "listen": "prerequest",
-                            "script": {
-                                "type": "text/javascript",
-                                "exec": [
-                                    "// ログイン前にCSRFクッキーを取得してXSRF-TOKENを環境変数に保存",
-                                    "pm.sendRequest({",
-                                    "    url: 'http://localhost:8080/sanctum/csrf-cookie',",
-                                    "    method: 'GET'",
-                                    "}, function (error, response, { cookies }) {",
-                                    "    let xsrfCookie = cookies.one('XSRF-TOKEN');",
-                                    "    if (xsrfCookie) {",
-                                    "        let xsrfToken = decodeURIComponent(xsrfCookie['value']);",
-                                    "        pm.request.headers.upsert({",
-                                    "            key: 'X-XSRF-TOKEN',",
-                                    "            value: xsrfToken",
-                                    "        });",
-                                    "        pm.environment.set('XSRF-TOKEN', xsrfToken);",
-                                    "    }",
-                                    "});"
-                                ]
-                            }
-                        }
-                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -157,7 +114,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"test_instructor@example.com\",\n    \"password\": \"password1\"\n}",
+                            "raw": "{\n    \"email\": \"test_instructor@example.com\",\n    \"password\": \"password\"\n}",
                             "options": { "raw": { "language": "json" } }
                         },
                         "url": {
@@ -236,9 +193,9 @@
                             "options": { "raw": { "language": "json" } }
                         },
                         "url": {
-                            "raw": "{{APP_URL}}/api/v1/student",
+                            "raw": "{{APP_URL}}/api/v1/students",
                             "host": ["{{APP_URL}}"],
-                            "path": ["api", "v1", "student"]
+                            "path": ["api", "v1", "students"]
                         }
                     },
                     "response": []
@@ -264,12 +221,12 @@
                             "options": { "raw": { "language": "json" } }
                         },
                         "url": {
-                            "raw": "{{APP_URL}}/api/v1/student/verification/:token",
+                            "raw": "{{APP_URL}}/api/v1/students/verification/:token",
                             "host": ["{{APP_URL}}"],
                             "path": [
                                 "api",
                                 "v1",
-                                "student",
+                                "students",
                                 "verification",
                                 ":token"
                             ],
@@ -301,9 +258,9 @@
                             "options": { "raw": { "language": "json" } }
                         },
                         "url": {
-                            "raw": "{{APP_URL}}/api/v1/instructor",
+                            "raw": "{{APP_URL}}/api/v1/instructors",
                             "host": ["{{APP_URL}}"],
-                            "path": ["api", "v1", "instructor"]
+                            "path": ["api", "v1", "instructors"]
                         }
                     },
                     "response": []
@@ -329,12 +286,12 @@
                             "options": { "raw": { "language": "json" } }
                         },
                         "url": {
-                            "raw": "{{APP_URL}}/api/v1/instructor/verification/:token",
+                            "raw": "{{APP_URL}}/api/v1/instructors/verification/:token",
                             "host": ["{{APP_URL}}"],
                             "path": [
                                 "api",
                                 "v1",
-                                "instructor",
+                                "instructors",
                                 "verification",
                                 ":token"
                             ],
@@ -368,9 +325,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/student",
+                                    "raw": "{{APP_URL}}/api/v1/students",
                                     "host": ["{{APP_URL}}"],
-                                    "path": ["api", "v1", "student"]
+                                    "path": ["api", "v1", "students"]
                                 }
                             },
                             "response": []
@@ -446,9 +403,9 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/student/update",
+                                    "raw": "{{APP_URL}}/api/v1/students/update",
                                     "host": ["{{APP_URL}}"],
-                                    "path": ["api", "v1", "student", "update"]
+                                    "path": ["api", "v1", "students", "update"]
                                 }
                             },
                             "response": []
@@ -468,12 +425,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/student/learning-history",
+                                    "raw": "{{APP_URL}}/api/v1/students/learning-history",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "student",
+                                        "students",
                                         "learning-history"
                                     ]
                                 }
@@ -500,12 +457,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/attendance/index?per_page=6&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/attendances/index?per_page=6&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "attendance",
+                                        "attendances",
                                         "index"
                                     ],
                                     "query": [
@@ -541,12 +498,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/attendance/:attendance_id",
+                                    "raw": "{{APP_URL}}/api/v1/attendances/:attendance_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id"
                                     ],
                                     "variable": [
@@ -571,12 +528,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/attendance/:attendance_id/progress",
+                                    "raw": "{{APP_URL}}/api/v1/attendances/:attendance_id/progress",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id",
                                         "progress"
                                     ],
@@ -606,12 +563,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/attendance/:attendance_id/complete",
+                                    "raw": "{{APP_URL}}/api/v1/attendances/:attendance_id/complete",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id",
                                         "complete"
                                     ],
@@ -641,14 +598,14 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/attendance/:attendance_id/chapter/:chapter_id/complete",
+                                    "raw": "{{APP_URL}}/api/v1/attendances/:attendance_id/chapters/:chapter_id/complete",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
                                         "complete"
                                     ],
@@ -692,12 +649,12 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/lesson_attendance/:lesson_attendance_id",
+                                    "raw": "{{APP_URL}}/api/v1/lesson-attendances/:lesson_attendance_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "lesson_attendance",
+                                        "lesson-attendances",
                                         ":lesson_attendance_id"
                                     ],
                                     "variable": [
@@ -730,12 +687,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/notification/index?per_page=20&page=1&sort_by=start_date&order=asc&filter=read",
+                                    "raw": "{{APP_URL}}/api/v1/notifications/index?per_page=20&page=1&sort_by=start_date&order=asc&filter=read",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "notification",
+                                        "notifications",
                                         "index"
                                     ],
                                     "query": [
@@ -776,12 +733,12 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/notification/mark-read",
+                                    "raw": "{{APP_URL}}/api/v1/notifications/mark-read",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "notification",
+                                        "notifications",
                                         "mark-read"
                                     ]
                                 }
@@ -803,12 +760,12 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -931,13 +888,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/tag/index",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/tags/index",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "tag",
+                                        "tags",
                                         "index"
                                     ]
                                 }
@@ -968,9 +925,9 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/tag",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/tags",
                                     "host": ["{{APP_URL}}"],
-                                    "path": ["api", "v1", "instructor", "tag"]
+                                    "path": ["api", "v1", "instructor", "tags"]
                                 }
                             },
                             "response": []
@@ -990,13 +947,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/tag/:tag_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/tags/:tag_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "tag",
+                                        "tags",
                                         ":tag_id"
                                     ],
                                     "variable": [
@@ -1030,13 +987,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/tag/:tag_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/tags/:tag_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "tag",
+                                        "tags",
                                         ":tag_id"
                                     ],
                                     "variable": [
@@ -1061,13 +1018,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/tag/:tag_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/tags/:tag_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "tag",
+                                        "tags",
                                         ":tag_id"
                                     ],
                                     "variable": [
@@ -1097,13 +1054,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         "index"
                                     ],
                                     "query": [
@@ -1182,13 +1139,13 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course"
+                                        "courses"
                                     ]
                                 }
                             },
@@ -1209,13 +1166,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id"
                                     ],
                                     "variable": [
@@ -1284,13 +1241,13 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id"
                                     ],
                                     "variable": [
@@ -1315,13 +1272,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id"
                                     ],
                                     "variable": [
@@ -1355,13 +1312,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         "status"
                                     ]
                                 }
@@ -1392,13 +1349,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/capacity",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/capacity",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         "capacity"
                                     ]
                                 }
@@ -1429,13 +1386,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/capacity/clear",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/capacity/clear",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         "capacity",
                                         "clear"
                                     ]
@@ -1467,13 +1424,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course"
+                                        "courses"
                                     ]
                                 }
                             },
@@ -1494,14 +1451,14 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/tag/index",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/tags/index",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        "tag",
+                                        "courses",
+                                        "tags",
                                         "index"
                                     ],
                                     "query": [
@@ -1539,13 +1496,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/deadline",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/deadline",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         "deadline"
                                     ]
                                 }
@@ -1581,15 +1538,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter"
+                                        "chapters"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" }
@@ -1613,15 +1570,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id"
                                     ],
                                     "variable": [
@@ -1656,15 +1611,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id"
                                     ],
                                     "variable": [
@@ -1699,15 +1652,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/sort",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters/sort",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         "sort"
                                     ],
                                     "variable": [
@@ -1741,15 +1694,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         "status"
                                     ],
                                     "variable": [
@@ -1783,15 +1736,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         "status"
                                     ],
                                     "variable": [
@@ -1825,15 +1778,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter"
+                                        "chapters"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" }
@@ -1857,15 +1810,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/all",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/chapters/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         "all"
                                     ],
                                     "variable": [
@@ -1904,17 +1857,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id/lessons",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
-                                        "lesson"
+                                        "lessons"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" },
@@ -1948,17 +1899,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/:lesson_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/lessons/:lesson_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
-                                        ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         ":lesson_id"
                                     ],
                                     "variable": [
@@ -1985,17 +1932,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/:lesson_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/lessons/:lesson_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
-                                        ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         ":lesson_id"
                                     ],
                                     "variable": [
@@ -2031,17 +1974,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/:lesson_id/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/lessons/:lesson_id/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
-                                        ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         ":lesson_id",
                                         "status"
                                     ],
@@ -2078,17 +2017,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/:lesson_id/title",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/lessons/:lesson_id/title",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
-                                        ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         ":lesson_id",
                                         "title"
                                     ],
@@ -2125,17 +2060,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/sort",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id/lessons/sort",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         "sort"
                                     ],
                                     "variable": [
@@ -2170,17 +2103,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id/lessons/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         "status"
                                     ],
                                     "variable": [
@@ -2215,17 +2146,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id/lessons",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
-                                        "lesson"
+                                        "lessons"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" },
@@ -2250,17 +2179,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/chapter/:chapter_id/lesson/all",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/chapters/:chapter_id/lessons/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
-                                        "lesson",
+                                        "lessons",
                                         "all"
                                     ],
                                     "variable": [
@@ -2300,13 +2227,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/attendance",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/attendances",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "attendance"
+                                        "attendances"
                                     ]
                                 }
                             },
@@ -2327,13 +2254,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/attendance/:attendance_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/attendances/:attendance_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id"
                                     ],
                                     "variable": [
@@ -2358,13 +2285,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/attendance/:attendance_id/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/attendances/:attendance_id/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id",
                                         "status"
                                     ],
@@ -2390,13 +2317,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/attendance/:attendance_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/attendances/:attendance_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "attendance",
+                                        "attendances",
                                         ":attendance_id"
                                     ],
                                     "variable": [
@@ -2421,15 +2348,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/attendance/follow-up?days=10",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/attendances/follow-up?days=10",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         "follow-up"
                                     ],
                                     "query": [{ "key": "days", "value": "10" }],
@@ -2455,15 +2382,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/attendance/expiring?thresholds[]=7&thresholds[]=30",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/attendances/expiring?thresholds[]=7&thresholds[]=30",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         "expiring"
                                     ],
                                     "query": [
@@ -2492,15 +2419,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/attendance/status/:period",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/attendances/status/:period",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         "status",
                                         ":period"
                                     ],
@@ -2527,15 +2454,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/attendance/:period",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/attendances/:period",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         ":period"
                                     ],
                                     "variable": [
@@ -2566,13 +2493,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/student/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/students/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "student",
+                                        "students",
                                         "index"
                                     ],
                                     "query": [
@@ -2613,13 +2540,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/student/:student_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/students/:student_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "student",
+                                        "students",
                                         ":student_id"
                                     ],
                                     "variable": [
@@ -2653,13 +2580,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/student",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/students",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "student"
+                                        "students"
                                     ]
                                 }
                             },
@@ -2685,13 +2612,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         "index"
                                     ],
                                     "query": [
@@ -2717,13 +2644,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -2760,15 +2687,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/course/:course_id/notification",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/notifications",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "notification"
+                                        "notifications"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" }
@@ -2801,13 +2728,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -2835,13 +2762,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -2878,13 +2805,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/type",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/type",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         "type"
                                     ]
                                 }
@@ -2915,13 +2842,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/type/all",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/type/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         "type",
                                         "all"
                                     ]
@@ -2953,13 +2880,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/status",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         "status"
                                     ]
                                 }
@@ -2990,13 +2917,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification/status/all",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications/status/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification",
+                                        "notifications",
                                         "status",
                                         "all"
                                     ]
@@ -3028,13 +2955,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/instructor/notification",
+                                    "raw": "{{APP_URL}}/api/v1/instructor/notifications",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "instructor",
-                                        "notification"
+                                        "notifications"
                                     ]
                                 }
                             },
@@ -3065,14 +2992,14 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/tag/index",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/tags/index",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
-                                        "tag",
+                                        "courses",
+                                        "tags",
                                         "index"
                                     ],
                                     "query": [
@@ -3101,44 +3028,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/tag/:tag_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/tags/:tag_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "tag",
-                                        ":tag_id"
-                                    ],
-                                    "variable": [
-                                        { "key": "tag_id", "value": "1" }
-                                    ]
-                                }
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "タグ削除",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Referer",
-                                        "value": "http://localhost:3000"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/tag/:tag_id",
-                                    "host": ["{{APP_URL}}"],
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "manager",
-                                        "tag",
+                                        "tags",
                                         ":tag_id"
                                     ],
                                     "variable": [
@@ -3168,13 +3064,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/instructor/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/manager/instructors/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "instructor",
+                                        "instructors",
                                         "index"
                                     ],
                                     "query": [
@@ -3210,13 +3106,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/instructor/:instructor_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/instructors/:instructor_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "instructor",
+                                        "instructors",
                                         ":instructor_id"
                                     ],
                                     "variable": [
@@ -3250,13 +3146,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/instructor",
+                                    "raw": "{{APP_URL}}/api/v1/manager/instructors",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "instructor"
+                                        "instructors"
                                     ]
                                 }
                             },
@@ -3308,13 +3204,13 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/instructor/:instructor_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/instructors/:instructor_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "instructor",
+                                        "instructors",
                                         ":instructor_id"
                                     ],
                                     "variable": [
@@ -3339,15 +3235,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/instructor/:instructor_id/course/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/manager/instructors/:instructor_id/courses/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "instructor",
+                                        "instructors",
                                         ":instructor_id",
-                                        "course",
+                                        "courses",
                                         "index"
                                     ],
                                     "query": [
@@ -3381,13 +3277,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         "index"
                                     ],
                                     "query": [
@@ -3423,13 +3319,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/:course_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         ":course_id"
                                     ],
                                     "variable": [
@@ -3491,9 +3387,9 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses",
                                     "host": ["{{APP_URL}}"],
-                                    "path": ["api", "v1", "manager", "course"]
+                                    "path": ["api", "v1", "manager", "courses"]
                                 }
                             },
                             "response": []
@@ -3551,13 +3447,13 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/:course_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         ":course_id"
                                     ],
                                     "variable": [
@@ -3591,13 +3487,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/status",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         "status"
                                     ]
                                 }
@@ -3628,13 +3524,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/deadline/clear-selected",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/deadline/clear-selected",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         "deadline",
                                         "clear-selected"
                                     ]
@@ -3662,15 +3558,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id/chapter/:chapter_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/chapters/:chapter_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id"
                                     ],
                                     "variable": [
@@ -3705,66 +3599,15 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id/chapter/:chapter_id/status",
+                                    "raw": "{{APP_URL}}/api/v1/manager/chapters/:chapter_id/status",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
+                                        "chapters",
                                         ":chapter_id",
                                         "status"
-                                    ],
-                                    "variable": [
-                                        { "key": "course_id", "value": "1" },
-                                        { "key": "chapter_id", "value": "1" }
-                                    ]
-                                }
-                            },
-                            "response": []
-                        }
-                    ]
-                },
-                {
-                    "name": "レッスン",
-                    "item": [
-                        {
-                            "name": "レッスン一括削除",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Referer",
-                                        "value": "http://localhost:3000"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"lessons\": [1, 2]\n}",
-                                    "options": { "raw": { "language": "json" } }
-                                },
-                                "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id/chapter/:chapter_id/lesson",
-                                    "host": ["{{APP_URL}}"],
-                                    "path": [
-                                        "api",
-                                        "v1",
-                                        "manager",
-                                        "course",
-                                        ":course_id",
-                                        "chapter",
-                                        ":chapter_id",
-                                        "lesson"
                                     ],
                                     "variable": [
                                         { "key": "course_id", "value": "1" },
@@ -3794,15 +3637,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id/attendance/status/:period",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/:course_id/attendances/status/:period",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         "status",
                                         ":period"
                                     ],
@@ -3829,15 +3672,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/course/:course_id/attendance/:period",
+                                    "raw": "{{APP_URL}}/api/v1/manager/courses/:course_id/attendances/:period",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "course",
+                                        "courses",
                                         ":course_id",
-                                        "attendance",
+                                        "attendances",
                                         ":period"
                                     ],
                                     "variable": [
@@ -3868,13 +3711,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/student/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/manager/students/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "student",
+                                        "students",
                                         "index"
                                     ],
                                     "query": [
@@ -3920,13 +3763,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/notification/index?per_page=20&page=1",
+                                    "raw": "{{APP_URL}}/api/v1/manager/notifications/index?per_page=20&page=1",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "notification",
+                                        "notifications",
                                         "index"
                                     ],
                                     "query": [
@@ -3961,13 +3804,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -3995,13 +3838,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/notification/:notification_id",
+                                    "raw": "{{APP_URL}}/api/v1/manager/notifications/:notification_id",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "notification",
+                                        "notifications",
                                         ":notification_id"
                                     ],
                                     "variable": [
@@ -4038,13 +3881,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/notification/type/all",
+                                    "raw": "{{APP_URL}}/api/v1/manager/notifications/type/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "notification",
+                                        "notifications",
                                         "type",
                                         "all"
                                     ]
@@ -4076,13 +3919,13 @@
                                     "options": { "raw": { "language": "json" } }
                                 },
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/manager/notification/status/all",
+                                    "raw": "{{APP_URL}}/api/v1/manager/notifications/status/all",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
                                         "v1",
                                         "manager",
-                                        "notification",
+                                        "notifications",
                                         "status",
                                         "all"
                                     ]

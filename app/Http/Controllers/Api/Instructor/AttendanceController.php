@@ -152,14 +152,12 @@ class AttendanceController extends Controller
      */
     public function showStatus(ShowStatusRequest $request): JsonResponse
     {
-        $instructorId = Auth::guard('instructor')->user()->id;
         $courseId = $request->course_id;
         $course = Course::findOrFail($courseId);
         
         // ログインしている講師の講座でない場合は403エラーを返す
         $this->authorize('view', $course);
         
-
         $attendances = Attendance::with([
             'lessonAttendances.lesson.chapter.course',
             'lessonAttendances.lesson.chapter.lessons',

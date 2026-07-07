@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\UpdateStatusRequest;
 
 class UpdateStatusRequest extends FormRequest
 {

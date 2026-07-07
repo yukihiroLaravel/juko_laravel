@@ -165,21 +165,24 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service)
     {
+        // DB::transactionを開始
+        return DB::transaction(function () use ($request, $service) {
+        //レッスンの取得
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
         // Policy による認可チェック
         $this->authorize('update', $lesson);
-
-        // サービスの呼び出し（関数のように使える）
-        $updateLessonStatusService($lesson, $request->status);
-
-        return response()->json([
-            'result' => true,
-        ]);
+    
+        // サービスの呼び出し
+        return $service(
+            lesson: $lesson,
+            status: $request->status
+        );
+        });
     }
-
+    
     /**
      * レッスンタイトル変更API
      */
@@ -270,9 +273,12 @@ class LessonController extends Controller
 
         // レッスンデータの取得
         $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
-
+        
         // Policy による認可チェック
         $this->authorize('bulkUpdate', [Lesson::class, $lessons]);
+        return response()->json([
+                'result' => true,
+            ]);
 
         try {
             // 認可

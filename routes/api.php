@@ -51,3 +51,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 // 認証不要API（仮登録・コード検証）
 Route::prefix('v1')->group(base_path('routes/api/guest.php'));
+
+// 講師API: コース内の特定チャプターのレッスンステータスを一括更新する
+Route::put('v1/instructor/courses/{course_id}/chapter/{chapter_id}/lesson/status', 
+    [App\Http\Controllers\Api\Instructor\LessonController::class, 'putStatus']
+);

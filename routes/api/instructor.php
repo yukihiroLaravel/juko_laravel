@@ -46,7 +46,6 @@ Route::prefix('courses')->group(function () {
             Route::post('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'store'])->name('store');
             Route::post('sort', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'sort'])->name('sort');
             Route::put('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'putStatus'])->name('put-status');
-            Route::put('lessons/status', [LessonController::class, 'updateStatus']);
             Route::patch('status', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'patchStatus'])->name('patch-status');
             Route::delete('/', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'bulkDelete'])->name('bulk-delete');
             Route::delete('all', [App\Http\Controllers\Api\Instructor\ChapterController::class, 'deleteAll'])->name('delete-all');

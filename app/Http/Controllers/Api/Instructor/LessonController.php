@@ -169,17 +169,17 @@ class LessonController extends Controller
     {
         // DB::transactionを開始
         return DB::transaction(function () use ($request, $service) {
-        //レッスンの取得
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+            //レッスンの取得
+            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
 
-        // Policy による認可チェック
-        $this->authorize('update', $lesson);
+            // Policy による認可チェック
+            $this->authorize('update', $lesson);
     
-        // サービスの呼び出し
-        return $service(
-            lesson: $lesson,
-            status: $request->status
-        );
+            // サービスの呼び出し
+            return $service(
+                lesson: $lesson,
+                status: $request->status
+            );
         });
     }
     

@@ -24,7 +24,7 @@ class UpdateLessonStatusService
     }
 
     /**
-     * レッソンのステータスを更新する
+     * レッスンのステータスを更新する
      */
     public function __invoke(Lesson $lesson, string $status): void
     {

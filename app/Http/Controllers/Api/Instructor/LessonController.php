@@ -30,7 +30,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\Test\Constraint\ResponseIsUnprocessable;
 
 /**
  * @tags Instructor-Lesson
@@ -166,20 +165,16 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service)
-    {
-        return DB::transaction(function () use ($request, $service) {
-            $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-            $this->authorize('update', $lesson);
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
+{
+    $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+    $this->authorize('update', $lesson);
 
-            $service($lesson, $request->status);
+    $service($lesson, $request->status);
 
-            return response()->json([
-                'result' => true,
-            ]);
-        });
-    }
-    
+    return response()->json(['result' => true]);
+}
+
     /**
      * レッスンタイトル変更API
      */

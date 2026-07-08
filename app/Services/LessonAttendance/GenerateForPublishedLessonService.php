@@ -23,7 +23,7 @@ class GenerateForPublishedLessonService
             ->toArray();
 
         // 受講生がまだ誰もいない場合は、何もせず終了
-        if (empty($attendanceIds)) {
+        if ($attendanceIds->isEmpty()) {
             return;
         }
 
@@ -33,28 +33,26 @@ class GenerateForPublishedLessonService
             ->pluck('attendance_id')
             ->toArray();
 
-        // 3. データベースに一括挿入（insert）するためのデータ配列（箱）を作る
-        $insertData = [];
-        
-        foreach ($attendanceIds as $attendanceId) {
-            // すでにデータが存在する受講生はスキップ（冪等性の担保）
-            if (in_array($attendanceId, $existingAttendanceIds)) {
-                continue;
-            }
-
-            // 一括保存するためのデータを準備
-            $insertData[] = [
+         //3. 存在しないIDだけを抽出（差分をとる）
+        $newAttendanceIds = collect($attendanceIds)->diff($existingAttendanceIds);
+        //  そのIDをデータ形式に変換（map）
+        $insertData = $newAttendanceIds->map(function ($attendanceId) use ($lesson) {
+          return [
                 'attendance_id' => $attendanceId,
                 'lesson_id' => $lesson->id,
-                'status' => 'before_attendance', // 仕様書の「未着手」ステータス（※プロジェクトの定数やEnumがあれば適宜合わせる）
+                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-        }
+        })->toArray();
 
         // 4. データがある場合のみ、1回のクエリでまとめてデータベースに保存（N+1問題の回避）
-        if (!empty($insertData)) {
-            LessonAttendance::insert($insertData);
+            // データを一括で作成するための配列準備が終わった後
+            $insertDataCollection = collect($insertData); 
+            // ここで初めて insert を呼び出す（これが1回だけ実行される）
+            if ($insertDataCollection->isNotEmpty()) {
+                LessonAttendance::insert($insertDataCollection->toArray());
         }
     }
 }
+    

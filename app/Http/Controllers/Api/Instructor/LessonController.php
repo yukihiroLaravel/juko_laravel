@@ -78,7 +78,7 @@ class LessonController extends Controller
         $this->authorize('update', $lesson);
 
         // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
+        $service($lesson, $request->title, $request->url, $request->remarks);
 
         return response()->json([
             'result' => true,

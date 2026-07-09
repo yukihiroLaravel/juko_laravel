@@ -29,7 +29,6 @@ class PutTest extends TestCase
             'title' => 'title',
             'url' => 'url',
             'remarks' => 'remarks',
-            'status' => 'public',
         ]);
 
         // Assert
@@ -61,7 +60,6 @@ class PutTest extends TestCase
             'title' => 'title',
             'url' => 'url',
             'remarks' => 'remarks',
-            'status' => 'public',
         ]);
 
         // Assert
@@ -88,7 +86,6 @@ class PutTest extends TestCase
             'lesson_id',
             'title',
             'url',
-            'status',
         ]);
     }
 }

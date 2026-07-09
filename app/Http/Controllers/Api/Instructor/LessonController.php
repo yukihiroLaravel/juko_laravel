@@ -78,7 +78,7 @@ class LessonController extends Controller
         $this->authorize('update', $lesson);
 
         // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->title, $request->url, $request->remarks, $request->status);
+        $service($lesson, $request->title, $request->url, $request->remarks);
 
         return response()->json([
             'result' => true,
@@ -165,19 +165,14 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $updateLessonStatusService): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-
-        // Policy による認可チェック
         $this->authorize('update', $lesson);
 
-        // サービスの呼び出し（関数のように使える）
-        $updateLessonStatusService($lesson, $request->status);
+        $service($lesson, $request->status);
 
-        return response()->json([
-            'result' => true,
-        ]);
+        return response()->json(['result' => true]);
     }
 
     /**

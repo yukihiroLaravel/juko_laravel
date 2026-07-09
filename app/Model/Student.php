@@ -44,6 +44,35 @@ class Student extends Authenticatable
     ];
 
     /**
+     * Get the remember token value.
+     */
+    #[\Override]
+    public function getRememberToken(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Set the remember token value.
+     *
+     * @param  string  $value
+     */
+    #[\Override]
+    public function setRememberToken($value): void
+    {
+        // Do nothing.
+    }
+
+    /**
+     * Get the name of the remember token.
+     */
+    #[\Override]
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
+
+    /**
      * 講座を取得
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

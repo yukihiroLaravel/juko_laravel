@@ -51,4 +51,3 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 // 認証不要API（仮登録・コード検証）
 Route::prefix('v1')->group(base_path('routes/api/guest.php'));
-

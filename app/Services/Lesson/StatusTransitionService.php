@@ -10,9 +10,9 @@ class StatusTransitionService
     /**
      * レッスンの状態遷移が許可されているか検証する
      *
-     * @param StatusEnum $currentStatus 現在のステータス
-     * @param StatusEnum $newStatus 変更後のステータス
-     * @return void
+     * @param  StatusEnum  $currentStatus  現在のステータス
+     * @param  StatusEnum  $newStatus  変更後のステータス
+     *
      * @throws ValidationException
      */
     public function validateTransition(StatusEnum $currentStatus, StatusEnum $newStatus): void
@@ -23,7 +23,7 @@ class StatusTransitionService
         }
 
         // 2. 禁止遷移のチェック（どれか1つでも当てはまったらエラー）
-        
+
         // 禁止①：下書き(draft)への後退は禁止
         $isBackToDraft = $newStatus === StatusEnum::DRAFT;
 

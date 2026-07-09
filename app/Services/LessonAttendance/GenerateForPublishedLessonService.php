@@ -2,8 +2,8 @@
 
 namespace App\Services\LessonAttendance;
 
-use App\Model\Lesson;
 use App\Model\Attendance;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 
 class GenerateForPublishedLessonService
@@ -11,8 +11,7 @@ class GenerateForPublishedLessonService
     /**
      * 公開されたレッスンに対して、既存受講者全員分の受講状況を一括生成する
      *
-     * @param Lesson $lesson 対象のレッスン
-     * @return void
+     * @param  Lesson  $lesson  対象のレッスン
      */
     public function execute(Lesson $lesson): void
     {
@@ -32,19 +31,17 @@ class GenerateForPublishedLessonService
 
         // 3. 存在しない attendance_id のみを対象に、LessonAttendance レコードを一括生成する
         $insertDataCollection = $attendanceIds->diff($existingAttendanceIds)
-        ->map(function ($attendanceId) use ($lesson) {
-            return [
-                    'attendance_id' => $attendanceId,
-                    'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-            ];
-        });
+            ->map(fn ($attendanceId) => [
+                'attendance_id' => $attendanceId,
+                'lesson_id' => $lesson->id,
+                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
         // 4. データがある場合のみ一括挿入
         if ($insertDataCollection->isNotEmpty()) {
-        LessonAttendance::insert($insertDataCollection->toArray());
-         }
+            LessonAttendance::insert($insertDataCollection->toArray());
+        }
     }
-}    
+}

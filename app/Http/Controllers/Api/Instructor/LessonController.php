@@ -10,10 +10,9 @@ use App\Http\Requests\Instructor\Lesson\PutRequest;
 use App\Http\Requests\Instructor\Lesson\PutStatusRequest;
 use App\Http\Requests\Instructor\Lesson\SortRequest;
 use App\Http\Requests\Instructor\Lesson\StoreRequest;
-use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
+use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Model\Chapter;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
@@ -25,6 +24,8 @@ use App\Services\Lesson\StoreLessonService;
 use App\Services\Lesson\UpdateLessonService;
 use App\Services\Lesson\UpdateLessonStatusService;
 use App\Services\Lesson\UpdateLessonTitleService;
+use App\Services\Lesson\StatusTransitionService;
+use App\Enums\Lesson\StatusEnum; 
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -71,14 +72,20 @@ class LessonController extends Controller
      */
     public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-        assert($lesson instanceof Lesson);
-
+        //レッスンの取得
+        $lesson = Lesson::with(['chapter.course'])->findOrFail($request->lesson_id);
         // Policy による認可チェック
         $this->authorize('update', $lesson);
-
-        // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->title, $request->url, $request->remarks);
+        //ステータスの特定　??= 代入演算子（左がnullなら右を代入する）
+        $status = StatusEnum::from($request->status ?? $lesson->status);
+        //  サービス層の呼び出し
+        $service(
+            $lesson,
+            $request['title'],
+            $request['url'],
+            $request['remarks'] ?? null,
+            $status
+        );
 
         return response()->json([
             'result' => true,
@@ -165,18 +172,25 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
-    {
-        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
-        $this->authorize('update', $lesson);
-
-        $service($lesson, $request->status);
-
-        return response()->json(['result' => true]);
-    }
-
     /**
-     * レッスンタイトル変更API
+     * ステータス更新処理
+     */
+    public function updateStatus(UpdateStatusRequest $request, Lesson $lesson, UpdateLessonStatusService $service ): JsonResponse 
+    {
+        // 1. バリデーション済みのデータを取得
+        $validated = $request->validated();
+
+        // 2. 文字列をEnum型に変換
+        $status = \App\Enums\Lesson\StatusEnum::from($validated['status']);
+
+        // 3. 変換したEnumの値（文字列）を渡してサービスを実行
+        $service($lesson, $status->value);
+        // 3. レスポンスを返す
+        return response()->json([
+            'message' => 'ステータスを更新しました。',
+        ]);
+    }
+     /* レッスンタイトル変更API
      */
     public function updateTitle(UpdateTitleRequest $request, UpdateLessonTitleService $service): JsonResponse
     {
@@ -294,3 +308,4 @@ class LessonController extends Controller
         }
     }
 }
+

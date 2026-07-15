@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Services\LessonAttendance;
-
-use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 
@@ -16,7 +14,7 @@ class GenerateForPublishedLessonService
     public function execute(Lesson $lesson): void
     {
     // 受講生がまだ誰もいない場合は、何もせず終了
-    $attendanceIds = $lesson->course->attendances->pluck('id')->toArray();
+    $attendanceIds = $lesson->chapter->course->attendances->pluck('id')->toArray();
     if (empty($attendanceIds)) {
         return;
     }

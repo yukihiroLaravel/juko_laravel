@@ -3,42 +3,43 @@
 namespace App\Services\Lesson;
 
 use App\Model\Lesson;
-use Illuminate\Support\Facades\DB; // 追記
- use App\Services\Lesson\StatusTransitionService;//追記
- use App\Services\Lesson\LessonAttendance\GenerateForPublishedLessonService;//追記
+use App\Services\Lesson\StatusTransitionService;
+use App\Services\LessonAttendance\GenerateForPublishedLessonService;
+use App\Enums\Lesson\StatusEnum;
+use Illuminate\Support\Facades\DB;
 
 class UpdateLessonService
 {
-    /**
-     * レッスン内容を更新する
-     */
-    public function __invoke(Lesson $lesson, string $title, string $url, ?string $remarks): void
-    {
-        $lesson->update([
-            'title' => $title,
-            'url' => $url,
-            'remarks' => $remarks,
-        ]);
-        // ここでトランザクションを一括管理する
+    // コンストラクタで注入する形式に整理
+    public function __construct(
+        private StatusTransitionService $transitionService,
+        private GenerateForPublishedLessonService $enrollmentService
+    ) {}
+
+    public function __invoke(Lesson $lesson, string $title, string $url, ?string $remarks, StatusEnum $status): void
+    {      
         DB::transaction(function () use ($lesson, $title, $url, $remarks, $status) {
             
-            // 1. 状態遷移のバリデーション（例外が投げられればここで止まる）
-            app(StatusTransitionService::class)->validateTransition($lesson->status, $status);
+            // 1. 【順序変更】更新前のステータスを保持（更新より先に！）
+            $oldStatus = $lesson->status;
 
-            // 更新前のステータスを保持（受講状況生成の判定用）
-            $previousStatus = $lesson->status;
+            // 2. 【バリデーション】ここで更新前の値と新しい値を比較する    
+    $this->transitionService->validateTransition(
+        $lesson->status instanceof StatusEnum ? $lesson->status : StatusEnum::from($lesson->status),
+        $status instanceof StatusEnum ? $status : StatusEnum::from($status)
+        );
 
-            // 2. レッスンの更新
+            // 3. 【DB更新】バリデーションが通ったら、ここで更新する
             $lesson->update([
                 'title'   => $title,
                 'url'     => $url,
                 'remarks' => $remarks,
-                'status'  => $status,
+                'status'  => $status->value,
             ]);
 
-            // 3. draft → public 遷移時の受講状況生成
-            if ($previousStatus === 'draft' && $status === 'public') {
-                app(GenerateForPublishedLessonService::class)->execute($lesson->id);
+            // 4. 更新後の処理
+            if ($oldStatus->value === StatusEnum::DRAFT->value && $status->value === StatusEnum::PUBLIC->value) {
+                $this->enrollmentService->execute($lesson);
             }
         });
     }

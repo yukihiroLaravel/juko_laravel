@@ -23,14 +23,16 @@ class UpdateRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    // app/Http/Requests/Instructor/UpdateRequest.php
+
+    public function rules(): array
     {
         return [
-            'nick_name' => ['required', 'string', 'max:50'],
-            'last_name' => ['required', 'string', 'max:50'],
-            'first_name' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()?->email), 'max:255'],
-            'profile_image' => ['mimes:jpg,png', 'max:2048'],
+            'title'   => ['required', 'string', 'max:255'],
+            'url'     => ['required', 'string', 'max:255'],
+            'remarks' => ['nullable', 'string'],
+            // status を必須にし、Enumの取りうる値（public/private）に制限
+            'status'  => ['required', 'string', 'in:public,private'],
         ];
     }
 }

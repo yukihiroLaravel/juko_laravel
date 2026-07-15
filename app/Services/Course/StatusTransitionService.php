@@ -27,7 +27,6 @@ class StatusTransitionService
 
     // 3. 許可リストになければ「固定の文字列」でエラーを投げる
     if (!in_array($newStatus->value, $allowed, true)) {
-        // ★ここを徹底的に文字列のみにする
         throw ValidationException::withMessages([
             'status' => ['このステータス遷移は許可されていません。'],
             ]);

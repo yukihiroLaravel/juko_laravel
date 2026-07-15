@@ -24,10 +24,7 @@ class UpdateLessonService
             $oldStatus = $lesson->status;
 
             // 2. 【バリデーション】ここで更新前の値と新しい値を比較する    
-    $this->transitionService->validateTransition(
-        $lesson->status instanceof StatusEnum ? $lesson->status : StatusEnum::from($lesson->status),
-        $status instanceof StatusEnum ? $status : StatusEnum::from($status)
-        );
+    $this->transitionService->validateTransition($lesson->status, $status);
 
             // 3. 【DB更新】バリデーションが通ったら、ここで更新する
             $lesson->update([

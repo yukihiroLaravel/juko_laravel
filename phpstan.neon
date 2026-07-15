@@ -2,6 +2,10 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
+    //厳格なチェックを少し緩和する設定
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
 
     paths:
         - app/

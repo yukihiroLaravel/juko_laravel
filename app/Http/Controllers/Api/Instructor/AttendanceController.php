@@ -111,7 +111,7 @@ class AttendanceController extends Controller
     {
         $courseId = $request->course_id;
         $course = Course::findOrFail($courseId);
-        // ログインしている講師の講座でない場合は403エラーを返す
+        // 担当講師またはマネージャー権限のある講師以外は403エラーを返す
         $this->authorize('view', $course);
 
         $nowDate = new Carbon;

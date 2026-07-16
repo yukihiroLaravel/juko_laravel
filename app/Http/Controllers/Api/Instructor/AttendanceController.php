@@ -111,14 +111,10 @@ class AttendanceController extends Controller
      */
     public function loginRate(LoginRateRequest $request): JsonResponse
     {
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-        $loginId = Auth::guard('instructor')->user()->id;
-
-        if ($instructorId !== $loginId) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+        $courseId = $request->course_id;
+        $course = Course::findOrFail($courseId);
+        // ログインしている講師の講座でない場合は403エラーを返す
+        $this->authorize('view', $course);
 
         $nowDate = new Carbon;
 

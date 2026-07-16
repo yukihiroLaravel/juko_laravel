@@ -28,11 +28,9 @@ use App\Services\Attendance\ShowService;
 use App\Services\Attendance\StoreService;
 use App\Services\Attendance\StuckPointsService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 

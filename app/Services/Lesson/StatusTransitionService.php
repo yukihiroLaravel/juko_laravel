@@ -15,11 +15,11 @@ class StatusTransitionService
      *
      * @throws ValidationException
      */
-public function validateTransition(StatusEnum $currentStatus, StatusEnum $newStatus): void
+    public function validateTransition(StatusEnum $currentStatus, StatusEnum $newStatus): void
     {
         // 1. 同一ステータスでない場合のみチェックする
         if ($currentStatus !== $newStatus) {
-            
+
             // 2. 許可された遷移リスト
             $allowedTransitions = [
                 StatusEnum::DRAFT->value => [StatusEnum::PUBLIC->value],
@@ -28,11 +28,11 @@ public function validateTransition(StatusEnum $currentStatus, StatusEnum $newSta
             ];
 
             // 3. 許可リストにない場合、強制的にエラーにする
-            if (!isset($allowedTransitions[$currentStatus->value]) || !in_array($newStatus->value, $allowedTransitions[$currentStatus->value])) {
+            if (! isset($allowedTransitions[$currentStatus->value]) || ! in_array($newStatus->value, $allowedTransitions[$currentStatus->value])) {
                 throw ValidationException::withMessages([
                     'status' => ['Invalid status transition.'],
                 ]);
             }
         }
     }
-}    
+}

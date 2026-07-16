@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api\Instructor\Lesson;
 
+use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
-use App\Model\Chapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -71,12 +71,12 @@ class UpdateStatusTest extends TestCase
         // 2. 実行：同じステータスで属性のみ更新
         $response = $this->patchJson(route('instructor.lessons.update-status', ['lesson_id' => $lesson->id]), [
             'status' => 'public',
-            'title' => '更新後のタイトル'
+            'title' => '更新後のタイトル',
         ]);
 
         // 3. 検証：200であること
         $response->assertStatus(200);
-        
+
         // 4. 検証：受講状況レコードが増えていないこと
         $this->assertDatabaseCount('lesson_attendances', 0); // もし他にレコードがない場合
         // または、特定のレッスンIDで件数が変化していないことを検証

@@ -28,11 +28,9 @@ use App\Services\Attendance\ShowService;
 use App\Services\Attendance\StoreService;
 use App\Services\Attendance\StuckPointsService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -111,14 +109,10 @@ class AttendanceController extends Controller
      */
     public function loginRate(LoginRateRequest $request): JsonResponse
     {
-        $instructorId = Course::findOrFail($request->course_id)->instructor_id;
-        $loginId = Auth::guard('instructor')->user()->id;
-
-        if ($instructorId !== $loginId) {
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+        $courseId = $request->course_id;
+        $course = Course::findOrFail($courseId);
+        // 担当講師またはマネージャー権限のある講師以外は403エラーを返す
+        $this->authorize('view', $course);
 
         $nowDate = new Carbon;
 

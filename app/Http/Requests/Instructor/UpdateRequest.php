@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Instructor;
 
+use App\Rules\InstructorUniqueEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateRequest extends FormRequest
 {
@@ -18,15 +20,17 @@ class UpdateRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     * 
+     * @return array
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'url' => ['required', 'string', 'max:255'],
-            'remarks' => ['nullable', 'string'],
-            // status を必須にし、Enumの取りうる値（public/private）に制限
-            'status' => ['required', 'string', 'in:public,private'],
+            'nick_name' => ['required', 'string', 'max:50'],
+            'last_name' => ['required', 'string', 'max:50'],
+            'first_name' => ['required', 'string', 'max:50'],
+            'email' => ['required', 'email', new InstructorUniqueEmailRule(Auth::user()?->email), 'max:255'],
+            'profile_image' => ['mimes:jpg,png', 'max:2048'],
         ];
     }
 }

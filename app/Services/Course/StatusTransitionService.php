@@ -10,7 +10,7 @@ class StatusTransitionService
     /**
      * 講座ステータスの状態遷移を検証
      */
-    public function validateTransition(StatusEnum $currentStatus, StatusEnum $newStatus): void
+    public function __invoke(StatusEnum $currentStatus, StatusEnum $newStatus): void
     {
         // 1. 同一ステータスは即時終了
         if ($currentStatus === $newStatus) {

@@ -174,18 +174,24 @@ class LessonController extends Controller
     /**
      * ステータス更新処理
      */
-    public function updateStatus(UpdateStatusRequest $request, Lesson $lesson, UpdateLessonStatusService $service): JsonResponse
+    public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
     {
-        // 1. バリデーション済みのデータを取得
+        // レッスンを取得
+        $lesson = Lesson::findOrFail($request->lesson_id);
+
+        // Policy による認可チェック
+        $this->authorize('update', $lesson);
+
+        //  バリデーション済みのデータを取得
         $validated = $request->validated();
 
-        // 2. 文字列をEnum型に変換
+        // 文字列をEnum型に変換
         $status = \App\Enums\Lesson\StatusEnum::from($validated['status']);
 
-        // 3. 変換したEnumの値（文字列）を渡してサービスを実行
+        //  変換したEnumの値（文字列）を渡してサービスを実行
         $service($lesson, $status->value);
 
-        // 3. レスポンスを返す
+        // 3レスポンスを返す
         return response()->json([
             'message' => 'ステータスを更新しました。',
         ]);

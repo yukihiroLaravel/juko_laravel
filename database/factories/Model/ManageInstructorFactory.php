@@ -7,7 +7,7 @@ use App\Model\ManageInstructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\ManageInstructor>
+ * @extends Factory<ManageInstructor>
  */
 class ManageInstructorFactory extends Factory
 {

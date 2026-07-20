@@ -7,7 +7,7 @@ use App\Model\CourseDeadline;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\CourseDeadline>
+ * @extends Factory<CourseDeadline>
  */
 class CourseDeadlineFactory extends Factory
 {

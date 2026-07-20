@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\Student\AttendanceController;
+use App\Http\Controllers\Api\Student\LearningHistoryController;
+use App\Http\Controllers\Api\Student\LessonAttendanceController;
+use App\Http\Controllers\Api\Student\LoginController;
+use App\Http\Controllers\Api\Student\NotificationController;
+use App\Http\Controllers\Api\Student\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,30 +20,30 @@ use Illuminate\Support\Facades\Route;
 
 // 受講生
 Route::prefix('students')->group(function () {
-    Route::get('/', [App\Http\Controllers\Api\Student\StudentController::class, 'show'])->name('show');
-    Route::post('update', [App\Http\Controllers\Api\Student\StudentController::class, 'update'])->name('update');
-    Route::get('learning-history', [App\Http\Controllers\Api\Student\LearningHistoryController::class, 'index'])->name('learning-history.index');
-    Route::get('login-streak', [App\Http\Controllers\Api\Student\LoginController::class, 'loginStreak'])->name('login-streak');
+    Route::get('/', [StudentController::class, 'show'])->name('show');
+    Route::post('update', [StudentController::class, 'update'])->name('update');
+    Route::get('learning-history', [LearningHistoryController::class, 'index'])->name('learning-history.index');
+    Route::get('login-streak', [LoginController::class, 'loginStreak'])->name('login-streak');
 });
 
 // 受講生-受講
 Route::prefix('attendances')->name('attendances.')->group(function () {
-    Route::get('index', [App\Http\Controllers\Api\Student\AttendanceController::class, 'index'])->name('index');
+    Route::get('index', [AttendanceController::class, 'index'])->name('index');
     Route::prefix('{attendance_id}')->group(function () {
-        Route::get('/', [App\Http\Controllers\Api\Student\AttendanceController::class, 'show'])->name('show');
-        Route::get('progress', [App\Http\Controllers\Api\Student\AttendanceController::class, 'progress'])->name('progress');
-        Route::put('complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllChapters'])->name('complete-all-chapters');
-        Route::put('chapters/{chapter_id}/complete', [App\Http\Controllers\Api\Student\AttendanceController::class, 'completeAllLessons'])->name('complete-all-lessons');
-        Route::get('stuck-points', [App\Http\Controllers\Api\Student\AttendanceController::class, 'stuckPoints'])->name('stuck-points');
+        Route::get('/', [AttendanceController::class, 'show'])->name('show');
+        Route::get('progress', [AttendanceController::class, 'progress'])->name('progress');
+        Route::put('complete', [AttendanceController::class, 'completeAllChapters'])->name('complete-all-chapters');
+        Route::put('chapters/{chapter_id}/complete', [AttendanceController::class, 'completeAllLessons'])->name('complete-all-lessons');
+        Route::get('stuck-points', [AttendanceController::class, 'stuckPoints'])->name('stuck-points');
     });
 });
 
 // 受講生-レッスン受講
-Route::patch('lesson-attendances/{lesson_attendance_id}', [App\Http\Controllers\Api\Student\LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
+Route::patch('lesson-attendances/{lesson_attendance_id}', [LessonAttendanceController::class, 'patchStatus'])->name('lesson-attendances.patch-status');
 
 // 受講生-お知らせ
 Route::prefix('notifications')->name('notifications.')->group(function () {
-    Route::get('index', [App\Http\Controllers\Api\Student\NotificationController::class, 'index'])->name('index');
-    Route::post('mark-read', [App\Http\Controllers\Api\Student\NotificationController::class, 'markRead'])->name('mark-read');
-    Route::get('{notification_id}', [App\Http\Controllers\Api\Student\NotificationController::class, 'show'])->name('show');
+    Route::get('index', [NotificationController::class, 'index'])->name('index');
+    Route::post('mark-read', [NotificationController::class, 'markRead'])->name('mark-read');
+    Route::get('{notification_id}', [NotificationController::class, 'show'])->name('show');
 });

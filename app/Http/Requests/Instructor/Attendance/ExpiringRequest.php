@@ -26,7 +26,7 @@ class ExpiringRequest extends FormRequest
     {
         $this->merge([
             'course_id' => $this->route('course_id'),
-            'thresholds' => is_array($this->thresholds) ? array_map('intval', $this->thresholds) : $this->thresholds,
+            'thresholds' => is_array($this->thresholds) ? array_map(intval(...), $this->thresholds) : $this->thresholds,
         ]);
     }
 }

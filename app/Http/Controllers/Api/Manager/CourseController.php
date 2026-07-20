@@ -38,7 +38,7 @@ class CourseController extends Controller
     {
         $perPage = $request->input('per_page', 6);
         $page = $request->input('page', 1);
-        $tagId = $request->input('tag_id', null);
+        $tagId = $request->input('tag_id');
         $searchWord = $request->input('search_word');
 
         $instructorId = Auth::guard('instructor')->user()->id;

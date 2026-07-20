@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Instructor;
 
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Model\Instructor;
+use App\Services\Auth\CredentialGeneratorService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -51,8 +54,8 @@ class StoreTest extends TestCase
         // Arrange
         $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
-        $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
-            $mock->shouldReceive('createCode')->andThrow(new \App\Exceptions\DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'));
+        $this->mock(CredentialGeneratorService::class, function ($mock) {
+            $mock->shouldReceive('createCode')->andThrow(new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'));
         });
 
         // Act
@@ -72,9 +75,9 @@ class StoreTest extends TestCase
         // Arrange
         $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
-        $this->mock(\App\Services\Auth\CredentialGeneratorService::class, function ($mock) {
+        $this->mock(CredentialGeneratorService::class, function ($mock) {
             $mock->shouldReceive('createCode')->andReturn('1234');
-            $mock->shouldReceive('createToken')->andThrow(new \App\Exceptions\DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'));
+            $mock->shouldReceive('createToken')->andThrow(new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'));
         });
 
         // Act

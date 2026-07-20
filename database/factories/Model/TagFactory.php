@@ -7,7 +7,7 @@ use App\Model\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\Tag>
+ * @extends Factory<Tag>
  */
 class TagFactory extends Factory
 {

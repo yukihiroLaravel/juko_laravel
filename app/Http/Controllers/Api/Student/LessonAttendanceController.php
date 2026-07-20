@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Lesson\PatchStatusRequest;
 use App\Model\LessonAttendance;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
@@ -17,7 +18,7 @@ class LessonAttendanceController extends Controller
     /**
      * レッスン出席状況更新API
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function patchStatus(PatchStatusRequest $request)
     {

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Instructor\InstructorController;
+use App\Http\Controllers\Api\Student\StudentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,11 +15,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('students')->name('student.')->group(function () {
-    Route::post('/', [App\Http\Controllers\Api\Student\StudentController::class, 'store'])->name('store');
-    Route::post('verification/{token}', [App\Http\Controllers\Api\Student\StudentController::class, 'verifyCode'])->name('verify-code');
+    Route::post('/', [StudentController::class, 'store'])->name('store');
+    Route::post('verification/{token}', [StudentController::class, 'verifyCode'])->name('verify-code');
 });
 
 Route::prefix('instructors')->name('instructor.')->group(function () {
-    Route::post('/', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'store'])->name('register');
-    Route::post('verification/{token}', [App\Http\Controllers\Api\Instructor\InstructorController::class, 'verifyCode'])->name('verify-code');
+    Route::post('/', [InstructorController::class, 'store'])->name('register');
+    Route::post('verification/{token}', [InstructorController::class, 'verifyCode'])->name('verify-code');
 });

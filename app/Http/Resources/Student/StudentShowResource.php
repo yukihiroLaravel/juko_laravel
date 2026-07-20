@@ -2,17 +2,19 @@
 
 namespace App\Http\Resources\Student;
 
+use App\Model\Student;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
 {
-    /** @var \App\Model\Student */
+    /** @var Student */
     public $resource;
 
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

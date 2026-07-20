@@ -10,7 +10,7 @@ class SortLessonsService
     /**
      * レッスン並び替えサービス order値は、配列要素のインデックスにする。１から始まる値にする。
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Lesson>  $lessons
+     * @param  Collection<int, Lesson>  $lessons
      */
     public function __invoke(Collection $lessons, array $inputLessons): void
     {

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Model\Instructor;
 use Closure;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EnsureIsManager
@@ -12,7 +13,7 @@ class EnsureIsManager
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return mixed
      */
     public function handle($request, Closure $next)

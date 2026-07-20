@@ -4,7 +4,10 @@ namespace App\Model;
 
 use App\Enums\Student\Gender;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
@@ -25,7 +28,7 @@ class Student extends Authenticatable
     protected $table = 'students';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'given_name_by_instructor',
@@ -75,7 +78,7 @@ class Student extends Authenticatable
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Course, $this>
      */
     public function courses()
     {
@@ -85,7 +88,7 @@ class Student extends Authenticatable
     /**
      * お知らせを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany<Notification, $this>
      */
     public function notifications()
     {
@@ -95,7 +98,7 @@ class Student extends Authenticatable
     /**
      * ログイン履歴を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<StudentLoginHistory, $this>
      */
     public function loginHistories()
     {
@@ -105,7 +108,7 @@ class Student extends Authenticatable
     /**
      * 受講履歴を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Attendance, $this>
      */
     public function attendances()
     {
@@ -115,9 +118,9 @@ class Student extends Authenticatable
     /**
      * フルネームアクセサー
      */
-    public function getFullNameAttribute()
+    protected function fullName(): Attribute
     {
-        return $this->last_name.' '.$this->first_name;
+        return Attribute::make(get: fn () => $this->last_name.' '.$this->first_name);
     }
 
     /**

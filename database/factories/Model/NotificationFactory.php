@@ -6,14 +6,15 @@ use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\Notification;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\Notification>
+ * @extends Factory<Notification>
  */
 class NotificationFactory extends Factory
 {
-    protected $model = \App\Model\Notification::class;
+    protected $model = Notification::class;
 
     /**
      * Define the model's default state.

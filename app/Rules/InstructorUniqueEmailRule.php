@@ -10,8 +10,6 @@ class InstructorUniqueEmailRule implements ValidationRule
 {
     /**
      * Create a new rule instance.
-     *
-     * @return void
      */
     public function __construct(
         private readonly ?string $email

@@ -5,6 +5,7 @@ namespace App\Http\Resources\Manager;
 use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Course;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class InstructorCourseIndexResource extends JsonResource
@@ -15,7 +16,7 @@ class InstructorCourseIndexResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

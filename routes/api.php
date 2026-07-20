@@ -1,5 +1,7 @@
 <?php
 
+use App\Model\Instructor;
+use App\Model\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,8 +27,8 @@ Route::middleware('auth:sanctum')->get('/user',
         return [
             ...$user->toArray(),
             'role' => match (true) {
-                $user instanceof \App\Model\Student => 'student',
-                $user instanceof \App\Model\Instructor => 'instructor',
+                $user instanceof Student => 'student',
+                $user instanceof Instructor => 'instructor',
                 default => 'unknown',
             },
         ];

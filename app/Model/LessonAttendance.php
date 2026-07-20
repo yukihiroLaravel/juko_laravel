@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LessonAttendance extends Model
@@ -18,7 +19,7 @@ class LessonAttendance extends Model
     protected $table = 'lesson_attendances';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'lesson_id',
@@ -42,7 +43,7 @@ class LessonAttendance extends Model
     /**
      * レッスン取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Lesson, $this>
      */
     public function lesson()
     {
@@ -52,7 +53,7 @@ class LessonAttendance extends Model
     /**
      * 受講
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Attendance, $this>
      */
     public function attendance()
     {

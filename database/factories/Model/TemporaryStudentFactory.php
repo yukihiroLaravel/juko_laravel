@@ -6,7 +6,7 @@ use App\Model\TemporaryStudent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\TemporaryStudent>
+ * @extends Factory<TemporaryStudent>
  */
 class TemporaryStudentFactory extends Factory
 {

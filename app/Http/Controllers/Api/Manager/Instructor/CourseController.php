@@ -28,7 +28,6 @@ class CourseController extends Controller
 
         // 配下の講師情報を取得
         $manager = Instructor::with('managings')->findOrFail($managerId);
-        assert($manager instanceof Instructor);
 
         $instructorIds = $manager->managings->pluck('id')->toArray();
         $instructorIds[] = $manager->id;

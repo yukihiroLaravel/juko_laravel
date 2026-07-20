@@ -19,7 +19,7 @@ class CourseDeadline extends Model
     protected $table = 'course_deadlines';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'course_id',

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Service\Auth;
 
+use App\Exceptions\DuplicateAuthorizationCodeException;
+use App\Exceptions\DuplicateAuthorizationTokenException;
 use App\Model\TemporaryInstructor;
 use App\Model\TemporaryStudent;
 use App\Services\Auth\CredentialGeneratorService;
@@ -36,7 +38,7 @@ class CredentialGeneratorServiceTest extends TestCase
 
     public function test_認証コード生成時に重複エラー(): void
     {
-        $this->expectException(\App\Exceptions\DuplicateAuthorizationCodeException::class);
+        $this->expectException(DuplicateAuthorizationCodeException::class);
         $service = new CredentialGeneratorService;
         TemporaryInstructor::create([
             'trial_count' => 0,
@@ -74,7 +76,7 @@ class CredentialGeneratorServiceTest extends TestCase
 
     public function test_トークン生成時に重複エラー(): void
     {
-        $this->expectException(\App\Exceptions\DuplicateAuthorizationTokenException::class);
+        $this->expectException(DuplicateAuthorizationTokenException::class);
 
         $service = new CredentialGeneratorService;
         TemporaryInstructor::create([

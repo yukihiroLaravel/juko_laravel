@@ -4,6 +4,7 @@ namespace App\Http\Resources\Student;
 
 use App\Model\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationReadResource extends JsonResource
@@ -14,7 +15,7 @@ class NotificationReadResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

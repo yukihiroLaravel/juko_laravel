@@ -4,8 +4,11 @@ namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
@@ -21,7 +24,7 @@ class Attendance extends Model
     protected $table = 'attendances';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'course_id',
@@ -37,7 +40,7 @@ class Attendance extends Model
     /**
      * 受講生を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Student, $this>
      */
     public function student()
     {
@@ -47,7 +50,7 @@ class Attendance extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Course, $this>
      */
     public function course()
     {
@@ -57,7 +60,7 @@ class Attendance extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<LessonAttendance, $this>
      */
     public function lessonAttendances()
     {
@@ -189,13 +192,14 @@ class Attendance extends Model
 
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
+     *
+     * @return Attribute<?CarbonImmutable, never>
      */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    protected function attendanceDeadlineEnd(): Attribute
     {
-
-        return $this->attendance_deadline
+        return Attribute::make(get: fn () => $this->attendance_deadline
             ? $this->attendance_deadline->endOfDay()
-            : null;
+            : null);
     }
 
     /**

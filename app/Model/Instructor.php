@@ -34,7 +34,7 @@ class Instructor extends Authenticatable
     const SORT_BY_CREATED_AT = 'created_at';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'nick_name',

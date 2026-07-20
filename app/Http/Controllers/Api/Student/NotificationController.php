@@ -9,6 +9,7 @@ use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
+use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
 use App\Services\Notification\ShowService;
@@ -43,7 +44,7 @@ class NotificationController extends Controller
      */
     public function show(ShowRequest $request, ShowService $service): NotificationResource
     {
-        /** @var \App\Model\Student $student */
+        /** @var Student $student */
         $student = $request->user();
 
         $response = $service(

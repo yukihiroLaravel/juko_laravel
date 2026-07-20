@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Student\Gender;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,7 @@ class TemporaryStudent extends Model
     protected $table = 'temporary_students';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'trial_count',
@@ -42,9 +43,9 @@ class TemporaryStudent extends Model
     /**
      * フルネームアクセサー
      */
-    public function getFullNameAttribute()
+    protected function fullName(): Attribute
     {
-        return $this->last_name.' '.$this->first_name;
+        return Attribute::make(get: fn () => $this->last_name.' '.$this->first_name);
     }
 
     /**

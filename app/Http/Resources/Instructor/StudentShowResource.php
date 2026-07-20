@@ -4,6 +4,7 @@ namespace App\Http\Resources\Instructor;
 
 use App\Model\Student;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentShowResource extends JsonResource
@@ -14,7 +15,7 @@ class StudentShowResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

@@ -17,7 +17,7 @@ class ManageInstructor extends Model
     protected $table = 'manage_instructors';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'instructor_id',

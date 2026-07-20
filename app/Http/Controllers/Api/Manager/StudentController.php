@@ -9,6 +9,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,7 +20,7 @@ class StudentController extends Controller
     /**
      * 受講生一覧取得API
      *
-     * @return StudentIndexResource|\Illuminate\Http\JsonResponse
+     * @return StudentIndexResource|JsonResponse
      */
     public function index(IndexRequest $request)
     {

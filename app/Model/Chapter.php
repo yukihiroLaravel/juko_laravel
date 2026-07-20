@@ -3,10 +3,15 @@
 namespace App\Model;
 
 use App\Enums\Chapter\StatusEnum;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Chapter extends Model
 {
@@ -20,7 +25,7 @@ class Chapter extends Model
     protected $table = 'chapters';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'chapter_id',
@@ -62,7 +67,7 @@ class Chapter extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Course, $this>
      */
     public function course()
     {
@@ -72,7 +77,7 @@ class Chapter extends Model
     /**
      * レッスンを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Lesson, $this>
      */
     public function lessons()
     {
@@ -82,8 +87,8 @@ class Chapter extends Model
     /**
      * 公開中のチャプターを抽出
      *
-     * @param  \Illuminate\Support\Collection  $chapters
-     * @return \Illuminate\Support\Collection
+     * @param  Collection  $chapters
+     * @return Collection
      */
     public static function extractPublicChapter($chapters)
     {
@@ -114,15 +119,16 @@ class Chapter extends Model
             ->count();
     }
 
-    public function getCompletedCountAttribute(): int
+    protected function completedCount(): Attribute
     {
-        return $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count();
+        return Attribute::make(get: fn () => $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
     }
 
     /**
      * 公開中のチャプターに絞り込む
      */
-    public function scopePublic(Builder $query): void
+    #[Scope]
+    protected function public(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

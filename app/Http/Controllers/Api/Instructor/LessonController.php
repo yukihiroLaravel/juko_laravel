@@ -71,20 +71,20 @@ class LessonController extends Controller
      */
     public function put(PutRequest $request, UpdateLessonService $service): JsonResponse
     {
-        // レッスンの取得
-        $lesson = Lesson::with(['chapter.course'])->findOrFail($request->lesson_id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+        assert($lesson instanceof Lesson);
+
         // Policy による認可チェック
         $this->authorize('update', $lesson);
-        // ステータスの特定　??= 代入演算子（左がnullなら右を代入する）
-        $status = StatusEnum::from($request->status ?? $lesson->status);
-        //  サービス層の呼び出し
-        $service(
-            $lesson,
-            $request['title'],
-            $request['url'],
-            $request['remarks'] ?? null,
-            $status
-        );
+
+        // status は任意項目のため、未指定の場合は現在のステータスを維持する
+        $validated = $request->validated();
+        $status = isset($validated['status'])
+            ? StatusEnum::from((string) $validated['status'])
+            : $lesson->status;
+
+        // UpdateLessonServiceを呼び出し更新処理
+        DB::transaction(fn () => $service($lesson, $request->title, $request->url, $request->remarks, $status));
 
         return response()->json([
             'result' => true,
@@ -171,34 +171,27 @@ class LessonController extends Controller
     /**
      * レッスンステータス更新API
      */
-    /**
-     * ステータス更新処理
-     */
     public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
     {
-        // レッスンを取得
-        $lesson = Lesson::findOrFail($request->lesson_id);
+        $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+        assert($lesson instanceof Lesson);
 
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 
-        //  バリデーション済みのデータを取得
-        $validated = $request->validated();
+        $status = StatusEnum::from((string) $request->validated()['status']);
 
-        // 文字列をEnum型に変換
-        $status = \App\Enums\Lesson\StatusEnum::from($validated['status']);
+        // UpdateLessonStatusServiceを呼び出し更新処理
+        DB::transaction(fn () => $service($lesson, $status));
 
-        //  変換したEnumの値（文字列）を渡してサービスを実行
-        $service($lesson, $status->value);
-
-        // 3レスポンスを返す
         return response()->json([
-            'message' => 'ステータスを更新しました。',
+            'result' => true,
         ]);
     }
 
-    /* レッスンタイトル変更API
-    */
+    /**
+     * レッスンタイトル変更API
+     */
     public function updateTitle(UpdateTitleRequest $request, UpdateLessonTitleService $service): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);

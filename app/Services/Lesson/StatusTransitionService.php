@@ -28,7 +28,7 @@ class StatusTransitionService
             ];
 
             // 3. 許可リストにない場合、強制的にエラーにする
-            if (! isset($allowedTransitions[$currentStatus->value]) || ! in_array($newStatus->value, $allowedTransitions[$currentStatus->value])) {
+            if (! in_array($newStatus->value, $allowedTransitions[$currentStatus->value], true)) {
                 throw ValidationException::withMessages([
                     'status' => ['Invalid status transition.'],
                 ]);

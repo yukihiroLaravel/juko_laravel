@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Instructor\Lesson;
 
+use App\Rules\LessonStatusRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PutRequest extends FormRequest
@@ -37,6 +38,8 @@ class PutRequest extends FormRequest
             'title' => ['required', 'string', 'max:50'],
             'url' => ['required', 'string'],
             'remarks' => ['nullable', 'string'],
+            // status は任意項目。未指定の場合は現在のステータスを維持する
+            'status' => ['nullable', 'string', new LessonStatusRule],
         ];
     }
 }

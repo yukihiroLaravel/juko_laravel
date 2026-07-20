@@ -25,7 +25,7 @@ class StatusTransitionService
 
         if (! $allowed) {
             throw ValidationException::withMessages([
-                'status' => ['ステータスを「' . $currentStatus->value . '」から「' . $newStatus->value . '」へ変更することはできません。'],
+                'status' => ['ステータスを「'.$currentStatus->value.'」から「'.$newStatus->value.'」へ変更することはできません。'],
             ]);
         }
     }

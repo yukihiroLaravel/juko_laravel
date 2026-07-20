@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Lesson\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Lesson\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Lesson\DeleteAllRequest;
@@ -13,7 +14,6 @@ use App\Http\Requests\Instructor\Lesson\StoreRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
@@ -77,8 +77,14 @@ class LessonController extends Controller
         // Policy による認可チェック
         $this->authorize('update', $lesson);
 
+        // status は任意項目のため、未指定の場合は現在のステータスを維持する
+        $validated = $request->validated();
+        $status = isset($validated['status'])
+            ? StatusEnum::from((string) $validated['status'])
+            : $lesson->status;
+
         // UpdateLessonServiceを呼び出し更新処理
-        $service($lesson, $request->title, $request->url, $request->remarks);
+        DB::transaction(fn () => $service($lesson, $request->title, $request->url, $request->remarks, $status));
 
         return response()->json([
             'result' => true,
@@ -168,11 +174,19 @@ class LessonController extends Controller
     public function updateStatus(UpdateStatusRequest $request, UpdateLessonStatusService $service): JsonResponse
     {
         $lesson = Lesson::with('chapter.course')->findOrFail($request->lesson_id);
+        assert($lesson instanceof Lesson);
+
+        // Policy による認可チェック
         $this->authorize('update', $lesson);
 
-        $service($lesson, $request->status);
+        $status = StatusEnum::from((string) $request->validated()['status']);
 
-        return response()->json(['result' => true]);
+        // UpdateLessonStatusServiceを呼び出し更新処理
+        DB::transaction(fn () => $service($lesson, $status));
+
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

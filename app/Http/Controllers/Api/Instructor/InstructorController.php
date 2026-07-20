@@ -226,7 +226,6 @@ class InstructorController extends Controller
                     'profile_image' => null,
                     'type' => $temporaryInstructor->type,
                 ]);
-                assert($instructor instanceof Instructor);
 
                 if ($temporaryInstructor->manager_id) {
                     /*

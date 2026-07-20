@@ -86,11 +86,9 @@ class StudentController extends Controller
                 'address' => $request->address,
             ]);
 
-            assert($temporaryStudent instanceof TemporaryStudent);
-
             DB::commit();
 
-            Mail::send(new AuthenticationConfirmationMail($email, $temporaryStudent->fullName, $code, $token));
+            Mail::send(new AuthenticationConfirmationMail($email, $temporaryStudent->full_name, $code, $token));
 
             return response()->json([
                 'result' => true,
@@ -121,7 +119,7 @@ class StudentController extends Controller
     /**
      * 生徒情報更新API
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(UpdateRequest $request)
     {
@@ -246,7 +244,6 @@ class StudentController extends Controller
                     'address' => $temporaryStudent->address,
                     'profile_image' => null,
                 ]);
-                assert($student instanceof Student);
 
                 // 仮登録情報を物理削除
                 $temporaryStudent->delete();

@@ -21,7 +21,7 @@ class TemporaryInstructor extends Model
     protected $table = 'temporary_instructors';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'manager_id',

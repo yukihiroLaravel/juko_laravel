@@ -3,9 +3,13 @@
 namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lesson extends Model
@@ -20,7 +24,7 @@ class Lesson extends Model
     protected $table = 'lessons';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'chapter_id',
@@ -47,7 +51,7 @@ class Lesson extends Model
     /**
      * チャプターを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Chapter, $this>
      */
     public function chapter()
     {
@@ -57,7 +61,7 @@ class Lesson extends Model
     /**
      * レッスン受講状態を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<LessonAttendance, $this>
      */
     public function lessonAttendances()
     {
@@ -66,28 +70,25 @@ class Lesson extends Model
 
     /**
      * レッスンの総数を取得する
-     *
-     * @return int
      */
-    public function getTotalLessonsCountAttribute()
+    protected function totalLessonsCount(): Attribute
     {
-        return $this->chapter->lessons->count();
+        return Attribute::make(get: fn () => $this->chapter->lessons->count());
     }
 
     /**
      * レッスンの完了数を取得する
-     *
-     * @return int
      */
-    public function getCompletedLessonsCountAttribute()
+    protected function completedLessonsCount(): Attribute
     {
-        return $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count();
+        return Attribute::make(get: fn () => $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count());
     }
 
     /**
      * 公開済みのレッスンに絞り込む
      */
-    public function scopePublic(Builder $query): void
+    #[Scope]
+    protected function public(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

@@ -3,8 +3,8 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
-use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -64,16 +64,15 @@ class IndexService
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(fn (Chapter $chapter) =>
-            $chapter->status === ChapterStatusEnum::PUBLIC &&
+        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->status === ChapterStatusEnum::PUBLIC &&
             $chapter->lessons->filter(
                 fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC
             )
-            ->every(function (Lesson $lesson) use ($attendance) {
-                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+                ->every(function (Lesson $lesson) use ($attendance) {
+                    $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        }))->count();
+                    return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+                }))->count();
     }
 
     /**
@@ -82,8 +81,7 @@ class IndexService
     private function getTotalChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters
-            ->filter(fn (Chapter $chapter) =>
-                    $chapter->status === ChapterStatusEnum::PUBLIC
+            ->filter(fn (Chapter $chapter) => $chapter->status === ChapterStatusEnum::PUBLIC
             )
             ->count();
     }

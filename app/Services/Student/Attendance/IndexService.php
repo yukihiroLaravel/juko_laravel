@@ -65,9 +65,9 @@ class IndexService
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters->filter(fn (Chapter $chapter) =>
-            $chapter->status === ChapterStatusEnum::PUBLIC &&
+            $chapter->status === ChapterStatusEnum::PUBLIC->value &&
             $chapter->lessons->filter(
-                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC
+                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC->value
             )
             ->every(function (Lesson $lesson) use ($attendance) {
                 $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
@@ -83,7 +83,7 @@ class IndexService
     {
         return $attendance->course->chapters
             ->filter(fn (Chapter $chapter) =>
-                    $chapter->status === ChapterStatusEnum::PUBLIC
+                    $chapter->status === ChapterStatusEnum::PUBLIC->value
             )
             ->count();
     }

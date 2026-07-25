@@ -3,19 +3,32 @@
 namespace App\Services\Lesson;
 
 use App\Model\Lesson;
+use App\Model\LessonAttendance;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
 
 class DeleteLessonService
 {
+    /**
+     * @param Lesson $lesson
+     * @throws AuthorizationException
+     */
     public function __invoke(Lesson $lesson): void
     {
-        $lesson->update(['order' => 0]);
+        // 受講状況の存在チェック
+        if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
+            throw new AuthorizationException('Forbidden, this lesson has attendance.');
+        }
 
-        $lesson->delete();
+        DB::transaction(function () use ($lesson) {
+            $lesson->update(['order' => 0]);
 
-        Lesson::where('chapter_id', $lesson->chapter_id)
-            ->orderBy('order')
-            ->get()
-            ->each(fn (Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1])
-            );
+            $lesson->delete();
+
+            Lesson::where('chapter_id', $lesson->chapter_id)
+                ->orderBy('order')
+                ->get()
+                ->each(fn(Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1]));
+        });
     }
 }

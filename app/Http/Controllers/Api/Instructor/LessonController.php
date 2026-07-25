@@ -84,7 +84,7 @@ class LessonController extends Controller
             : $lesson->status;
 
         // UpdateLessonServiceを呼び出し更新処理
-        DB::transaction(fn () => $service($lesson, $request->title, $request->url, $request->remarks, $status));
+        DB::transaction(fn() => $service($lesson, $request->title, $request->url, $request->remarks, $status));
 
         return response()->json([
             'result' => true,
@@ -102,11 +102,6 @@ class LessonController extends Controller
 
             // ログイン講師のidと削除レッスンの講師IDが一致しないと削除できない
             $this->authorize('delete', $lesson);
-
-            // 受講情報が登録されている場合は削除を許可しない
-            if (LessonAttendance::where('lesson_id', $lesson->id)->exists()) {
-                throw new AuthorizationException('Forbidden, this lesson has attendance.');
-            }
 
             $deleteLessonService($lesson);
 
@@ -144,10 +139,6 @@ class LessonController extends Controller
                 if ((int) $chapterId !== $lesson->chapter_id) {
                     throw new AuthorizationException('Invalid chapter.');
                 }
-                // 受講情報が登録されている場合は許可しない
-                if ($lesson->lessonAttendances->isNotEmpty()) {
-                    throw new AuthorizationException('This lesson has attendance.');
-                }
             });
 
             // サービスクラスで対象レッスンの削除処理を実行
@@ -182,7 +173,7 @@ class LessonController extends Controller
         $status = StatusEnum::from((string) $request->validated()['status']);
 
         // UpdateLessonStatusServiceを呼び出し更新処理
-        DB::transaction(fn () => $service($lesson, $status));
+        DB::transaction(fn() => $service($lesson, $status));
 
         return response()->json([
             'result' => true,

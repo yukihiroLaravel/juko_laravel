@@ -19,7 +19,7 @@ class DeleteAllLessonsService
         // 出席済みのレッスンがあれば削除不可
         $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
         if ($attendedLessonIds->isNotEmpty()) {
-            throw new AuthorizationException('This lessons contains attendance.');
+            throw new AuthorizationException('Forbidden, this lesson has attendance.');
         }
 
         // レッスン削除

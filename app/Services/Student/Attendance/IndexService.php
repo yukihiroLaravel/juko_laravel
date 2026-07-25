@@ -65,7 +65,7 @@ class IndexService
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
         return $attendance->course->chapters->filter(fn (Chapter $chapter) =>
-            $chapter->status === ChapterStatusEnum::PUBLIC->value &&
+            $chapter->status === ChapterStatusEnum::PUBLIC &&   //
             $chapter->lessons->filter(
                 fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC->value
             )

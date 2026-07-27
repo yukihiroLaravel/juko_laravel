@@ -22,6 +22,9 @@ class DeleteAllLessonsService
             throw new AuthorizationException('Forbidden, this lesson has attendance.');
         }
 
+        // 削除対象レッスンのorderカラムを0に設定する
+        Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
+
         // レッスン削除
         Lesson::whereIn('id', $lessonIds)->delete();
     }

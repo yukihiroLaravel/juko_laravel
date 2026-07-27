@@ -20,15 +20,13 @@ class DeleteLessonService
             throw new AuthorizationException('Forbidden, this lesson has attendance.');
         }
 
-        DB::transaction(function () use ($lesson) {
-            $lesson->update(['order' => 0]);
+        $lesson->update(['order' => 0]);
 
-            $lesson->delete();
+        $lesson->delete();
 
-            Lesson::where('chapter_id', $lesson->chapter_id)
-                ->orderBy('order')
-                ->get()
-                ->each(fn(Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1]));
-        });
+        Lesson::where('chapter_id', $lesson->chapter_id)
+            ->orderBy('order')
+            ->get()
+            ->each(fn(Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1]));
     }
 }

@@ -15,7 +15,6 @@ use App\Http\Requests\Instructor\Lesson\UpdateStatusRequest;
 use App\Http\Requests\Instructor\Lesson\UpdateTitleRequest;
 use App\Model\Chapter;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use App\Services\Lesson\BulkDeleteLessonsService;
 use App\Services\Lesson\BulkUpdateLessonStatusService;
 use App\Services\Lesson\DeleteAllLessonsService;
@@ -129,7 +128,7 @@ class LessonController extends Controller
         DB::beginTransaction();
         try {
             // レッスン情報を取得
-            $lessons = Lesson::with('chapter.course', 'lessonAttendances')->whereIn('id', $lessonIds)->get();
+            $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
             // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
             $this->authorize('bulkDelete', [Lesson::class, $lessons]);

@@ -18,7 +18,7 @@ class DeleteAllLessonsService
 
         // 出席済みのレッスンがあれば削除不可
         if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
-            throw new AuthorizationException('Forbidden, this lesson has attendance.');
+            throw new AuthorizationException('Forbidden, these lessons have attendance.');
         }
 
         // 削除対象レッスンのorderカラムを0に設定する

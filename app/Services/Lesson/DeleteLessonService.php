@@ -5,7 +5,6 @@ namespace App\Services\Lesson;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\DB;
 
 class DeleteLessonService
 {

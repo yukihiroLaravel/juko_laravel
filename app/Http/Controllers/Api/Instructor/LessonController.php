@@ -83,7 +83,7 @@ class LessonController extends Controller
             : $lesson->status;
 
         // UpdateLessonServiceを呼び出し更新処理
-        DB::transaction(fn() => $service($lesson, $request->title, $request->url, $request->remarks, $status));
+        DB::transaction(fn () => $service($lesson, $request->title, $request->url, $request->remarks, $status));
 
         return response()->json([
             'result' => true,
@@ -172,7 +172,7 @@ class LessonController extends Controller
         $status = StatusEnum::from((string) $request->validated()['status']);
 
         // UpdateLessonStatusServiceを呼び出し更新処理
-        DB::transaction(fn() => $service($lesson, $status));
+        DB::transaction(fn () => $service($lesson, $status));
 
         return response()->json([
             'result' => true,

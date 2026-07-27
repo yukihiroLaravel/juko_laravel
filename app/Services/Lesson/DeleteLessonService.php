@@ -9,7 +9,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 class DeleteLessonService
 {
     /**
-     * @param Lesson $lesson
      * @throws AuthorizationException
      */
     public function __invoke(Lesson $lesson): void
@@ -26,6 +25,6 @@ class DeleteLessonService
         Lesson::where('chapter_id', $lesson->chapter_id)
             ->orderBy('order')
             ->get()
-            ->each(fn(Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1]));
+            ->each(fn (Lesson $lesson, int $index): bool => (bool) $lesson->update(['order' => $index + 1]));
     }
 }

@@ -12,7 +12,7 @@ class BulkDeleteLessonsService
      * 複数レッスンの削除
      *
      * @param  array<int>  $lessonIds
-     * @param int $chapterId
+     *
      * @throws AuthorizationException
      */
     public function __invoke(array $lessonIds, int $chapterId): void

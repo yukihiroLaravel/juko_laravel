@@ -14,7 +14,7 @@ class ShowService
         ShowDto $showDto
     ): Attendance {
         $attendance = Attendance::with([
-            'course.publicChapters.lessons' => fn($q) => $q->where('status', LessonStatusEnum::PUBLIC->value),
+            'course.publicChapters.lessons' => fn ($q) => $q->where('status', LessonStatusEnum::PUBLIC->value),
             'course.instructor',
             'lessonAttendances',
             'course.courseDeadline',
@@ -23,7 +23,7 @@ class ShowService
 
         if ($attendance->student_id !== $showDto->getUserId()) {
             throw new AuthorizationException(
-                "The attendance's student ID {$attendance->student_id} " .
+                "The attendance's student ID {$attendance->student_id} ".
                     "does not match User ID {$showDto->getUserId()}."
             );
         }

@@ -3,14 +3,15 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
-use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService
@@ -24,23 +25,23 @@ class IndexService
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
-            'course.chapters' => fn ($q) => $q->where('status', ChapterStatusEnum::PUBLIC->value),
-            'course.chapters.lessons' => fn ($q) => $q->where('status', LessonStatusEnum::PUBLIC->value),
+            'course.chapters' => fn (HasMany $query) => $query->where('status', ChapterStatusEnum::PUBLIC->value),
+            'course.chapters.lessons' => fn (HasMany $query) => $query->where('status', LessonStatusEnum::PUBLIC->value),
             'lessonAttendances',
             'course.tags',
             'course.courseDeadline',
-        ])
+        ])  
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
-                $query->where('status', CourseStatusEnum::PUBLIC->value);
-                if ($indexDto->getSearchWord()) {
-                    $word = $indexDto->getSearchWord();
-                    $query->where(function (Builder $q) use ($word) {
-                        $q->where('title', 'like', "%{$word}%")
-                            ->orWhereHas('tags', fn ($tagQuery) => $tagQuery->where('content', 'like', "%{$word}%"));
-                    });
-                }
-            })
+                $searchWord = $indexDto->getSearchWord();
+                $query->where('status', CourseStatusEnum::PUBLIC->value)
+                    ->when($searchWord !== null && $searchWord !== '', function (Builder $query) use ($searchWord) {
+                        $query->where(function (Builder $query) use ($searchWord) {
+                            $query->where('title', 'like', "%{$searchWord}%")
+                                ->orWhereHas('tags', fn (Builder $query) => $query->where('content', 'like', "%{$searchWord}%"));
+                });
+    });
+                            })
             ->when($tagId, function (Builder $query) use ($tagId) {
                 $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
                     $query->where('tags.id', $tagId);
@@ -64,15 +65,12 @@ class IndexService
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->status === ChapterStatusEnum::PUBLIC &&
-            $chapter->lessons->filter(
-                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC
-            )
-                ->every(function (Lesson $lesson) use ($attendance) {
-                    $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-                    return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-                }))->count();
+        return $attendance->course->chapters->filter(fn (Chapter $chapter) =>$chapter->lessons->isNotEmpty()
+            && $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
+                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+                return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+            }
+        ))->count();
     }
 
     /**
@@ -80,9 +78,6 @@ class IndexService
      */
     private function getTotalChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters
-            ->filter(fn (Chapter $chapter) => $chapter->status === ChapterStatusEnum::PUBLIC
-            )
-            ->count();
+        return $attendance->course->chapters->count();  // chapters / lessons は eager load 時に公開中のみへ絞り込み済み
     }
 }

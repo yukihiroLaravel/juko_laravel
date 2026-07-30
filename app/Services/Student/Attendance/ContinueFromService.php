@@ -6,10 +6,8 @@ use App\Dto\Student\Attendance\ContinueFromDto;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
-use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Services\Chapter\UpdateChapterStatusService;
 
 class ContinueFromService
 {

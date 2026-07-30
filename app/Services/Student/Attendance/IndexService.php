@@ -3,8 +3,8 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
-use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -30,7 +30,7 @@ class IndexService
             'lessonAttendances',
             'course.tags',
             'course.courseDeadline',
-        ])  
+        ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
                 $searchWord = $indexDto->getSearchWord();
@@ -39,9 +39,9 @@ class IndexService
                         $query->where(function (Builder $query) use ($searchWord) {
                             $query->where('title', 'like', "%{$searchWord}%")
                                 ->orWhereHas('tags', fn (Builder $query) => $query->where('content', 'like', "%{$searchWord}%"));
-                });
-    });
-                            })
+                        });
+                    });
+            })
             ->when($tagId, function (Builder $query) use ($tagId) {
                 $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
                     $query->where('tags.id', $tagId);
@@ -65,12 +65,13 @@ class IndexService
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(fn (Chapter $chapter) =>$chapter->lessons->isNotEmpty()
+        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->lessons->isNotEmpty()
             && $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
                 $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
                 return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
             }
-        ))->count();
+            ))->count();
     }
 
     /**

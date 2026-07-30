@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
@@ -66,17 +67,27 @@ class AttendanceController extends Controller
         ShowRequest $request,
         ShowService $service
     ): AttendanceShowResource {
-        try {
-            $attendanceId = (int) $request->attendance_id;
-            $userId = $request->user()->id;
-            $showDto = new ShowDto($attendanceId, $userId);
-            $attendance = $service($showDto);
+        $attendance = Attendance::with([
+            'course.publicChapters.lessons' => function ($query) {
+                $query->where('status', LessonStatusEnum::PUBLIC->value);
+            },
+            'course.instructor',
+            'lessonAttendances',
+            'course.courseDeadline',
+        ])->findOrFail($request->attendance_id);
 
-            return new AttendanceShowResource($attendance);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
-            throw $e;
-        }
+        $this->authorize('viewStudent', $attendance);
+        $attendanceId = (int) $request->attendance_id;
+        $userId = $request->user()->id;
+        $showDto = new ShowDto($attendanceId, $userId);
+
+        $result = $service($showDto);
+
+        return new AttendanceShowResource([
+            'attendance' => $attendance,
+            'studentsCount' => $result['studentsCount'],
+            'chapters' => $result['chapters'],
+        ]);
     }
 
     /**
@@ -99,7 +110,7 @@ class AttendanceController extends Controller
             'totalChaptersCount' => $attendance->course->chapters->count(),
             'completedLessonsCount' => $attendance
                 ->lessonAttendances
-                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->filter(fn($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                 ->count(),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
             'continueFrom' => $continueFromService($attendance)?->toArray(),

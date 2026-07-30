@@ -4,6 +4,7 @@ namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
@@ -17,12 +18,17 @@ class IndexService
      * @return LengthAwarePaginator<Attendance>
      */
     public function __invoke(
-        IndexDto $indexDto, int $perPage, int $page, ?int $tagId
+        IndexDto $indexDto,
+        int $perPage,
+        int $page,
+        ?int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
-            'course.chapters.lessons',
+            'course.publicChapters.lessons' => function ($query) {
+                $query->where('status', LessonStatusEnum::PUBLIC->value);
+            },
             'lessonAttendances',
             'course.tags',
             'course.courseDeadline',
@@ -62,11 +68,16 @@ class IndexService
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
-            $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        }))->count();
+        return $attendance->course->chapters->filter(
+            fn(Chapter $chapter) => $chapter->lessons->filter(
+                fn(Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC->value
+            )
+                ->pipe(fn($lessons) => $lessons->isNotEmpty() && $lessons->every(function (Lesson $lesson) use ($attendance) {
+                    $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+                    return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+                }))
+        )
+            ->count();
     }
 
     /**
@@ -74,6 +85,6 @@ class IndexService
      */
     private function getTotalChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->count();
+        return $attendance->course->publicchapters->count();
     }
 }

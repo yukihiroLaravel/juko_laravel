@@ -3,6 +3,7 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\ContinueFromDto;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\LessonAttendance;
 
@@ -14,7 +15,11 @@ class ContinueFromService
      */
     public function __invoke(Attendance $attendance): ?ContinueFromDto
     {
-        foreach ($attendance->course->chapters as $chapter) {
+        $chapters = $attendance->course->publicChapters()->with(['lessons' => function ($query) {
+            $query->where('status', LessonStatusEnum::PUBLIC->value);
+        }])->get();
+
+        foreach ($chapters as $chapter) {
             $incompleteLesson = $chapter->lessons->first(function ($lesson) use ($attendance) {
                 $status = $attendance->lessonAttendances
                     ->where('lesson_id', $lesson->id)

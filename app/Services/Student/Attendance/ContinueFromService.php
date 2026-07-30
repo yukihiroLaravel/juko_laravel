@@ -20,12 +20,12 @@ class ContinueFromService
     public function __invoke(Attendance $attendance): ?ContinueFromDto
     {
         foreach ($attendance->course->chapters as $chapter) {
-            if ($chapter->status !== ChapterStatusEnum::PUBLIC->value) {
+            if ($chapter->status !== ChapterStatusEnum::PUBLIC) {
                 continue;
             }
 
             $publicLessons = $chapter->lessons->filter(
-                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC->value
+                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC
             );
 
             $incompleteLesson = $publicLessons->first(function ($lesson) use ($attendance) {

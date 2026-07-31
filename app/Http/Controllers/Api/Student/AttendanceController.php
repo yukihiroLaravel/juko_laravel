@@ -79,15 +79,9 @@ class AttendanceController extends Controller
         $this->authorize('viewStudent', $attendance);
         $attendanceId = (int) $request->attendance_id;
         $userId = $request->user()->id;
-        $showDto = new ShowDto($attendanceId, $userId);
+        new ShowDto($attendanceId, $userId);
 
-        $result = $service($showDto);
-
-        return new AttendanceShowResource([
-            'attendance' => $attendance,
-            'studentsCount' => $result['studentsCount'],
-            'chapters' => $result['chapters'],
-        ]);
+        return new AttendanceShowResource($attendance);
     }
 
     /**
@@ -110,7 +104,7 @@ class AttendanceController extends Controller
             'totalChaptersCount' => $attendance->course->chapters->count(),
             'completedLessonsCount' => $attendance
                 ->lessonAttendances
-                ->filter(fn($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
                 ->count(),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
             'continueFrom' => $continueFromService($attendance)?->toArray(),

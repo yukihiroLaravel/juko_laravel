@@ -3,7 +3,6 @@
 namespace App\Model;
 
 use App\Enums\Chapter\StatusEnum;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -127,8 +126,7 @@ class Chapter extends Model
     /**
      * 公開中のチャプターに絞り込む
      */
-    #[Scope]
-    protected function public(Builder $query): void
+    protected function scopePublic(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

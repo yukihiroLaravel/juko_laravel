@@ -14,10 +14,10 @@ final class ShowService
      * 受講状況詳細に必要な情報（期限切れを除いた受講人数を含む）を取得する
      *
      * @return array{
-     *     studentsCount: int<0, max>,
+     *     studentsCount: int,
      *     chapters: Collection<int, array{
      *         chapter: Chapter,
-     *         completedStudentsCount: int<0, max>
+     *         completedStudentsCount: int
      *     }>
      * }
      */

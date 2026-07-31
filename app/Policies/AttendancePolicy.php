@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
-use App\Enums\Course\StatusEnum as CourseStatusEnum;
 
 class AttendancePolicy
 {

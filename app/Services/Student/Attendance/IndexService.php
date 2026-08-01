@@ -4,7 +4,6 @@ namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
-use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
@@ -26,9 +25,7 @@ class IndexService
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
-            'course.publicChapters.lessons' => function ($query) {
-                $query->where('status', LessonStatusEnum::PUBLIC->value);
-            },
+            'course.publicChapters.publicLessons',
             'lessonAttendances',
             'course.tags',
             'course.courseDeadline',
@@ -65,20 +62,25 @@ class IndexService
 
     /**
      * 完了済みのチャプター数を取得する
+     *
+     * 公開レッスンを1つも持たないチャプターは、完了と判定しない
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->publicChapters->filter(
-            fn (Chapter $chapter) => $chapter->lessons->filter(
-                fn (Lesson $lesson) => $lesson->status === LessonStatusEnum::PUBLIC
-            )
-                ->pipe(fn ($lessons) => $lessons->isNotEmpty() && $lessons->every(function (Lesson $lesson) use ($attendance) {
-                    $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-                    return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-                }))
-        )
+        return $attendance->course->publicChapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty()
+                && $chapter->publicLessons->every(fn (Lesson $lesson) => $this->isCompletedLesson($attendance, $lesson)))
             ->count();
+    }
+
+    /**
+     * 該当レッスンを受講済みかどうかを判定する
+     */
+    private function isCompletedLesson(Attendance $attendance, Lesson $lesson): bool
+    {
+        $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
     }
 
     /**

@@ -171,7 +171,7 @@ class AttendanceController extends Controller
     public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection
     {
         // Policyによる認可チェック
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
         $this->authorize('viewStudent', $attendance);
 
         $result = $service($attendance->course_id);

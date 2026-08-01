@@ -3,8 +3,8 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\ContinueFromDto;
-use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 
 class ContinueFromService
@@ -15,20 +15,13 @@ class ContinueFromService
      */
     public function __invoke(Attendance $attendance): ?ContinueFromDto
     {
-        $chapters = $attendance->course->publicChapters()->with(['lessons' => function ($query) {
-            $query->where('status', LessonStatusEnum::PUBLIC->value);
-        }])->get();
+        $attendance->loadMissing(['course.publicChapters.publicLessons', 'lessonAttendances']);
 
-        foreach ($chapters as $chapter) {
-            $incompleteLesson = $chapter->lessons->first(function ($lesson) use ($attendance) {
-                $status = $attendance->lessonAttendances
-                    ->where('lesson_id', $lesson->id)
-                    ->first()?->status;
+        foreach ($attendance->course->publicChapters as $chapter) {
+            $incompleteLesson = $chapter->publicLessons
+                ->first(fn (Lesson $lesson) => ! $this->isCompletedLesson($attendance, $lesson));
 
-                return $status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            });
-
-            if ($incompleteLesson) {
+            if ($incompleteLesson instanceof Lesson) {
                 return new ContinueFromDto(
                     chapterId: $chapter->id,
                     chapterTitle: $chapter->title,
@@ -39,5 +32,15 @@ class ContinueFromService
         }
 
         return null;
+    }
+
+    /**
+     * 該当レッスンを受講済みかどうかを判定する
+     */
+    private function isCompletedLesson(Attendance $attendance, Lesson $lesson): bool
+    {
+        $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
     }
 }

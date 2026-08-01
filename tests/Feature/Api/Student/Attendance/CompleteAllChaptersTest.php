@@ -10,12 +10,20 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CompleteAllChaptersTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
 
     public function test_全チャプター完了_成功(): void
     {
@@ -43,6 +51,50 @@ class CompleteAllChaptersTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'status' => 'completed_attendance',
+        ]);
+    }
+
+    public function test_全チャプター完了で完了日時が記録される(): void
+    {
+        // Arrange — 未着手のレッスンと、過去に完了済みのレッスン
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-01 10:00:00'));
+        $completedAt = CarbonImmutable::parse('2026-07-01 09:00:00');
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $newLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $completedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $newLesson->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $completedLesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $completedAt,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->putJson(route('student.attendances.complete-all-chapters', ['attendance_id' => $attendance->id]));
+
+        // Assert — 未着手だったレッスンには現在時刻が記録され、既に完了していたレッスンの日時は変わらない
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $newLesson->id,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $completedLesson->id,
+            'completed_at' => $completedAt,
         ]);
     }
 

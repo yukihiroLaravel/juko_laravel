@@ -41,6 +41,41 @@ class ProgressTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_完了日時がなければ表示用ステータスが完了でも受講済みにならない(): void
+    {
+        // Arrange — 表示用ステータスは完了だが、完了日時が記録されていない状態
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $lesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert — 完了日時が判定の正なので、受講済みとして数えない
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_completed_lessons', 0);
+        $response->assertJsonPath('data.number_of_completed_chapters', 0);
+        $response->assertJsonPath('data.continue_from.lesson_id', $lesson->id);
+    }
+
     public function test_公開されていないチャプターとレッスンは進捗の件数に含まれない(): void
     {
         // Arrange — 公開チャプター（公開レッスン1・下書きレッスン1）と非公開チャプター（レッスン1）
@@ -71,10 +106,9 @@ class ProgressTest extends TestCase
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
         foreach ([$openLesson, $draftLesson, $closedChapterLesson] as $lesson) {
-            LessonAttendance::factory()->create([
+            LessonAttendance::factory()->completed()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
             ]);
         }
         $this->actingAs($student);
@@ -111,10 +145,9 @@ class ProgressTest extends TestCase
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::DRAFT->value,
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $openLesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
         ]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,

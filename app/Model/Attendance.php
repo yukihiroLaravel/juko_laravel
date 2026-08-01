@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Attendance extends Model
 {
@@ -224,11 +225,32 @@ class Attendance extends Model
 
     /**
      * 該当レッスンを受講済みかどうか
+     *
+     * 表示用のステータスではなく、完了日時が記録されているかどうかで判定する
      */
     public function hasCompletedLesson(Lesson $lesson): bool
     {
         $lessonAttendance = $this->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
-        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+        return $lessonAttendance?->completed_at !== null;
+    }
+
+    /**
+     * 指定したレッスンの受講状況をまとめて完了にする
+     *
+     * 完了日時は過去に完了した事実を保つため、まだ記録がないものにだけ現在時刻を記録する
+     *
+     * @param  Collection<int, int>  $lessonIds  完了にするレッスンのID
+     */
+    public function completeLessons(Collection $lessonIds): void
+    {
+        $this->lessonAttendances()
+            ->whereIn('lesson_id', $lessonIds)
+            ->whereNull('completed_at')
+            ->update(['completed_at' => CarbonImmutable::now()]);
+
+        $this->lessonAttendances()
+            ->whereIn('lesson_id', $lessonIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
     }
 }

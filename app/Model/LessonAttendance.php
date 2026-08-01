@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,6 +40,22 @@ class LessonAttendance extends Model
     const PERIOD_TODAY = 'today';
 
     const PERIOD_MONTH = 'month';
+
+    /**
+     * 表示用ステータスを変更する
+     *
+     * 完了日時は過去に完了した事実を保つため、まだ記録がない場合にだけ現在時刻を記録する
+     */
+    public function changeStatus(string $status): void
+    {
+        $this->status = $status;
+
+        if ($status === self::STATUS_COMPLETED_ATTENDANCE && $this->completed_at === null) {
+            $this->completed_at = CarbonImmutable::now();
+        }
+
+        $this->save();
+    }
 
     /**
      * レッスン取得

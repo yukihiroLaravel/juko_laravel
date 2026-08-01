@@ -19,7 +19,6 @@ use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\IndexService;
@@ -129,11 +128,7 @@ class AttendanceController extends Controller
 
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
-            $attendance->lessonAttendances()
-                ->whereIn('lesson_id', $chapter->publicLessons->pluck('id'))
-                ->update([
-                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                ]);
+            $attendance->completeLessons($chapter->publicLessons->pluck('id'));
 
             return response()->json([
                 'result' => true,
@@ -159,9 +154,7 @@ class AttendanceController extends Controller
         $publicLessonIds = $attendance->course->publicChapters
             ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
-        $attendance->lessonAttendances()
-            ->whereIn('lesson_id', $publicLessonIds)
-            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+        $attendance->completeLessons($publicLessonIds);
 
         return response()->json([
             'result' => true,

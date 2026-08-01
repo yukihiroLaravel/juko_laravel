@@ -76,6 +76,47 @@ class ProgressTest extends TestCase
         $response->assertJsonPath('data.continue_from.lesson_id', $lesson->id);
     }
 
+    public function test_公開レッスンがないチャプターは進捗の件数に含まれない(): void
+    {
+        // Arrange — 公開レッスンを持つチャプターと、下書きレッスンしか持たないチャプター
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapterWithOpenLesson = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $chapterWithDraftLessonOnly = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $openLesson = Lesson::factory()->create([
+            'chapter_id' => $chapterWithOpenLesson->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        Lesson::factory()->create([
+            'chapter_id' => $chapterWithDraftLessonOnly->id,
+            'status' => LessonStatusEnum::DRAFT->value,
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $openLesson->id,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert — 受講しようがないチャプターは分母に入らず、すべて受講済みになる
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_total_chapters', 1);
+        $response->assertJsonPath('data.number_of_completed_chapters', 1);
+        $response->assertJsonPath('data.continue_from', null);
+    }
+
     public function test_公開されていないチャプターとレッスンは進捗の件数に含まれない(): void
     {
         // Arrange — 公開チャプター（公開レッスン1・下書きレッスン1）と非公開チャプター（レッスン1）

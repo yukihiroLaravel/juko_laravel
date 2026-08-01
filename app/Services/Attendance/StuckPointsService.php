@@ -4,7 +4,6 @@ namespace App\Services\Attendance;
 
 use App\Dto\Common\Attendance\StuckLessonDto;
 use App\Dto\Common\Attendance\StuckPointDto;
-use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
@@ -71,7 +70,7 @@ final class StuckPointsService
     private function getPublicChapters(int $courseId): Collection
     {
         return Chapter::where('course_id', $courseId)
-            ->where('status', ChapterStatusEnum::PUBLIC)
+            ->public()
             ->get();
     }
 
@@ -132,10 +131,9 @@ final class StuckPointsService
     {
         return Lesson::query()
             ->whereIn('id', $publicLessons->pluck('id'))
-            ->withCount([
-                'lessonAttendances' => fn ($q) => $q
-                    ->whereIn('attendance_id', $attendances->pluck('id'))
-                    ->whereNotNull('completed_at'),
+            ->withCount(['lessonAttendances' => fn ($q) => $q
+                ->whereIn('attendance_id', $attendances->pluck('id'))
+                ->whereNotNull('completed_at'),
             ])
             ->get();
     }

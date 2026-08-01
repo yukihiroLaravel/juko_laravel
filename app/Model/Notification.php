@@ -4,6 +4,7 @@ namespace App\Model;
 
 use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -88,7 +89,8 @@ class Notification extends Model
     /**
      * スコープ: 公開中のお知らせを取得
      */
-    protected function scopePublic(Builder $query): Builder
+    #[Scope]
+    protected function public(Builder $query): Builder
     {
         return $query->where('status', StatusEnum::PUBLIC);
     }
@@ -96,7 +98,8 @@ class Notification extends Model
     /**
      * スコープ: 既読データ(read)/未読データ(unread)判別
      */
-    protected function scopeFilterByReadStatus(Builder $query, string $filter, int $studentId): Builder
+    #[Scope]
+    protected function filterByReadStatus(Builder $query, string $filter, int $studentId): Builder
     {
         return match ($filter) {
             'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),

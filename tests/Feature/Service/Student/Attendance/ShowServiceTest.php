@@ -30,7 +30,7 @@ class ShowServiceTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        $showDto = new ShowDto($attendance->id, $student->id);
+        $showDto = new ShowDto($attendance->id);
         $service = new ShowService;
 
         // Act
@@ -70,7 +70,7 @@ class ShowServiceTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        $showDto = new ShowDto($attendance->id, $student->id);
+        $showDto = new ShowDto($attendance->id);
         $service = new ShowService;
 
         // Act
@@ -83,11 +83,11 @@ class ShowServiceTest extends TestCase
         );
         $this->assertSame(
             [$publicLesson->id],
-            $result->course->publicChapters->first()->lessons->pluck('id')->all()
+            $result->course->publicChapters->first()->publicLessons->pluck('id')->all()
         );
         $this->assertNotContains(
             $draftLesson->id,
-            $result->course->publicChapters->first()->lessons->pluck('id')->all()
+            $result->course->publicChapters->first()->publicLessons->pluck('id')->all()
         );
     }
 }

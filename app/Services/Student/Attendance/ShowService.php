@@ -3,9 +3,7 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\ShowDto;
-use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ShowService
 {
@@ -13,7 +11,7 @@ class ShowService
         ShowDto $showDto
     ): Attendance {
         return Attendance::with([
-            'course.publicChapters.lessons' => fn (Relation $query) => $query->where('status', LessonStatusEnum::PUBLIC->value),
+            'course.publicChapters.publicLessons',
             'course.instructor',
             'lessonAttendances',
             'course.courseDeadline',

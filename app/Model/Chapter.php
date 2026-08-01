@@ -85,6 +85,16 @@ class Chapter extends Model
     }
 
     /**
+     * 公開中のレッスンを取得
+     *
+     * @return HasMany<Lesson, $this>
+     */
+    public function publicLessons(): HasMany
+    {
+        return $this->lessons()->public();
+    }
+
+    /**
      * 公開中のチャプターを抽出
      *
      * @param  Collection  $chapters

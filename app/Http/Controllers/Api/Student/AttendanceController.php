@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
@@ -119,17 +120,17 @@ class AttendanceController extends Controller
         $this->authorize('update', $attendance);
 
         // 該当チャプターを取得
-        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+        $chapter = Chapter::with('publicLessons')->findOrFail($request->chapter_id);
 
-        // $chapter が $attendance に紐づくか確認
-        if ($chapter->course_id !== $attendance->course_id) {
+        // $chapter が $attendance に紐づく公開中のチャプターか確認
+        if ($chapter->course_id !== $attendance->course_id || $chapter->status !== ChapterStatusEnum::PUBLIC) {
             throw new AuthorizationException('Forbidden, invalid chapter.');
         }
 
         try {
-            // 該当チャプターに含まれる全レッスンの受講状況を更新
-            LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
-                ->where('attendance_id', $attendance->id)
+            // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
+            $attendance->lessonAttendances()
+                ->whereIn('lesson_id', $chapter->publicLessons->pluck('id'))
                 ->update([
                     'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
                 ]);
@@ -148,16 +149,18 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        $attendance = Attendance::with('course.publicChapters.publicLessons')
+            ->findOrFail($request->attendance_id);
 
         // 本人のみ更新可
         $this->authorize('update', $attendance);
 
-        $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
-            ->pluck('id')
-            ->toArray();
+        // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
+        $publicLessonIds = $attendance->course->publicChapters
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
-        LessonAttendance::whereIn('id', $lessonAttendanceIds)
+        $attendance->lessonAttendances()
+            ->whereIn('lesson_id', $publicLessonIds)
             ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
 
         return response()->json([

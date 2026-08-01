@@ -99,7 +99,7 @@ class Notification extends Model
      * スコープ: 既読データ(read)/未読データ(unread)判別
      */
     #[Scope]
-    protected function filterByReadStatus($query, string $filter, int $studentId)
+    protected function filterByReadStatus(Builder $query, string $filter, int $studentId): Builder
     {
         return match ($filter) {
             'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),

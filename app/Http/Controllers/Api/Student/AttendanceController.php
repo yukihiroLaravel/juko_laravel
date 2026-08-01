@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
@@ -17,7 +18,7 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\LessonAttendance;
+use App\Model\Lesson;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\IndexService;
@@ -26,6 +27,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -66,17 +68,11 @@ class AttendanceController extends Controller
         ShowRequest $request,
         ShowService $service
     ): AttendanceShowResource {
-        try {
-            $attendanceId = (int) $request->attendance_id;
-            $userId = $request->user()->id;
-            $showDto = new ShowDto($attendanceId, $userId);
-            $attendance = $service($showDto);
+        $attendance = $service(new ShowDto((int) $request->attendance_id));
 
-            return new AttendanceShowResource($attendance);
-        } catch (AuthorizationException $e) {
-            Log::error($e->getMessage()."\n".$e->getTraceAsString());
-            throw $e;
-        }
+        $this->authorize('viewStudent', $attendance);
+
+        return new AttendanceShowResource($attendance);
     }
 
     /**
@@ -87,21 +83,26 @@ class AttendanceController extends Controller
         ContinueFromService $continueFromService
     ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
-            'course.chapters.lessons',
+            'course.publicChapters.publicLessons',
             'lessonAttendances',
         ])
             ->findOrFail($request->attendance_id);
 
         $this->authorize('viewStudent', $attendance);
 
+        // 公開レッスンを1つも持たないチャプターは受講しようがないため、進捗の集計対象から外す
+        $countableChapters = $attendance->course->publicChapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
+        $publicLessons = $countableChapters
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
+
         $progressData = [
-            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $attendance->course->chapters->count(),
-            'completedLessonsCount' => $attendance
-                ->lessonAttendances
-                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance, $countableChapters),
+            'totalChaptersCount' => $countableChapters->count(),
+            'completedLessonsCount' => $publicLessons
+                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
                 ->count(),
-            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
+            'totalLessonsCount' => $publicLessons->count(),
             'continueFrom' => $continueFromService($attendance)?->toArray(),
         ];
 
@@ -122,20 +123,16 @@ class AttendanceController extends Controller
         $this->authorize('update', $attendance);
 
         // 該当チャプターを取得
-        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
+        $chapter = Chapter::with('publicLessons')->findOrFail($request->chapter_id);
 
-        // $chapter が $attendance に紐づくか確認
-        if ($chapter->course_id !== $attendance->course_id) {
+        // $chapter が $attendance に紐づく公開中のチャプターか確認
+        if ($chapter->course_id !== $attendance->course_id || $chapter->status !== ChapterStatusEnum::PUBLIC) {
             throw new AuthorizationException('Forbidden, invalid chapter.');
         }
 
         try {
-            // 該当チャプターに含まれる全レッスンの受講状況を更新
-            LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
-                ->where('attendance_id', $attendance->id)
-                ->update([
-                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                ]);
+            // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
+            $attendance->completeLessons($chapter->publicLessons->pluck('id'));
 
             return response()->json([
                 'result' => true,
@@ -151,17 +148,17 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        $attendance = Attendance::with('course.publicChapters.publicLessons')
+            ->findOrFail($request->attendance_id);
 
         // 本人のみ更新可
         $this->authorize('update', $attendance);
 
-        $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
-            ->pluck('id')
-            ->toArray();
+        // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
+        $publicLessonIds = $attendance->course->publicChapters
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
-        LessonAttendance::whereIn('id', $lessonAttendanceIds)
-            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+        $attendance->completeLessons($publicLessonIds);
 
         return response()->json([
             'result' => true,
@@ -174,7 +171,7 @@ class AttendanceController extends Controller
     public function stuckPoints(StuckPointsRequest $request, StuckPointsService $service): AnonymousResourceCollection
     {
         // Policyによる認可チェック
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
         $this->authorize('viewStudent', $attendance);
 
         $result = $service($attendance->course_id);
@@ -183,44 +180,15 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 完了済みのチャプター数を取得する
+     * 受講済みのチャプター数を取得する
      *
-     * @param  Attendance  $attendance
-     * @return int
+     * @param  Collection<int, Chapter>  $chapters  集計対象のチャプター
      */
-    private function getCompletedChaptersCount($attendance)
+    private function getCompletedChaptersCount(Attendance $attendance, Collection $chapters): int
     {
-        return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
-            $isCompleted = false;
-            // 全てのレッスンが完了済みかどうかをチェック
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $isCompleted = false;
-
-                    return false;
-                }
-                $isCompleted = true;
-            });
-
-            return $isCompleted;
-        })->count();
-    }
-
-    /**
-     * レッスン合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalLessonsCount($attendance)
-    {
-        $totalLessonsCount = 0;
-        foreach ($attendance->course->chapters as $chapter) {
-            $lessonCount = $chapter->lessons->count();
-            $totalLessonsCount += $lessonCount;
-        }
-
-        return $totalLessonsCount;
+        return $chapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons
+                ->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
+            ->count();
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +14,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property bool $has_active_students
- * @property int $progress_percentage
  * @property int|null $capacity
  * @property int|null $current_attendance_count
  */
@@ -112,7 +110,7 @@ class Course extends Model
      */
     public function publicChapters(): HasMany
     {
-        return $this->chapters()->where('status', ChapterStatusEnum::PUBLIC->value);
+        return $this->chapters()->public();
     }
 
     /**

@@ -8,12 +8,20 @@ use App\Model\Course;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PatchStatusTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
 
     public function test_レッスン受講状態を更新_成功(): void
     {
@@ -44,6 +52,75 @@ class PatchStatusTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'id' => $lessonAttendance->id,
             'status' => 'before_attendance',
+        ]);
+    }
+
+    public function test_レッスンを受講済みにすると完了日時が記録される(): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-01 10:00:00'));
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lessonAttendance = LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->patchJson(
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            ['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]
+        );
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'id' => $lessonAttendance->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+    }
+
+    public function test_受講済みから受講中に戻しても完了日時は消えない(): void
+    {
+        // Arrange — 過去に一度受講済みになっているレッスン
+        $completedAt = CarbonImmutable::parse('2026-07-01 09:00:00');
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lessonAttendance = LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => $completedAt,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->patchJson(
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            ['status' => LessonAttendance::STATUS_IN_ATTENDANCE]
+        );
+
+        // Assert — 過去に受講済みになった事実は残る
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'id' => $lessonAttendance->id,
+            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'completed_at' => $completedAt,
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace Database\Factories\Model;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,5 +28,18 @@ class LessonAttendanceFactory extends Factory
             'attendance_id' => Attendance::factory(),
             'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
         ];
+    }
+
+    /**
+     * 受講済みの状態
+     *
+     * 完了日時が記録されているかどうかが受講済みの判定条件のため、表示用ステータスと合わせて記録する
+     */
+    public function completed(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
     }
 }

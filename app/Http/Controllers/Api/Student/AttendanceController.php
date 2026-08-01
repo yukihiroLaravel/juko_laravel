@@ -17,6 +17,7 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
@@ -81,21 +82,23 @@ class AttendanceController extends Controller
         ContinueFromService $continueFromService
     ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
-            'course.chapters.lessons',
+            'course.publicChapters.publicLessons',
             'lessonAttendances',
         ])
             ->findOrFail($request->attendance_id);
 
         $this->authorize('viewStudent', $attendance);
 
+        $publicLessons = $attendance->course->publicChapters
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
+
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $attendance->course->chapters->count(),
-            'completedLessonsCount' => $attendance
-                ->lessonAttendances
-                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+            'totalChaptersCount' => $attendance->course->publicChapters->count(),
+            'completedLessonsCount' => $publicLessons
+                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
                 ->count(),
-            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
+            'totalLessonsCount' => $publicLessons->count(),
             'continueFrom' => $continueFromService($attendance)?->toArray(),
         ];
 
@@ -177,44 +180,15 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 完了済みのチャプター数を取得する
+     * 受講済みのチャプター数を取得する
      *
-     * @param  Attendance  $attendance
-     * @return int
+     * 公開レッスンを1つも持たないチャプターは、受講済みと判定しない
      */
-    private function getCompletedChaptersCount($attendance)
+    private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
-            $isCompleted = false;
-            // 全てのレッスンが完了済みかどうかをチェック
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $isCompleted = false;
-
-                    return false;
-                }
-                $isCompleted = true;
-            });
-
-            return $isCompleted;
-        })->count();
-    }
-
-    /**
-     * レッスン合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalLessonsCount($attendance)
-    {
-        $totalLessonsCount = 0;
-        foreach ($attendance->course->chapters as $chapter) {
-            $lessonCount = $chapter->lessons->count();
-            $totalLessonsCount += $lessonCount;
-        }
-
-        return $totalLessonsCount;
+        return $attendance->course->publicChapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty()
+                && $chapter->publicLessons->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
+            ->count();
     }
 }

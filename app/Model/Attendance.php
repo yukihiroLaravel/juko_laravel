@@ -221,4 +221,14 @@ class Attendance extends Model
 
         return max(0, (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline, false));
     }
+
+    /**
+     * 該当レッスンを受講済みかどうか
+     */
+    public function hasCompletedLesson(Lesson $lesson): bool
+    {
+        $lessonAttendance = $this->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+    }
 }

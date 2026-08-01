@@ -5,7 +5,6 @@ namespace App\Services\Student\Attendance;
 use App\Dto\Student\Attendance\ContinueFromDto;
 use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 
 class ContinueFromService
 {
@@ -19,7 +18,7 @@ class ContinueFromService
 
         foreach ($attendance->course->publicChapters as $chapter) {
             $incompleteLesson = $chapter->publicLessons
-                ->first(fn (Lesson $lesson) => ! $this->isCompletedLesson($attendance, $lesson));
+                ->first(fn (Lesson $lesson) => ! $attendance->hasCompletedLesson($lesson));
 
             if ($incompleteLesson instanceof Lesson) {
                 return new ContinueFromDto(
@@ -32,15 +31,5 @@ class ContinueFromService
         }
 
         return null;
-    }
-
-    /**
-     * 該当レッスンを受講済みかどうかを判定する
-     */
-    private function isCompletedLesson(Attendance $attendance, Lesson $lesson): bool
-    {
-        $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
     }
 }

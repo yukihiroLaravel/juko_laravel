@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -37,6 +39,100 @@ class ProgressTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+    }
+
+    public function test_公開されていないチャプターとレッスンは進捗の件数に含まれない(): void
+    {
+        // Arrange — 公開チャプター（公開レッスン1・下書きレッスン1）と非公開チャプター（レッスン1）
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $openChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $closedChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PRIVATE->value,
+        ]);
+        $openLesson = Lesson::factory()->create([
+            'chapter_id' => $openChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        $draftLesson = Lesson::factory()->create([
+            'chapter_id' => $openChapter->id,
+            'status' => LessonStatusEnum::DRAFT->value,
+        ]);
+        $closedChapterLesson = Lesson::factory()->create([
+            'chapter_id' => $closedChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        foreach ([$openLesson, $draftLesson, $closedChapterLesson] as $lesson) {
+            LessonAttendance::factory()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            ]);
+        }
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert — 公開チャプター1つ・公開レッスン1つだけが件数に入る
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_total_chapters', 1);
+        $response->assertJsonPath('data.number_of_completed_chapters', 1);
+        $response->assertJsonPath('data.number_of_total_lessons', 1);
+        $response->assertJsonPath('data.number_of_completed_lessons', 1);
+    }
+
+    public function test_公開レッスンをすべて受講すると進捗が完了になる(): void
+    {
+        // Arrange — 公開レッスンのみ受講済みで、下書きレッスンは未着手のまま
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $openLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        $draftLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::DRAFT->value,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $openLesson->id,
+            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $draftLesson->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_completed_chapters', 1);
+        $response->assertJsonPath('data.number_of_total_chapters', 1);
+        $response->assertJsonPath('data.number_of_completed_lessons', 1);
+        $response->assertJsonPath('data.number_of_total_lessons', 1);
+        $response->assertJsonPath('data.continue_from', null);
     }
 
     public function test_受講進捗を取得_他の生徒の進捗を取得_失敗(): void

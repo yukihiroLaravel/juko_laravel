@@ -5,9 +5,6 @@ namespace App\Services\Student\Attendance;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
-use App\Model\Chapter;
-use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -23,7 +20,7 @@ class IndexService
         ?int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
-        $attendances = Attendance::with([
+        return Attendance::with([
             'course.instructor',
             'course.publicChapters.publicLessons',
             'lessonAttendances',
@@ -48,46 +45,5 @@ class IndexService
                 });
             })
             ->paginate($perPage, ['*'], 'page', $page);
-
-        // 各受講情報ごとにチャプター単位の進捗率を計算
-        $attendances->each(function (Attendance $attendance) {
-            $completedChaptersCount = $this->getCompletedChaptersCount($attendance);
-            $totalChaptersCount = $this->getTotalChaptersCount($attendance);
-            $progressPercentage = ($totalChaptersCount > 0) ? round(($completedChaptersCount / $totalChaptersCount) * 100) : 0;
-            $attendance->course->progress_percentage = $progressPercentage;
-        });
-
-        return $attendances;
-    }
-
-    /**
-     * 完了済みのチャプター数を取得する
-     *
-     * 公開レッスンを1つも持たないチャプターは、完了と判定しない
-     */
-    private function getCompletedChaptersCount(Attendance $attendance): int
-    {
-        return $attendance->course->publicChapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty()
-                && $chapter->publicLessons->every(fn (Lesson $lesson) => $this->isCompletedLesson($attendance, $lesson)))
-            ->count();
-    }
-
-    /**
-     * 該当レッスンを受講済みかどうかを判定する
-     */
-    private function isCompletedLesson(Attendance $attendance, Lesson $lesson): bool
-    {
-        $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-        return $lessonAttendance?->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-    }
-
-    /**
-     * チャプター合計を取得する
-     */
-    private function getTotalChaptersCount(Attendance $attendance): int
-    {
-        return $attendance->course->publicChapters->count();
     }
 }

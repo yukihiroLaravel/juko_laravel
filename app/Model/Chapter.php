@@ -91,7 +91,7 @@ class Chapter extends Model
      */
     public function publicLessons(): HasMany
     {
-        return $this->lessons()->public();
+        return $this->hasMany(Lesson::class)->public();
     }
 
     /**
@@ -102,7 +102,7 @@ class Chapter extends Model
      */
     public static function extractPublicChapter($chapters)
     {
-        return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
+        return $chapters->filter(fn($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
     /**
@@ -131,14 +131,14 @@ class Chapter extends Model
 
     protected function completedCount(): Attribute
     {
-        return Attribute::make(get: fn () => $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
+        return Attribute::make(get: fn() => $this->lessons->flatMap(fn(Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
     }
 
     /**
      * 公開中のチャプターに絞り込む
      */
     #[Scope]
-    protected function public(Builder $query): void
+    public function scopePublic(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

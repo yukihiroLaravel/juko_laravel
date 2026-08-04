@@ -73,7 +73,7 @@ class Lesson extends Model
      */
     protected function totalLessonsCount(): Attribute
     {
-        return Attribute::make(get: fn () => $this->chapter->lessons->count());
+        return Attribute::make(get: fn() => $this->chapter->lessons->count());
     }
 
     /**
@@ -81,14 +81,14 @@ class Lesson extends Model
      */
     protected function completedLessonsCount(): Attribute
     {
-        return Attribute::make(get: fn () => $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count());
+        return Attribute::make(get: fn() => $this->lessonAttendances->filter(fn(LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count());
     }
 
     /**
      * 公開済みのレッスンに絞り込む
      */
     #[Scope]
-    protected function public(Builder $query): void
+    protected function scopePublic(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

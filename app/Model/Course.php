@@ -110,7 +110,7 @@ class Course extends Model
      */
     public function publicChapters(): HasMany
     {
-        return $this->chapters()->public();
+        return $this->hasMany(Chapter::class)->public();
     }
 
     /**

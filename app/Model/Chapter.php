@@ -102,7 +102,7 @@ class Chapter extends Model
      */
     public static function extractPublicChapter($chapters)
     {
-        return $chapters->filter(fn($chapter) => $chapter->status === StatusEnum::PUBLIC);
+        return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
     /**
@@ -131,7 +131,7 @@ class Chapter extends Model
 
     protected function completedCount(): Attribute
     {
-        return Attribute::make(get: fn() => $this->lessons->flatMap(fn(Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
+        return Attribute::make(get: fn () => $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
     }
 
     /**

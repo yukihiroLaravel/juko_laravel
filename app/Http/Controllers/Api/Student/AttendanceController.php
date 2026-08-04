@@ -94,15 +94,15 @@ class AttendanceController extends Controller
 
         // 公開レッスンを1つも持たないチャプターは受講しようがないため、進捗の集計対象から外す
         $countableChapters = $attendance->course->publicChapters
-            ->filter(fn(Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
         $publicLessons = $countableChapters
-            ->flatMap(fn(Chapter $chapter) => $chapter->publicLessons);
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance, $countableChapters),
             'totalChaptersCount' => $countableChapters->count(),
             'completedLessonsCount' => $publicLessons
-                ->filter(fn(Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
+                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
                 ->count(),
             'totalLessonsCount' => $publicLessons->count(),
             'continueFrom' => $continueFromService($attendance)?->toArray(),
@@ -140,7 +140,7 @@ class AttendanceController extends Controller
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
             $publicLessonIds = $chapter->lessons
-                ->filter(fn($lesson) => $lesson->status === LessonStatusEnum::PUBLIC)
+                ->filter(fn ($lesson) => $lesson->status === LessonStatusEnum::PUBLIC)
                 ->pluck('id');
             $attendance->completeLessons($publicLessonIds);
 
@@ -171,8 +171,8 @@ class AttendanceController extends Controller
 
         // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
         $publicLessonIds = $attendance->course->chapters
-            ->filter(fn($chapter) => $chapter->status === ChapterStatusEnum::PUBLIC)
-            ->flatMap(fn($chapter) => $chapter->lessons->where('status', LessonStatusEnum::PUBLIC))
+            ->filter(fn ($chapter) => $chapter->status === ChapterStatusEnum::PUBLIC)
+            ->flatMap(fn ($chapter) => $chapter->lessons->where('status', LessonStatusEnum::PUBLIC))
             ->pluck('id');
         // レッスンを一括完了させる処理
         $attendance->completeLessons($publicLessonIds);
@@ -204,8 +204,8 @@ class AttendanceController extends Controller
     private function getCompletedChaptersCount(Attendance $attendance, Collection $chapters): int
     {
         return $chapters
-            ->filter(fn(Chapter $chapter) => $chapter->publicLessons
-                ->every(fn(Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons
+                ->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
             ->count();
     }
 }

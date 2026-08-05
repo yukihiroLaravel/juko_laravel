@@ -3,12 +3,15 @@
 namespace App\Services\Student\Attendance;
 
 use App\Dto\Student\Attendance\IndexDto;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService

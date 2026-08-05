@@ -22,22 +22,22 @@ class IndexService
         // 受講情報を関連情報と一緒に取得
         $attendances = Attendance::with([
             'course.instructor',
-            'course.chapters.lessons',
+            'course.publicChapters',
+            'course.publicChapters.publicLessons',
             'lessonAttendances',
             'course.tags',
             'course.courseDeadline',
         ])
             ->where('student_id', $indexDto->getStudentId())
             ->whereHas('course', function (Builder $query) use ($indexDto) {
-                $query->when(! $indexDto->getSearchWord(), function (Builder $query) {
-                    $query->where('status', CourseStatusEnum::PUBLIC->value);
-                })->when($indexDto->getSearchWord(), function (Builder $query) use ($indexDto) {
-                    $query->where('title', 'like', "%{$indexDto->getSearchWord()}%")
-                        ->orWhereHas('tags', function (Builder $query) use ($indexDto) {
-                            $query->where('content', 'like', "%{$indexDto->getSearchWord()}%");
-                        })
-                        ->where('status', CourseStatusEnum::PUBLIC->value);
-                });
+                $searchWord = $indexDto->getSearchWord();
+                $query->where('status', CourseStatusEnum::PUBLIC->value)
+                    ->when($searchWord !== null && $searchWord !=='', function (Builder $query) use ($searchWord) {
+                        $query->where(function (Builder $query) use ($searchWord) {
+                            $query->where('title', 'like', "%{$searchWord}%")
+                                ->orWhereHas('tags', fn (Builder $query) => $query->where('content', 'like', "%{$searchWord}%"));
+                        });
+                    });
             })
             ->when($tagId, function (Builder $query) use ($tagId) {
                 $query->whereHas('course.tags', function (Builder $query) use ($tagId) {
@@ -58,22 +58,34 @@ class IndexService
     }
 
     /**
-     * 完了済みのチャプター数を取得する
+     * 完了済み・公開中のチャプター数を取得する
      */
     private function getCompletedChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->filter(fn (Chapter $chapter) => $chapter->lessons->every(function (Lesson $lesson) use ($attendance) {
-            $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+        return $attendance->course->publicChapters->filter(function (Chapter $chapter) use ($attendance) {
 
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        }))->count();
+            // 公開レッスンがないチャプターは対象外
+            if ($chapter->publicLessons->isEmpty()) {
+                return false;
+            }
+
+            // 公開レッスンのみで every() を判定する
+            return $chapter->publicLessons->every(function (Lesson $lesson) use ($attendance) {
+                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+                return $lessonAttendance &&
+                    $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+            });
+        })->count();
     }
 
     /**
-     * チャプター合計を取得する
+     * 公開中のチャプター合計を取得する
      */
     private function getTotalChaptersCount(Attendance $attendance): int
     {
-        return $attendance->course->chapters->count();
+        return $attendance->course->publicChapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty())
+            ->count();
     }
 }

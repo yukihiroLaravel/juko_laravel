@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Chapter extends Model
 {
@@ -125,5 +126,13 @@ class Chapter extends Model
     public function scopePublic(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
+    }
+
+    /**
+     * 公開中のレッスンのリレーション
+     */
+        public function publicLessons(): HasMany
+    {
+        return $this->lessons()->public();
     }
 }

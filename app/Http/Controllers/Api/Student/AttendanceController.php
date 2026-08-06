@@ -17,6 +17,7 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
+use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
@@ -87,7 +88,7 @@ class AttendanceController extends Controller
         ContinueFromService $continueFromService
     ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
-            'course.chapters.lessons',
+            'course.publicChapters.publicLessons',
             'lessonAttendances',
         ])
             ->findOrFail($request->attendance_id);
@@ -96,11 +97,8 @@ class AttendanceController extends Controller
 
         $progressData = [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $attendance->course->chapters->count(),
-            'completedLessonsCount' => $attendance
-                ->lessonAttendances
-                ->filter(fn ($lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
-                ->count(),
+            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
+            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
             'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
             'continueFrom' => $continueFromService($attendance)?->toArray(),
         ];
@@ -190,21 +188,50 @@ class AttendanceController extends Controller
      */
     private function getCompletedChaptersCount($attendance)
     {
-        return $attendance->course->chapters->filter(function ($chapter) use ($attendance) {
-            $isCompleted = false;
-            // 全てのレッスンが完了済みかどうかをチェック
-            $chapter->lessons->each(function ($lesson) use ($attendance, &$isCompleted) {
-                $lessonAttendance = $attendance->lessonAttendances->where('lesson_id', $lesson->id)->first();
-                if ($lessonAttendance->status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE) {
-                    $isCompleted = false;
+        return $attendance->course->publicChapters->filter(function (Chapter $chapter) use ($attendance) {
 
-                    return false;
-                }
-                $isCompleted = true;
+            // 公開レッスンがないチャプターは対象外
+            if ($chapter->publicLessons->isEmpty()) {
+                return false;
+            }
+
+            // 公開レッスンのみで every() を判定する
+            return $chapter->publicLessons->every(function (Lesson $lesson) use ($attendance) {
+                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+                return $lessonAttendance &&
+                    $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
             });
-
-            return $isCompleted;
         })->count();
+    }
+
+    /**
+     * 公開中のチャプター合計を取得する
+     */
+    private function getTotalChaptersCount(Attendance $attendance): int
+    {
+        return $attendance->course->publicChapters
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty())
+            ->count();
+    }
+
+    /**
+     * 完了済みのレッスン数を取得する
+     *
+     * @param  Attendance  $attendance
+     * @return int
+     */
+    private function getCompletedLessonsCount(Attendance $attendance): int
+    {
+        return $attendance->course->publicChapters
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons)
+            ->filter(function (Lesson $lesson) use ($attendance) {
+                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+                return $lessonAttendance &&
+                    $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
+            })
+            ->count();
     }
 
     /**
@@ -216,8 +243,8 @@ class AttendanceController extends Controller
     private function getTotalLessonsCount($attendance)
     {
         $totalLessonsCount = 0;
-        foreach ($attendance->course->chapters as $chapter) {
-            $lessonCount = $chapter->lessons->count();
+        foreach ($attendance->course->publicChapters as $chapter) {
+            $lessonCount = $chapter->publicLessons->count();
             $totalLessonsCount += $lessonCount;
         }
 

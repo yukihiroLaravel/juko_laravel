@@ -9,7 +9,6 @@ use App\Model\Chapter;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class IndexService

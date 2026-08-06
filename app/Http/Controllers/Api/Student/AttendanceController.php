@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Student;
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
@@ -122,8 +124,13 @@ class AttendanceController extends Controller
 
         $this->authorize('update', $attendance);
 
+        //  講座の公開状態チェックを追加
+        if ($attendance->course->status !== CourseStatusEnum::PUBLIC) {
+            throw new AuthorizationException('Forbidden, invalid course.');
+        }
+
         // 該当チャプターを取得
-        $chapter = Chapter::with('publicLessons')->findOrFail($request->chapter_id);
+        $chapter = Chapter::with('lessons')->findOrFail($request->chapter_id);
 
         // $chapter が $attendance に紐づく公開中のチャプターか確認
         if ($chapter->course_id !== $attendance->course_id || $chapter->status !== ChapterStatusEnum::PUBLIC) {
@@ -132,7 +139,10 @@ class AttendanceController extends Controller
 
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
-            $attendance->completeLessons($chapter->publicLessons->pluck('id'));
+            $publicLessonIds = $chapter->lessons
+                ->filter(fn ($lesson) => $lesson->status === LessonStatusEnum::PUBLIC)
+                ->pluck('id');
+            $attendance->completeLessons($publicLessonIds);
 
             return response()->json([
                 'result' => true,
@@ -148,16 +158,23 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $attendance = Attendance::with('course.publicChapters.publicLessons')
+        $attendance = Attendance::with('course.chapters.lessons')
             ->findOrFail($request->attendance_id);
 
         // 本人のみ更新可
         $this->authorize('update', $attendance);
 
-        // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
-        $publicLessonIds = $attendance->course->publicChapters
-            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
+        // 講座の公開状態チェックを追加
+        if ($attendance->course->status !== CourseStatusEnum::PUBLIC) {
+            throw new AuthorizationException('Forbidden, invalid course.');
+        }
 
+        // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
+        $publicLessonIds = $attendance->course->chapters
+            ->filter(fn ($chapter) => $chapter->status === ChapterStatusEnum::PUBLIC)
+            ->flatMap(fn ($chapter) => $chapter->lessons->where('status', LessonStatusEnum::PUBLIC))
+            ->pluck('id');
+        // レッスンを一括完了させる処理
         $attendance->completeLessons($publicLessonIds);
 
         return response()->json([

@@ -91,7 +91,7 @@ class Chapter extends Model
      */
     public function publicLessons(): HasMany
     {
-        return $this->hasMany(Lesson::class)->public();
+        return $this->lessons()->public();
     }
 
     /**
@@ -138,7 +138,7 @@ class Chapter extends Model
      * 公開中のチャプターに絞り込む
      */
     #[Scope]
-    public function scopePublic(Builder $query): void
+    protected function public(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

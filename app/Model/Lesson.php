@@ -88,7 +88,7 @@ class Lesson extends Model
      * 公開済みのレッスンに絞り込む
      */
     #[Scope]
-    protected function scopePublic(Builder $query): void
+    protected function public(Builder $query): void
     {
         $query->where('status', StatusEnum::PUBLIC->value);
     }

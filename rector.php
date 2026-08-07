@@ -18,7 +18,7 @@ return RectorConfig::configure()
     ])
     ->withSets([
         LevelSetList::UP_TO_PHP_83,
-        // LaravelLevelSetList::UP_TO_LARAVEL_120,
+        LaravelLevelSetList::UP_TO_LARAVEL_120,
     ])
     ->withPreparedSets(
         deadCode: true

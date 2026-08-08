@@ -17,10 +17,10 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
+use App\Services\Student\Attendance\CourseProgressService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Exception;
@@ -86,6 +86,7 @@ class AttendanceController extends Controller
      */
     public function progress(
         ProgressRequest $request,
+        CourseProgressService $courseProgressService,
         ContinueFromService $continueFromService
     ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
@@ -96,17 +97,10 @@ class AttendanceController extends Controller
 
         $this->authorize('viewStudent', $attendance);
 
-        $progressData = [
-            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance),
-            'totalChaptersCount' => $this->getTotalChaptersCount($attendance),
-            'completedLessonsCount' => $this->getCompletedLessonsCount($attendance),
-            'totalLessonsCount' => $this->getTotalLessonsCount($attendance),
-            'continueFrom' => $continueFromService($attendance)?->toArray(),
-        ];
-
         return new AttendanceCourseProgressResource([
             'attendance' => $attendance,
-            'progressData' => $progressData,
+            'courseProgress' => $courseProgressService($attendance),
+            'continueFrom' => $continueFromService($attendance),
         ]);
     }
 
@@ -175,73 +169,5 @@ class AttendanceController extends Controller
         $result = $service($attendance->course_id);
 
         return StuckPointsResource::collection($result);
-    }
-
-    /**
-     * 完了済みのチャプター数を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getCompletedChaptersCount($attendance)
-    {
-        return $attendance->course->publicChapters->filter(function (Chapter $chapter) use ($attendance) {
-
-            // 公開レッスンがないチャプターは対象外
-            if ($chapter->publicLessons->isEmpty()) {
-                return false;
-            }
-
-            // 公開レッスンのみで every() を判定する
-            return $chapter->publicLessons->every(function (Lesson $lesson) use ($attendance) {
-                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-                return $lessonAttendance &&
-                    $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            });
-        })->count();
-    }
-
-    /**
-     * 公開中のチャプター合計を取得する
-     */
-    private function getTotalChaptersCount(Attendance $attendance): int
-    {
-        return $attendance->course->publicChapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty())
-            ->count();
-    }
-
-    /**
-     * 完了済みのレッスン数を取得する
-     */
-    private function getCompletedLessonsCount(Attendance $attendance): int
-    {
-        return $attendance->course->publicChapters
-            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons)
-            ->filter(function (Lesson $lesson) use ($attendance) {
-                $lessonAttendance = $attendance->lessonAttendances->firstWhere('lesson_id', $lesson->id);
-
-                return $lessonAttendance &&
-                    $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            })
-            ->count();
-    }
-
-    /**
-     * レッスン合計を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
-     */
-    private function getTotalLessonsCount($attendance)
-    {
-        $totalLessonsCount = 0;
-        foreach ($attendance->course->publicChapters as $chapter) {
-            $lessonCount = $chapter->publicLessons->count();
-            $totalLessonsCount += $lessonCount;
-        }
-
-        return $totalLessonsCount;
     }
 }

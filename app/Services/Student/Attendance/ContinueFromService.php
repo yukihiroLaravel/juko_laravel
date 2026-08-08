@@ -5,7 +5,6 @@ namespace App\Services\Student\Attendance;
 use App\Dto\Student\Attendance\ContinueFromDto;
 use App\Model\Attendance;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 
 class ContinueFromService
 {
@@ -16,13 +15,11 @@ class ContinueFromService
     public function __invoke(Attendance $attendance): ?ContinueFromDto
     {
         foreach ($attendance->course->publicChapters as $chapter) {
-            $incompleteLesson = $chapter->publicLessons->first(function (Lesson $lesson) use ($attendance) {
-                $status = $attendance->lessonAttendances
-                    ->where('lesson_id', $lesson->id)
-                    ->first()?->status;
-
-                return $status !== LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-            });
+            $incompleteLesson = $chapter->publicLessons->first(
+                fn (Lesson $lesson) => $attendance->lessonAttendances
+                    ->firstWhere('lesson_id', $lesson->id)
+                    ?->isCompleted() !== true
+            );
 
             if ($incompleteLesson) {
                 return new ContinueFromDto(

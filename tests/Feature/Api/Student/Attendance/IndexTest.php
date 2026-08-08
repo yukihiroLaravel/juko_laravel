@@ -238,10 +238,9 @@ class IndexTest extends TestCase
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
         ]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
@@ -269,10 +268,9 @@ class IndexTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -294,10 +292,9 @@ class IndexTest extends TestCase
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
         ]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,

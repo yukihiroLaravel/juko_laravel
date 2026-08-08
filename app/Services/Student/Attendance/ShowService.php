@@ -12,7 +12,7 @@ class ShowService
         ShowDto $showDto
     ): Attendance {
         $attendance = Attendance::with([
-            'course.publicChapters.lessons',
+            'course.publicChapters.publicLessons',
             'course.instructor',
             'lessonAttendances',
             'course.courseDeadline',

@@ -33,7 +33,7 @@ class AttendanceShowResource extends JsonResource
                     $this->resource->course->publicChapters
                 )->collection->map(fn (ChapterResource $chapterResource) => [
                     ...$chapterResource->toArray($request),
-                    'lessons' => $chapterResource->resource->lessons->map(function (Lesson $lesson) use ($request) {
+                    'lessons' => $chapterResource->resource->publicLessons->map(function (Lesson $lesson) use ($request) {
                         $lessonAttendance = $this->resource->lessonAttendances->firstWhere('lesson_id', $lesson->id);
 
                         return [

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
 
 class Chapter extends Model
 {
@@ -80,17 +79,6 @@ class Chapter extends Model
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class)->orderBy('order', 'asc');
-    }
-
-    /**
-     * 公開中のチャプターを抽出
-     *
-     * @param  Collection  $chapters
-     * @return Collection
-     */
-    public static function extractPublicChapter($chapters)
-    {
-        return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
     /**

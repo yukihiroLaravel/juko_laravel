@@ -14,14 +14,13 @@ class ContinueFromService
      */
     public function __invoke(Attendance $attendance): ?ContinueFromDto
     {
-        foreach ($attendance->course->publicChapters as $chapter) {
-            $incompleteLesson = $chapter->publicLessons->first(
-                fn (Lesson $lesson) => $attendance->lessonAttendances
-                    ->firstWhere('lesson_id', $lesson->id)
-                    ?->isCompleted() !== true
-            );
+        $attendance->loadMissing(['course.publicChapters.publicLessons', 'lessonAttendances']);
 
-            if ($incompleteLesson) {
+        foreach ($attendance->course->publicChapters as $chapter) {
+            $incompleteLesson = $chapter->publicLessons
+                ->first(fn (Lesson $lesson) => ! $attendance->hasCompletedLesson($lesson));
+
+            if ($incompleteLesson instanceof Lesson) {
                 return new ContinueFromDto(
                     chapterId: $chapter->id,
                     chapterTitle: $chapter->title,

@@ -8,7 +8,7 @@ use App\Model\ViewedOnceNotification;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\ViewedOnceNotification>
+ * @extends Factory<ViewedOnceNotification>
  */
 class ViewedOnceNotificationFactory extends Factory
 {

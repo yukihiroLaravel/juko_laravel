@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -10,7 +12,7 @@ class Handler extends ExceptionHandler
     /**
      * A list of the exception types that are not reported.
      *
-     * @var array<int, class-string<\Throwable>>
+     * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
         //
@@ -31,7 +33,7 @@ class Handler extends ExceptionHandler
      *
      * @return void
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[\Override]
     public function report(Throwable $exception)
@@ -42,10 +44,10 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  Request  $request
+     * @return Response
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     #[\Override]
     public function render($request, Throwable $exception)

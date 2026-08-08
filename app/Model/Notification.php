@@ -4,9 +4,12 @@ namespace App\Model;
 
 use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Notification extends Model
@@ -21,7 +24,7 @@ class Notification extends Model
     protected $table = 'notifications';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'course_id',
@@ -47,7 +50,7 @@ class Notification extends Model
     /**
      * 受講生を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return BelongsToMany<Student, $this>
      */
     public function students()
     {
@@ -57,7 +60,7 @@ class Notification extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Course, $this>
      */
     public function course()
     {
@@ -67,7 +70,7 @@ class Notification extends Model
     /**
      * 講師を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Instructor, $this>
      */
     public function instructor()
     {
@@ -86,7 +89,8 @@ class Notification extends Model
     /**
      * スコープ: 公開中のお知らせを取得
      */
-    public function scopePublic(Builder $query): Builder
+    #[Scope]
+    protected function public(Builder $query): Builder
     {
         return $query->where('status', StatusEnum::PUBLIC);
     }
@@ -94,7 +98,8 @@ class Notification extends Model
     /**
      * スコープ: 既読データ(read)/未読データ(unread)判別
      */
-    public function scopeFilterByReadStatus($query, string $filter, int $studentId)
+    #[Scope]
+    protected function filterByReadStatus(Builder $query, string $filter, int $studentId): Builder
     {
         return match ($filter) {
             'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -16,6 +17,11 @@ class AttendancePolicy
     {
         // 受講期限切れの場合は閲覧不可
         if ($attendance->isExpired()) {
+            return false;
+        }
+
+        // 非公開講座は閲覧不可
+        if ($attendance->course->status !== CourseStatusEnum::PUBLIC) {
             return false;
         }
 

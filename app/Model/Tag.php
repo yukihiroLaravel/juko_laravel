@@ -19,7 +19,7 @@ class Tag extends Model
     protected $table = 'tags';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'instructor_id',

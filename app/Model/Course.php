@@ -30,7 +30,7 @@ class Course extends Model
     protected $table = 'courses';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'instructor_id',

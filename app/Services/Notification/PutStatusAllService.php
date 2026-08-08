@@ -11,7 +11,7 @@ class PutStatusAllService
     /**
      * お知らせのステータスを一括更新する
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, \App\Model\Notification>  $notifications
+     * @param  Collection<int, Notification>  $notifications
      */
     public function __invoke(StatusEnum $status, Collection $notifications): void
     {

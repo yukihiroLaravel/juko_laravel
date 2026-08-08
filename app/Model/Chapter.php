@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Chapter\StatusEnum;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,7 @@ class Chapter extends Model
     protected $table = 'chapters';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'chapter_id',
@@ -66,7 +67,7 @@ class Chapter extends Model
      *
      * @return BelongsTo<Course, $this>
      */
-    public function course(): BelongsTo
+    public function course()
     {
         return $this->belongsTo(Course::class);
     }
@@ -76,17 +77,9 @@ class Chapter extends Model
      *
      * @return HasMany<Lesson, $this>
      */
-    public function lessons(): HasMany
+    public function lessons()
     {
         return $this->hasMany(Lesson::class)->orderBy('order', 'asc');
-    }
-
-    /**
-     * 公開中のチャプターに絞り込む
-     */
-    public function scopePublic(Builder $query): void
-    {
-        $query->where('status', StatusEnum::PUBLIC->value);
     }
 
     /**
@@ -97,5 +90,14 @@ class Chapter extends Model
     public function publicLessons(): HasMany
     {
         return $this->lessons()->public();
+    }
+
+    /**
+     * 公開中のチャプターに絞り込む
+     */
+    #[Scope]
+    protected function public(Builder $query): void
+    {
+        $query->where('status', StatusEnum::PUBLIC->value);
     }
 }

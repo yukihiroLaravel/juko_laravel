@@ -6,6 +6,7 @@ use App\Http\Resources\Base\Instructor\ChapterResource;
 use App\Http\Resources\Base\Instructor\CourseResource;
 use App\Http\Resources\Base\Instructor\TagResource;
 use App\Model\Attendance;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StatusResource extends JsonResource
@@ -16,7 +17,7 @@ class StatusResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

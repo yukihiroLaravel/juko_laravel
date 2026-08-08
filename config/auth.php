@@ -1,5 +1,8 @@
 <?php
 
+use App\Model\Instructor;
+use App\Model\Student;
+
 return [
 
     /*
@@ -71,11 +74,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Model\Student::class,
+            'model' => Student::class,
         ],
         'instructors' => [
             'driver' => 'eloquent',
-            'model' => App\Model\Instructor::class,
+            'model' => Instructor::class,
         ],
 
         // 'users' => [

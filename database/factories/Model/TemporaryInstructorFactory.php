@@ -7,7 +7,7 @@ use App\Model\TemporaryInstructor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Model\TemporaryInstructor>
+ * @extends Factory<TemporaryInstructor>
  */
 class TemporaryInstructorFactory extends Factory
 {

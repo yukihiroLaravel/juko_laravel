@@ -24,7 +24,7 @@ class TagController extends Controller
      */
     public function index(IndexRequest $request)
     {
-        $tagId = $request->query('tag_id', null);
+        $tagId = $request->query('tag_id');
 
         // マネージャーが管理する講師IDを取得
         $instructorId = Auth::guard('instructor')->user()->id;

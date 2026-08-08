@@ -5,6 +5,7 @@ namespace App\Http\Resources\Instructor;
 use App\Http\Resources\Base\Instructor\AttendanceResource;
 use App\Http\Resources\Base\Instructor\ChapterResource;
 use App\Http\Resources\Base\Instructor\CourseResource;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceShowResource extends JsonResource
@@ -12,7 +13,7 @@ class AttendanceShowResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

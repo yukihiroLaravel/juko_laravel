@@ -3,7 +3,6 @@
 namespace App\Model;
 
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +20,7 @@ class LessonAttendance extends Model
     protected $table = 'lesson_attendances';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'lesson_id',
@@ -43,11 +42,27 @@ class LessonAttendance extends Model
     const PERIOD_MONTH = 'month';
 
     /**
+     * 表示用ステータスを変更する
+     *
+     * 完了日時は過去に完了した事実を保つため、まだ記録がない場合にだけ現在時刻を記録する
+     */
+    public function changeStatus(string $status): void
+    {
+        $this->status = $status;
+
+        if ($status === self::STATUS_COMPLETED_ATTENDANCE && $this->completed_at === null) {
+            $this->completed_at = CarbonImmutable::now();
+        }
+
+        $this->save();
+    }
+
+    /**
      * レッスン取得
      *
      * @return BelongsTo<Lesson, $this>
      */
-    public function lesson(): BelongsTo
+    public function lesson()
     {
         return $this->belongsTo(Lesson::class);
     }
@@ -57,52 +72,9 @@ class LessonAttendance extends Model
      *
      * @return BelongsTo<Attendance, $this>
      */
-    public function attendance(): BelongsTo
+    public function attendance()
     {
         return $this->belongsTo(Attendance::class);
-    }
-
-    /**
-     * レッスンが完了済みかどうか
-     *
-     * ステータスは表示用のため、完了判定は完了日時の有無で行う。
-     */
-    public function isCompleted(): bool
-    {
-        return $this->completed_at !== null;
-    }
-
-    /**
-     * 受講状況を更新する
-     *
-     * 完了へ遷移した場合は完了日時を記録する。完了日時は最初に完了した時刻を
-     * 保持し続けるため、記録済みの場合は上書きしない。
-     */
-    public function changeStatus(string $status): void
-    {
-        $attributes = ['status' => $status];
-
-        if ($status === self::STATUS_COMPLETED_ATTENDANCE && $this->completed_at === null) {
-            $attributes['completed_at'] = CarbonImmutable::now();
-        }
-
-        $this->update($attributes);
-    }
-
-    /**
-     * 絞り込んだレッスン受講状況をまとめて完了にする
-     *
-     * 完了日時は最初に完了した時刻を保持し続けるため、未記録のものだけ現在日時を記録する。
-     *
-     * @param  Builder<LessonAttendance>  $query  更新対象を絞り込んだクエリ
-     */
-    public static function completeAll(Builder $query): void
-    {
-        (clone $query)
-            ->whereNull('completed_at')
-            ->update(['completed_at' => CarbonImmutable::now()]);
-
-        $query->update(['status' => self::STATUS_COMPLETED_ATTENDANCE]);
     }
 
     /**

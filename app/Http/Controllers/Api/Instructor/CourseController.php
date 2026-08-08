@@ -48,7 +48,7 @@ class CourseController extends Controller
         // 講座情報を取得
         $perPage = $request->query('per_page', '6');
         $searchWord = $request->query('search_word');
-        $tagId = $request->query('tag_id', null);
+        $tagId = $request->query('tag_id');
 
         if ($tagId !== null) {
             /** @var Tag $tag */

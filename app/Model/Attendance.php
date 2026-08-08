@@ -4,11 +4,13 @@ namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Attendance extends Model
 {
@@ -23,7 +25,7 @@ class Attendance extends Model
     protected $table = 'attendances';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'course_id',
@@ -191,13 +193,14 @@ class Attendance extends Model
 
     /**
      * 受講者ごとの最終期限（当日 23:59:59）。期限なしなら null。
+     *
+     * @return Attribute<?CarbonImmutable, never>
      */
-    public function getAttendanceDeadlineEndAttribute(): ?CarbonImmutable
+    protected function attendanceDeadlineEnd(): Attribute
     {
-
-        return $this->attendance_deadline
+        return Attribute::make(get: fn () => $this->attendance_deadline
             ? $this->attendance_deadline->endOfDay()
-            : null;
+            : null);
     }
 
     /**
@@ -218,5 +221,36 @@ class Attendance extends Model
         }
 
         return max(0, (int) CarbonImmutable::today()->diffInDays($this->attendance_deadline, false));
+    }
+
+    /**
+     * 該当レッスンを受講済みかどうか
+     *
+     * 表示用のステータスではなく、完了日時が記録されているかどうかで判定する
+     */
+    public function hasCompletedLesson(Lesson $lesson): bool
+    {
+        $lessonAttendance = $this->lessonAttendances->firstWhere('lesson_id', $lesson->id);
+
+        return $lessonAttendance?->completed_at !== null;
+    }
+
+    /**
+     * 指定したレッスンの受講状況をまとめて完了にする
+     *
+     * 完了日時は過去に完了した事実を保つため、まだ記録がないものにだけ現在時刻を記録する
+     *
+     * @param  Collection<int, int>  $lessonIds  完了にするレッスンのID
+     */
+    public function completeLessons(Collection $lessonIds): void
+    {
+        $this->lessonAttendances()
+            ->whereIn('lesson_id', $lessonIds)
+            ->whereNull('completed_at')
+            ->update(['completed_at' => CarbonImmutable::now()]);
+
+        $this->lessonAttendances()
+            ->whereIn('lesson_id', $lessonIds)
+            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
     }
 }

@@ -31,14 +31,13 @@ class LessonAttendanceFactory extends Factory
     }
 
     /**
-     * 完了済みの状態
+     * 受講済みの状態
      *
-     * 完了判定は完了日時で行うため、ステータスと合わせて完了日時も記録する。
-     * 完了日時が結果に影響するテストでは、明示的に日時を指定すること。
+     * 完了日時が記録されているかどうかが受講済みの判定条件のため、表示用ステータスと合わせて記録する
      */
     public function completed(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);

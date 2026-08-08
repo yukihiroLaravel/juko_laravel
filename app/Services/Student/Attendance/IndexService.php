@@ -14,7 +14,10 @@ class IndexService
      * @return LengthAwarePaginator<Attendance>
      */
     public function __invoke(
-        IndexDto $indexDto, int $perPage, int $page, ?int $tagId
+        IndexDto $indexDto,
+        int $perPage,
+        int $page,
+        ?int $tagId
     ): LengthAwarePaginator {
         // 受講情報を関連情報と一緒に取得
         return Attendance::with([

@@ -2,18 +2,20 @@
 
 namespace App\Http\Resources\Manager;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class StudentIndexResource extends JsonResource
 {
-    /** @var \Illuminate\Pagination\LengthAwarePaginator */
+    /** @var LengthAwarePaginator */
     public $resource;
 
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     #[\Override]

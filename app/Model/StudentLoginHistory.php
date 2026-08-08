@@ -18,7 +18,7 @@ class StudentLoginHistory extends Model
     protected $table = 'student_login_histories';
 
     /**
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'student_id',

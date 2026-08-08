@@ -17,10 +17,12 @@ class DeleteAllLessonsService
         $lessonIds = $lessons->pluck('id');
 
         // 出席済みのレッスンがあれば削除不可
-        $attendedLessonIds = LessonAttendance::whereIn('lesson_id', $lessonIds)->pluck('lesson_id');
-        if ($attendedLessonIds->isNotEmpty()) {
-            throw new AuthorizationException('This lessons contains attendance.');
+        if (LessonAttendance::whereIn('lesson_id', $lessonIds)->exists()) {
+            throw new AuthorizationException('Forbidden, these lessons have attendance.');
         }
+
+        // 削除対象レッスンのorderカラムを0に設定する
+        Lesson::whereIn('id', $lessonIds)->update(['order' => 0]);
 
         // レッスン削除
         Lesson::whereIn('id', $lessonIds)->delete();

@@ -27,6 +27,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -129,11 +130,10 @@ class AttendanceController extends Controller
 
         try {
             // 該当チャプターに含まれる全レッスンの受講状況を更新
-            LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
-                ->where('attendance_id', $attendance->id)
-                ->update([
-                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                ]);
+            DB::transaction(fn () => LessonAttendance::completeAll(
+                LessonAttendance::whereIn('lesson_id', $chapter->lessons->pluck('id'))
+                    ->where('attendance_id', $attendance->id)
+            ));
 
             return response()->json([
                 'result' => true,
@@ -154,12 +154,9 @@ class AttendanceController extends Controller
         // 本人のみ更新可
         $this->authorize('update', $attendance);
 
-        $lessonAttendanceIds = LessonAttendance::where('attendance_id', $attendance->id)
-            ->pluck('id')
-            ->toArray();
-
-        LessonAttendance::whereIn('id', $lessonAttendanceIds)
-            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+        DB::transaction(fn () => LessonAttendance::completeAll(
+            LessonAttendance::where('attendance_id', $attendance->id)
+        ));
 
         return response()->json([
             'result' => true,
@@ -217,9 +214,6 @@ class AttendanceController extends Controller
 
     /**
      * 完了済みのレッスン数を取得する
-     *
-     * @param  Attendance  $attendance
-     * @return int
      */
     private function getCompletedLessonsCount(Attendance $attendance): int
     {

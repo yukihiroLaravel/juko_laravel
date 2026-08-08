@@ -43,7 +43,7 @@ class Attendance extends Model
      *
      * @return BelongsTo<Student, $this>
      */
-    public function student(): BelongsTo
+    public function student()
     {
         return $this->belongsTo(Student::class);
     }
@@ -53,17 +53,17 @@ class Attendance extends Model
      *
      * @return BelongsTo<Course, $this>
      */
-    public function course(): BelongsTo
+    public function course()
     {
         return $this->belongsTo(Course::class);
     }
 
     /**
-     * レッスン受講状況を取得
+     * 講座を取得
      *
      * @return HasMany<LessonAttendance, $this>
      */
-    public function lessonAttendances(): HasMany
+    public function lessonAttendances()
     {
         return $this->hasMany(LessonAttendance::class);
     }

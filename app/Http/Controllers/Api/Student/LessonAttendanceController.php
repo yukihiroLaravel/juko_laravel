@@ -31,11 +31,7 @@ class LessonAttendanceController extends Controller
                 throw new AuthorizationException('Forbidden, invalid student');
             }
 
-            $payload = ['status' => $request->status];
-            if ($request->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $lessonAttendance->completed_at === null) {
-                $payload['completed_at'] = now();
-            }
-            $lessonAttendance->update($payload);
+            $lessonAttendance->changeStatus($request->status);
 
             return response()->json([
                 'result' => true,

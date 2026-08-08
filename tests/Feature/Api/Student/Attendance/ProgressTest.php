@@ -287,4 +287,70 @@ class ProgressTest extends TestCase
         // Assert
         $response->assertStatus(200);
     }
+
+    public function test_非公開のレッスンを受講済みでも進捗の件数に含まれない(): void
+    {
+        // Arrange — 非公開のレッスンだけを完了している状態
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        $privateLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $publicLesson->id,
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $privateLesson->id,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert — 非公開のレッスンは分母にも分子にも含まれない
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_total_lessons', 1);
+        $response->assertJsonPath('data.number_of_completed_lessons', 0);
+        $response->assertJsonPath('data.number_of_completed_chapters', 0);
+    }
+
+    public function test_一度受講済みになったレッスンは受講中に戻しても件数に数え続ける(): void
+    {
+        // Arrange — 完了日時が記録されたあとステータスだけ受講中に戻したレッスン
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lessonAttendance = LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+        ]);
+        $lessonAttendance->changeStatus(LessonAttendance::STATUS_IN_ATTENDANCE);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.progress', ['attendance_id' => $attendance->id]));
+
+        // Assert — 終えた事実は変わらないため完了として扱われる
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.number_of_completed_lessons', 1);
+        $response->assertJsonPath('data.number_of_completed_chapters', 1);
+        $response->assertJsonPath('data.continue_from', null);
+    }
 }

@@ -177,6 +177,32 @@ class IndexTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
+    public function test_講座名で検索しても非公開の講座は一覧に表示されない(): void
+    {
+        // Arrange — 検索語に一致する講座名を持つ、公開1つ・非公開1つ
+        $student = Student::factory()->create();
+        $publicCourse = Course::factory()->create([
+            'title' => 'Vue入門',
+            'status' => CourseStatusEnum::PUBLIC->value,
+        ]);
+        $privateCourse = Course::factory()->create([
+            'title' => 'Vue応用',
+            'status' => CourseStatusEnum::PRIVATE->value,
+        ]);
+        foreach ([$publicCourse, $privateCourse] as $course) {
+            Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        }
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.index', ['search_word' => 'Vue']));
+
+        // Assert — 検索時も公開中の講座だけが返る
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.course.course_id', $publicCourse->id);
+    }
+
     public function test_受講がない場合は空の一覧を返す(): void
     {
         // Arrange

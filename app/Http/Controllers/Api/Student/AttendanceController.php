@@ -19,17 +19,15 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
+use App\Services\Student\Attendance\CourseProgressService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -83,6 +81,7 @@ class AttendanceController extends Controller
      */
     public function progress(
         ProgressRequest $request,
+        CourseProgressService $courseProgressService,
         ContinueFromService $continueFromService
     ): AttendanceCourseProgressResource {
         $attendance = Attendance::with([
@@ -93,25 +92,10 @@ class AttendanceController extends Controller
 
         $this->authorize('viewStudent', $attendance);
 
-        // 公開レッスンを1つも持たないチャプターは受講しようがないため、進捗の集計対象から外す
-        $countableChapters = $attendance->course->publicChapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
-        $publicLessons = $countableChapters
-            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
-
-        $progressData = [
-            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance, $countableChapters),
-            'totalChaptersCount' => $countableChapters->count(),
-            'completedLessonsCount' => $publicLessons
-                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
-                ->count(),
-            'totalLessonsCount' => $publicLessons->count(),
-            'continueFrom' => $continueFromService($attendance)?->toArray(),
-        ];
-
         return new AttendanceCourseProgressResource([
             'attendance' => $attendance,
-            'progressData' => $progressData,
+            'courseProgress' => $courseProgressService($attendance),
+            'continueFrom' => $continueFromService($attendance),
         ]);
     }
 
@@ -139,27 +123,12 @@ class AttendanceController extends Controller
         }
 
         try {
-            // 公開中のレッスンの受講状況を更新
-            $publicLessonIds = $chapter->publicLessons->pluck('id');
+            // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
+            DB::transaction(fn () => $attendance->completeLessons($chapter->publicLessons->pluck('id')));
 
-            DB::transaction(function () use ($publicLessonIds) {
-                // 1つ目のクエリ
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                        'completed_at' => now(),
-                    ]);
-
-                // 2つ目のクエリ
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNotNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                    ]);
-            });
-
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             Log::error($e);
             throw $e;
@@ -179,25 +148,10 @@ class AttendanceController extends Controller
 
         // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
         $publicLessonIds = $attendance->course->publicChapters
-            ->flatMap(fn ($chapter) => $chapter->publicLessons->pluck('id'));
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
         try {
-            DB::transaction(function () use ($publicLessonIds) {
-                // 1つ目のクエリ: まだ completed_at が入っていないレコードに限り、status と now() を更新する
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                        'completed_at' => now(),
-                    ]);
-
-                // 2つ目のクエリ: すでに completed_at が入っているレコードは、status のみ更新する
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNotNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                    ]);
-            });
+            DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
 
             return response()->json([
                 'result' => true,
@@ -220,18 +174,5 @@ class AttendanceController extends Controller
         $result = $service($attendance->course_id);
 
         return StuckPointsResource::collection($result);
-    }
-
-    /**
-     * 受講済みのチャプター数を取得する
-     *
-     * @param  Collection<int, Chapter>  $chapters  集計対象のチャプター
-     */
-    private function getCompletedChaptersCount(Attendance $attendance, Collection $chapters): int
-    {
-        return $chapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons
-                ->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
-            ->count();
     }
 }

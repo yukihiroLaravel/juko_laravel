@@ -5,13 +5,11 @@ namespace App\Model;
 use App\Enums\Chapter\StatusEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
 
 class Chapter extends Model
 {
@@ -92,46 +90,6 @@ class Chapter extends Model
     public function publicLessons(): HasMany
     {
         return $this->lessons()->public();
-    }
-
-    /**
-     * 公開中のチャプターを抽出
-     *
-     * @param  Collection  $chapters
-     * @return Collection
-     */
-    public static function extractPublicChapter($chapters)
-    {
-        return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
-    }
-
-    /**
-     * チャプターの進捗計算
-     */
-    public function calculateChapterProgress(Attendance $attendance): int
-    {
-        $completedLessonsCount = $this->calculateCompletedLessonCount($this, $attendance);
-        $totalLessonsCount = $this->lessons->count();
-
-        return $totalLessonsCount > 0 ? ($completedLessonsCount / $totalLessonsCount) * 100 : 0;
-    }
-
-    /**
-     * チャプター内完了済みレッスン数計算
-     */
-    private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
-    {
-        return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })
-            ->count();
-    }
-
-    protected function completedCount(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count());
     }
 
     /**

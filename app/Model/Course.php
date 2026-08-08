@@ -2,7 +2,6 @@
 
 namespace App\Model;
 
-use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -112,7 +111,7 @@ class Course extends Model
      */
     public function publicChapters(): HasMany
     {
-        return $this->chapters()->where('status', ChapterStatusEnum::PUBLIC->value);
+        return $this->chapters()->public();
     }
 
     /**

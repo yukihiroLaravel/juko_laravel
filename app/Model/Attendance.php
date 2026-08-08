@@ -6,6 +6,8 @@ use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
@@ -37,9 +39,9 @@ class Attendance extends Model
     /**
      * 受講生を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Student, $this>
      */
-    public function student()
+    public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
@@ -47,19 +49,19 @@ class Attendance extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Course, $this>
      */
-    public function course()
+    public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
     /**
-     * 講座を取得
+     * レッスン受講状況を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<LessonAttendance, $this>
      */
-    public function lessonAttendances()
+    public function lessonAttendances(): HasMany
     {
         return $this->hasMany(LessonAttendance::class);
     }

@@ -6,8 +6,10 @@ use App\Enums\Chapter\StatusEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Chapter extends Model
 {
@@ -63,9 +65,9 @@ class Chapter extends Model
     /**
      * 講座を取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo<Course, $this>
      */
-    public function course()
+    public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
@@ -73,9 +75,9 @@ class Chapter extends Model
     /**
      * レッスンを取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany<Lesson, $this>
      */
-    public function lessons()
+    public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class)->orderBy('order', 'asc');
     }
@@ -83,8 +85,8 @@ class Chapter extends Model
     /**
      * 公開中のチャプターを抽出
      *
-     * @param  \Illuminate\Support\Collection  $chapters
-     * @return \Illuminate\Support\Collection
+     * @param  Collection  $chapters
+     * @return Collection
      */
     public static function extractPublicChapter($chapters)
     {
@@ -129,9 +131,11 @@ class Chapter extends Model
     }
 
     /**
-     * 公開中のレッスンのリレーション
+     * 公開中のレッスンを取得
+     *
+     * @return HasMany<Lesson, $this>
      */
-        public function publicLessons(): HasMany
+    public function publicLessons(): HasMany
     {
         return $this->lessons()->public();
     }

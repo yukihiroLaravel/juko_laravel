@@ -93,11 +93,6 @@ class Chapter extends Model
         return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
-    public function getCompletedCountAttribute(): int
-    {
-        return $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count();
-    }
-
     /**
      * 公開中のチャプターに絞り込む
      */

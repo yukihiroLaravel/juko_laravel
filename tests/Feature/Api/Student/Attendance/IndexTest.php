@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -352,5 +353,64 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
+    }
+
+    public function test_講座名で検索しても公開されていない講座は表示されない(): void
+    {
+        // Arrange — 検索語に一致する講座名を持つ、公開中の講座と非公開の講座
+        $student = Student::factory()->create();
+        $publicCourse = Course::factory()->create([
+            'title' => 'Vue入門',
+            'status' => CourseStatusEnum::PUBLIC->value,
+        ]);
+        $privateCourse = Course::factory()->create([
+            'title' => 'Vue応用',
+            'status' => CourseStatusEnum::PRIVATE->value,
+        ]);
+        foreach ([$publicCourse, $privateCourse] as $course) {
+            Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        }
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.index', ['search_word' => 'Vue']));
+
+        // Assert — 公開中の講座だけが返る
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.course.course_id', $publicCourse->id);
+    }
+
+    public function test_続きから_公開されていないレッスンは案内しない(): void
+    {
+        // Arrange — 未受講の非公開レッスンと、その後ろにある未受講の公開中レッスン
+        $student = Student::factory()->create();
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
+        $privateLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'order' => 1,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'order' => 2,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        foreach ([$privateLesson, $publicLesson] as $lesson) {
+            LessonAttendance::factory()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+            ]);
+        }
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->getJson(route('student.attendances.index'));
+
+        // Assert — 非公開のレッスンを飛ばして公開中のレッスンを案内する
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.0.course.continue_from.lesson_id', $publicLesson->id);
     }
 }

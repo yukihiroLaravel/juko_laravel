@@ -93,30 +93,6 @@ class Chapter extends Model
         return $chapters->filter(fn ($chapter) => $chapter->status === StatusEnum::PUBLIC);
     }
 
-    /**
-     * チャプターの進捗計算
-     */
-    public function calculateChapterProgress(Attendance $attendance): int
-    {
-        $completedLessonsCount = $this->calculateCompletedLessonCount($this, $attendance);
-        $totalLessonsCount = $this->lessons->count();
-
-        return $totalLessonsCount > 0 ? ($completedLessonsCount / $totalLessonsCount) * 100 : 0;
-    }
-
-    /**
-     * チャプター内完了済みレッスン数計算
-     */
-    private function calculateCompletedLessonCount(Chapter $chapter, Attendance $attendance): int
-    {
-        return $chapter->lessons->filter(function (Lesson $lesson) use ($attendance) {
-            $lessonAttendance = $lesson->lessonAttendances->firstWhere('attendance_id', $attendance->id);
-
-            return $lessonAttendance && $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE;
-        })
-            ->count();
-    }
-
     public function getCompletedCountAttribute(): int
     {
         return $this->lessons->flatMap(fn (Lesson $lesson) => $lesson->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))->count();

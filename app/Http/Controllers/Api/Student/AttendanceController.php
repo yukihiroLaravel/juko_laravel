@@ -96,15 +96,15 @@ class AttendanceController extends Controller
 
         // 公開レッスンを1つも持たないチャプターは受講しようがないため、進捗の集計対象から外す
         $countableChapters = $attendance->course->publicChapters
-            ->filter(fn(Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
         $publicLessons = $countableChapters
-            ->flatMap(fn(Chapter $chapter) => $chapter->publicLessons);
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
 
         [
             'completedChaptersCount' => $this->getCompletedChaptersCount($attendance, $countableChapters),
             'totalChaptersCount' => $countableChapters->count(),
             'completedLessonsCount' => $publicLessons
-                ->filter(fn(Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
+                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
                 ->count(),
             'totalLessonsCount' => $publicLessons->count(),
             'continueFrom' => $continueFromService($attendance)?->toArray(),
@@ -176,7 +176,7 @@ class AttendanceController extends Controller
 
         // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
         $publicLessonIds = $attendance->course->publicChapters
-            ->flatMap(fn(Chapter $chapter) => $chapter->publicLessons->pluck('id'));
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
         try {
             DB::transaction(function () use ($publicLessonIds) {
@@ -227,8 +227,8 @@ class AttendanceController extends Controller
     private function getCompletedChaptersCount(Attendance $attendance, Collection $chapters): int
     {
         return $chapters
-            ->filter(fn(Chapter $chapter) => $chapter->publicLessons
-                ->every(fn(Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
+            ->filter(fn (Chapter $chapter) => $chapter->publicLessons
+                ->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
             ->count();
     }
 }

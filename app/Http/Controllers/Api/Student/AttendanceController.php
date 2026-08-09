@@ -118,7 +118,7 @@ class AttendanceController extends Controller
 
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
-            DB::transaction(fn() => $attendance->completeLessons($chapter->publicLessons->pluck('id')));
+            DB::transaction(fn () => $attendance->completeLessons($chapter->publicLessons->pluck('id')));
 
             return response()->json([
                 'result' => true,
@@ -142,10 +142,10 @@ class AttendanceController extends Controller
 
         // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
         $publicLessonIds = $attendance->course->publicChapters
-            ->flatMap(fn(Chapter $chapter) => $chapter->publicLessons->pluck('id'));
+            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
         try {
-            DB::transaction(fn() => $attendance->completeLessons($publicLessonIds));
+            DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
 
             return response()->json([
                 'result' => true,

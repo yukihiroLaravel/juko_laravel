@@ -74,6 +74,7 @@ class AttendancePolicy
         if ($attendance->course->status !== CourseStatusEnum::PUBLIC) {
             return false;
         }
+
         return $attendance->student_id === $student->id;
     }
 

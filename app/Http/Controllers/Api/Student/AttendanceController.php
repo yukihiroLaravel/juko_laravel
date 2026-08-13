@@ -27,6 +27,7 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -102,8 +103,8 @@ class AttendanceController extends Controller
      */
     public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
     {
-        // 受講レコードを取得
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        // 受講レコードを取得（認可で講座の公開状態を参照するため合わせて読み込む）
+        $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
 
         $this->authorize('update', $attendance);
 
@@ -117,7 +118,7 @@ class AttendanceController extends Controller
 
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
-            $attendance->completeLessons($chapter->publicLessons->pluck('id'));
+            DB::transaction(fn () => $attendance->completeLessons($chapter->publicLessons->pluck('id')));
 
             return response()->json([
                 'result' => true,
@@ -143,7 +144,7 @@ class AttendanceController extends Controller
         $publicLessonIds = $attendance->course->publicChapters
             ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
-        $attendance->completeLessons($publicLessonIds);
+        DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
 
         return response()->json([
             'result' => true,

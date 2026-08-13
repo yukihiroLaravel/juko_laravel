@@ -70,6 +70,11 @@ class AttendancePolicy
      */
     public function update(Student $student, Attendance $attendance): bool
     {
+        // 非公開講座は更新不可
+        if ($attendance->course->status !== CourseStatusEnum::PUBLIC) {
+            return false;
+        }
+
         return $attendance->student_id === $student->id;
     }
 

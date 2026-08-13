@@ -19,7 +19,6 @@ use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\CourseProgressService;
@@ -136,27 +135,12 @@ class AttendanceController extends Controller
         }
 
         try {
-            // 公開中のレッスンの受講状況を更新
-            $publicLessonIds = $chapter->publicLessons->pluck('id');
+            // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新
+            DB::transaction(fn () => $attendance->completeLessons($chapter->publicLessons->pluck('id')));
 
-            DB::transaction(function () use ($publicLessonIds) {
-                // 1つ目のクエリ
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                        'completed_at' => now(),
-                    ]);
-
-                // 2つ目のクエリ
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNotNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                    ]);
-            });
-
-            return response()->json(['result' => true]);
+            return response()->json([
+                'result' => true,
+            ]);
         } catch (Exception $e) {
             Log::error($e);
             throw $e;
@@ -179,22 +163,7 @@ class AttendanceController extends Controller
             ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
         try {
-            DB::transaction(function () use ($publicLessonIds) {
-                // 1つ目のクエリ: まだ completed_at が入っていないレコードに限り、status と now() を更新する
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                        'completed_at' => now(),
-                    ]);
-
-                // 2つ目のクエリ: すでに completed_at が入っているレコードは、status のみ更新する
-                LessonAttendance::whereIn('id', $publicLessonIds)
-                    ->whereNotNull('completed_at')
-                    ->update([
-                        'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
-                    ]);
-            });
+            DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
 
             return response()->json([
                 'result' => true,

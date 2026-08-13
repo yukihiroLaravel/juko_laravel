@@ -134,7 +134,7 @@ class AttendanceController extends Controller
      */
     public function completeAllChapters(CompleteAllChaptersRequest $request): JsonResponse
     {
-        $attendance = Attendance::with(['course.publicChapters.publicLessons'])
+        $attendance = Attendance::with('course.publicChapters.publicLessons')
             ->findOrFail($request->attendance_id);
 
         // 本人のみ更新可
@@ -144,16 +144,11 @@ class AttendanceController extends Controller
         $publicLessonIds = $attendance->course->publicChapters
             ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons->pluck('id'));
 
-        try {
-            DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
+        DB::transaction(fn () => $attendance->completeLessons($publicLessonIds));
 
-            return response()->json([
-                'result' => true,
-            ]);
-        } catch (Exception $e) {
-            Log::error($e);
-            throw $e;
-        }
+        return response()->json([
+            'result' => true,
+        ]);
     }
 
     /**

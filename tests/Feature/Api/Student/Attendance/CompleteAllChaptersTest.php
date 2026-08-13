@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -153,6 +154,43 @@ class CompleteAllChaptersTest extends TestCase
                 'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
             ]);
         }
+    }
+
+    public function test_公開されていない講座は完了にできない(): void
+    {
+        // Arrange — 受講中の講座が非公開になっている
+        $student = Student::factory()->create();
+        $course = Course::factory()->create(['status' => CourseStatusEnum::PRIVATE->value]);
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+        $lesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->putJson(route('student.attendances.complete-all-chapters', ['attendance_id' => $attendance->id]));
+
+        // Assert — 受講生に見えない講座は完了操作を受け付けない
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'completed_at' => null,
+        ]);
     }
 
     public function test_権限がない生徒_失敗(): void

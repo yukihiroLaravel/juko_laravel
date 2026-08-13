@@ -103,8 +103,8 @@ class AttendanceController extends Controller
      */
     public function completeAllLessons(CompleteAllLessonsRequest $request): JsonResponse
     {
-        // 受講レコードを取得
-        $attendance = Attendance::findOrFail($request->attendance_id);
+        // 受講レコードを取得（認可で講座の公開状態を参照するため合わせて読み込む）
+        $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
 
         $this->authorize('update', $attendance);
 

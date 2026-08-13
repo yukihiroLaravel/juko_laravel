@@ -18,7 +18,6 @@ use App\Http\Resources\Student\AttendanceIndexResource;
 use App\Http\Resources\Student\AttendanceShowResource;
 use App\Model\Attendance;
 use App\Model\Chapter;
-use App\Model\Lesson;
 use App\Services\Attendance\StuckPointsService;
 use App\Services\Student\Attendance\ContinueFromService;
 use App\Services\Student\Attendance\CourseProgressService;
@@ -28,7 +27,6 @@ use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -92,22 +90,6 @@ class AttendanceController extends Controller
             ->findOrFail($request->attendance_id);
 
         $this->authorize('viewStudent', $attendance);
-
-        // 公開レッスンを1つも持たないチャプターは受講しようがないため、進捗の集計対象から外す
-        $countableChapters = $attendance->course->publicChapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons->isNotEmpty());
-        $publicLessons = $countableChapters
-            ->flatMap(fn (Chapter $chapter) => $chapter->publicLessons);
-
-        [
-            'completedChaptersCount' => $this->getCompletedChaptersCount($attendance, $countableChapters),
-            'totalChaptersCount' => $countableChapters->count(),
-            'completedLessonsCount' => $publicLessons
-                ->filter(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson))
-                ->count(),
-            'totalLessonsCount' => $publicLessons->count(),
-            'continueFrom' => $continueFromService($attendance)?->toArray(),
-        ];
 
         return new AttendanceCourseProgressResource([
             'attendance' => $attendance,
@@ -186,18 +168,5 @@ class AttendanceController extends Controller
         $result = $service($attendance->course_id);
 
         return StuckPointsResource::collection($result);
-    }
-
-    /**
-     * 受講済みのチャプター数を取得する
-     *
-     * @param  Collection<int, Chapter>  $chapters  集計対象のチャプター
-     */
-    private function getCompletedChaptersCount(Attendance $attendance, Collection $chapters): int
-    {
-        return $chapters
-            ->filter(fn (Chapter $chapter) => $chapter->publicLessons
-                ->every(fn (Lesson $lesson) => $attendance->hasCompletedLesson($lesson)))
-            ->count();
     }
 }

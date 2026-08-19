@@ -2,14 +2,42 @@
 
 このファイルは、このリポジトリのコードを操作する際のClaude Code (claude.ai/code) へのガイダンスを提供します。
 
-## プロジェクト概要
+受講管理アプリのバックエンドAPIである。講師が講座を用意して公開し、受講生が講座を受講して学習を進め、講師が受講生の学習状況を把握してフォローする。PHP 8.3 の Laravel 12 で実装し、受講生・講師・マネージャーの3区分にAPIを提供する。
 
-これは受講管理アプリのLaravelベースのeラーニングプラットフォームで、講座、講師、生徒、および学習進捗を管理します。
-アプリケーションはPHP 8.3のLaravel 11を使用し、生徒、講師、管理者の3種類のユーザー向けのAPIエンドポイントを含みます。
+このファイルは入口である。仕様と規約の実体は `docs/` にあり、ここには索引と、取り違えると壊れるものだけを置く。詳細をこのファイルに書き足さない。
 
-## 開発コマンド
+## ドキュメントの索引
 
-### コード品質・解析
+| 知りたいこと | 置き場 |
+|---|---|
+| 用語の意味・業務のルール | `docs/domain/` |
+| システムの振る舞い（受け入れ基準） | `docs/specs/` |
+| 技術構成・データモデル・エンドポイント | `docs/architecture/` |
+| コーディング規約 | `docs/architecture/coding-standards.md` |
+| 設計判断の経緯 | `docs/adr/` |
+| 未確定事項 | `docs/domain/open-questions.md` |
+| これから作る変更の起票 | `docs/changes/template.md` |
+| ドキュメントの書き方 | `docs/documentation-rules.md` |
+
+全体の入口は `docs/README.md` にある。ID を見かけたら `grep -rn 'BR-SHARED-006' docs/` で引く。
+
+## 実装前に必ず押さえる
+
+取り違えると壊れるものだけを挙げる。背景はリンク先を読む。
+
+- レッスンの完了判定は完了日時で行う。表示用の段階では判定しない。完了日時は一度記録したら上書きせず、段階が戻っても取り消さない（BR-SHARED-012・ADR-0002）
+- 受講状況は、下書きを除くすべてのレッスンについて未着手の分まで存在する前提である。受講の登録時とレッスンの公開時の両方で作る（ADR-0005）
+- 公開状態は下書きへ戻せない。取り下げるときは非公開にする（BR-SHARED-008・ADR-0004）
+- 受講期限は受講ごとに確定した日付を持つ。判定はその日の終わり（23時59分59秒）まで有効とする。期限なしは期限切れにならない（BR-SHARED-006・ADR-0003）
+- 講師の権限はマネージャーの配下を含む。認可の判定基準は `docs/specs/features/authorization.md` に集約している
+- 受講生に見せてよいのは公開されている講座・チャプター・レッスンだけである（BR-SHARED-009）
+
+## 用語
+
+`docs/domain/shared/glossary.md` を唯一の正とする。講座・チャプター・レッスン・受講・受講状況の表記を揺らさない。言い換えや併記をしない。
+
+## よく使うコマンド
+
 ```bash
 # コードフォーマット（Rector + Laravel Pint を順次実行）
 composer format
@@ -17,205 +45,39 @@ composer format
 # 静的解析（PHPStan レベル5）
 composer analyze
 
-# Rector ドライラン（変更内容の確認のみ）
-composer rector-dry-run
-```
-
-### テスト
-```bash
-# Docker経由でテストを実行
+# テスト
 docker compose exec app bash -c 'cd laravelapp && php artisan test'
 ```
 
-## アーキテクチャ
+## 実装のルール
 
-### データモデル
-アプリケーションは階層的な講座構造に従います。
-- 「講師」が「講座」を作成・管理
-- 「講座」は「チャプター」を含む（順序付き）
-- 「チャプター」は「レッスン」を含む（順序付き）
-- 「生徒」は「受講」を通じて「講座」に登録
-- 「レッスン受講」は個別の「レッスン進捗」を追跡
+- コーディング規約は `docs/architecture/coding-standards.md` に従う。Laravelの汎用的なベストプラクティスは `laravel-best-practices` スキルを参照し、衝突する場合はプロジェクトの規約を優先する
+- ドキュメントを書くときは `documentation-conventions` スキルと `docs/documentation-rules.md` に従う
 
-受講（Attendance）とレッスン受講（LessonAttendance）の仕様
-- 受講登録時に、講座内の「下書きではない」レッスン（`status` が `public` または `private`）に対して `LessonAttendance` レコードが `status = before_attendance` で一括作成される。下書き（`draft`）のレッスンには作成しない
-- レッスンが新規追加された場合も、その講座の全受講生に対して `LessonAttendance` レコードが自動作成される
-- 下書きのレッスンが `public` / `private` に切り替わったタイミングで、その時点の既存受講生に対して `LessonAttendance` を作成する設計とする（受講状況のライフサイクルを一貫させるため。なおこの補完処理の実装は別途対応）
-- つまり `LessonAttendance` は、下書きを除く公開対象（`public` / `private`）のレッスンについて、未着手のものも含めて全件分のレコードが存在する前提である
-- `LessonAttendance` のステータスは `before_attendance` → `in_attendance` → `completed_attendance` の順に遷移する
-- レッスン完了の判定は `completed_at` カラム（完了日時）を正とする。`status` はUIでの表示用ステータスであり、完了判定には `completed_at IS NOT NULL` を使用する
-- `LessonAttendance.completed_at` は、一度 `status = completed_attendance` で記録されたら、その後ステータスが `in_attendance` や `before_attendance` に戻されても `null` には戻さない。「過去に1度でも完了した事実」を不変な履歴として保持するため、`completed_at` は単調に保たれる（一度設定されたら以降は上書きしない）
-- 受講期限（`Attendance.attendance_deadline`）は日付（date）として保存され、判定時はその日の終端（当日 23:59:59）まで有効として扱う。期限切れ判定（`Attendance::isExpired()`）は、現在時刻が「期限日 23:59:59」を過ぎたかで行う
-- `Attendance.attendance_deadline` が `null` の場合は期限なし（無期限受講）とみなす
+禁止事項。
 
-主な関係性
-- 「マネージャー-講師階層」（講師は他の講師を管理可能）
-- 「分類のための講座タグシステム」
-- 「講座固有の告知のための通知システム」
-- 「生徒と講師両方の一時登録システム」
+- `config` 以外で `env()` を呼ばない
+- 状態や種別の値をクラス定数で増やさない。`app/Enums/{コンテキスト}/` にEnumを定義する
+- 認可の判定をコントローラーに散らさない。Policyに置く
+- サービス内でトランザクションを張らない。トランザクションはコントローラーの責務である
+- 変更の起票にテストの計画を書かない
 
-### API構造
-APIは`/api/v1/`の下に役割ベースのミドルウェアで整理されています：
+## 実装が終わったら
 
-認証
-- API認証にLaravel Sanctumを使用
-- ミドルウェア（`student`、`instructor`、`manager`）による役割ベースのアクセス制御
+同じ変更のなかでドキュメントを更新する。更新先の対応表は `docs/documentation-rules.md` にある。
 
-APIエンドポイント
-- `/api/v1/student/*` - 生徒操作（`student`ミドルウェアが必要）
-- `/api/v1/instructor/*` - 講師操作（`instructor`ミドルウェアが必要）
-- `/api/v1/manager/*` - 管理者操作（`manager`ミドルウェアが必要）
+- 振る舞いを変えた → `docs/specs/` の該当ファイルをIDを維持して上書きする
+- データ構造やエンドポイントを変えた → `docs/architecture/`
+- 業務ルールが判明・変更された → `docs/domain/shared/business-rules.md`
+- 技術選定の判断をした → `docs/adr/` に新しい記録を追加する
 
-### サービス層
-ビジネスロジックは`app/Services/`の下のサービスで整理されています：
-- `Attendance/` - 受講管理サービス
-- `Auth/` - 認証サービス
-- `Chapter/` - チャプター管理サービス
-- `Course/` - 講座管理サービス
-- `Instructor/` - 講師管理サービス
-- `Lesson/` - レッスン管理サービス
-- `Notification/` - 通知管理サービス
-- `Student/` - 生徒関連サービス
-- `Tag/` - タグ管理サービス
+文書を増やさず、既存の記述を上書きする。同じ主題が既に書かれていないかを `grep -rn` で確かめてから書く。
 
-### 認可（Policy）
-`app/Policies/`でモデルごとの認可ロジックを管理：
-- `CoursePolicy` - 講座の閲覧・編集・削除権限
-- `ChapterPolicy` - チャプターの操作権限
-- `LessonPolicy` - レッスンの操作権限
-- `AttendancePolicy` - 受講の操作権限
-- `NotificationPolicy` - 通知の操作権限
-- `InstructorPolicy` - 講師の操作権限
-- `StudentPolicy` - 生徒の操作権限
-- `TagPolicy` - タグの操作権限
+## 仕様が不足しているとき
 
-### リクエストバリデーション
-フォームリクエストをバリデーションに使用：
-- `app/Http/Requests/Auth/` - 認証リクエスト
-- `app/Http/Requests/Instructor/` - 講師固有リクエスト
-- `app/Http/Requests/Manager/` - 管理者固有リクエスト
-- `app/Http/Requests/Student/` - 生徒固有リクエスト
-
-### APIリソース
-Eloquentリソースを使用した一貫性のあるAPIレスポンス：
-- `app/Http/Resources/Student/` - 生徒APIレスポンス
-- `app/Http/Resources/Instructor/` - 講師APIレスポンス
-- `app/Http/Resources/Manager/` - 管理者APIレスポンス
-
-## コード品質基準
-
-- 120文字行制限のPSR-12コーディング標準
-- PHPStan レベル5静的解析
-- コードフォーマットにLaravel Pint
-- 自動コードリファクタリングとアップグレードにRector
-- ほとんどのモデルで論理削除が有効
-- 配列操作よりコレクションメソッドを優先し、宣言的に記述する
-- PHPの標準関数`empty()`の利用を避ける（`=== null`、`=== ''`、`->isEmpty()`等で明示的に判定する）
-- PHP・Laravelともに最新のメソッドや機能を積極的に利用する
-
-## テスト設定
-
-- テストにSQLiteインメモリデータベースを使用
-- 分離されたテストスイート：Unit と Feature
-- PHPUnit設定はカバレッジレポートをサポート
-- 高速実行のため並列でテストを実行可能
-- テストメソッド名にはレスポンスキーや変数名（`average_progress_rate` のような snake_case の英字）をそのまま使わず、対応する日本語名称（`平均進捗率` 等）で命名する
-
-## 主要な依存関係
-
-- dedoc/scramble - APIドキュメント生成
-- laravel/sanctum - API認証
-- barryvdh/laravel-ide-helper - IDEサポート
-- larastan/larastan - Laravel用静的解析
-- rector/rector - 自動リファクタリング
-
-## 重要な注意事項
-
-- すべてのタイムスタンプと日付は日本のロケールを考慮すべき
-- アプリケーションは論理削除を広く使用
-- 講座内容には`storage/app/public/course/`に保存される画像アップロードを含む
-- 認証は従来のセッションとSanctum経由のAPIトークンの両方を使用
-
-## コーディング規約
-
-Laravelの汎用的なベストプラクティスは `laravel-best-practices` スキルを参照する。以下は当プロジェクト固有の規約であり、汎用ルールと衝突する場合はこちらを優先する。
-
-既存コードには本規約が策定される前の書き方（複数形テーブル、`id` 主キー、複数アクションのコントローラー等）が残っている。新規実装・修正時に本規約を適用する。
-
-### 配置・命名の共通原則
-
-すべてのレイヤー（Controller / FormRequest / Service / Resource / Enum / Test）は、コンテキストごとのサブディレクトリに配置し、`{行う処理}{接尾辞}.php` で命名する。
-
-### コントローラー
-
-- シングルアクションコントローラー（`__invoke` のみを持つ）で実装する
-  - 例: ユーザー登録API → `app/Http/Controllers/Api/User/StoreController.php`
-- サービスクラスはメソッドインジェクションで受け取る（コンストラクタインジェクションにしない）
-- データベーストランザクションはコントローラーで管理する（`DB::transaction()` でサービス呼び出しを囲む）
-
-### バリデーション
-
-- FormRequestで実装し、1エンドポイント1ファイルとする（複数エンドポイントでの共有を禁止）
-- Enumの許可値制御は `Rule::enum(GenderEnum::class)` を使う（`in:1,2,9` のようなリテラル列挙をしない）
-
-### サービス
-
-- 複数のモデルが関与するビジネスロジックを置く（単一モデルで完結するならモデルに置く）
-- 公開メソッドは `__invoke` 1つのみとし、フローの可視化を優先して必要なら private 関数で責務を分離する
-- 入力値は `FormRequest::validated()` の配列で受け、認証ユーザーなど validated 以外のコンテキストは引数で明示的に受け取る
-- サービス内ではトランザクションを張らない（コントローラーの責務）
-
-### モデル
-
-- キャストを必ず定義し、明示的なphpdocを記述する
-- セキュリティ性が高いカラム（password、token等）は `$hidden` に設定する
-- 識別子カラムに定義したEnumは必ずモデルでキャストする
-
-### マイグレーション・テーブル設計
-
-- テーブル名は単数形にする（例: `user`、`student`）
-- プライマリーキーは `{テーブル名}_id` とし、モデルに `protected $primaryKey` を宣言する
-- 外部キーは `foreignIdFor` と `constrained` を使う。主キーが `id` ではないため名前推測が効かず、参照先を明示する
-  - 例: `foreignIdFor(User::class, 'user_id')->constrained(table: 'user', column: 'user_id')`
-- テーブルとカラムには必ず `->comment()` をつける
-- `timestamp` 型は2038年問題のため避けて `datetime` を使う。`timestamps()` ヘルパも同様に使わない
-
-### Enum
-
-- テーブルの識別子カラムにはEnumを活用し、`app/Enums/{コンテキスト}/~Enum.php` で定義する
-- バッキング型は格納値の性質で選ぶ。状態・種別を表すカラム（`status`、`type` 等）は string backed を既定とする
-
-### ルーティング
-
-- 複数形を利用する（例: ユーザー登録 → `POST users`）
-- コンテキストに合わせて `prefix` と `name` を活用し、エンドポイントには必ず `name()` を定義する
-
-### Resource
-
-- APIレスポンスのスキーマに利用し、ビジネスロジックの実装を禁止する（整形・表示のみ）
-
-### 型・PHP全般
-
-- 関数の返り値の型と引数のタイプヒントを必ず定義する
-- 日付ライブラリは特に理由がない限り `CarbonImmutable` を利用する
-- `config` 以外での `env()` 関数を禁止する
-
-### テスト
-
-- 対象のController / Serviceの配置に対応したサブディレクトリに `{行う処理}Test.php` で作成する
-- AAAパターンを利用し、必ずコメントで `Arrange` / `Act` / `Assert` を記述する
-- テスト関数名は日本語で書き、システム用語を避けて業務・ユーザー視点の言葉を使う
-- 参照データ（マスタ等）はシーダー、それ以外（ユーザー等）はファクトリーで用意する
-- 具体例に加えて、入力の全域で成り立つ性質（可逆性・冪等性・不変条件・可換性）に着目したテストを検討する
-
-### レビュー時の重大度
-
-コード差分やPRをレビューする際は、指摘ごとに重大度を付ける。
-
-- `must` … セキュリティ・データ整合性・規約の必須違反（env直接利用、認可漏れ、外部キー未設定、トランザクション欠如）
-- `should` … 設計規約からの逸脱、テスト不足（単一アクション化されていない、配置・命名違反、型注釈漏れ、振る舞い変更にテストがない）
-- `nits` … 軽微な指摘・好みの範囲
-- 判断原則: データ整合性・セキュリティに直結すれば `must`、設計・命名・配置・型の規約逸脱は `should`
+- まず `docs/domain/open-questions.md` を見る。未確定として記録済みかもしれない
+- 記録があるならその暫定方針に従う。暫定で実装するときはコードに `TODO(Q-NNN)` を残す
+- 記録がなく判断できないときは、勝手に決めずに確認する。決め切れないまま進めるなら `Q-<連番>` として起票してから実装する
 
 ===
 

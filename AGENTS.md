@@ -56,6 +56,16 @@ docker compose exec app bash -c 'cd laravelapp && php artisan test'
 規約の検査はファイルを書いた直後にも自動で走る。違反はその場で返るので、
 指摘されたら直してから次に進む。判定の一覧は `docs/architecture/convention-checks.md` にある。
 
+## 進め方
+
+実装は TDD で進める。勝手に先へ進まず、次の2か所で必ず依頼者の承認を取る。
+
+1. 起票を書く前。変更する振る舞い・変更する範囲・対象外の3点を要点だけ提示する
+2. 失敗するテストを書いたあと、実装に入る前。書いたテストを提示する
+
+2番目が仕様の確定点である。承認されたら実装して通し、整えてから評価に進む。
+段の全体は `docs/architecture/coding-standards.md` の「実装の進め方」にある。
+
 ## 実装のルール
 
 - コーディング規約は `docs/architecture/coding-standards.md` に従う。Laravelの汎用的なベストプラクティスは `laravel-best-practices` スキルを参照し、衝突する場合はプロジェクトの規約を優先する

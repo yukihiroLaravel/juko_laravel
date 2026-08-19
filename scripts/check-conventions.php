@@ -69,6 +69,30 @@ function scanLines(string $file, callable $judge): array
 }
 
 /**
+ * 地の文だけを走査する。囲みコードの中は対象から外す。
+ *
+ * 文体の規約は読み手に見せる文章に対するものであり、コード例の中の記号や
+ * 識別子まで拾うと誤検出になる。
+ *
+ * @param  callable(string, int): (string|null)  $judge
+ * @return list<string>
+ */
+function scanProseLines(string $file, callable $judge): array
+{
+    $inCode = false;
+
+    return scanLines($file, function (string $line, int $number) use ($judge, &$inCode): ?string {
+        if (str_starts_with(trim($line), '```')) {
+            $inCode = ! $inCode;
+
+            return null;
+        }
+
+        return $inCode ? null : $judge($line, $number);
+    });
+}
+
+/**
  * クラスの公開メソッド名を字句解析で取り出す。
  *
  * 正規表現だと文字列やコメントの中の "public function" を拾ってしまうため、
@@ -134,6 +158,18 @@ function idsIn(string $text, string $pattern): array
     preg_match_all('/'.trim($pattern, '/').'(?![0-9A-Za-z])/', $text, $matches);
 
     return array_values(array_unique($matches[0]));
+}
+
+/** 規約そのものと雛形は、書き方の例として禁止表現を含むため対象から外す */
+const DOC_EXCLUDED = ['docs/documentation-rules.md', 'docs/changes/template.md', 'docs/architecture/convention-checks.md'];
+
+/** @return list<string> */
+function docs(string $dir = 'docs'): array
+{
+    return array_values(array_filter(
+        files($dir, 'md'),
+        fn (string $file): bool => ! in_array($file, DOC_EXCLUDED, true)
+    ));
 }
 
 /** @var list<array{id: string, description: string, violations: list<string>}> $results */
@@ -437,6 +473,33 @@ check('CHK-TEST-02', 'テストに Arrange・Act・Assert を書く', function (
     return $violations;
 });
 
+check('CHK-TEST-06', 'テストが参照する受け入れ基準が実在する', function (): array {
+    $specs = '';
+    foreach (docs('docs/specs') as $file) {
+        $specs .= contents($file);
+    }
+    $defined = idsIn($specs, 'AC-[A-Z]+-\\d+');
+
+    $violations = [];
+    foreach (files('tests') as $file) {
+        if (! str_ends_with($file, 'Test.php')) {
+            continue;
+        }
+        $violations = array_merge($violations, scanLines($file, function (string $line) use ($defined): ?string {
+            if (preg_match('/(AC-[A-Z]+-\\d+)(?![0-9A-Za-z])/', $line, $matched) !== 1) {
+                return null;
+            }
+            if (in_array($matched[1], $defined, true)) {
+                return null;
+            }
+
+            return sprintf('%s が docs/specs/ にない', $matched[1]);
+        }));
+    }
+
+    return $violations;
+});
+
 check('CHK-TEST-03', 'テスト関数名を日本語で書く', function (): array {
     $violations = [];
     foreach (files('tests') as $file) {
@@ -457,22 +520,10 @@ check('CHK-TEST-03', 'テスト関数名を日本語で書く', function (): arr
 
 // ---------------------------------------------------------------- ドキュメント
 
-/** 規約そのものと雛形は、書き方の例として禁止表現を含むため対象から外す */
-const DOC_EXCLUDED = ['docs/documentation-rules.md', 'docs/changes/template.md', 'docs/architecture/convention-checks.md'];
-
-/** @return list<string> */
-function docs(string $dir = 'docs'): array
-{
-    return array_values(array_filter(
-        files($dir, 'md'),
-        fn (string $file): bool => ! in_array($file, DOC_EXCLUDED, true)
-    ));
-}
-
 check('CHK-DOC-01', '業務知識にシステムを主語にした文を書かない', function (): array {
     $violations = [];
     foreach (docs('docs/domain') as $file) {
-        $violations = array_merge($violations, scanLines($file, function (string $line): ?string {
+        $violations = array_merge($violations, scanProseLines($file, function (string $line): ?string {
             if (preg_match('/システムは.*(しなければ|してはならない)/u', $line) !== 1) {
                 return null;
             }
@@ -571,7 +622,7 @@ check('CHK-DOC-06', '実装が終わった起票を残さない', function (): a
 check('CHK-DOC-07', '太字記法と区切り線を使わない', function (): array {
     $violations = [];
     foreach (docs() as $file) {
-        $violations = array_merge($violations, scanLines($file, function (string $line): ?string {
+        $violations = array_merge($violations, scanProseLines($file, function (string $line): ?string {
             if (preg_match('/\*\*/', $line) === 1) {
                 return '強調は見出しと表で表す';
             }
@@ -612,7 +663,7 @@ check('CHK-DOC-09', '用語を揺らさない', function (): array {
         if (str_contains($file, 'glossary')) {
             continue;
         }
-        $violations = array_merge($violations, scanLines($file, function (string $line) use ($forbidden): ?string {
+        $violations = array_merge($violations, scanProseLines($file, function (string $line) use ($forbidden): ?string {
             foreach ($forbidden as $wrong => $right) {
                 if (str_contains($line, $wrong)) {
                     return sprintf('「%s」ではなく「%s」を使う', $wrong, $right);

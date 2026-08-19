@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
@@ -104,13 +105,13 @@ class AttendanceController extends Controller
                 default => throw new Exception('Invalid period'),
             };
 
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
+            return $lessonAttendance->status === LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
         }))->count();
 
         // 完了したチャプターの数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) =>
         // 各出席情報に関連するレッスン出席情報をフィルタリング
-        $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
+        $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 // チャプターに含まれているすべてのレッスンIDを取得
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
@@ -119,7 +120,7 @@ class AttendanceController extends Controller
                 // チャプター内で完了したレッスン数をカウント
                 $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
                     ->whereIn('lesson_id', $allLessonsId)
-                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)
                     ->count();
 
                 $updatedAtRequestPeriod = match ($period) {

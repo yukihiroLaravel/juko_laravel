@@ -14,7 +14,8 @@ use App\Http\Resources\Student\StudentShowResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Student;
 use App\Model\TemporaryStudent;
-use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Auth\CreateCodeService;
+use App\Services\Auth\CreateTokenService;
 use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
 use Carbon\CarbonImmutable;
@@ -43,7 +44,7 @@ class StudentController extends Controller
     public function show(Request $request, QueryService $queryService)
     {
         // 生徒情報を取得
-        $student = $queryService->getStudent($request->user()->id);
+        $student = $queryService($request->user()->id);
 
         // 生徒の詳細情報をリソース形式で返す
         return new StudentShowResource($student);
@@ -54,19 +55,20 @@ class StudentController extends Controller
      */
     public function store(
         StoreRequest $request,
-        CredentialGeneratorService $credentialGeneratorService
+        CreateCodeService $createCodeService,
+        CreateTokenService $createTokenService
     ): JsonResponse {
         $email = $request->email;
         DB::beginTransaction();
         try {
 
             // 認証コードを生成する。
-            $code = $credentialGeneratorService->createCode(
+            $code = $createCodeService(
                 existsChecker: fn (string $code) => TemporaryStudent::where('code', $code)->exists(),
             );
 
             // トークンを生成する。
-            $token = $credentialGeneratorService->createToken(
+            $token = $createTokenService(
                 existsChecker: fn (string $token) => TemporaryStudent::where('token', $token)->exists(),
             );
 

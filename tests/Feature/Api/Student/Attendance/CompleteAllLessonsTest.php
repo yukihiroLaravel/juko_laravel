@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\Student\Attendance;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -33,7 +34,7 @@ class CompleteAllLessonsTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -77,7 +78,7 @@ class CompleteAllLessonsTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
         $this->actingAs($student);
@@ -93,12 +94,12 @@ class CompleteAllLessonsTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $openLesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
         ]);
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $draftLesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
     }
 
@@ -119,7 +120,7 @@ class CompleteAllLessonsTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -134,7 +135,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
     }
 
@@ -158,7 +159,7 @@ class CompleteAllLessonsTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -173,7 +174,7 @@ class CompleteAllLessonsTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             'completed_at' => null,
         ]);
     }
@@ -270,7 +271,7 @@ class CompleteAllLessonsTest extends TestCase
         $finished = LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $finishedLesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => $firstCompletedAt,
         ]);
         $this->actingAs($student);

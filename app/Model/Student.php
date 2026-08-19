@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use App\Enums\Student\Gender;
+use App\Enums\Student\GenderEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -44,6 +44,15 @@ class Student extends Authenticatable
         'address',
         'profile_image',
         'last_login_at',
+    ];
+
+    /**
+     * シリアライズから除外する属性
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
     ];
 
     /**
@@ -148,7 +157,7 @@ class Student extends Authenticatable
      *  last_login_at: 'immutable_datetime',
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
-     *  gender: 'App\Enums\Student\Gender'
+     *  gender: 'App\Enums\Student\GenderEnum'
      * }
      */
     #[\Override]
@@ -159,7 +168,7 @@ class Student extends Authenticatable
             'last_login_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
-            'gender' => Gender::class,
+            'gender' => GenderEnum::class,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Student;
 
+use App\Enums\LessonAttendance\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Lesson\PatchStatusRequest;
 use App\Model\LessonAttendance;
@@ -31,7 +32,10 @@ class LessonAttendanceController extends Controller
                 throw new AuthorizationException('Forbidden, invalid student');
             }
 
-            $lessonAttendance->changeStatus($request->status);
+            $status = $request->enum('status', StatusEnum::class);
+            assert($status instanceof StatusEnum);
+
+            $lessonAttendance->changeStatus($status);
 
             return response()->json([
                 'result' => true,

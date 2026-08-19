@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Student\LessonAttendance;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -37,7 +38,7 @@ class PatchStatusTest extends TestCase
         $lessonAttendance = LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -70,21 +71,21 @@ class PatchStatusTest extends TestCase
         $lessonAttendance = LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
         // Act
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]
+            ['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]
         );
 
         // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('lesson_attendances', [
             'id' => $lessonAttendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
     }
@@ -104,7 +105,7 @@ class PatchStatusTest extends TestCase
         $lessonAttendance = LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => $completedAt,
         ]);
         $this->actingAs($student);
@@ -112,14 +113,14 @@ class PatchStatusTest extends TestCase
         // Act
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => LessonAttendance::STATUS_IN_ATTENDANCE]
+            ['status' => LessonAttendanceStatusEnum::IN_ATTENDANCE]
         );
 
         // Assert — 過去に受講済みになった事実は残る
         $response->assertStatus(200);
         $this->assertDatabaseHas('lesson_attendances', [
             'id' => $lessonAttendance->id,
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
             'completed_at' => $completedAt,
         ]);
     }
@@ -180,7 +181,7 @@ class PatchStatusTest extends TestCase
         // Act
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => LessonAttendance::STATUS_IN_ATTENDANCE]
+            ['status' => LessonAttendanceStatusEnum::IN_ATTENDANCE]
         );
 
         // Assert
@@ -193,14 +194,14 @@ class PatchStatusTest extends TestCase
         // Arrange — 過去に受講済みになったあと受講中に戻したレッスン
         $firstCompletedAt = CarbonImmutable::parse('2026-01-01 10:00:00');
         $lessonAttendance = $this->createLessonAttendanceForActingStudent([
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
             'completed_at' => $firstCompletedAt,
         ]);
 
         // Act — 学び直して再び完了にする
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]
+            ['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]
         );
 
         // Assert — 最初に終えた日時は上書きされない

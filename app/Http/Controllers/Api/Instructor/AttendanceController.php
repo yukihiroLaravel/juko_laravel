@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Instructor;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
 use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
@@ -49,11 +50,11 @@ class AttendanceController extends Controller
         // Policyによる認可チェック
         $this->authorize('create', [Attendance::class, $course]);
 
-        $service(
+        DB::transaction(fn () => $service(
             $request->course_id,
             $request->student_id,
             $calculateDeadline
-        );
+        ));
 
         return response()->json(['result' => true]);
     }
@@ -179,7 +180,7 @@ class AttendanceController extends Controller
                 throw new Exception('Invalid period');
             }
 
-            return $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
+            return $lessonAttendance->status === LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
         }))->count();
 
         // 指定期間内に完了したレッスン数をもとに平均進捗率を取得
@@ -202,14 +203,14 @@ class AttendanceController extends Controller
         );
 
         // 指定期間内に完了したチャプターの個数を取得
-        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE))
+        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
                 // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
                 $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
                 $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
                     ->whereIn('lesson_id', $allLessonsId)
-                    ->where('status', LessonAttendance::STATUS_COMPLETED_ATTENDANCE)
+                    ->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)
                     ->count();
                 if ($period === LessonAttendance::PERIOD_TODAY) {
                     $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Manager\Chapter;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -85,7 +86,7 @@ class DeleteTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
         ]);
         $this->actingAs($manager, 'instructor');
 

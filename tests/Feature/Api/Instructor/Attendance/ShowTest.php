@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -514,13 +515,13 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson2->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
         $this->actingAs($instructor, 'instructor');
@@ -550,7 +551,7 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
         LessonAttendance::factory()->create([
@@ -585,7 +586,7 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $activeAttendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
 
@@ -598,7 +599,7 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $expiredAttendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
         $this->actingAs($instructor, 'instructor');
@@ -650,7 +651,7 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
         LessonAttendance::factory()->create([
@@ -686,7 +687,7 @@ class ShowTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => null,
         ]);
         $this->actingAs($instructor, 'instructor');

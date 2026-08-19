@@ -6,13 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function test_basic_test()
+    public function test_テストの実行環境が動作する(): void
     {
-        $this->assertTrue(true);
+        // Arrange
+        $expected = true;
+
+        // Act
+        $actual = true;
+
+        // Assert
+        $this->assertSame($expected, $actual);
     }
 }

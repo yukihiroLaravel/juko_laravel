@@ -2,7 +2,7 @@
 
 namespace App\Model;
 
-use App\Enums\Student\Gender;
+use App\Enums\Student\GenderEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +41,16 @@ class TemporaryStudent extends Model
     ];
 
     /**
+     * シリアライズから除外する属性
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'code',
+        'token',
+    ];
+
+    /**
      * フルネームアクセサー
      */
     protected function fullName(): Attribute
@@ -54,7 +64,7 @@ class TemporaryStudent extends Model
      *  created_at: 'immutable_datetime',
      *  updated_at: 'immutable_datetime',
      *  expire_at: 'immutable_datetime',
-     *  gender: 'App\Enums\Student\Gender'
+     *  gender: 'App\Enums\Student\GenderEnum'
      * }
      */
     #[\Override]
@@ -65,7 +75,7 @@ class TemporaryStudent extends Model
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
             'expire_at' => 'immutable_datetime',
-            'gender' => Gender::class,
+            'gender' => GenderEnum::class,
         ];
     }
 }

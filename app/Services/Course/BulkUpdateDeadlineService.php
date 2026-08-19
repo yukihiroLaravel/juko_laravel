@@ -6,49 +6,47 @@ use App\Enums\Course\DeadlineTypeEnum;
 use App\Model\Course;
 use App\Model\CourseDeadline;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class BulkUpdateDeadlineService
 {
     /**
      * 講座の受講期限を一括更新する
      *
+     * 複数の講座への更新を一貫させるため、呼び出し側でトランザクションを張ること。
+     *
      * @param  Collection<int, Course>  $courses
      * @param  array{deadline_type: string, fixed_date?: string, relative_days?: int}  $deadlineParams
      */
     public function __invoke(Collection $courses, array $deadlineParams): int
     {
-        return DB::transaction(function () use ($courses, $deadlineParams) {
+        $courses->each(function (Course $course) use ($deadlineParams) {
 
-            $courses->each(function (Course $course) use ($deadlineParams) {
+            // none の場合は期限レコードを削除
+            if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
+                CourseDeadline::where('course_id', $course->id)->delete();
 
-                // none の場合は期限レコードを削除
-                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::NONE->value) {
-                    CourseDeadline::where('course_id', $course->id)->delete();
+                return; // each内ではreturnでcontinue相当
+            }
 
-                    return; // each内ではreturnでcontinue相当
-                }
+            $data = [
+                'fixed_date' => null,
+                'relative_days' => null,
+            ];
 
-                $data = [
-                    'fixed_date' => null,
-                    'relative_days' => null,
-                ];
+            if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::FIXED_DATE->value) {
+                $data['fixed_date'] = $deadlineParams['fixed_date'] ?? null;
+            }
 
-                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::FIXED_DATE->value) {
-                    $data['fixed_date'] = $deadlineParams['fixed_date'] ?? null;
-                }
+            if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::RELATIVE_DAYS->value) {
+                $data['relative_days'] = $deadlineParams['relative_days'] ?? null;
+            }
 
-                if ($deadlineParams['deadline_type'] === DeadlineTypeEnum::RELATIVE_DAYS->value) {
-                    $data['relative_days'] = $deadlineParams['relative_days'] ?? null;
-                }
-
-                CourseDeadline::updateOrCreate(
-                    ['course_id' => $course->id],
-                    $data
-                );
-            });
-
-            return $courses->count();
+            CourseDeadline::updateOrCreate(
+                ['course_id' => $course->id],
+                $data
+            );
         });
+
+        return $courses->count();
     }
 }

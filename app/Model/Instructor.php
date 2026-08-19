@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Instructor\TypeEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,11 +21,6 @@ class Instructor extends Authenticatable
      * @var string
      */
     protected $table = 'instructors';
-
-    // ステータス定数
-    const TYPE_MANAGER = 'manager';
-
-    const TYPE_INSTRUCTOR = 'instructor';
 
     // ソート対象フィールドの定数
     const SORT_BY_EMAIL = 'email';
@@ -46,9 +42,18 @@ class Instructor extends Authenticatable
         'type',
     ];
 
+    /**
+     * シリアライズから除外する属性
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+    ];
+
     public function isManager(): bool
     {
-        return $this->type === self::TYPE_MANAGER;
+        return $this->type === TypeEnum::MANAGER;
     }
 
     /**
@@ -111,7 +116,11 @@ class Instructor extends Authenticatable
     }
 
     /**
-     * @return array<string, string>
+     * @return array{
+     *  created_at: 'immutable_datetime',
+     *  updated_at: 'immutable_datetime',
+     *  type: 'App\Enums\Instructor\TypeEnum'
+     * }
      */
     #[\Override]
     protected function casts(): array
@@ -119,6 +128,7 @@ class Instructor extends Authenticatable
         return [
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
+            'type' => TypeEnum::class,
         ];
     }
 }

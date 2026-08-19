@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Student\Lesson;
 
-use App\Rules\LessonAttendanceStatusRule;
+use App\Enums\LessonAttendance\StatusEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PatchStatusRequest extends FormRequest
 {
@@ -35,7 +36,7 @@ class PatchStatusRequest extends FormRequest
         return [
             /** @ignoreParam */
             'lesson_attendance_id' => ['required', 'integer', 'exists:lesson_attendances,id,deleted_at,NULL'],
-            'status' => ['required', new LessonAttendanceStatusRule],
+            'status' => ['required', Rule::enum(StatusEnum::class)],
         ];
     }
 }

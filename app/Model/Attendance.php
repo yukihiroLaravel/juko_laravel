@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -251,6 +252,6 @@ class Attendance extends Model
 
         $this->lessonAttendances()
             ->whereIn('lesson_id', $lessonIds)
-            ->update(['status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE]);
+            ->update(['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]);
     }
 }

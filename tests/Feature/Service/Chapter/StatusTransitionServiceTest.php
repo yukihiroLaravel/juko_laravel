@@ -54,19 +54,29 @@ class StatusTransitionServiceTest extends TestCase
     #[DataProvider('allowedTransitions')]
     public function test_許容される遷移は例外を発生させない(StatusEnum $current, StatusEnum $target): void
     {
+        // Arrange
+        // 遷移の組み合わせはデータプロバイダから受け取る
+
+        // Assert
         $this->expectNotToPerformAssertions();
 
+        // Act
         ($this->service)($current, $target);
     }
 
     #[DataProvider('disallowedTransitions')]
     public function test_許容されない遷移は例外を発生させる(StatusEnum $current, StatusEnum $target): void
     {
+        // Arrange
+        // 遷移の組み合わせはデータプロバイダから受け取る
+
+        // Assert
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage(
             'ステータスを「'.$current->value.'」から「'.$target->value.'」へ変更することはできません。'
         );
 
+        // Act
         ($this->service)($current, $target);
     }
 }

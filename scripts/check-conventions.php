@@ -515,7 +515,7 @@ check('CHK-TEST-06', 'テストが参照する受け入れ基準が実在する'
     }
 
     return $violations;
-});
+}, 'merge');
 
 check('CHK-TEST-03', 'テスト関数名を日本語で書く', function (): array {
     $violations = [];
@@ -576,8 +576,12 @@ check('CHK-DOC-02', '業務知識から仕様と構成を参照しない', funct
 });
 
 check('CHK-DOC-04', '存在しない ID を参照しない', function (): array {
+    // 起票はこれから作る ID を書く場所なので、参照の実在は問わない
     $all = '';
     foreach (docs() as $file) {
+        if (str_starts_with($file, 'docs/changes/')) {
+            continue;
+        }
         $all .= contents($file);
     }
 

@@ -8,11 +8,7 @@
 
 | 項目 | 規約 | 既存コード |
 |---|---|---|
-| テーブル名 | 単数形 | 複数形（`courses`・`students` など） |
-| 主キー | `{テーブル名}_id` | `id` |
-| コントローラー | シングルアクション | 1クラスに複数のアクション |
-| 状態値の管理 | Enum | 一部はモデルのクラス定数 |
-| タイムスタンプ | `datetime` 型で明示 | 一部のテーブルで `timestamps()` ヘルパを使用 |
+| 型宣言 | 返り値と引数に型を書く | 一部に未宣言が残る（`phpstan-baseline.neon` に記録） |
 
 ## 配置と命名
 
@@ -20,14 +16,13 @@
 
 ## コントローラー
 
-- シングルアクションコントローラー（`__invoke` のみを持つ）で実装する。例としてユーザー登録の API は `app/Http/Controllers/Api/User/StoreController.php` に置く
 - サービスクラスはメソッドインジェクションで受け取る。コンストラクタインジェクションにしない
 - データベーストランザクションはコントローラーで管理する。`DB::transaction()` でサービス呼び出しを囲む
 
 ## バリデーション
 
 - FormRequest で実装し、1エンドポイント1ファイルとする。複数エンドポイントでの共有を禁止する
-- Enum の許可値の制御は `Rule::enum(GenderEnum::class)` を使う。`in:1,2,9` のようなリテラルの列挙をしない
+- Enum を定義している値の制御は `Rule::enum(GenderEnum::class)` を使い、`in:1,2,9` のようなリテラルの列挙をしない。Enum を持たない単純な選択肢（並び順など）は `in:` で書いてよい
 
 ## サービス
 
@@ -44,12 +39,10 @@
 
 ## マイグレーションとテーブル設計
 
-- テーブル名は単数形にする（`user`・`student` など）
-- プライマリーキーは `{テーブル名}_id` とし、モデルに `protected $primaryKey` を宣言する
-- 外部キーは `foreignIdFor` と `constrained` を使う。主キーが `id` ではないため名前の推測が効かず、参照先を明示する
+- 外部キーは `foreignIdFor` と `constrained` を使い、参照先への制約を必ず張る
 
 ```php
-foreignIdFor(User::class, 'user_id')->constrained(table: 'user', column: 'user_id')
+$table->foreignIdFor(Instructor::class, 'manager_id')->nullable()->constrained()->comment('講師ID');
 ```
 
 - テーブルとカラムには必ず `->comment()` をつける
@@ -59,7 +52,18 @@ foreignIdFor(User::class, 'user_id')->constrained(table: 'user', column: 'user_i
 
 - テーブルの識別子カラムには Enum を活用し、`app/Enums/{コンテキスト}/~Enum.php` で定義する
 - バッキング型は格納値の性質で選ぶ。状態や種別を表すカラム（`status`・`type` など）は string backed を既定とする
+- 定義した Enum はモデルの `casts()` でキャストし、返り値の phpdoc に配列シェイプで書く。書かないと静的解析がキャストを認識せず、比較が常に偽と判定される
 - 既存にクラス定数がある場合は、Enum の導入と合わせて削除し、参照箇所も Enum 参照に書き換える
+
+対象はテーブルのカラムに格納する状態と種別に限る。次のものは Enum にしない。
+
+| 対象 | 例 | 扱い |
+|---|---|---|
+| 並び順の指定 | `nick_name`・`created_at` | リクエストの検証で値を絞る |
+| 集計期間の指定 | `today`・`week`・`month` | 同上 |
+| 単なる既定値 | 進捗の初期値 | 定数のままでよい |
+
+これらはテーブルに保存されず、列挙の集合が業務の意味を持たない。Enum にするとクラスだけが増える。
 
 ## ルーティング
 
@@ -105,7 +109,7 @@ foreignIdFor(User::class, 'user_id')->constrained(table: 'user', column: 'user_i
 | 重大度 | 対象 |
 |---|---|
 | `must` | セキュリティ・データ整合性・規約の必須違反（`env()` の直接利用、認可漏れ、外部キー未設定、トランザクション欠如） |
-| `should` | 設計規約からの逸脱、テスト不足（シングルアクション化されていない、配置と命名の違反、型注釈漏れ、振る舞いの変更にテストがない） |
+| `should` | 設計規約からの逸脱、テスト不足（配置と命名の違反、型注釈漏れ、振る舞いの変更にテストがない） |
 | `nits` | 軽微な指摘や好みの範囲 |
 
 判断の原則として、データ整合性とセキュリティに直結すれば `must`、設計・命名・配置・型の規約からの逸脱は `should` とする。

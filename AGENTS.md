@@ -14,6 +14,7 @@
 | システムの振る舞い（受け入れ基準） | `docs/specs/` |
 | 技術構成・データモデル・エンドポイント | `docs/architecture/` |
 | コーディング規約 | `docs/architecture/coding-standards.md` |
+| 規約の検査手段 | `docs/architecture/convention-checks.md` |
 | 設計判断の経緯 | `docs/adr/` |
 | 未確定事項 | `docs/domain/open-questions.md` |
 | これから作る変更の起票 | `docs/changes/template.md` |

@@ -18,7 +18,6 @@ yarn-error.log
 .vscode/launch.json
 .vscode/settings.json
 
-CLAUDE.md
 /.serena
 
 # Claude Code の個人設定（共有するのは .claude/settings.json と .claude/skills）

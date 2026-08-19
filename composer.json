@@ -70,6 +70,9 @@
         "rector-dry-run": [
             "vendor/bin/rector process --dry-run"
         ],
+        "pint-test": [
+            "vendor/bin/pint --test"
+        ],
         "test": [
             "vendor/bin/phpunit"
         ]

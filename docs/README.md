@@ -12,6 +12,7 @@
 | [architecture/overview.md](architecture/overview.md) | 技術スタックと実装の構成 |
 | [architecture/data-model.md](architecture/data-model.md) | テーブルの役割とカラムの意味 |
 | [architecture/api.md](architecture/api.md) | エンドポイントの一覧と仕様の対応 |
+| [architecture/coding-standards.md](architecture/coding-standards.md) | このプロジェクト固有のコーディング規約 |
 | [adr/](adr/README.md) | 意思決定の記録 |
 | [changes/template.md](changes/template.md) | 変更を起票するときの雛形 |
 

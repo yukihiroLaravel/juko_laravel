@@ -103,28 +103,9 @@
 | `LessonAttendance::STATUS_*` | `lesson_attendances.status` | `before_attendance` / `in_attendance` / `completed_attendance` |
 | `Instructor::TYPE_*` | `instructors.type` | `instructor` / `manager` |
 
-## 現行コードと規約の差異
+## 実装のルール
 
-`CLAUDE.md` のコーディング規約は、規約策定後に書くコードへ適用する。既存コードには策定前の書き方が残っており、次の点が規約と異なる。
-
-| 項目 | 規約 | 既存コード |
-|---|---|---|
-| テーブル名 | 単数形 | 複数形（`courses`・`students` など） |
-| 主キー | `{テーブル名}_id` | `id` |
-| コントローラー | シングルアクション | 1クラスに複数のアクション |
-| 状態値の管理 | Enum | 一部はモデルのクラス定数 |
-| タイムスタンプ | `datetime` 型で明示 | 一部のテーブルで `timestamps()` ヘルパを使用 |
-
-## コード品質
-
-| コマンド | 内容 |
-|---|---|
-| `composer format` | Rector と Pint を順に実行する |
-| `composer analyze` | PHPStan（レベル5）を実行する |
-| `composer rector-dry-run` | Rector の変更内容だけを確認する |
-| `docker compose exec app bash -c 'cd laravelapp && php artisan test'` | テストを実行する |
-
-行の長さは 120 文字を上限とする PSR-12 に従う。
+このプロジェクト固有のコーディング規約と、既存コードとの差異は `docs/architecture/coding-standards.md` にある。Laravel の汎用的なベストプラクティスは `laravel-best-practices` スキルを参照する。
 
 ## テスト
 
@@ -133,7 +114,17 @@
 | フィーチャーテスト | `tests/Feature` | エンドポイントとサービスの振る舞いを検証する。対象の配置に対応したサブディレクトリに置く |
 | ユニットテスト | `tests/Unit` | 単体で完結する計算を検証する |
 
-テストは SQLite のインメモリデータベースで実行する。テスト関数名は日本語で書き、業務・利用者の視点の言葉を使う。参照データはシーダー、それ以外はファクトリで用意する。
+テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれており、並列実行に対応する。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `CLAUDE.md` にある。
+
+## アップロードしたファイルの保存先
+
+| 種別 | 保存先 |
+|---|---|
+| 講座のサムネイル画像 | `storage/app/public/course` |
+| 受講生のプロフィール画像 | `storage/app/public/student` |
+| 講師のプロフィール画像 | `storage/app/public/instructor` |
+
+データベースには `public/` を除いた相対パスを保存する。公開は `public/storage` へのシンボリックリンク経由で行う。
 
 ## API ドキュメントの生成
 

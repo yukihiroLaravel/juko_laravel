@@ -115,6 +115,7 @@ grep -rn 'BR-SHARED-006' docs/
 | ドキュメントを正とする | 業務判断が入るもの（権限による見え方、検索の仕様、状態の遷移、絞り込みの既定値、業務ルールから導かれる必須） |
 | マイグレーションを正とする | 業務ルールに紐づかない機械的な制約（型・桁数・単なる入力必須） |
 | リソースクラスを正とする | 応答に含める項目の一覧 |
+| `CLAUDE.md` を正とする | エージェント向けの索引、実装前に押さえる注意点、よく使うコマンド |
 
 このプロジェクトのスキーマ定義は `database/migrations` を正とする。`docs/architecture/data-model.md` にはカラムの意味と関連だけを書き、型と桁数を重複させない。
 
@@ -131,6 +132,7 @@ grep -rn 'BR-SHARED-006' docs/
 | データ構造を変えた | `docs/architecture/data-model.md`（上書き） |
 | エンドポイントを追加・変更した | `docs/architecture/api.md`（上書き） |
 | 実装の構成を変えた | `docs/architecture/overview.md`（上書き） |
+| コーディング規約を変えた | `docs/architecture/coding-standards.md`（上書き） |
 | 業務ルールが判明・変更された | `docs/domain/shared/business-rules.md`（上書き） |
 | 技術選定の判断をした | `docs/adr/` に新しい記録を追加（既存は上書きしない） |
 | 方針を覆した | 旧記録のステータスのみ更新し、新しい記録を追加 |

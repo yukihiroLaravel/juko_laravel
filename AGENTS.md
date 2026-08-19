@@ -19,6 +19,7 @@
 | 未確定事項 | `docs/domain/open-questions.md` |
 | これから作る変更の起票 | `docs/changes/template.md` |
 | ドキュメントの書き方 | `docs/documentation-rules.md` |
+| 変更を実装するときの手順 | `.claude/skills/change-flow/SKILL.md` |
 
 全体の入口は `docs/README.md` にある。ID を見かけたら `grep -rn 'BR-SHARED-006' docs/` で引く。
 
@@ -58,13 +59,18 @@ docker compose exec app bash -c 'cd laravelapp && php artisan test'
 
 ## 進め方
 
+コードに手を入れるときは `change-flow` スキルに従う。`/change-flow` でも呼べる。
+
 実装は TDD で進める。勝手に先へ進まず、次の2か所で必ず依頼者の承認を取る。
 
 1. 起票を書く前。変更する振る舞い・変更する範囲・対象外の3点を要点だけ提示する
-2. 失敗するテストを書いたあと、実装に入る前。書いたテストを提示する
+2. 失敗するテストを書いたあと、実装に入る前。何を確かめるかを業務の言葉で提示する
 
-2番目が仕様の確定点である。承認されたら実装して通し、整えてから評価に進む。
-段の全体は `docs/architecture/coding-standards.md` の「実装の進め方」にある。
+2番目が仕様の確定点である。ここではテストのコードを見せない。依頼者には開発の
+経験が浅い者が多く、コードを見せると判断できないまま承認する形になるためである。
+
+段の全体は `docs/architecture/coding-standards.md` の「実装の進め方」、
+関門で提示する形は `.claude/skills/change-flow/references/gates.md` にある。
 
 ## 実装のルール
 

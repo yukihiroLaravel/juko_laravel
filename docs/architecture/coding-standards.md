@@ -86,7 +86,7 @@ foreignIdFor(User::class, 'user_id')->constrained(table: 'user', column: 'user_i
 - PHPStan（larastan）のレベル5を通す
 - 整形は Laravel Pint、自動リファクタリングは Rector で行う
 
-実行するコマンドは `CLAUDE.md` にある。
+実行するコマンドは `AGENTS.md` にある。
 
 ## テスト
 

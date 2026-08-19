@@ -114,7 +114,7 @@
 | フィーチャーテスト | `tests/Feature` | エンドポイントとサービスの振る舞いを検証する。対象の配置に対応したサブディレクトリに置く |
 | ユニットテスト | `tests/Unit` | 単体で完結する計算を検証する |
 
-テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれており、並列実行に対応する。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `CLAUDE.md` にある。
+テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれており、並列実行に対応する。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
 
 ## アップロードしたファイルの保存先
 

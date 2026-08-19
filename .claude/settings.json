@@ -1,0 +1,31 @@
+{
+    "permissions": {
+        "allow": [
+            "Read",
+            "Bash(ls:*)",
+            "Bash(grep:*)",
+            "Bash(find:*)",
+            "Bash(git status:*)",
+            "Bash(git diff:*)",
+            "Bash(git log:*)",
+            "Bash(composer analyze)",
+            "Bash(composer format:*)",
+            "Bash(docker compose exec app bash:*)",
+            "Bash(gh pr view:*)",
+            "Bash(gh pr diff:*)",
+            "Bash(gh pr checks:*)",
+            "Bash(gh issue view:*)",
+            "Bash(gh run:*)",
+            "Bash(gh api:*)",
+            "WebFetch(domain:github.com)"
+        ],
+        "deny": [
+            "Read(./.env*)"
+        ]
+    },
+    "enabledMcpjsonServers": [
+        "laravel-boost"
+    ],
+    "language": "japanese",
+    "plansDirectory": "docs/changes"
+}

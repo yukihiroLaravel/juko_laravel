@@ -20,4 +20,10 @@ yarn-error.log
 
 CLAUDE.md
 /.serena
-/.claude
+
+# Claude Code の個人設定（共有するのは .claude/settings.json と .claude/skills）
+.claude/settings.local.json
+
+
+# APM dependencies
+apm_modules/

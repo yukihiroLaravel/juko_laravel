@@ -33,7 +33,7 @@ jobs:
       run: composer pint-test
 
     - name: Check project conventions
-      run: composer check-conventions
+      run: composer check-conventions-merge
 
     - name: Run static analysis with PHPStan
       run: composer analyze

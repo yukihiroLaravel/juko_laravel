@@ -76,6 +76,9 @@
         "check-conventions": [
             "@php scripts/check-conventions.php"
         ],
+        "check-conventions-merge": [
+            "@php scripts/check-conventions.php --merge"
+        ],
         "test": [
             "vendor/bin/phpunit"
         ]

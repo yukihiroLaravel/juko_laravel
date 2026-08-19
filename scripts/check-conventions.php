@@ -13,12 +13,19 @@
  * 使い方
  *   php scripts/check-conventions.php
  *   php scripts/check-conventions.php --quiet   違反だけを出す
+ *   php scripts/check-conventions.php --merge   取り込む前にだけ見るものも含める
+ *
+ * 検査には見る時機が2つある。作業中に見てよいものと、取り込む前にだけ見るものである。
+ * 起票の残骸のように、作業中は存在していて当然のものを毎回の編集で咎めると、
+ * 手順そのものが進まなくなる。既定は作業中に見るものだけとし、継続的
+ * インテグレーションだけが --merge を付ける。呼ぶ回数が多いほうを既定にする。
  */
 declare(strict_types=1);
 
 const ROOT = __DIR__.'/../';
 
 $quiet = in_array('--quiet', $argv, true);
+$merging = in_array('--merge', $argv, true);
 
 /**
  * 指定したディレクトリ以下のファイルを拡張子で集める。
@@ -176,11 +183,21 @@ function docs(string $dir = 'docs'): array
 $results = [];
 
 /**
+ * 検査を1件登録する。
+ *
+ * $stage が 'merge' の検査は取り込む前にだけ見る。作業中は成立していなくて当然の
+ * ものがあるため、--merge を付けたときだけ走らせる。
+ *
  * @param  callable(): list<string>  $check
+ * @param  'always'|'merge'  $stage
  */
-function check(string $id, string $description, callable $check): void
+function check(string $id, string $description, callable $check, string $stage = 'always'): void
 {
-    global $results;
+    global $results, $merging;
+    if ($stage === 'merge' && ! $merging) {
+        return;
+    }
+
     $results[] = ['id' => $id, 'description' => $description, 'violations' => $check()];
 }
 
@@ -617,7 +634,7 @@ check('CHK-DOC-06', '実装が終わった起票を残さない', function (): a
             fn (string $file): bool => $file !== 'docs/changes/template.md'
         ))
     );
-});
+}, 'merge');
 
 check('CHK-DOC-07', '太字記法と区切り線を使わない', function (): array {
     $violations = [];

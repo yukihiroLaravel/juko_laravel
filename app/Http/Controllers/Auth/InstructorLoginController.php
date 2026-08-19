@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\InstructorLoginRequest;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +15,7 @@ final class InstructorLoginController extends Controller
      *
      * @throws AuthenticationException
      */
-    public function __invoke(LoginRequest $request)
+    public function __invoke(InstructorLoginRequest $request)
     {
         if (Auth::guard('instructor')->attempt($request->only(['email', 'password']))) {
             $request->session()->regenerate();

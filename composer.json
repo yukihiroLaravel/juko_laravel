@@ -73,6 +73,9 @@
         "pint-test": [
             "vendor/bin/pint --test"
         ],
+        "check-conventions": [
+            "@php scripts/check-conventions.php"
+        ],
         "test": [
             "vendor/bin/phpunit"
         ]

@@ -32,6 +32,9 @@ jobs:
     - name: Check code style with Pint
       run: composer pint-test
 
+    - name: Check project conventions
+      run: composer check-conventions
+
     - name: Run static analysis with PHPStan
       run: composer analyze
 

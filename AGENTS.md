@@ -43,12 +43,18 @@
 # コードフォーマット（Rector + Laravel Pint を順次実行）
 composer format
 
-# 静的解析（PHPStan レベル5）
+# 規約の検査（何がどこで違反しているかを出す）
+composer check-conventions
+
+# 静的解析（PHPStan レベル6・既存の型未宣言は phpstan-baseline.neon に記録済み）
 composer analyze
 
 # テスト
 docker compose exec app bash -c 'cd laravelapp && php artisan test'
 ```
+
+規約の検査はファイルを書いた直後にも自動で走る。違反はその場で返るので、
+指摘されたら直してから次に進む。判定の一覧は `docs/architecture/convention-checks.md` にある。
 
 ## 実装のルール
 

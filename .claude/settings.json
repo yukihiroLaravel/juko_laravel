@@ -1,31 +1,48 @@
 {
-    "permissions": {
-        "allow": [
-            "Read",
-            "Bash(ls:*)",
-            "Bash(grep:*)",
-            "Bash(find:*)",
-            "Bash(git status:*)",
-            "Bash(git diff:*)",
-            "Bash(git log:*)",
-            "Bash(composer analyze)",
-            "Bash(composer format:*)",
-            "Bash(docker compose exec app bash:*)",
-            "Bash(gh pr view:*)",
-            "Bash(gh pr diff:*)",
-            "Bash(gh pr checks:*)",
-            "Bash(gh issue view:*)",
-            "Bash(gh run:*)",
-            "Bash(gh api:*)",
-            "WebFetch(domain:github.com)"
-        ],
-        "deny": [
-            "Read(./.env*)"
-        ]
-    },
-    "enabledMcpjsonServers": [
-        "laravel-boost"
+  "permissions": {
+    "allow": [
+      "Read",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(composer analyze)",
+      "Bash(composer format:*)",
+      "Bash(docker compose exec app bash:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh run:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(composer check-conventions)",
+      "Bash(php scripts/check-conventions.php:*)"
     ],
-    "language": "japanese",
-    "plansDirectory": "docs/changes"
+    "deny": [
+      "Read(./.env*)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ],
+  "language": "japanese",
+  "plansDirectory": "docs/changes",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f; case \"$f\" in *.php|*.md) vendor/bin/pint --dirty --format agent >/dev/null 2>&1; php scripts/check-conventions.php --quiet >&2 || exit 2 ;; esac; }",
+            "timeout": 30,
+            "statusMessage": "規約を検査しています"
+          }
+        ]
+      }
+    ]
+  }
 }

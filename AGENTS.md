@@ -40,19 +40,24 @@
 
 ## よく使うコマンド
 
+開発環境は Docker に集約している。ホストに PHP と Composer を入れる前提にしない。
+`scripts/dc` がコンテナの中でコマンドを実行する。
+
 ```bash
 # コードフォーマット（Rector + Laravel Pint を順次実行）
-composer format
+scripts/dc composer format
 
 # 規約の検査（何がどこで違反しているかを出す）
-composer check-conventions
+scripts/dc composer check-conventions
 
 # 静的解析（PHPStan レベル6・既存の型未宣言は phpstan-baseline.neon に記録済み）
-composer analyze
+scripts/dc composer analyze
 
 # テスト
-docker compose exec app bash -c 'cd laravelapp && php artisan test'
+scripts/dc php artisan test --compact
 ```
+
+コンテナが起動していないと動かない。リポジトリの根で `docker compose up -d` を実行する。
 
 規約の検査はファイルを書いた直後にも自動で走る。違反はその場で返るので、
 指摘されたら直してから次に進む。判定の一覧は `docs/architecture/convention-checks.md` にある。

@@ -37,8 +37,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f; case \"$f\" in *.php|*.md) vendor/bin/pint --dirty --format agent >/dev/null 2>&1; php scripts/check-conventions.php --quiet >&2 || exit 2 ;; esac; }",
-            "timeout": 30,
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f; case \"$f\" in *.php|*.md) scripts/dc vendor/bin/pint --dirty --format agent >/dev/null 2>&1; scripts/dc php scripts/check-conventions.php --quiet >&2 || exit 2 ;; esac; }",
+            "timeout": 60,
             "statusMessage": "規約を検査しています"
           }
         ]

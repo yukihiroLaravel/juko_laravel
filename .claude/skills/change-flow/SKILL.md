@@ -129,7 +129,7 @@ flowchart TD
 書いたら実行し、意図した理由で落ちていることを確かめる。書き間違いで落ちているのか、実装がないから落ちているのかを取り違えない。
 
 ```bash
-php artisan test --compact --filter=<テスト名>
+scripts/dc php artisan test --compact --filter=<テスト名>
 ```
 
 ## 4 関門2 テストの承認
@@ -154,19 +154,21 @@ php artisan test --compact --filter=<テスト名>
 
 規約に合わせて整理する。振る舞いは変えない。
 
-`composer format` で整形と自動リファクタリングをかける。
+`scripts/dc composer format` で整形と自動リファクタリングをかける。
 
 ## 7 評価
 
 次をすべて通す。1つでも落ちたら段5へ戻る。
 
 ```bash
-composer pint-test          # 整形
-composer check-conventions  # 規約
-composer analyze            # 静的解析
-composer rector-dry-run     # 旧い記法
-php artisan test --compact  # 全テスト
+scripts/dc composer pint-test          # 整形
+scripts/dc composer check-conventions  # 規約
+scripts/dc composer analyze            # 静的解析
+scripts/dc composer rector-dry-run     # 旧い記法
+scripts/dc php artisan test --compact  # 全テスト
 ```
+
+開発環境は Docker に集約している。`scripts/dc` がコンテナの中で実行する。
 
 これらは規約に合っているかだけを見ており、振る舞いが正しいかは見ていない。全部通っても、正しさを保証したことにはならない。正しさは段4で確定させている。
 
@@ -191,7 +193,7 @@ php artisan test --compact  # 全テスト
 削除したあと、取り込む前の検査を通す。段7の評価には含まれない項目がここで見られる。
 
 ```bash
-composer check-conventions-merge
+scripts/dc composer check-conventions-merge
 ```
 
 コミットは意味のある単位に分ける。何を変えたかではなく、なぜ変えたかを本文に書く。

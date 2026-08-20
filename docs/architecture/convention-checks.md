@@ -33,16 +33,16 @@
 `scripts/check-conventions.php` が 25 項目を判定する。違反があれば終了コード 1 を返し、違反の場所と直し方を出す。
 
 ```bash
-composer check-conventions
+scripts/dc composer check-conventions
 ```
 
 呼び出す場所は 2 つある。
 
 | 場所 | 呼び方 | 効き方 |
 |---|---|---|
-| 編集直後（`.claude/settings.json` のフック） | `composer check-conventions` | ファイルを書いた直後に整形と検査を行い、違反があればその場で書き手に返す |
-| 実装中の評価 | `composer check-conventions` | 同上 |
-| 継続的インテグレーション | `composer check-conventions-merge` | 取り込む前に落とす |
+| 編集直後（`.claude/settings.json` のフック） | `scripts/dc composer check-conventions` | ファイルを書いた直後に整形と検査を行い、違反があればその場で書き手に返す |
+| 実装中の評価 | `scripts/dc composer check-conventions` | 同上 |
+| 継続的インテグレーション | `composer check-conventions-merge`（PHP が入った環境のため直接呼ぶ） | 取り込む前に落とす |
 
 同じスクリプトを両方から呼ぶ。フックは手元で気づくため、継続的インテグレーションは取りこぼしを止めるためにある。
 
@@ -158,7 +158,7 @@ CHK-ENUM-03 は 2026-08-19 に対応した。受講状況の段階（`STATUS_*`�
 
 CHK-TYPE-01 は区分 B に残る唯一の規約である。2026-08-19 に PHPStan をレベル6へ上げ、その時点の 241 件を `phpstan-baseline.neon` に記録した。既存はそのまま通り、新しく書いたコードで型を省くと落ちる。
 
-基準線は記録した違反が消えると「記録が古い」と知らせてくる。既存を直したときは `vendor/bin/phpstan analyse --generate-baseline` で記録を更新する。この性質があるため、直した分を取りこぼさずに減らしていける。
+基準線は記録した違反が消えると「記録が古い」と知らせてくる。既存を直したときは `scripts/dc vendor/bin/phpstan analyse --generate-baseline` で記録を更新する。この性質があるため、直した分を取りこぼさずに減らしていける。
 
 CHK-TYPE-04 の既存 4 件は、リクエストから受け取る講座の指定を `$request->collect()` に変え、`isNotEmpty()` で判定する形にして解消した。
 
@@ -170,7 +170,7 @@ CHK-TYPE-04 の既存 4 件は、リクエストから受け取る講座の指�
 | CHK-QUALITY-02 | PHPStan を通す | A | PHPStan | 0 件 |
 | CHK-QUALITY-03 | Rector の指摘を残さない | A | Rector | 継続的インテグレーションで確認済み |
 
-CHK-QUALITY-01 は以前、継続的インテグレーションが整形結果を自動で反映しており、違反が現れなかった。2026-08-19 にその自動反映をやめ、`composer pint-test` で落とす形に変えた。整形そのものは編集直後に寄せる。
+CHK-QUALITY-01 は以前、継続的インテグレーションが整形結果を自動で反映しており、違反が現れなかった。2026-08-19 にその自動反映をやめ、継続的インテグレーションの `composer pint-test` で落とす形に変えた。整形そのものは編集直後に寄せる。
 
 ### テスト
 

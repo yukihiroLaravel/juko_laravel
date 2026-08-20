@@ -128,4 +128,4 @@
 
 ## API ドキュメントの生成
 
-dedoc/scramble が OpenAPI 定義を生成する。リポジトリ直下の `api.json` は生成した時点のもので、ルートの変更に追従していない場合がある。現在のエンドポイントを確認する際は `php artisan route:list --except-vendor` を正とする。`docs/architecture/api.md` はこの一覧をもとに整理したものである。
+dedoc/scramble が OpenAPI 定義を生成する。リポジトリ直下の `api.json` は生成した時点のもので、ルートの変更に追従していない場合がある。現在のエンドポイントを確認する際は `scripts/dc php artisan route:list --except-vendor` を正とする。`docs/architecture/api.md` はこの一覧をもとに整理したものである。

@@ -2,7 +2,7 @@
 
 現在のエンドポイントの一覧である。振る舞いの詳細は `docs/specs/` を参照し、ここでは経路と対応する仕様の対応づけだけを扱う。
 
-一覧の正は `php artisan route:list --except-vendor` である。リポジトリ直下の `api.json` は生成時点のもので古い場合がある。
+一覧の正は `scripts/dc php artisan route:list --except-vendor` である。リポジトリ直下の `api.json` は生成時点のもので古い場合がある。
 
 ## 前提
 

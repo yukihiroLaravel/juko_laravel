@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Instructor\TypeEnum as InstructorTypeEnum;
 use App\Model\Instructor;
 use Closure;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,7 @@ class EnsureIsManager
     public function handle($request, Closure $next)
     {
         $instructor = Instructor::find(Auth::guard('instructor')->id());
-        if ($instructor->type !== Instructor::TYPE_MANAGER) {
+        if ($instructor->type !== InstructorTypeEnum::MANAGER) {
             return new JsonResponse([
                 'message' => 'Forbidden, not allowed to use manager api.',
             ], 403);

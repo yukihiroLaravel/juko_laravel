@@ -3,48 +3,66 @@
 namespace Tests\Feature\Models;
 
 use App\Model\Attendance;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AttendanceTest extends TestCase
 {
-    public function test_ログイン率を計算する(): void
+    /**
+     * ログイン率の計算例
+     *
+     * @return array<string, array{int, int, int}>
+     */
+    public static function loginRates(): array
     {
-        $result = Attendance::calcLoginRate(5, 0);
-        $this->assertEquals(0, $result);
-
-        $result = Attendance::calcLoginRate(0, 10);
-        $this->assertEquals(0, $result);
-
-        $result = Attendance::calcLoginRate(5, 10);
-        $this->assertEquals(50, $result);
-
-        $result = Attendance::calcLoginRate(10, 10);
-        $this->assertEquals(100, $result);
-
-        $result = Attendance::calcLoginRate(7, 10);
-        $this->assertEquals(70, $result);
+        return [
+            '受講生がいない場合は0になる' => [5, 0, 0],
+            'ログインした人がいない場合は0になる' => [0, 10, 0],
+            '半数がログインした場合は50になる' => [5, 10, 50],
+            '全員がログインした場合は100になる' => [10, 10, 100],
+            '10人中7人がログインした場合は70になる' => [7, 10, 70],
+        ];
     }
 
-    public function test_修了率を計算する(): void
+    /**
+     * 修了率の計算例
+     *
+     * @return array<string, array{int, int, int}>
+     */
+    public static function completionRates(): array
     {
-        // 受講生が0人の場合は0を返す
-        $result = Attendance::calcCompletionRate(5, 0);
-        $this->assertEquals(0, $result);
+        return [
+            '受講生がいない場合は0になる' => [5, 0, 0],
+            '修了した人がいない場合は0になる' => [0, 10, 0],
+            '半数が修了した場合は50になる' => [5, 10, 50],
+            '全員が修了した場合は100になる' => [10, 10, 100],
+            '7人中3人が修了した場合は端数を切り捨てて42になる' => [3, 7, 42],
+        ];
+    }
 
-        // 修了者が0人の場合は0を返す
-        $result = Attendance::calcCompletionRate(0, 10);
-        $this->assertEquals(0, $result);
+    #[DataProvider('loginRates')]
+    public function test_ログイン率を計算する(int $loggedInCount, int $totalCount, int $expected): void
+    {
+        // Arrange
+        // 集計に使う人数はデータプロバイダから受け取る
 
-        // 半数が修了している場合は50を返す
-        $result = Attendance::calcCompletionRate(5, 10);
-        $this->assertEquals(50, $result);
+        // Act
+        $result = Attendance::calcLoginRate($loggedInCount, $totalCount);
 
-        // 全員修了している場合は100を返す
-        $result = Attendance::calcCompletionRate(10, 10);
-        $this->assertEquals(100, $result);
+        // Assert
+        $this->assertEquals($expected, $result);
+    }
 
-        // 端数は切り捨てる（3/7 ≒ 42.85 → 42）
-        $result = Attendance::calcCompletionRate(3, 7);
-        $this->assertEquals(42, $result);
+    #[DataProvider('completionRates')]
+    public function test_修了率を計算する(int $completedCount, int $totalCount, int $expected): void
+    {
+        // Arrange
+        // 集計に使う人数はデータプロバイダから受け取る
+
+        // Act
+        $result = Attendance::calcCompletionRate($completedCount, $totalCount);
+
+        // Assert
+        $this->assertEquals($expected, $result);
     }
 }

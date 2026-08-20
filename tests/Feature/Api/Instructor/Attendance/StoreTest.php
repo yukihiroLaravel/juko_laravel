@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Attendance;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -65,7 +66,7 @@ class StoreTest extends TestCase
             $this->assertDatabaseHas('lesson_attendances', [
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\LessonAttendance;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -19,7 +20,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 1,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -27,7 +28,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 2,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                 'completed_at' => Carbon::now()->subDays(40),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -35,7 +36,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 3,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -43,7 +44,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 4,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -51,7 +52,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 5,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -59,7 +60,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 6,
                 'attendance_id' => 1,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -67,7 +68,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 1,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                 'completed_at' => Carbon::now()->subDays(1),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -75,7 +76,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 2,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                 'completed_at' => Carbon::now()->subDays(10),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -83,7 +84,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 3,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -91,7 +92,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 4,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -99,7 +100,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 5,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
@@ -107,7 +108,7 @@ class LessonAttendanceSeeder extends Seeder
             [
                 'lesson_id' => 6,
                 'attendance_id' => 2,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => null,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

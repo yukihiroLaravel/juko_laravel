@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Attendance;
 
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -154,7 +155,7 @@ class ShowStatusTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             ]);
         }
         // 非公開Lesson はステータス遷移しないものの、レコード自体は存在する想定
@@ -162,7 +163,7 @@ class ShowStatusTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
 
@@ -201,8 +202,8 @@ class ShowStatusTest extends TestCase
                 'attendance_id' => $attendanceA->id,
                 'lesson_id' => $lesson->id,
                 'status' => $i < 3
-                    ? LessonAttendance::STATUS_COMPLETED_ATTENDANCE
-                    : LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                    ? LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE
+                    : LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
         // 受講生B: 4レッスンのうち2件を完了
@@ -211,8 +212,8 @@ class ShowStatusTest extends TestCase
                 'attendance_id' => $attendanceB->id,
                 'lesson_id' => $lesson->id,
                 'status' => $i < 2
-                    ? LessonAttendance::STATUS_COMPLETED_ATTENDANCE
-                    : LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                    ? LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE
+                    : LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
 
@@ -273,7 +274,7 @@ class ShowStatusTest extends TestCase
                 LessonAttendance::factory()->create([
                     'attendance_id' => $attendance->id,
                     'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                    'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 ]);
             }
         }
@@ -309,7 +310,7 @@ class ShowStatusTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendanceA->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                 'completed_at' => now(),
             ]);
         }
@@ -322,8 +323,8 @@ class ShowStatusTest extends TestCase
                 'attendance_id' => $attendanceB->id,
                 'lesson_id' => $lesson->id,
                 'status' => $i === 0
-                    ? LessonAttendance::STATUS_COMPLETED_ATTENDANCE
-                    : LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                    ? LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE
+                    : LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
                 'completed_at' => $i === 0 ? now() : null,
             ]);
         }
@@ -362,7 +363,7 @@ class ShowStatusTest extends TestCase
                 LessonAttendance::factory()->create([
                     'attendance_id' => $attendance->id,
                     'lesson_id' => $lesson->id,
-                    'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                    'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                     'completed_at' => now(),
                 ]);
             }
@@ -405,7 +406,7 @@ class ShowStatusTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
                 'completed_at' => now(),
             ]);
         }
@@ -413,7 +414,7 @@ class ShowStatusTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $privateLesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
 
         $this->actingAs($instructor, 'instructor');
@@ -448,14 +449,14 @@ class ShowStatusTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lessons[0]->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => now(),
         ]);
         // 2件目: 過去に完了したが再学習でステータスが in_attendance に戻った状態（completed_at は残る）
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lessons[1]->id,
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
             'completed_at' => now()->subDay(),
         ]);
 

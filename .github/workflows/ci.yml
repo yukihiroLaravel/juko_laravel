@@ -29,6 +29,12 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
+    - name: Check code style with Pint
+      run: composer pint-test
+
+    - name: Check project conventions
+      run: composer check-conventions-merge
+
     - name: Run static analysis with PHPStan
       run: composer analyze
 
@@ -38,39 +44,3 @@ jobs:
     - name: Run tests
       run: composer test
     
-  format-code:
-    runs-on: ubuntu-latest
-    name: Auto-format Code
-    needs: [code-quality]
-    if: success()
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.3'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql
-        tools: composer:v2.8.2
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --ansi
-
-    - name: Format code
-      run: composer format
-
-    - name: Commit and Push changes
-      run: |
-        git config --global user.name "GitHub Actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add -A
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Automated code format"
-          git push
-        fi

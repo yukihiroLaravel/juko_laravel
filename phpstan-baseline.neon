@@ -1,0 +1,1435 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has parameter \$leftOnlyRouteList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has parameter \$leftRouteList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has parameter \$matchRouteList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has parameter \$rightOnlyRouteList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:compare\(\) has parameter \$rightRouteList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:echoOneRoute\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:echoOneRoute\(\) has parameter \$route with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:getNextUriIndex\(\) has parameter \$uriIndexesEx with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:handle\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:loadOpenapi\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:loadRoutes\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:sortRouteListByKey\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\CompareRoute\:\:sortRouteListByKey\(\) has parameter \$routeList with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Console/Commands/CompareRoute.php
+
+		-
+			message: '#^Property App\\Console\\Kernel\:\:\$commands type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Console/Kernel.php
+
+		-
+			message: '#^Method App\\Dto\\Student\\Attendance\\ContinueFromDto\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Dto/Student/Attendance/ContinueFromDto.php
+
+		-
+			message: '#^Method App\\Dto\\Student\\Notification\\IndexDto\:\:getIndex\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Dto/Student/Notification/IndexDto.php
+
+		-
+			message: '#^Method App\\Enums\\Chapter\\StatusEnum\:\:switchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/Chapter/StatusEnum.php
+
+		-
+			message: '#^Method App\\Enums\\Course\\StatusEnum\:\:switchableStatuses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/Course/StatusEnum.php
+
+		-
+			message: '#^Method App\\Exceptions\\ValidationErrorException\:\:__construct\(\) has parameter \$message with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Exceptions/ValidationErrorException.php
+
+		-
+			message: '#^Method App\\Exceptions\\ValidationErrorException\:\:__construct\(\) has parameter \$statusCode with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Exceptions/ValidationErrorException.php
+
+		-
+			message: '#^Method App\\Exceptions\\ValidationErrorException\:\:getStatusCode\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Exceptions/ValidationErrorException.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\Instructor\\CourseController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/Instructor/CourseController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\Instructor\\TagController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/Instructor/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\Instructor\\TagController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/Instructor/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\Manager\\TagController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/Manager/TagController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Api\\Student\\LearningHistoryController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/Api/Student/LearningHistoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Auth\\RegisterController\:\:validator\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Auth/RegisterController.php
+
+		-
+			message: '#^Method App\\Http\\Middleware\\CorsMiddleware\:\:handle\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Middleware/CorsMiddleware.php
+
+		-
+			message: '#^Method App\\Http\\Middleware\\CorsMiddleware\:\:handle\(\) has parameter \$request with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Middleware/CorsMiddleware.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Auth\\LoginRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Auth/LoginRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\ExpiringRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/ExpiringRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\LoginRateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/LoginRateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\ShowStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/ShowStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\StatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/StatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Attendance\\StuckPointsRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Attendance/StuckPointsRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\BulkDeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/BulkDeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\DeleteAllRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/DeleteAllRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\PatchRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/PatchRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\PatchStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/PatchStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\PutStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/PutStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\SortRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/SortRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Chapter\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Chapter/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\ClearCapacityRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/ClearCapacityRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\PutStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/PutStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Course\\UpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Course/UpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\BulkDeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/BulkDeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\DeleteAllRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/DeleteAllRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\PutRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/PutRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\PutStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/PutStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\SortRequest\:\:after\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/SortRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\SortRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/SortRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\UpdateStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/UpdateStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Lesson\\UpdateTitleRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Lesson/UpdateTitleRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\BulkDeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/BulkDeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\PutRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/PutRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Notification\\UpdateTypeRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Notification/UpdateTypeRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Student\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Student/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Student\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Student/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Student\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Student/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\Tag\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/Tag/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\UpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/UpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Instructor\\UserAuthenticationRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Instructor/UserAuthenticationRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Attendance\\LoginRateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Attendance/LoginRateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Attendance\\ShowStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Attendance/ShowStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Chapter\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Chapter/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Chapter\\UpdateStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Chapter/UpdateStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Course\\ClearSelectedDeadlineRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Course/ClearSelectedDeadlineRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Course\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Course/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Course\\StatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Course/StatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Course\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Course/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Course\\UpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Course/UpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\Course\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/Course/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\TotalCurrentAttendanceCountRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/TotalCurrentAttendanceCountRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Instructor\\UpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Instructor/UpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Lesson\\BulkDeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Lesson/BulkDeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\BulkDeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/BulkDeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\DeleteRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/DeleteRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\PutRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/PutRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Notification\\UpdateTypeRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Notification/UpdateTypeRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Student\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Student/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Manager\\Student\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Manager/Student/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\CompleteAllChaptersRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/CompleteAllChaptersRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\CompleteAllLessonsRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/CompleteAllLessonsRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\ProgressRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/ProgressRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Attendance\\StuckPointsRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Attendance/StuckPointsRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Lesson\\PatchStatusRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Lesson/PatchStatusRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Notification\\IndexRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Notification/IndexRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\Notification\\ShowRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/Notification/ShowRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\StoreRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/StoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\UpdateRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/UpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Student\\UserAuthenticationRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Student/UserAuthenticationRequest.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\AttendanceResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/AttendanceResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\ChapterResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/ChapterResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\CourseDeadlineResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/CourseDeadlineResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\CourseDeadlineResource\:\:toArray\(\) return type with generic interface Illuminate\\Contracts\\Support\\Arrayable does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Base/Instructor/CourseDeadlineResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\CourseResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/CourseResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\LessonResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/LessonResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\NotificationResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/NotificationResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Instructor\\TagResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Instructor/TagResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\AttendanceResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/AttendanceResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\ChapterResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/ChapterResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\CourseResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/CourseResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\LessonAttendanceResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/LessonAttendanceResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\LessonResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/LessonResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\NotificationResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/NotificationResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Base\\Student\\TagResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Base/Student/TagResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Common\\Attendance\\StuckLessonsResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Common/Attendance/StuckLessonsResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Common\\Attendance\\StuckPointsResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Common/Attendance/StuckPointsResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\Attendance\\ExpiringResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/Attendance/ExpiringResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\Attendance\\ExpiringStudentResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/Attendance/ExpiringStudentResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\Attendance\\StatusResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/Attendance/StatusResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\AttendanceShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/AttendanceShowResource.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Resources/Instructor/AttendanceShowResource.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Resources/Instructor/AttendanceShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\ChapterShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/ChapterShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\CourseIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/CourseIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\CourseShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/CourseShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\InstructorCourseResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/InstructorCourseResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\NotificationIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/NotificationIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\StudentIndexResource\:\:mapStudents\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Resources/Instructor/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\StudentIndexResource\:\:mapStudents\(\) has parameter \$results with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Instructor/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\StudentIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/StudentIndexResource.php
+
+		-
+			message: '#^Property App\\Http\\Resources\\Instructor\\StudentIndexResource\:\:\$resource with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Instructor/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\StudentShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/StudentShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Instructor\\TagIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Instructor/TagIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\ChapterShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/ChapterShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\InstructorCourseIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/InstructorCourseIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\InstructorIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/InstructorIndexResource.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$data contains generic class Illuminate\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Manager/InstructorIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\InstructorShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/InstructorShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\NotificationIndexResource\:\:mapNotifications\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/NotificationIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\NotificationIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/NotificationIndexResource.php
+
+		-
+			message: '#^Property App\\Http\\Resources\\Manager\\NotificationIndexResource\:\:\$resource with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Manager/NotificationIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\NotificationShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/NotificationShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\StudentIndexResource\:\:mapStudents\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Resources/Manager/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\StudentIndexResource\:\:mapStudents\(\) has parameter \$results with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Manager/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\StudentIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/StudentIndexResource.php
+
+		-
+			message: '#^Property App\\Http\\Resources\\Manager\\StudentIndexResource\:\:\$resource with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Manager/StudentIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Manager\\TagIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Manager/TagIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\AttendanceCourseProgressResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/AttendanceCourseProgressResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\AttendanceIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/AttendanceIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\AttendanceShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/AttendanceShowResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\NotificationIndexResource\:\:mapNotifications\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/NotificationIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\NotificationIndexResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/NotificationIndexResource.php
+
+		-
+			message: '#^Property App\\Http\\Resources\\Student\\NotificationIndexResource\:\:\$resource with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Resources/Student/NotificationIndexResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\NotificationReadResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/NotificationReadResource.php
+
+		-
+			message: '#^Method App\\Http\\Resources\\Student\\StudentShowResource\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Resources/Student/StudentShowResource.php
+
+		-
+			message: '#^Class App\\Model\\Attendance uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Attendance.php
+
+		-
+			message: '#^Class App\\Model\\Chapter uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Chapter.php
+
+		-
+			message: '#^Method App\\Model\\Chapter\:\:public\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Chapter.php
+
+		-
+			message: '#^Class App\\Model\\Course uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Course.php
+
+		-
+			message: '#^Class App\\Model\\CourseDeadline uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/CourseDeadline.php
+
+		-
+			message: '#^Class App\\Model\\Instructor uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Instructor.php
+
+		-
+			message: '#^Class App\\Model\\Lesson uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Lesson.php
+
+		-
+			message: '#^Method App\\Model\\Lesson\:\:completedLessonsCount\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Lesson.php
+
+		-
+			message: '#^Method App\\Model\\Lesson\:\:public\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Lesson.php
+
+		-
+			message: '#^Method App\\Model\\Lesson\:\:totalLessonsCount\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Lesson.php
+
+		-
+			message: '#^Class App\\Model\\LessonAttendance uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/LessonAttendance.php
+
+		-
+			message: '#^Class App\\Model\\ManageInstructor uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/ManageInstructor.php
+
+		-
+			message: '#^Class App\\Model\\Notification uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Notification.php
+
+		-
+			message: '#^Method App\\Model\\Notification\:\:filterByReadStatus\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Notification.php
+
+		-
+			message: '#^Method App\\Model\\Notification\:\:filterByReadStatus\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Notification.php
+
+		-
+			message: '#^Method App\\Model\\Notification\:\:public\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Notification.php
+
+		-
+			message: '#^Method App\\Model\\Notification\:\:public\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Notification.php
+
+		-
+			message: '#^Class App\\Model\\Student uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Student.php
+
+		-
+			message: '#^Method App\\Model\\Student\:\:fullName\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Student.php
+
+		-
+			message: '#^Class App\\Model\\StudentLoginHistory uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/StudentLoginHistory.php
+
+		-
+			message: '#^Method App\\Model\\StudentLoginHistory\:\:student\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/StudentLoginHistory.php
+
+		-
+			message: '#^Class App\\Model\\Tag uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/Tag.php
+
+		-
+			message: '#^Class App\\Model\\TemporaryInstructor uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/TemporaryInstructor.php
+
+		-
+			message: '#^Method App\\Model\\TemporaryInstructor\:\:fullName\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/TemporaryInstructor.php
+
+		-
+			message: '#^Class App\\Model\\TemporaryStudent uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/TemporaryStudent.php
+
+		-
+			message: '#^Method App\\Model\\TemporaryStudent\:\:fullName\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/TemporaryStudent.php
+
+		-
+			message: '#^Class App\\Model\\ViewedOnceNotification uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Model/ViewedOnceNotification.php
+
+		-
+			message: '#^Method App\\Model\\ViewedOnceNotification\:\:notification\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Model/ViewedOnceNotification.php
+
+		-
+			message: '#^Method App\\Policies\\StudentPolicy\:\:hasCommonCourses\(\) has parameter \$attendedCourseIds with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Policies/StudentPolicy.php
+
+		-
+			message: '#^Method App\\Policies\\StudentPolicy\:\:hasCommonCourses\(\) has parameter \$courseIds with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Policies/StudentPolicy.php
+
+		-
+			message: '#^Method App\\Policies\\TagPolicy\:\:delete\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Policies/TagPolicy.php
+
+		-
+			message: '#^Method App\\Rules\\StudentUniqueEmailRule\:\:__construct\(\) has parameter \$email with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Rules/StudentUniqueEmailRule.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\ExpiringService\:\:__invoke\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/ExpiringService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\FollowUpService\:\:__invoke\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/FollowUpService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\FollowUpService\:\:buildFollowUpStudentDtos\(\) has parameter \$students with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/FollowUpService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\FollowUpService\:\:buildFollowUpStudentDtos\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/FollowUpService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:__invoke\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:countCompletedLessons\(\) has parameter \$attendances with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:countCompletedLessons\(\) has parameter \$publicLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getActiveAttendances\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getFirstLesson\(\) has parameter \$publicChapters with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getFirstLesson\(\) has parameter \$publicLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getFirstLesson\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getLastLesson\(\) has parameter \$publicChapters with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getLastLesson\(\) has parameter \$publicLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getNextLesson\(\) has parameter \$maxCompletedLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getNextLesson\(\) has parameter \$publicChapters with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getNextLesson\(\) has parameter \$publicLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getNextLesson\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getPublicChapters\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getPublicLessons\(\) has parameter \$publicChapters with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:getPublicLessons\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:isEligible\(\) has parameter \$attendances with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:isEligible\(\) has parameter \$publicChapters with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:isEligible\(\) has parameter \$publicLessons with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:mergeDuplicatedChapters\(\) has parameter \$stuckPoints with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Attendance\\StuckPointsService\:\:mergeDuplicatedChapters\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapKey in call to method Illuminate\\Support\\Collection\<int,mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapValue in call to method Illuminate\\Support\\Collection\<int,mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Services/Attendance/StuckPointsService.php
+
+		-
+			message: '#^Method App\\Services\\Chapter\\UpdateChapterStatusService\:\:__invoke\(\) has parameter \$chapterIds with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Chapter/UpdateChapterStatusService.php
+
+		-
+			message: '#^Method App\\Services\\Course\\ClearSelectedDeadlineService\:\:__invoke\(\) has parameter \$selectedCourseIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Course/ClearSelectedDeadlineService.php
+
+		-
+			message: '#^Method App\\Services\\Lesson\\SortLessonsService\:\:__invoke\(\) has parameter \$inputLessons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Lesson/SortLessonsService.php
+
+		-
+			message: '#^Method App\\Services\\Notification\\BulkDeleteService\:\:__invoke\(\) has parameter \$notifications with generic class Illuminate\\Database\\Eloquent\\Collection but does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Notification/BulkDeleteService.php
+
+		-
+			message: '#^Method App\\Services\\Notification\\IndexService\:\:__invoke\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/Notification/IndexService.php
+
+		-
+			message: '#^Method App\\Services\\Notification\\ShowService\:\:__invoke\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Notification/ShowService.php
+
+		-
+			message: '#^Method App\\Services\\Student\\Attendance\\IndexService\:\:__invoke\(\) return type with generic class Illuminate\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/Student/Attendance/IndexService.php
+
+		-
+			message: '#^Method App\\Services\\Student\\Attendance\\StudentLearningHistoryService\:\:__invoke\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Student/Attendance/StudentLearningHistoryService.php
+
+		-
+			message: '#^Method App\\Services\\Student\\Attendance\\StudentLearningHistoryService\:\:getChapterStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Student/Attendance/StudentLearningHistoryService.php
+
+		-
+			message: '#^Method App\\Services\\Student\\Attendance\\StudentLearningHistoryService\:\:getCourseStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Student/Attendance/StudentLearningHistoryService.php
+
+		-
+			message: '#^Method App\\Services\\Student\\Attendance\\StudentLearningHistoryService\:\:getLessonStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Student/Attendance/StudentLearningHistoryService.php

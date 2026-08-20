@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Model;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
@@ -26,7 +27,7 @@ class LessonAttendanceFactory extends Factory
         return [
             'lesson_id' => Lesson::factory(),
             'attendance_id' => Attendance::factory(),
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ];
     }
 
@@ -38,7 +39,7 @@ class LessonAttendanceFactory extends Factory
     public function completed(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::now(),
         ]);
     }

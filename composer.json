@@ -70,6 +70,15 @@
         "rector-dry-run": [
             "vendor/bin/rector process --dry-run"
         ],
+        "pint-test": [
+            "vendor/bin/pint --test"
+        ],
+        "check-conventions": [
+            "@php scripts/check-conventions.php"
+        ],
+        "check-conventions-merge": [
+            "@php scripts/check-conventions.php --merge"
+        ],
         "test": [
             "vendor/bin/phpunit"
         ]

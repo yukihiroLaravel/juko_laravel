@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -81,7 +82,7 @@ class Lesson extends Model
      */
     protected function completedLessonsCount(): Attribute
     {
-        return Attribute::make(get: fn () => $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendance::STATUS_COMPLETED_ATTENDANCE)->count());
+        return Attribute::make(get: fn () => $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)->count());
     }
 
     /**

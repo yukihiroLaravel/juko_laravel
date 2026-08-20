@@ -16,7 +16,8 @@ use App\Http\Resources\Manager\InstructorTotalCurrentAttendanceCountResource;
 use App\Mail\AuthenticationConfirmationMail;
 use App\Model\Instructor;
 use App\Model\TemporaryInstructor;
-use App\Services\Auth\CredentialGeneratorService;
+use App\Services\Auth\CreateCodeService;
+use App\Services\Auth\CreateTokenService;
 use App\Services\Instructor\StoreService;
 use App\Services\Instructor\TotalCurrentAttendanceCountService;
 use Exception;
@@ -117,19 +118,20 @@ class InstructorController extends Controller
     public function store(
         StoreRequest $request,
         StoreService $storeService,
-        CredentialGeneratorService $credentialGeneratorService
+        CreateCodeService $createCodeService,
+        CreateTokenService $createTokenService
     ): JsonResponse {
         $email = $request->email;
 
         DB::beginTransaction();
         try {
             // 認証コードを生成する
-            $code = $credentialGeneratorService->createCode(
+            $code = $createCodeService(
                 existsChecker: fn (string $code) => TemporaryInstructor::where('code', $code)->exists(),
             );
 
             // トークンを生成する
-            $token = $credentialGeneratorService->createToken(
+            $token = $createTokenService(
                 existsChecker: fn (string $token) => TemporaryInstructor::where('token', $token)->exists(),
             );
 

@@ -6,6 +6,7 @@ use App\Dto\Common\Attendance\StuckLessonDto;
 use App\Dto\Common\Attendance\StuckPointDto;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -212,13 +213,13 @@ class StuckPointsServiceTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $firstLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_IN_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
             'completed_at' => null,
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $firstLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             'completed_at' => null,
         ]);
 
@@ -279,7 +280,7 @@ class StuckPointsServiceTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $secondLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
 
@@ -329,13 +330,13 @@ class StuckPointsServiceTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $lastLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lastLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-03'),
         ]);
 
@@ -387,19 +388,19 @@ class StuckPointsServiceTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-03'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lastLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-04'),
         ]);
 
@@ -463,19 +464,19 @@ class StuckPointsServiceTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $chapter1LastLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $chapter1LastLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-03'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $courseLastLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-04'),
         ]);
 

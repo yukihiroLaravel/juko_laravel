@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\LessonAttendance\StatusEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,13 +30,6 @@ class LessonAttendance extends Model
         'completed_at',
     ];
 
-    // ステータス定数
-    const STATUS_BEFORE_ATTENDANCE = 'before_attendance';
-
-    const STATUS_IN_ATTENDANCE = 'in_attendance';
-
-    const STATUS_COMPLETED_ATTENDANCE = 'completed_attendance';
-
     // 期間内の受講状況を取得する際の期間に関する定数
     const PERIOD_TODAY = 'today';
 
@@ -46,11 +40,11 @@ class LessonAttendance extends Model
      *
      * 完了日時は過去に完了した事実を保つため、まだ記録がない場合にだけ現在時刻を記録する
      */
-    public function changeStatus(string $status): void
+    public function changeStatus(StatusEnum $status): void
     {
         $this->status = $status;
 
-        if ($status === self::STATUS_COMPLETED_ATTENDANCE && $this->completed_at === null) {
+        if ($status === StatusEnum::COMPLETED_ATTENDANCE && $this->completed_at === null) {
             $this->completed_at = CarbonImmutable::now();
         }
 
@@ -78,7 +72,13 @@ class LessonAttendance extends Model
     }
 
     /**
-     * @return array<string, string>
+     * @return array{
+     *  created_at: 'immutable_datetime',
+     *  updated_at: 'immutable_datetime',
+     *  deleted_at: 'immutable_datetime',
+     *  completed_at: 'immutable_datetime',
+     *  status: 'App\Enums\LessonAttendance\StatusEnum'
+     * }
      */
     #[\Override]
     protected function casts(): array
@@ -88,6 +88,7 @@ class LessonAttendance extends Model
             'updated_at' => 'immutable_datetime',
             'deleted_at' => 'immutable_datetime',
             'completed_at' => 'immutable_datetime',
+            'status' => StatusEnum::class,
         ];
     }
 }

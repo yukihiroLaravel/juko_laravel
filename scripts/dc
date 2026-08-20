@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#
+# コンテナの中でコマンドを実行する。
+#
+# 開発環境は Docker に集約している。ホストに PHP と Composer を入れる前提にすると、
+# 入れた人と入れていない人で結果が変わり、環境差の切り分けに時間を取られる。
+#
+# 使い方
+#   scripts/dc composer analyze
+#   scripts/dc composer check-conventions
+#   scripts/dc php artisan test --compact
+#   scripts/dc vendor/bin/pint --dirty
+#
+# compose.yml の場所は上位ディレクトリを遡って探す。
+# 別の場所に置いている場合は COMPOSE_FILE で指定する。
+set -uo pipefail
+
+readonly SERVICE="${LARAVEL_SERVICE:-app}"
+readonly WORKDIR="${LARAVEL_WORKDIR:-/var/www/html/laravelapp}"
+
+die() {
+    printf '%s\n' "$@" >&2
+    exit 1
+}
+
+# リポジトリの根から上へ遡って compose.yml を探す
+find_compose_file() {
+    local dir
+    dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+    while [ "$dir" != "/" ]; do
+        for name in compose.yml compose.yaml docker-compose.yml docker-compose.yaml; do
+            if [ -f "$dir/$name" ]; then
+                printf '%s\n' "$dir/$name"
+                return 0
+            fi
+        done
+        dir="$(dirname "$dir")"
+    done
+
+    return 1
+}
+
+[ $# -gt 0 ] || die "実行するコマンドを指定する。例: scripts/dc composer analyze"
+
+command -v docker >/dev/null 2>&1 || die \
+    "docker が見つからない。" \
+    "Docker Desktop を入れてから、リポジトリの根で docker compose up -d を実行する。"
+
+if [ -n "${COMPOSE_FILE:-}" ]; then
+    [ -f "$COMPOSE_FILE" ] || die "COMPOSE_FILE に指定されたファイルがない: $COMPOSE_FILE"
+    compose_file="$COMPOSE_FILE"
+else
+    compose_file="$(find_compose_file)" || die \
+        "compose.yml が見つからない。" \
+        "上位ディレクトリを遡って探したが無かった。別の場所にある場合は COMPOSE_FILE で指定する。"
+fi
+
+if ! docker compose -f "$compose_file" ps --status running --services 2>/dev/null | grep -qx "$SERVICE"; then
+    die \
+        "コンテナ ${SERVICE} が起動していない。" \
+        "次を実行してから、もう一度試す。" \
+        "  docker compose -f ${compose_file} up -d"
+fi
+
+exec docker compose -f "$compose_file" exec -T -w "$WORKDIR" "$SERVICE" "$@"

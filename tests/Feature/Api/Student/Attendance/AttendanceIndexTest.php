@@ -12,9 +12,9 @@ class AttendanceIndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_attendance_index_is_paginated()
+    public function test_受講中の講座一覧をページに分けて取得する(): void
     {
-        // Arrange — 1人の生徒が7つの講座を受講
+        // Arrange — 1人の受講生が7つの講座を受講
         $student = Student::factory()->create();
         $courses = Course::factory()->count(7)->create();
 

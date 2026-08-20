@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
@@ -137,13 +138,13 @@ class StuckPointsTest extends TestCase
         LessonAttendance::factory()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => CarbonImmutable::parse('2026-05-03'),
         ]);
 

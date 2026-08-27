@@ -47,6 +47,7 @@ Route::prefix('courses')->group(function () {
             Route::get('/', [CourseController::class, 'show'])->name('show');
             Route::post('/', [CourseController::class, 'update'])->name('update');
             Route::delete('/', [CourseController::class, 'delete'])->name('delete');
+            Route::post('copy', [CourseController::class, 'copy'])->name('copy');  // 講座複製
         });
 
         // 講師-講座-チャプター

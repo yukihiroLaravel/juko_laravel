@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\ClearCapacityRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
+use App\Http\Requests\Instructor\Course\CopyRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutCapacityRequest;
 use App\Http\Requests\Instructor\Course\PutStatusRequest;
@@ -209,18 +210,19 @@ class CourseController extends Controller
     /**
      * 講座複製API
      */
-    public function copy(StoreRequest $request, CopyService $service): JsonResponse
+    public function copy(CopyRequest $request, CopyService $service): JsonResponse
     {
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
+        // dd($instructorId);
 
         try {
             $course = Course::findOrFail($request->course_id);
-
             $this->authorize('copy', $course);
-
-            $copiedCourse = $service($course);
+            
+            $copiedCourse = $service($course, $instructorId);
+            // dd($course);
 
             DB::commit();
 

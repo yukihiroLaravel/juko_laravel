@@ -215,14 +215,12 @@ class CourseController extends Controller
         DB::beginTransaction();
 
         $instructorId = Auth::guard('instructor')->user()->id;
-        // dd($instructorId);
 
         try {
             $course = Course::findOrFail($request->course_id);
             $this->authorize('copy', $course);
             
             $copiedCourse = $service($course, $instructorId);
-            // dd($course);
 
             DB::commit();
 

@@ -51,6 +51,21 @@ class CoursePolicy
     }
 
     /**
+     * 講座複製に関する認可処理
+     */
+    public function copy(Instructor $instructor, Course $course): bool
+    {
+        if ($instructor->isManager()) {
+            $managerIds = $instructor->managings->pluck('id')->toArray();
+            $managerIds[] = $instructor->id;
+
+            return in_array($course->instructor_id, $managerIds, true);
+        }
+        // 講座の所有者が現在のユーザーであるかを確認
+        return $instructor->id === $course->instructor_id;
+    }
+
+    /**
      * 複数講座のステータス更新に関する認可処理
      *
      * @param  Collection<int, Course>  $courses

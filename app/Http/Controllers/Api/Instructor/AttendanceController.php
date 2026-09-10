@@ -132,7 +132,7 @@ class AttendanceController extends Controller
 
         foreach ($attendances as $attendance) {
             $lastLoginDate = $attendance->student->last_login_at;
-            if ($lastLoginDate->gte($periodAgo)) {
+            if ($lastLoginDate !== null && $lastLoginDate->gte($periodAgo)) {
                 $loginCount++;
             }
         }

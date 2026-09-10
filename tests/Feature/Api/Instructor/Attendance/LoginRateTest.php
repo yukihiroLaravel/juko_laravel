@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
+use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -105,5 +107,39 @@ class LoginRateTest extends TestCase
             'course_id',
             'period',
         ]);
+    }
+
+    public function test_受講生ログイン率取得(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        // 期間内にログインした受講生 2人
+        Attendance::factory()
+            ->count(2)
+            ->for(Student::factory()->state(['last_login_at' => now()]), 'student')
+            ->create(['course_id' => $course->id]);
+
+        // 期間外（過去だけ）の受講生 1人
+        Attendance::factory()
+            ->for(Student::factory()->state(['last_login_at' => now()->subMonths(2)]), 'student')
+            ->create(['course_id' => $course->id]);
+
+        // 一度もログインしていない受講生 2人
+        Attendance::factory()
+            ->count(2)
+            ->for(Student::factory()->state(['last_login_at' => null]), 'student')
+            ->create(['course_id' => $course->id]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.login-rate', [
+            'course_id' => $course->id,
+            'period' => 'week',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('login_rate', 40);
     }
 }

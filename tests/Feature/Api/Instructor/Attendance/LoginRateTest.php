@@ -116,21 +116,21 @@ class LoginRateTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
         // 期間内にログインした受講生 2人
-        Attendance::factory()
+        Student::factory()
             ->count(2)
-            ->for(Student::factory()->state(['last_login_at' => now()]), 'student')
-            ->create(['course_id' => $course->id]);
+            ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
+            ->create(['last_login_at' => now()]);
 
         // 期間外（過去だけ）の受講生 1人
-        Attendance::factory()
-            ->for(Student::factory()->state(['last_login_at' => now()->subMonths(2)]), 'student')
-            ->create(['course_id' => $course->id]);
+        Student::factory()
+            ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
+            ->create(['last_login_at' => now()->subMonths(2)]);
 
         // 一度もログインしていない受講生 2人
-        Attendance::factory()
+        Student::factory()
             ->count(2)
-            ->for(Student::factory()->state(['last_login_at' => null]), 'student')
-            ->create(['course_id' => $course->id]);
+            ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
+            ->create(['last_login_at' => null]);
 
         // Act
         $response = $this->getJson(route('instructor.courses.attendances.login-rate', [

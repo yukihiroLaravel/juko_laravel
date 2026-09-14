@@ -35,7 +35,7 @@ class StudentShowResource extends JsonResource
             'gender' => $this->resource->gender?->value,
             'address' => $this->resource->address,
             'created_at' => $this->resource->created_at->format('Y/m/d'),
-            'last_login_at' => $this->resource->last_login_at->format('Y/m/d'),
+            'last_login_at' => $this->resource->last_login_at?->format('Y/m/d'),
             'profile_image' => $this->resource->profile_image,
         ];
     }

@@ -65,9 +65,9 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_ログインがnull場合の生徒取得_成功(): void
+    public function test_最終ログイン日時がnullの受講生取得_成功(): void
     {
-        // Arrange — 生徒が講師の講座を受講している
+        // Arrange — 一度もログインしていない受講生が講師の講座を受講している
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $student = Student::factory()->create(['last_login_at' => null]);

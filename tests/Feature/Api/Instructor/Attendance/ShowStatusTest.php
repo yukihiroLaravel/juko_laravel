@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
@@ -471,5 +472,167 @@ class ShowStatusTest extends TestCase
         // Assert — 完了日時が両方設定されているので全公開レッスン修了扱い
         $response->assertStatus(200);
         $response->assertJson(['completion_rate' => 100]);
+    }
+
+    public function test_下書きと非公開チャプターは完了済みチャプター数に含まれない(): void
+    {
+        $instructor = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+        ]);
+
+        // 公開チャプター
+        $publicChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+
+        // 下書きチャプター
+        $draftChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::DRAFT->value,
+        ]);
+
+        // 非公開チャプター
+        $privateChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PRIVATE->value,
+        ]);
+
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $publicChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $draftChapterLesson = Lesson::factory()->create([
+            'chapter_id' => $draftChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $privateChapterLesson = Lesson::factory()->create([
+            'chapter_id' => $privateChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $student = Student::factory()->create();
+
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        foreach ([$publicLesson, $draftChapterLesson, $privateChapterLesson] as $lesson) {
+            LessonAttendance::factory()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            ]);
+        }
+
+        $this->actingAs($instructor, 'instructor');
+
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_chapters_count' => 1,
+        ]);
+    }
+
+    public function test_チャプター完了判定は公開レッスンのみを対象にする(): void
+    {
+        $instructor = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+        ]);
+
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+
+        $student = Student::factory()->create();
+
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $publicLesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_chapters_count' => 1,
+        ]);
+    }
+
+    public function test_公開レッスンが0件のチャプターは完了済みチャプター数に含まれない(): void
+    {
+        $instructor = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+        ]);
+
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+
+        $privateLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+
+        $student = Student::factory()->create();
+
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $privateLesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_chapters_count' => 0,
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
+use App\Enums\Chapter\StatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
@@ -155,7 +156,7 @@ class AttendanceController extends Controller
 
         $attendances = Attendance::with([
             'lessonAttendances.lesson.chapter.course',
-            'lessonAttendances.lesson.chapter.lessons',
+            'lessonAttendances.lesson.chapter.publicLessons',
         ])->where('course_id', $courseId)->get();
 
         $studentsCount = $attendances->count();
@@ -205,9 +206,18 @@ class AttendanceController extends Controller
         // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                $chapter = $lessonAttendance->lesson->chapter;
+
+                if ($chapter->status !== StatusEnum::PUBLIC) {
+                    return false;
+                }
+
                 // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
-                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
+                $allLessonsId = $chapter->publicLessons->pluck('id');
                 $totalLessonsCount = $allLessonsId->count();
+                if ($totalLessonsCount === 0) {
+                    return false;
+                }
                 $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
                     ->whereIn('lesson_id', $allLessonsId)
                     ->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)

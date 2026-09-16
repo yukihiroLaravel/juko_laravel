@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\Instructor;
 
-use App\Enums\Chapter\StatusEnum;
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
@@ -206,9 +206,13 @@ class AttendanceController extends Controller
         // 指定期間内に完了したチャプターの個数を取得
         $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
+                if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC) {
+                    return false;
+                }
+
                 $chapter = $lessonAttendance->lesson->chapter;
 
-                if ($chapter->status !== StatusEnum::PUBLIC) {
+                if ($chapter->status !== ChapterStatusEnum::PUBLIC) {
                     return false;
                 }
 

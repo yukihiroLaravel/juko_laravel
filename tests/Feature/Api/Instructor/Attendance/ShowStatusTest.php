@@ -476,6 +476,7 @@ class ShowStatusTest extends TestCase
 
     public function test_下書きと非公開チャプターは完了済みチャプター数に含まれない(): void
     {
+        // Arrange
         $instructor = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -532,11 +533,13 @@ class ShowStatusTest extends TestCase
 
         $this->actingAs($instructor, 'instructor');
 
+        // Act
         $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'today',
         ]));
 
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'completed_chapters_count' => 1,
@@ -545,6 +548,7 @@ class ShowStatusTest extends TestCase
 
     public function test_チャプター完了判定は公開レッスンのみを対象にする(): void
     {
+        // Arrange
         $instructor = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -581,11 +585,13 @@ class ShowStatusTest extends TestCase
 
         $this->actingAs($instructor, 'instructor');
 
+        // Act
         $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'today',
         ]));
 
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'completed_chapters_count' => 1,
@@ -594,6 +600,7 @@ class ShowStatusTest extends TestCase
 
     public function test_公開レッスンが0件のチャプターは完了済みチャプター数に含まれない(): void
     {
+        // Arrange
         $instructor = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -625,11 +632,77 @@ class ShowStatusTest extends TestCase
 
         $this->actingAs($instructor, 'instructor');
 
+        // Act
         $response = $this->getJson(route('instructor.courses.attendances.show-status', [
             'course_id' => $course->id,
             'period' => 'today',
         ]));
 
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_chapters_count' => 0,
+        ]);
+    }
+
+    public function test_非公開レッスンの更新日時は完了済みチャプターの期間判定に使用されない(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+        ]);
+
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+
+        // 公開レッスンA：40日前に完了
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        // 非公開レッスンB
+        $privateLesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
+        ]);
+
+        $student = Student::factory()->create();
+
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $publicLesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => now()->subDays(40),
+            'updated_at' => now()->subDays(40),
+        ]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $privateLesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => now()->subDays(40),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'completed_chapters_count' => 0,

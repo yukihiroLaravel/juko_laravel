@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Instructor;
 
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
-use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Attendance\DeleteRequest;
 use App\Http\Requests\Instructor\Attendance\ExpiringRequest;
@@ -33,6 +32,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -169,19 +169,17 @@ class AttendanceController extends Controller
         $period = $request->period;
 
         // 指定期間内に完了した公開レッスンの個数を取得
+        // 完了の判定は段階ではなく完了日時で行う（BR-SHARED-012）
         $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC) {
+            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC || $lessonAttendance->completed_at === null) {
                 return false;
             }
-            if ($period === LessonAttendance::PERIOD_TODAY) {
-                $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-            } elseif ($period === LessonAttendance::PERIOD_MONTH) {
-                $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
-            } else {
-                throw new Exception('Invalid period');
-            }
 
-            return $lessonAttendance->status === LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE && $updatedAtRequestPeriod;
+            return match ($period) {
+                LessonAttendance::PERIOD_TODAY => $lessonAttendance->completed_at->isToday(),
+                LessonAttendance::PERIOD_MONTH => $lessonAttendance->completed_at->isCurrentMonth(),
+                default => throw new Exception('Invalid period'),
+            };
         }))->count();
 
         // 指定期間内に完了したレッスン数をもとに平均進捗率を取得
@@ -204,46 +202,31 @@ class AttendanceController extends Controller
         );
 
         // 指定期間内に完了したチャプターの個数を取得
-        $completedChaptersCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
-            ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-                if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC) {
+        // 受講ごとに公開チャプター内の公開レッスンをチャプター単位でまとめ、そのすべてに完了日時があり、
+        // そのうち最も新しい完了日時（チャプターを完了した日時）が指定期間内にあるものを数える
+        $completedChaptersCount = $attendances->sum(fn (Attendance $attendance) => $attendance->lessonAttendances
+            ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === LessonStatusEnum::PUBLIC
+                && $lessonAttendance->lesson->chapter->status === ChapterStatusEnum::PUBLIC)
+            ->groupBy('lesson.chapter_id')
+            ->filter(function (Collection $lessonAttendancesInChapter) use ($period) {
+                $completedAtByLessonId = $lessonAttendancesInChapter
+                    ->whereNotNull('completed_at')
+                    ->mapWithKeys(fn (LessonAttendance $lessonAttendance) => [$lessonAttendance->lesson_id => $lessonAttendance->completed_at]);
+                $publicLessonIdsInChapter = $lessonAttendancesInChapter->first()->lesson->chapter->publicLessons->pluck('id');
+
+                if ($publicLessonIdsInChapter->diff($completedAtByLessonId->keys())->isNotEmpty()) {
                     return false;
                 }
 
-                $chapter = $lessonAttendance->lesson->chapter;
+                $chapterCompletedAt = $completedAtByLessonId->max();
 
-                if ($chapter->status !== ChapterStatusEnum::PUBLIC) {
-                    return false;
-                }
-
-                // チャプターに含まれているレッスンが全て完了されているかつ、最新のレッスンの完了済みステータスの更新日時が指定期間のもので絞り込む
-                $allLessonsId = $chapter->publicLessons->pluck('id');
-                $totalLessonsCount = $allLessonsId->count();
-                if ($totalLessonsCount === 0) {
-                    return false;
-                }
-                $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
-                    ->whereIn('lesson_id', $allLessonsId)
-                    ->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)
-                    ->count();
-                if ($period === LessonAttendance::PERIOD_TODAY) {
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isToday();
-                } elseif ($period === LessonAttendance::PERIOD_MONTH) {
-                    $updatedAtRequestPeriod = $lessonAttendance->updated_at->isCurrentMonth();
-                } else {
-                    throw new Exception('Invalid period');
-                }
-
-                return $updatedAtRequestPeriod && $totalLessonsCount === $completedLessonsCount;
+                return match ($period) {
+                    LessonAttendance::PERIOD_TODAY => $chapterCompletedAt->isToday(),
+                    LessonAttendance::PERIOD_MONTH => $chapterCompletedAt->isCurrentMonth(),
+                    default => throw new Exception('Invalid period'),
+                };
             })
-            ->map(fn (LessonAttendance $lessonAttendance) =>
-            // chapter_idとattendance_idをキーにもつ新しい配列を作成
-            [
-                'chapter_id' => $lessonAttendance->lesson->chapter_id,
-                'attendance_id' => $lessonAttendance->attendance_id,
-            ])
-            ->unique()
-            ->count();
+            ->count());
 
         return response()->json([
             'completed_lessons_count' => $completedLessonsCount,

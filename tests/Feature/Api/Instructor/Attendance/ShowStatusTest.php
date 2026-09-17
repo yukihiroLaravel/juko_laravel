@@ -12,12 +12,27 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ShowStatusTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[\Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-09-17 12:00:00'));
+    }
+
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
 
     public function test_当日の出席状況を取得_成功(): void
     {
@@ -131,6 +146,7 @@ class ShowStatusTest extends TestCase
         $response->assertJson(['average_progress_rate' => 0]);
     }
 
+    /** AC-ANALYTICS-008・AC-ANALYTICS-010 */
     public function test_非公開レッスンは平均進捗率の計算に含まれない(): void
     {
         // Arrange — 公開2本 + 非公開2本、受講生1名が公開レッスン2本を完了
@@ -153,10 +169,9 @@ class ShowStatusTest extends TestCase
 
         // 公開Lesson 2件を完了
         foreach ($publicLessons as $lesson) {
-            LessonAttendance::factory()->create([
+            LessonAttendance::factory()->completed()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             ]);
         }
         // 非公開Lesson はステータス遷移しないものの、レコード自体は存在する想定
@@ -184,6 +199,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-008・AC-ANALYTICS-010 */
     public function test_平均進捗率の計算が正しい(): void
     {
         // Arrange — 受講生2名 × レッスン4本、当日完了が5件 → floor(5 / (2 * 4) * 100) = 62
@@ -205,6 +221,7 @@ class ShowStatusTest extends TestCase
                 'status' => $i < 3
                     ? LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE
                     : LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+                'completed_at' => $i < 3 ? CarbonImmutable::now() : null,
             ]);
         }
         // 受講生B: 4レッスンのうち2件を完了
@@ -215,6 +232,7 @@ class ShowStatusTest extends TestCase
                 'status' => $i < 2
                     ? LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE
                     : LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+                'completed_at' => $i < 2 ? CarbonImmutable::now() : null,
             ]);
         }
 
@@ -474,6 +492,7 @@ class ShowStatusTest extends TestCase
         $response->assertJson(['completion_rate' => 100]);
     }
 
+    /** AC-ANALYTICS-009 */
     public function test_下書きと非公開チャプターは完了済みチャプター数に含まれない(): void
     {
         // Arrange
@@ -524,10 +543,9 @@ class ShowStatusTest extends TestCase
         ]);
 
         foreach ([$publicLesson, $draftChapterLesson, $privateChapterLesson] as $lesson) {
-            LessonAttendance::factory()->create([
+            LessonAttendance::factory()->completed()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             ]);
         }
 
@@ -546,6 +564,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-009 */
     public function test_チャプター完了判定は公開レッスンのみを対象にする(): void
     {
         // Arrange
@@ -577,10 +596,9 @@ class ShowStatusTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $publicLesson->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
         ]);
 
         $this->actingAs($instructor, 'instructor');
@@ -598,6 +616,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-009 */
     public function test_公開レッスンが0件のチャプターは完了済みチャプター数に含まれない(): void
     {
         // Arrange
@@ -624,10 +643,9 @@ class ShowStatusTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $privateLesson->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
         ]);
 
         $this->actingAs($instructor, 'instructor');
@@ -645,7 +663,8 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_非公開レッスンの更新日時は完了済みチャプターの期間判定に使用されない(): void
+    /** AC-ANALYTICS-009 */
+    public function test_非公開レッスンの完了日時は完了済みチャプターの期間判定に使用されない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -665,7 +684,7 @@ class ShowStatusTest extends TestCase
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
-        // 非公開レッスンB
+        // 非公開レッスンB：当日に完了
         $privateLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::PRIVATE->value,
@@ -690,7 +709,7 @@ class ShowStatusTest extends TestCase
             'attendance_id' => $attendance->id,
             'lesson_id' => $privateLesson->id,
             'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => now()->subDays(40),
+            'completed_at' => now(),
             'updated_at' => now(),
         ]);
 
@@ -707,5 +726,465 @@ class ShowStatusTest extends TestCase
         $response->assertJson([
             'completed_chapters_count' => 0,
         ]);
+    }
+
+    /** AC-ANALYTICS-008 */
+    public function test_当日に完了したレッスンの数は当日0時0分0秒以降の完了だけを数える(): void
+    {
+        // Arrange — 前日23時59分59秒に完了したレッスンと、当日0時0分0秒に完了したレッスン
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-16 23:59:59'),
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 00:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert — 当日0時0分0秒に完了した1件だけを数える
+        $response->assertStatus(200);
+        $response->assertJson(['completed_lessons_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-008 */
+    public function test_当月に完了したレッスンの数は当月1日0時0分0秒以降の完了だけを数える(): void
+    {
+        // Arrange — 前月末日23時59分59秒に完了したレッスンと、当月1日0時0分0秒に完了したレッスン
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-08-31 23:59:59'),
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-01 00:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'month',
+        ]));
+
+        // Assert — 当月1日0時0分0秒に完了した1件だけを数える
+        $response->assertStatus(200);
+        $response->assertJson(['completed_lessons_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-008 */
+    public function test_前月に完了したレッスンは当日に更新されても当日の完了に数えない(): void
+    {
+        // Arrange — 前月に完了し、受講状況は当日に更新されている
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'completed_at' => CarbonImmutable::parse('2026-08-20 10:00:00'),
+            'updated_at' => CarbonImmutable::now(),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_lessons_count' => 0]);
+    }
+
+    /** AC-ANALYTICS-008 */
+    public function test_学び直しで段階が受講中に戻ったレッスンも完了日時が当日なら当日の完了に数える(): void
+    {
+        // Arrange — 当日に完了したあと、学び直しで段階を受講中に戻した
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_lessons_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-008 */
+    public function test_完了日時が記録されていないレッスンは段階が完了でも数えない(): void
+    {
+        // Arrange — 段階は完了だが、完了日時が記録されていない
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_lessons_count' => 0]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_チャプター内のすべてのレッスンを当日に完了した受講生はチャプターを1件完了したと数える(): void
+    {
+        // Arrange — 2つのレッスンを持つチャプターを、受講生1人が当日にすべて完了
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 10:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert — レッスン2件分ではなく、チャプター1件として数える
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_同じチャプターを完了した受講生が2人いれば2件と数える(): void
+    {
+        // Arrange — 1つのレッスンを持つチャプターを、受講生2人がそれぞれ当日に完了
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+
+        $studentA = Student::factory()->create();
+        $attendanceA = Attendance::factory()->create(['student_id' => $studentA->id, 'course_id' => $course->id]);
+        $studentB = Student::factory()->create();
+        $attendanceB = Attendance::factory()->create(['student_id' => $studentB->id, 'course_id' => $course->id]);
+
+        foreach ([$attendanceA, $attendanceB] as $attendance) {
+            LessonAttendance::factory()->completed()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+            ]);
+        }
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 2]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_最後のレッスンを当日に完了したチャプターはほかのレッスンを前月に完了していても当日の完了に数える(): void
+    {
+        // Arrange — 1つ目のレッスンを前月に、最後のレッスンを当日に完了
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-08-20 10:00:00'),
+        ]);
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_当日に完了したチャプターの数は最後のレッスンの完了が当日0時0分0秒以降のものだけを数える(): void
+    {
+        // Arrange — 最後のレッスンの完了が前日23時59分59秒のチャプターと、当日0時0分0秒のチャプター
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapterBefore = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessonsBefore = Lesson::factory()->count(2)->create(['chapter_id' => $chapterBefore->id]);
+        $chapterAfter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessonsAfter = Lesson::factory()->count(2)->create(['chapter_id' => $chapterAfter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        $completedAtByLesson = [
+            [$lessonsBefore[0], '2026-09-16 10:00:00'],
+            [$lessonsBefore[1], '2026-09-16 23:59:59'],
+            [$lessonsAfter[0], '2026-09-16 10:00:00'],
+            [$lessonsAfter[1], '2026-09-17 00:00:00'],
+        ];
+        foreach ($completedAtByLesson as [$lesson, $completedAt]) {
+            LessonAttendance::factory()->completed()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'completed_at' => CarbonImmutable::parse($completedAt),
+            ]);
+        }
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert — 最後のレッスンを当日0時0分0秒に完了したチャプターだけを数える
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 1]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_すべてのレッスンを前月に完了したチャプターは当月に更新されても当月の完了に数えない(): void
+    {
+        // Arrange — 前月にすべて完了し、受講状況は当日に更新されている
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        foreach ($lessons as $lesson) {
+            LessonAttendance::factory()->completed()->create([
+                'attendance_id' => $attendance->id,
+                'lesson_id' => $lesson->id,
+                'completed_at' => CarbonImmutable::parse('2026-08-20 10:00:00'),
+                'updated_at' => CarbonImmutable::now(),
+            ]);
+        }
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'month',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 0]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_未完了のレッスンが残っているチャプターは完了に数えない(): void
+    {
+        // Arrange — 1つ目のレッスンは当日に完了、2つ目は未着手
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 0]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_段階が完了でも完了日時が記録されていないレッスンが残っているチャプターは完了に数えない(): void
+    {
+        // Arrange — 1つ目のレッスンは当日に完了、2つ目は段階だけが完了で完了日時がない
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 0]);
+    }
+
+    /** AC-ANALYTICS-009 */
+    public function test_学び直しで段階が受講中に戻ったレッスンがあってもすべてのレッスンに完了日時があるチャプターは完了に数える(): void
+    {
+        // Arrange — 2つのレッスンを当日に完了し、2つ目は学び直しで段階を受講中に戻した
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
+
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[0]->id,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
+        ]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessons[1]->id,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => CarbonImmutable::parse('2026-09-17 10:00:00'),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson(['completed_chapters_count' => 1]);
     }
 }

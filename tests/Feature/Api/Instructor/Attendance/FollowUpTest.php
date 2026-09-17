@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Attendance;
 
 use App\Enums\Chapter\StatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -511,6 +512,41 @@ class FollowUpTest extends TestCase
             'incomplete_chapter' => [
                 'id' => $chapter2->id,
                 'title' => '公開チャプター',
+            ],
+        ]);
+    }
+
+    public function test_非公開のレッスンがある場合_後ろの公開チャプターの未完了が返る(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => '公開チャプター1']);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1, 'status' => LessonStatusEnum::PRIVATE->value, 'title' => '非公開レッスン']);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター2']);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 2]);
+        $this->actingAs($instructor, 'instructor');
+
+        $student = Student::factory()->create();
+        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert — 非公開レッスンに紐づいている公開用チャプターは無視され、後ろの公開チャプターの未完了が返る
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => [
+                'id' => $chapter2->id,
+                'title' => '公開チャプター2',
             ],
         ]);
     }

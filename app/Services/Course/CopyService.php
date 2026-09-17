@@ -8,6 +8,8 @@ use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Course;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class CopyService
@@ -21,7 +23,6 @@ class CopyService
      */
     public function __invoke(Course $course, int $instructorId): Course
     {
-        // /** @var Course|null $original */
         $course->load([
             'chapters',
             'chapters.lessons',
@@ -29,19 +30,29 @@ class CopyService
         ]);
 
         // トランザクション開始
-        return DB::transaction(function () use ($course, $instructorId) {
+        // return DB::transaction(function () use ($course, $instructorId) {
 
             // 講座名を「 - コピー」付きで生成
             $newTitle = $course->title . ' - コピー';
+
+            // 複製した講座の画像ファイルパスを作成
+            $image = $course->image;
+            // $extension = $image->getClientOriginalExtension();
+            $extension = pathinfo($image, PATHINFO_EXTENSION);
+            $copiedFilename = Str::uuid()->toString().'.'.$extension;
+            $copiedImage = Storage::putFileAs('public/course', $image, $copiedFilename);
+            $copiedfilePath = Course::convertImagePath($copiedImage);
+            // dd(Storage::disk('public')->exists($newFilePath));
 
             // Course を複製（created_at はモデルの boot() により自動で現在時刻）
             /** @var Course $newCourse */
             $newCourse = Course::create([
                 'instructor_id' => $instructorId,
                 'title' => $newTitle,
-                'image' => $course->image, // 画像はそのままコピー
+                // 'image' => $course->image, 
+                'image' => $copiedfilePath, // 複製した画像ファイルパスを使用
                 'status' => CourseStatusEnum::DRAFT->value,
-                'deadline_type' => $course->deadline_type,
+                'deadline_type' => 'none',
                 'capacity' => $course->capacity,
             ]);
 
@@ -72,7 +83,9 @@ class CopyService
                 }
             }
 
+            $newCourse->load(['chapters.lessons', 'courseDeadline']);
+
             return $newCourse;
-        });
+        // });
     }
 }

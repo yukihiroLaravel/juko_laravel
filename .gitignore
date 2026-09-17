@@ -21,3 +21,6 @@ yarn-error.log
 CLAUDE.md
 /.serena
 /.claude
+
+# Postman 拡張機能
+.postman/

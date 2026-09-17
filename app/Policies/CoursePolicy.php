@@ -55,14 +55,14 @@ class CoursePolicy
      */
     public function copy(Instructor $instructor, Course $course): bool
     {
-        if ($instructor->isManager()) {
-            $managerIds = $instructor->managings->pluck('id')->toArray();
-            $managerIds[] = $instructor->id;
+        // if ($instructor->isManager()) {
+        //     $managerIds = $instructor->managings->pluck('id')->toArray();
+        //     $managerIds[] = $instructor->id;
 
-            return in_array($course->instructor_id, $managerIds, true);
-        }
+        //     return in_array($course->instructor_id, $managerIds, true);
+        // }
         // 講座の所有者が現在のユーザーであるかを確認
-        return $instructor->id === $course->instructor_id;
+        return $this->update($instructor, $course); //$instructor->id === $course->instructor_id;
     }
 
     /**

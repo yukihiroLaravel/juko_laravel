@@ -37,23 +37,19 @@ class CopyService
 
             // 複製した講座の画像ファイルパスを作成
             $image = $course->image;
-            // $extension = $image->getClientOriginalExtension();
             $extension = pathinfo($image, PATHINFO_EXTENSION);
-            $copiedFilename = Str::uuid()->toString().'.'.$extension;
-            $copiedImage = Storage::putFileAs('public/course', $image, $copiedFilename);
-            $copiedfilePath = Course::convertImagePath($copiedImage);
-            // dd(Storage::disk('public')->exists($newFilePath));
+            $copiedPath = 'course/'.Str::uuid()->toString().'.'.pathinfo($course->image, PATHINFO_EXTENSION);
+            Storage::disk('public')->copy($course->image, $copiedPath);
 
             // Course を複製（created_at はモデルの boot() により自動で現在時刻）
             /** @var Course $newCourse */
             $newCourse = Course::create([
                 'instructor_id' => $instructorId,
                 'title' => $newTitle,
-                // 'image' => $course->image, 
-                'image' => $copiedfilePath, // 複製した画像ファイルパスを使用
+                'image' => $copiedPath,
                 'status' => CourseStatusEnum::DRAFT->value,
                 'deadline_type' => 'none',
-                'capacity' => $course->capacity,
+                'capacity' => null,
             ]);
 
             // タグを複製（中間テーブル）

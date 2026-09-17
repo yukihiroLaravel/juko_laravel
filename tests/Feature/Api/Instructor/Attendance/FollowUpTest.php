@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\Chapter\StatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -433,6 +434,84 @@ class FollowUpTest extends TestCase
         $response->assertJsonFragment([
             'student_id' => $student->id,
             'incomplete_chapter' => null,
+        ]);
+    }
+
+    public function test_下書きと非公開のチャプターのみ未完了の場合_未完了のチャプターがない(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'status' => StatusEnum::DRAFT->value]);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => StatusEnum::PRIVATE->value]);
+        $lesson3 = Lesson::factory()->create(['chapter_id' => $chapter3->id, 'order' => 1]);
+        $this->actingAs($instructor, 'instructor');
+
+        // チャプター1は完了、チャプター2・3は下書き・非公開 → 未完了のチャプターがない結果が返る
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson1->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now()->subDays(5),
+        ]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert — 未完了チャプターがない結果が返る
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => null,
+        ]);
+    }
+
+    public function test_下書きチャプターが先頭にある場合_後ろの公開チャプターの未完了が返る(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => StatusEnum::DRAFT->value, 'title' => '下書きチャプター']);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター']);
+        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        $this->actingAs($instructor, 'instructor');
+
+        // 下書きチャプター・公開チャプターともにレッスンは未完了のまま
+        $student = Student::factory()->create();
+        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert — 下書きチャプターは無視され、後ろの公開チャプターの未完了が返る
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => [
+                'id' => $chapter2->id,
+                'title' => '公開チャプター',
+            ],
         ]);
     }
 }

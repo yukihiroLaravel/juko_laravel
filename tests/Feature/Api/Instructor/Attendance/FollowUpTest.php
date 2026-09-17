@@ -445,9 +445,9 @@ class FollowUpTest extends TestCase
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'status' => StatusEnum::DRAFT->value]);
-        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
         $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => StatusEnum::PRIVATE->value]);
-        $lesson3 = Lesson::factory()->create(['chapter_id' => $chapter3->id, 'order' => 1]);
+        Lesson::factory()->create(['chapter_id' => $chapter3->id, 'order' => 1]);
         $this->actingAs($instructor, 'instructor');
 
         // チャプター1は完了、チャプター2・3は下書き・非公開 → 未完了のチャプターがない結果が返る
@@ -485,9 +485,9 @@ class FollowUpTest extends TestCase
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => StatusEnum::DRAFT->value, 'title' => '下書きチャプター']);
-        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター']);
-        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
         $this->actingAs($instructor, 'instructor');
 
         // 下書きチャプター・公開チャプターともにレッスンは未完了のまま

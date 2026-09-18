@@ -138,8 +138,8 @@ erDiagram
 | `id` | 主キー |
 | `lesson_id`・`attendance_id` | 対象のレッスンと受講 |
 | `status` | `before_attendance` / `in_attendance` / `completed_attendance`。表示用の段階 |
-| `updated_at` | 最終更新日時。講師向けの期間集計に用いる |
-| `completed_at` | 完了日時。完了の判定はこの値で行い、一度入ったら上書きしない |
+| `updated_at` | 最終更新日時。マネージャー向けの期間集計に用いる |
+| `completed_at` | 完了日時。完了の判定と講師向けの期間集計はこの値で行い、一度入ったら上書きしない |
 | `deleted_at` | 論理削除 |
 
 同じ受講とレッスンの組み合わせに対する一意制約はなく、生成時にアプリ側で重複を除外する。

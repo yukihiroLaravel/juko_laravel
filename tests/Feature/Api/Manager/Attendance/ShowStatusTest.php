@@ -105,7 +105,7 @@ class ShowStatusTest extends TestCase
         // Assert
         $response->assertStatus(403);
     }
-    
+
     public function test_公開レッスンのみ完了していればチャプター完了としてカウントされる(): void
     {
         // Arrange

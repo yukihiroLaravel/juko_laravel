@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Manager;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manager\Attendance\LoginRateRequest;
@@ -93,7 +94,7 @@ class AttendanceController extends Controller
         // 出席情報（関連する情報を含む）を取得
         $attendances = Attendance::with([
             'lessonAttendances.lesson.chapter.course',
-            'lessonAttendances.lesson.chapter.lessons',
+            'lessonAttendances.lesson.chapter.publicLessons',
         ])->where('course_id', $request->course_id)->get();
         $period = $request->period;
 
@@ -113,13 +114,22 @@ class AttendanceController extends Controller
         // 各出席情報に関連するレッスン出席情報をフィルタリング
         $attendance->lessonAttendances->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE))
             ->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-                // チャプターに含まれているすべてのレッスンIDを取得
-                $allLessonsId = $lessonAttendance->lesson->chapter->lessons->pluck('id');
-                // チャプター内の全レッスン数をカウント
-                $totalLessonsCount = $allLessonsId->count();
-                // チャプター内で完了したレッスン数をカウント
+                $chapter = $lessonAttendance->lesson->chapter;
+                // 公開中のチャプター以外は集計対象外
+                if ($chapter->status !== ChapterStatusEnum::PUBLIC) {
+                    return false;
+                }
+                // チャプターに含まれている公開中のレッスンIDを取得
+                $publicLessonIds = $chapter->publicLessons->pluck('id');
+                // 公開中のレッスン数をカウント
+                $totalLessonsCount = $publicLessonIds->count();
+                // 公開中のレッスンが０件の場合は完了件数に含めない
+                if ($totalLessonsCount === 0) {
+                    return false;
+                }
+                // チャプター内で完了した公開レッスン数をカウント
                 $completedLessonsCount = $lessonAttendance->where('attendance_id', $lessonAttendance->attendance_id)
-                    ->whereIn('lesson_id', $allLessonsId)
+                    ->whereIn('lesson_id', $publicLessonIds)
                     ->where('status', LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)
                     ->count();
 
@@ -129,7 +139,7 @@ class AttendanceController extends Controller
                     default => throw new Exception('Invalid period'),
                 };
 
-                // チャプター内の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
+                // 公開中の全レッスンが完了しているかつ、指定期間内に更新されているかをチェック
                 return $updatedAtRequestPeriod && ($totalLessonsCount === $completedLessonsCount);
             })
             ->map(fn (LessonAttendance $lessonAttendance) =>

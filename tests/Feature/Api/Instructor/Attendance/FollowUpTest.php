@@ -522,9 +522,9 @@ class FollowUpTest extends TestCase
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => '公開チャプター1']);
-        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1, 'status' => LessonStatusEnum::PRIVATE->value, 'title' => '非公開レッスン']);
+        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1, 'status' => LessonStatusEnum::PRIVATE->value, 'title' => '非公開レッスン']);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター2']);
-        $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 2]);
+        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 2]);
         $this->actingAs($instructor, 'instructor');
 
         $student = Student::factory()->create();

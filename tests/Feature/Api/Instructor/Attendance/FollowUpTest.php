@@ -451,7 +451,7 @@ class FollowUpTest extends TestCase
         Lesson::factory()->create(['chapter_id' => $chapter3->id, 'order' => 1]);
         $this->actingAs($instructor, 'instructor');
 
-        // チャプター1は完了、チャプター2・3は下書き・非公開 → 未完了のチャプターがない結果が返る
+        // チャプター1は完了、チャプター2・3は下書き・非公開
         $student = Student::factory()->create();
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         LessonAttendance::factory()->create([
@@ -471,7 +471,7 @@ class FollowUpTest extends TestCase
             'days' => 10,
         ]));
 
-        // Assert — 未完了チャプターがない結果が返る
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment([
@@ -505,7 +505,7 @@ class FollowUpTest extends TestCase
             'days' => 10,
         ]));
 
-        // Assert — 下書きチャプターは無視され、後ろの公開チャプターの未完了が返る
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'student_id' => $student->id,
@@ -522,11 +522,12 @@ class FollowUpTest extends TestCase
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => '公開チャプター1']);
-        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1, 'status' => LessonStatusEnum::PRIVATE->value, 'title' => '非公開レッスン']);
+        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1, 'status' => LessonStatusEnum::PRIVATE->value]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター2']);
-        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 2]);
+        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
         $this->actingAs($instructor, 'instructor');
 
+        // 公開チャプター1のレッスンは非公開だけ、公開チャプター2のレッスンは未完了のまま
         $student = Student::factory()->create();
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         StudentLoginHistory::factory()->create([
@@ -540,7 +541,51 @@ class FollowUpTest extends TestCase
             'days' => 10,
         ]));
 
-        // Assert — 非公開レッスンに紐づいている公開用チャプターは無視され、後ろの公開チャプターの未完了が返る
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'student_id' => $student->id,
+            'incomplete_chapter' => [
+                'id' => $chapter2->id,
+                'title' => '公開チャプター2',
+            ],
+        ]);
+    }
+
+    // AC-ANALYTICS-026
+    public function test_公開チャプターに下書きのレッスンが混ざっている場合_後ろの公開チャプターの未完了が返る(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'title' => '公開チャプター1']);
+        $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
+        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 2, 'status' => LessonStatusEnum::DRAFT->value]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'title' => '公開チャプター2']);
+        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'order' => 1]);
+        $this->actingAs($instructor, 'instructor');
+
+        // 公開チャプター1の公開レッスンは完了済み、同じチャプターの下書きレッスンは完了できない
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson1->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now()->subDays(5),
+        ]);
+        StudentLoginHistory::factory()->create([
+            'student_id' => $student->id,
+            'logged_in_at' => CarbonImmutable::now()->subDays(15),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.follow-up', [
+            'course_id' => $course->id,
+            'days' => 10,
+        ]));
+
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'student_id' => $student->id,

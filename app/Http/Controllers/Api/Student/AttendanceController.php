@@ -137,8 +137,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::with('course.publicChapters.publicLessons')
             ->findOrFail($request->attendance_id);
 
-        // 本人のみ更新可
-        $this->authorize('update', $attendance);
+        $this->authorize('completeAllChapters', $attendance);
 
         // 公開中のチャプターに含まれる公開中のレッスンの受講状況を更新
         $publicLessonIds = $attendance->course->publicChapters

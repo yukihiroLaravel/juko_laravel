@@ -269,6 +269,9 @@ class CompleteAllChaptersTest extends TestCase
 
         // Assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'This action is unauthorized.',
+        ]);
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $unfinishedLesson->id,

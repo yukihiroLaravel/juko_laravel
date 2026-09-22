@@ -882,4 +882,49 @@ class ShowStatusTest extends TestCase
             'completed_chapters_count' => 1,
         ]);
     }
+
+    public function test_下書きチャプターに属する公開レッスンは完了日時が当日でも完了したレッスン件数に含めない(): void
+    {
+        // Arrange — 下書きチャプターに公開レッスンがあり、そのレッスンを当日に完了している
+        $manager = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $manager->id,
+        ]);
+
+        $chapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::DRAFT->value,
+        ]);
+
+        $lesson = Lesson::factory()->create([
+            'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $attendance = Attendance::factory()->create([
+            'course_id' => $course->id,
+        ]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('manager.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_lessons_count' => 0,
+            'completed_chapters_count' => 0,
+        ]);
+    }
 }

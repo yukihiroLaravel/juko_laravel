@@ -101,7 +101,9 @@ class AttendanceController extends Controller
 
         // 指定期間内に完了した公開レッスンの個数を取得
         $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC || $lessonAttendance->completed_at === null) {
+            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC
+                || $lessonAttendance->lesson->chapter->status !== ChapterStatusEnum::PUBLIC
+                || $lessonAttendance->completed_at === null) {
                 return false;
             }
 

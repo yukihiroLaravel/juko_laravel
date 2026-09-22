@@ -106,7 +106,7 @@ class AttendanceController extends Controller
         // 受講レコードを取得（認可で講座の公開状態を参照するため合わせて読み込む）
         $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
 
-        $this->authorize('update', $attendance);
+        $this->authorize('completeAllLessons', $attendance);
 
         // 該当チャプターを取得
         $chapter = Chapter::with('publicLessons')->findOrFail($request->chapter_id);

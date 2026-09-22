@@ -92,6 +92,19 @@ class AttendancePolicy
     }
 
     /**
+     * 講座単位の一括完了権限
+     */
+    public function completeAllChapters(Student $student, Attendance $attendance): bool
+    {
+        // TODO(Q-004): 学習記録を更新できる期限切れ・非公開講座の範囲は未確定
+        if ($attendance->isExpired()) {
+            return false;
+        }
+
+        return $this->update($student, $attendance);
+    }
+
+    /**
      * 削除権限
      */
     public function delete(Instructor $instructor, Attendance $attendance): bool

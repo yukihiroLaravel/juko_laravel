@@ -1139,6 +1139,7 @@ class ShowStatusTest extends TestCase
         $response->assertJson([
             'completed_lessons_count' => 1,
             'average_progress_rate' => 100,
+            'completion_rate' => 100,
         ]);
     }
 }

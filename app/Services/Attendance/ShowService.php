@@ -23,7 +23,7 @@ final class ShowService
      */
     public function __invoke(Course $course): array
     {
-        $course->loadMissing(['chapters.lessons']);
+        $course->loadMissing(['publicChapters.publicLessons']);
 
         $validAttendances = Attendance::with('lessonAttendances')
             ->where('course_id', $course->id)
@@ -35,8 +35,8 @@ final class ShowService
 
         $studentsCount = $validAttendances->count();
 
-        $chapters = $course->chapters->map(function (Chapter $chapter) use ($validAttendances) {
-            $allLessonIds = $chapter->lessons->pluck('id');
+        $chapters = $course->publicChapters->map(function (Chapter $chapter) use ($validAttendances) {
+            $allLessonIds = $chapter->publicLessons->pluck('id');
             $totalLessonsCount = $allLessonIds->count();
 
             if ($totalLessonsCount === 0) {

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Attendance;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -14,6 +16,7 @@ use App\Model\ManageInstructor;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ShowTest extends TestCase
@@ -698,5 +701,198 @@ class ShowTest extends TestCase
         // Assert — completed_at が null なら status に関わらずカウントされない
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 0);
+    }
+
+    /**
+     * 除外されるチャプターのステータス
+     *
+     * @return array<string, array{ChapterStatusEnum}>
+     */
+    public static function excludedChapterStatuses(): array
+    {
+        return [
+            '下書き' => [ChapterStatusEnum::DRAFT],
+            '非公開' => [ChapterStatusEnum::PRIVATE],
+        ];
+    }
+
+    /**
+     * 完了人数の分子分母から除外されるレッスンのステータス
+     *
+     * @return array<string, array{LessonStatusEnum}>
+     */
+    public static function excludedLessonStatuses(): array
+    {
+        return [
+            '下書き' => [LessonStatusEnum::DRAFT],
+            '非公開' => [LessonStatusEnum::PRIVATE],
+        ];
+    }
+
+    #[DataProvider('excludedChapterStatuses')]
+    public function test_公開ではないチャプターは受講状況詳細のチャプター一覧から除外される(ChapterStatusEnum $status): void
+    {
+        // Arrange — 公開チャプター1つと、対象ステータスのチャプター1つを作成
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $publicChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
+        Chapter::factory()->create(['course_id' => $course->id, 'status' => $status]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — 公開ではないチャプターは一覧に含まれない
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data.chapters');
+        $response->assertJsonPath('data.chapters.0.chapter_id', $publicChapter->id);
+    }
+
+    #[DataProvider('excludedLessonStatuses')]
+    public function test_公開チャプター内の公開ではないレッスンは完了人数の分子分母から除外される(LessonStatusEnum $status): void
+    {
+        // Arrange — 公開レッスンと対象ステータスのレッスンを持つ公開チャプター。受講者は公開レッスンのみ完了
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
+        $publicLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::PUBLIC]);
+        Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => $status]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $publicLesson->id,
+            'attendance_id' => $attendance->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — 公開ではないレッスンは分母から除外されるため、公開レッスンのみ完了で1になる
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
+    }
+
+    public function test_下書きレッスンが未完了でも公開レッスンをすべて完了していればチャプター完了人数にカウントされる(): void
+    {
+        // Arrange — 公開レッスンは完了、下書きレッスンは未着手のまま
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
+        $publicLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::PUBLIC]);
+        $draftLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::DRAFT]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $publicLesson->id,
+            'attendance_id' => $attendance->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $draftLesson->id,
+            'attendance_id' => $attendance->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — 下書きレッスンが未完了でも、公開レッスンをすべて完了しているため1になる
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
+    }
+
+    public function test_公開チャプターでレッスンが全て下書きの場合は完了人数が0になる(): void
+    {
+        // Arrange — 公開チャプターだが、レッスンは下書きのみ（公開レッスン0件）
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
+        $draftLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::DRAFT]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        LessonAttendance::factory()->create([
+            'lesson_id' => $draftLesson->id,
+            'attendance_id' => $attendance->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — 公開レッスンが0件のため、下書きレッスンを完了していても0になる
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.chapters.0.chapter_id', $chapter->id);
+        $response->assertJsonPath('data.chapters.0.completed_students_count', 0);
+    }
+
+    public function test_下書き公開非公開のチャプターが混在する場合は公開チャプターのみ順序どおり返る(): void
+    {
+        // Arrange — order:1下書き, order:2公開, order:3非公開, order:4公開
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => ChapterStatusEnum::DRAFT]);
+        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'status' => ChapterStatusEnum::PUBLIC]);
+        Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => ChapterStatusEnum::PRIVATE]);
+        $chapter4 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 4, 'status' => ChapterStatusEnum::PUBLIC]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — 公開チャプターのみ2件、order順で返る
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data.chapters');
+        $response->assertJsonPath('data.chapters.0.chapter_id', $chapter2->id);
+        $response->assertJsonPath('data.chapters.1.chapter_id', $chapter4->id);
+    }
+
+    public function test_全チャプターが下書き非公開の場合はチャプター一覧が空になる(): void
+    {
+        // Arrange — 下書きチャプターと非公開チャプターのみ（公開チャプターなし）
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::DRAFT]);
+        Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PRIVATE]);
+        $student = Student::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert — チャプター一覧は空。対象外の受講者数には影響しない
+        $response->assertStatus(200);
+        $response->assertJsonPath('data.chapters', []);
+        $response->assertJsonPath('data.students_count', 1);
     }
 }

@@ -23,7 +23,11 @@ class IndexService
         $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
 
         // お知らせ取得
-        $query = Notification::with('students', 'course', 'instructor')
+        $query = Notification::with([
+            'students' => fn ($query) => $query->where('students.id', $studentId),
+            'course',
+            'instructor',
+        ])
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
@@ -42,7 +46,15 @@ class IndexService
             });
 
         // ソート条件を適用
-        if ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
+        if ($dto->sortBy === Notification::SORT_BY_READ_STATUS) {
+            $query->leftJoin('viewed_once_notifications', function ($join) use ($studentId) {
+                $join->on('notifications.id', '=', 'viewed_once_notifications.notification_id')
+                    ->where('viewed_once_notifications.student_id', '=', $studentId);
+            })
+                ->select('notifications.*')
+                ->orderByRaw('CASE WHEN viewed_once_notifications.student_id IS NULL THEN 0 ELSE 1 END '.$dto->order)
+                ->orderBy('notifications.id', 'asc');
+        } elseif ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
             $query->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')
                 ->select('notifications.*')
                 ->orderBy('instructors.nick_name', $dto->order)

@@ -1078,9 +1078,10 @@ class ShowStatusTest extends TestCase
         $response->assertJson(['completed_chapters_count' => 1]);
     }
 
-    public function test_下書きチャプターに属する公開レッスンは完了レッスン数と平均進捗率の計算に含めない(): void
+    /** AC-ANALYTICS-008・AC-ANALYTICS-010・AC-ANALYTICS-011 */
+    public function test_非公開チャプターに属する公開レッスンは完了したレッスン件数と平均進捗率と修了率の集計に含めない(): void
     {
-        // Arrange — 公開チャプターと下書きチャプターに公開レッスンを1件ずつ作成し、両方を当日に完了
+        // Arrange — 公開チャプターと、完了後に非公開にされたチャプターに公開レッスンが1件ずつあり、両方を当日に完了
         $instructor = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -1092,9 +1093,9 @@ class ShowStatusTest extends TestCase
             'status' => ChapterStatusEnum::PUBLIC->value,
         ]);
 
-        $draftChapter = Chapter::factory()->create([
+        $privateChapter = Chapter::factory()->create([
             'course_id' => $course->id,
-            'status' => ChapterStatusEnum::DRAFT->value,
+            'status' => ChapterStatusEnum::PRIVATE->value,
         ]);
 
         $publicLesson = Lesson::factory()->create([
@@ -1102,8 +1103,8 @@ class ShowStatusTest extends TestCase
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
-        $draftChapterLesson = Lesson::factory()->create([
-            'chapter_id' => $draftChapter->id,
+        $lessonInPrivateChapter = Lesson::factory()->create([
+            'chapter_id' => $privateChapter->id,
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
@@ -1122,7 +1123,7 @@ class ShowStatusTest extends TestCase
 
         LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
-            'lesson_id' => $draftChapterLesson->id,
+            'lesson_id' => $lessonInPrivateChapter->id,
             'completed_at' => CarbonImmutable::now(),
         ]);
 
@@ -1134,7 +1135,7 @@ class ShowStatusTest extends TestCase
             'period' => 'today',
         ]));
 
-        // Assert — 下書きチャプター配下の公開レッスンは分子・分母の両方から除外
+        // Assert — 非公開チャプター配下の公開レッスンは分子・分母の両方から除外
         $response->assertStatus(200);
         $response->assertJson([
             'completed_lessons_count' => 1,

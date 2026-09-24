@@ -13,6 +13,7 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ShowStatusTest extends TestCase
@@ -31,6 +32,19 @@ class ShowStatusTest extends TestCase
     {
         CarbonImmutable::setTestNow();
         parent::tearDown();
+    }
+
+    /**
+     * 完了件数の集計期間
+     *
+     * @return array<string, array{string}>
+     */
+    public static function periods(): array
+    {
+        return [
+            '当日' => ['today'],
+            '当月' => ['month'],
+        ];
     }
 
     public function test_当日の出席状況を取得_成功(): void
@@ -122,9 +136,10 @@ class ShowStatusTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_公開レッスンのみ完了していればチャプター完了としてカウントされる(): void
+    /** AC-ANALYTICS-009 */
+    public function test_公開レッスンをすべて完了していれば下書きや非公開のレッスンが未完了でも完了したチャプター件数に含める(): void
     {
-        // Arrange
+        // Arrange — 公開・下書き・非公開のレッスンが1件ずつあり、公開レッスンだけを完了
         $manager = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -135,18 +150,16 @@ class ShowStatusTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        // 公開レッスン
         $publicLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
         ]);
 
-        // 下書きレッスン
         Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::DRAFT->value,
         ]);
 
-        // 非公開レッスン
         Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::PRIVATE->value,
@@ -156,7 +169,6 @@ class ShowStatusTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        // 公開レッスンだけ完了
         LessonAttendance::factory()
             ->completed()
             ->create([
@@ -179,9 +191,10 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_下書きチャプターは完了チャプター数に含まれない(): void
+    /** AC-ANALYTICS-009 */
+    public function test_公開レッスンが1件もないチャプターは完了したチャプター件数に含めない(): void
     {
-        // Arrange
+        // Arrange — 完了したあとで非公開にされたレッスンだけを持つチャプター
         $manager = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -190,11 +203,11 @@ class ShowStatusTest extends TestCase
 
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
-            'status' => ChapterStatusEnum::DRAFT->value,
         ]);
 
-        $lesson = Lesson::factory()->create([
+        $privateLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
+            'status' => LessonStatusEnum::PRIVATE->value,
         ]);
 
         $attendance = Attendance::factory()->create([
@@ -205,7 +218,7 @@ class ShowStatusTest extends TestCase
             ->completed()
             ->create([
                 'attendance_id' => $attendance->id,
-                'lesson_id' => $lesson->id,
+                'lesson_id' => $privateLesson->id,
             ]);
 
         $this->actingAs($manager, 'instructor');
@@ -223,52 +236,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_公開レッスンが0件のチャプターは完了チャプター数に含まれない(): void
-    {
-        // Arrange
-        $manager = Instructor::factory()->create();
-
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        // 下書きレッスンのみ作成
-        $draftLesson = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::DRAFT->value,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        // 下書きレッスンを完了済みにする
-        LessonAttendance::factory()
-            ->completed()
-            ->create([
-                'attendance_id' => $attendance->id,
-                'lesson_id' => $draftLesson->id,
-            ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'month',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_chapters_count' => 0,
-        ]);
-    }
-
+    /** AC-ANALYTICS-008 */
     public function test_学び直しで段階が受講中に戻ったレッスンも完了日時が当日なら当日の完了したレッスン件数に含める(): void
     {
         // Arrange — 当日に完了したあと、学び直しで段階を受講中に戻した
@@ -303,6 +271,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-008 */
     public function test_段階が完了でも完了日時がなければ当日の完了したレッスン件数に含めない(): void
     {
         // Arrange — 段階は完了だが完了日時が記録されていない
@@ -337,9 +306,11 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_非公開レッスンの更新日時が当日でも公開レッスンを当日に完了していないチャプターは当日の完了件数に含めない(): void
+    /** AC-ANALYTICS-009 */
+    #[DataProvider('periods')]
+    public function test_非公開レッスンの受講状況が当日に更新されても公開レッスンの完了が期間外のチャプターは完了したチャプター件数に含めない(string $period): void
     {
-        // Arrange — 公開レッスンは40日前に完了し、非公開レッスンの受講状況のみ当日に更新
+        // Arrange — 公開レッスンと非公開レッスンを40日前に完了し、非公開レッスンの受講状況だけを当日に更新
         $manager = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -365,7 +336,6 @@ class ShowStatusTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        // 公開レッスンは40日前に完了
         LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $publicLesson->id,
@@ -373,7 +343,6 @@ class ShowStatusTest extends TestCase
             'updated_at' => CarbonImmutable::now()->subDays(40),
         ]);
 
-        // 非公開レッスンも過去に完了しているが、受講状況だけ今日更新
         LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $privateLesson->id,
@@ -386,7 +355,7 @@ class ShowStatusTest extends TestCase
         // Act
         $response = $this->getJson(route('manager.courses.attendances.show-status', [
             'course_id' => $course->id,
-            'period' => 'today',
+            'period' => $period,
         ]));
 
         // Assert
@@ -396,6 +365,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-008 */
     public function test_過去に完了して当日に更新されたレッスンは当日の完了したレッスン件数に含めない(): void
     {
         // Arrange — 40日前に完了したレッスンの受講状況を当日に更新
@@ -436,6 +406,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-008 */
     public function test_完了日時が当日なら更新日時に関係なく当日の完了したレッスン件数に含める(): void
     {
         // Arrange — 完了日時は当日、更新日時は過去
@@ -476,110 +447,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_最後の公開レッスンを当日に完了したチャプターは当日の完了したチャプター件数に含める(): void
-    {
-        // Arrange — 1つ目を前日、最後の公開レッスンを当日に完了
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-            'status' => ChapterStatusEnum::PUBLIC->value,
-        ]);
-
-        $lesson1 = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value,
-        ]);
-        $lesson2 = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson1->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-16 09:00:00'),
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson2->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-17 09:00:00'),
-        ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'today',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_chapters_count' => 1,
-        ]);
-    }
-
-    public function test_すべての公開レッスンを前日までに完了したチャプターは当日の完了したチャプター件数に含めない(): void
-    {
-        // Arrange — すべての公開レッスンを前日までに完了
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-            'status' => ChapterStatusEnum::PUBLIC->value,
-        ]);
-
-        $lesson1 = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value,
-        ]);
-        $lesson2 = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson1->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-15 09:00:00'),
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson2->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-16 09:00:00'),
-        ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'today',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_chapters_count' => 0,
-        ]);
-    }
-
+    /** AC-ANALYTICS-008 */
     public function test_完了日時が当日0時0分0秒以降のレッスンだけを当日の完了したレッスン件数に含める(): void
     {
         // Arrange — 前日23時59分59秒に完了したレッスンと、当日0時0分0秒に完了したレッスン
@@ -625,6 +493,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-008 */
     public function test_完了日時が当月1日0時0分0秒以降のレッスンだけを当月の完了したレッスン件数に含める(): void
     {
         // Arrange — 前月末日23時59分59秒に完了したレッスンと、当月1日0時0分0秒に完了したレッスン
@@ -670,6 +539,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-009 */
     public function test_最後のレッスンの完了が当日0時0分0秒以降のチャプターだけを当日の完了したチャプター件数に含める(): void
     {
         // Arrange — 最後のレッスンの完了が前日23時59分59秒のチャプターと、当日0時0分0秒のチャプター
@@ -726,6 +596,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-009 */
     public function test_すべてのレッスンを前月に完了したチャプターは当月に更新されても当月の完了したチャプター件数に含めない(): void
     {
         // Arrange — 前月にすべて完了し、受講状況は当日に更新されている
@@ -768,65 +639,7 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_非公開レッスンの更新日時が当日でも公開レッスンを当月に完了していないチャプターは当月の完了件数に含めない(): void
-    {
-        // Arrange — 公開レッスンは40日前に完了し、非公開レッスンの受講状況のみ当日に更新
-        $manager = Instructor::factory()->create();
-
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-            'status' => ChapterStatusEnum::PUBLIC->value,
-        ]);
-
-        $publicLesson = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PUBLIC->value,
-        ]);
-
-        $privateLesson = Lesson::factory()->create([
-            'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::PRIVATE->value,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        // 公開レッスンは40日前に完了
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $publicLesson->id,
-            'completed_at' => CarbonImmutable::now()->subDays(40),
-            'updated_at' => CarbonImmutable::now()->subDays(40),
-        ]);
-
-        // 非公開レッスンも過去に完了しているが、受講状況だけ今日更新
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $privateLesson->id,
-            'completed_at' => CarbonImmutable::now()->subDays(40),
-            'updated_at' => CarbonImmutable::now(),
-        ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'month',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_chapters_count' => 0,
-        ]);
-    }
-
+    /** AC-ANALYTICS-009 */
     public function test_最後のレッスンの完了が当月1日0時0分0秒以降のチャプターだけを当月の完了したチャプター件数に含める(): void
     {
         // Arrange — 最後のレッスンの完了が前月末23時59分59秒のチャプターと、当月1日0時0分0秒のチャプター
@@ -883,9 +696,10 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_下書きチャプターに属する公開レッスンは完了日時が当日でも完了したレッスン件数に含めない(): void
+    /** AC-ANALYTICS-008・AC-ANALYTICS-009 */
+    public function test_非公開チャプターに属する公開レッスンは完了したレッスン件数にも完了したチャプター件数にも含めない(): void
     {
-        // Arrange — 下書きチャプターに公開レッスンがあり、そのレッスンを当日に完了している
+        // Arrange — 公開レッスンを当日に完了したあと、そのチャプターが非公開にされた
         $manager = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -894,7 +708,7 @@ class ShowStatusTest extends TestCase
 
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
-            'status' => ChapterStatusEnum::DRAFT->value,
+            'status' => ChapterStatusEnum::PRIVATE->value,
         ]);
 
         $lesson = Lesson::factory()->create([

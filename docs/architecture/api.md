@@ -192,7 +192,7 @@
 | DELETE | `api/v1/manager/chapters/{chapter_id}` | `manager.chapters.delete` | チャプターの削除 | AC-AUTHOR-023 |
 | PATCH | `api/v1/manager/chapters/{chapter_id}/status` | `manager.chapters.update-status` | チャプターの公開状態の変更 | AC-AUTHOR-022 |
 | GET | `api/v1/manager/courses/{course_id}/attendances/{period}` | `manager.courses.attendances.login-rate` | ログイン率 | AC-ANALYTICS-004 |
-| GET | `api/v1/manager/courses/{course_id}/attendances/status/{period}` | `manager.courses.attendances.show-status` | 完了件数（絞り込みなし） | AC-ANALYTICS-012 |
+| GET | `api/v1/manager/courses/{course_id}/attendances/status/{period}` | `manager.courses.attendances.show-status` | 完了件数 | AC-ANALYTICS-012 |
 | GET | `api/v1/manager/students/index` | `manager.students.index` | 受講生一覧 | AC-AUTHZ-002 |
 | GET | `api/v1/manager/notifications/index` | `manager.notifications.index` | お知らせ一覧 | AC-NOTIF-028 |
 | PUT | `api/v1/manager/notifications/{notification_id}` | `manager.notifications.put` | お知らせの更新 | AC-NOTIF-008 |
@@ -204,11 +204,11 @@
 
 ## 経路が重複している集計
 
-同じ名前の集計でも、講師向けとマネージャー向けで対象範囲が異なる。
+講師向けとマネージャー向けの両方に経路がある集計について、両者の違いを示す。
 
 | 集計 | 講師向け | マネージャー向け |
 |---|---|---|
-| 完了件数 | 公開されているチャプターの公開レッスンに絞り、平均進捗率と修了率も返す | 公開されているチャプターの公開レッスンに絞り、完了したレッスン件数とチャプター件数のみ返す |
+| 完了件数 | 公開されているチャプターの公開レッスンに絞り、平均進捗率と修了率も返す | 講師向けと同じ範囲と数え方で、完了したレッスン件数とチャプター件数のみ返す |
 | ログイン率 | 同じ算出 | 同じ算出 |
 
 ## 応答の形

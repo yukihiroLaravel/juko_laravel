@@ -8,9 +8,11 @@ use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Course;
+use App\Model\Tag;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CopyService
 {
@@ -52,8 +54,19 @@ class CopyService
                 'capacity' => null,
             ]);
 
-            // タグを複製（中間テーブル）
+            // ログイン中の講師が作成したタグかどうか確認
             $tagIds = $course->tags->pluck('id')->all();
+            $tag = Tag::where('id', $tagIds)
+                ->where('instructor_id', $instructorId)
+                ->first();
+
+            // タグが存在しない場合はエラーを返す
+            if ($tag === null) {
+                throw new NotFoundHttpException('Not Found Tag.');
+            }
+
+            // タグを複製（中間テーブル）
+            // $tagIds = $course->tags->pluck('id')->all();
             if (!empty($tagIds)) {
                 $newCourse->tags()->attach($tagIds);
             }

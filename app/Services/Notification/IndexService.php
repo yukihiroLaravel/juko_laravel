@@ -9,6 +9,7 @@ use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class IndexService
 {
@@ -47,12 +48,16 @@ class IndexService
 
         // ソート条件を適用
         if ($dto->sortBy === Notification::SORT_BY_READ_STATUS) {
-            $query->leftJoin('viewed_once_notifications', function ($join) use ($studentId) {
-                $join->on('notifications.id', '=', 'viewed_once_notifications.notification_id')
-                    ->where('viewed_once_notifications.student_id', '=', $studentId);
+            $viewedNotifications = DB::table('viewed_once_notifications')
+                ->select('notification_id')
+                ->where('student_id', $studentId)
+                ->distinct();
+
+            $query->leftJoinSub($viewedNotifications, 'viewed_notifications', function ($join) {
+                $join->on('notifications.id', '=', 'viewed_notifications.notification_id');
             })
                 ->select('notifications.*')
-                ->orderByRaw('CASE WHEN viewed_once_notifications.student_id IS NULL THEN 0 ELSE 1 END '.$dto->order)
+                ->orderByRaw('CASE WHEN viewed_notifications.notification_id IS NULL THEN 0 ELSE 1 END '.$dto->order)
                 ->orderBy('notifications.id', 'asc');
         } elseif ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
             $query->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')

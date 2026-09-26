@@ -23,7 +23,7 @@ final class ShowService
      */
     public function __invoke(Course $course): array
     {
-        $course->loadMissing(['chapters.lessons']);
+        $course->loadMissing(['publicChapters.publicLessons']);
 
         $validAttendances = Attendance::with('lessonAttendances')
             ->where('course_id', $course->id)
@@ -35,31 +35,27 @@ final class ShowService
 
         $studentsCount = $validAttendances->count();
 
-        $chapters = $course->chapters->map(function (Chapter $chapter) use ($validAttendances) {
-            $allLessonIds = $chapter->lessons->pluck('id');
-            $totalLessonsCount = $allLessonIds->count();
+        $chapters = $course->publicChapters
+            ->filter(fn (Chapter $chapter): bool => $chapter->publicLessons->isNotEmpty())
+            ->values()
+            ->map(function (Chapter $chapter) use ($validAttendances) {
+                $allLessonIds = $chapter->publicLessons->pluck('id');
+                $totalLessonsCount = $allLessonIds->count();
 
-            if ($totalLessonsCount === 0) {
+                $completedStudentsCount = $validAttendances->filter(function (Attendance $attendance) use ($allLessonIds, $totalLessonsCount) {
+                    $completedLessonsCount = $attendance->lessonAttendances
+                        ->whereIn('lesson_id', $allLessonIds)
+                        ->whereNotNull('completed_at')
+                        ->count();
+
+                    return $totalLessonsCount === $completedLessonsCount;
+                })->count();
+
                 return [
                     'chapter' => $chapter,
-                    'completedStudentsCount' => 0,
+                    'completedStudentsCount' => $completedStudentsCount,
                 ];
-            }
-
-            $completedStudentsCount = $validAttendances->filter(function (Attendance $attendance) use ($allLessonIds, $totalLessonsCount) {
-                $completedLessonsCount = $attendance->lessonAttendances
-                    ->whereIn('lesson_id', $allLessonIds)
-                    ->whereNotNull('completed_at')
-                    ->count();
-
-                return $totalLessonsCount === $completedLessonsCount;
-            })->count();
-
-            return [
-                'chapter' => $chapter,
-                'completedStudentsCount' => $completedStudentsCount,
-            ];
-        });
+            });
 
         return [
             'studentsCount' => $studentsCount,

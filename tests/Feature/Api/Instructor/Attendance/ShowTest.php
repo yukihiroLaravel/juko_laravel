@@ -615,7 +615,7 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
     }
 
-    public function test_公開レッスンを持たないチャプターは受講状況詳細のチャプター一覧から除外される(): void
+    public function test_レッスンを1つも持たないチャプターはチャプター一覧から除外される(): void
     {
         // Arrange — レッスンが存在しないチャプターを作成
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
@@ -780,41 +780,6 @@ class ShowTest extends TestCase
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
         // Assert — 公開ではないレッスンは分母から除外されるため、公開レッスンのみ完了で1になる
-        $response->assertStatus(200);
-        $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
-    }
-
-    public function test_下書きレッスンが未完了でも公開レッスンをすべて完了していればチャプター完了人数にカウントされる(): void
-    {
-        // Arrange — 公開レッスンは完了、下書きレッスンは未着手のまま
-        $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
-        $publicLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $draftLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::DRAFT]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $publicLesson->id,
-            'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $draftLesson->id,
-            'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-            'completed_at' => null,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
-
-        // Assert — 下書きレッスンが未完了でも、公開レッスンをすべて完了しているため1になる
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
     }

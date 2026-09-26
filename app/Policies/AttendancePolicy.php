@@ -78,6 +78,13 @@ class AttendancePolicy
         return $attendance->student_id === $student->id;
     }
 
+    public function updateLessonAttendance(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id
+            && ! $attendance->isExpired()
+            && $attendance->course->status === CourseStatusEnum::PUBLIC;
+    }
+
     /**
      * チャプター単位の一括完了権限
      */

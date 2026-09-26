@@ -162,6 +162,7 @@ class AttendanceController extends Controller
         $studentsCount = $attendances->count();
 
         $totalLessonsCount = $course->chapters()
+            ->public()
             ->withCount(['lessons' => fn ($query) => $query->public()])
             ->get()
             ->sum('lessons_count');
@@ -171,7 +172,9 @@ class AttendanceController extends Controller
         // 指定期間内に完了した公開レッスンの個数を取得
         // 完了の判定は段階ではなく完了日時で行う（BR-SHARED-012）
         $completedLessonsCount = $attendances->flatMap(fn (Attendance $attendance) => $attendance->lessonAttendances->filter(function (LessonAttendance $lessonAttendance) use ($period) {
-            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC || $lessonAttendance->completed_at === null) {
+            if ($lessonAttendance->lesson->status !== LessonStatusEnum::PUBLIC
+                || $lessonAttendance->lesson->chapter->status !== ChapterStatusEnum::PUBLIC
+                || $lessonAttendance->completed_at === null) {
                 return false;
             }
 

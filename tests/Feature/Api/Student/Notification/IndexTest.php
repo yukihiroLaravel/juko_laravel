@@ -278,6 +278,149 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.notifications.1.instructor_nick_name', 'Alice');
     }
 
+    // AC-NOTIF-030
+    public function test_お知らせ一覧で既読と未読を確認できる(): void
+    {
+        // Arrange
+        $student = Student::factory()->create(['occupation' => 'Other']);
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $readNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '既読のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $unreadNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '未読のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $readNotification->students()->attach($student->id);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notifications.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'notification_id' => $readNotification->id,
+            'read_status' => 'read',
+        ]);
+        $response->assertJsonFragment([
+            'notification_id' => $unreadNotification->id,
+            'read_status' => 'unread',
+        ]);
+    }
+
+    public function test_同じお知らせに同じ受講生の確認済み記録が複数あってもお知らせは重複しない(): void
+    {
+        // Arrange
+        $student = Student::factory()->create(['occupation' => 'Other']);
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $notification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '既読のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+
+        $notification->students()->attach($student->id);
+        $notification->students()->attach($student->id);
+
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notifications.index', [
+            'sort_by' => 'read_status',
+            'order' => 'asc',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data.notifications');
+    }
+
+    // AC-NOTIF-030
+    public function test_既読状態の昇順と降順で未読と既読の順序が切り替わる(): void
+    {
+        // Arrange
+        $student = Student::factory()->create(['occupation' => 'Other']);
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $readNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '既読のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $unreadNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '未読のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $readNotification->students()->attach($student->id);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $ascendingResponse = $this->getJson(route('student.notifications.index', [
+            'sort_by' => 'read_status',
+            'order' => 'asc',
+        ]));
+        $descendingResponse = $this->getJson(route('student.notifications.index', [
+            'sort_by' => 'read_status',
+            'order' => 'desc',
+        ]));
+
+        // Assert
+        $ascendingResponse->assertStatus(200);
+        $ascendingResponse->assertJsonPath('data.notifications.0.notification_id', $unreadNotification->id);
+        $ascendingResponse->assertJsonPath('data.notifications.1.notification_id', $readNotification->id);
+        $descendingResponse->assertStatus(200);
+        $descendingResponse->assertJsonPath('data.notifications.0.notification_id', $readNotification->id);
+        $descendingResponse->assertJsonPath('data.notifications.1.notification_id', $unreadNotification->id);
+    }
+
     public function test_不正なソート項目はバリデーションエラーになる(): void
     {
         // Arrange

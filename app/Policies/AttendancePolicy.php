@@ -78,6 +78,9 @@ class AttendancePolicy
         return $attendance->student_id === $student->id;
     }
 
+    /**
+     * 受講状況を1件ずつ更新する権限
+     */
     public function updateLessonAttendance(Student $student, Attendance $attendance): bool
     {
         return $attendance->student_id === $student->id

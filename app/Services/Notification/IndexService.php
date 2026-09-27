@@ -5,6 +5,7 @@ namespace App\Services\Notification;
 use App\Dto\Student\Notification\IndexDto;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Enums\Notification\StatusEnum;
+use App\Enums\Notification\TypeEnum;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
@@ -50,6 +51,9 @@ class IndexService
             $query->withExists([
                 'students as is_read' => fn ($query) => $query->where('students.id', $studentId),
             ])
+                ->orderByRaw('CASE WHEN notifications.type = ? THEN 1 ELSE 0 END ASC', [
+                    TypeEnum::ALWAYS->value,
+                ])
                 ->orderBy('is_read', $dto->order)
                 ->orderBy('notifications.id', 'asc');
         } elseif ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {

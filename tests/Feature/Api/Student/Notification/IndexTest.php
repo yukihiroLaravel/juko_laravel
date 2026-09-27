@@ -279,7 +279,7 @@ class IndexTest extends TestCase
     }
 
     // AC-NOTIF-030
-    public function test_お知らせ一覧で既読と未読を確認できる(): void
+    public function test_お知らせ一覧で既読と未読と常時表示を確認できる(): void
     {
         // Arrange
         $student = Student::factory()->create(['occupation' => 'Other']);
@@ -310,6 +310,17 @@ class IndexTest extends TestCase
             'start_date' => now()->subDay(),
             'end_date' => now()->addWeek(),
         ]);
+
+        $alwaysNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '常時表示のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ALWAYS,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+
         $readNotification->students()->attach($student->id);
         $this->actingAs($student, 'web');
 
@@ -325,6 +336,10 @@ class IndexTest extends TestCase
         $response->assertJsonFragment([
             'notification_id' => $unreadNotification->id,
             'read_status' => 'unread',
+        ]);
+        $response->assertJsonFragment([
+            'notification_id' => $alwaysNotification->id,
+            'read_status' => null,
         ]);
     }
 
@@ -368,7 +383,7 @@ class IndexTest extends TestCase
     }
 
     // AC-NOTIF-030
-    public function test_既読状態の昇順と降順で未読と既読の順序が切り替わる(): void
+    public function test_既読状態の昇順と降順で未読と既読の順序が切り替わり常時表示は最後になる(): void
     {
         // Arrange
         $student = Student::factory()->create(['occupation' => 'Other']);
@@ -399,6 +414,15 @@ class IndexTest extends TestCase
             'start_date' => now()->subDay(),
             'end_date' => now()->addWeek(),
         ]);
+        $alwaysNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'title' => '常時表示のお知らせ',
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ALWAYS,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
         $readNotification->students()->attach($student->id);
         $this->actingAs($student, 'web');
 
@@ -416,9 +440,11 @@ class IndexTest extends TestCase
         $ascendingResponse->assertStatus(200);
         $ascendingResponse->assertJsonPath('data.notifications.0.notification_id', $unreadNotification->id);
         $ascendingResponse->assertJsonPath('data.notifications.1.notification_id', $readNotification->id);
+        $ascendingResponse->assertJsonPath('data.notifications.2.notification_id', $alwaysNotification->id);
         $descendingResponse->assertStatus(200);
         $descendingResponse->assertJsonPath('data.notifications.0.notification_id', $readNotification->id);
         $descendingResponse->assertJsonPath('data.notifications.1.notification_id', $unreadNotification->id);
+        $descendingResponse->assertJsonPath('data.notifications.2.notification_id', $alwaysNotification->id);
     }
 
     public function test_不正なソート項目はバリデーションエラーになる(): void

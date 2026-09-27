@@ -248,4 +248,4 @@
 | 項目 | 内容 |
 |---|---|
 | 影響範囲 | BR-SHARED-006・BR-SHARED-009・`docs/specs/features/lesson-progress.md`・`docs/specs/features/authorization.md` |
-| 決定 | BR-SHARED-006 と BR-SHARED-009 のとおり、期限切れ・非公開の講座では学習を続けられない。受講内容の閲覧・まとめて完了にする操作・1件ずつ更新する操作をいずれも拒否し、救済のための例外は設けない |
+| 決定 | BR-SHARED-006 と BR-SHARED-009 のとおり、期限切れ・非公開の講座では学習を続けられない。1件ずつ更新する操作も、まとめて完了にする操作と同じく拒否する |

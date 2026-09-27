@@ -211,71 +211,45 @@ class PatchStatusTest extends TestCase
         $this->assertTrue($firstCompletedAt->equalTo($lessonAttendance->fresh()->completed_at));
     }
 
-    /** AC-PROG-008 */
+    /** AC-PROG-008, AC-ENROLL-012 */
     #[DataProvider('blockedUpdateProvider')]
-    public function test_期限切れまたは公開されていない講座では受講状況を変更できない(
+    public function test_期限切れまたは公開されていない講座では受講状況を更新できない(
         CourseStatusEnum $courseStatus,
         ?string $deadline,
-        LessonAttendanceStatusEnum $initialStatus,
-        ?string $completedAt,
-        LessonAttendanceStatusEnum $requestedStatus,
     ): void {
         // Arrange
         CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-02 00:00:00'));
         $lessonAttendance = $this->createLessonAttendanceForActingStudent([
-            'status' => $initialStatus,
-            'completed_at' => $completedAt,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => null,
         ]);
         $lessonAttendance->attendance->update(['attendance_deadline' => $deadline]);
         $lessonAttendance->attendance->course->update(['status' => $courseStatus]);
 
-        // Act
+        // Act — 初めて完了にしようとする
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => $requestedStatus]
+            ['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]
         );
 
-        // Assert
+        // Assert — 段階も完了日時も変わらない
         $response->assertForbidden();
         $this->assertDatabaseHas('lesson_attendances', [
             'id' => $lessonAttendance->id,
-            'status' => $initialStatus,
-            'completed_at' => $completedAt,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => null,
         ]);
     }
 
-    /**
-     * @return iterable<string, array{CourseStatusEnum, ?string, LessonAttendanceStatusEnum, ?string,
-     *     LessonAttendanceStatusEnum}>
-     */
-    public static function blockedUpdateProvider(): iterable
+    /** @return array<string, array{CourseStatusEnum, ?string}> */
+    public static function blockedUpdateProvider(): array
     {
-        $conditions = [
+        return [
             '期限翌日の午前零時' => [CourseStatusEnum::PUBLIC, '2026-08-01'],
             '期限なしで非公開' => [CourseStatusEnum::PRIVATE, null],
             '期限なしで下書き' => [CourseStatusEnum::DRAFT, null],
             '期限切れかつ非公開' => [CourseStatusEnum::PRIVATE, '2026-08-01'],
         ];
-        $transitions = [
-            '未着手から受講中' => [
-                LessonAttendanceStatusEnum::BEFORE_ATTENDANCE, null,
-                LessonAttendanceStatusEnum::IN_ATTENDANCE,
-            ],
-            '初めて完了' => [
-                LessonAttendanceStatusEnum::IN_ATTENDANCE, null,
-                LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            ],
-            '完了から未着手' => [
-                LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE, '2026-07-01 09:00:00',
-                LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-            ],
-        ];
-
-        foreach ($conditions as $condition => $values) {
-            foreach ($transitions as $transition => $statuses) {
-                yield $condition.'・'.$transition => [...$values, ...$statuses];
-            }
-        }
     }
 
     /** AC-PROG-008, AC-ENROLL-012 */

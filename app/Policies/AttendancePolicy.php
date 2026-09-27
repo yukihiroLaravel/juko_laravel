@@ -93,7 +93,6 @@ class AttendancePolicy
      */
     public function completeAllLessons(Student $student, Attendance $attendance): bool
     {
-        // TODO(Q-004): 学習記録を更新できる期限切れ・非公開講座の範囲は未確定
         if ($attendance->isExpired()) {
             return false;
         }
@@ -106,7 +105,6 @@ class AttendancePolicy
      */
     public function completeAllChapters(Student $student, Attendance $attendance): bool
     {
-        // TODO(Q-004): 学習記録を更新できる期限切れ・非公開講座の範囲は未確定
         if ($attendance->isExpired()) {
             return false;
         }

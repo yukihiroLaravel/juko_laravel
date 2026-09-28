@@ -51,7 +51,7 @@
 | PUT | `api/v1/attendances/{attendance_id}/chapters/{chapter_id}/complete` | `student.attendances.complete-all-lessons` | チャプター単位でまとめて完了にする | AC-PROG-009 |
 | GET | `api/v1/attendances/{attendance_id}/stuck-points` | `student.attendances.stuck-points` | つまずき箇所 | AC-ANALYTICS-016 |
 | PATCH | `api/v1/lesson-attendances/{lesson_attendance_id}` | `student.lesson-attendances.patch-status` | 受講状況を1件更新する | AC-PROG-005・AC-PROG-008 |
-| GET | `api/v1/notifications/index` | `student.notifications.index` | お知らせ一覧 | AC-NOTIF-014 |
+| GET | `api/v1/notifications/index` | `student.notifications.index` | お知らせ一覧 | AC-NOTIF-014・AC-NOTIF-030 |
 | GET | `api/v1/notifications/{notification_id}` | `student.notifications.show` | お知らせ詳細 | AC-NOTIF-019 |
 | POST | `api/v1/notifications/mark-read` | `student.notifications.mark-read` | お知らせの確認済みの記録 | AC-NOTIF-023 |
 

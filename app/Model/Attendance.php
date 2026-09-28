@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use Carbon\CarbonImmutable;
@@ -119,6 +120,7 @@ class Attendance extends Model
 
         $completedCount = $this->lessonAttendances
             ->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->lesson->status === LessonStatusEnum::PUBLIC
+                && $lessonAttendance->lesson->chapter->status === ChapterStatusEnum::PUBLIC
                 && $lessonAttendance->completed_at !== null
             )
             ->count();

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Student\LessonAttendance;
 
+use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
@@ -11,6 +12,7 @@ use App\Model\LessonAttendance;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PatchStatusTest extends TestCase
@@ -207,6 +209,85 @@ class PatchStatusTest extends TestCase
         // Assert — 最初に終えた日時は上書きされない
         $response->assertStatus(200);
         $this->assertTrue($firstCompletedAt->equalTo($lessonAttendance->fresh()->completed_at));
+    }
+
+    /** AC-PROG-008, AC-ENROLL-012 */
+    #[DataProvider('blockedUpdateProvider')]
+    public function test_期限切れまたは公開されていない講座では受講状況を更新できない(
+        CourseStatusEnum $courseStatus,
+        ?string $deadline,
+    ): void {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-02 00:00:00'));
+        $lessonAttendance = $this->createLessonAttendanceForActingStudent([
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+        $lessonAttendance->attendance->update(['attendance_deadline' => $deadline]);
+        $lessonAttendance->attendance->course->update(['status' => $courseStatus]);
+
+        // Act — 初めて完了にしようとする
+        $response = $this->patchJson(
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            ['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]
+        );
+
+        // Assert — 段階も完了日時も変わらない
+        $response->assertForbidden();
+        $this->assertDatabaseHas('lesson_attendances', [
+            'id' => $lessonAttendance->id,
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+    }
+
+    /** @return array<string, array{CourseStatusEnum, ?string}> */
+    public static function blockedUpdateProvider(): array
+    {
+        return [
+            '期限翌日の午前零時' => [CourseStatusEnum::PUBLIC, '2026-08-01'],
+            '期限なしで非公開' => [CourseStatusEnum::PRIVATE, null],
+            '期限なしで下書き' => [CourseStatusEnum::DRAFT, null],
+            '期限切れかつ非公開' => [CourseStatusEnum::PRIVATE, '2026-08-01'],
+        ];
+    }
+
+    /** AC-PROG-008, AC-ENROLL-012 */
+    #[DataProvider('allowedUpdateProvider')]
+    public function test_公開講座で受講期限内または期限なしなら受講状況を更新できる(?string $deadline): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-01 23:59:59'));
+        $lessonAttendance = $this->createLessonAttendanceForActingStudent([
+            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+        $lessonAttendance->attendance->update(['attendance_deadline' => $deadline]);
+        $lessonAttendance->attendance->course->update(['status' => CourseStatusEnum::PUBLIC]);
+
+        // Act
+        $response = $this->patchJson(
+            route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
+            ['status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE]
+        );
+
+        // Assert
+        $response->assertOk();
+        $this->assertDatabaseHas('lesson_attendances', [
+            'id' => $lessonAttendance->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+    }
+
+    /** @return array<string, array{?string}> */
+    public static function allowedUpdateProvider(): array
+    {
+        return [
+            '期限当日の23時59分59秒' => ['2026-08-01'],
+            '期限より前' => ['2026-08-02'],
+            '期限なし' => [null],
+        ];
     }
 
     /**

@@ -1077,4 +1077,70 @@ class ShowStatusTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson(['completed_chapters_count' => 1]);
     }
+
+    /** AC-ANALYTICS-008・AC-ANALYTICS-010・AC-ANALYTICS-011 */
+    public function test_非公開チャプターに属する公開レッスンは完了したレッスン件数と平均進捗率と修了率の集計に含めない(): void
+    {
+        // Arrange — 公開チャプターと、完了後に非公開にされたチャプターに公開レッスンが1件ずつあり、両方を当日に完了
+        $instructor = Instructor::factory()->create();
+
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+        ]);
+
+        $publicChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PUBLIC->value,
+        ]);
+
+        $privateChapter = Chapter::factory()->create([
+            'course_id' => $course->id,
+            'status' => ChapterStatusEnum::PRIVATE->value,
+        ]);
+
+        $publicLesson = Lesson::factory()->create([
+            'chapter_id' => $publicChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $lessonInPrivateChapter = Lesson::factory()->create([
+            'chapter_id' => $privateChapter->id,
+            'status' => LessonStatusEnum::PUBLIC->value,
+        ]);
+
+        $student = Student::factory()->create();
+
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $publicLesson->id,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+
+        LessonAttendance::factory()->completed()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lessonInPrivateChapter->id,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => 'today',
+        ]));
+
+        // Assert — 非公開チャプター配下の公開レッスンは分子・分母の両方から除外
+        $response->assertStatus(200);
+        $response->assertJson([
+            'completed_lessons_count' => 1,
+            'average_progress_rate' => 100,
+            'completion_rate' => 100,
+        ]);
+    }
 }

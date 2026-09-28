@@ -79,11 +79,20 @@ class AttendancePolicy
     }
 
     /**
+     * 受講状況を1件ずつ更新する権限
+     */
+    public function updateLessonAttendance(Student $student, Attendance $attendance): bool
+    {
+        return $attendance->student_id === $student->id
+            && ! $attendance->isExpired()
+            && $attendance->course->status === CourseStatusEnum::PUBLIC;
+    }
+
+    /**
      * チャプター単位の一括完了権限
      */
     public function completeAllLessons(Student $student, Attendance $attendance): bool
     {
-        // TODO(Q-004): 学習記録を更新できる期限切れ・非公開講座の範囲は未確定
         if ($attendance->isExpired()) {
             return false;
         }
@@ -96,7 +105,6 @@ class AttendancePolicy
      */
     public function completeAllChapters(Student $student, Attendance $attendance): bool
     {
-        // TODO(Q-004): 学習記録を更新できる期限切れ・非公開講座の範囲は未確定
         if ($attendance->isExpired()) {
             return false;
         }

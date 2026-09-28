@@ -55,8 +55,6 @@
 | GET | `api/v1/notifications/{notification_id}` | `student.notifications.show` | お知らせ詳細 | AC-NOTIF-019 |
 | POST | `api/v1/notifications/mark-read` | `student.notifications.mark-read` | お知らせの確認済みの記録 | AC-NOTIF-023 |
 
-受講生のお知らせ一覧は、`sort_by=read_status` と `order=asc|desc` で既読状態を並び替えられる。一度きりのお知らせは `read_status` として `read` または `unread` を含み、常時表示のお知らせは既読・未読の対象外として `null` を含む。`order=asc` では未読、既読、常時表示の順に、`order=desc` では既読、未読、常時表示の順に並べる。
-
 ## 講師向け
 
 接頭辞は `api/v1/instructor` である。

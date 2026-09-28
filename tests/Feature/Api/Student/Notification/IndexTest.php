@@ -279,7 +279,7 @@ class IndexTest extends TestCase
     }
 
     // AC-NOTIF-030
-    public function test_お知らせ一覧で既読と未読と常時表示を確認できる(): void
+    public function test_一度きりのお知らせは既読と未読を返し常時表示は対象外になる(): void
     {
         // Arrange
         $student = Student::factory()->create(['occupation' => 'Other']);
@@ -343,7 +343,7 @@ class IndexTest extends TestCase
         ]);
     }
 
-    public function test_同じお知らせに同じ受講生の確認済み記録が複数あってもお知らせは重複しない(): void
+    public function test_同じお知らせに同じ受講生の確認済みの記録が複数あってもお知らせは重複しない(): void
     {
         // Arrange
         $student = Student::factory()->create(['occupation' => 'Other']);

@@ -5,6 +5,7 @@ namespace App\Services\Notification;
 use App\Dto\Student\Notification\IndexDto;
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Enums\Notification\StatusEnum;
+use App\Enums\Notification\TypeEnum;
 use App\Model\Attendance;
 use App\Model\Notification;
 use Carbon\CarbonImmutable;
@@ -23,7 +24,11 @@ class IndexService
         $courseIds = Attendance::where('student_id', $studentId)->pluck('course_id')->toArray();
 
         // お知らせ取得
-        $query = Notification::with('students', 'course', 'instructor')
+        $query = Notification::with([
+            'students' => fn ($query) => $query->where('students.id', $studentId),
+            'course',
+            'instructor',
+        ])
             ->whereIn('course_id', $courseIds)
             ->where('status', StatusEnum::PUBLIC)
             ->where('start_date', '<=', $currentDateTime)
@@ -42,7 +47,16 @@ class IndexService
             });
 
         // ソート条件を適用
-        if ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
+        if ($dto->sortBy === Notification::SORT_BY_READ_STATUS) {
+            $query->withExists([
+                'students as is_read' => fn ($query) => $query->where('students.id', $studentId),
+            ])
+                ->orderByRaw('CASE WHEN notifications.type = ? THEN 1 ELSE 0 END ASC', [
+                    TypeEnum::ALWAYS->value,
+                ])
+                ->orderBy('is_read', $dto->order)
+                ->orderBy('notifications.id', 'asc');
+        } elseif ($dto->sortBy === Notification::SORT_BY_INSTRUCTOR_NICK_NAME) {
             $query->join('instructors', 'notifications.instructor_id', '=', 'instructors.id')
                 ->select('notifications.*')
                 ->orderBy('instructors.nick_name', $dto->order)

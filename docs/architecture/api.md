@@ -50,8 +50,8 @@
 | PUT | `api/v1/attendances/{attendance_id}/complete` | `student.attendances.complete-all-chapters` | 講座単位でまとめて完了にする | AC-PROG-010 |
 | PUT | `api/v1/attendances/{attendance_id}/chapters/{chapter_id}/complete` | `student.attendances.complete-all-lessons` | チャプター単位でまとめて完了にする | AC-PROG-009 |
 | GET | `api/v1/attendances/{attendance_id}/stuck-points` | `student.attendances.stuck-points` | つまずき箇所 | AC-ANALYTICS-016 |
-| PATCH | `api/v1/lesson-attendances/{lesson_attendance_id}` | `student.lesson-attendances.patch-status` | 受講状況を1件更新する | AC-PROG-005 |
-| GET | `api/v1/notifications/index` | `student.notifications.index` | お知らせ一覧 | AC-NOTIF-014 |
+| PATCH | `api/v1/lesson-attendances/{lesson_attendance_id}` | `student.lesson-attendances.patch-status` | 受講状況を1件更新する | AC-PROG-005・AC-PROG-008 |
+| GET | `api/v1/notifications/index` | `student.notifications.index` | お知らせ一覧 | AC-NOTIF-014・AC-NOTIF-030 |
 | GET | `api/v1/notifications/{notification_id}` | `student.notifications.show` | お知らせ詳細 | AC-NOTIF-019 |
 | POST | `api/v1/notifications/mark-read` | `student.notifications.mark-read` | お知らせの確認済みの記録 | AC-NOTIF-023 |
 
@@ -192,7 +192,7 @@
 | DELETE | `api/v1/manager/chapters/{chapter_id}` | `manager.chapters.delete` | チャプターの削除 | AC-AUTHOR-023 |
 | PATCH | `api/v1/manager/chapters/{chapter_id}/status` | `manager.chapters.update-status` | チャプターの公開状態の変更 | AC-AUTHOR-022 |
 | GET | `api/v1/manager/courses/{course_id}/attendances/{period}` | `manager.courses.attendances.login-rate` | ログイン率 | AC-ANALYTICS-004 |
-| GET | `api/v1/manager/courses/{course_id}/attendances/status/{period}` | `manager.courses.attendances.show-status` | 完了件数（絞り込みなし） | AC-ANALYTICS-012 |
+| GET | `api/v1/manager/courses/{course_id}/attendances/status/{period}` | `manager.courses.attendances.show-status` | 完了件数 | AC-ANALYTICS-012 |
 | GET | `api/v1/manager/students/index` | `manager.students.index` | 受講生一覧 | AC-AUTHZ-002 |
 | GET | `api/v1/manager/notifications/index` | `manager.notifications.index` | お知らせ一覧 | AC-NOTIF-028 |
 | PUT | `api/v1/manager/notifications/{notification_id}` | `manager.notifications.put` | お知らせの更新 | AC-NOTIF-008 |
@@ -201,15 +201,6 @@
 | PUT | `api/v1/manager/notifications/status/all` | `manager.notifications.put-status-all` | 全お知らせの公開状態の変更 | AC-NOTIF-011 |
 
 マネージャー向けには、講師向けに存在する経路のうち一部が用意されていない（レッスンの操作、受講の登録と削除、要フォロー受講生、近日期限切れ、つまずき箇所、タグの作成と更新と削除など）。これらはマネージャーも講師向けの経路を利用する。
-
-## 経路が重複している集計
-
-同じ名前の集計でも、講師向けとマネージャー向けで対象範囲が異なる。
-
-| 集計 | 講師向け | マネージャー向け |
-|---|---|---|
-| 完了件数 | 公開されているレッスンに絞り、平均進捗率と修了率も返す | 絞り込まず、完了したレッスン件数とチャプター件数のみ返す |
-| ログイン率 | 同じ算出 | 同じ算出 |
 
 ## 応答の形
 

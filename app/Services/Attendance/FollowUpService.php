@@ -37,8 +37,8 @@ final class FollowUpService
             ->get();
 
         $course->load([
-            'chapters' => fn ($q) => $q->orderBy('order'),
-            'chapters.lessons',
+            'publicChapters' => fn ($q) => $q->orderBy('order'),
+            'publicChapters.publicLessons',
         ]);
 
         return $this->buildFollowUpStudentDtos($students, $course);
@@ -74,8 +74,8 @@ final class FollowUpService
             $completedLessonIds = $attendance->lessonAttendances
                 ->pluck('lesson_id');
 
-            $incompleteChapter = $course->chapters->first(function ($chapter) use ($completedLessonIds) {
-                $lessonIds = $chapter->lessons->pluck('id');
+            $incompleteChapter = $course->publicChapters->first(function ($chapter) use ($completedLessonIds) {
+                $lessonIds = $chapter->publicLessons->pluck('id');
 
                 if ($lessonIds->isEmpty()) {
                     return false;

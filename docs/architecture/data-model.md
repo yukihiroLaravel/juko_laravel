@@ -164,7 +164,7 @@ erDiagram
 | カラム | 内容 |
 |---|---|
 | `id` | 主キー |
-| `notification_id`・`student_id` | 対象のお知らせと受講生 |
+| `notification_id`・`student_id` | 対象のお知らせと受講生。組み合わせは一意である |
 
 ## tags（タグ）と course_tag（講座とタグの関連）
 

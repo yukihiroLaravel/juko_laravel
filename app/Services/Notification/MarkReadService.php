@@ -30,7 +30,7 @@ class MarkReadService
             throw new AuthorizationException('The course has expired.');
         }
 
-        // 同じ確認済み記録は追加しない
+        // 同じ確認済みの記録は追加しない
         $now = CarbonImmutable::now();
         ViewedOnceNotification::query()->insertOrIgnore([
             'notification_id' => $notification->id,

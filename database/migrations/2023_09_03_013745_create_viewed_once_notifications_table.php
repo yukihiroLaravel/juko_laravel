@@ -21,6 +21,7 @@ class CreateViewedOnceNotificationsTable extends Migration
             $table->foreignIdFor(Student::class, 'student_id')->constrained()->comment('生徒ID');
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
+            $table->unique(['notification_id', 'student_id']);
         });
     }
 

@@ -93,7 +93,6 @@
 | `App\Enums\Course\DeadlineTypeEnum` | `courses.deadline_type` | `none` / `fixed_date` / `relative_days` |
 | `App\Enums\Notification\StatusEnum` | `notifications.status` | `public` / `private` |
 | `App\Enums\Notification\TypeEnum` | `notifications.type` | `always` / `once` |
-| `App\Enums\Notification\FilterEnum` | 入力値のみ | `read` / `unread` |
 | `App\Enums\Student\Gender` | `students.gender` | `unknown` / `man` / `woman` |
 
 `lesson_attendances.status` と `instructors.type` はモデルのクラス定数で管理しており、Enum に移行していない。

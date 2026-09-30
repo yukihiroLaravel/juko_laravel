@@ -423,4 +423,101 @@ class IndexTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['sort_by']);
     }
+
+    // AC-NOTIF-017
+    public function test_既読未読の絞り込み条件に決められていない値を指定してもエラーにならず全件返る(): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $readNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $unreadNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $readNotification->students()->attach($student->id);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notifications.index', [
+            'filter' => 'invalid_filter',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data.notifications');
+        $response->assertJsonFragment(['notification_id' => $readNotification->id]);
+        $response->assertJsonFragment(['notification_id' => $unreadNotification->id]);
+    }
+
+    // AC-NOTIF-017
+    public function test_既読未読の絞り込み条件に既読や未読を指定しても既読と未読のお知らせが全件返る(): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $readNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $unreadNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $readNotification->students()->attach($student->id);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $readFilterResponse = $this->getJson(route('student.notifications.index', [
+            'filter' => 'read',
+        ]));
+        $unreadFilterResponse = $this->getJson(route('student.notifications.index', [
+            'filter' => 'unread',
+        ]));
+
+        // Assert
+        $readFilterResponse->assertStatus(200);
+        $readFilterResponse->assertJsonCount(2, 'data.notifications');
+        $readFilterResponse->assertJsonFragment(['notification_id' => $readNotification->id]);
+        $readFilterResponse->assertJsonFragment(['notification_id' => $unreadNotification->id]);
+        $unreadFilterResponse->assertStatus(200);
+        $unreadFilterResponse->assertJsonCount(2, 'data.notifications');
+        $unreadFilterResponse->assertJsonFragment(['notification_id' => $readNotification->id]);
+        $unreadFilterResponse->assertJsonFragment(['notification_id' => $unreadNotification->id]);
+    }
 }

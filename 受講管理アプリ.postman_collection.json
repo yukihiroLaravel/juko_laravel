@@ -726,7 +726,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{APP_URL}}/api/v1/notifications/index?per_page=20&page=1&sort_by=start_date&order=asc&filter=read",
+                                    "raw": "{{APP_URL}}/api/v1/notifications/index?per_page=20&page=1&sort_by=start_date&order=asc",
                                     "host": ["{{APP_URL}}"],
                                     "path": [
                                         "api",
@@ -741,8 +741,7 @@
                                             "key": "sort_by",
                                             "value": "start_date"
                                         },
-                                        { "key": "order", "value": "asc" },
-                                        { "key": "filter", "value": "read" }
+                                        { "key": "order", "value": "asc" }
                                     ]
                                 }
                             },

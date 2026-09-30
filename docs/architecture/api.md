@@ -181,7 +181,7 @@
 | POST | `api/v1/manager/instructors/{instructor_id}` | `manager.instructors.update` | 講師情報の更新 | AC-ACCOUNT-030 |
 | GET | `api/v1/manager/instructors/{instructor_id}/courses/index` | `manager.instructors.courses.index` | 講師ごとの講座一覧 | AC-AUTHZ-002 |
 | GET | `api/v1/manager/instructors/{instructor_id}/total-current-attendance-count` | `manager.instructors.total-current-attendance-count` | 講師ごとの受講中の受講生数 | AC-ANALYTICS-045 |
-| GET | `api/v1/manager/courses/index` | `manager.courses.index` | 講座一覧 | AC-COMMON-006 |
+| GET | `api/v1/manager/courses/index` | `manager.courses.index` | 講座一覧 | AC-COMMON-006・AC-COMMON-007・AC-COMMON-008 |
 | POST | `api/v1/manager/courses` | `manager.courses.store` | 講座の作成 | AC-AUTHOR-001 |
 | GET | `api/v1/manager/courses/{course_id}` | `manager.courses.show` | 講座詳細 | AC-AUTHZ-002 |
 | POST | `api/v1/manager/courses/{course_id}` | `manager.courses.update` | 講座の更新 | AC-AUTHOR-008 |

@@ -33,8 +33,9 @@ class IndexTest extends TestCase
         $tag = Tag::factory()->create(['instructor_id' => $manager->id, 'content' => '基礎講座入門']);
         $taggedCourse = Course::factory()->create(['instructor_id' => $manager->id, 'title' => '応用編']);
         $taggedCourse->tags()->attach($tag);
-        $bothCourse = Course::factory()->create(['instructor_id' => $manager->id, 'title' => '基礎講座入門']);
-        $bothCourse->tags()->attach($tag);
+        // 講座名とタグ名の両方に一致しても1件として返る
+        $titleAndTagMatchedCourse = Course::factory()->create(['instructor_id' => $manager->id, 'title' => '基礎講座入門']);
+        $titleAndTagMatchedCourse->tags()->attach($tag);
         Course::factory()->create(['instructor_id' => $manager->id, 'title' => '対象外']);
         Course::factory()->create(['instructor_id' => $outsider->id, 'title' => '基礎講座入門']);
         $outsiderCourse = Course::factory()->create(['instructor_id' => $outsider->id, 'title' => '対象外']);
@@ -48,7 +49,7 @@ class IndexTest extends TestCase
         // Assert
         $response->assertOk();
         $this->assertSame(
-            [$ownCourse->id, $subordinateCourse->id, $taggedCourse->id, $bothCourse->id],
+            [$ownCourse->id, $subordinateCourse->id, $taggedCourse->id, $titleAndTagMatchedCourse->id],
             array_column($response->json('data'), 'course_id')
         );
         $response->assertJsonPath('meta.total', 4);
@@ -66,7 +67,7 @@ class IndexTest extends TestCase
     }
 
     /** AC-COMMON-008 */
-    public function test_講座名またはタグ名が一致しても指定タグのない講座は含まれない(): void
+    public function test_キーワードとタグを併用すると両方を満たす講座だけを返す(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();

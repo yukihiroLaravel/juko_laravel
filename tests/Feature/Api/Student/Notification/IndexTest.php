@@ -11,6 +11,7 @@ use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class IndexTest extends TestCase
@@ -422,5 +423,61 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['sort_by']);
+    }
+
+    // AC-NOTIF-017
+    #[DataProvider('filterProvider')]
+    public function test_既読・未読の絞り込み条件を指定してもエラーにならずお知らせが全件返る(string $filter): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
+        ]);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+        ]);
+        $readNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $unreadNotification = Notification::factory()->create([
+            'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC,
+            'type' => TypeEnum::ONCE,
+            'start_date' => now()->subDay(),
+            'end_date' => now()->addWeek(),
+        ]);
+        $readNotification->students()->attach($student->id);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notifications.index', [
+            'filter' => $filter,
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(2, 'data.notifications');
+        $response->assertJsonFragment(['notification_id' => $readNotification->id]);
+        $response->assertJsonFragment(['notification_id' => $unreadNotification->id]);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function filterProvider(): array
+    {
+        return [
+            '既読' => ['read'],
+            '未読' => ['unread'],
+            '決められていない値' => ['invalid_filter'],
+        ];
     }
 }

@@ -99,17 +99,4 @@ class Notification extends Model
     {
         return $query->where('status', StatusEnum::PUBLIC);
     }
-
-    /**
-     * スコープ: 既読データ(read)/未読データ(unread)判別
-     */
-    #[Scope]
-    protected function filterByReadStatus(Builder $query, string $filter, int $studentId): Builder
-    {
-        return match ($filter) {
-            'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),
-            'unread' => $query->whereDoesntHave('students', fn ($q) => $q->where('student_id', $studentId)),
-            default => $query,
-        };
-    }
 }

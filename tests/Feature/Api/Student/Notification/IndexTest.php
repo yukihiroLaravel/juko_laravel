@@ -427,7 +427,7 @@ class IndexTest extends TestCase
 
     // AC-NOTIF-017
     #[DataProvider('filterProvider')]
-    public function test_既読と未読の絞り込み条件を指定してもエラーにならず既読と未読のお知らせが全件返る(string $filter): void
+    public function test_既読・未読の絞り込み条件を指定してもエラーにならずお知らせが全件返る(string $filter): void
     {
         // Arrange
         $student = Student::factory()->create();

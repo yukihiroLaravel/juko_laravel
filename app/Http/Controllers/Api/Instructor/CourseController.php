@@ -229,6 +229,7 @@ class CourseController extends Controller
                 'course' => new CourseShowResource($copiedCourse),
             ]);
         } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             throw $e;
         }

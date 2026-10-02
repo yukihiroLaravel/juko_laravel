@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\Student\Attendance;
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -40,7 +41,7 @@ class CompleteAllChaptersTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -72,12 +73,12 @@ class CompleteAllChaptersTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $newLesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $completedLesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => $completedAt,
         ]);
         $this->actingAs($student);
@@ -132,7 +133,7 @@ class CompleteAllChaptersTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
         $this->actingAs($student);
@@ -145,13 +146,13 @@ class CompleteAllChaptersTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $openLesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
         ]);
         foreach ([$draftLesson, $closedChapterLesson] as $lesson) {
             $this->assertDatabaseHas('lesson_attendances', [
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
     }
@@ -176,7 +177,7 @@ class CompleteAllChaptersTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -188,7 +189,7 @@ class CompleteAllChaptersTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             'completed_at' => null,
         ]);
     }
@@ -228,6 +229,80 @@ class CompleteAllChaptersTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
             'attendance_id',
+        ]);
+    }
+
+    /** AC-PROG-020 */
+    public function test_受講期限を過ぎた講座では講座単位でまとめて完了にできない(): void
+    {
+        // Arrange — 受講期限の翌日になった直後
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-02-01 00:00:00'));
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => '2026-01-31',
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->putJson(route('student.attendances.complete-all-chapters', [
+            'attendance_id' => $attendance->id,
+        ]));
+
+        // Assert
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'This action is unauthorized.',
+        ]);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+            'completed_at' => null,
+        ]);
+    }
+
+    /** AC-PROG-020 */
+    public function test_受講期限当日の終了時刻までは講座単位でまとめて完了にできる(): void
+    {
+        // Arrange
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-01-31 23:59:59'));
+        $student = Student::factory()->create();
+        $course = Course::factory()->create();
+        $attendance = Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            'attendance_deadline' => CarbonImmutable::now()->toDateString(),
+        ]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
+        ]);
+        $this->actingAs($student);
+
+        // Act
+        $response = $this->putJson(route('student.attendances.complete-all-chapters', [
+            'attendance_id' => $attendance->id,
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $lesson->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
         ]);
     }
 }

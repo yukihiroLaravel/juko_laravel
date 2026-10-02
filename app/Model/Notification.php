@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property TypeEnum $type
+ */
 class Notification extends Model
 {
     use HasFactory, SoftDeletes;
@@ -46,6 +49,8 @@ class Notification extends Model
 
     // 仮想キー notificationsテーブルの実カラムではなく、IndexService内でinstructors.nick_nameにマップされる
     const SORT_BY_INSTRUCTOR_NICK_NAME = 'instructor_nick_name';
+
+    const SORT_BY_READ_STATUS = 'read_status';
 
     /**
      * 受講生を取得
@@ -93,18 +98,5 @@ class Notification extends Model
     protected function public(Builder $query): Builder
     {
         return $query->where('status', StatusEnum::PUBLIC);
-    }
-
-    /**
-     * スコープ: 既読データ(read)/未読データ(unread)判別
-     */
-    #[Scope]
-    protected function filterByReadStatus(Builder $query, string $filter, int $studentId): Builder
-    {
-        return match ($filter) {
-            'read' => $query->whereHas('students', fn ($q) => $q->where('student_id', $studentId)),
-            'unread' => $query->whereDoesntHave('students', fn ($q) => $q->where('student_id', $studentId)),
-            default => $query,
-        };
     }
 }

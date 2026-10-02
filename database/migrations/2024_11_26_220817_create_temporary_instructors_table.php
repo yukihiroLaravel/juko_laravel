@@ -24,7 +24,8 @@ return new class extends Migration
             $table->string('first_name', 50)->comment('名前');
             $table->string('email', 255)->comment('メールアドレス');
             $table->string('type', 30)->comment('講師タイプ');
-            $table->timestamps();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

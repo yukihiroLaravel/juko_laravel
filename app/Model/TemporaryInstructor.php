@@ -37,6 +37,16 @@ class TemporaryInstructor extends Model
     ];
 
     /**
+     * シリアライズから除外する属性
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'code',
+        'token',
+    ];
+
+    /**
      * フルネームアクセサー
      */
     protected function fullName(): Attribute

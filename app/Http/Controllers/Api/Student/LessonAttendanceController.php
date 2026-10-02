@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\Student;
 
+use App\Enums\LessonAttendance\StatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Lesson\PatchStatusRequest;
 use App\Model\LessonAttendance;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -17,21 +17,20 @@ class LessonAttendanceController extends Controller
 {
     /**
      * レッスン出席状況更新API
-     *
-     * @return JsonResponse
      */
-    public function patchStatus(PatchStatusRequest $request)
+    public function patchStatus(PatchStatusRequest $request): JsonResponse
     {
         try {
-            $lessonAttendance = LessonAttendance::with('attendance')
+            $lessonAttendance = LessonAttendance::with('attendance.course')
                 ->find($request->lesson_attendance_id);
             assert($lessonAttendance instanceof LessonAttendance);
 
-            if ($request->user()->id !== $lessonAttendance->attendance->student_id) {
-                throw new AuthorizationException('Forbidden, invalid student');
-            }
+            $this->authorize('updateLessonAttendance', $lessonAttendance->attendance);
 
-            $lessonAttendance->changeStatus($request->status);
+            $status = $request->enum('status', StatusEnum::class);
+            assert($status instanceof StatusEnum);
+
+            $lessonAttendance->changeStatus($status);
 
             return response()->json([
                 'result' => true,

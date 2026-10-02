@@ -7,6 +7,7 @@ use App\Http\Requests\Instructor\CourseDeadline\BulkUpdateRequest;
 use App\Model\Course;
 use App\Services\Course\BulkUpdateDeadlineService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class CourseDeadlineController extends Controller
 {
@@ -19,14 +20,14 @@ class CourseDeadlineController extends Controller
         // Policy による認可（失敗時は自動で AuthorizationException）
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
-        $updatedCount = $service(
+        $updatedCount = DB::transaction(fn () => $service(
             $courses,
             $request->only([
                 'deadline_type',
                 'fixed_date',
                 'relative_days',
             ])
-        );
+        ));
 
         return response()->json([
             'result' => true,

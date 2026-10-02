@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Api\Instructor\Lesson;
 
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
-use App\Model\LessonAttendance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -41,7 +41,7 @@ class UpdateStatusTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
     }
 

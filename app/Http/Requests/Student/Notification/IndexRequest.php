@@ -2,10 +2,8 @@
 
 namespace App\Http\Requests\Student\Notification;
 
-use App\Enums\Notification\FilterEnum;
 use App\Rules\NotificationSortByRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class IndexRequest extends FormRequest
 {
@@ -31,7 +29,6 @@ class IndexRequest extends FormRequest
             'page' => ['integer', 'min:1'],
             'sort_by' => ['string', new NotificationSortByRule],
             'order' => ['string', 'in:asc,desc'],
-            'filter' => ['string', Rule::Enum(FilterEnum::class)],
         ];
     }
 }

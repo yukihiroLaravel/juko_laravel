@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\Student\Attendance;
 
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
+use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -61,7 +62,7 @@ class ProgressTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
-            'status' => LessonAttendance::STATUS_COMPLETED_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
             'completed_at' => null,
         ]);
         $this->actingAs($student);
@@ -193,7 +194,7 @@ class ProgressTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $draftLesson->id,
-            'status' => LessonAttendance::STATUS_BEFORE_ATTENDANCE,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -341,7 +342,7 @@ class ProgressTest extends TestCase
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson->id,
         ]);
-        $lessonAttendance->changeStatus(LessonAttendance::STATUS_IN_ATTENDANCE);
+        $lessonAttendance->changeStatus(LessonAttendanceStatusEnum::IN_ATTENDANCE);
         $this->actingAs($student);
 
         // Act

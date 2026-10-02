@@ -34,11 +34,11 @@ class StudentController extends Controller
         $inputText = $request->input('input_text');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $courseIds = $request->input('courses', []);
+        $courseIds = $request->collect('courses');
 
         $loginId = Auth::guard('instructor')->user()->id;
 
-        if (! empty($courseIds)) {
+        if ($courseIds->isNotEmpty()) {
             $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
 
             foreach ($courses as $course) {
@@ -62,7 +62,7 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             ->join('courses', 'attendances.course_id', '=', 'courses.id')
-            ->when(! empty($courseIds), function (Builder $query) use ($courseIds) {
+            ->when($courseIds->isNotEmpty(), function (Builder $query) use ($courseIds) {
                 $query->whereIn('attendances.course_id', $courseIds);
             })
             // ログインしている講師IDを検索
@@ -115,7 +115,7 @@ class StudentController extends Controller
 
         $this->authorize('update', $course);
 
-        $service($request->validated());
+        DB::transaction(fn () => $service($request->validated()));
 
         return response()->json([
             'result' => true,

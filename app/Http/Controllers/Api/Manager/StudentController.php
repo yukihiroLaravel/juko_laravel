@@ -47,9 +47,9 @@ class StudentController extends Controller
             ->toArray();
 
         // クエリパラメータからcourses（配列）を取得
-        $requestedCourseIds = $request->input('courses', []);
+        $requestedCourseIds = $request->collect('courses');
         // 指定された講座IDが有効かどうかチェック
-        if (! empty($requestedCourseIds)) {
+        if ($requestedCourseIds->isNotEmpty()) {
             foreach ($requestedCourseIds as $courseId) {
                 if (! in_array((int) $courseId, $courseIds, true)) {
                     throw new AuthorizationException('Forbidden, invalid course_id.');
@@ -69,7 +69,7 @@ class StudentController extends Controller
             )
             ->join('students', 'attendances.student_id', '=', 'students.id')
             // 複数の講座IDで絞り込み
-            ->when(! empty($requestedCourseIds), fn (Builder $query) => $query->whereIn('attendances.course_id', $requestedCourseIds))
+            ->when($requestedCourseIds->isNotEmpty(), fn (Builder $query) => $query->whereIn('attendances.course_id', $requestedCourseIds))
             // 受講生名検索（ニックネーム/メールアドレス/姓名）
             ->when($inputText, function (Builder $query) use ($inputText) {
                 $inputText = preg_replace('/[　\s]/u', '', (string) $inputText);

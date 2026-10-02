@@ -21,7 +21,7 @@ class UpdateLessonStatusService
         $currentStatus = $lesson->status;
 
         // 状態遷移が許可されているか検証する
-        $this->statusTransitionService->validateTransition($currentStatus, $status);
+        ($this->statusTransitionService)($currentStatus, $status);
 
         $lesson->update([
             'status' => $status->value,
@@ -29,7 +29,7 @@ class UpdateLessonStatusService
 
         // 下書きから公開に切り替わったタイミングで、既存受講生分の受講状況を生成する
         if ($currentStatus === StatusEnum::DRAFT && $status === StatusEnum::PUBLIC) {
-            $this->generateForPublishedLessonService->execute($lesson);
+            ($this->generateForPublishedLessonService)($lesson);
         }
     }
 }

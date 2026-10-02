@@ -43,7 +43,7 @@ class ChapterController extends Controller
     public function show(ShowRequest $request, QueryService $queryService)
     {
         // チャプターを取得
-        $chapter = $queryService->getChapter($request->chapter_id);
+        $chapter = $queryService($request->chapter_id);
 
         $this->authorize('view', $chapter);
 

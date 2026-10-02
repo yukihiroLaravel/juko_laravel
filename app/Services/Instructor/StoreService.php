@@ -2,9 +2,9 @@
 
 namespace App\Services\Instructor;
 
-use App\Model\Instructor;
+use App\Enums\Instructor\TypeEnum as InstructorTypeEnum;
 use App\Model\TemporaryInstructor;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 class StoreService
 {
@@ -29,12 +29,12 @@ class StoreService
             'trial_count' => 0,
             'code' => $code,
             'token' => $token,
-            'expire_at' => Carbon::now()->addMinutes(60),
+            'expire_at' => CarbonImmutable::now()->addMinutes(60),
             'nick_name' => $data['nick_name'],
             'last_name' => $data['last_name'],
             'first_name' => $data['first_name'],
             'email' => $data['email'],
-            'type' => Instructor::TYPE_INSTRUCTOR,
+            'type' => InstructorTypeEnum::INSTRUCTOR,
         ]);
     }
 }

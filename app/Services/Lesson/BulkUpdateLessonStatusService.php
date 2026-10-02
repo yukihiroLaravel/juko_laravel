@@ -5,7 +5,6 @@ namespace App\Services\Lesson;
 use App\Enums\Lesson\StatusEnum;
 use App\Model\Lesson;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class BulkUpdateLessonStatusService
 {
@@ -14,6 +13,8 @@ class BulkUpdateLessonStatusService
 
     /**
      * レッスンのステータスを一括更新する
+     *
+     * 遷移の判定と更新を一貫させるため、呼び出し側でトランザクションを張ること。
      *
      * @param  Collection<int, Lesson>  $lessons
      * @param  string  $status  'public'|'private'
@@ -31,19 +32,15 @@ class BulkUpdateLessonStatusService
             return;
         }
 
-        // 4. 一連のチェックと更新を単一のトランザクション（一蓮托生）で行う
-        DB::transaction(function () use ($targetLessons, $newStatus, $status) {
+        // 4. 除外した後に残ったレッスン1件ずつに対して、遷移チェックをかける
+        foreach ($targetLessons as $lesson) {
+            ($this->statusTransitionService)($lesson->status, $newStatus);
+        }
 
-            // ① 除外した後に残ったレッスン1件ずつに対して、遷移チェックをかける
-            foreach ($targetLessons as $lesson) {
-                $this->statusTransitionService->validateTransition($lesson->status, $newStatus);
-            }
-
-            // ② 誰ひとりエラーにならずに全員通過したら、対象レッスンをまとめて一括更新！
-            $targetIds = $targetLessons->pluck('id')->toArray();
-            Lesson::whereIn('id', $targetIds)->update([
-                'status' => $status,
-            ]);
-        });
+        // 5. 誰ひとりエラーにならずに全員通過したら、対象レッスンをまとめて一括更新
+        $targetIds = $targetLessons->pluck('id')->toArray();
+        Lesson::whereIn('id', $targetIds)->update([
+            'status' => $status,
+        ]);
     }
 }

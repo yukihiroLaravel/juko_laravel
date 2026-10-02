@@ -28,7 +28,8 @@ return new class extends Migration
             $table->date('birth_date')->nullable()->comment('誕生日');
             $table->string('gender', 10)->nullable()->comment('性別');
             $table->string('address', 255)->nullable()->comment('都道府県');
-            $table->timestamps();
+            $table->dateTime('created_at');
+            $table->dateTime('updated_at');
         });
     }
 

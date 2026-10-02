@@ -54,8 +54,11 @@ class CourseController extends Controller
             ->whereIn('instructor_id', $instructorIds)
             ->when($tagId, fn (Builder $q) => $q->whereHas('tags', fn (Builder $q) => $q->where('tags.id', $tagId)))
             ->when($searchWord, function (Builder $query) use ($searchWord) {
-                $query->WhereHas('tags', function (Builder $tagQuery) use ($searchWord) {
-                    $tagQuery->where('content', 'like', "%{$searchWord}%");
+                $query->where(function (Builder $query) use ($searchWord) {
+                    $query->where('title', 'LIKE', "%{$searchWord}%")
+                        ->orWhereHas('tags', function (Builder $tagQuery) use ($searchWord) {
+                            $tagQuery->where('content', 'LIKE', "%{$searchWord}%");
+                        });
                 });
             })
             ->withCount('attendances')

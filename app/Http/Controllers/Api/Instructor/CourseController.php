@@ -321,7 +321,7 @@ class CourseController extends Controller
 
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
-        $updatedCount = $service($courses);
+        $updatedCount = DB::transaction(fn () => $service($courses));
 
         return response()->json([
             'result' => true,
@@ -338,7 +338,7 @@ class CourseController extends Controller
 
         $this->authorize('bulkUpdate', [Course::class, $courses]);
 
-        $updatedCount = $service($courses);
+        $updatedCount = DB::transaction(fn () => $service($courses));
 
         return response()->json([
             'result' => true,

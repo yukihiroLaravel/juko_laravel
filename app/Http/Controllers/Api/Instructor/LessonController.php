@@ -282,10 +282,10 @@ class LessonController extends Controller
                 }
             });
 
-            $service(
+            DB::transaction(fn () => $service(
                 lessons: $lessons,
                 status: $status
-            );
+            ));
 
             return response()->json([
                 'result' => true,

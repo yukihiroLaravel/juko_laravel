@@ -18,7 +18,7 @@ class InstructorIndexResource extends JsonResource
     #[\Override]
     public function toArray($request)
     {
-        /** @var LengthAwarePaginator $data */
+        /** @var LengthAwarePaginator<int, Instructor> $data */
         $data = $this->resource;
 
         return [

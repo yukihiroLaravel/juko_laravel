@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Course;
 
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Model\Course;
@@ -17,8 +18,10 @@ class CopyService
 {
     /**
      * 講座複製サービス
+     *
+     * @throws NotFoundHttpException
      */
-    public function __invoke(Course $course, int $instructorId): Course
+    public function __invoke(Course $course): Course
     {
         $course->load([
             'chapters',
@@ -30,7 +33,6 @@ class CopyService
         $tagIds = $course->tags->pluck('id')->all();
 
         if ($tagIds !== []) {
-
             $ownedCount = Tag::whereIn('id', $tagIds)
                 ->where('instructor_id', $course->instructor_id)
                 ->count();
@@ -40,44 +42,27 @@ class CopyService
             }
         }
 
-        // 講座名を「 - コピー」付きで生成
-        $newTitle = $course->title.' - コピー';
-
-        // 複製した講座の画像ファイルパスを作成
-        $image = $course->image;
-        $extension = pathinfo($image, PATHINFO_EXTENSION);
-        $copiedPath = 'course/'.Str::uuid()->toString().'.'.pathinfo($course->image, PATHINFO_EXTENSION);
-        Storage::disk('public')->copy($course->image, $copiedPath);
-
-        // Course を複製（created_at はモデルの boot() により自動で現在時刻）
         /** @var Course $newCourse */
         $newCourse = Course::create([
             'instructor_id' => $course->instructor_id,
-            'title' => $newTitle,
-            'image' => $copiedPath,
+            'title' => $course->title.' - コピー',
+            'image' => $this->copyImage($course->image),
             'status' => CourseStatusEnum::DRAFT->value,
-            'deadline_type' => 'none',
+            'deadline_type' => DeadlineTypeEnum::NONE->value,
             'capacity' => null,
         ]);
 
-        // 該当する講座を所有する講師が作成したタグなら複製する
-        $tagIds = $course->tags->pluck('id')->all();
-
         if ($tagIds !== []) {
-            // タグを複製（中間テーブル）
             $newCourse->tags()->attach($tagIds);
         }
 
-        // チャプター複製
         foreach ($course->chapters as $chapter) {
-
             $newChapter = $newCourse->chapters()->create([
                 'order' => $chapter->order,
                 'title' => $chapter->title,
                 'status' => ChapterStatusEnum::DRAFT->value,
             ]);
 
-            // レッスン複製
             foreach ($chapter->lessons as $lesson) {
                 $newChapter->lessons()->create([
                     'title' => $lesson->title,
@@ -92,5 +77,23 @@ class CopyService
         $newCourse->load(['chapters.lessons', 'courseDeadline']);
 
         return $newCourse;
+    }
+
+    /**
+     * サムネイル画像を別のファイルとして複製し、複製先のパスを返す
+     *
+     * 複製元と同じファイルを指すと、片方の講座を削除したときにもう片方の画像まで消える。
+     * 複製元の実体がないときも、同じ理由で複製先には別のパスを割り当てる。
+     */
+    private function copyImage(string $imagePath): string
+    {
+        $copiedPath = 'course/'.Str::uuid()->toString().'.'.pathinfo($imagePath, PATHINFO_EXTENSION);
+
+        $disk = Storage::disk('public');
+        if ($disk->exists($imagePath)) {
+            $disk->copy($imagePath, $copiedPath);
+        }
+
+        return $copiedPath;
     }
 }

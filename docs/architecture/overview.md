@@ -19,14 +19,14 @@
 
 | 項目 | 内容 |
 |---|---|
-| フレームワーク | Laravel 12 |
+| フレームワーク | Laravel 13 |
 | PHP | 8.3 以上 |
 | データベース | MySQL 5.7（テスト時は SQLite のインメモリ） |
 | 認証 | Laravel Sanctum（セッションを用いたステートフル認証） |
 | API ドキュメント生成 | dedoc/scramble |
 | 静的解析 | PHPStan（larastan・レベル5） |
 | コード整形 | Laravel Pint・Rector |
-| テスト | PHPUnit 11 |
+| テスト | PHPUnit 12 |
 | タイムゾーン | Asia/Tokyo |
 
 ## ローカル実行環境

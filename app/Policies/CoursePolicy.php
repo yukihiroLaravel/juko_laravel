@@ -51,6 +51,15 @@ class CoursePolicy
     }
 
     /**
+     * 講座複製に関する認可処理
+     */
+    public function copy(Instructor $instructor, Course $course): bool
+    {
+        // update() に委譲
+        return $this->update($instructor, $course);
+    }
+
+    /**
      * 複数講座のステータス更新に関する認可処理
      *
      * @param  Collection<int, Course>  $courses

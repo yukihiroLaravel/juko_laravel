@@ -75,6 +75,7 @@
 | GET | `api/v1/instructor/courses/{course_id}` | `instructor.courses.show` | 講座詳細 | AC-AUTHZ-001 |
 | POST | `api/v1/instructor/courses/{course_id}` | `instructor.courses.update` | 講座の更新 | AC-AUTHOR-008 |
 | DELETE | `api/v1/instructor/courses/{course_id}` | `instructor.courses.delete` | 講座の削除 | AC-AUTHOR-015 |
+| POST | `api/v1/instructor/courses/{course_id}/copy` | `instructor.courses.copy` | 講座の複製 | AC-AUTHOR-033 |
 | DELETE | `api/v1/instructor/courses` | `instructor.courses.bulk-delete` | 講座の一括削除 | AC-AUTHOR-018 |
 | PUT | `api/v1/instructor/courses/status` | `instructor.courses.put-status` | 公開状態の一括変更 | AC-AUTHOR-012 |
 | PUT | `api/v1/instructor/courses/capacity` | `instructor.courses.put-capacity` | 定員の一括変更 | AC-ENROLL-018 |

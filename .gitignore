@@ -29,3 +29,6 @@ apm_modules/
 
 # エージェント用の作業ツリー
 .claude/worktrees/
+
+# Postman 拡張機能
+.postman/

@@ -6,6 +6,7 @@ use App\Enums\Course\DeadlineTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Course\BulkDeleteRequest;
 use App\Http\Requests\Instructor\Course\ClearCapacityRequest;
+use App\Http\Requests\Instructor\Course\CopyRequest;
 use App\Http\Requests\Instructor\Course\DeleteRequest;
 use App\Http\Requests\Instructor\Course\IndexRequest;
 use App\Http\Requests\Instructor\Course\PutCapacityRequest;
@@ -19,6 +20,7 @@ use App\Model\Course;
 use App\Model\Tag;
 use App\Services\Attendance\CalculateDeadlineService;
 use App\Services\Course\ClearCapacityService;
+use App\Services\Course\CopyService;
 use App\Services\Course\DeleteService;
 use App\Services\Course\PutCapacityService;
 use App\Services\Course\PutStatusService;
@@ -200,6 +202,32 @@ class CourseController extends Controller
                 'result' => true,
             ]);
         } catch (Exception $e) {
+            Log::error($e);
+            throw $e;
+        }
+    }
+
+    /**
+     * 講座複製API
+     */
+    public function copy(CopyRequest $request, CopyService $service): JsonResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $course = Course::findOrFail($request->course_id);
+            $this->authorize('copy', $course);
+
+            $copiedCourse = $service(course: $course);
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'course' => new CourseShowResource($copiedCourse),
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
             Log::error($e);
             throw $e;
         }

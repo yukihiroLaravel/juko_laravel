@@ -1327,6 +1327,38 @@
                             "response": []
                         },
                         {
+                            "name": "講座複製",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Referer",
+                                        "value": "http://localhost:3000"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{APP_URL}}/api/v1/instructor/courses/:course_id/copy",
+                                    "host": ["{{APP_URL}}"],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "instructor",
+                                        "courses",
+                                        ":course_id",
+                                        "copy"
+                                    ],
+                                    "variable": [
+                                        { "key": "course_id", "value": "1" }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
                             "name": "講座ステータス一括更新",
                             "request": {
                                 "method": "PUT",

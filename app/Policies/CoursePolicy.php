@@ -55,7 +55,7 @@ class CoursePolicy
      */
     public function copy(Instructor $instructor, Course $course): bool
     {
-        // update() に譲渡
+        // update() に委譲
         return $this->update($instructor, $course);
     }
 

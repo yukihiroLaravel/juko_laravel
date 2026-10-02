@@ -81,6 +81,7 @@ scripts/dc php artisan test --compact
 
 - コーディング規約は `docs/architecture/coding-standards.md` に従う。Laravelの汎用的なベストプラクティスは `laravel-best-practices` スキルを参照し、衝突する場合はプロジェクトの規約を優先する
 - ドキュメントを書くときは `documentation-conventions` スキルと `docs/documentation-rules.md` に従う
+- 構成は Laravel 10 の形のまま運用している。ミドルウェアは `app/Http/Kernel.php`、例外処理は `app/Exceptions/Handler.php`、コマンドとスケジュールは `app/Console/Kernel.php` に登録する。公式ドキュメントや Boost が示す `bootstrap/app.php` の `withMiddleware` などは、ここでは効かない
 
 禁止事項。
 

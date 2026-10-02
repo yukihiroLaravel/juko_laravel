@@ -16,6 +16,7 @@ use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CopyTest extends TestCase
@@ -48,13 +49,44 @@ class CopyTest extends TestCase
         $copiedCourse = Course::where('title', '元の講座 - コピー')->sole();
         $this->assertSame(CourseStatusEnum::DRAFT, $copiedCourse->status);
         $copiedChapter = Chapter::where('course_id', $copiedCourse->id)->sole();
-        $this->assertSame($chapter->title, $copiedChapter->title);
+        $this->assertSame($chapter->only(['title', 'order']), $copiedChapter->only(['title', 'order']));
         $this->assertSame(ChapterStatusEnum::DRAFT, $copiedChapter->status);
         $copiedLesson = Lesson::where('chapter_id', $copiedChapter->id)->sole();
-        $this->assertSame($lesson->title, $copiedLesson->title);
+        $this->assertSame(
+            $lesson->only(['title', 'url', 'remarks', 'order']),
+            $copiedLesson->only(['title', 'url', 'remarks', 'order'])
+        );
         $this->assertSame(LessonStatusEnum::DRAFT, $copiedLesson->status);
         $response->assertJsonPath('course.course_id', $copiedCourse->id);
         $response->assertJsonPath('course.chapters.0.lessons.0.lesson_id', $copiedLesson->id);
+    }
+
+    /** AC-AUTHOR-033 */
+    #[DataProvider('titleLengthProvider')]
+    public function test_複製した講座の講座名は50文字に収まる(string $title, string $expectedTitle): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id, 'title' => $title]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->postJson(route('instructor.courses.copy', ['course_id' => $course->id]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('course.title', $expectedTitle);
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function titleLengthProvider(): array
+    {
+        return [
+            '44文字はそのまま50文字になる' => [str_repeat('あ', 44), str_repeat('あ', 44).' - コピー'],
+            '45文字は末尾の1文字を切り詰める' => [str_repeat('あ', 44).'い', str_repeat('あ', 44).' - コピー'],
+        ];
     }
 
     /** AC-AUTHOR-034 */
@@ -128,6 +160,23 @@ class CopyTest extends TestCase
         $this->assertDatabaseMissing('course_tag', ['course_id' => $response->json('course.course_id')]);
     }
 
+    /** AC-AUTHOR-035 */
+    public function test_担当講師以外が作成したタグが付いた講座は複製できない(): void
+    {
+        // Arrange — 他の講師が作成したタグが付いた講座
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course->tags()->attach(Tag::factory()->create());
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->postJson(route('instructor.courses.copy', ['course_id' => $course->id]));
+
+        // Assert
+        $response->assertStatus(404);
+        $this->assertDatabaseCount('courses', 1);
+    }
+
     /** AC-AUTHOR-036 */
     public function test_サムネイル画像は別のファイルとして複製される(): void
     {
@@ -166,12 +215,13 @@ class CopyTest extends TestCase
     }
 
     /** AC-AUTHOR-037 */
-    public function test_配下にない講師の講座は複製できない(): void
+    #[DataProvider('instructorTypeProvider')]
+    public function test_担当でも配下でもない講師の講座は複製できない(string $type): void
     {
-        // Arrange — マネージャーの配下にない講師の講座
-        $manager = Instructor::factory()->create();
+        // Arrange — 操作者の担当でも配下でもない講師の講座
+        $operator = Instructor::factory()->create(['type' => $type]);
         $course = Course::factory()->create();
-        $this->actingAs($manager, 'instructor');
+        $this->actingAs($operator, 'instructor');
 
         // Act
         $response = $this->postJson(route('instructor.courses.copy', ['course_id' => $course->id]));
@@ -179,5 +229,16 @@ class CopyTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $this->assertDatabaseCount('courses', 1);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function instructorTypeProvider(): array
+    {
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 }

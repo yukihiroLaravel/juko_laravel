@@ -16,6 +16,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CopyService
 {
+    private const string TITLE_SUFFIX = ' - コピー';
+
+    private const int TITLE_MAX_LENGTH = 50;
+
     /**
      * 講座複製サービス
      *
@@ -42,11 +46,14 @@ class CopyService
             }
         }
 
+        // 複製元と同じファイルを指すと、片方の講座を削除したときにもう片方の画像まで消える
+        $copiedImagePath = 'course/'.Str::uuid()->toString().'.'.pathinfo($course->image, PATHINFO_EXTENSION);
+
         /** @var Course $newCourse */
         $newCourse = Course::create([
             'instructor_id' => $course->instructor_id,
-            'title' => $course->title.' - コピー',
-            'image' => $this->copyImage($course->image),
+            'title' => $this->copiedTitle($course->title),
+            'image' => $copiedImagePath,
             'status' => CourseStatusEnum::DRAFT->value,
             'deadline_type' => DeadlineTypeEnum::NONE->value,
             'capacity' => null,
@@ -74,26 +81,26 @@ class CopyService
             }
         }
 
+        // 登録が失敗したときに実体だけが残らないよう、ファイルの複製は最後に行う
+        $disk = Storage::disk('public');
+        if ($disk->exists($course->image)) {
+            $disk->copy($course->image, $copiedImagePath);
+        }
+
         $newCourse->load(['chapters.lessons', 'courseDeadline']);
 
         return $newCourse;
     }
 
     /**
-     * サムネイル画像を別のファイルとして複製し、複製先のパスを返す
+     * 複製した講座の講座名を返す
      *
-     * 複製元と同じファイルを指すと、片方の講座を削除したときにもう片方の画像まで消える。
-     * 複製元の実体がないときも、同じ理由で複製先には別のパスを割り当てる。
+     * 講座名の上限に収まるよう、複製元の講座名の末尾を切り詰めてから接尾辞を付ける。
      */
-    private function copyImage(string $imagePath): string
+    private function copiedTitle(string $title): string
     {
-        $copiedPath = 'course/'.Str::uuid()->toString().'.'.pathinfo($imagePath, PATHINFO_EXTENSION);
+        $maxLength = self::TITLE_MAX_LENGTH - mb_strlen(self::TITLE_SUFFIX);
 
-        $disk = Storage::disk('public');
-        if ($disk->exists($imagePath)) {
-            $disk->copy($imagePath, $copiedPath);
-        }
-
-        return $copiedPath;
+        return mb_substr($title, 0, $maxLength).self::TITLE_SUFFIX;
     }
 }

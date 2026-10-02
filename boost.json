@@ -5,6 +5,8 @@
     "cloud": false,
     "guidelines": true,
     "skills": [
-        "laravel-best-practices"
+        "infer-conventions",
+        "laravel-best-practices",
+        "testing-best-practices"
     ]
 }

@@ -38,13 +38,17 @@ class IndexTest extends TestCase
         $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $course->tags()->attach($tag->id);
+        $otherTag = Tag::factory()->create(['instructor_id' => $instructor->id]);
+        $otherCourse = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $otherCourse->tags()->attach($otherTag->id);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.courses.tags.index', ['tag_id' => $tag->id]));
 
-        // Assert
+        // Assert — 指定したタグだけが返り、ほかのタグは含まれない
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.tag_id', $tag->id);
     }
 }

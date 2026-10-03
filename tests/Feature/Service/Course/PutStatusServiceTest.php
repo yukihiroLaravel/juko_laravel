@@ -67,14 +67,18 @@ class PutStatusServiceTest extends TestCase
             'status' => $currentStatus,
         ]);
 
-        // Assert
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('ステータスを「'.$currentStatus.'」から「'.$targetStatus.'」へ変更することはできません。');
+        // Act & Assert
+        try {
+            $service(collect([$course]), $targetStatus);
+            $this->fail('ValidationExceptionが発生しませんでした。');
+        } catch (ValidationException $e) {
+            $this->assertSame(
+                'ステータスを「'.$currentStatus.'」から「'.$targetStatus.'」へ変更することはできません。',
+                $e->errors()['status'][0]
+            );
+        }
 
-        // Act
-        $service(collect([$course]), $targetStatus);
-
-        // Assert
+        // ステータスは更新されていない
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
             'status' => $currentStatus,

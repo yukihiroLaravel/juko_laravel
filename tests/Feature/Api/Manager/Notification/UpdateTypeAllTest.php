@@ -20,6 +20,7 @@ class UpdateTypeAllTest extends TestCase
         $notification = Notification::factory()->create([
             'course_id' => $course->id,
             'instructor_id' => $manager->id,
+            'type' => 'always',
         ]);
         $this->actingAs($manager, 'instructor');
 

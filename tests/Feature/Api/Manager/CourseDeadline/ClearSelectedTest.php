@@ -141,7 +141,11 @@ class ClearSelectedTest extends TestCase
         $otherManager = Instructor::factory()->create();
         $otherCourse = Course::factory()->create([
             'instructor_id' => $otherManager->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
+        ]);
+        CourseDeadline::factory()->create([
+            'course_id' => $otherCourse->id,
+            'relative_days' => 30,
         ]);
         $this->actingAs($manager, 'instructor');
 
@@ -152,9 +156,12 @@ class ClearSelectedTest extends TestCase
 
         // Assert — サービスは冪等性があるため成功を返すが、変更は行われない
         $response->assertStatus(200);
+        $this->assertDatabaseHas('course_deadlines', [
+            'course_id' => $otherCourse->id,
+        ]);
         $this->assertDatabaseHas('courses', [
             'id' => $otherCourse->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
+            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
         ]);
     }
 

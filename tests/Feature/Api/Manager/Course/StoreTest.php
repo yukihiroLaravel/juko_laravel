@@ -8,11 +8,22 @@ use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Override;
 use Tests\TestCase;
 
 class StoreTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // 講座画像は既定のディスクに保存する
+        Storage::fake();
+    }
 
     public function test_受講期限なし_講座登録_成功(): void
     {

@@ -35,8 +35,16 @@ class StuckPointsTest extends TestCase
     public function test_講座の期限内の受講が2人未満の場合_空のコレクションを返す(): void
     {
         // Arrange
+        // 公開レッスンはあり、期限内の受講は1人だけ
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        Attendance::factory()->create([
+            'course_id' => $course->id,
+            'student_id' => Student::factory()->create()->id,
+            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
+        ]);
         $this->actingAs($instructor, 'instructor');
 
         // Act

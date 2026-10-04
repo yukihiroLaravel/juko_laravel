@@ -59,7 +59,6 @@ class VerifyCodeTest extends TestCase
         // Arrange
         $temporaryStudent = TemporaryStudent::factory()->create([
             'code' => '1234',
-            'expire_at' => now()->subMinutes(10),
         ]);
 
         // Act
@@ -74,6 +73,10 @@ class VerifyCodeTest extends TestCase
 
         // Assert
         $response->assertStatus(400);
+        $this->assertDatabaseHas('temporary_students', [
+            'id' => $temporaryStudent->id,
+            'trial_count' => 1,
+        ]);
     }
 
     public function test_トークン認証_失敗_試行回数超過(): void
@@ -82,7 +85,6 @@ class VerifyCodeTest extends TestCase
         $temporaryStudent = TemporaryStudent::factory()->create([
             'trial_count' => 3,
             'code' => '1234',
-            'expire_at' => now()->subMinutes(10),
         ]);
 
         // Act

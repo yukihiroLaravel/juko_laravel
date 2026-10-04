@@ -58,7 +58,7 @@ erDiagram
 | `birth_date` | 生年月日（日付） |
 | `gender` | `unknown` / `man` / `woman` |
 | `last_login_at` | 最終ログイン日時。ログイン率の判定に用いる |
-| `email_verified_at` | 認証日時。現状の登録処理では書き込んでいない |
+| `email_verified_at` | 認証日時。書き込む処理はない |
 | `profile_image` | 画像の保存パス |
 | `deleted_at` | 論理削除 |
 
@@ -79,7 +79,7 @@ erDiagram
 
 ## course_deadlines（講座の受講期限の設定）
 
-講座と1対1で対応する。`deadline_type` が `none` のときはレコードを持たない。
+講座ごとに1件だけ持つ。`course_id` に一意制約はなく、書き込みを `updateOrCreate` で行うことで1件に保っている。`deadline_type` が `none` のときはレコードを持たない。
 
 | カラム | 内容 |
 |---|---|
@@ -138,8 +138,7 @@ erDiagram
 | `id` | 主キー |
 | `lesson_id`・`attendance_id` | 対象のレッスンと受講 |
 | `status` | `before_attendance` / `in_attendance` / `completed_attendance`。表示用の段階 |
-| `updated_at` | 最終更新日時。マネージャー向けの期間集計に用いる |
-| `completed_at` | 完了日時。完了の判定と講師向けの期間集計はこの値で行い、一度入ったら上書きしない |
+| `completed_at` | 完了日時。完了の判定と、講師向け・マネージャー向けの期間集計はこの値で行う。一度入ったら上書きしない |
 | `deleted_at` | 論理削除 |
 
 同じ受講とレッスンの組み合わせに対する一意制約はなく、生成時にアプリ側で重複を除外する。
@@ -192,7 +191,7 @@ erDiagram
 | `student_id` | 対象の受講生 |
 | `logged_in_at` | ログイン日時。索引を張っている |
 
-論理削除は行わない。連続ログイン日数と学習履歴の集計に用いる。
+論理削除は行わない。連続ログイン日数と学習履歴の集計、フォローが必要な受講生の抽出に用いる。
 
 ## temporary_students・temporary_instructors（仮登録）
 
@@ -241,5 +240,4 @@ erDiagram
 ## 実装上の注意
 
 - `attendances` には `progress` というカラムがモデルの更新可能な項目として残っているが、テーブルには存在しない。進捗は都度算出する
-- `students.email_verified_at` は仮登録からの本登録処理で書き込んでいない
 - 期限の判定に使う値は日付として保持しているため、日時と比較すると当日の扱いがずれる。判定は当日の終わりまでを有効とする実装に揃える必要がある（Q-013）

@@ -19,14 +19,14 @@
 
 | 項目 | 内容 |
 |---|---|
-| フレームワーク | Laravel 12 |
+| フレームワーク | Laravel 13 |
 | PHP | 8.3 以上 |
 | データベース | MySQL 5.7（テスト時は SQLite のインメモリ） |
 | 認証 | Laravel Sanctum（セッションを用いたステートフル認証） |
 | API ドキュメント生成 | dedoc/scramble |
-| 静的解析 | PHPStan（larastan・レベル5） |
+| 静的解析 | PHPStan（larastan・レベル6） |
 | コード整形 | Laravel Pint・Rector |
-| テスト | PHPUnit 11 |
+| テスト | PHPUnit 12 |
 | タイムゾーン | Asia/Tokyo |
 
 ## ローカル実行環境
@@ -81,7 +81,7 @@
 | DTO | `app/Dto` | サービスの入出力の受け渡し |
 | リソース | `app/Http/Resources` | 応答の整形。ビジネスロジックを持たない |
 
-トランザクションはコントローラーで張る。サービス側で張っているものもあり（受講の登録、受講生の代理登録、定員と期限の一括更新など）、これは占有ロックと組み合わせる必要があるためである。
+トランザクションはコントローラーで張り、サービスでは張らない。占有ロックを取るサービス（受講の登録の `Attendance\StoreService`、受講生の代理登録の `Student\StoreStudentService`）も、コントローラーが張ったトランザクションの内側で呼び出す。
 
 ## 状態と Enum の対応
 
@@ -93,14 +93,9 @@
 | `App\Enums\Course\DeadlineTypeEnum` | `courses.deadline_type` | `none` / `fixed_date` / `relative_days` |
 | `App\Enums\Notification\StatusEnum` | `notifications.status` | `public` / `private` |
 | `App\Enums\Notification\TypeEnum` | `notifications.type` | `always` / `once` |
-| `App\Enums\Student\Gender` | `students.gender` | `unknown` / `man` / `woman` |
-
-`lesson_attendances.status` と `instructors.type` はモデルのクラス定数で管理しており、Enum に移行していない。
-
-| クラス定数 | 対応するカラム | 値 |
-|---|---|---|
-| `LessonAttendance::STATUS_*` | `lesson_attendances.status` | `before_attendance` / `in_attendance` / `completed_attendance` |
-| `Instructor::TYPE_*` | `instructors.type` | `instructor` / `manager` |
+| `App\Enums\Student\GenderEnum` | `students.gender` | `unknown` / `man` / `woman` |
+| `App\Enums\LessonAttendance\StatusEnum` | `lesson_attendances.status` | `before_attendance` / `in_attendance` / `completed_attendance` |
+| `App\Enums\Instructor\TypeEnum` | `instructors.type` | `instructor` / `manager` |
 
 ## 実装のルール
 
@@ -113,7 +108,7 @@
 | フィーチャーテスト | `tests/Feature` | エンドポイントとサービスの振る舞いを検証する。対象の配置に対応したサブディレクトリに置く |
 | ユニットテスト | `tests/Unit` | 単体で完結する計算を検証する |
 
-テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれており、並列実行に対応する。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
+テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれる。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
 
 ## アップロードしたファイルの保存先
 
@@ -127,4 +122,4 @@
 
 ## API ドキュメントの生成
 
-dedoc/scramble が OpenAPI 定義を生成する。リポジトリ直下の `api.json` は生成した時点のもので、ルートの変更に追従していない場合がある。現在のエンドポイントを確認する際は `scripts/dc php artisan route:list --except-vendor` を正とする。`docs/architecture/api.md` はこの一覧をもとに整理したものである。
+dedoc/scramble が OpenAPI 定義を生成し、リポジトリ直下の `api.json` に置く。エンドポイントの一覧と、どれを正とするかは `docs/architecture/api.md` にある。

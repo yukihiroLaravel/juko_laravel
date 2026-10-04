@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Instructor\Attendance;
 
 use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
+use App\Enums\Course\DeadlineTypeEnum;
 use App\Enums\Lesson\StatusEnum as LessonStatusEnum;
 use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
@@ -347,7 +348,7 @@ class ShowTest extends TestCase
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create([
             'instructor_id' => $instructor->id,
-            'deadline_type' => 'fixed',
+            'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
         ]);
         CourseDeadline::factory()->create([
             'course_id' => $course->id,
@@ -368,7 +369,7 @@ class ShowTest extends TestCase
         $response->assertJson([
             'data' => [
                 'course' => [
-                    'deadline_type' => 'fixed',
+                    'deadline_type' => 'fixed_date',
                 ],
             ],
         ]);
@@ -816,13 +817,15 @@ class ShowTest extends TestCase
 
     public function test_下書き公開非公開のチャプターが混在する場合は公開チャプターのみ順序どおり返る(): void
     {
-        // Arrange — order:1下書き, order:2公開(公開レッスンあり), order:3非公開, order:4公開(公開レッスンあり)
+        // Arrange — order:1下書き, order:2公開, order:3非公開, order:4公開（いずれも公開レッスンあり）
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => ChapterStatusEnum::DRAFT]);
+        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => ChapterStatusEnum::DRAFT]);
+        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'status' => LessonStatusEnum::PUBLIC]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'status' => ChapterStatusEnum::PUBLIC]);
         Lesson::factory()->create(['chapter_id' => $chapter2->id, 'status' => LessonStatusEnum::PUBLIC]);
-        Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => ChapterStatusEnum::PRIVATE]);
+        $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => ChapterStatusEnum::PRIVATE]);
+        Lesson::factory()->create(['chapter_id' => $chapter3->id, 'status' => LessonStatusEnum::PUBLIC]);
         $chapter4 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 4, 'status' => ChapterStatusEnum::PUBLIC]);
         Lesson::factory()->create(['chapter_id' => $chapter4->id, 'status' => LessonStatusEnum::PUBLIC]);
         $student = Student::factory()->create();
@@ -844,11 +847,13 @@ class ShowTest extends TestCase
 
     public function test_全チャプターが下書き非公開の場合はチャプター一覧が空になる(): void
     {
-        // Arrange — 下書きチャプターと非公開チャプターのみ（公開チャプターなし）
+        // Arrange — 下書きチャプターと非公開チャプターのみ（公開チャプターなし）。どちらにも公開レッスンがある
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::DRAFT]);
-        Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PRIVATE]);
+        $draftChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::DRAFT]);
+        Lesson::factory()->create(['chapter_id' => $draftChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
+        $privateChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PRIVATE]);
+        Lesson::factory()->create(['chapter_id' => $privateChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
         $student = Student::factory()->create();
         $attendance = Attendance::factory()->create([
             'student_id' => $student->id,

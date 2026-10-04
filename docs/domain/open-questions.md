@@ -14,7 +14,7 @@
 
 ここに並ぶ項目は、稼働中の実装を読み直した結果、扱いを決めきれなかったものである（整理日 2026-08-17）。いずれも現状の実装は動いており、確認が済むまでは現状の振る舞いを維持する。
 
-業務ルールは確認済みである（2026-08-20）。そのため、業務ルールが定めている事柄について実装がそれに沿っていない項目は、どちらが正しいかがすでに決まっている。残る判断は実装を合わせるかどうかと、その時機である。業務ルールが定めていない領域の項目は、引き続き業務側の確認を要する。どちらに当たるかは項目の本文を読んで判断する。
+業務ルールが定めている事柄の項目は業務ルールを正とし（`docs/domain/shared/business-rules.md` の出典の扱い）、定めていない領域の項目は引き続き業務側の確認を要する。
 
 ## 未確定
 
@@ -31,7 +31,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| 影響範囲 | BR-SHARED-003・`docs/specs/features/authorization.md`・`docs/specs/features/enrollment.md` |
+| 影響範囲 | BR-SHARED-003・`docs/specs/features/authorization.md` |
 | 暫定方針 | 現状の振る舞い（講師向けは自分の講座のみ）を維持する |
 
 ### Q-005 一度もログインしていない受講生をログイン率にどう含めるか
@@ -79,7 +79,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| 影響範囲 | BR-SHARED-013・`docs/specs/features/enrollment.md`・`docs/specs/features/progress-analytics.md` |
+| 影響範囲 | BR-SHARED-013・`docs/specs/features/enrollment.md`・`docs/specs/features/lesson-progress.md`・`docs/specs/features/progress-analytics.md` |
 | 暫定方針 | 現状は記録しない。修了者数が必要な場面では、公開レッスンをすべて完了したかどうかをそのつど算出する |
 | 実装保留 | 記録タイミングが決まるまで、修了した日時の書き込みは実装しない |
 
@@ -96,7 +96,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| 影響範囲 | BR-SHARED-007・`docs/specs/features/enrollment.md` |
+| 影響範囲 | BR-SHARED-007・`docs/specs/features/course-authoring.md`・`docs/specs/features/enrollment.md` |
 | 暫定方針 | 現状の振る舞いを維持する |
 
 ### Q-011 講師が代理登録した受講生に受講期限と受講状況を用意するか
@@ -196,7 +196,7 @@
 | 項目 | 内容 |
 |---|---|
 | 影響範囲 | BR-SHARED-012・`docs/specs/features/progress-analytics.md` |
-| 決定 | BR-SHARED-012 に合わせ、完了日時で数える。チャプターは、最後のレッスンを完了した日時で数える |
+| 決定 | BR-SHARED-012 に合わせ、完了日時で数える。チャプターは、最後のレッスンを完了した日時で数える。ADR-0002 の影響の節に挙げた食い違いは、実装をこの決定に合わせて解消した |
 
 ### Q-003 講師向けの集計に公開されていないチャプターとレッスンを含めるか
 

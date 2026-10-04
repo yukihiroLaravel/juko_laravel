@@ -6,11 +6,21 @@ use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Override;
 use Tests\TestCase;
 
 class UpdateTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('public');
+    }
 
     public function test_講師更新_成功(): void
     {

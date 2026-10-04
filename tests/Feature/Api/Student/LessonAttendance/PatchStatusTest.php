@@ -26,6 +26,7 @@ class PatchStatusTest extends TestCase
         parent::tearDown();
     }
 
+    /** AC-PROG-005 */
     public function test_レッスン受講状態を更新_成功(): void
     {
         // Arrange
@@ -47,14 +48,14 @@ class PatchStatusTest extends TestCase
         // Act
         $response = $this->patchJson(
             route('student.lesson-attendances.patch-status', ['lesson_attendance_id' => $lessonAttendance->id]),
-            ['status' => 'before_attendance']
+            ['status' => 'in_attendance']
         );
 
         // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('lesson_attendances', [
             'id' => $lessonAttendance->id,
-            'status' => 'before_attendance',
+            'status' => 'in_attendance',
         ]);
     }
 

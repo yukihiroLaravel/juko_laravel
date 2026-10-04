@@ -72,24 +72,17 @@ class PutStatusTest extends TestCase
         $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
-        // Act — PutTest(個別更新)のバリデーションエラーを検証
-        $response = $this->putJson(route('instructor.notifications.put', ['notification_id' => 'aaaa']), [
-            'title' => '',
-            'type' => '',
-            'start_date' => '',
-            'end_date' => '',
-            'content' => '',
+        // Act
+        $response = $this->putJson(route('instructor.notifications.put-status'), [
+            'notifications' => [],
+            'status' => '',
         ]);
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors([
-            'notification_id',
-            'title',
-            'type',
-            'start_date',
-            'end_date',
-            'content',
+            'notifications',
+            'status',
         ]);
     }
 }

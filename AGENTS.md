@@ -74,7 +74,7 @@ scripts/dc php artisan test --compact
 2番目が仕様の確定点である。ここではテストのコードを見せない。依頼者には開発の
 経験が浅い者が多く、コードを見せると判断できないまま承認する形になるためである。
 
-段の全体は `docs/architecture/coding-standards.md` の「実装の進め方」、
+段の全体は `.claude/skills/change-flow/SKILL.md`、
 関門で提示する形は `.claude/skills/change-flow/references/gates.md` にある。
 
 ## 実装のルール

@@ -70,7 +70,7 @@
 
 | メソッド | パス | ルート名 | 内容 | 仕様 |
 |---|---|---|---|---|
-| GET | `api/v1/instructor/courses/index` | `instructor.courses.index` | 講座一覧 | AC-COMMON-006 |
+| GET | `api/v1/instructor/courses/index` | `instructor.courses.index` | 講座一覧 | AC-COMMON-006・AC-AUTHOR-038・AC-AUTHOR-039・AC-AUTHOR-040・AC-AUTHOR-041 |
 | POST | `api/v1/instructor/courses` | `instructor.courses.store` | 講座の作成 | AC-AUTHOR-001 |
 | GET | `api/v1/instructor/courses/{course_id}` | `instructor.courses.show` | 講座詳細 | AC-AUTHZ-001 |
 | POST | `api/v1/instructor/courses/{course_id}` | `instructor.courses.update` | 講座の更新 | AC-AUTHOR-008 |

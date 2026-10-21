@@ -13,6 +13,7 @@ use App\Services\Chapter\StatusTransitionService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Manager-Chapter
@@ -41,7 +42,7 @@ class ChapterController extends Controller
         }
 
         // チャプター削除（受講中レッスンの有無チェックはサービス内で実施）
-        $deleteChapterService($chapter);
+        DB::transaction(fn () => $deleteChapterService($chapter));
 
         return response()->json([
             'result' => true,

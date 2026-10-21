@@ -5,8 +5,10 @@ namespace Tests;
 use App\Model\Instructor;
 use App\Model\Student;
 use Closure;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -51,5 +53,19 @@ abstract class TestCase extends BaseTestCase
         DB::disableQueryLog();
 
         return $queryCount;
+    }
+
+    /**
+     * 指定した文で始まるクエリが実行された直後に例外を投げる
+     *
+     * 複数の更新の途中で失敗したときに、先に実行した更新が残らないことを確かめるために使う。
+     */
+    protected function failAfterQuery(string $sqlPrefix): void
+    {
+        DB::listen(function (QueryExecuted $query) use ($sqlPrefix): void {
+            if (str_starts_with($query->sql, $sqlPrefix)) {
+                throw new RuntimeException('テストのために失敗させた');
+            }
+        });
     }
 }

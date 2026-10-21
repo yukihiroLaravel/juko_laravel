@@ -163,8 +163,7 @@ class NotificationController extends Controller
         // 講師と一致しないお知らせが含まれている場合はエラー
         $this->authorize('bulkUpdate', [Notification::class, $notifications]);
 
-        // 一括更新サービス
-        $service($status, $notifications);
+        DB::transaction(fn () => $service($status, $notifications));
 
         return response()->json([
             'result' => true,

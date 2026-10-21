@@ -151,10 +151,10 @@ class ChapterController extends Controller
                 }
             });
 
-            $bulkDeleteChapterService(
+            DB::transaction(fn () => $bulkDeleteChapterService(
                 chapterIds: $chapterIds,
                 chapters: $chapters
-            );
+            ));
 
             return response()->json([
                 'result' => true,

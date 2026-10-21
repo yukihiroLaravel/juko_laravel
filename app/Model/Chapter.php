@@ -26,7 +26,6 @@ class Chapter extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'chapter_id',
         'course_id',
         'order',
         'title',

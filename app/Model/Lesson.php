@@ -3,10 +3,8 @@
 namespace App\Model;
 
 use App\Enums\Lesson\StatusEnum;
-use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,22 +65,6 @@ class Lesson extends Model
     public function lessonAttendances()
     {
         return $this->hasMany(LessonAttendance::class);
-    }
-
-    /**
-     * レッスンの総数を取得する
-     */
-    protected function totalLessonsCount(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->chapter->lessons->count());
-    }
-
-    /**
-     * レッスンの完了数を取得する
-     */
-    protected function completedLessonsCount(): Attribute
-    {
-        return Attribute::make(get: fn () => $this->lessonAttendances->filter(fn (LessonAttendance $lessonAttendance) => $lessonAttendance->status === LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE)->count());
     }
 
     /**

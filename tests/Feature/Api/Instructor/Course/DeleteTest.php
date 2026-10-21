@@ -142,4 +142,27 @@ class DeleteTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['course_id']);
     }
+
+    /** AC-COMMON-015 */
+    public function test_削除の途中で失敗するとチャプターとレッスンと受講期限も元のまま残る(): void
+    {
+        // Arrange — 子を消したあと、講座を消すクエリの直後に失敗させる
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        CourseDeadline::factory()->create(['course_id' => $course->id]);
+        $this->failAfterQuery('update "courses"');
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->deleteJson(route('instructor.courses.delete', ['course_id' => $course->id]));
+
+        // Assert
+        $response->assertStatus(500);
+        $this->assertNotSoftDeleted('courses', ['id' => $course->id]);
+        $this->assertNotSoftDeleted('chapters', ['id' => $chapter->id]);
+        $this->assertNotSoftDeleted('lessons', ['id' => $lesson->id]);
+        $this->assertDatabaseHas('course_deadlines', ['course_id' => $course->id]);
+    }
 }

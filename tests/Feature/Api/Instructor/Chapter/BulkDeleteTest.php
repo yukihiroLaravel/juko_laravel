@@ -91,7 +91,7 @@ class BulkDeleteTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid course_id.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 
@@ -139,5 +139,27 @@ class BulkDeleteTest extends TestCase
             'course_id',
             'chapters',
         ]);
+    }
+
+    /** AC-COMMON-015 */
+    public function test_削除の途中で失敗するとレッスンも元のまま残る(): void
+    {
+        // Arrange — レッスンを消したあと、チャプターを消すクエリの直後に失敗させる
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $this->failAfterQuery('update "chapters"');
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->deleteJson(route('instructor.chapters.bulk-delete', ['course_id' => $course->id]), [
+            'chapters' => [$chapter->id],
+        ]);
+
+        // Assert
+        $response->assertStatus(500);
+        $this->assertNotSoftDeleted('chapters', ['id' => $chapter->id]);
+        $this->assertNotSoftDeleted('lessons', ['id' => $lesson->id]);
     }
 }

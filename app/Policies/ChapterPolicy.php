@@ -108,4 +108,34 @@ class ChapterPolicy
         // 講師の場合、自分の講座のみ削除可能
         return $chapters->every(fn (Chapter $chapter) => $chapter->course->instructor_id === $instructor->id);
     }
+
+    /**
+     * 指定した講座のチャプターをまとめて更新する際の認可処理
+     *
+     * @param  Collection<int, Chapter>  $chapters
+     */
+    public function bulkUpdateInCourse(Instructor $instructor, Collection $chapters, Course $course): bool
+    {
+        // 指定した講座に属さないチャプターが含まれるときは許可しない
+        if ($chapters->contains(fn (Chapter $chapter) => $chapter->course_id !== $course->id)) {
+            return false;
+        }
+
+        return $this->bulkUpdate($instructor, $chapters);
+    }
+
+    /**
+     * 指定した講座のチャプターをまとめて削除する際の認可処理
+     *
+     * @param  Collection<int, Chapter>  $chapters
+     */
+    public function bulkDeleteInCourse(Instructor $instructor, Collection $chapters, Course $course): bool
+    {
+        // 指定した講座に属さないチャプターが含まれるときは許可しない
+        if ($chapters->contains(fn (Chapter $chapter) => $chapter->course_id !== $course->id)) {
+            return false;
+        }
+
+        return $this->bulkDelete($instructor, $chapters);
+    }
 }

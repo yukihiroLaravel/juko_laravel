@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
@@ -99,5 +100,20 @@ class LessonPolicy
         return $lessons->every(
             fn (Lesson $lesson) => $lesson->chapter->course->instructor_id === $instructor->id
         );
+    }
+
+    /**
+     * 指定したチャプターのレッスンをまとめて削除する際の認可処理
+     *
+     * @param  Collection<int, Lesson>  $lessons
+     */
+    public function bulkDeleteInChapter(Instructor $instructor, Collection $lessons, Chapter $chapter): bool
+    {
+        // 指定したチャプターに属さないレッスンが含まれるときは許可しない
+        if ($lessons->contains(fn (Lesson $lesson) => $lesson->chapter_id !== $chapter->id)) {
+            return false;
+        }
+
+        return $this->bulkDelete($instructor, $lessons);
     }
 }

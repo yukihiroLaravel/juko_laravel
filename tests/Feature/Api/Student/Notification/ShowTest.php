@@ -47,7 +47,7 @@ class ShowTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'The course has expired.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

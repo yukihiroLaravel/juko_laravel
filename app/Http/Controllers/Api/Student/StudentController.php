@@ -20,7 +20,6 @@ use App\Services\Student\QueryService;
 use App\Services\Student\VerifyCodeService;
 use Carbon\CarbonImmutable;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -130,10 +129,6 @@ class StudentController extends Controller
 
         try {
             $student = Student::findOrFail($request->user()->id);
-
-            if ($request->user()->id !== $student->id) {
-                throw new AuthorizationException('Not authorized.');
-            }
 
             $imagePath = $student->profile_image;
 

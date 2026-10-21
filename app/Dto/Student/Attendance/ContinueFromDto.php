@@ -11,26 +11,6 @@ class ContinueFromDto
         private readonly string $lessonTitle
     ) {}
 
-    public function getChapterId(): int
-    {
-        return $this->chapterId;
-    }
-
-    public function getChapterTitle(): string
-    {
-        return $this->chapterTitle;
-    }
-
-    public function getLessonId(): int
-    {
-        return $this->lessonId;
-    }
-
-    public function getLessonTitle(): string
-    {
-        return $this->lessonTitle;
-    }
-
     public function toArray(): array
     {
         return [

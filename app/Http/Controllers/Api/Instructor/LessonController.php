@@ -127,18 +127,13 @@ class LessonController extends Controller
 
         DB::beginTransaction();
         try {
+            $chapter = Chapter::findOrFail($chapterId);
+
             // レッスン情報を取得
             $lessons = Lesson::with('chapter.course')->whereIn('id', $lessonIds)->get();
 
-            // 自身の講座・チャプターに紐づくレッスンでない場合は許可しない
-            $this->authorize('bulkDelete', [Lesson::class, $lessons]);
-
-            $lessons->each(function (Lesson $lesson) use ($chapterId) {
-                // 指定したチャプターIDがレッスンのチャプターIDと一致しない場合は許可しない
-                if ((int) $chapterId !== $lesson->chapter_id) {
-                    throw new AuthorizationException('Invalid chapter.');
-                }
-            });
+            // 指定したチャプターに属するレッスンかどうかも含めて認可する
+            $this->authorize('bulkDeleteInChapter', [Lesson::class, $lessons, $chapter]);
 
             // サービスクラスで対象レッスンの削除処理を実行
             $service(

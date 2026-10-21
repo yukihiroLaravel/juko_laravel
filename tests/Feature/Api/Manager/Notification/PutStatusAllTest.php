@@ -117,4 +117,31 @@ class PutStatusAllTest extends TestCase
         // Assert
         $response->assertStatus(401);
     }
+
+    /** AC-COMMON-015 */
+    public function test_変更の途中で失敗するとすべてのお知らせが元の公開状態のまま残る(): void
+    {
+        // Arrange — 1件目を変えたクエリの直後に失敗させる
+        $instructor = Instructor::factory()->create();
+        $notifications = Notification::factory()->count(2)->create([
+            'instructor_id' => $instructor->id,
+            'status' => 'private',
+        ]);
+        $this->failAfterQuery('update "notifications"');
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->putJson(route('manager.notifications.put-status-all'), [
+            'status' => 'public',
+        ]);
+
+        // Assert
+        $response->assertStatus(500);
+        foreach ($notifications as $notification) {
+            $this->assertDatabaseHas('notifications', [
+                'id' => $notification->id,
+                'status' => 'private',
+            ]);
+        }
+    }
 }

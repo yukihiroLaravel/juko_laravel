@@ -6,7 +6,6 @@ use App\Enums\Student\GenderEnum;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -82,26 +81,6 @@ class Student extends Authenticatable
     public function getRememberTokenName(): string
     {
         return '';
-    }
-
-    /**
-     * 講座を取得
-     *
-     * @return HasMany<Course, $this>
-     */
-    public function courses()
-    {
-        return $this->hasMany(Course::class);
-    }
-
-    /**
-     * お知らせを取得
-     *
-     * @return BelongsToMany<Notification, $this>
-     */
-    public function notifications()
-    {
-        return $this->belongsToMany(Notification::class, 'viewed_once_notifications', 'student_id', 'notification_id')->withTimestamps();
     }
 
     /**

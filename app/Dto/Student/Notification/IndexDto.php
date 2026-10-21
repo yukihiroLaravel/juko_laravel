@@ -16,15 +16,4 @@ class IndexDto
         public readonly string $sortBy,
         public readonly string $order
     ) {}
-
-    public function getIndex(): array
-    {
-        return [
-            'student_id' => $this->studentId,
-            'per_page' => $this->perPage,
-            'page' => $this->page,
-            'sort_by' => $this->sortBy,
-            'order' => $this->order,
-        ];
-    }
 }

@@ -2,13 +2,13 @@
 
 現在のエンドポイントの一覧である。振る舞いの詳細は `docs/specs/` を参照し、ここでは経路と対応する仕様の対応づけだけを扱う。
 
-一覧の正は `scripts/dc php artisan route:list --except-vendor` である。リポジトリ直下の `api.json` は生成時点のもので古い場合がある。
+一覧の正は `scripts/dc php artisan route:list --except-vendor` である。`api.json` は `scramble:export` で出力する生成物で、このリポジトリには含めない。フロントエンドに置いてあるコピーは生成時点のもので古い場合がある。
 
 ## 前提
 
 | 項目 | 内容 |
 |---|---|
-| 接頭辞 | `api/v1`（ログインとログアウトを除く） |
+| 接頭辞 | `api/v1`（ログイン・ログアウトと `api/user` を除く） |
 | 認証 | Sanctum のステートフル認証。要求ごとにロールのミドルウェアで区分を判定する |
 | 応答形式 | 常に JSON |
 | 共通の振る舞い | `docs/specs/conventions.md` |
@@ -125,7 +125,7 @@
 | メソッド | パス | ルート名 | 内容 | 仕様 |
 |---|---|---|---|---|
 | GET | `api/v1/instructor/courses/{course_id}/attendances/{period}` | `instructor.courses.attendances.login-rate` | ログイン率 | AC-ANALYTICS-004 |
-| GET | `api/v1/instructor/courses/{course_id}/attendances/status/{period}` | `instructor.courses.attendances.show-status` | 完了件数・平均進捗率・修了率 | AC-ANALYTICS-007 |
+| GET | `api/v1/instructor/courses/{course_id}/attendances/status/{period}` | `instructor.courses.attendances.show-status` | 完了件数・平均進捗率・修了率 | AC-ANALYTICS-007〜011 |
 | GET | `api/v1/instructor/courses/{course_id}/attendances/follow-up` | `instructor.courses.attendances.follow-up` | 要フォロー受講生 | AC-ANALYTICS-024 |
 | GET | `api/v1/instructor/courses/{course_id}/attendances/expiring` | `instructor.courses.attendances.expiring` | 近日期限切れの受講生 | AC-ANALYTICS-028 |
 | GET | `api/v1/instructor/courses/{course_id}/attendances/stuck-points` | `instructor.courses.attendances.stuck-points` | つまずき箇所 | AC-ANALYTICS-016 |
@@ -207,8 +207,8 @@
 
 | 種別 | 形 |
 |---|---|
-| 登録・更新・削除 | `result` に真を返す。一括操作では `updated_count` または `deleted_count` を伴う |
-| 一覧 | ページネーション情報を伴う一覧。形はエンドポイントによって異なり、リソースクラスの定義が正である |
-| 単体取得 | リソースクラスの定義が正である |
+| 登録・更新・削除 | `result` に真を返す。講座の一括削除は `deleted_count`、定員の取り消しと受講期限の一括変更は `updated_count`、マネージャーの公開状態の一括変更は `updated_ids` を併せて返す |
+| 一覧 | ページネーション情報を伴う。形はエンドポイントによって異なる |
+| 単体取得 | エンドポイントごとの形 |
 
 応答の項目は `app/Http/Resources` のリソースクラスを正とする。この文書には転記しない。

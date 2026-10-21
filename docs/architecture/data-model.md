@@ -41,7 +41,7 @@ erDiagram
 | `password` | ハッシュ化したパスワード |
 | `profile_image` | 画像の保存パス。未設定は `null` |
 | `type` | `instructor` または `manager` |
-| `deleted_at` | 論理削除 |
+| `deleted_at` | 使っていない（削除の方式を参照） |
 
 ## students（受講生）
 
@@ -60,7 +60,7 @@ erDiagram
 | `last_login_at` | 最終ログイン日時。ログイン率の判定に用いる |
 | `email_verified_at` | 認証日時。書き込む処理はない |
 | `profile_image` | 画像の保存パス |
-| `deleted_at` | 論理削除 |
+| `deleted_at` | 使っていない（削除の方式を参照） |
 
 ## courses（講座）
 
@@ -87,8 +87,6 @@ erDiagram
 | `course_id` | 対象の講座 |
 | `fixed_date` | 固定の期限日（日付）。`fixed_date` 型のときだけ使う |
 | `relative_days` | 受講開始からの日数。`relative_days` 型のときだけ使う |
-
-論理削除は行わない。
 
 ## chapters（チャプター）
 
@@ -158,7 +156,7 @@ erDiagram
 
 ## viewed_once_notifications（お知らせの確認済みの記録）
 
-一度きりのお知らせを受講生が確認したことを記録する中間テーブルである。論理削除は行わない。
+一度きりのお知らせを受講生が確認したことを記録する中間テーブルである。
 
 | カラム | 内容 |
 |---|---|
@@ -169,8 +167,8 @@ erDiagram
 
 | テーブル | 内容 |
 |---|---|
-| `tags` | `instructor_id`（作成した講師）と `content`（表記）を持つ。論理削除は行わない |
-| `course_tag` | 講座とタグの関連。`course_id` と `tag_id` の組み合わせに一意制約がある。論理削除は行わない |
+| `tags` | `instructor_id`（作成した講師）と `content`（表記）を持つ |
+| `course_tag` | 講座とタグの関連。`course_id` と `tag_id` の組み合わせに一意制約がある |
 
 ## manage_instructors（マネージャーと配下の講師）
 
@@ -179,7 +177,7 @@ erDiagram
 | `id` | 主キー |
 | `instructor_id` | 配下の講師 |
 | `manager_id` | マネージャー |
-| `deleted_at` | 論理削除 |
+| `deleted_at` | 使っていない（削除の方式を参照） |
 
 いずれも `instructors` を参照する自己参照の関連である。
 
@@ -191,11 +189,11 @@ erDiagram
 | `student_id` | 対象の受講生 |
 | `logged_in_at` | ログイン日時。索引を張っている |
 
-論理削除は行わない。連続ログイン日数と学習履歴の集計、フォローが必要な受講生の抽出に用いる。
+連続ログイン日数と学習履歴の集計、フォローが必要な受講生の抽出に用いる。
 
 ## temporary_students・temporary_instructors（仮登録）
 
-本登録の前段として保持する。本登録が成立した時点、および失効した時点で物理削除する。
+本登録の前段として保持する。本登録が成立したとき、および失効後か試行回数の上限で本登録に失敗したときに物理削除する。本登録の要求が来ない失効分は残る。
 
 | カラム | 内容 |
 |---|---|
@@ -212,7 +210,8 @@ erDiagram
 
 | 方式 | テーブル |
 |---|---|
-| 論理削除 | `instructors`・`students`・`courses`・`chapters`・`lessons`・`attendances`・`lesson_attendances`・`notifications`・`manage_instructors` |
+| 論理削除 | `courses`・`chapters`・`lessons`・`attendances`・`lesson_attendances`・`notifications` |
+| 削除しない | `instructors`・`students`・`manage_instructors`。`deleted_at` カラムはあるが、モデルが論理削除を使わず、削除する処理もない |
 | 物理削除 | `course_deadlines`・`tags`・`course_tag`・`viewed_once_notifications`・`student_login_histories`・`temporary_students`・`temporary_instructors` |
 
 論理削除したレコードは参照時に除外する。存在しない扱いとし、対象を指定する検証でも除外している。
@@ -226,13 +225,13 @@ erDiagram
 | 受講 | 受講状況 |
 | お知らせ | 確認済みの記録 |
 
-講座を削除しても `course_tag` の関連は残る。タグ側からの削除は関連する講座があると拒否するため、論理削除された講座に付いたタグは削除できない状態になる。
+講座を削除しても `course_tag` の関連は残る。タグの削除は、関連する講座があると拒否する。削除済みの講座にしか付いていないタグの扱いは Q-014 で未確定であり、現状は拒否の判定をすり抜けて、外部キー制約のエラーになる。
 
 ## フレームワークが用意するテーブル
 
 | テーブル | 状態 |
 |---|---|
-| `personal_access_tokens` | Sanctum が使用する |
+| `personal_access_tokens` | 使用していない（認証はセッションで行い、API トークンは発行しない） |
 | `users` | 使用していない。認証は `students` と `instructors` で行う |
 | `password_resets` | 使用していない（パスワード再設定は未実装） |
 | `failed_jobs` | 使用していない（キューを利用していない） |
@@ -240,4 +239,4 @@ erDiagram
 ## 実装上の注意
 
 - `attendances` には `progress` というカラムがモデルの更新可能な項目として残っているが、テーブルには存在しない。進捗は都度算出する
-- 期限の判定に使う値は日付として保持しているため、日時と比較すると当日の扱いがずれる。判定は当日の終わりまでを有効とする実装に揃える必要がある（Q-013）
+- 受講期限は日付として保持しているため、日時と比較すると期限当日が切り捨てられる。当日の終わり（23時59分59秒）までを有効とする判定は `Attendance` の `attendance_deadline_end` で行う。お知らせの一覧は日付のまま比較しており、この扱いに揃っていない（Q-013）

@@ -2,7 +2,7 @@
 
 技術スタックと実装の構成を記述する。振る舞いは `docs/specs/` に、業務ルールは `docs/domain/` にあり、ここでは「どう組み立てているか」だけを扱う。
 
-この文書と `data-model.md`・`api.md` は開発者向けであり、クラス名・テーブル名・カラム名をそのまま記載する。`docs/domain/` と `docs/specs/` では実装の名前を出さない方針であり、その対応関係はここが受け持つ。
+この文書と `data-model.md`・`api.md` は開発者向けであり、クラス名・テーブル名・カラム名をそのまま記載する。
 
 ## リポジトリの位置づけ
 
@@ -71,8 +71,8 @@
 
 | レイヤ | 場所 | 責務 |
 |---|---|---|
-| コントローラー | `app/Http/Controllers/Api/{Student,Instructor,Manager}` | 入力の受け取り、認可の起動、トランザクションの管理、応答の組み立て |
-| フォームリクエスト | `app/Http/Requests/{Student,Instructor,Manager}` | 入力値の検証。1エンドポイント1クラス |
+| コントローラー | `app/Http/Controllers/Api/{Student,Instructor,Manager}`。ログイン・ログアウトは `app/Http/Controllers/Auth` | 入力の受け取り、認可の起動、トランザクションの管理、応答の組み立て |
+| フォームリクエスト | `app/Http/Requests/{Student,Instructor,Manager}`。ログインは `app/Http/Requests/Auth` | 入力値の検証。1エンドポイント1クラス |
 | 検証ルール | `app/Rules` | 複数箇所で使う値の検証（並び替え項目・期間・状態など） |
 | サービス | `app/Services/{コンテキスト}` | 複数のモデルが関わる処理。公開メソッドは `__invoke` |
 | ポリシー | `app/Policies` | 対象ごとの認可判定 |
@@ -85,17 +85,19 @@
 
 ## 状態と Enum の対応
 
-| Enum | 対応するカラム | 値 |
-|---|---|---|
-| `App\Enums\Course\StatusEnum` | `courses.status` | `draft` / `public` / `private` |
-| `App\Enums\Chapter\StatusEnum` | `chapters.status` | `draft` / `public` / `private` |
-| `App\Enums\Lesson\StatusEnum` | `lessons.status` | `draft` / `public` / `private` |
-| `App\Enums\Course\DeadlineTypeEnum` | `courses.deadline_type` | `none` / `fixed_date` / `relative_days` |
-| `App\Enums\Notification\StatusEnum` | `notifications.status` | `public` / `private` |
-| `App\Enums\Notification\TypeEnum` | `notifications.type` | `always` / `once` |
-| `App\Enums\Student\GenderEnum` | `students.gender` | `unknown` / `man` / `woman` |
-| `App\Enums\LessonAttendance\StatusEnum` | `lesson_attendances.status` | `before_attendance` / `in_attendance` / `completed_attendance` |
-| `App\Enums\Instructor\TypeEnum` | `instructors.type` | `instructor` / `manager` |
+値の一覧は `app/Enums` が正であり、カラムごとの値は `data-model.md` にある。
+
+| Enum | 対応するカラム |
+|---|---|
+| `App\Enums\Course\StatusEnum` | `courses.status` |
+| `App\Enums\Chapter\StatusEnum` | `chapters.status` |
+| `App\Enums\Lesson\StatusEnum` | `lessons.status` |
+| `App\Enums\Course\DeadlineTypeEnum` | `courses.deadline_type` |
+| `App\Enums\Notification\StatusEnum` | `notifications.status` |
+| `App\Enums\Notification\TypeEnum` | `notifications.type` |
+| `App\Enums\Student\GenderEnum` | `students.gender` |
+| `App\Enums\LessonAttendance\StatusEnum` | `lesson_attendances.status` |
+| `App\Enums\Instructor\TypeEnum` | `instructors.type` |
 
 ## 実装のルール
 
@@ -108,7 +110,7 @@
 | フィーチャーテスト | `tests/Feature` | エンドポイントとサービスの振る舞いを検証する。対象の配置に対応したサブディレクトリに置く |
 | ユニットテスト | `tests/Unit` | 単体で完結する計算を検証する |
 
-テストは SQLite のインメモリデータベースで実行する。スイートは Unit と Feature に分かれる。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
+スイートは Unit と Feature に分かれる。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
 
 ## アップロードしたファイルの保存先
 
@@ -122,4 +124,4 @@
 
 ## API ドキュメントの生成
 
-dedoc/scramble が OpenAPI 定義を生成し、リポジトリ直下の `api.json` に置く。エンドポイントの一覧と、どれを正とするかは `docs/architecture/api.md` にある。
+dedoc/scramble が OpenAPI 定義を生成する。エンドポイントの一覧と、どれを正とするかは `docs/architecture/api.md` にある。

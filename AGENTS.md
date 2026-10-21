@@ -20,6 +20,7 @@
 | これから作る変更の起票 | `docs/changes/template.md` |
 | ドキュメントの書き方 | `docs/documentation-rules.md` |
 | 変更を実装するときの手順 | `.claude/skills/change-flow/SKILL.md` |
+| docs とテストの文章の点検 | `.claude/agents/writing-reviewer.md` |
 
 全体の入口は `docs/README.md` にある。ID を見かけたら `grep -rn 'BR-SHARED-006' docs/` で引く。
 
@@ -101,6 +102,8 @@ scripts/dc php artisan test --compact
 - 技術選定の判断をした → `docs/adr/` に新しい記録を追加する
 
 文書を増やさず、既存の記述を上書きする。同じ主題が既に書かれていないかを `grep -rn` で確かめてから書く。
+
+書き終えたら、変更した docs とテストを `writing-reviewer` エージェントで点検する。ドキュメントだけを直したときも同じである。
 
 ## 仕様が不足しているとき
 

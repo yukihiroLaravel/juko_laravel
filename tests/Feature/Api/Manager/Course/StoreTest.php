@@ -25,6 +25,7 @@ class StoreTest extends TestCase
         Storage::fake();
     }
 
+    /** AC-AUTHOR-001 */
     public function test_受講期限なし_講座登録_成功(): void
     {
         // Arrange
@@ -60,6 +61,7 @@ class StoreTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-001 */
     public function test_固定受講期限あり_講座登録_成功(): void
     {
         // Arrange
@@ -97,6 +99,7 @@ class StoreTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-001 */
     public function test_相対受講期限あり_講座登録_成功(): void
     {
         // Arrange
@@ -134,7 +137,8 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_無効なタグの指定_失敗(): void
+    /** AC-AUTHOR-003 */
+    public function test_他のマネージャーのタグを指定すると講座を登録できない(): void
     {
         // Arrange — 別のマネージャーが所有するタグを指定
         $manager = Instructor::factory()->create();
@@ -157,8 +161,12 @@ class StoreTest extends TestCase
         $response->assertJson([
             'message' => 'Not Found Tag.',
         ]);
+        $this->assertDatabaseMissing('courses', [
+            'title' => 'テスト講座',
+        ]);
     }
 
+    /** AC-AUTHOR-002 */
     public function test_バリデーションエラー_失敗(): void
     {
         // Arrange

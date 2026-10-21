@@ -11,6 +11,7 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
+use App\Model\ManageInstructor;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -47,11 +48,66 @@ class ShowStatusTest extends TestCase
         ];
     }
 
-    public function test_当日の出席状況を取得_成功(): void
+    /**
+     * レッスンの完了日時が期間の開始の直前か、開始ちょうどか
+     *
+     * @return array<string, array{string, string, string}>
+     */
+    public static function lessonPeriodBoundaries(): array
+    {
+        return [
+            '当日' => ['today', '2026-09-16 23:59:59', '2026-09-17 00:00:00'],
+            '当月' => ['month', '2026-08-31 23:59:59', '2026-09-01 00:00:00'],
+        ];
+    }
+
+    /**
+     * チャプターの最後のレッスンの完了日時が期間の開始の直前か、開始ちょうどか。前の期間のレッスンは期間の開始より前の日の10時に完了している
+     *
+     * @return array<string, array{string, string, string, string}>
+     */
+    public static function chapterPeriodBoundaries(): array
+    {
+        return [
+            '当日' => ['today', '2026-09-16 10:00:00', '2026-09-16 23:59:59', '2026-09-17 00:00:00'],
+            '当月' => ['month', '2026-08-31 10:00:00', '2026-08-31 23:59:59', '2026-09-01 00:00:00'],
+        ];
+    }
+
+    /** AC-ANALYTICS-007・AC-ANALYTICS-012 */
+    #[DataProvider('periods')]
+    public function test_完了件数の集計は当日と当月を指定でき完了したレッスン件数と完了したチャプター件数だけを返す(string $period): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('manager.courses.attendances.show-status', [
+            'course_id' => $course->id,
+            'period' => $period,
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertExactJson([
+            'completed_lessons_count' => 0,
+            'completed_chapters_count' => 0,
+        ]);
+    }
+
+    /** AC-AUTHZ-002 */
+    public function test_配下の講師の講座の完了件数をマネージャーが取得できる(): void
+    {
+        // Arrange
+        $manager = Instructor::factory()->create();
+        $subordinate = Instructor::factory()->create(['type' => 'instructor']);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate->id,
+        ]);
+        $course = Course::factory()->create(['instructor_id' => $subordinate->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -64,24 +120,8 @@ class ShowStatusTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_今月の出席状況を取得_成功(): void
-    {
-        // Arrange
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'month',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-    }
-
-    public function test_無効のパラメータ(): void
+    /** AC-ANALYTICS-007 */
+    public function test_完了件数の集計期間に当日と当月以外を指定すると422になる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -101,7 +141,8 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    public function test_配下ではない講師の講座_失敗(): void
+    /** AC-AUTHZ-003 */
+    public function test_配下でないマネージャーの講座の完了件数は取得できない(): void
     {
         // Arrange — 別のマネージャーの講座
         $otherManager = Instructor::factory()->create();
@@ -123,23 +164,25 @@ class ShowStatusTest extends TestCase
     {
         // Arrange — マネージャーではない講師
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
         $this->actingAs($nonManager, 'instructor');
 
         // Act
         $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
+            'course_id' => 1,
             'period' => 'today',
         ]));
 
         // Assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
+        ]);
     }
 
     /** AC-ANALYTICS-009 */
     public function test_公開レッスンをすべて完了していれば下書きや非公開のレッスンが未完了でも完了したチャプター件数に含める(): void
     {
-        // Arrange — 公開・下書き・非公開のレッスンが1件ずつあり、公開レッスンだけを完了
+        // Arrange — 公開・下書き・非公開のレッスンが1件ずつあり、公開レッスンだけを完了。下書きには受講状況がなく、非公開は未着手
         $manager = Instructor::factory()->create();
 
         $course = Course::factory()->create([
@@ -160,7 +203,7 @@ class ShowStatusTest extends TestCase
             'status' => LessonStatusEnum::DRAFT->value,
         ]);
 
-        Lesson::factory()->create([
+        $privateLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::PRIVATE->value,
         ]);
@@ -175,6 +218,11 @@ class ShowStatusTest extends TestCase
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $publicLesson->id,
             ]);
+
+        LessonAttendance::factory()->create([
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $privateLesson->id,
+        ]);
 
         $this->actingAs($manager, 'instructor');
 
@@ -448,9 +496,10 @@ class ShowStatusTest extends TestCase
     }
 
     /** AC-ANALYTICS-008 */
-    public function test_完了日時が当日0時0分0秒以降のレッスンだけを当日の完了したレッスン件数に含める(): void
+    #[DataProvider('lessonPeriodBoundaries')]
+    public function test_完了日時が期間の開始以降のレッスンだけを完了したレッスン件数に含める(string $period, string $justBefore, string $atStart): void
     {
-        // Arrange — 前日23時59分59秒に完了したレッスンと、当日0時0分0秒に完了したレッスン
+        // Arrange — 期間の開始の直前に完了したレッスンと、開始ちょうどに完了したレッスン
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create([
             'instructor_id' => $manager->id,
@@ -469,13 +518,13 @@ class ShowStatusTest extends TestCase
         LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lessons[0]->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-16 23:59:59'),
+            'completed_at' => CarbonImmutable::parse($justBefore),
         ]);
 
         LessonAttendance::factory()->completed()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lessons[1]->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-17 00:00:00'),
+            'completed_at' => CarbonImmutable::parse($atStart),
         ]);
 
         $this->actingAs($manager, 'instructor');
@@ -483,53 +532,7 @@ class ShowStatusTest extends TestCase
         // Act
         $response = $this->getJson(route('manager.courses.attendances.show-status', [
             'course_id' => $course->id,
-            'period' => 'today',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_lessons_count' => 1,
-        ]);
-    }
-
-    /** AC-ANALYTICS-008 */
-    public function test_完了日時が当月1日0時0分0秒以降のレッスンだけを当月の完了したレッスン件数に含める(): void
-    {
-        // Arrange — 前月末日23時59分59秒に完了したレッスンと、当月1日0時0分0秒に完了したレッスン
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-        $chapter = Chapter::factory()->create([
-            'course_id' => $course->id,
-        ]);
-        $lessons = Lesson::factory()->count(2)->create([
-            'chapter_id' => $chapter->id,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lessons[0]->id,
-            'completed_at' => CarbonImmutable::parse('2026-08-31 23:59:59'),
-        ]);
-
-        LessonAttendance::factory()->completed()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lessons[1]->id,
-            'completed_at' => CarbonImmutable::parse('2026-09-01 00:00:00'),
-        ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'month',
+            'period' => $period,
         ]));
 
         // Assert
@@ -540,9 +543,10 @@ class ShowStatusTest extends TestCase
     }
 
     /** AC-ANALYTICS-009 */
-    public function test_最後のレッスンの完了が当日0時0分0秒以降のチャプターだけを当日の完了したチャプター件数に含める(): void
+    #[DataProvider('chapterPeriodBoundaries')]
+    public function test_最後のレッスンの完了が期間の開始以降のチャプターだけを完了したチャプター件数に含める(string $period, string $earlier, string $justBefore, string $atStart): void
     {
-        // Arrange — 最後のレッスンの完了が前日23時59分59秒のチャプターと、当日0時0分0秒のチャプター
+        // Arrange — 最後のレッスンの完了が期間の開始の直前のチャプターと、開始ちょうどのチャプター
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create([
             'instructor_id' => $manager->id,
@@ -567,10 +571,10 @@ class ShowStatusTest extends TestCase
         ]);
 
         $completedAtByLesson = [
-            [$lessonsBefore[0], '2026-09-16 10:00:00'],
-            [$lessonsBefore[1], '2026-09-16 23:59:59'],
-            [$lessonsAfter[0], '2026-09-16 10:00:00'],
-            [$lessonsAfter[1], '2026-09-17 00:00:00'],
+            [$lessonsBefore[0], $earlier],
+            [$lessonsBefore[1], $justBefore],
+            [$lessonsAfter[0], $earlier],
+            [$lessonsAfter[1], $atStart],
         ];
 
         foreach ($completedAtByLesson as [$lesson, $completedAt]) {
@@ -586,7 +590,7 @@ class ShowStatusTest extends TestCase
         // Act
         $response = $this->getJson(route('manager.courses.attendances.show-status', [
             'course_id' => $course->id,
-            'period' => 'today',
+            'period' => $period,
         ]));
 
         // Assert
@@ -636,63 +640,6 @@ class ShowStatusTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'completed_chapters_count' => 0,
-        ]);
-    }
-
-    /** AC-ANALYTICS-009 */
-    public function test_最後のレッスンの完了が当月1日0時0分0秒以降のチャプターだけを当月の完了したチャプター件数に含める(): void
-    {
-        // Arrange — 最後のレッスンの完了が前月末23時59分59秒のチャプターと、当月1日0時0分0秒のチャプター
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $manager->id,
-        ]);
-
-        $chapterBefore = Chapter::factory()->create([
-            'course_id' => $course->id,
-        ]);
-        $lessonsBefore = Lesson::factory()->count(2)->create([
-            'chapter_id' => $chapterBefore->id,
-        ]);
-
-        $chapterAfter = Chapter::factory()->create([
-            'course_id' => $course->id,
-        ]);
-        $lessonsAfter = Lesson::factory()->count(2)->create([
-            'chapter_id' => $chapterAfter->id,
-        ]);
-
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
-
-        $completedAtByLesson = [
-            [$lessonsBefore[0], '2026-08-31 10:00:00'],
-            [$lessonsBefore[1], '2026-08-31 23:59:59'],
-            [$lessonsAfter[0], '2026-08-31 10:00:00'],
-            [$lessonsAfter[1], '2026-09-01 00:00:00'],
-        ];
-
-        foreach ($completedAtByLesson as [$lesson, $completedAt]) {
-            LessonAttendance::factory()->completed()->create([
-                'attendance_id' => $attendance->id,
-                'lesson_id' => $lesson->id,
-                'completed_at' => CarbonImmutable::parse($completedAt),
-            ]);
-        }
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('manager.courses.attendances.show-status', [
-            'course_id' => $course->id,
-            'period' => 'month',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJson([
-            'completed_chapters_count' => 1,
         ]);
     }
 

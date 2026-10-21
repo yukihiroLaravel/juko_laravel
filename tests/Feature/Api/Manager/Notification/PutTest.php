@@ -3,7 +3,6 @@
 namespace Tests\Feature\Api\Manager\Notification;
 
 use App\Enums\Notification\TypeEnum;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,14 +12,15 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ更新_成功(): void
+    /** AC-NOTIF-008 */
+    public function test_お知らせの内容を更新できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $notification = Notification::factory()->create([
-            'course_id' => $course->id,
             'instructor_id' => $manager->id,
+            'type' => TypeEnum::ALWAYS,
+            'status' => 'private',
         ]);
         $this->actingAs($manager, 'instructor');
 
@@ -40,21 +40,21 @@ class PutTest extends TestCase
             'result' => true,
         ]);
         $this->assertDatabaseHas('notifications', [
+            'id' => $notification->id,
             'title' => 'update',
             'type' => TypeEnum::ONCE,
+            'start_date' => '2025-01-01 10:00:00',
+            'end_date' => '2025-01-01 18:00:00',
             'content' => 'updateテスト',
+            'status' => 'public',
         ]);
     }
 
-    public function test_お知らせ更新_バリデーションエラー(): void
+    public function test_お知らせの項目が不正なときは入力エラーになる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $manager->id,
-        ]);
+        $notification = Notification::factory()->create(['instructor_id' => $manager->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -79,27 +79,14 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_お知らせ更新_権限エラー(): void
+    public function test_マネージャーでない講師はお知らせを更新できない(): void
     {
-        // Arrange — マネージャーではない講師
+        // Arrange
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $manager->id,
-        ]);
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.notifications.put', ['notification_id' => $notification->id]), [
-            'title' => '権限なしテスト',
-            'type' => 'once',
-            'start_date' => '2025-01-01 10:00:00',
-            'end_date' => '2025-01-10 18:00:00',
-            'content' => 'これはテストの内容です。',
-            'status' => 'public',
-        ]);
+        $response = $this->putJson(route('manager.notifications.put', ['notification_id' => 1]));
 
         // Assert
         $response->assertStatus(403);

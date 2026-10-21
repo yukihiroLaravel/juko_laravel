@@ -112,17 +112,20 @@ class IndexTest extends TestCase
         $response->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('meta.total', 0);
     }
 
-    public function test_講座一覧取得_成功(): void
+    /** AC-COMMON-009・AC-AUTHZ-002 */
+    public function test_絞り込みがなければ本人と配下の講座をすべて返し配下でない講師の講座は含めない(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
         $subordinate = Instructor::factory()->create(['type' => 'instructor']);
+        $outsider = Instructor::factory()->create(['type' => 'instructor']);
         ManageInstructor::factory()->create([
             'manager_id' => $manager->id,
             'instructor_id' => $subordinate->id,
         ]);
         Course::factory()->count(3)->create(['instructor_id' => $manager->id]);
         Course::factory()->count(3)->create(['instructor_id' => $subordinate->id]);
+        Course::factory()->create(['instructor_id' => $outsider->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -131,8 +134,10 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(6, 'data');
+        $response->assertJsonPath('meta.total', 6);
     }
 
+    /** AC-COMMON-006 */
     public function test_パラメータ指定_成功(): void
     {
         // Arrange

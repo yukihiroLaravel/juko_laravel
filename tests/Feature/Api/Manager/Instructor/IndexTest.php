@@ -11,7 +11,7 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_講師講座一覧取得_成功(): void
+    public function test_配下の講師の一覧を取得できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -33,11 +33,13 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data.instructors');
+        $instructorIds = $response->json('data.instructors.*.instructor_id');
+        $this->assertEqualsCanonicalizing([$subordinate1->id, $subordinate2->id], $instructorIds);
     }
 
-    public function test_マネージャーではない_失敗(): void
+    public function test_マネージャーでない講師は配下の講師の一覧を取得できない(): void
     {
-        // Arrange — マネージャーではない講師
+        // Arrange
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($nonManager, 'instructor');
 

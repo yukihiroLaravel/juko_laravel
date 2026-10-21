@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Manager\Chapter;
 
-use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
@@ -10,7 +9,6 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\ManageInstructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,13 +16,14 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプター削除_成功(): void
+    /** AC-AUTHOR-024 */
+    public function test_チャプターを削除すると配下のレッスンも削除される(): void
     {
         // Arrange — マネージャー自身の講座のチャプター（受講なし）
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -41,8 +40,12 @@ class DeleteTest extends TestCase
         $this->assertSoftDeleted('chapters', [
             'id' => $chapter->id,
         ]);
+        $this->assertSoftDeleted('lessons', [
+            'id' => $lesson->id,
+        ]);
     }
 
+    /** AC-AUTHZ-002 */
     public function test_配下の講師チャプター削除_成功(): void
     {
         // Arrange — 配下講師の講座のチャプター
@@ -71,22 +74,18 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_マネージャーの受講済みレッスン削除_失敗(): void
+    /** AC-AUTHOR-023 */
+    public function test_受講状況があるレッスンを含むチャプターは削除できない(): void
     {
-        // Arrange — チャプター内のレッスンに受講中のレッスン受講がある
+        // Arrange — チャプター内のレッスンに受講状況がある
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::IN_ATTENDANCE,
         ]);
         $this->actingAs($manager, 'instructor');
 
@@ -102,7 +101,8 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_配下でない講師_失敗(): void
+    /** AC-AUTHZ-003 */
+    public function test_配下でないマネージャーのチャプターは削除できない(): void
     {
         // Arrange — 別のマネージャーの講座のチャプターを削除しようとする
         $otherManager = Instructor::factory()->create();
@@ -127,13 +127,11 @@ class DeleteTest extends TestCase
     {
         // Arrange — マネージャーではない講師
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $this->actingAs($nonManager, 'instructor');
 
         // Act
         $response = $this->deleteJson(route('manager.chapters.delete', [
-            'chapter_id' => $chapter->id,
+            'chapter_id' => 1,
         ]));
 
         // Assert

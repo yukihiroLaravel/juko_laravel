@@ -119,18 +119,10 @@ class UpdateTest extends TestCase
     {
         // Arrange — マネージャーではない講師
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $nonManager->id]);
         $this->actingAs($nonManager, 'instructor');
 
-        $file = UploadedFile::fake()->image('test.jpg');
-
         // Act
-        $response = $this->post(route('manager.courses.update', ['course_id' => $course->id]), [
-            'title' => 'テスト講座',
-            'image' => $file,
-            'status' => 'private',
-            'deadline_type' => 'none',
-        ]);
+        $response = $this->post(route('manager.courses.update', ['course_id' => 1]));
 
         // Assert
         $response->assertStatus(403);
@@ -139,7 +131,8 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_配下の講師でない_失敗(): void
+    /** AC-AUTHZ-003 */
+    public function test_配下でないマネージャーの講座は更新できない(): void
     {
         // Arrange — 別のマネージャーの講座を更新しようとする
         $otherManager = Instructor::factory()->create();

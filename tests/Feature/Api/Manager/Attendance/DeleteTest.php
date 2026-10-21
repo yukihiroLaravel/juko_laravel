@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,6 +15,7 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-ENROLL-022 */
     public function test_受講削除_成功(): void
     {
         // Arrange
@@ -23,11 +23,7 @@ class DeleteTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $manager->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
@@ -51,16 +47,13 @@ class DeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-003 */
     public function test_権限がない講師_失敗(): void
     {
         // Arrange — 別のマネージャーの講座の受講を削除しようとする
         $ownerManager = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerManager->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $otherManager = Instructor::factory()->create();
         $this->actingAs($otherManager, 'instructor');
 

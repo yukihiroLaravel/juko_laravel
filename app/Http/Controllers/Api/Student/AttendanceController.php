@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Student;
 
 use App\Dto\Student\Attendance\IndexDto;
 use App\Dto\Student\Attendance\ShowDto;
-use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Attendance\CompleteAllChaptersRequest;
 use App\Http\Requests\Student\Attendance\CompleteAllLessonsRequest;
@@ -24,7 +23,6 @@ use App\Services\Student\Attendance\CourseProgressService;
 use App\Services\Student\Attendance\IndexService;
 use App\Services\Student\Attendance\ShowService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
@@ -106,15 +104,11 @@ class AttendanceController extends Controller
         // 受講レコードを取得（認可で講座の公開状態を参照するため合わせて読み込む）
         $attendance = Attendance::with('course')->findOrFail($request->attendance_id);
 
-        $this->authorize('completeAllLessons', $attendance);
-
         // 該当チャプターを取得
         $chapter = Chapter::with('publicLessons')->findOrFail($request->chapter_id);
 
-        // $chapter が $attendance に紐づく公開中のチャプターか確認
-        if ($chapter->course_id !== $attendance->course_id || $chapter->status !== ChapterStatusEnum::PUBLIC) {
-            throw new AuthorizationException('Forbidden, invalid chapter.');
-        }
+        // 受講の講座に属する公開中のチャプターかどうかも含めて認可する
+        $this->authorize('completeAllLessons', [$attendance, $chapter]);
 
         try {
             // 該当チャプターに含まれる公開中の全レッスンの受講状況を更新

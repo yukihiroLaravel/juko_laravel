@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Instructor\Tag\IndexRequest;
 use App\Http\Resources\Instructor\TagIndexResource;
 use App\Model\Tag;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
@@ -30,10 +29,8 @@ class TagController extends Controller
             /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
-            // ログインしている講師とtag_idの講師が一致しない
-            if ($instructorId !== $tag->instructor_id) {
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            // Policyによる認可処理（本人のタグのみ）
+            $this->authorize('viewOwn', $tag);
         }
 
         $query = Tag::where('instructor_id', $instructorId)

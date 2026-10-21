@@ -11,7 +11,6 @@ use App\Http\Resources\Instructor\StudentShowResource;
 use App\Model\Course;
 use App\Model\Student;
 use App\Services\Student\StoreStudentService;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -42,9 +41,8 @@ class StudentController extends Controller
             $courses = Course::whereIn('id', $courseIds)->get(['id', 'instructor_id']);
 
             foreach ($courses as $course) {
-                if ($loginId !== $course->instructor_id) {
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
+                // Policyによる認可処理（本人の講座のみ）
+                $this->authorize('viewOwn', $course);
             }
         }
 

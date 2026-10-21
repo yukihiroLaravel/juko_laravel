@@ -115,7 +115,7 @@ class BulkDeleteTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Invalid chapter.',
+            'message' => 'This action is unauthorized.',
         ]);
         $this->assertNotSoftDeleted('lessons', [
             'id' => $lesson->id,

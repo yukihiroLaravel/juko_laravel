@@ -2,8 +2,10 @@
 
 namespace App\Policies;
 
+use App\Enums\Chapter\StatusEnum as ChapterStatusEnum;
 use App\Enums\Course\StatusEnum as CourseStatusEnum;
 use App\Model\Attendance;
+use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Student;
@@ -91,9 +93,14 @@ class AttendancePolicy
     /**
      * チャプター単位の一括完了権限
      */
-    public function completeAllLessons(Student $student, Attendance $attendance): bool
+    public function completeAllLessons(Student $student, Attendance $attendance, Chapter $chapter): bool
     {
         if ($attendance->isExpired()) {
+            return false;
+        }
+
+        // 受講の講座に属する公開中のチャプターでなければ完了にできない
+        if ($chapter->course_id !== $attendance->course_id || $chapter->status !== ChapterStatusEnum::PUBLIC) {
             return false;
         }
 
@@ -127,5 +134,17 @@ class AttendancePolicy
 
         // マネージャー権限のない講師
         return $instructor->id === $attendance->course->instructor_id;
+    }
+
+    /**
+     * 受講生側のお知らせの閲覧権限（本人の受講で、受講期限内であること）
+     */
+    public function viewNotification(Student $student, Attendance $attendance): bool
+    {
+        if ($attendance->isExpired()) {
+            return false;
+        }
+
+        return $attendance->student_id === $student->id;
     }
 }

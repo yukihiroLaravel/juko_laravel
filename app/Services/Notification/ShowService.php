@@ -5,7 +5,6 @@ namespace App\Services\Notification;
 use App\Model\Attendance;
 use App\Model\Notification;
 use App\Model\Student;
-use Illuminate\Auth\Access\AuthorizationException;
 
 class ShowService
 {
@@ -25,11 +24,6 @@ class ShowService
         $attendance = Attendance::where('student_id', $student->id)
             ->where('course_id', $notification->course_id)
             ->firstOrFail();
-
-        if ($attendance->isExpired()) {
-            // 受講期限切れ
-            throw new AuthorizationException('The course has expired.');
-        }
 
         return [
             'notification' => $notification,

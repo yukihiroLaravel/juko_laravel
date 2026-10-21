@@ -6,16 +6,19 @@ use App\Enums\Notification\TypeEnum;
 use App\Model\Course;
 use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ登録_成功(): void
+    /** AC-NOTIF-001, AC-NOTIF-007 */
+    #[DataProvider('instructorTypeProvider')]
+    public function test_講座を指定してお知らせを登録できる(string $type): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => $type]);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -33,6 +36,7 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
             'course_id' => $course->id,
+            'instructor_id' => $instructor->id,
             'title' => 'title',
             'type' => TypeEnum::ALWAYS,
             'start_date' => '2022-01-01 00:00:00',
@@ -42,12 +46,13 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師の講座にはお知らせを登録できない(): void
     {
-        // Arrange — 他の講師の講座にお知らせ登録
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -67,7 +72,7 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_入力がすべて空のときはお知らせを登録できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -94,5 +99,16 @@ class StoreTest extends TestCase
             'content',
             'status',
         ]);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function instructorTypeProvider(): array
+    {
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 }

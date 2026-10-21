@@ -12,7 +12,7 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプター取得_成功(): void
+    public function test_チャプターを取得できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -29,9 +29,10 @@ class ShowTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_講師が一致しない_失敗(): void
+    /** AC-AUTHZ-003, AC-AUTHZ-004 */
+    public function test_他の講師の講座のチャプターは取得できない(): void
     {
-        // Arrange — 別の講師の講座のチャプター
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
@@ -50,7 +51,7 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_チャプターの指定が数値でないと取得できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

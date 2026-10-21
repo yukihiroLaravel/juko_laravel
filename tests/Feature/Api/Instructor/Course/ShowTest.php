@@ -14,15 +14,18 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_講座取得_成功(): void
+    public function test_講座の詳細をチャプターとレッスンつきで取得できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create([
             'instructor_id' => $instructor->id,
-            'deadline_type' => 'none',
+            'deadline_type' => 'relative_days',
         ]);
-        CourseDeadline::factory()->create(['course_id' => $course->id]);
+        CourseDeadline::factory()->create([
+            'course_id' => $course->id,
+            'relative_days' => 30,
+        ]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $this->actingAs($instructor, 'instructor');
@@ -65,12 +68,13 @@ class ShowTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師_失敗(): void
     {
-        // Arrange — 別の講師が所有する講座
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act

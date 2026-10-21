@@ -12,13 +12,15 @@ class PatchStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプターのステータス変更_成功(): void
+    /** AC-AUTHOR-022 */
+    public function test_選んだチャプターの公開状態をまとめて変更できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
+        $unselectedChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => 'public']);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -36,16 +38,25 @@ class PatchStatusTest extends TestCase
             'id' => $chapter1->id,
             'status' => 'private',
         ]);
+        $this->assertDatabaseHas('chapters', [
+            'id' => $chapter2->id,
+            'status' => 'private',
+        ]);
+        $this->assertDatabaseHas('chapters', [
+            'id' => $unselectedChapter->id,
+            'status' => 'public',
+        ]);
     }
 
-    public function test_講師が一致しない_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座のチャプターの公開状態は変更できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -61,9 +72,10 @@ class PatchStatusTest extends TestCase
         ]);
     }
 
-    public function test_講座が一致しない_失敗(): void
+    /** AC-AUTHZ-011 */
+    public function test_指定した講座に属さないチャプターの公開状態は変更できない(): void
     {
-        // Arrange — チャプターが属する講座と異なるcourse_idを指定
+        // Arrange — チャプターが属する講座とは別の講座を指定する
         $instructor = Instructor::factory()->create();
         $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
         $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
@@ -84,7 +96,7 @@ class PatchStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座とチャプターと公開状態の指定が不正な場合は変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -105,7 +117,7 @@ class PatchStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー_statusが下書き(): void
+    public function test_公開状態に下書きは指定できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

@@ -13,28 +13,11 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ一覧取得_成功(): void
+    /** AC-NOTIF-029 */
+    public function test_定員ありの講座のお知らせには定員と受講中の受講生数が含まれる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Notification::factory()->create([
-            'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.notifications.index'));
-
-        // Assert
-        $response->assertStatus(200);
-    }
-
-    public function test_定員あり講座_受講者数が返却される(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create([
             'instructor_id' => $instructor->id,
             'capacity' => 10,
@@ -55,10 +38,10 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.current_attendance_count', 3);
     }
 
-    public function test_定員なし講座_受講者数がnullで返却される(): void
+    public function test_定員なしの講座のお知らせは受講中の受講生数を返さない(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create([
             'instructor_id' => $instructor->id,
             'capacity' => null,

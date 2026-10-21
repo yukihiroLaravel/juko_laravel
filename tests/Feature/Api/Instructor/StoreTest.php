@@ -4,22 +4,19 @@ namespace Tests\Feature\Api\Instructor;
 
 use App\Exceptions\DuplicateAuthorizationCodeException;
 use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Model\Instructor;
 use App\Services\Auth\CreateCodeService;
 use App\Services\Auth\CreateTokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_仮講師登録_成功(): void
+    /** AC-ACCOUNT-001 */
+    public function test_講師を仮登録として受け付ける(): void
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
         // Act
         $response = $this->postJson(route('instructor.register'), [
             'nick_name' => 'test',
@@ -30,14 +27,16 @@ class StoreTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+        $this->assertDatabaseHas('temporary_instructors', [
+            'email' => 'testtest@exmaple.com',
+        ]);
+        $this->assertDatabaseMissing('instructors', [
+            'email' => 'testtest@exmaple.com',
+        ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_入力がすべて空のときは仮登録できない(): void
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
         // Act
         $response = $this->postJson(route('instructor.register'), [
             'nick_name' => '',
@@ -50,34 +49,30 @@ class StoreTest extends TestCase
         $response->assertStatus(422);
     }
 
-    public function test_認証コード重複エラー(): void
+    /**
+     * @return array<string, array{class-string, \Throwable}>
+     */
+    public static function duplicateFailures(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-        $this->mock(CreateCodeService::class, function ($mock) {
-            $mock->shouldReceive('__invoke')->andThrow(new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'));
-        });
-
-        // Act
-        $response = $this->postJson(route('instructor.register'), [
-            'nick_name' => 'test',
-            'last_name' => 'test',
-            'first_name' => 'test',
-            'email' => 'testtest@exmaple.com',
-        ]);
-
-        // Assert
-        $response->assertStatus(400);
+        return [
+            '認証コードが重複する' => [
+                CreateCodeService::class,
+                new DuplicateAuthorizationCodeException('Failed to generate unique authorization code.'),
+            ],
+            '照会用の符号が重複する' => [
+                CreateTokenService::class,
+                new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'),
+            ],
+        ];
     }
 
-    public function test_トークン重複エラー(): void
+    /** AC-ACCOUNT-006 */
+    #[DataProvider('duplicateFailures')]
+    public function test_重複しない値を生成できないときは仮登録できない(string $service, \Throwable $exception): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-        $this->mock(CreateTokenService::class, function ($mock) {
-            $mock->shouldReceive('__invoke')->andThrow(new DuplicateAuthorizationTokenException('Failed to generate unique authorization token.'));
+        $this->mock($service, function ($mock) use ($exception) {
+            $mock->shouldReceive('__invoke')->andThrow($exception);
         });
 
         // Act
@@ -90,5 +85,8 @@ class StoreTest extends TestCase
 
         // Assert
         $response->assertStatus(400);
+        $this->assertDatabaseMissing('temporary_instructors', [
+            'email' => 'testtest@exmaple.com',
+        ]);
     }
 }

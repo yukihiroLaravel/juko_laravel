@@ -6,17 +6,15 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ClearCapacityTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * 正常系: 選択した講座の定員をなくせること
-     */
+    /** AC-ENROLL-021 */
     public function test_選択した講座の定員をなくせること(): void
     {
         // Arrange
@@ -41,7 +39,6 @@ class ClearCapacityTest extends TestCase
             'updated_count' => 3,
         ]);
 
-        // DBのcapacityがnullになっていること
         $courses->each(function (Course $course) {
             $this->assertDatabaseHas('courses', [
                 'id' => $course->id,
@@ -50,9 +47,7 @@ class ClearCapacityTest extends TestCase
         });
     }
 
-    /**
-     * 異常系: 受講者が存在する講座が含まれている場合はエラーになること
-     */
+    /** AC-ENROLL-020 */
     public function test_受講者が存在する講座が含まれている場合はエラーになること(): void
     {
         // Arrange
@@ -63,7 +58,6 @@ class ClearCapacityTest extends TestCase
             'capacity' => 10,
         ]);
 
-        // 受講者を紐付け
         Attendance::factory()->create([
             'course_id' => $course->id,
         ]);
@@ -79,16 +73,13 @@ class ClearCapacityTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
 
-        // capacityが変更されていないこと
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
             'capacity' => 10,
         ]);
     }
 
-    /**
-     * 異常系: 受講者ありの講座と受講者なしの講座が混在する場合はエラーになること
-     */
+    /** AC-ENROLL-020 */
     public function test_一部に受講者が存在する講座を含む場合はエラーになること(): void
     {
         // Arrange
@@ -103,11 +94,7 @@ class ClearCapacityTest extends TestCase
             'capacity' => 10,
         ]);
 
-        $student = Student::factory()->create();
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseWithStudents->id,
-        ]);
+        Attendance::factory()->create(['course_id' => $courseWithStudents->id]);
 
         $this->actingAs($instructor, 'instructor');
 
@@ -120,7 +107,6 @@ class ClearCapacityTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
 
-        // どちらのcapacityも変更されていないこと（トランザクションでロールバック）
         $this->assertDatabaseHas('courses', [
             'id' => $courseWithoutStudents->id,
             'capacity' => 10,
@@ -131,9 +117,7 @@ class ClearCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 正常系: マネージャーが自分の講座の定員をクリアできること
-     */
+    /** AC-AUTHZ-002 */
     public function test_マネージャーが自分の講座の定員をクリアできること(): void
     {
         // Arrange
@@ -162,9 +146,7 @@ class ClearCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 正常系: マネージャーが配下の講師の講座の定員をクリアできること
-     */
+    /** AC-AUTHZ-002 */
     public function test_マネージャーが配下の講師の講座の定員をクリアできること(): void
     {
         // Arrange
@@ -199,21 +181,18 @@ class ClearCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 異常系: 他講師の講座は変更できないこと
-     */
-    public function test_他講師の講座は変更できないこと(): void
+    /** AC-AUTHZ-001, AC-AUTHZ-003 */
+    #[DataProvider('instructorTypeProvider')]
+    public function test_担当でも配下でもない講師の講座の定員は取り消せない(string $type): void
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
+        // Arrange — 操作者の担当でも配下でもない講師の講座
+        $operator = Instructor::factory()->create(['type' => $type]);
         $otherInstructor = Instructor::factory()->create();
-
         $course = Course::factory()->create([
             'instructor_id' => $otherInstructor->id,
             'capacity' => 10,
         ]);
-
-        $this->actingAs($instructor, 'instructor');
+        $this->actingAs($operator, 'instructor');
 
         // Act
         $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
@@ -228,36 +207,17 @@ class ClearCapacityTest extends TestCase
     }
 
     /**
-     * 異常系: 権限がないマネージャーの場合変更できないこと
+     * @return array<string, array{string}>
      */
-    public function test_権限がないマネージャーの場合変更できないこと(): void
+    public static function instructorTypeProvider(): array
     {
-        // Arrange — 配下にない講師の講座
-        $manager = Instructor::factory()->create();
-        $otherInstructor = Instructor::factory()->create();
-
-        $course = Course::factory()->create([
-            'instructor_id' => $otherInstructor->id,
-            'capacity' => 10,
-        ]);
-
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
-            'courses' => [$course->id],
-        ]);
-
-        // Assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'This action is unauthorized.',
-        ]);
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 
-    /**
-     * 異常系: 一部に権限がない講座を含む場合変更できないこと
-     */
+    /** AC-AUTHZ-003 */
     public function test_一部に権限がない講座を含む場合変更できないこと(): void
     {
         // Arrange
@@ -285,7 +245,6 @@ class ClearCapacityTest extends TestCase
             'message' => 'This action is unauthorized.',
         ]);
 
-        // どちらのcapacityも変更されていないこと
         $this->assertDatabaseHas('courses', [
             'id' => $ownCourse->id,
             'capacity' => 10,
@@ -293,107 +252,38 @@ class ClearCapacityTest extends TestCase
     }
 
     /**
-     * 異常系: 講座が空の場合はバリデーションエラーになること
+     * @param  array<string, mixed>  $payload
      */
-    public function test_講座が空の場合はバリデーションエラーになること(): void
+    #[DataProvider('invalidCoursesProvider')]
+    public function test_講座の指定が不正だと定員を取り消せない(array $payload, string $errorKey): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
-
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
-            'courses' => [],
-        ]);
+        $response = $this->patchJson(route('instructor.courses.capacity.clear'), $payload);
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
+        $response->assertJsonValidationErrors([$errorKey]);
     }
 
     /**
-     * 異常系: 講座が未送信の場合はバリデーションエラーになること
+     * @return array<string, array{array<string, mixed>, string}>
      */
-    public function test_講座が未送信の場合はバリデーションエラーになること(): void
+    public static function invalidCoursesProvider(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), []);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
+        return [
+            '講座の指定がない' => [[], 'courses'],
+            '講座の指定が空' => [['courses' => []], 'courses'],
+            '講座の指定が配列でない' => [['courses' => 'abc'], 'courses'],
+            '講座の指定が整数でない' => [['courses' => ['abc']], 'courses.0'],
+            '存在しない講座を含む' => [['courses' => [99999]], 'courses.0'],
+        ];
     }
 
-    /**
-     * 異常系: 講座が配列でない場合はバリデーションエラーになること
-     */
-    public function test_講座が配列でない場合はバリデーションエラーになること(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
-            'courses' => 'abc',
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
-    }
-
-    /**
-     * 異常系:
-     */
-    public function test_講座が整数でない場合はバリデーションエラーになること(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
-            'courses' => ['abc'],
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    /**
-     * 異常系: 存在しない講座を含む場合はバリデーションエラーになること
-     */
-    public function test_存在しない講座を含む場合はバリデーションエラーになること(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->patchJson(route('instructor.courses.capacity.clear'), [
-            'courses' => [99999],
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    /**
-     * 異常系: 削除済みの講座を含む場合はバリデーションエラーになること
-     */
-    public function test_削除済みの講座を含む場合はバリデーションエラーになること(): void
+    public function test_削除済みの講座を含むと定員を取り消せない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -415,9 +305,6 @@ class ClearCapacityTest extends TestCase
         $response->assertJsonValidationErrors(['courses.0']);
     }
 
-    /**
-     * 異常系: 未認証の場合はエラーになること
-     */
     public function test_未認証の場合はエラーになること(): void
     {
         // Arrange

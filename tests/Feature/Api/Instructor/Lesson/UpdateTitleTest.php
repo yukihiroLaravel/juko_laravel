@@ -13,7 +13,8 @@ class UpdateTitleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_レッスンタイトル更新_成功(): void
+    /** AC-AUTHOR-026 */
+    public function test_レッスンのタイトルを変更できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -40,14 +41,15 @@ class UpdateTitleTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師のレッスン更新_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師のレッスンのタイトルは変更できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -64,7 +66,7 @@ class UpdateTitleTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_タイトルが空でレッスンの指定が不正なときはタイトルを変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

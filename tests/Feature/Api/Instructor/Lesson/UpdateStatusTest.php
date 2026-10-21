@@ -15,6 +15,7 @@ class UpdateStatusTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-PROG-002 */
     public function test_下書きから公開への変更で受講状況が生成される(): void
     {
         // Arrange
@@ -45,7 +46,7 @@ class UpdateStatusTest extends TestCase
         ]);
     }
 
-    public function test_下書きから非公開への変更は失敗する(): void
+    public function test_下書きから非公開への変更はできない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -70,7 +71,8 @@ class UpdateStatusTest extends TestCase
         ]);
     }
 
-    public function test_同一ステータスへの更新では受講状況は生成されない(): void
+    /** AC-PROG-002 */
+    public function test_公開のレッスンを公開に更新しても受講状況は生成されない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -89,18 +91,18 @@ class UpdateStatusTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        // 下書きからの公開ではないため、受講状況は生成されない
         $this->assertDatabaseCount('lesson_attendances', 0);
     }
 
-    public function test_権限がない講師のレッスン状態更新_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師のレッスンの公開状態は変更できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => 'draft']);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -118,7 +120,7 @@ class UpdateStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_公開でも非公開でもない公開状態は指定できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

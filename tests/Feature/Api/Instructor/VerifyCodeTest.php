@@ -10,7 +10,8 @@ class VerifyCodeTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_トークン認証_成功(): void
+    /** AC-ACCOUNT-015 */
+    public function test_認証コードが一致すると講師として本登録され仮登録が消える(): void
     {
         // Arrange
         $temporaryInstructor = TemporaryInstructor::factory()->create([
@@ -30,9 +31,12 @@ class VerifyCodeTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+        $this->assertDatabaseHas('instructors', ['email' => $temporaryInstructor->email]);
+        $this->assertEmpty(TemporaryInstructor::all());
     }
 
-    public function test_トークン認証_失敗_期限切れ(): void
+    /** AC-ACCOUNT-012 */
+    public function test_認証コードの有効期間を過ぎていると本登録できず仮登録が消える(): void
     {
         // Arrange
         $temporaryInstructor = TemporaryInstructor::factory()->create([
@@ -52,9 +56,11 @@ class VerifyCodeTest extends TestCase
 
         // Assert
         $response->assertStatus(400);
+        $this->assertEmpty(TemporaryInstructor::all());
     }
 
-    public function test_トークン認証_失敗_認証コード不一致(): void
+    /** AC-ACCOUNT-013 */
+    public function test_認証コードが一致しないと本登録できない(): void
     {
         // Arrange
         $temporaryInstructor = TemporaryInstructor::factory()->create([
@@ -76,7 +82,8 @@ class VerifyCodeTest extends TestCase
         $response->assertStatus(400);
     }
 
-    public function test_トークン認証_失敗_試行回数超過(): void
+    /** AC-ACCOUNT-014 */
+    public function test_認証コードの試行回数が上限を超えると本登録できず仮登録が消える(): void
     {
         // Arrange
         $temporaryInstructor = TemporaryInstructor::factory()->create([

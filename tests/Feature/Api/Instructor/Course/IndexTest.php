@@ -7,7 +7,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -84,7 +83,7 @@ class IndexTest extends TestCase
         );
     }
 
-    public function test_講座一覧取得_成功(): void
+    public function test_自分の講座の一覧を取得できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -99,7 +98,26 @@ class IndexTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
-    public function test_パラメータ指定_成功(): void
+    /** AC-COMMON-006 */
+    public function test_per_pageとpageで講座をページングできる(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        Course::factory()->count(3)->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $firstPage = $this->getJson(route('instructor.courses.index', ['per_page' => 2, 'page' => 1]));
+        $secondPage = $this->getJson(route('instructor.courses.index', ['per_page' => 2, 'page' => 2]));
+
+        // Assert
+        $firstPage->assertStatus(200);
+        $firstPage->assertJsonCount(2, 'data');
+        $secondPage->assertStatus(200);
+        $secondPage->assertJsonCount(1, 'data');
+    }
+
+    public function test_タグで講座を絞り込める(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -110,14 +128,14 @@ class IndexTest extends TestCase
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.courses.index', ['per_page' => 5, 'tag_id' => $tag->id]));
+        $response = $this->getJson(route('instructor.courses.index', ['tag_id' => $tag->id]));
 
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
     }
 
-    public function test_タイトル検索_成功(): void
+    public function test_講座名で検索できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -133,7 +151,7 @@ class IndexTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function test_タグ名検索_成功(): void
+    public function test_タグ名で検索できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -158,12 +176,6 @@ class IndexTest extends TestCase
     {
         $this->actingAs($instructor, 'instructor');
 
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        $this->getJson(route('instructor.courses.index'))->assertOk();
-        $queryCount = count(DB::getQueryLog());
-        DB::disableQueryLog();
-
-        return $queryCount;
+        return $this->countQueries(fn () => $this->getJson(route('instructor.courses.index'))->assertOk());
     }
 }

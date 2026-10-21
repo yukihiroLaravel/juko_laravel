@@ -14,9 +14,10 @@ class LoginRateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_担当講師はログイン率を取得できる_成功(): void
+    /** AC-AUTHZ-001 */
+    public function test_担当講師はログイン率を取得できる(): void
     {
-        // Arrange — 自分の講座のログイン率を取得する
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
@@ -31,9 +32,10 @@ class LoginRateTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_配下講師の講座はマネージャーがログイン率を取得できる_成功(): void
+    /** AC-AUTHZ-002 */
+    public function test_配下講師の講座はマネージャーがログイン率を取得できる(): void
     {
-        // Arrange — マネージャーが配下講師の講座のログイン率を取得する
+        // Arrange
         $manager = Instructor::factory()->create();
         $subordinate = Instructor::factory()->create(['type' => 'instructor']);
         ManageInstructor::factory()->create([
@@ -53,9 +55,10 @@ class LoginRateTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_担当外の講師はログイン率を取得できない_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_担当外の講師はログイン率を取得できない(): void
     {
-        // Arrange — 他の講師の講座を指定する
+        // Arrange
         $ownerInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
@@ -71,9 +74,10 @@ class LoginRateTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_配下でないマネージャーはログイン率を取得できない_失敗(): void
+    /** AC-AUTHZ-003 */
+    public function test_配下でないマネージャーはログイン率を取得できない(): void
     {
-        // Arrange — 配下ではない講師の講座を指定する
+        // Arrange
         $ownerInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $otherManager = Instructor::factory()->create();
@@ -89,7 +93,8 @@ class LoginRateTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_バリデーションエラー(): void
+    /** AC-ANALYTICS-005 */
+    public function test_講座と期間の指定が不正だと422になる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
@@ -109,9 +114,11 @@ class LoginRateTest extends TestCase
         ]);
     }
 
-    public function test_受講生ログイン率取得(): void
+    /** AC-ANALYTICS-004・AC-ANALYTICS-006 */
+    public function test_期間内にログインした受講生の割合を返す(): void
     {
         // Arrange
+        // 一度もログインしていない受講生も分母に含める（Q-005 の暫定方針）
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');

@@ -2,67 +2,53 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PutStatusAllTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ一括更新_public_成功(): void
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function statusChanges(): array
+    {
+        return [
+            '非公開のお知らせを公開にする' => ['private', 'public'],
+            '公開のお知らせを非公開にする' => ['public', 'private'],
+        ];
+    }
+
+    /** AC-NOTIF-010 */
+    #[DataProvider('statusChanges')]
+    public function test_自分のすべてのお知らせの公開状態をまとめて変更できる(string $before, string $after): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $notification = Notification::factory()->create([
             'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-            'status' => 'private',
+            'status' => $before,
         ]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->putJson(route('instructor.notifications.put-status-all'), [
-            'status' => 'public',
+            'status' => $after,
         ]);
 
         // Assert
         $response->assertStatus(200);
         $this->assertDatabaseHas('notifications', [
             'id' => $notification->id,
-            'status' => 'public',
+            'status' => $after,
         ]);
     }
 
-    public function test_お知らせ一括更新_private_成功(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $notification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-            'status' => 'public',
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.notifications.put-status-all'), [
-            'status' => 'private',
-        ]);
-
-        // Assert
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('notifications', [
-            'id' => $notification->id,
-            'status' => 'private',
-        ]);
-    }
-
-    public function test_ステータス空欄_失敗(): void
+    public function test_公開状態が空のときはまとめて変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -80,7 +66,7 @@ class PutStatusAllTest extends TestCase
         ]);
     }
 
-    public function test_無効なステータス_失敗(): void
+    public function test_公開でも非公開でもない公開状態ではまとめて変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -98,7 +84,7 @@ class PutStatusAllTest extends TestCase
         ]);
     }
 
-    public function test_認証なし_失敗(): void
+    public function test_ログインしていないときはまとめて変更できない(): void
     {
         // Act
         $response = $this->putJson(route('instructor.notifications.put-status-all'), [

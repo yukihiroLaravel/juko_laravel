@@ -12,7 +12,8 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプター更新_成功(): void
+    /** AC-AUTHOR-020 */
+    public function test_チャプターの名称を更新できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -38,13 +39,14 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座のチャプターは更新できない(): void
     {
-        // Arrange — 別の講師の講座のチャプター
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -61,7 +63,7 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_チャプターの指定が数値でない場合や名称が空の場合は更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

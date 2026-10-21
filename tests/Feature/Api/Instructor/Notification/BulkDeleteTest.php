@@ -2,25 +2,23 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class BulkDeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ一括削除_成功(): void
+    /** AC-NOTIF-009 */
+    #[DataProvider('instructorTypeProvider')]
+    public function test_選んだお知らせをまとめて削除できる(string $type): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $notification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-        ]);
+        $instructor = Instructor::factory()->create(['type' => $type]);
+        $notification = Notification::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -38,21 +36,14 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-NOTIF-012 */
+    public function test_他の講師のお知らせが混ざっていると1件も削除されない(): void
     {
-        // Arrange — 自分のと他人のお知らせを混ぜて一括削除
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $ownNotification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-        ]);
-        $otherInstructor = Instructor::factory()->create();
-        $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
-        $otherNotification = Notification::factory()->create([
-            'instructor_id' => $otherInstructor->id,
-            'course_id' => $otherCourse->id,
-        ]);
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $ownNotification = Notification::factory()->create(['instructor_id' => $instructor->id]);
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
+        $otherNotification = Notification::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -65,9 +56,11 @@ class BulkDeleteTest extends TestCase
         $response->assertJson([
             'message' => 'This action is unauthorized.',
         ]);
+        $this->assertNotSoftDeleted('notifications', ['id' => $ownNotification->id]);
+        $this->assertNotSoftDeleted('notifications', ['id' => $otherNotification->id]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_削除するお知らせを1件も選ばないと削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -83,5 +76,16 @@ class BulkDeleteTest extends TestCase
         $response->assertJsonValidationErrors([
             'notifications',
         ]);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function instructorTypeProvider(): array
+    {
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 }

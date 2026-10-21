@@ -4,7 +4,9 @@ namespace Tests;
 
 use App\Model\Instructor;
 use App\Model\Student;
+use Closure;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\DB;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -35,5 +37,19 @@ abstract class TestCase extends BaseTestCase
     {
         $instructor = Instructor::find($instructorId);
         $this->actingAs($instructor, 'instructor');
+    }
+
+    /**
+     * 渡した処理の中で発行されたクエリの数を返す
+     */
+    protected function countQueries(Closure $callback): int
+    {
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $callback();
+        $queryCount = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $queryCount;
     }
 }

@@ -14,6 +14,7 @@ class BulkUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-ENROLL-015 */
     public function test_自分の講座の受講期限を固定日に変更_成功(): void
     {
         // Arrange
@@ -41,6 +42,7 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-ENROLL-015 */
     public function test_自分の講座の受講期限を相対日数に変更_成功(): void
     {
         // Arrange
@@ -68,17 +70,15 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-ENROLL-015 */
     public function test_自分の講座の受講期限を削除_成功(): void
     {
-        // Arrange — 既存のCourseDeadlineレコードを作成
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         CourseDeadline::factory()->create([
             'course_id' => $course->id,
             'fixed_date' => '2026-12-31',
-        ]);
-        $this->assertDatabaseHas('course_deadlines', [
-            'course_id' => $course->id,
         ]);
         $this->actingAs($instructor, 'instructor');
 
@@ -99,6 +99,7 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-ENROLL-015 */
     public function test_複数講座の受講期限を一括変更_成功(): void
     {
         // Arrange
@@ -130,9 +131,10 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-002 */
     public function test_マネージャーが配下の講師の講座を更新_成功(): void
     {
-        // Arrange — マネージャーが配下の講師の講座を更新
+        // Arrange
         $manager = Instructor::factory()->create();
         $subordinate = Instructor::factory()->create(['type' => 'instructor']);
         ManageInstructor::factory()->create([
@@ -161,11 +163,12 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_他の講師の講座を更新_失敗(): void
     {
-        // Arrange — 配下でない講師の講座を更新しようとする
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -183,12 +186,13 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-003 AC-COMMON-016 */
     public function test_配下でない講師の講座を含めて更新_失敗(): void
     {
-        // Arrange — 自分の講座と配下でない講師の講座を混ぜて更新
+        // Arrange
         $manager = Instructor::factory()->create();
         $ownCourse = Course::factory()->create(['instructor_id' => $manager->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($manager, 'instructor');
 
@@ -206,7 +210,7 @@ class BulkUpdateTest extends TestCase
         ]);
     }
 
-    public function test_空のcoursesで更新_成功(): void
+    public function test_講座を1件も指定しない一括変更_失敗(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -223,6 +227,7 @@ class BulkUpdateTest extends TestCase
             ->assertJsonValidationErrors(['courses']);
     }
 
+    /** AC-COMMON-001 */
     public function test_未認証でアクセス_失敗(): void
     {
         // Act

@@ -5,6 +5,7 @@ namespace Tests\Feature\Api\Manager\Attendance;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
+use App\Model\ManageInstructor;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,11 +14,17 @@ class LoginRateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_ログイン率取得_成功(): void
+    /** AC-AUTHZ-002 */
+    public function test_配下の講師の講座のログイン率をマネージャーが取得できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $subordinate = Instructor::factory()->create(['type' => 'instructor']);
+        ManageInstructor::factory()->create([
+            'manager_id' => $manager->id,
+            'instructor_id' => $subordinate->id,
+        ]);
+        $course = Course::factory()->create(['instructor_id' => $subordinate->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -30,7 +37,8 @@ class LoginRateTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_講師が一致しない_失敗(): void
+    /** AC-AUTHZ-003 */
+    public function test_配下でないマネージャーの講座のログイン率は取得できない(): void
     {
         // Arrange — 別のマネージャーの講座のログイン率を取得しようとする
         $otherManager = Instructor::factory()->create();
@@ -48,6 +56,7 @@ class LoginRateTest extends TestCase
         $response->assertStatus(403);
     }
 
+    /** AC-ANALYTICS-005 */
     public function test_バリデーションエラー(): void
     {
         // Arrange
@@ -68,7 +77,8 @@ class LoginRateTest extends TestCase
         ]);
     }
 
-    public function test_受講生ログイン率取得(): void
+    /** AC-ANALYTICS-004・AC-ANALYTICS-006 */
+    public function test_期間内にログインした受講生の割合をログイン率として返す(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -85,7 +95,7 @@ class LoginRateTest extends TestCase
             ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
             ->create(['last_login_at' => now()->subMonths(2)]);
 
-        // 一度もログインしていない受講生 2人
+        // 一度もログインしていない受講生 2人。Q-005 の暫定方針により分母に含める
         Student::factory()
             ->count(2)
             ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')

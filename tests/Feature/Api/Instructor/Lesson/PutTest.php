@@ -13,7 +13,8 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_レッスン更新_成功(): void
+    /** AC-AUTHOR-026 */
+    public function test_レッスンの名称_参照先_備考を更新できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -38,11 +39,13 @@ class PutTest extends TestCase
         ]);
         $this->assertDatabaseHas('lessons', [
             'id' => $lesson->id,
-            'chapter_id' => $chapter->id,
             'title' => 'title',
+            'url' => 'url',
+            'remarks' => 'remarks',
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師のレッスン更新_失敗(): void
     {
         // Arrange
@@ -50,7 +53,7 @@ class PutTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -59,7 +62,6 @@ class PutTest extends TestCase
         ]), [
             'title' => 'title',
             'url' => 'url',
-            'remarks' => 'remarks',
         ]);
 
         // Assert
@@ -69,7 +71,7 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_レッスンの指定が数値でなく名称と参照先もないと更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

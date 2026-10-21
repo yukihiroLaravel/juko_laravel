@@ -7,7 +7,6 @@ use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +14,8 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_レッスン登録_成功(): void
+    /** AC-AUTHOR-025 */
+    public function test_チャプターにレッスンを下書きで登録できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -43,17 +43,14 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_受講者がいる講座でレッスンを作成しても受講状況は作成されない(): void
+    /** AC-AUTHOR-025, AC-PROG-001 */
+    public function test_受講生がいる講座でレッスンを作成しても受講状況は作成されない(): void
     {
-        // Arrange — すでに受講者がいる講座
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -63,7 +60,7 @@ class StoreTest extends TestCase
             'title' => 'title',
         ]);
 
-        // Assert — 作成したレッスンに対する受講状況は作られない
+        // Assert
         $response->assertStatus(200);
         $this->assertDatabaseMissing('lesson_attendances', [
             'attendance_id' => $attendance->id,
@@ -71,13 +68,14 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師のレッスン登録_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師のチャプターにはレッスンを登録できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -94,7 +92,7 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_チャプターの指定が不正でタイトルが空のときはレッスンを登録できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

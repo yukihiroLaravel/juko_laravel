@@ -18,122 +18,14 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ一覧取得_成功(): void
-    {
-        // Arrange — 生徒が受講している講座に公開お知らせ2件
-        $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        Notification::factory()->count(2)->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $this->actingAs($student, 'web');
-
-        // Act
-        $response = $this->getJson(route('student.notifications.index'));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data.notifications');
-    }
-
-    public function test_固定期限切れのお知らせは取得しない(): void
-    {
-        // Arrange — 固定期限切れの受講
-        $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::FIXED_DATE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => now()->subDay(),
-        ]);
-        Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $this->actingAs($student, 'web');
-
-        // Act
-        $response = $this->getJson(route('student.notifications.index'));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(0, 'data.notifications');
-    }
-
-    public function test_相対期限切れのお知らせは取得しない(): void
-    {
-        // Arrange — 相対期限切れの受講
-        $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::RELATIVE_DAYS->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => now()->subDay(),
-        ]);
-        Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $this->actingAs($student, 'web');
-
-        // Act
-        $response = $this->getJson(route('student.notifications.index'));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(0, 'data.notifications');
-    }
-
+    /** AC-NOTIF-014 */
     public function test_期限がない講座のお知らせは取得する(): void
     {
-        // Arrange — 期限なしの講座
+        // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        Notification::factory()->count(2)->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $course = $this->createEnrolledCourse($student);
+        $this->createDisplayableNotification($course);
+        $this->createDisplayableNotification($course);
         $this->actingAs($student, 'web');
 
         // Act
@@ -144,27 +36,45 @@ class IndexTest extends TestCase
         $response->assertJsonCount(2, 'data.notifications');
     }
 
+    /** AC-NOTIF-014 */
+    #[DataProvider('deadlineTypeProvider')]
+    public function test_受講期限を過ぎた講座のお知らせは取得しない(string $deadlineType): void
+    {
+        // Arrange
+        $student = Student::factory()->create();
+        $course = $this->createEnrolledCourse(
+            $student,
+            courseAttributes: ['deadline_type' => $deadlineType],
+            attendanceAttributes: ['attendance_deadline' => now()->subDay()],
+        );
+        $this->createDisplayableNotification($course);
+        $this->actingAs($student, 'web');
+
+        // Act
+        $response = $this->getJson(route('student.notifications.index'));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonCount(0, 'data.notifications');
+    }
+
+    /** @return array<string, array{string}> */
+    public static function deadlineTypeProvider(): array
+    {
+        return [
+            '固定日' => [DeadlineTypeEnum::FIXED_DATE->value],
+            '相対日数' => [DeadlineTypeEnum::RELATIVE_DAYS->value],
+        ];
+    }
+
+    /** AC-NOTIF-018 */
     public function test_お知らせ一覧に講師名が含まれる(): void
     {
         // Arrange
         $student = Student::factory()->create();
         $instructor = Instructor::factory()->create(['nick_name' => 'Alice']);
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $course = $this->createEnrolledCourse($student);
+        $this->createDisplayableNotification($course, ['instructor_id' => $instructor->id]);
         $this->actingAs($student, 'web');
 
         // Act
@@ -175,153 +85,54 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Alice');
     }
 
-    public function test_講師名昇順でソートできる(): void
+    /**
+     * AC-NOTIF-015
+     *
+     * @param  list<string>  $createdNickNames
+     * @param  list<string>  $expectedNickNames
+     */
+    #[DataProvider('instructorNickNameSortProvider')]
+    public function test_講師名でソートできる(string $order, array $createdNickNames, array $expectedNickNames): void
     {
-        // Arrange — 講師2名のお知らせを作成
+        // Arrange — 作成順と期待する並びを逆にし、作成順のまま返ると失敗するようにする
         $student = Student::factory()->create();
-        $instructorB = Instructor::factory()->create(['nick_name' => 'Bob']);
-        $instructorA = Instructor::factory()->create(['nick_name' => 'Alice']);
-        $courseB = Course::factory()->create([
-            'instructor_id' => $instructorB->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        $courseA = Course::factory()->create([
-            'instructor_id' => $instructorA->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseB->id,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseA->id,
-        ]);
-        Notification::factory()->create([
-            'course_id' => $courseB->id,
-            'instructor_id' => $instructorB->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        Notification::factory()->create([
-            'course_id' => $courseA->id,
-            'instructor_id' => $instructorA->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $course = $this->createEnrolledCourse($student);
+        foreach ($createdNickNames as $nickName) {
+            $instructor = Instructor::factory()->create(['nick_name' => $nickName]);
+            $this->createDisplayableNotification($course, ['instructor_id' => $instructor->id]);
+        }
         $this->actingAs($student, 'web');
 
         // Act
         $response = $this->getJson(route('student.notifications.index', [
             'sort_by' => 'instructor_nick_name',
-            'order' => 'asc',
+            'order' => $order,
         ]));
 
         // Assert
         $response->assertStatus(200);
-        $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Alice');
-        $response->assertJsonPath('data.notifications.1.instructor_nick_name', 'Bob');
+        $response->assertJsonPath('data.notifications.0.instructor_nick_name', $expectedNickNames[0]);
+        $response->assertJsonPath('data.notifications.1.instructor_nick_name', $expectedNickNames[1]);
     }
 
-    public function test_講師名降順でソートできる(): void
+    /** @return array<string, array{string, list<string>, list<string>}> */
+    public static function instructorNickNameSortProvider(): array
     {
-        // Arrange — 講師2名のお知らせを作成
-        $student = Student::factory()->create();
-        $instructorA = Instructor::factory()->create(['nick_name' => 'Alice']);
-        $instructorB = Instructor::factory()->create(['nick_name' => 'Bob']);
-        $courseA = Course::factory()->create([
-            'instructor_id' => $instructorA->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        $courseB = Course::factory()->create([
-            'instructor_id' => $instructorB->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseA->id,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseB->id,
-        ]);
-        Notification::factory()->create([
-            'course_id' => $courseA->id,
-            'instructor_id' => $instructorA->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        Notification::factory()->create([
-            'course_id' => $courseB->id,
-            'instructor_id' => $instructorB->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $this->actingAs($student, 'web');
-
-        // Act
-        $response = $this->getJson(route('student.notifications.index', [
-            'sort_by' => 'instructor_nick_name',
-            'order' => 'desc',
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonPath('data.notifications.0.instructor_nick_name', 'Bob');
-        $response->assertJsonPath('data.notifications.1.instructor_nick_name', 'Alice');
+        return [
+            '昇順' => ['asc', ['Bob', 'Alice'], ['Alice', 'Bob']],
+            '降順' => ['desc', ['Alice', 'Bob'], ['Bob', 'Alice']],
+        ];
     }
 
     // AC-NOTIF-030
     public function test_一度きりのお知らせは既読と未読を返し常時表示は対象外になる(): void
     {
         // Arrange
-        $student = Student::factory()->create(['occupation' => 'Other']);
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $readNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '既読のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $unreadNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '未読のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-
-        $alwaysNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '常時表示のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ALWAYS,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-
+        $student = Student::factory()->create();
+        $course = $this->createEnrolledCourse($student);
+        $readNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
+        $unreadNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
+        $alwaysNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ALWAYS]);
         $readNotification->students()->attach($student->id);
         $this->actingAs($student, 'web');
 
@@ -348,43 +159,11 @@ class IndexTest extends TestCase
     public function test_既読状態の昇順と降順で未読と既読の順序が切り替わり常時表示は最後になる(): void
     {
         // Arrange
-        $student = Student::factory()->create(['occupation' => 'Other']);
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $readNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '既読のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $unreadNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '未読のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $alwaysNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'title' => '常時表示のお知らせ',
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ALWAYS,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $student = Student::factory()->create();
+        $course = $this->createEnrolledCourse($student);
+        $readNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
+        $unreadNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
+        $alwaysNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ALWAYS]);
         $readNotification->students()->attach($student->id);
         $this->actingAs($student, 'web');
 
@@ -431,31 +210,9 @@ class IndexTest extends TestCase
     {
         // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'deadline_type' => DeadlineTypeEnum::NONE->value,
-        ]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $readNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $unreadNotification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $course = $this->createEnrolledCourse($student);
+        $readNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
+        $unreadNotification = $this->createDisplayableNotification($course, ['type' => TypeEnum::ONCE]);
         $readNotification->students()->attach($student->id);
         $this->actingAs($student, 'web');
 
@@ -479,5 +236,38 @@ class IndexTest extends TestCase
             '未読' => ['unread'],
             '決められていない値' => ['invalid_filter'],
         ];
+    }
+
+    /**
+     * 生徒が受講している講座を作る。受講期限は既定でなし。
+     *
+     * @param  array<string, mixed>  $courseAttributes
+     * @param  array<string, mixed>  $attendanceAttributes
+     */
+    private function createEnrolledCourse(Student $student, array $courseAttributes = [], array $attendanceAttributes = []): Course
+    {
+        $course = Course::factory()->create($courseAttributes);
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            ...$attendanceAttributes,
+        ]);
+
+        return $course;
+    }
+
+    /**
+     * 現在掲示中の公開お知らせを作る。start_date の既定は乱数なので、掲示開始を昨日に固定する。
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createDisplayableNotification(Course $course, array $attributes = []): Notification
+    {
+        return Notification::factory()->create([
+            'course_id' => $course->id,
+            'status' => StatusEnum::PUBLIC,
+            'start_date' => now()->subDay(),
+            ...$attributes,
+        ]);
     }
 }

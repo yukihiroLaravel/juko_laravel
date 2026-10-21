@@ -13,6 +13,7 @@ class SortTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-AUTHOR-032 */
     public function test_レッスン並び替え_成功(): void
     {
         // Arrange
@@ -48,14 +49,15 @@ class SortTest extends TestCase
         $this->assertDatabaseHas('lessons', ['id' => $lesson1->id, 'order' => 4]);
     }
 
-    public function test_権限がない講師のレッスン登録_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_権限がない講師のレッスン並び替え_失敗(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -74,7 +76,7 @@ class SortTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_チャプターの指定が数値でなくレッスンの指定もないと並び替えできない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -93,7 +95,7 @@ class SortTest extends TestCase
         ]);
     }
 
-    public function test_レッスン_i_dが不足している_失敗(): void
+    public function test_チャプターの全レッスンを指定していないと並び替えできない(): void
     {
         // Arrange — チャプターに4つのレッスンがあるが3つだけ指定
         $instructor = Instructor::factory()->create();
@@ -102,7 +104,7 @@ class SortTest extends TestCase
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
         $lesson3 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 3]);
-        Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 4]); // 含めない
+        Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 4]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -170,7 +172,7 @@ class SortTest extends TestCase
             'lessons' => [
                 $lesson1->id,
                 $lesson2->id,
-                $lesson1->id, // 重複
+                $lesson1->id,
             ],
         ]);
 

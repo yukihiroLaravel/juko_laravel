@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,13 +15,16 @@ class DeleteAllTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプター全削除_成功(): void
+    /** AC-AUTHOR-024 */
+    public function test_講座の全チャプターとそのレッスンを削除できる(): void
     {
-        // Arrange — チャプターとレッスンを作成（受講なし）
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $chapters = Chapter::factory()->count(2)->create(['course_id' => $course->id]);
+        foreach ($chapters as $chapter) {
+            Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        }
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -33,26 +35,25 @@ class DeleteAllTest extends TestCase
         $response->assertJsonStructure([
             'result',
         ]);
-        $this->assertSoftDeleted('chapters', [
-            'course_id' => $course->id,
-        ]);
-        $this->assertSoftDeleted('lessons', [
-            'chapter_id' => $chapter->id,
-        ]);
+        foreach ($chapters as $chapter) {
+            $this->assertSoftDeleted('chapters', [
+                'id' => $chapter->id,
+            ]);
+            $this->assertSoftDeleted('lessons', [
+                'chapter_id' => $chapter->id,
+            ]);
+        }
     }
 
-    public function test_受講済みレッスン削除_失敗(): void
+    /** AC-AUTHOR-023 */
+    public function test_受講状況があるレッスンを含むチャプターがあると全チャプターを削除できない(): void
     {
-        // Arrange — レッスンに受講がある場合
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
@@ -69,13 +70,14 @@ class DeleteAllTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座のチャプターは全削除できない(): void
     {
-        // Arrange — 別の講師の講座
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         Chapter::factory()->create(['course_id' => $course->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -88,7 +90,7 @@ class DeleteAllTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座の指定が数値でない場合は全削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

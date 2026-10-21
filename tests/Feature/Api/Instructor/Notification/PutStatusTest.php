@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,14 +11,13 @@ class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ更新_成功(): void
+    /** AC-NOTIF-009 */
+    public function test_選んだお知らせの公開状態をまとめて変更できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $notification = Notification::factory()->create([
             'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
         ]);
         $this->actingAs($instructor, 'instructor');
 
@@ -39,16 +37,14 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    public function test_他の講師のお知らせの公開状態は変更できない(): void
     {
-        // Arrange — 他の講師のお知らせのステータスを更新しようとする
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $notification = Notification::factory()->create([
             'instructor_id' => $ownerInstructor->id,
-            'course_id' => $course->id,
         ]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -66,7 +62,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_お知らせを1件も選ばず公開状態も空のときは変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

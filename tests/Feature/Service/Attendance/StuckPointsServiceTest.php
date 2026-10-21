@@ -10,7 +10,6 @@ use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
@@ -38,142 +37,84 @@ class StuckPointsServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_公開チャプターが1件も存在しない場合_空コレクションを返す(): void
+    /** AC-ANALYTICS-017 */
+    public function test_公開チャプターが1つもないときはつまずき箇所なし(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         Chapter::factory()->create([
             'course_id' => $course->id,
             'status' => ChapterStatusEnum::PRIVATE->value,
         ]);
-
-        // 受講生2人を期限内で登録
-        $student1 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-
-        $service = new StuckPointsService;
+        $this->enrollStudents($course, 2);
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
         // Assert
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertTrue($result->isEmpty());
-
     }
 
-    public function test_公開レッスンが1件も存在しない場合_空コレクションを返す(): void
+    /** AC-ANALYTICS-017 */
+    public function test_公開レッスンが1つもないときはつまずき箇所なし(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::PRIVATE->value,
         ]);
-
-        // 受講生2人を期限内で登録
-        $student1 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-
-        $service = new StuckPointsService;
+        $this->enrollStudents($course, 2);
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
         // Assert
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertTrue($result->isEmpty());
-
     }
 
-    public function test_受講期限が切れている場合_空コレクションを返す(): void
+    /** AC-ANALYTICS-018 */
+    public function test_受講期限を過ぎた受講生は数えず有効な受講生がいないときはつまずき箇所なし(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-
-        // 期限切れの受講生2人
-        $student1 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-04-30'),
-        ]);
-        $student2 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-04-30'),
-        ]);
-
-        $service = new StuckPointsService;
+        $this->enrollStudents($course, 2, '2026-04-30');
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
         // Assert
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertTrue($result->isEmpty());
-
     }
 
-    public function test_受講生が1人の場合_空コレクションを返す(): void
+    /** AC-ANALYTICS-018 */
+    public function test_受講期限を過ぎていない受講生が1人のときはつまずき箇所なし(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-
-        // 受講生1人のみ
-        $student = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-
-        $service = new StuckPointsService;
+        $this->enrollStudents($course, 1);
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
         // Assert
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertTrue($result->isEmpty());
-
     }
 
-    public function test_受講済みのレッスンがない場合_最初の公開レッスンを返す(): void
+    /** AC-ANALYTICS-019 */
+    public function test_完了した受講生がいないときは最初の公開レッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter1 = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,
@@ -196,20 +137,7 @@ class StuckPointsServiceTest extends TestCase
             'chapter_id' => $chapter2->id,
             'order' => 1,
         ]);
-
-        // 受講生2人がレッスン未完了
-        $student1 = Student::factory()->create();
-        $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        $attendance2 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
+        [$attendance1, $attendance2] = $this->enrollStudents($course, 2);
         LessonAttendance::factory()->create([
             'lesson_id' => $firstLesson->id,
             'attendance_id' => $attendance1->id,
@@ -223,12 +151,10 @@ class StuckPointsServiceTest extends TestCase
             'completed_at' => null,
         ]);
 
-        $service = new StuckPointsService;
-
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
-        // Assert — 最初のチャプターの最初のレッスンが返る
+        // Assert
         $this->assertCount(1, $result);
         /** @var StuckPointDto $stuckPoint */
         $stuckPoint = $result->first();
@@ -241,14 +167,13 @@ class StuckPointsServiceTest extends TestCase
         $this->assertInstanceOf(StuckLessonDto::class, $stuckLesson);
         $this->assertSame($firstLesson->id, $stuckLesson->id);
         $this->assertSame('最初のレッスン', $stuckLesson->title);
-
     }
 
-    public function test_最多数が必要受講生数未満の場合_最初の公開レッスンを返す(): void
+    /** AC-ANALYTICS-019 */
+    public function test_完了者が最も多いレッスンの完了者が2人に満たないときは最初の公開レッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,
@@ -263,33 +188,14 @@ class StuckPointsServiceTest extends TestCase
             'chapter_id' => $chapter->id,
             'order' => 2,
         ]);
-
-        // 受講生2人。1人だけ secondLesson を完了（最多1人 < MINIMUM_REQUIRED_STUDENTS=2）
-        $student1 = Student::factory()->create();
-        $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $secondLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-02'),
-        ]);
-
-        $service = new StuckPointsService;
+        // 受講生2人のうち、2つ目のレッスンを完了したのは1人だけ
+        [$attendance1] = $this->enrollStudents($course, 2);
+        $this->completeLesson($secondLesson, $attendance1, '2026-05-02');
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
-        // Assert — 最初のチャプターの最初のレッスンが返る
+        // Assert
         $this->assertCount(1, $result);
         /** @var StuckPointDto $stuckPoint */
         $stuckPoint = $result->first();
@@ -299,70 +205,43 @@ class StuckPointsServiceTest extends TestCase
         $stuckLesson = $stuckPoint->lessons->first();
         $this->assertSame($firstLesson->id, $stuckLesson->id);
         $this->assertSame('最初のレッスン', $stuckLesson->title);
-
     }
 
-    public function test_受講済み最多数のレッスンが最終レッスンのみの場合_空コレクションを返す(): void
+    /** AC-ANALYTICS-020 */
+    public function test_完了者が最も多いレッスンが最終の公開レッスンだけのときはつまずき箇所なし(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lastLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'order' => 2,
         ]);
-
-        // 受講生2人がともに最終レッスンのみ完了
-        $student1 = Student::factory()->create();
-        $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        $attendance2 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $lastLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-02'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $lastLesson->id,
-            'attendance_id' => $attendance2->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-03'),
-        ]);
-
-        $service = new StuckPointsService;
+        [$attendance1, $attendance2] = $this->enrollStudents($course, 2);
+        $this->completeLesson($lastLesson, $attendance1, '2026-05-02');
+        $this->completeLesson($lastLesson, $attendance2, '2026-05-03');
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
         // Assert
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertTrue($result->isEmpty());
-
     }
 
-    public function test_受講済み最多数のレッスンが最終レッスン以外の場合_同一チャプターの次のレッスンを返す(): void
+    /** AC-ANALYTICS-021 */
+    public function test_完了者が最も多いレッスンの次のレッスンが同じチャプターにあるときはそのレッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,
             'title' => 'チャプター1',
         ]);
         Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $targetLesson = Lesson::factory()->create([
+        $mostCompletedLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'order' => 2,
         ]);
@@ -371,45 +250,16 @@ class StuckPointsServiceTest extends TestCase
             'order' => 3,
             'title' => '最終レッスン',
         ]);
-
-        // 受講生2人がともに targetLesson まで完了、1人は最終レッスンも完了
-        $student1 = Student::factory()->create();
-        $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        $attendance2 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $targetLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-02'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $targetLesson->id,
-            'attendance_id' => $attendance2->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-03'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $lastLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-04'),
-        ]);
-
-        $service = new StuckPointsService;
+        // 2人が2つ目のレッスンを完了し、1人は3つ目（最終）も完了している
+        [$attendance1, $attendance2] = $this->enrollStudents($course, 2);
+        $this->completeLesson($mostCompletedLesson, $attendance1, '2026-05-02');
+        $this->completeLesson($mostCompletedLesson, $attendance2, '2026-05-03');
+        $this->completeLesson($lastLesson, $attendance1, '2026-05-04');
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
-        // Assert — targetLesson の次の lastLesson が返る
+        // Assert
         $this->assertCount(1, $result);
         /** @var StuckPointDto $stuckPoint */
         $stuckPoint = $result->first();
@@ -419,14 +269,13 @@ class StuckPointsServiceTest extends TestCase
         $stuckLesson = $stuckPoint->lessons->first();
         $this->assertSame($lastLesson->id, $stuckLesson->id);
         $this->assertSame('最終レッスン', $stuckLesson->title);
-
     }
 
-    public function test_受講済み最多数のレッスンが最終レッスン以外の場合_次のチャプターの最初のレッスンを返す(): void
+    /** AC-ANALYTICS-021 */
+    public function test_完了者が最も多いレッスンがチャプターの最後のときは次のチャプターの最初のレッスンを返す(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $course = Course::factory()->create();
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create([
             'course_id' => $course->id,
@@ -447,45 +296,16 @@ class StuckPointsServiceTest extends TestCase
             'chapter_id' => $chapter2->id,
             'order' => 2,
         ]);
-
-        // 受講生2人がともに chapter1 の最終レッスンまで完了、1人は講座の最終レッスンも完了
-        $student1 = Student::factory()->create();
-        $attendance1 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student1->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        $student2 = Student::factory()->create();
-        $attendance2 = Attendance::factory()->create([
-            'course_id' => $course->id,
-            'student_id' => $student2->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $chapter1LastLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-02'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $chapter1LastLesson->id,
-            'attendance_id' => $attendance2->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-03'),
-        ]);
-        LessonAttendance::factory()->create([
-            'lesson_id' => $courseLastLesson->id,
-            'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-04'),
-        ]);
-
-        $service = new StuckPointsService;
+        // 2人がチャプター1の最後のレッスンを完了し、1人は講座の最終レッスンも完了している
+        [$attendance1, $attendance2] = $this->enrollStudents($course, 2);
+        $this->completeLesson($chapter1LastLesson, $attendance1, '2026-05-02');
+        $this->completeLesson($chapter1LastLesson, $attendance2, '2026-05-03');
+        $this->completeLesson($courseLastLesson, $attendance1, '2026-05-04');
 
         // Act
-        $result = $service($course->id);
+        $result = (new StuckPointsService)($course->id);
 
-        // Assert — chapter2 の最初のレッスンが返る
+        // Assert
         $this->assertCount(1, $result);
         /** @var StuckPointDto $stuckPoint */
         $stuckPoint = $result->first();
@@ -495,6 +315,34 @@ class StuckPointsServiceTest extends TestCase
         $stuckLesson = $stuckPoint->lessons->first();
         $this->assertSame($chapter2FirstLesson->id, $stuckLesson->id);
         $this->assertSame('チャプター2の最初のレッスン', $stuckLesson->title);
+    }
 
+    /**
+     * 受講生を指定の人数だけ講座に受講させる。受講期限の既定は、テスト内の現在日時（2026-05-01）より後。
+     *
+     * @return list<Attendance>
+     */
+    private function enrollStudents(Course $course, int $count, string $deadline = '2026-05-20'): array
+    {
+        $attendances = [];
+        for ($i = 0; $i < $count; $i++) {
+            $attendances[] = Attendance::factory()->create([
+                'course_id' => $course->id,
+                'student_id' => Student::factory()->create()->id,
+                'attendance_deadline' => CarbonImmutable::parse($deadline),
+            ]);
+        }
+
+        return $attendances;
+    }
+
+    private function completeLesson(Lesson $lesson, Attendance $attendance, string $completedAt): void
+    {
+        LessonAttendance::factory()->create([
+            'lesson_id' => $lesson->id,
+            'attendance_id' => $attendance->id,
+            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
+            'completed_at' => CarbonImmutable::parse($completedAt),
+        ]);
     }
 }

@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\Instructor\Student;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,13 +12,12 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_受講生一覧取得_成功(): void
+    public function test_講師の講座を受講している受講生の一覧を取得できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
-        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -27,11 +25,12 @@ class IndexTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+        $response->assertJsonPath('data.students.0.student_id', $attendance->student_id);
     }
 
-    public function test_講座id指定_要件定義されている講座指定_失敗(): void
+    public function test_削除済みの講座を指定して絞り込めない(): void
     {
-        // Arrange — 論理削除された講座を指定
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $course->delete();
@@ -47,10 +46,10 @@ class IndexTest extends TestCase
         ]);
     }
 
-    public function test_講座id指定_講師が一致しない_失敗(): void
+    public function test_他の講師の講座を指定して絞り込めない(): void
     {
-        // Arrange — 他の講師の講座を指定
-        $instructor = Instructor::factory()->create();
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherInstructor = Instructor::factory()->create();
         $otherCourse = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
@@ -65,7 +64,7 @@ class IndexTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座の指定が数値でないときは絞り込めない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

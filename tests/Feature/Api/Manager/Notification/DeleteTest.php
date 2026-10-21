@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Api\Manager\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\Student;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,19 +12,14 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ削除_成功(): void
+    /** AC-NOTIF-013 */
+    public function test_お知らせを削除すると受講生の確認済みの記録も削除される(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $manager->id]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $manager->id,
-        ]);
-        $student = Student::factory()->create();
+        $notification = Notification::factory()->create(['instructor_id' => $manager->id]);
         $viewedNotification = ViewedOnceNotification::factory()->create([
             'notification_id' => $notification->id,
-            'student_id' => $student->id,
         ]);
         $this->actingAs($manager, 'instructor');
 
@@ -38,22 +31,20 @@ class DeleteTest extends TestCase
         $response->assertJson([
             'result' => true,
         ]);
-
-        // リレーションされているデータが削除されているか確認
+        $this->assertSoftDeleted('notifications', [
+            'id' => $notification->id,
+        ]);
         $this->assertDatabaseMissing('viewed_once_notifications', [
             'id' => $viewedNotification->id,
         ]);
     }
 
-    public function test_権限がないマネージャー_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_ほかのマネージャーのお知らせは削除できない(): void
     {
-        // Arrange — 別のマネージャーの通知を削除しようとする
+        // Arrange
         $ownerManager = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerManager->id]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $ownerManager->id,
-        ]);
+        $notification = Notification::factory()->create(['instructor_id' => $ownerManager->id]);
         $otherManager = Instructor::factory()->create();
         $this->actingAs($otherManager, 'instructor');
 
@@ -65,17 +56,19 @@ class DeleteTest extends TestCase
         $response->assertJson([
             'message' => 'This action is unauthorized.',
         ]);
+        $this->assertNotSoftDeleted('notifications', [
+            'id' => $notification->id,
+        ]);
     }
 
-    public function test_マネージャー権限がない_失敗(): void
+    public function test_マネージャーでない講師はお知らせを削除できない(): void
     {
-        // Arrange — マネージャーではない講師
+        // Arrange
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $notification = Notification::factory()->create();
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->deleteJson(route('manager.notifications.delete', ['notification_id' => $notification->id]));
+        $response = $this->deleteJson(route('manager.notifications.delete', ['notification_id' => 1]));
 
         // Assert
         $response->assertStatus(403);
@@ -84,7 +77,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_お知らせの指定が整数でないときは入力エラーになる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();

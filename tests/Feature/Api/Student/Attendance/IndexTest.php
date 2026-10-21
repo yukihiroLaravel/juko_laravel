@@ -14,29 +14,22 @@ use App\Model\LessonAttendance;
 use App\Model\Student;
 use App\Model\Tag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_受講一覧を取得_成功(): void
+    public function test_自分の受講の一覧を取得できる(): void
     {
-        // Arrange — 3つの公開講座にチャプター・レッスン・レッスン受講を含む受講を作成
+        // Arrange — 3つの講座を受講している
         $student = Student::factory()->create();
-        $courses = Course::factory()->count(3)->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $courses = Course::factory()->count(3)->create();
         foreach ($courses as $course) {
-            $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-            $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-            $attendance = Attendance::factory()->create([
+            Attendance::factory()->create([
                 'student_id' => $student->id,
                 'course_id' => $course->id,
-            ]);
-            LessonAttendance::factory()->create([
-                'attendance_id' => $attendance->id,
-                'lesson_id' => $lesson->id,
-                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
         $this->actingAs($student);
@@ -69,14 +62,15 @@ class IndexTest extends TestCase
         ]);
     }
 
+    /** AC-ENROLL-026 */
     public function test_受講一覧を取得_タグ指定_成功(): void
     {
         // Arrange — 1つの講座にタグを紐付け、もう1つはタグなし
         $student = Student::factory()->create();
         $tag = Tag::factory()->create();
-        $courseWithTag = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $courseWithTag = Course::factory()->create();
         $courseWithTag->tags()->attach($tag->id);
-        $courseWithoutTag = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $courseWithoutTag = Course::factory()->create();
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $courseWithTag->id]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $courseWithoutTag->id]);
         $this->actingAs($student);
@@ -89,16 +83,17 @@ class IndexTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
+    /** AC-ENROLL-025 */
     public function test_タグ名で検索_成功(): void
     {
         // Arrange — タグ「バックエンド」を持つ講座2つ、持たない講座1つ
         $student = Student::factory()->create();
         $tag = Tag::factory()->create(['content' => 'バックエンド']);
-        $course1 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course1 = Course::factory()->create();
         $course1->tags()->attach($tag->id);
-        $course2 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course2 = Course::factory()->create();
         $course2->tags()->attach($tag->id);
-        $course3 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course3 = Course::factory()->create();
         foreach ([$course1, $course2, $course3] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -112,13 +107,14 @@ class IndexTest extends TestCase
         $response->assertJsonCount(2, 'data');
     }
 
+    /** AC-ENROLL-025 */
     public function test_講座名で検索_成功(): void
     {
         // Arrange — 「Vue入門」という講座1つ、他の講座2つ
         $student = Student::factory()->create();
-        $courseVue = Course::factory()->create(['title' => 'Vue入門', 'status' => CourseStatusEnum::PUBLIC->value]);
-        $courseOther1 = Course::factory()->create(['title' => 'Laravel基礎', 'status' => CourseStatusEnum::PUBLIC->value]);
-        $courseOther2 = Course::factory()->create(['title' => 'React実践', 'status' => CourseStatusEnum::PUBLIC->value]);
+        $courseVue = Course::factory()->create(['title' => 'Vue入門']);
+        $courseOther1 = Course::factory()->create(['title' => 'Laravel基礎']);
+        $courseOther2 = Course::factory()->create(['title' => 'React実践']);
         foreach ([$courseVue, $courseOther1, $courseOther2] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -141,13 +137,14 @@ class IndexTest extends TestCase
         $response->assertStatus(401);
     }
 
+    /** AC-ENROLL-024 */
     public function test_自分の受講のみ取得される(): void
     {
         // Arrange — 2人の生徒がそれぞれ受講を持つ
         $student1 = Student::factory()->create();
         $student2 = Student::factory()->create();
-        $course1 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
-        $course2 = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course1 = Course::factory()->create();
+        $course2 = Course::factory()->create();
         Attendance::factory()->create(['student_id' => $student1->id, 'course_id' => $course1->id]);
         Attendance::factory()->create(['student_id' => $student2->id, 'course_id' => $course2->id]);
         $this->actingAs($student1);
@@ -160,25 +157,13 @@ class IndexTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function test_非公開の講座は一覧に表示されない(): void
-    {
-        // Arrange — 公開1つ、非公開1つ
-        $student = Student::factory()->create();
-        $publicCourse = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
-        $privateCourse = Course::factory()->create(['status' => CourseStatusEnum::PRIVATE->value]);
-        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $publicCourse->id]);
-        Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $privateCourse->id]);
-        $this->actingAs($student);
-
-        // Act
-        $response = $this->getJson(route('student.attendances.index'));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonCount(1, 'data');
-    }
-
-    public function test_講座名で検索しても非公開の講座は一覧に表示されない(): void
+    /**
+     * AC-ENROLL-024
+     *
+     * @param  array<string, string>  $query
+     */
+    #[DataProvider('listQueryProvider')]
+    public function test_非公開の講座は一覧に表示されない(array $query): void
     {
         // Arrange — 検索語に一致する講座名を持つ、公開1つ・非公開1つ
         $student = Student::factory()->create();
@@ -196,12 +181,21 @@ class IndexTest extends TestCase
         $this->actingAs($student);
 
         // Act
-        $response = $this->getJson(route('student.attendances.index', ['search_word' => 'Vue']));
+        $response = $this->getJson(route('student.attendances.index', $query));
 
-        // Assert — 検索時も公開中の講座だけが返る
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.course.course_id', $publicCourse->id);
+    }
+
+    /** @return array<string, array{array<string, string>}> */
+    public static function listQueryProvider(): array
+    {
+        return [
+            '検索語なし' => [[]],
+            '講座名で検索' => [['search_word' => 'Vue']],
+        ];
     }
 
     public function test_受講がない場合は空の一覧を返す(): void
@@ -218,11 +212,12 @@ class IndexTest extends TestCase
         $response->assertJsonCount(0, 'data');
     }
 
+    /** AC-COMMON-006 */
     public function test_ページ指定で件数を区切って取得できる(): void
     {
         // Arrange — 5つの受講を作成し、per_page=2で取得
         $student = Student::factory()->create();
-        $courses = Course::factory()->count(5)->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $courses = Course::factory()->count(5)->create();
         foreach ($courses as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         }
@@ -234,6 +229,11 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data');
+        $response->assertJsonStructure([
+            'links' => ['first', 'last', 'prev', 'next'],
+            'meta' => ['from', 'to'],
+        ]);
+        $response->assertJsonPath('meta.current_page', 1);
         $response->assertJsonPath('meta.total', 5);
         $response->assertJsonPath('meta.last_page', 3);
 
@@ -243,6 +243,7 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('meta.current_page', 3);
     }
 
     public function test_存在しないタグを指定するとエラーを返す(): void
@@ -259,11 +260,12 @@ class IndexTest extends TestCase
         $response->assertJsonValidationErrors('tag_id');
     }
 
+    /** AC-ENROLL-028, AC-PROG-016, AC-PROG-017 */
     public function test_続きから_未完了のレッスンがある場合は最初の未完了レッスン情報を返す(): void
     {
         // Arrange
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
@@ -275,7 +277,6 @@ class IndexTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson2->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -290,11 +291,12 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.continue_from.lesson_title', $lesson2->title);
     }
 
+    /** AC-ENROLL-028, AC-PROG-016 */
     public function test_続きから_全レッスン完了の場合は続きから情報がない(): void
     {
         // Arrange
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
@@ -312,11 +314,12 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.continue_from', null);
     }
 
+    /** AC-ENROLL-028, AC-PROG-016 */
     public function test_続きから_最初のチャプター完了済みなら次のチャプターから再開する(): void
     {
         // Arrange — 1つ目のチャプターは完了、2つ目のチャプターに未完了レッスンがある
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id, 'order' => 1]);
@@ -342,11 +345,12 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.continue_from.lesson_id', $lesson2->id);
     }
 
+    /** AC-ENROLL-028, AC-PROG-016 */
     public function test_続きから_レッスンがない講座では続きから情報がない(): void
     {
         // Arrange — チャプターはあるがレッスンがない講座
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         Chapter::factory()->create(['course_id' => $course->id]);
         Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
         $this->actingAs($student);
@@ -359,13 +363,14 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.continue_from', null);
     }
 
-    public function test_続きから_公開されていないレッスンは飛ばして次の公開レッスンを返す(): void
+    /** AC-ENROLL-028, AC-PROG-016 */
+    public function test_続きから_下書きのレッスンは飛ばして次の公開レッスンを返す(): void
     {
         // Arrange — 未着手レッスンのうち先頭は下書き、次が公開中
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
-        $draftLesson = Lesson::factory()->create([
+        Lesson::factory()->create([
             'chapter_id' => $chapter->id,
             'order' => 1,
             'status' => LessonStatusEnum::DRAFT->value,
@@ -379,7 +384,6 @@ class IndexTest extends TestCase
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $openLesson->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->actingAs($student);
 
@@ -389,14 +393,14 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.0.course.continue_from.lesson_id', $openLesson->id);
-        $this->assertNotSame($draftLesson->id, $response->json('data.0.course.continue_from.lesson_id'));
     }
 
+    /** AC-ENROLL-028, AC-PROG-016 */
     public function test_続きから_公開されていないチャプターは飛ばして次のチャプターから再開する(): void
     {
         // Arrange — 1つ目のチャプターは非公開、2つ目が公開中
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PUBLIC->value]);
+        $course = Course::factory()->create();
         $closedChapter = Chapter::factory()->create([
             'course_id' => $course->id,
             'order' => 1,
@@ -414,7 +418,6 @@ class IndexTest extends TestCase
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
-                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
             ]);
         }
         $this->actingAs($student);
@@ -428,14 +431,15 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.0.course.continue_from.lesson_id', $openChapterLesson->id);
     }
 
+    /** AC-ENROLL-026 */
     public function test_タグ指定と検索ワードを同時に使って絞り込める(): void
     {
         // Arrange — タグ付き講座2つのうち、講座名が一致するのは1つだけ
         $student = Student::factory()->create();
         $tag = Tag::factory()->create(['content' => 'プログラミング']);
-        $courseMatch = Course::factory()->create(['title' => 'PHP入門', 'status' => CourseStatusEnum::PUBLIC->value]);
+        $courseMatch = Course::factory()->create(['title' => 'PHP入門']);
         $courseMatch->tags()->attach($tag->id);
-        $courseNoMatch = Course::factory()->create(['title' => 'デザイン基礎', 'status' => CourseStatusEnum::PUBLIC->value]);
+        $courseNoMatch = Course::factory()->create(['title' => 'デザイン基礎']);
         $courseNoMatch->tags()->attach($tag->id);
         foreach ([$courseMatch, $courseNoMatch] as $course) {
             Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
@@ -498,12 +502,6 @@ class IndexTest extends TestCase
     {
         $this->actingAs($student);
 
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        $this->getJson(route('student.attendances.index'))->assertOk();
-        $queryCount = count(DB::getQueryLog());
-        DB::disableQueryLog();
-
-        return $queryCount;
+        return $this->countQueries(fn () => $this->getJson(route('student.attendances.index'))->assertOk());
     }
 }

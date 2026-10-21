@@ -13,7 +13,8 @@ class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_レッスン更新_成功(): void
+    /** AC-AUTHOR-029 */
+    public function test_複数のレッスンを非公開にできる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -49,7 +50,8 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師のレッスン更新_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_権限がない講師のレッスン公開状態の変更_失敗(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
@@ -57,7 +59,7 @@ class PutStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -78,15 +80,17 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_レッスンの指定が空で公開状態が不正だと変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->putJson(route('instructor.chapters.lessons.put-status', [
-            'chapter_id' => 'bbb',
+            'chapter_id' => $chapter->id,
         ]), [
             'lessons' => [],
             'status' => 'invalid_status',

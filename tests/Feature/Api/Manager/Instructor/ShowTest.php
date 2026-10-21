@@ -11,7 +11,7 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_講師講座取得_成功(): void
+    public function test_配下の講師の詳細を取得できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -27,11 +27,12 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+        $response->assertJsonPath('data.instructor_id', $subordinate->id);
     }
 
-    public function test_権限がない_講師講座取得_失敗(): void
+    public function test_配下でない講師の詳細は取得できない(): void
     {
-        // Arrange — 配下ではない講師を閲覧しようとする
+        // Arrange
         $manager = Instructor::factory()->create();
         $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($manager, 'instructor');
@@ -46,15 +47,14 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_マネージャーではない_失敗(): void
+    public function test_マネージャーでない講師は講師の詳細を取得できない(): void
     {
-        // Arrange — マネージャーではない講師
+        // Arrange
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
-        $otherInstructor = Instructor::factory()->create();
         $this->actingAs($nonManager, 'instructor');
 
         // Act
-        $response = $this->getJson(route('manager.instructors.show', ['instructor_id' => $otherInstructor->id]));
+        $response = $this->getJson(route('manager.instructors.show', ['instructor_id' => 1]));
 
         // Assert
         $response->assertStatus(403);

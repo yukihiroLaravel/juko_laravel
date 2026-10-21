@@ -3,12 +3,14 @@
 namespace Tests\Feature\Api\Instructor\Course;
 
 use App\Model\Attendance;
+use App\Model\Chapter;
 use App\Model\Course;
 use App\Model\CourseDeadline;
 use App\Model\Instructor;
+use App\Model\Lesson;
 use App\Model\ManageInstructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class DeleteTest extends TestCase
@@ -32,9 +34,10 @@ class DeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-002 */
     public function test_マネージャーで配下の講師の講座削除する(): void
     {
-        // Arrange — 配下の講師の講座を削除
+        // Arrange
         $manager = Instructor::factory()->create();
         $subordinate = Instructor::factory()->create(['type' => 'instructor']);
         ManageInstructor::factory()->create([
@@ -54,11 +57,14 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_講師で講座削除する(): void
+    /** AC-AUTHOR-016 */
+    public function test_講座を削除するとチャプターとレッスンと受講期限も削除される(): void
     {
-        // Arrange — 講師自身の講座（受講生なし、受講期限あり）
+        // Arrange — 受講生がいない講座
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         CourseDeadline::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -67,21 +73,21 @@ class DeleteTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $this->assertSoftDeleted('courses', [
-            'id' => $course->id,
-        ]);
-        $this->assertDatabaseMissing('course_deadlines', [
-            'course_id' => $course->id,
-        ]);
+        $this->assertSoftDeleted('courses', ['id' => $course->id]);
+        $this->assertSoftDeleted('chapters', ['id' => $chapter->id]);
+        $this->assertSoftDeleted('lessons', ['id' => $lesson->id]);
+        $this->assertDatabaseMissing('course_deadlines', ['course_id' => $course->id]);
     }
 
-    public function test_権限がないマネージャーの場合削除できない(): void
+    /** AC-AUTHZ-001, AC-AUTHZ-003 */
+    #[DataProvider('instructorTypeProvider')]
+    public function test_担当でも配下でもない講師の講座は削除できない(string $type): void
     {
-        // Arrange — 配下にない講師の講座
-        $manager = Instructor::factory()->create();
+        // Arrange — 操作者の担当でも配下でもない講師の講座
+        $operator = Instructor::factory()->create(['type' => $type]);
         $otherInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
-        $this->actingAs($manager, 'instructor');
+        $this->actingAs($operator, 'instructor');
 
         // Act
         $response = $this->deleteJson(route('instructor.courses.delete', ['course_id' => $course->id]));
@@ -93,34 +99,24 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師の場合削除できない(): void
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function instructorTypeProvider(): array
     {
-        // Arrange — 別の講師の講座
-        $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $otherInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->deleteJson(route('instructor.courses.delete', ['course_id' => $course->id]));
-
-        // Assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'This action is unauthorized.',
-        ]);
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 
+    /** AC-AUTHOR-015 */
     public function test_受講生がいる講座は削除できない(): void
     {
-        // Arrange — 受講生がいる講座
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -133,7 +129,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー_失敗(): void
+    public function test_講座の指定が数値でないと削除できない(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();

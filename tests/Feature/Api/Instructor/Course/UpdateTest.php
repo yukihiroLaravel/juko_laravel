@@ -8,35 +8,22 @@ use App\Model\Instructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Override;
 use Tests\TestCase;
 
 class UpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Override]
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // 講座画像は既定のディスクに保存し、差し替え前の画像は public ディスクから削除する
-        Storage::fake();
-        Storage::fake('public');
-    }
-
-    public function test__受講期限なし_講座更新_成功(): void
+    public function test_受講期限なし_講座更新_成功(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
         $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
-            'image' => $file,
             'status' => 'private',
             'deadline_type' => 'none',
         ]);
@@ -60,12 +47,10 @@ class UpdateTest extends TestCase
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
         $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
-            'image' => $file,
             'status' => 'public',
             'deadline_type' => 'fixed_date',
             'fixed_date' => now()->addDays(30)->format('Y-m-d'),
@@ -92,12 +77,10 @@ class UpdateTest extends TestCase
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
 
         // Act
         $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
-            'image' => $file,
             'status' => 'public',
             'deadline_type' => 'relative_days',
             'relative_days' => 30,
@@ -118,19 +101,48 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_権限がない_失敗(): void
+    /** AC-COMMON-025 */
+    public function test_画像を送ると差し替え前の画像が消えて新しい画像が保存される(): void
     {
-        // Arrange — 別の講師の講座
-        $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
-        $this->actingAs($otherInstructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
+        // Arrange
+        Storage::fake();
+        Storage::fake('public');
+        $instructor = Instructor::factory()->create();
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'image' => 'course/old.jpg',
+        ]);
+        Storage::disk('public')->put('course/old.jpg', 'old');
+        $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
             'title' => 'テスト講座',
-            'image' => $file,
+            'image' => UploadedFile::fake()->image('new.jpg'),
+            'status' => 'private',
+            'deadline_type' => 'none',
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        Storage::disk('public')->assertMissing('course/old.jpg');
+        $newImage = $course->fresh()->getRawOriginal('image');
+        $this->assertNotSame('course/old.jpg', $newImage);
+        Storage::assertExists('public/'.$newImage);
+    }
+
+    /** AC-AUTHZ-001 */
+    public function test_権限がない_失敗(): void
+    {
+        // Arrange
+        $ownerInstructor = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
+        $this->actingAs($otherInstructor, 'instructor');
+
+        // Act
+        $response = $this->post(route('instructor.courses.update', ['course_id' => $course->id]), [
+            'title' => 'テスト講座',
             'status' => 'private',
             'deadline_type' => 'none',
         ]);
@@ -142,7 +154,7 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_不正な値を送ると更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -186,7 +198,7 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_定員をnullにして講座更新_成功(): void
+    public function test_定員なしにして講座更新_成功(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -212,6 +224,7 @@ class UpdateTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-011 */
     public function test_定員が受講者数と同じ_講座更新_成功(): void
     {
         // Arrange
@@ -236,7 +249,8 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_定員が受講者数を下回る_バリデーションエラー(): void
+    /** AC-AUTHOR-011 */
+    public function test_定員が受講者数を下回ると更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

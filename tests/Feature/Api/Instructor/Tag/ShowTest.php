@@ -11,10 +11,11 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_タグ取得_成功(): void
+    /** AC-TAG-011 */
+    public function test_自分のタグを取得できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -23,9 +24,11 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+        $response->assertJsonPath('data.tag_id', $tag->id);
+        $response->assertJsonPath('data.content', $tag->content);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_タグの指定が数値でないときは取得できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

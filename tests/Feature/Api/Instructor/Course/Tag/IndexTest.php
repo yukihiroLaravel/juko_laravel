@@ -12,15 +12,14 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_タグ一覧取得_成功(): void
+    /** AC-TAG-007 */
+    public function test_自分のタグだけが一覧に返る(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
-        $tag1 = Tag::factory()->create(['instructor_id' => $instructor->id]);
-        $tag2 = Tag::factory()->create(['instructor_id' => $instructor->id]);
-        $tag3 = Tag::factory()->create(['instructor_id' => $instructor->id]);
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $course->tags()->attach([$tag1->id, $tag2->id, $tag3->id]);
+        Tag::factory()->count(3)->create(['instructor_id' => $instructor->id]);
+        // 他の講師のタグは一覧に含まれない
+        Tag::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -31,7 +30,8 @@ class IndexTest extends TestCase
         $response->assertJsonCount(3, 'data');
     }
 
-    public function test_パラメータ指定_成功(): void
+    /** AC-TAG-008 */
+    public function test_タグを指定すると_そのタグだけが返る(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

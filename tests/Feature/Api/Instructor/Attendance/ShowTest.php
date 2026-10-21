@@ -14,7 +14,6 @@ use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\ManageInstructor;
-use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -24,16 +23,13 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_マネージャーで受講状況を取得(): void
+    /** AC-AUTHZ-002 */
+    public function test_マネージャーは自分の講座の受講状況を取得できる(): void
     {
-        // Arrange — マネージャーが自分の講座の受講を取得
+        // Arrange
         $manager = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $manager->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -41,28 +37,12 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'data' => [
-                'attendance_id',
-                'attendance_deadline',
-                'days_until_deadline',
-                'course' => [
-                    'course_id',
-                    'title',
-                    'image',
-                    'status',
-                    'capacity',
-                    'deadline_type',
-                    'course_deadline',
-                ],
-                'students_count',
-            ],
-        ]);
     }
 
-    public function test_マネージャーで配下の講師で受講状況を取得(): void
+    /** AC-AUTHZ-002 */
+    public function test_マネージャーは配下の講師の講座の受講状況を取得できる(): void
     {
-        // Arrange — マネージャーが配下講師の講座の受講を取得
+        // Arrange
         $manager = Instructor::factory()->create();
         $subordinate = Instructor::factory()->create(['type' => 'instructor']);
         ManageInstructor::factory()->create([
@@ -70,11 +50,7 @@ class ShowTest extends TestCase
             'instructor_id' => $subordinate->id,
         ]);
         $course = Course::factory()->create(['instructor_id' => $subordinate->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -82,74 +58,15 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'data' => [
-                'attendance_id',
-                'attendance_deadline',
-                'days_until_deadline',
-                'course' => [
-                    'course_id',
-                    'title',
-                    'image',
-                    'status',
-                    'capacity',
-                    'deadline_type',
-                    'course_deadline',
-                ],
-                'students_count',
-            ],
-        ]);
     }
 
-    public function test_講師で受講状況を取得(): void
-    {
-        // Arrange — 講師が自分の講座の受講を取得
-        $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'data' => [
-                'attendance_id',
-                'attendance_deadline',
-                'days_until_deadline',
-                'course' => [
-                    'course_id',
-                    'title',
-                    'image',
-                    'status',
-                    'capacity',
-                    'deadline_type',
-                    'course_deadline',
-                ],
-                'students_count',
-            ],
-        ]);
-    }
-
-    public function test_レスポンスの値が正しい(): void
+    /** AC-AUTHZ-001 */
+    public function test_講師は自分の講座の受講状況を取得できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'capacity' => 30,
-        ]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -157,6 +74,38 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
+    }
+
+    public function test_受講状況の詳細に講座と受講人数が含まれる(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                'attendance_id',
+                'attendance_deadline',
+                'days_until_deadline',
+                'course' => [
+                    'course_id',
+                    'title',
+                    'image',
+                    'status',
+                    'capacity',
+                    'deadline_type',
+                    'course_deadline',
+                ],
+                'students_count',
+            ],
+        ]);
         $response->assertJson([
             'data' => [
                 'attendance_id' => $attendance->id,
@@ -164,26 +113,33 @@ class ShowTest extends TestCase
                     'course_id' => $course->id,
                     'title' => $course->title,
                     'status' => $course->status->value,
-                    'capacity' => 30,
                 ],
                 'students_count' => 1,
             ],
         ]);
     }
 
-    public function test_定員未設定の場合capacityがnullで返る(): void
+    /**
+     * @return array<string, array{int|null}>
+     */
+    public static function capacities(): array
+    {
+        return [
+            '定員あり' => [30],
+            '定員なし' => [null],
+        ];
+    }
+
+    #[DataProvider('capacities')]
+    public function test_講座の定員をそのまま返し_定員を設定していなければ定員なしで返す(?int $capacity): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create([
             'instructor_id' => $instructor->id,
-            'capacity' => null,
+            'capacity' => $capacity,
         ]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -191,32 +147,20 @@ class ShowTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertJson([
-            'data' => [
-                'course' => [
-                    'capacity' => null,
-                ],
-            ],
-        ]);
+        $response->assertJsonPath('data.course.capacity', $capacity);
     }
 
-    public function test_受講生が複数いる場合のカウント(): void
+    /** AC-ANALYTICS-013 */
+    public function test_受講生が複数いる場合は受講人数に全員を数える(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $students = Student::factory()->count(3)->create();
-        foreach ($students as $student) {
-            Attendance::factory()->create([
-                'student_id' => $student->id,
-                'course_id' => $course->id,
-            ]);
-        }
-        $firstAttendance = Attendance::where('course_id', $course->id)->first();
+        $attendances = Attendance::factory()->count(3)->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $firstAttendance->id]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendances->first()->id]));
 
         // Assert
         $response->assertStatus(200);
@@ -227,14 +171,13 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_受講期限切れの場合は閲覧不可(): void
+    /** AC-AUTHZ-010 */
+    public function test_受講期限が過ぎた受講の受講状況は取得できない(): void
     {
-        // Arrange — 受講期限が過去の受講
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
         $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::yesterday(),
         ]);
@@ -247,17 +190,14 @@ class ShowTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座の受講状況は取得できない(): void
     {
-        // Arrange — 他の講師の講座の受講を取得しようとする
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $otherInstructor = Instructor::factory()->create();
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -270,17 +210,14 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_マネージャーで配下でない講師の受講は取得不可(): void
+    /** AC-AUTHZ-003 */
+    public function test_マネージャーは配下でない講師の講座の受講状況は取得できない(): void
     {
-        // Arrange — マネージャーだが配下でない講師の講座
+        // Arrange
         $manager = Instructor::factory()->create();
         $unrelatedInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $unrelatedInstructor->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($manager, 'instructor');
 
         // Act
@@ -290,16 +227,12 @@ class ShowTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_論理削除済みの受講はバリデーションエラー(): void
+    public function test_削除済みの受講の受講状況は取得できない(): void
     {
-        // Arrange — 論理削除された受講
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $attendanceId = $attendance->id;
         $attendance->delete();
         $this->actingAs($instructor, 'instructor');
@@ -312,37 +245,33 @@ class ShowTest extends TestCase
         $response->assertJsonValidationErrors(['attendance_id']);
     }
 
-    public function test_存在しないattendance_idはバリデーションエラー(): void
+    /**
+     * @return array<string, array{int|string}>
+     */
+    public static function invalidAttendanceIds(): array
+    {
+        return [
+            '存在しない受講' => [99999],
+            '数値でない値' => ['aaa'],
+        ];
+    }
+
+    #[DataProvider('invalidAttendanceIds')]
+    public function test_受講の指定が不正な場合は取得できない(int|string $attendanceId): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => 99999]));
+        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendanceId]));
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['attendance_id']);
     }
 
-    public function test_バリデーションエラー_文字列(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => 'aaa']));
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors([
-            'attendance_id',
-        ]);
-    }
-
-    public function test_講座に期限設定がある場合のレスポンス(): void
+    public function test_講座の期限の決め方が特定の日の場合は期限日を返す(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
@@ -354,11 +283,7 @@ class ShowTest extends TestCase
             'course_id' => $course->id,
             'fixed_date' => '2026-12-31',
         ]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -376,20 +301,17 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.course.course_deadline.fixed_date', '2026-12-31');
     }
 
-    public function test_期限切れの受講者は受講人数から除外される(): void
+    /** AC-ANALYTICS-013 */
+    public function test_受講期限が過ぎた受講生は受講人数に含めない(): void
     {
-        // Arrange — 期限内の受講者と期限切れの受講者を作成し、期限内の受講で取得
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $activeStudent = Student::factory()->create();
         $activeAttendance = Attendance::factory()->create([
-            'student_id' => $activeStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::tomorrow(),
         ]);
-        $expiredStudent = Student::factory()->create();
         Attendance::factory()->create([
-            'student_id' => $expiredStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::yesterday(),
         ]);
@@ -398,7 +320,7 @@ class ShowTest extends TestCase
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
-        // Assert — 期限切れの受講者は除外されてカウントされる
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'data' => [
@@ -407,20 +329,17 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_当日が期限の受講者は受講人数に含まれる(): void
+    /** AC-ANALYTICS-013 */
+    public function test_受講期限が当日の受講生は受講人数に含める(): void
     {
-        // Arrange — 当日が期限の受講者と期限内の受講者を作成
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $todayDeadlineStudent = Student::factory()->create();
         Attendance::factory()->create([
-            'student_id' => $todayDeadlineStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::today(),
         ]);
-        $futureDeadlineStudent = Student::factory()->create();
         $futureAttendance = Attendance::factory()->create([
-            'student_id' => $futureDeadlineStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::tomorrow(),
         ]);
@@ -429,7 +348,7 @@ class ShowTest extends TestCase
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $futureAttendance->id]));
 
-        // Assert — 当日が期限の受講者も含めてカウントされる（>= の境界）
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'data' => [
@@ -438,20 +357,17 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_受講期限なしの受講者は受講人数に含まれる(): void
+    /** AC-ANALYTICS-013 */
+    public function test_受講期限のない受講生は受講人数に含める(): void
     {
-        // Arrange — 期限なしの受講者と期限内の受講者を作成
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $noDeadlineStudent = Student::factory()->create();
         Attendance::factory()->create([
-            'student_id' => $noDeadlineStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => null,
         ]);
-        $activeStudent = Student::factory()->create();
         $activeAttendance = Attendance::factory()->create([
-            'student_id' => $activeStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::tomorrow(),
         ]);
@@ -460,7 +376,7 @@ class ShowTest extends TestCase
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
-        // Assert — 期限なしの受講者も含めてカウントされる
+        // Assert
         $response->assertStatus(200);
         $response->assertJson([
             'data' => [
@@ -469,24 +385,21 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_チャプター情報がレスポンスに含まれる(): void
+    /** AC-ANALYTICS-014 */
+    public function test_チャプターごとに名称と並びと完了人数を返す(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — chapters キー配下に各チャプター情報と完了人数が含まれる
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
@@ -503,30 +416,23 @@ class ShowTest extends TestCase
         ]);
     }
 
-    public function test_チャプター内の全レッスンを完了した受講者はチャプター完了人数にカウントされる(): void
+    /** AC-ANALYTICS-014 */
+    public function test_チャプター内の全レッスンを完了した受講生はチャプターの完了人数に数える(): void
     {
-        // Arrange — 2レッスン両方を完了した受講者を作成
+        // Arrange — 2レッスンの両方を完了した受講生
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        LessonAttendance::factory()->create([
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson2->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
         $this->actingAs($instructor, 'instructor');
 
@@ -539,29 +445,23 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
     }
 
-    public function test_チャプター内に未完了レッスンが残っている受講者はチャプター完了人数にカウントされない(): void
+    /** AC-ANALYTICS-014 */
+    public function test_チャプター内に未完了のレッスンが残る受講生はチャプターの完了人数に数えない(): void
     {
-        // Arrange — 2レッスン中1レッスンのみ完了した受講者を作成
+        // Arrange — 2レッスンのうち1つだけ完了した受講生
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        LessonAttendance::factory()->create([
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson2->id,
             'attendance_id' => $attendance->id,
-            'completed_at' => null,
         ]);
         $this->actingAs($instructor, 'instructor');
 
@@ -573,101 +473,85 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.chapters.0.completed_students_count', 0);
     }
 
-    public function test_期限切れの受講者は全レッスン完了でもチャプター完了人数から除外される(): void
+    /** AC-ANALYTICS-013・AC-ANALYTICS-014 */
+    public function test_受講期限が過ぎた受講生は全レッスンを完了していてもチャプターの完了人数に数えない(): void
     {
-        // Arrange — 期限切れの受講者と期限内の受講者の両方が全レッスン完了
+        // Arrange — 期限内と期限切れの受講生が、どちらも全レッスンを完了
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
 
-        $activeStudent = Student::factory()->create();
         $activeAttendance = Attendance::factory()->create([
-            'student_id' => $activeStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::tomorrow(),
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $activeAttendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
 
-        $expiredStudent = Student::factory()->create();
         $expiredAttendance = Attendance::factory()->create([
-            'student_id' => $expiredStudent->id,
             'course_id' => $course->id,
             'attendance_deadline' => CarbonImmutable::yesterday(),
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $expiredAttendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $activeAttendance->id]));
 
-        // Assert — 期限切れの受講者は除外され、期限内の1名のみカウントされる
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
     }
 
-    public function test_レッスンを1つも持たないチャプターはチャプター一覧から除外される(): void
+    /** AC-ANALYTICS-015 */
+    public function test_レッスンを1つも持たないチャプターはチャプター一覧に含めない(): void
     {
-        // Arrange — レッスンが存在しないチャプターを作成
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         Chapter::factory()->create(['course_id' => $course->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — 公開レッスンを持たないチャプターは一覧に含まれない
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters', []);
     }
 
-    public function test_複数チャプターそれぞれのチャプター完了人数が個別に返る(): void
+    /** AC-ANALYTICS-014 */
+    public function test_複数のチャプターの完了人数をチャプターごとに返す(): void
     {
-        // Arrange — 2チャプター存在、受講者はチャプター1のみ全レッスン完了
+        // Arrange — 2チャプターのうち、受講生はチャプター1だけ全レッスンを完了
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1]);
         $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2]);
         $lesson1 = Lesson::factory()->create(['chapter_id' => $chapter1->id]);
         $lesson2 = Lesson::factory()->create(['chapter_id' => $chapter2->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        LessonAttendance::factory()->create([
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $lesson1->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson2->id,
             'attendance_id' => $attendance->id,
-            'completed_at' => null,
         ]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — chapter1 は全レッスン完了で1、chapter2 は未完了で0
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.chapter_id', $chapter1->id);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
@@ -675,18 +559,15 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.chapters.1.completed_students_count', 0);
     }
 
-    public function test_完了日時が未設定の場合は表示用ステータスが完了でもチャプター完了人数にカウントされない(): void
+    /** AC-ANALYTICS-014 */
+    public function test_完了日時が未設定のレッスンは段階が完了でもチャプターの完了人数に数えない(): void
     {
-        // Arrange — 表示用ステータスは完了だが completed_at（完了日時）が未設定の状態
+        // Arrange — 段階は完了だが、完了日時が記録されていないレッスン
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
@@ -698,7 +579,7 @@ class ShowTest extends TestCase
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — completed_at が null なら status に関わらずカウントされない
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 0);
     }
@@ -729,66 +610,59 @@ class ShowTest extends TestCase
         ];
     }
 
+    /** AC-ANALYTICS-014・AC-ANALYTICS-015 */
     #[DataProvider('excludedChapterStatuses')]
-    public function test_公開ではないチャプターは受講状況詳細のチャプター一覧から除外される(ChapterStatusEnum $status): void
+    public function test_公開ではないチャプターは受講状況詳細のチャプター一覧に含めない(ChapterStatusEnum $status): void
     {
-        // Arrange — 公開チャプター1つ(公開レッスンあり)と、対象ステータスのチャプター1つ(公開レッスンあり)を作成
+        // Arrange — 公開チャプターと、対象ステータスのチャプター（どちらも公開レッスンあり）
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $publicChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
         Lesson::factory()->create(['chapter_id' => $publicChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
         $nonPublicChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => $status]);
         Lesson::factory()->create(['chapter_id' => $nonPublicChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — 公開レッスンがあっても、チャプターが公開ではない場合は一覧に含まれない
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data.chapters');
         $response->assertJsonPath('data.chapters.0.chapter_id', $publicChapter->id);
     }
 
+    /** AC-ANALYTICS-014 */
     #[DataProvider('excludedLessonStatuses')]
-    public function test_公開チャプター内の公開ではないレッスンは完了人数の分子分母から除外される(LessonStatusEnum $status): void
+    public function test_公開チャプター内の公開ではないレッスンはチャプターの完了人数の対象から外す(LessonStatusEnum $status): void
     {
-        // Arrange — 公開レッスンと対象ステータスのレッスンを持つ公開チャプター。受講者は公開レッスンのみ完了
+        // Arrange — 公開レッスンと対象ステータスのレッスンを持つ公開チャプター。受講生は公開レッスンだけ完了
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PUBLIC]);
         $publicLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => LessonStatusEnum::PUBLIC]);
         Lesson::factory()->create(['chapter_id' => $chapter->id, 'status' => $status]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        LessonAttendance::factory()->create([
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $publicLesson->id,
             'attendance_id' => $attendance->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::now(),
         ]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — 公開ではないレッスンは分母から除外されるため、公開レッスンのみ完了で1になる
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters.0.completed_students_count', 1);
     }
 
+    /** AC-ANALYTICS-015 */
     #[DataProvider('excludedLessonStatuses')]
-    public function test_公開レッスンを持たない公開チャプターはチャプター一覧から除外され残りは連続した添字で返る(LessonStatusEnum $status): void
+    public function test_公開レッスンを持たない公開チャプターは一覧に含めず残りは連続した添字で返す(LessonStatusEnum $status): void
     {
-        // Arrange — order:1公開(公開レッスンあり), order:2公開(対象ステータスのレッスンのみ), order:3公開(公開レッスンあり)
+        // Arrange — 順番に、公開レッスンあり・対象ステータスのレッスンのみ・公開レッスンありの公開チャプター
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => ChapterStatusEnum::PUBLIC]);
@@ -797,17 +671,13 @@ class ShowTest extends TestCase
         Lesson::factory()->create(['chapter_id' => $chapter2->id, 'status' => $status]);
         $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => ChapterStatusEnum::PUBLIC]);
         Lesson::factory()->create(['chapter_id' => $chapter3->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — 公開レッスンを持たないチャプターは除外され、残り2件が連続した添字のJSON配列として順序どおり返る
+        // Assert
         $response->assertStatus(200);
         $this->assertTrue(array_is_list($response->json('data.chapters')));
         $response->assertJsonCount(2, 'data.chapters');
@@ -815,56 +685,23 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.chapters.1.chapter_id', $chapter3->id);
     }
 
-    public function test_下書き公開非公開のチャプターが混在する場合は公開チャプターのみ順序どおり返る(): void
+    /** AC-ANALYTICS-014・AC-ANALYTICS-015 */
+    public function test_公開チャプターがなければチャプター一覧は空になる(): void
     {
-        // Arrange — order:1下書き, order:2公開, order:3非公開, order:4公開（いずれも公開レッスンあり）
-        $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $chapter1 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 1, 'status' => ChapterStatusEnum::DRAFT]);
-        Lesson::factory()->create(['chapter_id' => $chapter1->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $chapter2 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 2, 'status' => ChapterStatusEnum::PUBLIC]);
-        Lesson::factory()->create(['chapter_id' => $chapter2->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $chapter3 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 3, 'status' => ChapterStatusEnum::PRIVATE]);
-        Lesson::factory()->create(['chapter_id' => $chapter3->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $chapter4 = Chapter::factory()->create(['course_id' => $course->id, 'order' => 4, 'status' => ChapterStatusEnum::PUBLIC]);
-        Lesson::factory()->create(['chapter_id' => $chapter4->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
-
-        // Assert — 公開チャプターのみ2件、order順で返る
-        $response->assertStatus(200);
-        $response->assertJsonCount(2, 'data.chapters');
-        $response->assertJsonPath('data.chapters.0.chapter_id', $chapter2->id);
-        $response->assertJsonPath('data.chapters.1.chapter_id', $chapter4->id);
-    }
-
-    public function test_全チャプターが下書き非公開の場合はチャプター一覧が空になる(): void
-    {
-        // Arrange — 下書きチャプターと非公開チャプターのみ（公開チャプターなし）。どちらにも公開レッスンがある
+        // Arrange — 下書きと非公開のチャプターだけ（どちらも公開レッスンあり）
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $draftChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::DRAFT]);
         Lesson::factory()->create(['chapter_id' => $draftChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
         $privateChapter = Chapter::factory()->create(['course_id' => $course->id, 'status' => ChapterStatusEnum::PRIVATE]);
         Lesson::factory()->create(['chapter_id' => $privateChapter->id, 'status' => LessonStatusEnum::PUBLIC]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.attendances.show', ['attendance_id' => $attendance->id]));
 
-        // Assert — チャプター一覧は空。対象外の受講者数には影響しない
+        // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.chapters', []);
         $response->assertJsonPath('data.students_count', 1);

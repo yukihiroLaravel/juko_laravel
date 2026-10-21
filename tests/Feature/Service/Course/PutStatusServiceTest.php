@@ -16,31 +16,32 @@ class PutStatusServiceTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return array<int, array{0: string, 1: string}>
+     * @return array<string, array{0: string, 1: string}>
      */
     public static function allowedStatusProvider(): array
     {
         return [
-            [StatusEnum::DRAFT->value, StatusEnum::PUBLIC->value],
-            [StatusEnum::PUBLIC->value, StatusEnum::PRIVATE->value],
-            [StatusEnum::PRIVATE->value, StatusEnum::PUBLIC->value],
-            [StatusEnum::PUBLIC->value, StatusEnum::PUBLIC->value],
-            [StatusEnum::PRIVATE->value, StatusEnum::PRIVATE->value],
+            '下書きから公開' => [StatusEnum::DRAFT->value, StatusEnum::PUBLIC->value],
+            '公開から非公開' => [StatusEnum::PUBLIC->value, StatusEnum::PRIVATE->value],
+            '非公開から公開' => [StatusEnum::PRIVATE->value, StatusEnum::PUBLIC->value],
+            '公開から公開（変更なし）' => [StatusEnum::PUBLIC->value, StatusEnum::PUBLIC->value],
+            '非公開から非公開（変更なし）' => [StatusEnum::PRIVATE->value, StatusEnum::PRIVATE->value],
         ];
     }
 
     /**
-     * @return array<int, array{0: string, 1: string}>
+     * @return array<string, array{0: string, 1: string}>
      */
     public static function disallowedStatusProvider(): array
     {
         return [
-            [StatusEnum::DRAFT->value, StatusEnum::PRIVATE->value],
+            '下書きから非公開' => [StatusEnum::DRAFT->value, StatusEnum::PRIVATE->value],
         ];
     }
 
+    /** AC-AUTHOR-009 */
     #[DataProvider('allowedStatusProvider')]
-    public function test_講座ステータス一括更新_許容する組み合わせ_成功(string $currentStatus, string $targetStatus): void
+    public function test_許される変更なら講座の公開状態を変更できる(string $currentStatus, string $targetStatus): void
     {
         // Arrange
         $service = new PutStatusService(new StatusTransitionService);
@@ -58,8 +59,9 @@ class PutStatusServiceTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-009 */
     #[DataProvider('disallowedStatusProvider')]
-    public function test_講座ステータス一括更新_許容しない組み合わせ_失敗(string $currentStatus, string $targetStatus): void
+    public function test_下書きの講座を非公開にしようとすると変更できず元の公開状態のまま(string $currentStatus, string $targetStatus): void
     {
         // Arrange
         $service = new PutStatusService(new StatusTransitionService);
@@ -78,10 +80,28 @@ class PutStatusServiceTest extends TestCase
             );
         }
 
-        // ステータスは更新されていない
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
             'status' => $currentStatus,
         ]);
+    }
+
+    /** AC-AUTHOR-012, AC-COMMON-014 */
+    public function test_一部に許されない変更が含まれると全講座が元の公開状態のまま(): void
+    {
+        // Arrange
+        $service = new PutStatusService(new StatusTransitionService);
+        $publicCourse = Course::factory()->create(['status' => StatusEnum::PUBLIC->value]);
+        $draftCourse = Course::factory()->create(['status' => StatusEnum::DRAFT->value]);
+
+        // Act & Assert
+        try {
+            $service(collect([$publicCourse, $draftCourse]), StatusEnum::PRIVATE->value);
+            $this->fail('ValidationExceptionが発生しませんでした。');
+        } catch (ValidationException) {
+        }
+
+        $this->assertDatabaseHas('courses', ['id' => $publicCourse->id, 'status' => StatusEnum::PUBLIC->value]);
+        $this->assertDatabaseHas('courses', ['id' => $draftCourse->id, 'status' => StatusEnum::DRAFT->value]);
     }
 }

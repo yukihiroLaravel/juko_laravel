@@ -7,12 +7,14 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-AUTHOR-012 */
     public function test_講師で自分の講座のステータスを一括更新_成功(): void
     {
         // Arrange
@@ -46,6 +48,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-012 AC-AUTHZ-002 */
     public function test_マネージャーで配下の講師の講座を一括更新_成功(): void
     {
         // Arrange
@@ -76,6 +79,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-009 */
     public function test_状態遷移バリデーションエラー_下書きから非公開へ更新できない(): void
     {
         // Arrange
@@ -101,9 +105,10 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-003 */
     public function test_権限がないマネージャーの場合更新できない(): void
     {
-        // Arrange — 配下にない講師の講座
+        // Arrange
         $manager = Instructor::factory()->create();
         $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create([
@@ -129,15 +134,13 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師の場合更新できない(): void
     {
-        // Arrange — 別の講師の講座
+        // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
-        $course = Course::factory()->create([
-            'instructor_id' => $otherInstructor->id,
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
+        $course = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -153,6 +156,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-COMMON-016 */
     public function test_一部に権限がない講座を含む場合更新できない(): void
     {
         // Arrange
@@ -161,7 +165,7 @@ class PutStatusTest extends TestCase
             'instructor_id' => $manager->id,
             'status' => StatusEnum::PUBLIC->value,
         ]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherCourse = Course::factory()->create([
             'instructor_id' => $otherInstructor->id,
             'status' => StatusEnum::PUBLIC->value,
@@ -185,7 +189,11 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー_coursesが未送信(): void
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    #[DataProvider('講座の指定が不正な入力')]
+    public function test_講座の指定が不正だと一括更新できない(array $input, string $errorKey): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -194,89 +202,33 @@ class PutStatusTest extends TestCase
         // Act
         $response = $this->putJson(route('instructor.courses.put-status'), [
             'status' => StatusEnum::PUBLIC->value,
+            ...$input,
         ]);
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
+        $response->assertJsonValidationErrors([$errorKey]);
     }
 
-    public function test_バリデーションエラー_coursesが空配列(): void
+    /**
+     * @return array<string, array{array<string, mixed>, string}>
+     */
+    public static function 講座の指定が不正な入力(): array
+    {
+        return [
+            '講座の指定がない' => [[], 'courses'],
+            '講座の指定が空' => [['courses' => []], 'courses'],
+            '講座の指定が配列でない' => [['courses' => 'abc'], 'courses'],
+            '講座の指定が数値でない' => [['courses' => ['abc']], 'courses.0'],
+            '存在しない講座を指定' => [['courses' => [99999]], 'courses.0'],
+        ];
+    }
+
+    public function test_削除済みの講座は一括更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => [],
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
-    }
-
-    public function test_バリデーションエラー_coursesが配列でない(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => 'abc',
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
-    }
-
-    public function test_バリデーションエラー_courses要素が整数でない(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => ['abc'],
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    public function test_バリデーションエラー_存在しない_i_dを含む(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => [99999],
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    public function test_バリデーションエラー_削除済みの_i_dを含む(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $course->delete();
         $this->actingAs($instructor, 'instructor');
 
@@ -291,19 +243,21 @@ class PutStatusTest extends TestCase
         $response->assertJsonValidationErrors(['courses.0']);
     }
 
-    public function test_バリデーションエラー_statusが未送信(): void
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    #[DataProvider('公開状態が不正な入力')]
+    public function test_公開状態が不正だと一括更新できない(array $input): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->putJson(route('instructor.courses.put-status'), [
             'courses' => [$course->id],
+            ...$input,
         ]);
 
         // Assert
@@ -311,45 +265,15 @@ class PutStatusTest extends TestCase
         $response->assertJsonValidationErrors(['status']);
     }
 
-    public function test_バリデーションエラー_statusが文字列でない(): void
+    /**
+     * @return array<string, array{array<string, mixed>}>
+     */
+    public static function 公開状態が不正な入力(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => [$course->id],
-            'status' => 123,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
-    }
-
-    public function test_バリデーションエラー_statusが下書き(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create([
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC->value,
-        ]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-status'), [
-            'courses' => [$course->id],
-            'status' => StatusEnum::DRAFT->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
+        return [
+            '公開状態の指定がない' => [[]],
+            '公開状態が文字列でない' => [['status' => 123]],
+            '公開状態が下書き' => [['status' => StatusEnum::DRAFT->value]],
+        ];
     }
 }

@@ -12,7 +12,8 @@ class SortTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプター並び替え_成功(): void
+    /** AC-AUTHOR-021 */
+    public function test_指定した並び順の値でチャプターが並び替わる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -41,7 +42,8 @@ class SortTest extends TestCase
         $this->assertDatabaseHas('chapters', ['id' => $chapter1->id, 'order' => 3]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-003, AC-AUTHZ-004 */
+    public function test_他の講師の講座のチャプターは並び替えられない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
@@ -64,7 +66,7 @@ class SortTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座の指定が不正でチャプターの指定もないと並び替えられない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

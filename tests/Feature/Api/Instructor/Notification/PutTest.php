@@ -3,7 +3,6 @@
 namespace Tests\Feature\Api\Instructor\Notification;
 
 use App\Enums\Notification\TypeEnum;
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,14 +12,15 @@ class PutTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ更新_成功(): void
+    /** AC-NOTIF-008 */
+    public function test_お知らせの内容を更新できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $notification = Notification::factory()->create([
             'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
+            'type' => 'always',
+            'status' => 'private',
         ]);
         $this->actingAs($instructor, 'instructor');
 
@@ -47,16 +47,15 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師のお知らせは更新できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $notification = Notification::factory()->create([
             'instructor_id' => $ownerInstructor->id,
-            'course_id' => $course->id,
         ]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -76,7 +75,7 @@ class PutTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_入力がすべて空のときはお知らせを更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

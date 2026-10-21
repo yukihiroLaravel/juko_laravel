@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,13 +15,16 @@ class BulkDeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_チャプターの一括削除_成功(): void
+    /** AC-AUTHOR-024 */
+    public function test_選んだチャプターとそのレッスンだけをまとめて削除できる(): void
     {
-        // Arrange — チャプターとレッスンを作成（受講なし）
+        // Arrange — 選ぶチャプターと、選ばないチャプターを用意する
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $unselectedChapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $unselectedLesson = Lesson::factory()->create(['chapter_id' => $unselectedChapter->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -41,15 +43,22 @@ class BulkDeleteTest extends TestCase
         $this->assertSoftDeleted('lessons', [
             'chapter_id' => $chapter->id,
         ]);
+        $this->assertNotSoftDeleted('chapters', [
+            'id' => $unselectedChapter->id,
+        ]);
+        $this->assertNotSoftDeleted('lessons', [
+            'id' => $unselectedLesson->id,
+        ]);
     }
 
-    public function test_講師が一致しない_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座のチャプターは削除できない(): void
     {
-        // Arrange — 別の講師の講座のチャプター
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -64,9 +73,10 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_講座が一致しない_失敗(): void
+    /** AC-AUTHZ-011 */
+    public function test_指定した講座に属さないチャプターは削除できない(): void
     {
-        // Arrange — チャプターが属する講座と異なるcourse_idを指定
+        // Arrange — チャプターが属する講座とは別の講座を指定する
         $instructor = Instructor::factory()->create();
         $course1 = Course::factory()->create(['instructor_id' => $instructor->id]);
         $course2 = Course::factory()->create(['instructor_id' => $instructor->id]);
@@ -85,18 +95,15 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_受講している_失敗(): void
+    /** AC-AUTHOR-023 */
+    public function test_受講状況があるレッスンを含むチャプターは削除できない(): void
     {
-        // Arrange — レッスンに受講がある場合
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
@@ -115,7 +122,7 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座とチャプターの指定が不正な場合は削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

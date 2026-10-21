@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Student\Attendance;
 
-use App\Enums\LessonAttendance\StatusEnum as LessonAttendanceStatusEnum;
 use App\Model\Attendance;
 use App\Model\Chapter;
 use App\Model\Lesson;
@@ -10,6 +9,7 @@ use App\Model\LessonAttendance;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StuckPointsTest extends TestCase
@@ -30,7 +30,8 @@ class StuckPointsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_講座の期限内の受講が2人未満の場合_空のコレクションを返す(): void
+    /** AC-ANALYTICS-018 */
+    public function test_期限内の受講生が2人未満ならつまずき箇所はない(): void
     {
         // Arrange
         $attendance = Attendance::factory()->create();
@@ -46,6 +47,7 @@ class StuckPointsTest extends TestCase
         $response->assertJsonCount(0, 'data');
     }
 
+    /** AC-ANALYTICS-019 */
     public function test_受講済みのレッスンがない場合_最初の公開レッスンを返す(): void
     {
         // Arrange
@@ -98,6 +100,7 @@ class StuckPointsTest extends TestCase
         ]);
     }
 
+    /** AC-ANALYTICS-021 */
     public function test_受講済み最多数のレッスンが最終レッスン以外の場合_次のレッスンを返す(): void
     {
         // Arrange
@@ -135,17 +138,13 @@ class StuckPointsTest extends TestCase
             'student_id' => $student2->id,
             'attendance_deadline' => CarbonImmutable::parse('2026-05-20'),
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance1->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-02'),
         ]);
-        LessonAttendance::factory()->create([
+        LessonAttendance::factory()->completed()->create([
             'lesson_id' => $targetLesson->id,
             'attendance_id' => $attendance2->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => CarbonImmutable::parse('2026-05-03'),
         ]);
 
         // Act
@@ -166,7 +165,8 @@ class StuckPointsTest extends TestCase
         ]);
     }
 
-    public function test_権限のない生徒_失敗(): void
+    /** AC-AUTHZ-006 */
+    public function test_他の受講生の受講ではつまずき箇所を取得できない(): void
     {
         // Arrange
         $owner = Student::factory()->create();
@@ -185,7 +185,8 @@ class StuckPointsTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_バリデーションエラー_受講idが文字列(): void
+    #[DataProvider('invalidAttendanceIdProvider')]
+    public function test_受講idが数字でないか存在しない場合は入力エラーになる(string|int $attendanceId): void
     {
         // Arrange
         $attendance = Attendance::factory()->create();
@@ -193,7 +194,7 @@ class StuckPointsTest extends TestCase
 
         // Act
         $response = $this->getJson(route('student.attendances.stuck-points', [
-            'attendance_id' => 'aaa',
+            'attendance_id' => $attendanceId,
         ]));
 
         // Assert
@@ -201,23 +202,16 @@ class StuckPointsTest extends TestCase
         $response->assertJsonValidationErrors(['attendance_id']);
     }
 
-    public function test_バリデーションエラー_存在しない受講id(): void
+    /** @return array<string, array{string|int}> */
+    public static function invalidAttendanceIdProvider(): array
     {
-        // Arrange
-        $attendance = Attendance::factory()->create();
-        $this->actingAs($attendance->student);
-
-        // Act
-        $response = $this->getJson(route('student.attendances.stuck-points', [
-            'attendance_id' => 99999,
-        ]));
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['attendance_id']);
+        return [
+            '数字でない' => ['aaa'],
+            '存在しない' => [99999],
+        ];
     }
 
-    public function test_バリデーションエラー_論理削除された受講id(): void
+    public function test_削除済みの受講idを指定すると入力エラーになる(): void
     {
         // Arrange
         $attendance = Attendance::factory()->create();

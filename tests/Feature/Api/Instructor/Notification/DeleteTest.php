@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
-use App\Model\Student;
 use App\Model\ViewedOnceNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,20 +12,13 @@ class DeleteTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ削除_成功(): void
+    /** AC-NOTIF-013 */
+    public function test_お知らせを削除すると受講生の確認済みの記録も削除される(): void
     {
-        // Arrange — ViewedOnceNotificationも作成してカスケード削除を確認
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $notification = Notification::factory()->create([
-            'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
-        ]);
-        $student = Student::factory()->create();
-        $viewedOnce = ViewedOnceNotification::factory()->create([
-            'notification_id' => $notification->id,
-            'student_id' => $student->id,
-        ]);
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $notification = Notification::factory()->create(['instructor_id' => $instructor->id]);
+        $viewedOnce = ViewedOnceNotification::factory()->create(['notification_id' => $notification->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -38,21 +29,21 @@ class DeleteTest extends TestCase
         $response->assertJson([
             'result' => true,
         ]);
+        $this->assertSoftDeleted('notifications', [
+            'id' => $notification->id,
+        ]);
         $this->assertDatabaseMissing('viewed_once_notifications', [
             'id' => $viewedOnce->id,
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-004 */
+    public function test_他の講師のお知らせは削除できない(): void
     {
         // Arrange
         $ownerInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $notification = Notification::factory()->create([
-            'instructor_id' => $ownerInstructor->id,
-            'course_id' => $course->id,
-        ]);
-        $otherInstructor = Instructor::factory()->create();
+        $notification = Notification::factory()->create(['instructor_id' => $ownerInstructor->id]);
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -65,7 +56,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_お知らせの指定が不正なときは削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

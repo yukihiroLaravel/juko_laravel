@@ -2,11 +2,9 @@
 
 namespace Tests\Feature\Api\Student\Notification;
 
-use App\Enums\Notification\StatusEnum;
 use App\Enums\Notification\TypeEnum;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\Notification;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,20 +18,7 @@ class MarkReadTest extends TestCase
     {
         // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $notification = $this->createNotificationOfEnrolledCourse($student);
         $this->actingAs($student, 'web');
 
         // Act
@@ -58,20 +43,7 @@ class MarkReadTest extends TestCase
     {
         // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $notification = $this->createNotificationOfEnrolledCourse($student);
         $this->actingAs($student, 'web');
 
         // Act
@@ -90,24 +62,13 @@ class MarkReadTest extends TestCase
         $this->assertDatabaseCount('viewed_once_notifications', 1);
     }
 
-    public function test_期限切れのお知らせは既読登録できない(): void
+    /** AC-NOTIF-025 */
+    public function test_受講期限を過ぎた受講生はお知らせを確認済みにできない(): void
     {
-        // Arrange — 期限切れの受講
+        // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => now()->subDays(1),
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
+        $notification = $this->createNotificationOfEnrolledCourse($student, [
+            'attendance_deadline' => now()->subDay(),
         ]);
         $this->actingAs($student, 'web');
 
@@ -125,6 +86,26 @@ class MarkReadTest extends TestCase
         $this->assertDatabaseMissing('viewed_once_notifications', [
             'notification_id' => $notification->id,
             'student_id' => $student->id,
+        ]);
+    }
+
+    /**
+     * 生徒が受講している講座の、一度きりのお知らせを作る。
+     *
+     * @param  array<string, mixed>  $attendanceAttributes
+     */
+    private function createNotificationOfEnrolledCourse(Student $student, array $attendanceAttributes = []): Notification
+    {
+        $course = Course::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            ...$attendanceAttributes,
+        ]);
+
+        return Notification::factory()->create([
+            'course_id' => $course->id,
+            'type' => TypeEnum::ONCE,
         ]);
     }
 }

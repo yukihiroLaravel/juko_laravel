@@ -14,55 +14,18 @@ use App\Model\LessonAttendance;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CompleteAllLessonsTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\Override]
-    protected function tearDown(): void
+    /** AC-PROG-009 */
+    #[DataProvider('notPublicStatusProvider')]
+    public function test_公開されていないレッスンは完了にならない(string $lessonStatus): void
     {
-        CarbonImmutable::setTestNow();
-        parent::tearDown();
-    }
-
-    public function test_指定したチャプターのレッスンを全て完了_成功(): void
-    {
-        // Arrange
-        $student = Student::factory()->create();
-        $course = Course::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        LessonAttendance::factory()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-        ]);
-        $this->actingAs($student);
-
-        // Act
-        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
-            'attendance_id' => $attendance->id,
-            'chapter_id' => $chapter->id,
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('lesson_attendances', [
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => 'completed_attendance',
-        ]);
-    }
-
-    public function test_公開されていないレッスンは完了にならない(): void
-    {
-        // Arrange — 公開中のチャプターに公開レッスンと下書きレッスンがある
+        // Arrange — 公開中のチャプターに公開レッスンと公開されていないレッスンがある
         $student = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
@@ -77,11 +40,11 @@ class CompleteAllLessonsTest extends TestCase
             'chapter_id' => $chapter->id,
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
-        $draftLesson = Lesson::factory()->create([
+        $closedLesson = Lesson::factory()->create([
             'chapter_id' => $chapter->id,
-            'status' => LessonStatusEnum::DRAFT->value,
+            'status' => $lessonStatus,
         ]);
-        foreach ([$openLesson, $draftLesson] as $lesson) {
+        foreach ([$openLesson, $closedLesson] as $lesson) {
             LessonAttendance::factory()->create([
                 'attendance_id' => $attendance->id,
                 'lesson_id' => $lesson->id,
@@ -105,12 +68,23 @@ class CompleteAllLessonsTest extends TestCase
         ]);
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
-            'lesson_id' => $draftLesson->id,
+            'lesson_id' => $closedLesson->id,
             'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
     }
 
-    public function test_公開されていないチャプターは完了にできない(): void
+    /** @return array<string, array{string}> */
+    public static function notPublicStatusProvider(): array
+    {
+        return [
+            '下書き' => ['draft'],
+            '非公開' => ['private'],
+        ];
+    }
+
+    /** AC-AUTHZ-013 */
+    #[DataProvider('notPublicStatusProvider')]
+    public function test_公開されていないチャプターは完了にできない(string $chapterStatus): void
     {
         // Arrange
         $student = Student::factory()->create();
@@ -121,7 +95,7 @@ class CompleteAllLessonsTest extends TestCase
         ]);
         $chapter = Chapter::factory()->create([
             'course_id' => $course->id,
-            'status' => ChapterStatusEnum::PRIVATE->value,
+            'status' => $chapterStatus,
         ]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         LessonAttendance::factory()->create([
@@ -146,6 +120,7 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-007 */
     public function test_公開されていない講座は完了にできない(): void
     {
         // Arrange — 受講中の講座が非公開になっている
@@ -186,9 +161,10 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    public function test_権限がない生徒_失敗(): void
+    /** AC-AUTHZ-006 */
+    public function test_ほかの生徒の受講はまとめて完了にできない(): void
     {
-        // Arrange — 別の生徒のAttendanceにアクセス
+        // Arrange
         $owner = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
@@ -212,9 +188,10 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    public function test_権限がないチャプター_失敗(): void
+    /** AC-AUTHZ-013 */
+    public function test_受講している講座に属さないチャプターは完了にできない(): void
     {
-        // Arrange — 別の講座のチャプターを指定
+        // Arrange
         $student = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
@@ -238,7 +215,7 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_受講とチャプターの指定が整数でないときは入力エラーになる(): void
     {
         // Arrange
         $student = Student::factory()->create();
@@ -258,10 +235,12 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    public function test_チャプター内の全レッスン完了で完了日時が記録される(): void
+    /** AC-PROG-011 */
+    public function test_未着手のレッスンにだけ完了日時が記録される(): void
     {
         // Arrange — 未着手のレッスンと、過去に完了済みのレッスン
-        $firstCompletedAt = CarbonImmutable::parse('2026-01-01 10:00:00');
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-08-01 10:00:00'));
+        $completedAt = CarbonImmutable::parse('2026-07-01 09:00:00');
         $student = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
@@ -269,17 +248,18 @@ class CompleteAllLessonsTest extends TestCase
             'course_id' => $course->id,
         ]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $unfinishedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $finishedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
-        $unfinished = LessonAttendance::factory()->create([
+        $newLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $completedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
-            'lesson_id' => $unfinishedLesson->id,
+            'lesson_id' => $newLesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
-        $finished = LessonAttendance::factory()->create([
+        LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
-            'lesson_id' => $finishedLesson->id,
+            'lesson_id' => $completedLesson->id,
             'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-            'completed_at' => $firstCompletedAt,
+            'completed_at' => $completedAt,
         ]);
         $this->actingAs($student);
 
@@ -289,32 +269,40 @@ class CompleteAllLessonsTest extends TestCase
             'chapter_id' => $chapter->id,
         ]));
 
-        // Assert — 未着手だったレッスンには日時が記録され、既に完了していたレッスンの日時は変わらない
+        // Assert — 未着手だったレッスンには現在時刻が記録され、既に完了していたレッスンの日時は変わらない
         $response->assertStatus(200);
-        $this->assertNotNull($unfinished->fresh()->completed_at);
-        $this->assertTrue($firstCompletedAt->equalTo($finished->fresh()->completed_at));
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $newLesson->id,
+            'completed_at' => CarbonImmutable::now(),
+        ]);
+        $this->assertDatabaseHas('lesson_attendances', [
+            'attendance_id' => $attendance->id,
+            'lesson_id' => $completedLesson->id,
+            'completed_at' => $completedAt,
+        ]);
     }
 
     /** AC-PROG-020 */
     public function test_受講期限を過ぎた講座ではチャプター単位でまとめて完了にできない(): void
     {
-        // Arrange
+        // Arrange — 受講期限の翌日になった直後
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-02-01 00:00:00'));
         $completedAt = CarbonImmutable::parse('2026-01-01 10:00:00');
         $student = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
             'student_id' => $student->id,
             'course_id' => $course->id,
-            'attendance_deadline' => now()->subDay()->toDateString(),
+            'attendance_deadline' => '2026-01-31',
         ]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $unfinishedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $relearningLesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
+        $unfinishedLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $relearningLesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $unfinishedLesson->id,
             'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-            'completed_at' => null,
         ]);
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
@@ -346,17 +334,18 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    /** AC-PROG-020 */
-    public function test_受講期限当日はチャプター単位でまとめて完了にできる(): void
+    /** AC-ENROLL-012, AC-ENROLL-013 */
+    #[DataProvider('withinDeadlineProvider')]
+    public function test_受講期限内の講座ではチャプター単位でまとめて完了にできる(string $now, ?string $deadline): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-01-31 23:59:59'));
+        CarbonImmutable::setTestNow(CarbonImmutable::parse($now));
         $student = Student::factory()->create();
         $course = Course::factory()->create();
         $attendance = Attendance::factory()->create([
             'student_id' => $student->id,
             'course_id' => $course->id,
-            'attendance_deadline' => now()->toDateString(),
+            'attendance_deadline' => $deadline,
         ]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
@@ -382,73 +371,13 @@ class CompleteAllLessonsTest extends TestCase
         ]);
     }
 
-    /** AC-PROG-020 */
-    public function test_受講期限がない講座ではチャプター単位でまとめて完了にできる(): void
+    /** @return array<string, array{string, string|null}> */
+    public static function withinDeadlineProvider(): array
     {
-        // Arrange
-        $student = Student::factory()->create();
-        $course = Course::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => null,
-        ]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        LessonAttendance::factory()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-        ]);
-        $this->actingAs($student);
-
-        // Act
-        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
-            'attendance_id' => $attendance->id,
-            'chapter_id' => $chapter->id,
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('lesson_attendances', [
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-        ]);
-    }
-
-    /** AC-PROG-020 */
-    public function test_受講期限内の講座ではチャプター単位でまとめて完了にできる(): void
-    {
-        // Arrange
-        $student = Student::factory()->create();
-        $course = Course::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => now()->addDay()->toDateString(),
-        ]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        LessonAttendance::factory()->create([
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-        ]);
-        $this->actingAs($student);
-
-        // Act
-        $response = $this->putJson(route('student.attendances.complete-all-lessons', [
-            'attendance_id' => $attendance->id,
-            'chapter_id' => $chapter->id,
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('lesson_attendances', [
-            'attendance_id' => $attendance->id,
-            'lesson_id' => $lesson->id,
-            'status' => LessonAttendanceStatusEnum::COMPLETED_ATTENDANCE,
-        ]);
+        return [
+            '受講期限当日の終了時刻' => ['2026-01-31 23:59:59', '2026-01-31'],
+            '受講期限の前日' => ['2026-01-30 12:00:00', '2026-01-31'],
+            '受講期限なし' => ['2026-01-31 23:59:59', null],
+        ];
     }
 }

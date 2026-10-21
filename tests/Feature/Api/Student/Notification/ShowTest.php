@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Api\Student\Notification;
 
-use App\Enums\Notification\StatusEnum;
-use App\Enums\Notification\TypeEnum;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
@@ -16,51 +14,13 @@ class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ取得できる(): void
-    {
-        // Arrange
-        $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
-        $this->actingAs($student, 'web');
-
-        // Act
-        $response = $this->getJson(route('student.notifications.show', ['notification_id' => $notification->id]));
-
-        // Assert
-        $response->assertStatus(200);
-    }
-
+    /** AC-NOTIF-018 */
     public function test_お知らせ詳細に講師名が含まれる(): void
     {
         // Arrange
         $student = Student::factory()->create();
         $instructor = Instructor::factory()->create(['nick_name' => 'Alice']);
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
-        ]);
+        $notification = $this->createNotificationOfEnrolledCourse($student, [], $instructor);
         $this->actingAs($student, 'web');
 
         // Act
@@ -71,24 +31,13 @@ class ShowTest extends TestCase
         $response->assertJsonPath('data.instructor_nick_name', 'Alice');
     }
 
-    public function test_講座の期限切れは403になる(): void
+    /** AC-NOTIF-021 */
+    public function test_受講期限を過ぎた受講生はお知らせの詳細を開けない(): void
     {
-        // Arrange — 期限切れの受講
+        // Arrange
         $student = Student::factory()->create();
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => now()->subDays(1),
-        ]);
-        $notification = Notification::factory()->create([
-            'course_id' => $course->id,
-            'instructor_id' => $instructor->id,
-            'status' => StatusEnum::PUBLIC,
-            'type' => TypeEnum::ONCE,
-            'start_date' => now()->subDay(),
-            'end_date' => now()->addWeek(),
+        $notification = $this->createNotificationOfEnrolledCourse($student, [
+            'attendance_deadline' => now()->subDay(),
         ]);
         $this->actingAs($student, 'web');
 
@@ -99,6 +48,29 @@ class ShowTest extends TestCase
         $response->assertStatus(403);
         $response->assertJson([
             'message' => 'The course has expired.',
+        ]);
+    }
+
+    /**
+     * 生徒が受講している講座の、公開されているお知らせを作る。
+     *
+     * @param  array<string, mixed>  $attendanceAttributes
+     */
+    private function createNotificationOfEnrolledCourse(
+        Student $student,
+        array $attendanceAttributes = [],
+        ?Instructor $instructor = null,
+    ): Notification {
+        $course = Course::factory()->create();
+        Attendance::factory()->create([
+            'student_id' => $student->id,
+            'course_id' => $course->id,
+            ...$attendanceAttributes,
+        ]);
+
+        return Notification::factory()->create([
+            'course_id' => $course->id,
+            ...($instructor ? ['instructor_id' => $instructor->id] : []),
         ]);
     }
 }

@@ -5,7 +5,6 @@ namespace Tests\Feature\Api\Instructor\Course;
 use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,9 +12,7 @@ class ClearAllCapacityTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * 正常系: 自分の全講座の定員をなくせること
-     */
+    /** AC-ENROLL-021 */
     public function test_自分の全講座の定員をなくせること(): void
     {
         // Arrange
@@ -46,9 +43,6 @@ class ClearAllCapacityTest extends TestCase
         });
     }
 
-    /**
-     * 正常系: 定員が設定されていない講座も含めて正常に処理されること
-     */
     public function test_定員が設定されていない講座も含めて正常に処理されること(): void
     {
         // Arrange
@@ -75,9 +69,6 @@ class ClearAllCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 正常系: 講座がない場合も正常にレスポンスされること
-     */
     public function test_講座がない場合も正常にレスポンスされること(): void
     {
         // Arrange
@@ -96,9 +87,7 @@ class ClearAllCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 異常系: 受講者が存在する講座が含まれている場合はエラーになること
-     */
+    /** AC-ENROLL-020 */
     public function test_受講者が存在する講座が含まれている場合はエラーになること(): void
     {
         // Arrange
@@ -109,9 +98,7 @@ class ClearAllCapacityTest extends TestCase
             'capacity' => 10,
         ]);
 
-        Attendance::factory()->create([
-            'course_id' => $course->id,
-        ]);
+        Attendance::factory()->create(['course_id' => $course->id]);
 
         $this->actingAs($instructor, 'instructor');
 
@@ -122,16 +109,13 @@ class ClearAllCapacityTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
 
-        // capacityが変更されていないこと
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
             'capacity' => 10,
         ]);
     }
 
-    /**
-     * 異常系: 受講者ありの講座と受講者なしの講座が混在する場合はエラーになること
-     */
+    /** AC-ENROLL-020 */
     public function test_一部に受講者が存在する講座を含む場合はエラーになること(): void
     {
         // Arrange
@@ -146,11 +130,7 @@ class ClearAllCapacityTest extends TestCase
             'capacity' => 10,
         ]);
 
-        $student = Student::factory()->create();
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $courseWithStudents->id,
-        ]);
+        Attendance::factory()->create(['course_id' => $courseWithStudents->id]);
 
         $this->actingAs($instructor, 'instructor');
 
@@ -161,7 +141,6 @@ class ClearAllCapacityTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['courses']);
 
-        // どちらのcapacityも変更されていないこと（トランザクションでロールバック）
         $this->assertDatabaseHas('courses', [
             'id' => $courseWithoutStudents->id,
             'capacity' => 10,
@@ -172,9 +151,6 @@ class ClearAllCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 正常系: 他の講師の講座は影響を受けないこと
-     */
     public function test_他の講師の講座は影響を受けないこと(): void
     {
         // Arrange
@@ -199,16 +175,12 @@ class ClearAllCapacityTest extends TestCase
         // Assert
         $response->assertStatus(200);
 
-        // 他講師の講座のcapacityが変更されていないこと
         $this->assertDatabaseHas('courses', [
             'id' => $otherCourse->id,
             'capacity' => 20,
         ]);
     }
 
-    /**
-     * 正常系: 論理削除された講座は対象外であること
-     */
     public function test_論理削除された講座は対象外であること(): void
     {
         // Arrange
@@ -242,9 +214,6 @@ class ClearAllCapacityTest extends TestCase
         ]);
     }
 
-    /**
-     * 異常系: 未認証の場合はエラーになること
-     */
     public function test_未認証の場合はエラーになること(): void
     {
         // Act

@@ -18,63 +18,11 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_受講登録_成功(): void
+    /** AC-ENROLL-006 */
+    public function test_受講登録で下書きでないレッスンの受講状況が未着手で作られる(): void
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $student = Student::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->postJson(route('instructor.attendances.store'), [
-            'course_id' => $course->id,
-            'student_id' => $student->id,
-        ]);
-
-        // Assert
-        $response->assertStatus(200);
-        $response->assertJsonStructure([
-            'result',
-        ]);
-    }
-
-    public function test_受講登録_成功_レッスン受講レコードが一括作成される(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
-        $lessons = Lesson::factory()->count(3)->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->postJson(route('instructor.attendances.store'), [
-            'course_id' => $course->id,
-            'student_id' => $student->id,
-        ]);
-
-        // Assert
-        $response->assertStatus(200);
-        $attendance = Attendance::where('course_id', $course->id)
-            ->where('student_id', $student->id)
-            ->first();
-        $this->assertNotNull($attendance);
-        $this->assertCount(3, LessonAttendance::where('attendance_id', $attendance->id)->get());
-        foreach ($lessons as $lesson) {
-            $this->assertDatabaseHas('lesson_attendances', [
-                'attendance_id' => $attendance->id,
-                'lesson_id' => $lesson->id,
-                'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
-            ]);
-        }
-    }
-
-    public function test_受講登録_下書きレッスンには受講状況が作成されない(): void
-    {
-        // Arrange — 公開中・限定公開・下書きのレッスンを混在させる
-        $instructor = Instructor::factory()->create();
+        // Arrange — 公開・非公開・下書きのレッスンを混在させる
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $publicLesson = Lesson::factory()->create([
@@ -98,8 +46,9 @@ class StoreTest extends TestCase
             'student_id' => $student->id,
         ]);
 
-        // Assert — 下書きではないレッスンの分のみ受講状況が作成される
+        // Assert
         $response->assertStatus(200);
+        $response->assertJson(['result' => true]);
         $attendance = Attendance::where('course_id', $course->id)
             ->where('student_id', $student->id)
             ->first();
@@ -108,10 +57,12 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $publicLesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->assertDatabaseHas('lesson_attendances', [
             'attendance_id' => $attendance->id,
             'lesson_id' => $privateLesson->id,
+            'status' => LessonAttendanceStatusEnum::BEFORE_ATTENDANCE,
         ]);
         $this->assertDatabaseMissing('lesson_attendances', [
             'attendance_id' => $attendance->id,
@@ -119,9 +70,10 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_受講登録_全レッスンが下書きの場合は受講状況が作成されない(): void
+    /** AC-ENROLL-007 */
+    public function test_全レッスンが下書きの講座は受講だけが登録され受講状況は作られない(): void
     {
-        // Arrange — 講座内の全レッスンが下書き
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
@@ -138,7 +90,7 @@ class StoreTest extends TestCase
             'student_id' => $student->id,
         ]);
 
-        // Assert — 受講登録は成立するが、受講状況は1件も作成されない
+        // Assert
         $response->assertStatus(200);
         $attendance = Attendance::where('course_id', $course->id)
             ->where('student_id', $student->id)
@@ -147,7 +99,8 @@ class StoreTest extends TestCase
         $this->assertCount(0, LessonAttendance::where('attendance_id', $attendance->id)->get());
     }
 
-    public function test_定員オーバー_失敗(): void
+    /** AC-ENROLL-003 */
+    public function test_定員に達した講座には受講を登録できない(): void
     {
         // Arrange — 定員1の講座に既に1名登録済み
         $instructor = Instructor::factory()->create();
@@ -172,7 +125,8 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_重複登録_失敗(): void
+    /** AC-ENROLL-002 */
+    public function test_同じ受講生を同じ講座に二重に登録できない(): void
     {
         // Arrange — 同じ生徒が同じ講座に既に登録済み
         $instructor = Instructor::factory()->create();
@@ -225,13 +179,14 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_他の講師の講座には受講を登録できない(): void
     {
-        // Arrange — 他の講師の講座に受講登録しようとする
+        // Arrange
         $ownerInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $student = Student::factory()->create();
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -247,7 +202,7 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_講座と受講生の指定がなければ受講を登録できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

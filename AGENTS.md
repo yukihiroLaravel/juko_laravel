@@ -20,6 +20,7 @@
 | これから作る変更の起票 | `docs/changes/template.md` |
 | ドキュメントの書き方 | `docs/documentation-rules.md` |
 | 変更を実装するときの手順 | `.claude/skills/change-flow/SKILL.md` |
+| docs とテストの文章の点検 | `.claude/agents/writing-reviewer.md` |
 
 全体の入口は `docs/README.md` にある。ID を見かけたら `grep -rn 'BR-SHARED-006' docs/` で引く。
 
@@ -79,7 +80,7 @@ scripts/dc php artisan test --compact
 
 ## 実装のルール
 
-- コーディング規約は `docs/architecture/coding-standards.md` に従う。Laravelの汎用的なベストプラクティスは `laravel-best-practices` スキルを参照し、衝突する場合はプロジェクトの規約を優先する
+- コーディング規約は `docs/architecture/coding-standards.md` に従う
 - ドキュメントを書くときは `documentation-conventions` スキルと `docs/documentation-rules.md` に従う
 - 構成は Laravel 10 の形のまま運用している。ミドルウェアは `app/Http/Kernel.php`、例外処理は `app/Exceptions/Handler.php`、コマンドとスケジュールは `app/Console/Kernel.php` に登録する。公式ドキュメントや Boost が示す `bootstrap/app.php` の `withMiddleware` などは、ここでは効かない
 
@@ -101,6 +102,8 @@ scripts/dc php artisan test --compact
 - 技術選定の判断をした → `docs/adr/` に新しい記録を追加する
 
 文書を増やさず、既存の記述を上書きする。同じ主題が既に書かれていないかを `grep -rn` で確かめてから書く。
+
+書き終えたら、変更した docs とテストを `writing-reviewer` エージェントで点検する。ドキュメントだけを直したときも同じである。
 
 ## 仕様が不足しているとき
 

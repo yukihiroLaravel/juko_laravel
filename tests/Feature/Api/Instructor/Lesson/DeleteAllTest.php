@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -53,6 +52,7 @@ class DeleteAllTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-030 */
     public function test_受講済みレッスンを含むチャプターの全レッスン削除_失敗(): void
     {
         // Arrange — チャプター内の一方のレッスンにだけ受講がある
@@ -61,11 +61,7 @@ class DeleteAllTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessonWithAttendance = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lessonWithoutAttendance = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lessonWithAttendance->id,
             'attendance_id' => $attendance->id,
@@ -93,6 +89,7 @@ class DeleteAllTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師_失敗(): void
     {
         // Arrange
@@ -100,7 +97,7 @@ class DeleteAllTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -118,7 +115,7 @@ class DeleteAllTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_チャプターの指定が数値でないと全レッスンを削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

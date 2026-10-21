@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class StoreTest extends TestCase
@@ -25,6 +26,7 @@ class StoreTest extends TestCase
         Storage::fake();
     }
 
+    /** AC-AUTHOR-001 */
     public function test_受講期限なし_講座登録_成功(): void
     {
         // Arrange
@@ -46,6 +48,7 @@ class StoreTest extends TestCase
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
             'status' => CourseStatusEnum::DRAFT->value,
+            'capacity' => null,
         ]);
         $course = Course::where('title', 'テスト講座')->first();
         $this->assertDatabaseHas('course_tag', [
@@ -76,15 +79,7 @@ class StoreTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $this->assertDatabaseHas('courses', [
-            'title' => 'テスト講座',
-            'status' => CourseStatusEnum::DRAFT->value,
-        ]);
         $course = Course::where('title', 'テスト講座')->first();
-        $this->assertDatabaseHas('course_tag', [
-            'course_id' => $course->id,
-            'tag_id' => $tag->id,
-        ]);
         $this->assertDatabaseHas('course_deadlines', [
             'course_id' => $course->id,
             'fixed_date' => now()->addDays(30)->format('Y-m-d 00:00:00'),
@@ -110,26 +105,19 @@ class StoreTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $this->assertDatabaseHas('courses', [
-            'title' => 'テスト講座',
-            'status' => CourseStatusEnum::DRAFT->value,
-        ]);
         $course = Course::where('title', 'テスト講座')->first();
-        $this->assertDatabaseHas('course_tag', [
-            'course_id' => $course->id,
-            'tag_id' => $tag->id,
-        ]);
         $this->assertDatabaseHas('course_deadlines', [
             'course_id' => $course->id,
             'relative_days' => 30,
         ]);
     }
 
-    public function test_無効なタグの指定_失敗(): void
+    /** AC-AUTHOR-003 */
+    public function test_他の講師のタグは指定できない(): void
     {
-        // Arrange — 別の講師のタグを指定
-        $instructor = Instructor::factory()->create();
-        $otherInstructor = Instructor::factory()->create();
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $otherTag = Tag::factory()->create(['instructor_id' => $otherInstructor->id]);
         $this->actingAs($instructor, 'instructor');
         $file = UploadedFile::fake()->image('test.jpg');
@@ -149,6 +137,7 @@ class StoreTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-006 */
     public function test_定員あり_講座登録_成功(): void
     {
         // Arrange
@@ -170,12 +159,13 @@ class StoreTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('courses', [
             'title' => 'テスト講座',
-            'status' => CourseStatusEnum::DRAFT->value,
             'capacity' => 30,
         ]);
     }
 
-    public function test_定員なし_講座登録_成功(): void
+    /** AC-AUTHOR-006 */
+    #[DataProvider('範囲外の定員')]
+    public function test_定員が1人から100人の範囲外だと登録できない(int $capacity): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -189,32 +179,7 @@ class StoreTest extends TestCase
             'image' => $file,
             'tag_id' => $tag->id,
             'deadline_type' => 'none',
-        ]);
-
-        // Assert
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('courses', [
-            'title' => 'テスト講座',
-            'status' => CourseStatusEnum::DRAFT->value,
-            'capacity' => null,
-        ]);
-    }
-
-    public function test_定員が0以下_バリデーションエラー(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
-
-        // Act
-        $response = $this->post(route('instructor.courses.store'), [
-            'title' => 'テスト講座',
-            'image' => $file,
-            'tag_id' => $tag->id,
-            'deadline_type' => 'none',
-            'capacity' => 0,
+            'capacity' => $capacity,
         ]);
 
         // Assert
@@ -222,29 +187,19 @@ class StoreTest extends TestCase
         $response->assertJsonValidationErrors(['capacity']);
     }
 
-    public function test_定員が上限超過_バリデーションエラー(): void
+    /**
+     * @return array<string, array{int}>
+     */
+    public static function 範囲外の定員(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $tag = Tag::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-        $file = UploadedFile::fake()->image('test.jpg');
-
-        // Act
-        $response = $this->post(route('instructor.courses.store'), [
-            'title' => 'テスト講座',
-            'image' => $file,
-            'tag_id' => $tag->id,
-            'deadline_type' => 'none',
-            'capacity' => 101,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['capacity']);
+        return [
+            '0人' => [0],
+            '101人' => [101],
+        ];
     }
 
-    public function test_バリデーションエラー_失敗(): void
+    /** AC-AUTHOR-002 */
+    public function test_必須項目が空だと登録できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

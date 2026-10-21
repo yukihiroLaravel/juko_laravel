@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,9 +15,10 @@ class BulkDeleteTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-AUTHOR-031 */
     public function test_複数レッスンの一括削除_成功(): void
     {
-        // Arrange — 受講なしのレッスン3件のうち、先頭2件を削除対象にする
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
@@ -54,6 +54,7 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-030 AC-COMMON-014 */
     public function test_受講済みレッスンを含む一括削除_失敗(): void
     {
         // Arrange — 削除対象の一方にだけ受講がある
@@ -62,11 +63,7 @@ class BulkDeleteTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessonWithAttendance = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
         $lessonWithoutAttendance = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 2]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lessonWithAttendance->id,
             'attendance_id' => $attendance->id,
@@ -96,6 +93,7 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-012 */
     public function test_別チャプターのレッスンを含む一括削除_失敗(): void
     {
         // Arrange — 同じ講師の別チャプターに属するレッスンを混ぜる
@@ -127,6 +125,7 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師_失敗(): void
     {
         // Arrange
@@ -134,7 +133,7 @@ class BulkDeleteTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id, 'order' => 1]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -154,7 +153,7 @@ class BulkDeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_レッスンを1件も指定しないと削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

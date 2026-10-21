@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api\Instructor\Notification;
 
-use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,14 +11,13 @@ class UpdateTypeAllTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_お知らせ更新_成功(): void
+    /** AC-NOTIF-010 */
+    public function test_自分のすべてのお知らせの種類をまとめて変更できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $notification = Notification::factory()->create([
             'instructor_id' => $instructor->id,
-            'course_id' => $course->id,
             'type' => 'always',
         ]);
         $this->actingAs($instructor, 'instructor');
@@ -37,7 +35,7 @@ class UpdateTypeAllTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー_失敗(): void
+    public function test_種類が不正なときはまとめて変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

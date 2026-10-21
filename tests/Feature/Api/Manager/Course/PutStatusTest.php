@@ -7,12 +7,14 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PutStatusTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-AUTHOR-013・AC-AUTHOR-014 */
     public function test_マネージャーで自分の複数講座のステータスを一括更新_成功(): void
     {
         // Arrange
@@ -49,6 +51,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-013・AC-AUTHOR-014・AC-AUTHZ-002 */
     public function test_マネージャーで配下の講師の講座も一括更新_成功(): void
     {
         // Arrange
@@ -90,6 +93,7 @@ class PutStatusTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-013 */
     public function test_下書きの講座は一括更新の対象外(): void
     {
         // Arrange
@@ -126,7 +130,8 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_スコープ外の講座は一括更新の対象外(): void
+    /** AC-AUTHOR-013 */
+    public function test_配下でない講師の講座は一括更新の対象外(): void
     {
         // Arrange
         $ownerManager = Instructor::factory()->create();
@@ -172,62 +177,33 @@ class PutStatusTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー_statusが未送信(): void
+    /**
+     * 公開状態に指定できない値。下書きの扱いは仕様の確認待ちのため、AC-ID は付けていない
+     *
+     * @return array<string, array{array<string, mixed>}>
+     */
+    public static function invalidRequests(): array
     {
-        // Arrange
-        $manager = Instructor::factory()->create();
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('manager.courses.put-status'), []);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
+        return [
+            '公開状態が未送信' => [[]],
+            '公開状態が数値' => [['status' => 123]],
+            '公開状態が下書き' => [['status' => StatusEnum::DRAFT->value]],
+            '公開状態が存在しない値' => [['status' => 'invalid_status']],
+        ];
     }
 
-    public function test_バリデーションエラー_statusが文字列でない(): void
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    #[DataProvider('invalidRequests')]
+    public function test_公開状態が未送信か不正な値だと一括更新できない(array $payload): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
         $this->actingAs($manager, 'instructor');
 
         // Act
-        $response = $this->putJson(route('manager.courses.put-status'), [
-            'status' => 123,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
-    }
-
-    public function test_バリデーションエラー_statusが下書き(): void
-    {
-        // Arrange
-        $manager = Instructor::factory()->create();
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('manager.courses.put-status'), [
-            'status' => StatusEnum::DRAFT->value,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
-    }
-
-    public function test_バリデーションエラー_statusが許容外の文字列(): void
-    {
-        // Arrange
-        $manager = Instructor::factory()->create();
-        $this->actingAs($manager, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('manager.courses.put-status'), [
-            'status' => 'invalid_status',
-        ]);
+        $response = $this->putJson(route('manager.courses.put-status'), $payload);
 
         // Assert
         $response->assertStatus(422);

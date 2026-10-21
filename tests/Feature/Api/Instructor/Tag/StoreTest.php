@@ -10,10 +10,11 @@ class StoreTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_タグ登録_成功(): void
+    /** AC-TAG-001 */
+    public function test_タグを自分のタグとして登録できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($instructor, 'instructor');
 
         // Act
@@ -29,7 +30,7 @@ class StoreTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_タグの表記が空のときは登録できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

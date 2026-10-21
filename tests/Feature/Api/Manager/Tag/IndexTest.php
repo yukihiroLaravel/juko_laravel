@@ -13,7 +13,8 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_タグ一覧取得_成功(): void
+    /** AC-TAG-009 */
+    public function test_自分と配下の講師のタグを一覧で取得できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -35,7 +36,7 @@ class IndexTest extends TestCase
         $response->assertJsonCount(6, 'data');
     }
 
-    public function test_パラメータ指定_成功(): void
+    public function test_タグを指定すると指定したタグだけを取得できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -51,11 +52,12 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.tag_id', $tag->id);
     }
 
-    public function test_権限エラー(): void
+    public function test_マネージャーでない講師はタグの一覧を取得できない(): void
     {
-        // Arrange — マネージャーではない講師
+        // Arrange
         $nonManager = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($nonManager, 'instructor');
 
@@ -64,5 +66,8 @@ class IndexTest extends TestCase
 
         // Assert
         $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Forbidden, not allowed to use manager api.',
+        ]);
     }
 }

@@ -21,7 +21,7 @@ class UpdateTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_講師更新_成功(): void
+    public function test_講師の情報を更新できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['profile_image' => 'instructor/dummy.jpg']);
@@ -49,7 +49,7 @@ class UpdateTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_入力がすべて空のときは講師の情報を更新できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

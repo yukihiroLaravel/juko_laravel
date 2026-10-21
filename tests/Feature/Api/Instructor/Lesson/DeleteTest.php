@@ -8,7 +8,6 @@ use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\Lesson;
 use App\Model\LessonAttendance;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +17,7 @@ class DeleteTest extends TestCase
 
     public function test_レッスン削除_成功(): void
     {
-        // Arrange — 受講なしのレッスン
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
@@ -41,18 +40,15 @@ class DeleteTest extends TestCase
         ]);
     }
 
+    /** AC-AUTHOR-030 */
     public function test_受講済みレッスン削除_失敗(): void
     {
-        // Arrange — レッスンに受講がある場合
+        // Arrange
         $instructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $student = Student::factory()->create();
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
+        $attendance = Attendance::factory()->create(['course_id' => $course->id]);
         LessonAttendance::factory()->create([
             'lesson_id' => $lesson->id,
             'attendance_id' => $attendance->id,
@@ -69,8 +65,12 @@ class DeleteTest extends TestCase
         $response->assertJson([
             'message' => 'Forbidden, this lesson has attendance.',
         ]);
+        $this->assertNotSoftDeleted('lessons', [
+            'id' => $lesson->id,
+        ]);
     }
 
+    /** AC-AUTHZ-001 */
     public function test_権限がない講師_失敗(): void
     {
         // Arrange
@@ -78,7 +78,7 @@ class DeleteTest extends TestCase
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -93,7 +93,7 @@ class DeleteTest extends TestCase
         ]);
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_レッスンの指定が数値でないと削除できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();

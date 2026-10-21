@@ -6,15 +6,15 @@ use App\Model\Attendance;
 use App\Model\Course;
 use App\Model\Instructor;
 use App\Model\ManageInstructor;
-use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class PutCapacityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_講座定員を一括更新_成功(): void
+    public function test_選択した講座の定員をまとめて変更できる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -35,7 +35,8 @@ class PutCapacityTest extends TestCase
         $this->assertDatabaseHas('courses', ['id' => $course2->id, 'capacity' => 50]);
     }
 
-    public function test_定員をnullに更新_成功(): void
+    /** AC-ENROLL-019 */
+    public function test_定員を空にすると定員なしになる(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -54,7 +55,8 @@ class PutCapacityTest extends TestCase
         $this->assertDatabaseHas('courses', ['id' => $course->id, 'capacity' => null]);
     }
 
-    public function test_マネージャーで配下の講師の講座を一括更新_成功(): void
+    /** AC-AUTHZ-002 */
+    public function test_マネージャーは配下の講師の講座の定員を変更できる(): void
     {
         // Arrange
         $manager = Instructor::factory()->create();
@@ -78,38 +80,38 @@ class PutCapacityTest extends TestCase
         $this->assertDatabaseHas('courses', ['id' => $course->id, 'capacity' => 30]);
     }
 
-    public function test_定員が現在の受講者数を下回る場合_失敗(): void
+    /** AC-ENROLL-018 */
+    public function test_定員が現在の受講者数を下回る講座を含むと1件も更新されない(): void
     {
-        // Arrange
+        // Arrange — 受講者5人の講座と、受講者のいない講座
         $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id, 'capacity' => 10]);
-        $students = Student::factory()->count(5)->create();
-        foreach ($students as $student) {
-            Attendance::factory()->create([
-                'student_id' => $student->id,
-                'course_id' => $course->id,
-            ]);
-        }
+        $courseWithStudents = Course::factory()->create(['instructor_id' => $instructor->id, 'capacity' => 10]);
+        $courseWithoutStudents = Course::factory()->create(['instructor_id' => $instructor->id, 'capacity' => 10]);
+        Attendance::factory()->count(5)->create(['course_id' => $courseWithStudents->id]);
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [$course->id],
+            'courses' => [$courseWithStudents->id, $courseWithoutStudents->id],
             'capacity' => 3,
         ]);
 
         // Assert
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['capacity']);
+        $this->assertDatabaseHas('courses', ['id' => $courseWithStudents->id, 'capacity' => 10]);
+        $this->assertDatabaseHas('courses', ['id' => $courseWithoutStudents->id, 'capacity' => 10]);
     }
 
-    public function test_権限がないマネージャーの場合更新できない(): void
+    /** AC-AUTHZ-001, AC-AUTHZ-003 */
+    #[DataProvider('instructorTypeProvider')]
+    public function test_担当でも配下でもない講師の講座の定員は変更できない(string $type): void
     {
-        // Arrange
-        $manager = Instructor::factory()->create();
+        // Arrange — 操作者の担当でも配下でもない講師の講座
+        $operator = Instructor::factory()->create(['type' => $type]);
         $otherInstructor = Instructor::factory()->create();
         $course = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
-        $this->actingAs($manager, 'instructor');
+        $this->actingAs($operator, 'instructor');
 
         // Act
         $response = $this->putJson(route('instructor.courses.put-capacity'), [
@@ -124,27 +126,18 @@ class PutCapacityTest extends TestCase
         ]);
     }
 
-    public function test_権限がない講師の場合更新できない(): void
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function instructorTypeProvider(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create(['type' => 'instructor']);
-        $otherInstructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $otherInstructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [$course->id],
-            'capacity' => 50,
-        ]);
-
-        // Assert
-        $response->assertStatus(403);
-        $response->assertJson([
-            'message' => 'This action is unauthorized.',
-        ]);
+        return [
+            'マネージャー' => ['manager'],
+            '講師' => ['instructor'],
+        ];
     }
 
+    /** AC-AUTHZ-003 */
     public function test_一部に権限がない講座を含む場合更新できない(): void
     {
         // Arrange
@@ -168,88 +161,39 @@ class PutCapacityTest extends TestCase
         $this->assertDatabaseHas('courses', ['id' => $ownCourse->id, 'capacity' => 10]);
     }
 
-    public function test_バリデーションエラー_coursesが未送信(): void
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    #[DataProvider('invalidCoursesProvider')]
+    public function test_講座の指定が不正だと定員を変更できない(array $payload, string $errorKey): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
         // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), []);
+        $response = $this->putJson(route('instructor.courses.put-capacity'), $payload);
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
+        $response->assertJsonValidationErrors([$errorKey]);
     }
 
-    public function test_バリデーションエラー_coursesが空配列(): void
+    /**
+     * @return array<string, array{array<string, mixed>, string}>
+     */
+    public static function invalidCoursesProvider(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [],
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
+        return [
+            '講座の指定がない' => [[], 'courses'],
+            '講座の指定が空' => [['courses' => []], 'courses'],
+            '講座の指定が配列でない' => [['courses' => 'abc', 'capacity' => 10], 'courses'],
+            '講座の指定が整数でない' => [['courses' => ['abc'], 'capacity' => 10], 'courses.0'],
+            '存在しない講座を含む' => [['courses' => [99999], 'capacity' => 10], 'courses.0'],
+        ];
     }
 
-    public function test_バリデーションエラー_coursesが配列でない(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => 'abc',
-            'capacity' => 10,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses']);
-    }
-
-    public function test_バリデーションエラー_courses要素が整数でない(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => ['abc'],
-            'capacity' => 10,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    public function test_バリデーションエラー_存在しない_i_dを含む(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [99999],
-            'capacity' => 10,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['courses.0']);
-    }
-
-    public function test_バリデーションエラー_削除済みの_i_dを含む(): void
+    public function test_削除済みの講座を含むと定員を変更できない(): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -268,7 +212,8 @@ class PutCapacityTest extends TestCase
         $response->assertJsonValidationErrors(['courses.0']);
     }
 
-    public function test_バリデーションエラー_capacityが0(): void
+    #[DataProvider('invalidCapacityProvider')]
+    public function test_定員が不正だと変更できない(mixed $capacity): void
     {
         // Arrange
         $instructor = Instructor::factory()->create();
@@ -278,7 +223,7 @@ class PutCapacityTest extends TestCase
         // Act
         $response = $this->putJson(route('instructor.courses.put-capacity'), [
             'courses' => [$course->id],
-            'capacity' => 0,
+            'capacity' => $capacity,
         ]);
 
         // Assert
@@ -286,39 +231,15 @@ class PutCapacityTest extends TestCase
         $response->assertJsonValidationErrors(['capacity']);
     }
 
-    public function test_バリデーションエラー_capacityが負の値(): void
+    /**
+     * @return array<string, array{mixed}>
+     */
+    public static function invalidCapacityProvider(): array
     {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [$course->id],
-            'capacity' => -1,
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['capacity']);
-    }
-
-    public function test_バリデーションエラー_capacityが文字列(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->putJson(route('instructor.courses.put-capacity'), [
-            'courses' => [$course->id],
-            'capacity' => 'abc',
-        ]);
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['capacity']);
+        return [
+            '定員が0' => [0],
+            '定員が負の数' => [-1],
+            '定員が文字列' => ['abc'],
+        ];
     }
 }

@@ -18,7 +18,21 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_学習履歴取得_成功(): void
+    #[\Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+        CarbonImmutable::setTestNow(CarbonImmutable::create(2026, 3, 12));
+    }
+
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
+
+    public function test_自分の受講の総数を講座とレッスンとチャプターごとに取得できる(): void
     {
         // Arrange
         $student = Student::factory()->create();
@@ -56,7 +70,7 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.stats.chapters.total', 1);
     }
 
-    public function test_学習履歴取得_受講なし_成功(): void
+    public function test_受講がない場合は件数がすべて0で最新の完了日時もない(): void
     {
         // Arrange
         $student = Student::factory()->create();
@@ -76,11 +90,11 @@ class IndexTest extends TestCase
         $response->assertJsonPath('data.stats.chapters.total', 0);
     }
 
+    /** AC-ANALYTICS-035 */
     public function test_学習履歴取得_期間内に完了した講座のみカウントされる(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $course1 = Course::factory()->create();
@@ -107,15 +121,13 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.courses.completed', 1);
         $response->assertJsonPath('data.stats.courses.total', 2);
-
-        CarbonImmutable::setTestNow();
     }
 
+    /** AC-ANALYTICS-035 */
     public function test_学習履歴取得_期間内に完了したレッスンのみカウントされる(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $course = Course::factory()->create();
@@ -150,15 +162,13 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.lessons.completed', 1);
         $response->assertJsonPath('data.stats.lessons.total', 2);
-
-        CarbonImmutable::setTestNow();
     }
 
+    /** AC-ANALYTICS-036 */
     public function test_学習履歴取得_期間内の最新レッスン完了日時が返却される(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $course = Course::factory()->create();
@@ -201,15 +211,13 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.lessons.last_completed_at', $latestCompletedAt->format('Y-m-d H:i:s'));
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_学習履歴取得_期間内に完了レッスンがない場合は最新レッスン完了日時がnull(): void
+    /** AC-ANALYTICS-036 */
+    public function test_学習履歴取得_期間内に完了したレッスンがない場合は最新の完了日時がない(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $course = Course::factory()->create();
@@ -235,15 +243,13 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.lessons.last_completed_at', null);
-
-        CarbonImmutable::setTestNow();
     }
 
+    /** AC-ANALYTICS-037 */
     public function test_学習履歴取得_全レッスン完了したチャプターのみカウントされる(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $course = Course::factory()->create();
@@ -263,7 +269,6 @@ class IndexTest extends TestCase
             'course_id' => $course->id,
         ]);
 
-        // チャプター1の全レッスンを期間内に完了
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson1a->id,
@@ -277,7 +282,6 @@ class IndexTest extends TestCase
             'completed_at' => $now->subDays(3),
         ]);
 
-        // チャプター2は1つだけ完了
         LessonAttendance::factory()->create([
             'attendance_id' => $attendance->id,
             'lesson_id' => $lesson2a->id,
@@ -298,15 +302,13 @@ class IndexTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.chapters.completed', 1);
         $response->assertJsonPath('data.stats.chapters.total', 2);
-
-        CarbonImmutable::setTestNow();
     }
 
+    /** AC-ANALYTICS-038 */
     public function test_学習履歴取得_期間内のログイン回数のみカウントされる(): void
     {
         // Arrange
-        $now = CarbonImmutable::create(2026, 3, 12);
-        CarbonImmutable::setTestNow($now);
+        $now = CarbonImmutable::now();
 
         $student = Student::factory()->create();
         $otherStudent = Student::factory()->create();
@@ -335,11 +337,9 @@ class IndexTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJsonPath('data.stats.login_count', 3);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_未認証_学習履歴取得_失敗(): void
+    public function test_未ログインの場合は学習履歴を取得できない(): void
     {
         // Act
         $response = $this->getJson(route('student.learning-history.index'));

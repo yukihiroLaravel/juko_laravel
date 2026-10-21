@@ -11,11 +11,13 @@ class IndexTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_タグ一覧取得_成功(): void
+    /** AC-TAG-007 */
+    public function test_自分のタグの一覧を取得できる(): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         Tag::factory()->count(3)->create(['instructor_id' => $instructor->id]);
+        Tag::factory()->create();
         $this->actingAs($instructor, 'instructor');
 
         // Act

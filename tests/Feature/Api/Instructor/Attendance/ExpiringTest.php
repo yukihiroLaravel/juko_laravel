@@ -8,22 +8,64 @@ use App\Model\Instructor;
 use App\Model\Student;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ExpiringTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_thresholdsごとに排他的にグループ化される(): void
+    #[\Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
+    }
+
+    #[\Override]
+    protected function tearDown(): void
+    {
+        CarbonImmutable::setTestNow();
+        parent::tearDown();
+    }
+
+    /**
+     * いずれの区間にも含めない受講生の受講期限
+     *
+     * @return array<string, array{?string, list<int>}>
+     */
+    public static function excludedDeadlines(): array
+    {
+        return [
+            '受講期限なし' => [null, [30]],
+            '期限切れ済み（昨日が期限）' => ['2026-03-31', [30]],
+            '当日が期限' => ['2026-04-01', [3]],
+        ];
+    }
+
+    /**
+     * 422 になる入力
+     *
+     * @return array<string, array{bool, array<string, list<int>>, string}>
+     */
+    public static function invalidInputs(): array
+    {
+        return [
+            '日数を指定しない' => [true, [], 'thresholds'],
+            '日数が 1 未満' => [true, ['thresholds' => [0]], 'thresholds.0'],
+            '存在しない講座' => [false, ['thresholds' => [30]], 'course_id'],
+        ];
+    }
+
+    /** AC-ANALYTICS-028・AC-ANALYTICS-030 */
+    public function test_指定した日数ごとに受講期限が近い区間へ重複なく振り分ける(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // 2日後に期限切れ（3日以内グループ）
+        // 2日後に期限切れ
         $student3days = Student::factory()->create();
         Attendance::factory()->create([
             'student_id' => $student3days->id,
@@ -31,7 +73,7 @@ class ExpiringTest extends TestCase
             'attendance_deadline' => CarbonImmutable::parse('2026-04-03'),
         ]);
 
-        // 5日後に期限切れ（4〜7日グループ）
+        // 5日後に期限切れ
         $student7days = Student::factory()->create();
         Attendance::factory()->create([
             'student_id' => $student7days->id,
@@ -39,7 +81,7 @@ class ExpiringTest extends TestCase
             'attendance_deadline' => CarbonImmutable::parse('2026-04-06'),
         ]);
 
-        // 20日後に期限切れ（8〜30日グループ）
+        // 20日後に期限切れ
         $student30days = Student::factory()->create();
         Attendance::factory()->create([
             'student_id' => $student30days->id,
@@ -58,45 +100,39 @@ class ExpiringTest extends TestCase
         $data = $response->json('data');
         $this->assertCount(3, $data);
 
-        // 3日以内グループ
         $this->assertEquals(3, $data[0]['days']);
         $this->assertCount(1, $data[0]['students']);
         $this->assertEquals($student3days->id, $data[0]['students'][0]['student_id']);
 
-        // 4〜7日グループ
         $this->assertEquals(7, $data[1]['days']);
         $this->assertCount(1, $data[1]['students']);
         $this->assertEquals($student7days->id, $data[1]['students'][0]['student_id']);
 
-        // 8〜30日グループ
         $this->assertEquals(30, $data[2]['days']);
         $this->assertCount(1, $data[2]['students']);
         $this->assertEquals($student30days->id, $data[2]['students'][0]['student_id']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_期限なしの受講生は含まれない(): void
+    /** AC-ANALYTICS-031・AC-ANALYTICS-032 */
+    #[DataProvider('excludedDeadlines')]
+    public function test_受講期限がない・切れている・当日の受講生はどの区間にも含めない(?string $deadline, array $thresholds): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // 期限なしの受講生
-        $studentNoDeadline = Student::factory()->create();
+        $student = Student::factory()->create();
         Attendance::factory()->create([
-            'student_id' => $studentNoDeadline->id,
+            'student_id' => $student->id,
             'course_id' => $course->id,
-            'attendance_deadline' => null,
+            'attendance_deadline' => $deadline === null ? null : CarbonImmutable::parse($deadline),
         ]);
 
         // Act
         $response = $this->getJson(route('instructor.courses.attendances.expiring', [
             'course_id' => $course->id,
-            'thresholds' => [30],
+            'thresholds' => $thresholds,
         ]));
 
         // Assert
@@ -104,48 +140,13 @@ class ExpiringTest extends TestCase
         $data = $response->json('data');
         $this->assertCount(1, $data);
         $this->assertCount(0, $data[0]['students']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_期限切れ済みの受講生は含まれない(): void
+    /** AC-ANALYTICS-028 */
+    public function test_受講期限がちょうど指定した日数後の受講生は含める(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // 昨日に期限切れ
-        $studentExpired = Student::factory()->create();
-        Attendance::factory()->create([
-            'student_id' => $studentExpired->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-03-31'),
-        ]);
-
-        // Act
-        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
-            'course_id' => $course->id,
-            'thresholds' => [30],
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $data = $response->json('data');
-        $this->assertCount(1, $data);
-        $this->assertCount(0, $data[0]['students']);
-
-        CarbonImmutable::setTestNow();
-    }
-
-    public function test_境界値_ちょうどthreshold日後の受講生は含まれる(): void
-    {
-        // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -168,47 +169,13 @@ class ExpiringTest extends TestCase
         $data = $response->json('data');
         $this->assertCount(1, $data[0]['students']);
         $this->assertEquals($student->id, $data[0]['students'][0]['student_id']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_境界値_当日の受講生は含まれない(): void
+    /** AC-ANALYTICS-033 */
+    public function test_近日期限切れの受講生に氏名と受講期限日と期限までの残り日数が含まれる(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // 当日が期限
-        $student = Student::factory()->create();
-        Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-            'attendance_deadline' => CarbonImmutable::parse('2026-04-01'),
-        ]);
-
-        // Act
-        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
-            'course_id' => $course->id,
-            'thresholds' => [3],
-        ]));
-
-        // Assert
-        $response->assertStatus(200);
-        $data = $response->json('data');
-        $this->assertCount(0, $data[0]['students']);
-
-        CarbonImmutable::setTestNow();
-    }
-
-    public function test_レスポンスにdays_until_expiryが含まれる(): void
-    {
-        // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -235,16 +202,12 @@ class ExpiringTest extends TestCase
         $this->assertEquals('山田 太郎', $studentData['name']);
         $this->assertEquals('2026-04-11', $studentData['expires_at']);
         $this->assertEquals(10, $studentData['days_until_expiry']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_受講期限が近い順にソートされる(): void
+    public function test_受講期限が近い順に並ぶ(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
@@ -276,21 +239,16 @@ class ExpiringTest extends TestCase
         $this->assertCount(2, $students);
         $this->assertEquals($studentSooner->id, $students[0]['student_id']);
         $this->assertEquals($studentLater->id, $students[1]['student_id']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_他講座の受講生は含まれない(): void
+    public function test_ほかの講座の受講生は含めない(): void
     {
         // Arrange
-        CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-04-01'));
-
-        $instructor = Instructor::factory()->create();
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $instructor->id]);
         $otherCourse = Course::factory()->create(['instructor_id' => $instructor->id]);
         $this->actingAs($instructor, 'instructor');
 
-        // 対象講座の受講生
         $studentInCourse = Student::factory()->create();
         Attendance::factory()->create([
             'student_id' => $studentInCourse->id,
@@ -298,7 +256,6 @@ class ExpiringTest extends TestCase
             'attendance_deadline' => CarbonImmutable::parse('2026-04-05'),
         ]);
 
-        // 別講座の受講生
         $studentInOther = Student::factory()->create();
         Attendance::factory()->create([
             'student_id' => $studentInOther->id,
@@ -317,16 +274,15 @@ class ExpiringTest extends TestCase
         $students = $response->json('data.0.students');
         $this->assertCount(1, $students);
         $this->assertEquals($studentInCourse->id, $students[0]['student_id']);
-
-        CarbonImmutable::setTestNow();
     }
 
-    public function test_権限のない講師_失敗(): void
+    /** AC-AUTHZ-001 */
+    public function test_担当ではない講師の講座は取得できない(): void
     {
         // Arrange
-        $ownerInstructor = Instructor::factory()->create();
+        $ownerInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $course = Course::factory()->create(['instructor_id' => $ownerInstructor->id]);
-        $otherInstructor = Instructor::factory()->create();
+        $otherInstructor = Instructor::factory()->create(['type' => 'instructor']);
         $this->actingAs($otherInstructor, 'instructor');
 
         // Act
@@ -339,55 +295,29 @@ class ExpiringTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_バリデーションエラー_thresholdsが未指定(): void
+    /**
+     * AC-ANALYTICS-029
+     *
+     * @param  array<string, list<int>>  $query
+     */
+    #[DataProvider('invalidInputs')]
+    public function test_日数の指定または講座が不正だと422になる(bool $courseExists, array $query, string $errorKey): void
     {
         // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $courseId = $courseExists
+            ? Course::factory()->create(['instructor_id' => $instructor->id])->id
+            : 99999;
         $this->actingAs($instructor, 'instructor');
 
         // Act
         $response = $this->getJson(route('instructor.courses.attendances.expiring', [
-            'course_id' => $course->id,
+            'course_id' => $courseId,
+            ...$query,
         ]));
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['thresholds']);
-    }
-
-    public function test_バリデーションエラー_thresholdsが0以下(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
-            'course_id' => $course->id,
-            'thresholds' => [0],
-        ]));
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['thresholds.0']);
-    }
-
-    public function test_バリデーションエラー_存在しない講座id(): void
-    {
-        // Arrange
-        $instructor = Instructor::factory()->create();
-        $this->actingAs($instructor, 'instructor');
-
-        // Act
-        $response = $this->getJson(route('instructor.courses.attendances.expiring', [
-            'course_id' => 99999,
-            'thresholds' => [30],
-        ]));
-
-        // Assert
-        $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['course_id']);
+        $response->assertJsonValidationErrors([$errorKey]);
     }
 }

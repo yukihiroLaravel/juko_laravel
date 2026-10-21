@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Dto\Student\Notification\IndexDto;
+use App\Enums\Notification\TypeEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\Notification\IndexRequest;
 use App\Http\Requests\Student\Notification\MarkReadRequest;
 use App\Http\Requests\Student\Notification\ShowRequest;
 use App\Http\Resources\Base\Student\NotificationResource;
 use App\Http\Resources\Student\NotificationIndexResource;
+use App\Model\Attendance;
+use App\Model\Notification;
 use App\Model\Student;
 use App\Services\Notification\IndexService;
 use App\Services\Notification\MarkReadService;
@@ -51,6 +54,9 @@ class NotificationController extends Controller
             notificationId: (int) $request->notification_id
         );
 
+        // Policyによる認可処理（本人の受講で、受講期限内であること）
+        $this->authorize('viewNotification', $response['attendance']);
+
         return new NotificationResource([
             'notification' => $response['notification'],
             'attendance_deadline' => $response['attendance']->attendance_deadline?->format('Y-m-d'),
@@ -63,13 +69,18 @@ class NotificationController extends Controller
     public function markRead(MarkReadRequest $request, MarkReadService $service): JsonResponse
     {
         $student = $request->user();
-        $notificationId = $request->input('notification_id');
 
-        // サービスクラス呼び出し(登録処理)
-        $service(
-            student: $student,
-            notificationId: $notificationId
-        );
+        $notification = Notification::where('id', $request->input('notification_id'))
+            ->where('type', TypeEnum::ONCE)
+            ->firstOrFail();
+        $attendance = Attendance::where('student_id', $student->id)
+            ->where('course_id', $notification->course_id)
+            ->firstOrFail();
+
+        // 既読を記録する前に、本人の受講で受講期限内であることを確かめる
+        $this->authorize('viewNotification', $attendance);
+
+        $service(student: $student, notification: $notification);
 
         return response()->json([
             'result' => true,

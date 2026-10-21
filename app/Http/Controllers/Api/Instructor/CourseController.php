@@ -27,7 +27,6 @@ use App\Services\Course\PutStatusService;
 use App\Services\Course\StoreService;
 use App\Services\Course\UpdateService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,10 +55,8 @@ class CourseController extends Controller
             /** @var Tag $tag */
             $tag = Tag::findOrFail($tagId);
 
-            // ログインしている講師とtag_idの講師が一致しない
-            if ($instructorId !== $tag->instructor_id) {
-                throw new AuthorizationException('Forbidden, invalid instructor_id.');
-            }
+            // Policyによる認可処理（本人のタグのみ）
+            $this->authorize('viewOwn', $tag);
         }
 
         $query = Course::where('instructor_id', $instructorId)->withCount('attendances')

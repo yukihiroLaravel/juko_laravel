@@ -97,4 +97,12 @@ class CoursePolicy
         // 一般講師
         return $courses->every(fn (Course $course) => $course->instructor_id === $instructor->id);
     }
+
+    /**
+     * 講師側で本人の講座を指定する際の認可処理（配下の講師の講座は含めない）
+     */
+    public function viewOwn(Instructor $instructor, Course $course): bool
+    {
+        return $course->instructor_id === $instructor->id;
+    }
 }

@@ -57,4 +57,12 @@ class TagPolicy
         // マネージャー権限のない講師
         return $tag->instructor_id === $instructor->id;
     }
+
+    /**
+     * 講師側で本人のタグを指定する際の認可処理（配下の講師のタグは含めない）
+     */
+    public function viewOwn(Instructor $instructor, Tag $tag): bool
+    {
+        return $tag->instructor_id === $instructor->id;
+    }
 }

@@ -119,7 +119,7 @@ class DeleteTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, not allowed to delete this chapter.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

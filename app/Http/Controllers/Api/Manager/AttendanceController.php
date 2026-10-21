@@ -9,14 +9,11 @@ use App\Http\Requests\Manager\Attendance\LoginRateRequest;
 use App\Http\Requests\Manager\Attendance\ShowStatusRequest;
 use App\Model\Attendance;
 use App\Model\Course;
-use App\Model\Instructor;
 use App\Model\LessonAttendance;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * @tags Manager-Attendance
@@ -28,21 +25,10 @@ class AttendanceController extends Controller
      */
     public function loginRate(LoginRateRequest $request): JsonResponse
     {
-        // 現在ログインしているinstructorのidを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // ログインしている講師とその管理している講師を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        // 管理している講師のIDを配列として取得し、自分自身のIDも追加
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $course = Course::findOrFail($request->course_id);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+
+        // Policyによる認可処理
+        $this->authorize('view', $course);
 
         $nowDate = new Carbon;
 
@@ -76,21 +62,10 @@ class AttendanceController extends Controller
      */
     public function showStatus(ShowStatusRequest $request): JsonResponse
     {
-        // 現在ログインしているinstructorのidを取得
-        $instructorId = Auth::guard('instructor')->user()->id;
-        // 現在の講師（マネージャー）とその管理下の講師情報を取得
-        $manager = Instructor::with('managings')->find($instructorId);
-        // 管理している講師のIDを取得して配列に変換し、マネージャー本人のIDを追加
-        $instructorIds = $manager->managings->pluck('id')->toArray();
-        $instructorIds[] = $instructorId;
-
         $course = Course::findOrFail($request->course_id);
-        if (! in_array($course->instructor_id, $instructorIds, true)) {
-            // 自分と配下の講師の講座でない場合はエラーを返す
-            throw new AuthorizationException(
-                'Forbidden, not allowed to access this course.'
-            );
-        }
+
+        // Policyによる認可処理
+        $this->authorize('view', $course);
 
         // 出席情報（関連する情報を含む）を取得
         $attendances = Attendance::with([

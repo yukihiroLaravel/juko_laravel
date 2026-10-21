@@ -211,7 +211,7 @@ class CompleteAllLessonsTest extends TestCase
         // Assert
         $response->assertStatus(403);
         $response->assertJson([
-            'message' => 'Forbidden, invalid chapter.',
+            'message' => 'This action is unauthorized.',
         ]);
     }
 

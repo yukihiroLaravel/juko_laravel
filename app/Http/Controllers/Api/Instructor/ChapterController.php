@@ -24,7 +24,6 @@ use App\Services\Chapter\UpdateAllChaptersStatusService;
 use App\Services\Chapter\UpdateChapterService;
 use App\Services\Chapter\UpdateChapterStatusService;
 use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -109,16 +108,10 @@ class ChapterController extends Controller
     public function patchStatus(PatchStatusRequest $request, UpdateChapterStatusService $updateChapterStatusService): JsonResponse
     {
         $chapters = Chapter::whereIn('id', $request->chapters)->with('course')->get();
-        $courseId = $request->course_id;
+        $course = Course::findOrFail($request->course_id);
 
-        $chapters->each(function (Chapter $chapter) use ($courseId) {
-
-            if ((int) $courseId !== $chapter->course->id) {
-                throw new AuthorizationException('Forbidden, invalid course_id.');
-            }
-        });
-
-        $this->authorize('bulkUpdate', [Chapter::class, $chapters]);
+        // 指定した講座に属するチャプターかどうかも含めて認可する
+        $this->authorize('bulkUpdateInCourse', [Chapter::class, $chapters, $course]);
 
         $updateChapterStatusService(
             chapterIds: $chapters->pluck('id'),
@@ -136,20 +129,13 @@ class ChapterController extends Controller
     public function bulkDelete(BulkDeleteRequest $request, BulkDeleteChapterService $bulkDeleteChapterService): JsonResponse
     {
         $chapterIds = $request->input('chapters', []);
-        $courseId = $request->input('course_id');
 
         try {
+            $course = Course::findOrFail($request->input('course_id'));
             $chapters = Chapter::with(['course', 'lessons'])->whereIn('id', $chapterIds)->get();
 
-            // 認可処理 policy使用
-            $this->authorize('bulkDelete', [Chapter::class, $chapters]);
-
-            $chapters->each(function (Chapter $chapter) use ($courseId) {
-                if ((int) $courseId !== $chapter->course_id) {
-                    // 指定した講座に属するチャプターでなければエラー応答
-                    throw new AuthorizationException('Forbidden, invalid course_id.');
-                }
-            });
+            // 指定した講座に属するチャプターかどうかも含めて認可する
+            $this->authorize('bulkDeleteInCourse', [Chapter::class, $chapters, $course]);
 
             DB::transaction(fn () => $bulkDeleteChapterService(
                 chapterIds: $chapterIds,

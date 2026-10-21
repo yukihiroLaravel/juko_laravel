@@ -12,13 +12,14 @@ use App\Model\Lesson;
 use App\Model\LessonAttendance;
 use App\Model\Student;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_受講取得_成功(): void
+    public function test_自分の受講の詳細を取得できる(): void
     {
         // Arrange
         $student = Student::factory()->create();
@@ -36,7 +37,8 @@ class ShowTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_権限がない受講生_失敗(): void
+    /** AC-AUTHZ-006 */
+    public function test_他の受講生の受講詳細は閲覧できない(): void
     {
         // Arrange — 別の受講生のAttendanceにアクセス
         $owner = Student::factory()->create();
@@ -55,11 +57,13 @@ class ShowTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_公開が取り消された講座の受講詳細は閲覧できない(): void
+    /** AC-AUTHZ-007 */
+    #[DataProvider('unpublishedCourseStatusProvider')]
+    public function test_公開されていない講座の受講詳細は閲覧できない(CourseStatusEnum $courseStatus): void
     {
         // Arrange
         $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::PRIVATE->value]);
+        $course = Course::factory()->create(['status' => $courseStatus->value]);
         $attendance = Attendance::factory()->create([
             'student_id' => $student->id,
             'course_id' => $course->id,
@@ -73,24 +77,16 @@ class ShowTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_下書きの講座の受講詳細は閲覧できない(): void
+    /** @return array<string, array{CourseStatusEnum}> */
+    public static function unpublishedCourseStatusProvider(): array
     {
-        // Arrange
-        $student = Student::factory()->create();
-        $course = Course::factory()->create(['status' => CourseStatusEnum::DRAFT->value]);
-        $attendance = Attendance::factory()->create([
-            'student_id' => $student->id,
-            'course_id' => $course->id,
-        ]);
-        $this->actingAs($student);
-
-        // Act
-        $response = $this->getJson(route('student.attendances.show', ['attendance_id' => $attendance->id]));
-
-        // Assert
-        $response->assertStatus(403);
+        return [
+            '公開が取り消された講座' => [CourseStatusEnum::PRIVATE],
+            '下書きの講座' => [CourseStatusEnum::DRAFT],
+        ];
     }
 
+    /** AC-ENROLL-029 */
     public function test_受講詳細には公開中のチャプターとレッスンだけが並ぶ(): void
     {
         // Arrange
@@ -101,7 +97,7 @@ class ShowTest extends TestCase
             'status' => ChapterStatusEnum::PUBLIC->value,
             'order' => 1,
         ]);
-        $closedChapter = Chapter::factory()->create([
+        Chapter::factory()->create([
             'course_id' => $course->id,
             'status' => ChapterStatusEnum::PRIVATE->value,
             'order' => 2,
@@ -110,7 +106,7 @@ class ShowTest extends TestCase
             'chapter_id' => $openChapter->id,
             'status' => LessonStatusEnum::PUBLIC->value,
         ]);
-        $draftLesson = Lesson::factory()->create([
+        Lesson::factory()->create([
             'chapter_id' => $openChapter->id,
             'status' => LessonStatusEnum::DRAFT->value,
         ]);
@@ -139,12 +135,9 @@ class ShowTest extends TestCase
         $chapters = $response->json('data.course.chapters');
         $this->assertSame([$openChapter->id], array_column($chapters, 'chapter_id'));
         $this->assertSame([$openLesson->id], array_column($chapters[0]['lessons'], 'lesson_id'));
-        $this->assertNotContains($draftLesson->id, array_column($chapters[0]['lessons'], 'lesson_id'));
-        $this->assertNotContains($closedLesson->id, array_column($chapters[0]['lessons'], 'lesson_id'));
-        $this->assertNotContains($closedChapter->id, array_column($chapters, 'chapter_id'));
     }
 
-    public function test_バリデーションエラー(): void
+    public function test_受講idが数字でない場合は入力エラーになる(): void
     {
         // Arrange
         $student = Student::factory()->create();

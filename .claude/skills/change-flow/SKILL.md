@@ -200,6 +200,8 @@ scripts/dc php artisan test --compact  # 全テスト
 scripts/dc composer check-conventions-merge
 ```
 
+続けて、変更した docs とテストを `writing-reviewer` エージェントに渡し、文章を点検する。簡潔か、冗長な説明がないか、実装と記述が食い違っていないかを見るもので、検査では拾えない。指摘は直してから PR を出す。業務の判断が要るものとして返ってきたものは、直さずに依頼者へ伝える。
+
 コミットは意味のある単位に分ける。何を変えたかではなく、なぜ変えたかを本文に書く。
 
 ## 中断したとき

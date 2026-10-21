@@ -158,4 +158,24 @@ class DeleteTest extends TestCase
             'chapter_id',
         ]);
     }
+
+    /** AC-COMMON-015 */
+    public function test_削除の途中で失敗するとレッスンも元のまま残る(): void
+    {
+        // Arrange — レッスンを消したあと、チャプターを消すクエリの直後に失敗させる
+        $manager = Instructor::factory()->create();
+        $course = Course::factory()->create(['instructor_id' => $manager->id]);
+        $chapter = Chapter::factory()->create(['course_id' => $course->id]);
+        $lesson = Lesson::factory()->create(['chapter_id' => $chapter->id]);
+        $this->failAfterQuery('update "chapters"');
+        $this->actingAs($manager, 'instructor');
+
+        // Act
+        $response = $this->deleteJson(route('manager.chapters.delete', ['chapter_id' => $chapter->id]));
+
+        // Assert
+        $response->assertStatus(500);
+        $this->assertNotSoftDeleted('chapters', ['id' => $chapter->id]);
+        $this->assertNotSoftDeleted('lessons', ['id' => $lesson->id]);
+    }
 }

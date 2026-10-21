@@ -193,7 +193,7 @@ class CourseController extends Controller
             // ログイン講師のidと削除講座の講師IDが一致しないと削除できない
             $this->authorize('delete', $course);
 
-            $service(course: $course);
+            DB::transaction(fn () => $service(course: $course));
 
             return response()->json([
                 'result' => true,

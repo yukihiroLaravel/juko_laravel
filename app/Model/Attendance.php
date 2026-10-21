@@ -32,13 +32,9 @@ class Attendance extends Model
     protected $fillable = [
         'course_id',
         'student_id',
-        'progress',
         'attendance_deadline',
         'completed_at',
     ];
-
-    // 受講状態初期値
-    const PROGRESS_DEFAULT_VALUE = 0;
 
     /**
      * 受講生を取得
@@ -148,11 +144,6 @@ class Attendance extends Model
         return floor($percent);
     }
 
-    public static function hasActiveStudents(int $courseId): bool
-    {
-        return self::where('course_id', $courseId)->exists();
-    }
-
     // ソート項目
     const SORT_BY_NICK_NAME = 'nick_name';
 
@@ -173,7 +164,6 @@ class Attendance extends Model
      * @return array{
      *   student_id: 'int',
      *   course_id: 'int',
-     *   progress: 'int',
      *   attendance_deadline: 'immutable_date',
      *   created_at: 'immutable_datetime',
      *   updated_at: 'immutable_datetime',
@@ -186,7 +176,6 @@ class Attendance extends Model
         return [
             'student_id' => 'int',
             'course_id' => 'int',
-            'progress' => 'int',
             'attendance_deadline' => 'immutable_date',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',

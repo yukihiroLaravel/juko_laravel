@@ -137,10 +137,10 @@ class ChapterController extends Controller
             // 指定した講座に属するチャプターかどうかも含めて認可する
             $this->authorize('bulkDeleteInCourse', [Chapter::class, $chapters, $course]);
 
-            $bulkDeleteChapterService(
+            DB::transaction(fn () => $bulkDeleteChapterService(
                 chapterIds: $chapterIds,
                 chapters: $chapters
-            );
+            ));
 
             return response()->json([
                 'result' => true,

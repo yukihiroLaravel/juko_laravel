@@ -18,9 +18,4 @@ class ViewedOnceNotification extends Model
         'notification_id',
         'student_id',
     ];
-
-    public function notification()
-    {
-        return $this->belongsTo(Notification::class, 'notification_id');
-    }
 }

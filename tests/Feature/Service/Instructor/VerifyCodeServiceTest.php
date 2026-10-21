@@ -14,14 +14,12 @@ class VerifyCodeServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_認証コードが有効(): void
+    public function test_認証コードが一致すれば確認が通る(): void
     {
         // Arrange
         $service = new VerifyCodeService;
         $temporaryInstructor = TemporaryInstructor::factory()->create([
-            'trial_count' => 0,
             'code' => '1234',
-            'expire_at' => now()->addMinutes(10),
         ]);
 
         // Act
@@ -31,15 +29,14 @@ class VerifyCodeServiceTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function test_認証コードが無効_期限切れ(): void
+    /** AC-ACCOUNT-012 */
+    public function test_有効期限を過ぎていると確認できない(): void
     {
         // Arrange
         $this->expectException(ExpiredAuthorizationCodeException::class);
 
         $service = new VerifyCodeService;
         $temporaryInstructor = TemporaryInstructor::factory()->create([
-            'trial_count' => 0,
-            'code' => '1234',
             'expire_at' => now()->subMinutes(10),
         ]);
 
@@ -47,7 +44,8 @@ class VerifyCodeServiceTest extends TestCase
         $service($temporaryInstructor, CarbonImmutable::now(), '1234');
     }
 
-    public function test_認証コードが無効_試行回数超過(): void
+    /** AC-ACCOUNT-014 */
+    public function test_失敗が3回を超えると確認できない(): void
     {
         // Arrange
         $this->expectException(TryCountOverAuthorizationCodeException::class);
@@ -56,21 +54,19 @@ class VerifyCodeServiceTest extends TestCase
         $temporaryInstructor = TemporaryInstructor::factory()->create([
             'trial_count' => 3,
             'code' => '1234',
-            'expire_at' => now()->addMinutes(10),
         ]);
 
         // Act
         $service($temporaryInstructor, CarbonImmutable::now(), '0000');
     }
 
-    public function test_認証コードが無効_試行回数増加(): void
+    /** AC-ACCOUNT-013 */
+    public function test_コードが違うと失敗回数が1増える(): void
     {
         // Arrange
         $service = new VerifyCodeService;
         $temporaryInstructor = TemporaryInstructor::factory()->create([
-            'trial_count' => 0,
             'code' => '1234',
-            'expire_at' => now()->addMinutes(10),
         ]);
 
         // Act
@@ -78,6 +74,9 @@ class VerifyCodeServiceTest extends TestCase
 
         // Assert
         $this->assertFalse($result);
-        $this->assertEquals(1, $temporaryInstructor->trial_count);
+        $this->assertDatabaseHas('temporary_instructors', [
+            'id' => $temporaryInstructor->id,
+            'trial_count' => 1,
+        ]);
     }
 }

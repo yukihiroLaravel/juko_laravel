@@ -10,6 +10,7 @@ class InstructorLogoutTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** AC-ACCOUNT-025 */
     public function test_ログアウト_成功(): void
     {
         // Arrange
@@ -27,6 +28,7 @@ class InstructorLogoutTest extends TestCase
         $this->assertGuest('instructor');
     }
 
+    /** AC-ACCOUNT-025 */
     public function test_未認証時_ログアウト(): void
     {
         // Act

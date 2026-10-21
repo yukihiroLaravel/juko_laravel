@@ -21,8 +21,6 @@ class StatusTransitionServiceTest extends TestCase
     }
 
     /**
-     * 許容される遷移の組み合わせ
-     *
      * @return array<string, array{StatusEnum, StatusEnum}>
      */
     public static function allowedTransitions(): array
@@ -38,8 +36,6 @@ class StatusTransitionServiceTest extends TestCase
     }
 
     /**
-     * 許容されない遷移の組み合わせ
-     *
      * @return array<string, array{StatusEnum, StatusEnum}>
      */
     public static function disallowedTransitions(): array
@@ -51,11 +47,11 @@ class StatusTransitionServiceTest extends TestCase
         ];
     }
 
+    /** AC-AUTHOR-022 */
     #[DataProvider('allowedTransitions')]
-    public function test_許容される遷移は例外を発生させない(StatusEnum $current, StatusEnum $target): void
+    public function test_許される公開状態の変更は受け付けられる(StatusEnum $current, StatusEnum $target): void
     {
         // Arrange
-        // 遷移の組み合わせはデータプロバイダから受け取る
 
         // Assert
         $this->expectNotToPerformAssertions();
@@ -64,11 +60,11 @@ class StatusTransitionServiceTest extends TestCase
         ($this->service)($current, $target);
     }
 
+    /** AC-AUTHOR-022 */
     #[DataProvider('disallowedTransitions')]
-    public function test_許容されない遷移は例外を発生させる(StatusEnum $current, StatusEnum $target): void
+    public function test_許されない公開状態の変更は拒否される(StatusEnum $current, StatusEnum $target): void
     {
         // Arrange
-        // 遷移の組み合わせはデータプロバイダから受け取る
 
         // Assert
         $this->expectException(ValidationException::class);

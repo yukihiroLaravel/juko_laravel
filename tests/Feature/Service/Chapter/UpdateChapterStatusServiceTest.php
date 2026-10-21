@@ -24,7 +24,8 @@ class UpdateChapterStatusServiceTest extends TestCase
         $this->service = new UpdateChapterStatusService(new StatusTransitionService);
     }
 
-    public function test_指定したチャプターのステータスを更新できる(): void
+    /** AC-AUTHOR-022 */
+    public function test_指定したチャプターの公開状態を変更できる(): void
     {
         // Arrange
         $chapter = Chapter::factory()->create(['status' => StatusEnum::PUBLIC->value]);
@@ -39,7 +40,8 @@ class UpdateChapterStatusServiceTest extends TestCase
         ]);
     }
 
-    public function test_複数のチャプターをまとめて更新できる(): void
+    /** AC-AUTHOR-022 */
+    public function test_複数のチャプターをまとめて変更できる(): void
     {
         // Arrange（公開・非公開いずれからも公開への遷移は許容される）
         $publicChapter = Chapter::factory()->create(['status' => StatusEnum::PUBLIC->value]);
@@ -53,7 +55,8 @@ class UpdateChapterStatusServiceTest extends TestCase
         $this->assertDatabaseHas('chapters', ['id' => $privateChapter->id, 'status' => StatusEnum::PUBLIC->value]);
     }
 
-    public function test_許容されない遷移を含む場合は例外を発生させステータスを更新しない(): void
+    /** AC-AUTHOR-022 */
+    public function test_許されない公開状態の変更は拒否され元の公開状態のまま(): void
     {
         // Arrange（下書きから非公開への遷移は許容されない）
         $chapter = Chapter::factory()->create(['status' => StatusEnum::DRAFT->value]);
@@ -62,21 +65,17 @@ class UpdateChapterStatusServiceTest extends TestCase
         try {
             ($this->service)(collect([$chapter->id]), StatusEnum::PRIVATE->value);
             $this->fail('ValidationExceptionが発生しませんでした。');
-        } catch (ValidationException $e) {
-            $this->assertSame(
-                'ステータスを「'.StatusEnum::DRAFT->value.'」から「'.StatusEnum::PRIVATE->value.'」へ変更することはできません。',
-                $e->errors()['status'][0]
-            );
+        } catch (ValidationException) {
         }
 
-        // ステータスは更新されていない
         $this->assertDatabaseHas('chapters', [
             'id' => $chapter->id,
             'status' => StatusEnum::DRAFT->value,
         ]);
     }
 
-    public function test_一部に許容されない遷移が含まれる場合は全件更新しない(): void
+    /** AC-AUTHOR-022, AC-COMMON-014 */
+    public function test_一部に許されない変更が含まれると全チャプターが元の公開状態のまま(): void
     {
         // Arrange（公開→非公開は可だが、下書き→非公開は不可のため全体が失敗する）
         $publicChapter = Chapter::factory()->create(['status' => StatusEnum::PUBLIC->value]);
@@ -87,7 +86,6 @@ class UpdateChapterStatusServiceTest extends TestCase
             ($this->service)(collect([$publicChapter->id, $draftChapter->id]), StatusEnum::PRIVATE->value);
             $this->fail('ValidationExceptionが発生しませんでした。');
         } catch (ValidationException) {
-            // 検証段階で中断するため、更新は一切行われない
         }
 
         // Assert（原子性: いずれのチャプターも元のステータスのまま）

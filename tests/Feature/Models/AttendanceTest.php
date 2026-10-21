@@ -9,42 +9,28 @@ use Tests\TestCase;
 class AttendanceTest extends TestCase
 {
     /**
-     * ログイン率の計算例
+     * ログイン率と修了率で共通の計算例（該当人数、受講生の総数、期待する割合）
      *
      * @return array<string, array{int, int, int}>
      */
-    public static function loginRates(): array
+    public static function rates(): array
     {
         return [
             '受講生がいない場合は0になる' => [5, 0, 0],
-            'ログインした人がいない場合は0になる' => [0, 10, 0],
-            '半数がログインした場合は50になる' => [5, 10, 50],
-            '全員がログインした場合は100になる' => [10, 10, 100],
-            '10人中7人がログインした場合は70になる' => [7, 10, 70],
+            '該当する人がいない場合は0になる' => [0, 10, 0],
+            '半数が該当する場合は50になる' => [5, 10, 50],
+            '全員が該当する場合は100になる' => [10, 10, 100],
+            '10人中7人が該当する場合は70になる' => [7, 10, 70],
+            '7人中3人が該当する場合は端数を切り捨てて42になる' => [3, 7, 42],
         ];
     }
 
-    /**
-     * 修了率の計算例
-     *
-     * @return array<string, array{int, int, int}>
-     */
-    public static function completionRates(): array
-    {
-        return [
-            '受講生がいない場合は0になる' => [5, 0, 0],
-            '修了した人がいない場合は0になる' => [0, 10, 0],
-            '半数が修了した場合は50になる' => [5, 10, 50],
-            '全員が修了した場合は100になる' => [10, 10, 100],
-            '7人中3人が修了した場合は端数を切り捨てて42になる' => [3, 7, 42],
-        ];
-    }
-
-    #[DataProvider('loginRates')]
+    /** AC-ANALYTICS-001 */
+    #[DataProvider('rates')]
     public function test_ログイン率を計算する(int $loggedInCount, int $totalCount, int $expected): void
     {
         // Arrange
-        // 集計に使う人数はデータプロバイダから受け取る
+        // 人数は DataProvider から受け取る
 
         // Act
         $result = Attendance::calcLoginRate($loggedInCount, $totalCount);
@@ -53,11 +39,12 @@ class AttendanceTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    #[DataProvider('completionRates')]
+    /** AC-ANALYTICS-001 */
+    #[DataProvider('rates')]
     public function test_修了率を計算する(int $completedCount, int $totalCount, int $expected): void
     {
         // Arrange
-        // 集計に使う人数はデータプロバイダから受け取る
+        // 人数は DataProvider から受け取る
 
         // Act
         $result = Attendance::calcCompletionRate($completedCount, $totalCount);

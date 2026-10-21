@@ -25,6 +25,7 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
         $this->service = new UpdateAllChaptersStatusService(new StatusTransitionService);
     }
 
+    /** AC-AUTHOR-022 */
     public function test_講座内の全チャプターを公開にできる(): void
     {
         // Arrange（下書き・非公開いずれからも公開への遷移は許容される）
@@ -40,6 +41,7 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
         $this->assertDatabaseHas('chapters', ['id' => $privateChapter->id, 'status' => StatusEnum::PUBLIC->value]);
     }
 
+    /** AC-AUTHOR-022 */
     public function test_講座内の全チャプターを非公開にできる(): void
     {
         // Arrange（公開・非公開いずれからも非公開への遷移は許容される）
@@ -55,7 +57,8 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
         $this->assertDatabaseHas('chapters', ['id' => $privateChapter->id, 'status' => StatusEnum::PRIVATE->value]);
     }
 
-    public function test_下書きを含む講座を非公開にしようとすると例外を発生させ全件更新しない(): void
+    /** AC-AUTHOR-022, AC-COMMON-014 */
+    public function test_下書きを含む講座を非公開にしようとすると変更できず全チャプターが元の公開状態のまま(): void
     {
         // Arrange（下書き→非公開は許容されないため、講座全体の更新が失敗する）
         $course = Course::factory()->create();
@@ -67,7 +70,6 @@ class UpdateAllChaptersStatusServiceTest extends TestCase
             ($this->service)($course->id, StatusEnum::PRIVATE->value);
             $this->fail('ValidationExceptionが発生しませんでした。');
         } catch (ValidationException) {
-            // 検証段階で中断するため、更新は一切行われない
         }
 
         // Assert（原子性: いずれのチャプターも元のステータスのまま）

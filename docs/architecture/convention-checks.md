@@ -209,10 +209,13 @@ CHK-TEST-06 は、テストが書いている AC-ID が `docs/specs/` に実在�
 | CHK-DOC-07 | 太字記法と区切り線を使わない | A | 検査スクリプト | — |
 | CHK-DOC-08 | 版を分けたファイルを作らない | A | 検査スクリプト | — |
 | CHK-DOC-09 | 用語を揺らさない | A | 検査スクリプト | — |
+| CHK-DOC-10 | ER 図がマイグレーションと一致する | A | `scripts/generate-er.php --check` | — |
 
 この文書は、書き方の例として禁止表現を含む。そのため `docs()` を使う検査（CHK-DOC-04・07・09）は、この文書を対象から外す。
 
 CHK-DOC-06 は、実装が終わった起票を `docs/changes/` に残さない規約だった。プランを `.claude/plans/` に置いて git の管理から外したため、規約ごと廃止した（ADR-0007）。番号は空けたままにする。
+
+CHK-DOC-10 は、マイグレーションから ER 図を作り直し、`docs/architecture/er.drawio` と1文字でも違えば落とす。`composer check-all` の中の `er-check` で、作業の終わりと継続的インテグレーションに見る。ER 図は draw.io の形式なので `scripts/check-conventions.php` には入れず、作り直す処理と同じスクリプトで判定している。
 
 CHK-DOC-09 は `docs/domain/` と `docs/specs/` を対象に、コース・セクション・単元・学習進捗・出席状況・生徒・管理者の 7 語を見る。`.ai/rules/docs.md` の表にある「章」「ユーザー」は見ない。
 

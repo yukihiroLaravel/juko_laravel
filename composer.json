@@ -82,9 +82,13 @@
         "test": [
             "vendor/bin/phpunit"
         ],
+        "er-check": [
+            "@php scripts/generate-er.php --check"
+        ],
         "check-all": [
             "@pint-test",
             "@check-conventions-merge",
+            "@er-check",
             "@analyze",
             "@rector-dry-run",
             "@test"

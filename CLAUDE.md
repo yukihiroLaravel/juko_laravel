@@ -71,7 +71,7 @@ Boost のガイドラインにある「頼まれたときだけ文書を作る�
 開発環境は Docker に集約している。ホストに PHP と Composer を入れる前提にしない。`scripts/dc` がコンテナの中でコマンドを実行する。コンテナはセッションの開始時にフックが確かめ、止まっていれば起動する。
 
 ```bash
-# 作業の終わりと CI で流す検査を全部（整形・規約・静的解析・旧い記法・テスト）
+# 作業の終わりと CI で流す検査を全部（整形・規約・ER 図・静的解析・旧い記法・テスト）
 scripts/dc composer check-all
 
 # 整形と自動リファクタリング（Rector と Laravel Pint）
@@ -79,6 +79,9 @@ scripts/dc composer format
 
 # 規約の検査だけ
 scripts/dc composer check-conventions
+
+# スキーマを変えたあとに ER 図を作り直す
+scripts/dc php scripts/generate-er.php
 
 # テストを絞って流す
 scripts/dc php artisan test --compact --filter=<テスト名>

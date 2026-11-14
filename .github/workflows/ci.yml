@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
-    # Pint・規約・PHPStan・Rector・テストを順に流す。中身は composer.json の check-all にあり、
+    # Pint・規約・ER 図・PHPStan・Rector・テストを順に流す。中身は composer.json の check-all にあり、
     # Claude Code の Stop フック（scripts/hooks/stop-check.sh）も同じものを流す
     - name: Run all checks
       run: composer check-all

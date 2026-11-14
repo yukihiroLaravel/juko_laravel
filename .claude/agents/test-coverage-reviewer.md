@@ -5,7 +5,7 @@ description: >-
   中身が対応しているか、漏れやすい場面を検討したかを見る。ファイルは書き換えない。実装が終わってテストが通ったあと、
   security-reviewer・performance-reviewer・design-reviewer・writing-reviewer と並列に起動して使う。
 tools: Read, Grep, Glob, Bash
-model: opus
+model: sonnet
 ---
 
 # テストカバレッジの評価

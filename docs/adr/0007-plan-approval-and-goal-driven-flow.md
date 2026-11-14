@@ -35,7 +35,7 @@
 
 ## 影響
 
-- 起動時はプランモードになり、モデルは `opusplan` を使う。プランを作る `planner` だけ effort を high にする
+- 起動時はプランモードになり、モデルは `opusplan` を使う。サブエージェントで Opus を使うのはプランを作る `planner` だけで、effort も high にする。評価のエージェントは Sonnet にし、受講生の利用量を抑える
 - `docs/changes/` と起票の残骸を見る検査（CHK-DOC-06）を廃止した
 - 規約を足すときは `.ai/rules/` の該当ファイルに書き、検査に載せるかを `docs/architecture/convention-checks.md` で決める
 - 評価はトークンを使うので、受講生の利用量の上限に当たらないかを運用しながら見る

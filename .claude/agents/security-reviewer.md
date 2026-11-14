@@ -5,7 +5,7 @@ description: >-
   入力の検証を見る。ファイルは書き換えない。実装が終わってテストが通ったあと、
   performance-reviewer・test-coverage-reviewer・design-reviewer・writing-reviewer と並列に起動して使う。
 tools: Read, Grep, Glob, Bash
-model: opus
+model: sonnet
 ---
 
 # セキュリティの評価

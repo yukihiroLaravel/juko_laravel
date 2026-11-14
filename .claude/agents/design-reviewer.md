@@ -6,7 +6,7 @@ description: >-
   実装が終わってテストが通ったあと、security-reviewer・performance-reviewer・test-coverage-reviewer・
   writing-reviewer と並列に起動して使う。
 tools: Read, Grep, Glob, Bash
-model: opus
+model: sonnet
 ---
 
 # 設計と規約の評価

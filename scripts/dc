@@ -13,10 +13,19 @@
 #
 # compose.yml の場所は上位ディレクトリを遡って探す。
 # 別の場所に置いている場合は COMPOSE_FILE で指定する。
+#
+# コンテナの中で実行する場所は、このスクリプトを置いたリポジトリの場所から決める。
+# compose.yml は、その隣の backend を /var/www/html に載せている。backend の下にあるリポジトリなら、
+# 手元のチェックアウトでも worktree でも、同じ相対パスでコンテナの中を指せる。
+# 決め打ちにすると、worktree で作業しても手元のチェックアウトを検査してしまう。
+# 載せ方を変えたときは LARAVEL_MOUNT_SOURCE と LARAVEL_MOUNT_TARGET、
+# 場所を直接決めたいときは LARAVEL_WORKDIR で指定する。
 set -uo pipefail
 
 readonly SERVICE="${LARAVEL_SERVICE:-app}"
-readonly WORKDIR="${LARAVEL_WORKDIR:-/var/www/html/laravelapp}"
+readonly MOUNT_SOURCE="${LARAVEL_MOUNT_SOURCE:-backend}"
+readonly MOUNT_TARGET="${LARAVEL_MOUNT_TARGET:-/var/www/html}"
+readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 die() {
     printf '%s\n' "$@" >&2
@@ -26,7 +35,7 @@ die() {
 # リポジトリの根から上へ遡って compose.yml を探す
 find_compose_file() {
     local dir
-    dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    dir="$ROOT"
 
     while [ "$dir" != "/" ]; do
         for name in compose.yml compose.yaml docker-compose.yml docker-compose.yaml; do
@@ -63,4 +72,24 @@ if ! docker compose -f "$compose_file" ps --status running --services 2>/dev/nul
         "  docker compose -f ${compose_file} up -d"
 fi
 
-exec docker compose -f "$compose_file" exec -T -w "$WORKDIR" "$SERVICE" "$@"
+if [ -n "${LARAVEL_WORKDIR:-}" ]; then
+    workdir="$LARAVEL_WORKDIR"
+else
+    mount_dir="$(cd "$(dirname "$compose_file")/${MOUNT_SOURCE}" 2>/dev/null && pwd -P)" || die \
+        "compose.yml の隣に ${MOUNT_SOURCE} がない。コンテナに載せている場所を LARAVEL_MOUNT_SOURCE で指定する。"
+    case "${ROOT}/" in
+        "${mount_dir}"/*) workdir="${MOUNT_TARGET}/${ROOT#"${mount_dir}"/}" ;;
+        *) die \
+            "このリポジトリ（${ROOT}）はコンテナに載っていない。" \
+            "コンテナから見えるのは ${mount_dir} の下だけである。worktree はその下に作る。" ;;
+    esac
+fi
+
+# worktree には vendor がない。composer install 以外を流す前に知らせる
+if [ ! -e "${ROOT}/vendor" ] && [ "$*" != "composer install" ]; then
+    die \
+        "${ROOT} に vendor がない。worktree で作業しているなら、先に次を実行する。" \
+        "  scripts/dc composer install"
+fi
+
+exec docker compose -f "$compose_file" exec -T -w "$workdir" "$SERVICE" "$@"

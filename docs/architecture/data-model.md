@@ -4,7 +4,7 @@
 
 型と桁数はマイグレーション（`database/migrations`）を正とし、ここには重複して書かない。日付だけを持つのか日時を持つのかは判定の意味が変わるため明記する。
 
-カラムと型まで含めた ER 図は `docs/architecture/er.drawio` にある。draw.io で開く。マイグレーションから `scripts/generate-er.php` で作り直すもので、手では直さない。フレームワークが用意するテーブルは描いていない。
+カラムと型まで含めた ER 図は、draw.io で開く `docs/architecture/er.drawio` と、ブラウザや GitHub でそのまま見られる `docs/architecture/er.svg` にある。どちらもマイグレーションから `scripts/generate-er.php` で作り直すもので、手では直さない。フレームワークが用意するテーブルは描いていない。
 
 ## 全体の関連
 

@@ -10,7 +10,7 @@
 | [specs/](specs/README.md) | システム仕様。共通仕様と機能ごとの受け入れ基準 |
 | [architecture/overview.md](architecture/overview.md) | 技術スタックと実装の構成 |
 | [architecture/data-model.md](architecture/data-model.md) | テーブルの役割とカラムの意味 |
-| [architecture/er.drawio](architecture/er.drawio) | カラムと型まで含めた ER 図（draw.io）。マイグレーションから作り直す |
+| [architecture/er.svg](architecture/er.svg) | カラムと型まで含めた ER 図。draw.io で開く版は [er.drawio](architecture/er.drawio)。マイグレーションから作り直す |
 | [architecture/api.md](architecture/api.md) | エンドポイントの一覧と仕様の対応 |
 | [architecture/convention-checks.md](architecture/convention-checks.md) | 規約をどこまで機械で判定できるかの対応表と、レビューで見るもの |
 | [adr/](adr/README.md) | 意思決定の記録 |

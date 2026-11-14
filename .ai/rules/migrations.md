@@ -20,7 +20,7 @@ $table->foreignIdFor(Instructor::class, 'manager_id')->nullable()->constrained()
 
 ## スキーマを変えたら ER 図を作り直す
 
-マイグレーションでテーブルやカラム、外部キー、一意制約を変えたら、同じ変更のなかで ER 図（`docs/architecture/er.drawio`）を `scripts/dc php scripts/generate-er.php` で作り直す。ER 図は手で直さない。作り直していないと、`composer check-all` の ER 図の検査（CHK-DOC-10）で落ちる。
+マイグレーションでテーブルやカラム、外部キー、一意制約を変えたら、同じ変更のなかで ER 図（`docs/architecture/er.drawio` と `er.svg`）を `scripts/dc php scripts/generate-er.php` で作り直す。ER 図は手で直さない。作り直していないと、`composer check-all` の ER 図の検査（CHK-DOC-10）で落ちる。
 
 テーブルを足したときは、`scripts/generate-er.php` の `NAMES` に日本語の名前を、`LAYOUT` に置き場所を足してから作り直す。カラムの説明は `->comment()` から拾うので、マイグレーションに説明を書く。あわせて `docs/architecture/data-model.md` のカラムの意味と関連の図も直す。
 

@@ -114,7 +114,7 @@ flowchart LR
 |---|---|
 | 振る舞いを変えた | `docs/specs/features/<機能>.md`（上書き） |
 | 全エンドポイントに共通する扱いを変えた | `docs/specs/conventions.md`（上書き） |
-| データ構造を変えた | `docs/architecture/data-model.md`（上書き）と `docs/architecture/er.drawio`（`scripts/generate-er.php` で作り直す） |
+| データ構造を変えた | `docs/architecture/data-model.md`（上書き）と `docs/architecture/er.drawio`・`er.svg`（`scripts/generate-er.php` で作り直す） |
 | エンドポイントを追加・変更した | `docs/architecture/api.md`（上書き） |
 | 実装の構成を変えた | `docs/architecture/overview.md`（上書き） |
 | 規約を変えた | `.ai/rules/` の該当ファイルと `docs/architecture/convention-checks.md`（上書き） |

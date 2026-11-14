@@ -1,12 +1,15 @@
 <?php
 
 /**
- * マイグレーションから ER 図（docs/architecture/er.drawio）を作り直す。
+ * マイグレーションから ER 図（docs/architecture/er.drawio と er.svg）を作り直す。
  *
  * スキーマの正はマイグレーションである。ER 図を手で直すと、いずれマイグレーションと食い違う。
  * そのため ER 図は手で直さず、このスクリプトで作り直す。--check を付けると、作り直した内容と
  * 今の ER 図を比べ、違えば終了コード 1 を返す。composer check-all から呼び、スキーマを変えたのに
  * ER 図を作り直していなければ、作業の終わりと継続的インテグレーションで止まる。
+ *
+ * draw.io の形式は編集して眺めるためのもの、SVG は GitHub や PR でそのまま見るためのものである。
+ * 2つは同じ配置から書き出す。
  *
  * 構造（カラムの並び・必須かどうか・主キー・外部キー・一意制約）は、使い捨ての SQLite に
  * マイグレーションを流して取り出す。型の名前と説明は、マイグレーションの記述から拾う。
@@ -22,7 +25,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 const ROOT = __DIR__.'/../';
-const OUTPUT = 'docs/architecture/er.drawio';
+const OUTPUTS = ['drawio' => 'docs/architecture/er.drawio', 'svg' => 'docs/architecture/er.svg'];
 
 /** フレームワークが用意するテーブルは描かない */
 const EXCLUDED = ['migrations', 'failed_jobs', 'password_resets', 'personal_access_tokens', 'users'];
@@ -56,30 +59,48 @@ const LAYOUT = [
     ['students', 'temporary_students'],
 ];
 
-const TABLE_WIDTH = 420;
-const COLUMN_GAP = 120;
+const MARGIN = 40;
+const MIN_TABLE_WIDTH = 360;
+const COLUMN_GAP = 140;
 const ROW_GAP = 60;
 const TITLE_HEIGHT = 30;
 const ROW_HEIGHT = 24;
+const FONT_SIZE = 12;
+const PADDING = 8;
 
 $checking = in_array('--check', $argv, true);
 
 $schema = readSchema();
-$definitions = readMigrations();
-$xml = render($schema, $definitions);
+$tables = placeTables($schema, readMigrations());
+$relations = relationsOf($schema, $tables);
+$contents = [
+    'drawio' => renderDrawio($tables, $relations),
+    'svg' => renderSvg($tables, $relations),
+];
 
-if ($checking) {
-    $current = is_file(ROOT.OUTPUT) ? (string) file_get_contents(ROOT.OUTPUT) : '';
-    if ($current !== $xml) {
-        fwrite(STDERR, OUTPUT." がマイグレーションと食い違っている。scripts/dc php scripts/generate-er.php で作り直す。\n");
-        exit(1);
+$stale = [];
+foreach (OUTPUTS as $kind => $path) {
+    if ($checking) {
+        $current = is_file(ROOT.$path) ? (string) file_get_contents(ROOT.$path) : '';
+        if ($current !== $contents[$kind]) {
+            $stale[] = $path;
+        }
+
+        continue;
     }
-    echo OUTPUT." はマイグレーションと一致している。\n";
-    exit(0);
+
+    file_put_contents(ROOT.$path, $contents[$kind]);
+    echo $path." を書き出した。\n";
 }
 
-file_put_contents(ROOT.OUTPUT, $xml);
-echo OUTPUT." を書き出した。\n";
+if ($stale !== []) {
+    fwrite(STDERR, implode('・', $stale)." がマイグレーションと食い違っている。scripts/dc php scripts/generate-er.php で作り直す。\n");
+    exit(1);
+}
+
+if ($checking) {
+    echo implode('・', OUTPUTS)." はマイグレーションと一致している。\n";
+}
 
 /**
  * 使い捨ての SQLite にマイグレーションを流し、テーブルの構造を取り出す。
@@ -196,49 +217,147 @@ function columnsOf(string $method, string $arguments): array
 }
 
 /**
- * draw.io の形式で ER 図を組み立てる。同じスキーマからは同じ内容を返す。
+ * テーブルごとの見出しと行の文言を決め、置き場所と大きさを割り当てる。
+ * 幅は列ごとに、その列で一番長い行に合わせてそろえる。
  *
  * @param  array<string, array{columns: list<array{name: string, nullable: bool}>, primary: list<string>, unique: list<string>, foreign: array<string, array{table: string, column: string}>}>  $schema
  * @param  array<string, array<string, array{type: string, comment: string}>>  $definitions
+ * @return array<string, array{title: string, rows: list<array{column: string, label: string}>, x: int, y: int, width: int, height: int}>
  */
-function render(array $schema, array $definitions): string
+function placeTables(array $schema, array $definitions): array
 {
+    $tables = [];
+    foreach ($schema as $table => $structure) {
+        $rows = [];
+        foreach ($structure['columns'] as $column) {
+            $name = $column['name'];
+            $marks = array_filter([
+                in_array($name, $structure['primary'], true) ? 'PK' : null,
+                isset($structure['foreign'][$name]) ? 'FK' : null,
+                in_array($name, $structure['unique'], true) ? 'UQ' : null,
+            ]);
+            $definition = $definitions[$table][$name] ?? ['type' => '', 'comment' => ''];
+            $rows[] = ['column' => $name, 'label' => trim(sprintf(
+                '%s%s : %s%s %s',
+                $marks === [] ? '' : '['.implode(',', $marks).'] ',
+                $name,
+                $definition['type'],
+                $column['nullable'] ? '（null 可）' : '',
+                $definition['comment']
+            ))];
+        }
+        $tables[$table] = ['title' => isset(NAMES[$table]) ? $table.'（'.NAMES[$table].'）' : $table, 'rows' => $rows];
+    }
+
     $layout = LAYOUT;
-    $placed = array_merge(...$layout);
-    $rest = array_values(array_diff(array_keys($schema), $placed));
+    $rest = array_values(array_diff(array_keys($tables), array_merge(...$layout)));
     if ($rest !== []) {
         $layout[] = $rest;
     }
 
-    $cells = [];
-    $x = 40;
+    $placed = [];
+    $x = MARGIN;
     foreach ($layout as $column) {
-        $y = 40;
+        $longest = 0.0;
+        foreach (array_intersect_key($tables, array_flip($column)) as $table) {
+            foreach ([$table['title'], ...array_column($table['rows'], 'label')] as $text) {
+                $longest = max($longest, textWidth($text));
+            }
+        }
+        $width = max(MIN_TABLE_WIDTH, (int) ceil(($longest + PADDING * 3) / 10) * 10);
+
+        $y = MARGIN;
         foreach ($column as $table) {
-            if (! isset($schema[$table])) {
+            if (! isset($tables[$table])) {
                 continue;
             }
-            $cells[] = tableCells($table, $schema[$table], $definitions[$table] ?? [], $x, $y);
-            $y += TITLE_HEIGHT + ROW_HEIGHT * count($schema[$table]['columns']) + ROW_GAP;
+            $height = TITLE_HEIGHT + ROW_HEIGHT * count($tables[$table]['rows']);
+            $placed[$table] = $tables[$table] + ['x' => $x, 'y' => $y, 'width' => $width, 'height' => $height];
+            $y += $height + ROW_GAP;
         }
-        $x += TABLE_WIDTH + COLUMN_GAP;
+        $x += $width + COLUMN_GAP;
     }
 
+    return $placed;
+}
+
+/**
+ * 外部キーの関係を並べる。参照先が描かれないものは外す。
+ *
+ * @param  array<string, array{columns: list<array{name: string, nullable: bool}>, primary: list<string>, unique: list<string>, foreign: array<string, array{table: string, column: string}>}>  $schema
+ * @param  array<string, array{title: string, rows: list<array{column: string, label: string}>, x: int, y: int, width: int, height: int}>  $tables
+ * @return list<array{table: string, column: string, target: string, targetColumn: string, nullable: bool}>
+ */
+function relationsOf(array $schema, array $tables): array
+{
+    $relations = [];
     foreach ($schema as $table => $structure) {
         foreach ($structure['foreign'] as $column => $target) {
-            if (! isset($schema[$target['table']])) {
+            if (! isset($tables[$target['table']])) {
                 continue;
             }
-            $nullable = current(array_filter($structure['columns'], fn (array $c): bool => $c['name'] === $column))['nullable'] ?? false;
-            $end = $nullable ? 'ERzeroToOne' : 'ERmandOne';
+            $nullable = false;
+            foreach ($structure['columns'] as $definition) {
+                if ($definition['name'] === $column) {
+                    $nullable = $definition['nullable'];
+                }
+            }
+            $relations[] = ['table' => $table, 'column' => $column, 'target' => $target['table'], 'targetColumn' => $target['column'], 'nullable' => $nullable];
+        }
+    }
+
+    return $relations;
+}
+
+/**
+ * 文字列の描画幅を見積もる。全角を半角2文字分として数える。
+ */
+function textWidth(string $text): float
+{
+    return mb_strwidth($text) * FONT_SIZE * 0.55;
+}
+
+/**
+ * draw.io の形式で書き出す。同じスキーマからは同じ内容を返す。
+ *
+ * @param  array<string, array{title: string, rows: list<array{column: string, label: string}>, x: int, y: int, width: int, height: int}>  $tables
+ * @param  list<array{table: string, column: string, target: string, targetColumn: string, nullable: bool}>  $relations
+ */
+function renderDrawio(array $tables, array $relations): string
+{
+    $cells = [];
+    foreach ($tables as $name => $table) {
+        $cells[] = sprintf(
+            '<mxCell id="%s" value="%s" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=%d;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;" vertex="1" parent="1"><mxGeometry x="%d" y="%d" width="%d" height="%d" as="geometry" /></mxCell>',
+            e($name),
+            e($table['title']),
+            TITLE_HEIGHT,
+            $table['x'],
+            $table['y'],
+            $table['width'],
+            $table['height']
+        );
+        foreach ($table['rows'] as $index => $row) {
             $cells[] = sprintf(
-                '<mxCell id="%s" style="edgeStyle=entityRelationEdgeStyle;html=1;startArrow=ERmany;startFill=0;endArrow=%s;endFill=0;" edge="1" parent="1" source="%s" target="%s"><mxGeometry relative="1" as="geometry" /></mxCell>',
-                e("fk-{$table}-{$column}"),
-                $end,
-                e("{$table}.{$column}"),
-                e("{$target['table']}.{$target['column']}")
+                '<mxCell id="%s" value="%s" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;html=1;" vertex="1" parent="%s"><mxGeometry y="%d" width="%d" height="%d" as="geometry" /></mxCell>',
+                e("{$name}.{$row['column']}"),
+                e($row['label']),
+                e($name),
+                TITLE_HEIGHT + ROW_HEIGHT * $index,
+                $table['width'],
+                ROW_HEIGHT
             );
         }
+    }
+
+    foreach ($relations as $relation) {
+        $cells[] = sprintf(
+            '<mxCell id="%s" style="edgeStyle=entityRelationEdgeStyle;html=1;startArrow=ERmany;startFill=0;endArrow=%s;endFill=0;" edge="1" parent="1" source="%s" target="%s"><mxGeometry relative="1" as="geometry" /></mxCell>',
+            e("fk-{$relation['table']}-{$relation['column']}"),
+            $relation['nullable'] ? 'ERzeroToOne' : 'ERmandOne',
+            e("{$relation['table']}.{$relation['column']}"),
+            e("{$relation['target']}.{$relation['targetColumn']}")
+        );
     }
 
     return '<mxfile host="generate-er.php">'."\n"
@@ -247,7 +366,7 @@ function render(array $schema, array $definitions): string
         .'      <root>'."\n"
         .'        <mxCell id="0" />'."\n"
         .'        <mxCell id="1" parent="0" />'."\n"
-        .implode("\n", array_map(fn (string $cell): string => preg_replace('/^/m', '        ', $cell), $cells))."\n"
+        .implode("\n", array_map(fn (string $cell): string => '        '.$cell, $cells))."\n"
         .'      </root>'."\n"
         .'    </mxGraphModel>'."\n"
         .'  </diagram>'."\n"
@@ -255,54 +374,87 @@ function render(array $schema, array $definitions): string
 }
 
 /**
- * テーブル1つ分の枠とカラムの行を組み立てる。
+ * SVG で書き出す。線はテーブルのあいだの通り道を縦に走らせ、重ならないよう少しずつずらす。
+ * 線はテーブルより先に描き、テーブルの下をくぐる部分はテーブルで隠す。
  *
- * @param  array{columns: list<array{name: string, nullable: bool}>, primary: list<string>, unique: list<string>, foreign: array<string, array{table: string, column: string}>}  $structure
- * @param  array<string, array{type: string, comment: string}>  $definitions
+ * @param  array<string, array{title: string, rows: list<array{column: string, label: string}>, x: int, y: int, width: int, height: int}>  $tables
+ * @param  list<array{table: string, column: string, target: string, targetColumn: string, nullable: bool}>  $relations
  */
-function tableCells(string $table, array $structure, array $definitions, int $x, int $y): string
+function renderSvg(array $tables, array $relations): string
 {
-    $title = isset(NAMES[$table]) ? $table.'（'.NAMES[$table].'）' : $table;
-    $height = TITLE_HEIGHT + ROW_HEIGHT * count($structure['columns']);
-    $lines = [sprintf(
-        '<mxCell id="%s" value="%s" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=%d;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;" vertex="1" parent="1"><mxGeometry x="%d" y="%d" width="%d" height="%d" as="geometry" /></mxCell>',
-        e($table),
-        e($title),
-        TITLE_HEIGHT,
-        $x,
-        $y,
-        TABLE_WIDTH,
-        $height
-    )];
+    $right = max(array_map(fn (array $t): int => $t['x'] + $t['width'], $tables)) + MARGIN + 20;
+    $bottom = max(array_map(fn (array $t): int => $t['y'] + $t['height'], $tables)) + MARGIN;
+    $height = $bottom + 30;
 
-    foreach ($structure['columns'] as $index => $column) {
-        $name = $column['name'];
-        $marks = array_filter([
-            in_array($name, $structure['primary'], true) ? 'PK' : null,
-            isset($structure['foreign'][$name]) ? 'FK' : null,
-            in_array($name, $structure['unique'], true) ? 'UQ' : null,
-        ]);
-        $definition = $definitions[$name] ?? ['type' => '', 'comment' => ''];
-        $label = trim(sprintf(
-            '%s%s : %s%s %s',
-            $marks === [] ? '' : '['.implode(',', $marks).'] ',
-            $name,
-            $definition['type'],
-            $column['nullable'] ? '（null 可）' : '',
-            $definition['comment']
-        ));
+    $lanes = [];
+    $lines = [];
+    foreach ($relations as $relation) {
+        $source = $tables[$relation['table']];
+        $target = $tables[$relation['target']];
+        $sy = rowCenter($source, $relation['column']);
+        $ty = rowCenter($target, $relation['targetColumn']);
+
+        if ($target['x'] > $source['x']) {
+            [$sx, $sd, $tx, $td, $base] = [$source['x'] + $source['width'], 1, $target['x'], -1, $source['x'] + $source['width'] + COLUMN_GAP / 2];
+        } elseif ($target['x'] < $source['x']) {
+            [$sx, $sd, $tx, $td, $base] = [$source['x'], -1, $target['x'] + $target['width'], 1, $source['x'] - COLUMN_GAP / 2];
+        } else {
+            [$sx, $sd, $tx, $td, $base] = [$source['x'] + $source['width'], 1, $target['x'] + $target['width'], 1, $source['x'] + $source['width'] + 24];
+        }
+        $lane = $lanes[$base] = ($lanes[$base] ?? -1) + 1;
+        $mx = $base + ($target['x'] === $source['x'] ? $lane * 8 : ($lane % 2 === 0 ? 1 : -1) * intdiv($lane + 1, 2) * 8);
+
+        $lines[] = sprintf('<path d="M%d %d H%d V%d H%d" fill="none" stroke="#5f6b7a" stroke-width="1.2" />', $sx + $sd * 12, $sy, $mx, $ty, $tx + $td * 12);
         $lines[] = sprintf(
-            '<mxCell id="%s" value="%s" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=6;html=1;" vertex="1" parent="%s"><mxGeometry y="%d" width="%d" height="%d" as="geometry" /></mxCell>',
-            e("{$table}.{$name}"),
-            e($label),
-            e($table),
-            TITLE_HEIGHT + ROW_HEIGHT * $index,
-            TABLE_WIDTH,
-            ROW_HEIGHT
+            '<path d="M%1$d %2$d L%3$d %4$d M%1$d %2$d L%3$d %2$d M%1$d %2$d L%3$d %5$d" fill="none" stroke="#5f6b7a" stroke-width="1.2" />',
+            $sx + $sd * 12,
+            $sy,
+            $sx,
+            $sy - 6,
+            $sy + 6
         );
+        $lines[] = sprintf('<path d="M%d %d H%d M%d %d V%d" fill="none" stroke="#5f6b7a" stroke-width="1.2" />', $tx, $ty, $tx + $td * 12, $tx + $td * 6, $ty - 6, $ty + 6);
+        if ($relation['nullable']) {
+            $lines[] = sprintf('<circle cx="%d" cy="%d" r="4" fill="#ffffff" stroke="#5f6b7a" stroke-width="1.2" />', $tx + $td * 16, $ty);
+        }
     }
 
-    return implode("\n", $lines);
+    $boxes = [];
+    foreach ($tables as $table) {
+        $boxes[] = sprintf('<rect x="%d" y="%d" width="%d" height="%d" fill="#ffffff" stroke="#5f6b7a" />', $table['x'], $table['y'], $table['width'], $table['height']);
+        $boxes[] = sprintf('<rect x="%d" y="%d" width="%d" height="%d" fill="#dae8fc" stroke="#5f6b7a" />', $table['x'], $table['y'], $table['width'], TITLE_HEIGHT);
+        $boxes[] = sprintf('<text x="%d" y="%d" font-weight="bold" text-anchor="middle">%s</text>', $table['x'] + intdiv($table['width'], 2), $table['y'] + 20, e($table['title']));
+        foreach ($table['rows'] as $index => $row) {
+            $top = $table['y'] + TITLE_HEIGHT + ROW_HEIGHT * $index;
+            if ($index > 0) {
+                $boxes[] = sprintf('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="#e3e7ec" />', $table['x'], $top, $table['x'] + $table['width'], $top);
+            }
+            $boxes[] = sprintf('<text x="%d" y="%d">%s</text>', $table['x'] + PADDING, $top + 16, e($row['label']));
+        }
+    }
+
+    $legend = sprintf(
+        '<text x="%d" y="%d" fill="#5f6b7a">[PK] 主キー　[FK] 外部キー　[UQ] 一意制約　線の端は、三つ又が多、縦線が1、丸と縦線が0か1を表す。docs/architecture/er.drawio と同じく scripts/generate-er.php で作る。</text>',
+        MARGIN,
+        $bottom + 10
+    );
+
+    return sprintf('<svg xmlns="http://www.w3.org/2000/svg" width="%1$d" height="%2$d" viewBox="0 0 %1$d %2$d" font-family="sans-serif" font-size="%3$d" fill="#1f2328">', $right, $height, FONT_SIZE)."\n"
+        .sprintf('  <rect width="%d" height="%d" fill="#ffffff" />', $right, $height)."\n"
+        .implode("\n", array_map(fn (string $line): string => '  '.$line, [...$lines, ...$boxes, $legend]))."\n"
+        .'</svg>'."\n";
+}
+
+/**
+ * テーブルの中で、指定したカラムの行の縦の中心を返す。
+ *
+ * @param  array{title: string, rows: list<array{column: string, label: string}>, x: int, y: int, width: int, height: int}  $table
+ */
+function rowCenter(array $table, string $column): int
+{
+    $index = (int) array_search($column, array_column($table['rows'], 'column'), true);
+
+    return $table['y'] + TITLE_HEIGHT + ROW_HEIGHT * $index + intdiv(ROW_HEIGHT, 2);
 }
 
 function e(string $value): string

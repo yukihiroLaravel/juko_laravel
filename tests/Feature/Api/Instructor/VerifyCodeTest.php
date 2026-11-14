@@ -60,7 +60,7 @@ class VerifyCodeTest extends TestCase
     }
 
     /** AC-ACCOUNT-013 */
-    public function test_認証コードが一致しないと本登録できない(): void
+    public function test_認証コードが一致しないと本登録できず試行回数が1増える(): void
     {
         // Arrange
         $temporaryInstructor = TemporaryInstructor::factory()->create([
@@ -80,6 +80,11 @@ class VerifyCodeTest extends TestCase
 
         // Assert
         $response->assertStatus(400);
+        $this->assertDatabaseHas('temporary_instructors', [
+            'id' => $temporaryInstructor->id,
+            'trial_count' => 1,
+        ]);
+        $this->assertDatabaseMissing('instructors', ['email' => $temporaryInstructor->email]);
     }
 
     /** AC-ACCOUNT-014 */

@@ -21,7 +21,7 @@
 |---|---|
 | フレームワーク | Laravel 13 |
 | PHP | 8.3 以上 |
-| データベース | MySQL 5.7（テスト時は SQLite のインメモリ） |
+| データベース | MySQL 8.4（テスト時は SQLite のインメモリ） |
 | 認証 | Laravel Sanctum（セッションを用いたステートフル認証） |
 | API ドキュメント生成 | dedoc/scramble |
 | 静的解析 | PHPStan（larastan・レベル6） |
@@ -34,7 +34,7 @@
 | コンテナ | 内容 |
 |---|---|
 | `app` | PHP 8.3 + Apache。ホストの 8080 番で公開 |
-| `db` | MySQL 5.7。ホストの 13306 番で公開。タイムゾーンは Asia/Tokyo |
+| `db` | MySQL 8.4。ホストの 13306 番で公開。タイムゾーンは Asia/Tokyo |
 | `adminer` | データベース閲覧用。ホストの 8088 番で公開 |
 
 ## 認証と利用者の区分
@@ -101,16 +101,17 @@
 
 ## 実装のルール
 
-このプロジェクト固有のコーディング規約と、既存コードとの差異は `docs/architecture/coding-standards.md` にある。Laravel の汎用的なベストプラクティスは `laravel-best-practices` スキルを参照する。
+このプロジェクト固有の書き方の規約は `.ai/rules/` にパスごとに分けて置いている。どのパスにどの規約が当たるかは `.ai/rules/index.md` にある。Laravel の汎用的なベストプラクティスは `laravel-best-practices` スキルを参照する。
 
 ## テスト
 
 | 種別 | 場所 | 方針 |
 |---|---|---|
-| フィーチャーテスト | `tests/Feature` | エンドポイントとサービスの振る舞いを検証する。対象の配置に対応したサブディレクトリに置く |
-| ユニットテスト | `tests/Unit` | 単体で完結する計算を検証する |
+| フィーチャーテスト | `tests/Feature/Api` | API を通して受け入れ基準を検証する。対象のコントローラーの配置に対応したサブディレクトリに置く |
+| フィーチャーテスト | `tests/Feature/Auth` | ログインと認証の流れを検証する |
+| ユニットテスト | `tests/Unit` | API から条件を作ると重くなる計算だけを、フレームワークとデータベースを使わずに検証する（例外） |
 
-スイートは Unit と Feature に分かれる。テストの書き方は `docs/architecture/coding-standards.md`、実行するコマンドは `AGENTS.md` にある。
+テストの方針と実行するコマンドは `CLAUDE.md`、書き方は `.ai/rules/tests.md` にある。
 
 ## アップロードしたファイルの保存先
 

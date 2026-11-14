@@ -11,7 +11,8 @@
 | [ADR-0003](0003-copy-attendance-deadline-to-attendance.md) | 受講期限を受講のレコードに複製して保持する | 承認済み (2026-08-17 記録) |
 | [ADR-0004](0004-restrict-publication-status-transitions.md) | 公開状態の遷移を制限し、下書きへ戻さない | 承認済み (2026-08-17 記録) |
 | [ADR-0005](0005-pre-generate-lesson-attendances.md) | 受講状況を未着手の分まで先に作る | 承認済み (2026-08-17 記録) |
-| [ADR-0006](0006-split-docs-into-domain-and-specs.md) | ドキュメントを業務知識とシステム仕様に分けて構成する | 承認済み (2026-08-17) |
+| [ADR-0006](0006-split-docs-into-domain-and-specs.md) | ドキュメントを業務知識とシステム仕様に分けて構成する | 承認済み (2026-08-17)。`docs/changes/` は ADR-0007 で廃止 |
+| [ADR-0007](0007-plan-approval-and-goal-driven-flow.md) | 承認をプランの1回にし、機械の検査と観点別の評価と /goal で進める | 承認済み (2026-11-14) |
 
 ADR-0001 から ADR-0005 は、すでに稼働している実装から設計判断を復元して記録したものである。決定そのものは記録日より前に行われている。今後の決定は判断した時点で記録する。
 
@@ -33,6 +34,6 @@ ADR-0001 から ADR-0005 は、すでに稼働している実装から設計判�
 
 - 1つの決定を1つのファイルとし、`NNNN-<内容を表す英小文字とハイフン>.md` で作成する
 - 番号は連番で、欠番を埋め直さない
-- 雛形は `.claude/skills/documentation-conventions/templates/adr.md` を使う
+- 雛形は同じディレクトリの `template.md` を使う
 - 採用しなかった案とその理由を必ず書く。ここが記録の本体である
 - 決定によって生じた制約や将来の課題を影響の節に書く

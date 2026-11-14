@@ -1,5 +1,8 @@
 {
+  "model": "opusplan",
+  "effortLevel": "medium",
   "permissions": {
+    "defaultMode": "plan",
     "allow": [
       "Read",
       "Bash(ls:*)",
@@ -19,7 +22,16 @@
       "Bash(gh api:*)",
       "WebFetch(domain:github.com)",
       "Bash(composer check-conventions)",
-      "Bash(php scripts/check-conventions.php:*)"
+      "Bash(php scripts/check-conventions.php:*)",
+      "Bash(scripts/dc composer check-all)",
+      "Bash(scripts/dc composer check-conventions)",
+      "Bash(scripts/dc composer analyze)",
+      "Bash(scripts/dc composer format)",
+      "Bash(scripts/dc composer test:*)",
+      "Bash(scripts/dc php artisan test:*)",
+      "Bash(scripts/dc vendor/bin/pint:*)",
+      "Bash(scripts/dc vendor/bin/phpunit:*)",
+      "Bash(scripts/dc php scripts/check-conventions.php:*)"
     ],
     "deny": [
       "Read(./.env*)"
@@ -29,8 +41,33 @@
     "laravel-boost"
   ],
   "language": "japanese",
-  "plansDirectory": "docs/changes",
+  "plansDirectory": ".claude/plans",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/scripts/hooks/session-start.sh",
+            "timeout": 180,
+            "statusMessage": "アプリのコンテナを確かめています"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-.}\"/scripts/hooks/stop-check.sh",
+            "timeout": 300,
+            "statusMessage": "CI と同じ検査を流しています"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",

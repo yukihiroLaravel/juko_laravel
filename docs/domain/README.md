@@ -24,4 +24,4 @@
 
 ## 書くときの注意
 
-書き方と点検の手順は `docs/documentation-rules.md` に従う。
+書き方と点検の手順は `.ai/rules/docs.md` に従う。

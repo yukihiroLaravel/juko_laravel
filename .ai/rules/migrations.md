@@ -1,0 +1,27 @@
+---
+paths:
+  - 'database/migrations/**'
+---
+
+# マイグレーション
+
+## 外部キー
+
+外部キーは `foreignIdFor` と `constrained` を使い、参照先への制約を必ず張る（CHK-MIGRATE-03）。
+
+```php
+$table->foreignIdFor(Instructor::class, 'manager_id')->nullable()->constrained()->comment('講師ID');
+```
+
+## 説明と型
+
+- テーブルとカラムには必ず `->comment()` を付ける
+- `timestamp` 型は 2038 年問題があるので使わず、`datetime` を使う。`timestamps()` ヘルパも使わない（CHK-MIGRATE-05）
+
+## DDL だけにし、既存の create マイグレーションを直す
+
+リリース前で、本番に既存データがない。この間は次のように運用する。リリースの時点で見直す。
+
+- マイグレーションには、既存データを削除・更新する処理を入れない
+- UNIQUE 制約やカラムを足すときは、新しいマイグレーションファイルを作らず、既存の create マイグレーションを編集する
+- 既存のマイグレーションを書き換えたときは、ローカルのデータベースを `scripts/dc php artisan migrate:fresh --seed` で作り直すよう利用者に伝える

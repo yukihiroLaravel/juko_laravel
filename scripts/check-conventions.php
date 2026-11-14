@@ -7,18 +7,18 @@
  * ここで見るのは「本文の走査で判定できて、既存の違反が 0 件のもの」だけである。
  * 整形は Pint、型は PHPStan、旧い記法は Rector が受け持つ。
  *
- * 編集直後のフックと継続的インテグレーションの両方からこのファイルを呼ぶ。
- * 判定を 2 か所に書くと、いずれ食い違う。
+ * 編集直後のフック、作業の終わりのフック、継続的インテグレーションのすべてから
+ * このファイルを呼ぶ。判定を 2 か所に書くと、いずれ食い違う。
  *
  * 使い方
  *   php scripts/check-conventions.php
  *   php scripts/check-conventions.php --quiet   違反だけを出す
  *   php scripts/check-conventions.php --merge   取り込む前にだけ見るものも含める
  *
- * 検査には見る時機が2つある。作業中に見てよいものと、取り込む前にだけ見るものである。
- * 起票の残骸のように、作業中は存在していて当然のものを毎回の編集で咎めると、
- * 手順そのものが進まなくなる。既定は作業中に見るものだけとし、継続的
- * インテグレーションだけが --merge を付ける。呼ぶ回数が多いほうを既定にする。
+ * 検査には見る時機が2つある。編集のたびに見てよいものと、作業の終わりにだけ見るものである。
+ * テストに書いた AC-ID が仕様にまだないように、作業の途中では成り立っていなくて当然のものを
+ * 毎回の編集で咎めると、手順そのものが進まなくなる。既定は編集のたびに見るものだけとし、
+ * 作業の終わりと継続的インテグレーション（composer check-all）が --merge を付ける。
  */
 declare(strict_types=1);
 
@@ -167,8 +167,8 @@ function idsIn(string $text, string $pattern): array
     return array_values(array_unique($matches[0]));
 }
 
-/** 規約そのものと雛形は、書き方の例として禁止表現を含むため対象から外す */
-const DOC_EXCLUDED = ['docs/documentation-rules.md', 'docs/changes/template.md', 'docs/architecture/convention-checks.md'];
+/** 検査の対応表は、書き方の例として禁止表現を含むため対象から外す */
+const DOC_EXCLUDED = ['docs/architecture/convention-checks.md'];
 
 /** @return list<string> */
 function docs(string $dir = 'docs'): array
@@ -185,7 +185,7 @@ $results = [];
 /**
  * 検査を1件登録する。
  *
- * $stage が 'merge' の検査は取り込む前にだけ見る。作業中は成立していなくて当然の
+ * $stage が 'merge' の検査は作業の終わりにだけ見る。作業の途中では成立していなくて当然の
  * ものがあるため、--merge を付けたときだけ走らせる。
  *
  * @param  callable(): list<string>  $check
@@ -576,12 +576,8 @@ check('CHK-DOC-02', '業務知識から仕様と構成を参照しない', funct
 });
 
 check('CHK-DOC-04', '存在しない ID を参照しない', function (): array {
-    // 起票はこれから作る ID を書く場所なので、参照の実在は問わない
     $all = '';
     foreach (docs() as $file) {
-        if (str_starts_with($file, 'docs/changes/')) {
-            continue;
-        }
         $all .= contents($file);
     }
 
@@ -629,16 +625,6 @@ check('CHK-DOC-05', 'TODO(Q-NNN) の未確定事項が実在する', function ()
 
     return $violations;
 });
-
-check('CHK-DOC-06', '実装が終わった起票を残さない', function (): array {
-    return array_map(
-        fn (string $file): string => sprintf('%s  実装後は起票ごと削除する', $file),
-        array_values(array_filter(
-            files('docs/changes', 'md'),
-            fn (string $file): bool => $file !== 'docs/changes/template.md'
-        ))
-    );
-}, 'merge');
 
 check('CHK-DOC-07', '太字記法と区切り線を使わない', function (): array {
     $violations = [];

@@ -10,6 +10,13 @@ use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * 受講期限の計算だけをサービスで直接確かめる。
+ *
+ * API から同じ条件を作ると、講師・講座・受講生を用意して受講を登録するところまで要り、期限の決め方ごとに
+ * テストが重くなる。必要な値が欠けたときの例外は、FormRequest や呼び出し元のサービスが先に止めるため、API からは届かない。
+ * 計算はフレームワークを使わないので、データベースなしの単体の形で残している。
+ */
 final class CalculateDeadlineServiceTest extends TestCase
 {
     /** AC-ENROLL-010 */

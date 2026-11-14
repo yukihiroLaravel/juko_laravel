@@ -49,16 +49,17 @@ class ShowStatusTest extends TestCase
     }
 
     /**
-     * 修了率（受講生Aと受講生Bが完了した公開レッスンの数, 期待する修了率）
+     * 修了率（受講生ごとに完了した公開レッスンの数, 期待する修了率）。公開レッスンは2本
      *
-     * @return array<string, array{int, int, int}>
+     * @return array<string, array{list<int>, int}>
      */
     public static function completionCounts(): array
     {
         return [
-            '全員未修了' => [0, 0, 0],
-            '2人のうち1人が修了' => [2, 1, 50],
-            '全員修了' => [2, 2, 100],
+            '全員未修了' => [[0, 0], 0],
+            '2人のうち1人が修了' => [[2, 1], 50],
+            '全員修了' => [[2, 2], 100],
+            '3人のうち2人が修了で小数を切り捨てる' => [[2, 2, 0], 66],
         ];
     }
 
@@ -284,9 +285,13 @@ class ShowStatusTest extends TestCase
         ]);
     }
 
-    /** AC-ANALYTICS-011 */
+    /**
+     * AC-ANALYTICS-001・AC-ANALYTICS-011
+     *
+     * @param  list<int>  $completedCounts
+     */
     #[DataProvider('completionCounts')]
-    public function test_公開レッスンをすべて完了した受講生の割合を修了率として返す(int $completedByA, int $completedByB, int $expectedRate): void
+    public function test_公開レッスンをすべて完了した受講生の割合を修了率として返す(array $completedCounts, int $expectedRate): void
     {
         // Arrange
         $instructor = Instructor::factory()->create(['type' => 'instructor']);
@@ -294,7 +299,7 @@ class ShowStatusTest extends TestCase
         $chapter = Chapter::factory()->create(['course_id' => $course->id]);
         $lessons = Lesson::factory()->count(2)->create(['chapter_id' => $chapter->id]);
 
-        foreach ([$completedByA, $completedByB] as $completedCount) {
+        foreach ($completedCounts as $completedCount) {
             $student = Student::factory()->create();
             $attendance = Attendance::factory()->create(['student_id' => $student->id, 'course_id' => $course->id]);
             foreach ($lessons as $i => $lesson) {

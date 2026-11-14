@@ -2,11 +2,9 @@
 
 namespace Tests\Feature\Api\Student;
 
-use App\Exceptions\DuplicateAuthorizationCodeException;
-use App\Exceptions\DuplicateAuthorizationTokenException;
-use App\Services\Auth\CreateCodeService;
-use App\Services\Auth\CreateTokenService;
+use App\Model\TemporaryStudent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -49,35 +47,54 @@ class StoreTest extends TestCase
         $response->assertStatus(422);
     }
 
+    /** AC-ACCOUNT-005 */
+    public function test_仮登録では4文字の認証コードと10文字の照会用の符号を発行する(): void
+    {
+        // Arrange
+        $payload = $this->validPayload();
+
+        // Act
+        $response = $this->postJson(route('student.store'), $payload);
+
+        // Assert
+        $response->assertStatus(200);
+        $temporaryStudent = TemporaryStudent::where('email', $payload['email'])->sole();
+        $this->assertSame(4, strlen($temporaryStudent->code));
+        $this->assertSame(10, strlen($temporaryStudent->token));
+    }
+
+    /**
+     * 既存の仮登録と重なる値
+     *
+     * @return array<string, array{array<string, string>}>
+     */
+    public static function duplicatedValues(): array
+    {
+        return [
+            '認証コードが重なる' => [['code' => 'aaaa']],
+            '照会用の符号が重なる' => [['token' => 'aaaaaaaaaa']],
+        ];
+    }
+
     /**
      * AC-ACCOUNT-006
      *
-     * @param  class-string  $serviceClass
-     * @param  class-string<\Throwable>  $exceptionClass
+     * @param  array<string, string>  $existingValues
      */
-    #[DataProvider('duplicateErrorProvider')]
-    public function test_重複しない値を生成できないときは400になり仮登録を作らない(string $serviceClass, string $exceptionClass): void
+    #[DataProvider('duplicatedValues')]
+    public function test_既存の仮登録と重ならない値を生成できないときは400になり仮登録を作らない(array $existingValues): void
     {
-        // Arrange
-        $this->mock($serviceClass, function ($mock) use ($exceptionClass) {
-            $mock->shouldReceive('__invoke')->andThrow(new $exceptionClass('Failed to generate a unique value.'));
-        });
+        // Arrange — 生成する値を毎回同じにして、既存の仮登録と必ず重なるようにする
+        TemporaryStudent::factory()->create($existingValues);
+        Str::createRandomStringsUsing(fn (int $length) => str_repeat('a', $length));
+        $payload = $this->validPayload();
 
         // Act
-        $response = $this->postJson(route('student.store'), $this->validPayload());
+        $response = $this->postJson(route('student.store'), $payload);
 
         // Assert
         $response->assertStatus(400);
-        $this->assertDatabaseCount('temporary_students', 0);
-    }
-
-    /** @return array<string, array{string, string}> */
-    public static function duplicateErrorProvider(): array
-    {
-        return [
-            '認証コード' => [CreateCodeService::class, DuplicateAuthorizationCodeException::class],
-            '照会用の符号' => [CreateTokenService::class, DuplicateAuthorizationTokenException::class],
-        ];
+        $this->assertDatabaseMissing('temporary_students', ['email' => $payload['email']]);
     }
 
     /** @return array<string, string> */

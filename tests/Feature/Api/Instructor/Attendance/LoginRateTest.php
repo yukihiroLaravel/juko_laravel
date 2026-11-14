@@ -149,4 +149,49 @@ class LoginRateTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonPath('login_rate', 40);
     }
+
+    /** AC-ANALYTICS-001 */
+    public function test_ログイン率は小数を切り捨てて返す(): void
+    {
+        // Arrange — 3人のうち2人が期間内にログインしている（66.6…%）
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+        Student::factory()
+            ->count(2)
+            ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
+            ->create(['last_login_at' => now()]);
+        Student::factory()
+            ->has(Attendance::factory()->state(['course_id' => $course->id]), 'attendances')
+            ->create(['last_login_at' => null]);
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.login-rate', [
+            'course_id' => $course->id,
+            'period' => 'week',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('login_rate', 66);
+    }
+
+    /** AC-ANALYTICS-002 */
+    public function test_受講生がいない講座のログイン率は0を返す(): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create(['instructor_id' => $instructor->id]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->getJson(route('instructor.courses.attendances.login-rate', [
+            'course_id' => $course->id,
+            'period' => 'week',
+        ]));
+
+        // Assert
+        $response->assertStatus(200);
+        $response->assertJsonPath('login_rate', 0);
+    }
 }

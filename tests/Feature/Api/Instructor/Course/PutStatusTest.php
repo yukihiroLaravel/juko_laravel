@@ -98,9 +98,86 @@ class PutStatusTest extends TestCase
 
         // Assert
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['status']);
+        $response->assertJsonFragment(['status' => [
+            'ステータスを「'.StatusEnum::DRAFT->value.'」から「'.StatusEnum::PRIVATE->value.'」へ変更することはできません。',
+        ]]);
         $this->assertDatabaseHas('courses', [
             'id' => $course->id,
+            'status' => StatusEnum::DRAFT->value,
+        ]);
+    }
+
+    /**
+     * 許される公開状態の変更（今の公開状態, 変更先の公開状態）。変更先に下書きは指定できないため含めない
+     *
+     * @return array<string, array{StatusEnum, StatusEnum}>
+     */
+    public static function allowedTransitions(): array
+    {
+        return [
+            '下書きから公開' => [StatusEnum::DRAFT, StatusEnum::PUBLIC],
+            '公開から非公開' => [StatusEnum::PUBLIC, StatusEnum::PRIVATE],
+            '非公開から公開' => [StatusEnum::PRIVATE, StatusEnum::PUBLIC],
+            '公開のまま' => [StatusEnum::PUBLIC, StatusEnum::PUBLIC],
+            '非公開のまま' => [StatusEnum::PRIVATE, StatusEnum::PRIVATE],
+        ];
+    }
+
+    /** AC-AUTHOR-009 */
+    #[DataProvider('allowedTransitions')]
+    public function test_許される公開状態の変更なら受け付ける(StatusEnum $currentStatus, StatusEnum $targetStatus): void
+    {
+        // Arrange
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $course = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'status' => $currentStatus->value,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->putJson(route('instructor.courses.put-status'), [
+            'courses' => [$course->id],
+            'status' => $targetStatus->value,
+        ]);
+
+        // Assert
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'status' => $targetStatus->value,
+        ]);
+    }
+
+    /** AC-AUTHOR-012・AC-COMMON-014 */
+    public function test_変更できない講座が含まれると全講座が元の公開状態のまま(): void
+    {
+        // Arrange — 公開から非公開は許されるが、下書きから非公開は許されない
+        $instructor = Instructor::factory()->create(['type' => 'instructor']);
+        $publicCourse = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::PUBLIC->value,
+        ]);
+        $draftCourse = Course::factory()->create([
+            'instructor_id' => $instructor->id,
+            'status' => StatusEnum::DRAFT->value,
+        ]);
+        $this->actingAs($instructor, 'instructor');
+
+        // Act
+        $response = $this->putJson(route('instructor.courses.put-status'), [
+            'courses' => [$publicCourse->id, $draftCourse->id],
+            'status' => StatusEnum::PRIVATE->value,
+        ]);
+
+        // Assert
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('courses', [
+            'id' => $publicCourse->id,
+            'status' => StatusEnum::PUBLIC->value,
+        ]);
+        $this->assertDatabaseHas('courses', [
+            'id' => $draftCourse->id,
             'status' => StatusEnum::DRAFT->value,
         ]);
     }

@@ -39,6 +39,27 @@ mcp_notice() {
     say "laravel-boost の MCP ツール（mcp__laravel-boost__*）が見えないときは、利用者に /mcp で laravel-boost を再接続するよう伝える。"
 }
 
+# Laravel Boost の MCP サーバーが起動できるかを、MCP の最初のやり取り（initialize）で確かめる。
+# .mcp.json と同じく scripts/dc で起動し、応答が返ればサーバーは起動できる状態である。
+# このセッションの Claude Code が実際につながったかは、フックからは見えない。
+boost_check() {
+    local root request output
+    root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    request='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"session-start-hook","version":"1.0"}}}'
+    output="$(printf '%s\n' "$request" | "$root/scripts/dc" timeout 20 php artisan boost:mcp 2>&1)"
+
+    if printf '%s' "$output" | grep -q '"result"'; then
+        say "laravel-boost の MCP サーバーは起動できる（initialize に応答した）。"
+        mcp_notice
+        return
+    fi
+
+    say "laravel-boost の MCP サーバーが起動できなかった。MCP のツールは使えないので、利用者に伝える。出力の末尾を次に示す。" \
+        "worktree で作業しているなら、.env と vendor が揃っているかを確かめる（.env がないと Boost が読み込まれない）。" \
+        "----"
+    printf '%s\n' "$output" | tail -n 10
+}
+
 if ! command -v docker >/dev/null 2>&1; then
     say "docker が見つからない。検査と laravel-boost の MCP が使えないので、利用者に Docker Desktop を入れるよう伝える。"
     exit 0
@@ -67,7 +88,7 @@ is_running() {
 
 if is_running; then
     say "コンテナ ${SERVICE} は動いている。"
-    mcp_notice
+    boost_check
     exit 0
 fi
 
@@ -80,8 +101,9 @@ fi
 
 if is_running; then
     say "コンテナ ${SERVICE} が止まっていたので、docker compose up -d で起動した。"
+    boost_check
 else
     say "docker compose up -d は終わったが、コンテナ ${SERVICE} が動いていない。docker compose -f ${compose_file} ps で状態を確かめる。"
+    mcp_notice
 fi
-mcp_notice
 exit 0

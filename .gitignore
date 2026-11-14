@@ -30,5 +30,8 @@ apm_modules/
 # エージェント用の作業ツリー
 .claude/worktrees/
 
+# プランモードで書くプラン（作業ごとの使い捨てなので共有しない）
+.claude/plans/
+
 # Postman 拡張機能
 .postman/

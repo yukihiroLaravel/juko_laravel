@@ -29,18 +29,7 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --ansi
 
-    - name: Check code style with Pint
-      run: composer pint-test
-
-    - name: Check project conventions
-      run: composer check-conventions-merge
-
-    - name: Run static analysis with PHPStan
-      run: composer analyze
-
-    - name: Check code with Rector (dry-run)
-      run: composer rector-dry-run
-    
-    - name: Run tests
-      run: composer test
-    
+    # Pint・規約・PHPStan・Rector・テストを順に流す。中身は composer.json の check-all にあり、
+    # Claude Code の Stop フック（scripts/hooks/stop-check.sh）も同じものを流す
+    - name: Run all checks
+      run: composer check-all

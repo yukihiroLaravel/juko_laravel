@@ -81,6 +81,13 @@
         ],
         "test": [
             "vendor/bin/phpunit"
+        ],
+        "check-all": [
+            "@pint-test",
+            "@check-conventions-merge",
+            "@analyze",
+            "@rector-dry-run",
+            "@test"
         ]
     }
 }

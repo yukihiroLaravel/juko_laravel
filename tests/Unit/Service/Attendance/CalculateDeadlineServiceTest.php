@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Service\Attendance;
+namespace Tests\Unit\Service\Attendance;
 
 use App\Enums\Course\DeadlineTypeEnum;
 use App\Services\Attendance\CalculateDeadlineService;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
  *
  * API から同じ条件を作ると、講師・講座・受講生を用意して受講を登録するところまで要り、期限の決め方ごとに
  * テストが重くなる。必要な値が欠けたときの例外は、FormRequest や呼び出し元のサービスが先に止めるため、API からは届かない。
- * 計算はフレームワークを使わないので、データベースなしの単体の形で残している。
+ * 計算はフレームワークもデータベースも使わないので、Unit のスイートに置いている。
  */
 final class CalculateDeadlineServiceTest extends TestCase
 {

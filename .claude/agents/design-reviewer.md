@@ -15,7 +15,7 @@ model: sonnet
 
 ## 受け取るもの
 
-呼び出す側は、比べる基準（`git merge-base origin/develop HEAD` で求めたコミット）とプランのパスを渡す。作業はコミットされていないことがあるので、`git diff <基準>` で作業ツリーまでの変更を読み、新しく作ったファイルは `git status --porcelain` で見つけて読む。変更が触るパスに当たる `.ai/rules` の rule ファイルを `.ai/rules/index.md` から探してすべて読む。2回目以降の評価では、前回の指摘も渡される。
+呼び出す側は、比べる基準（切った元のブランチとの merge-base で求めたコミット。既定は `git merge-base origin/develop HEAD`）とプランのパスを渡す。作業はコミットされていないことがあるので、`git diff <基準>` で作業ツリーまでの変更を読み、新しく作ったファイルは `git status --porcelain` で見つけて読む。変更が触るパスに当たる `.ai/rules` の rule ファイルを `.ai/rules/index.md` から探してすべて読む。2回目以降の評価では、前回の指摘も渡される。
 
 機械で判定できず、レビューで見る規約の一覧は、`docs/architecture/convention-checks.md` の「レビューで見るもの」にある。
 

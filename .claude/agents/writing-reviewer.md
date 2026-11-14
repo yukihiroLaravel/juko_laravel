@@ -18,7 +18,7 @@ model: sonnet
 
 ## 対象の受け取り方
 
-呼び出す側は、ファイルのパスの一覧か、比べる基準（`git merge-base origin/develop HEAD` で求めたコミット）を渡す。基準を渡されたときは、`git diff --name-only <基準>` と `git status --porcelain` で変更したファイルと新しく作ったファイルを出し、次のものだけを見る。`docs/` の Markdown、`tests/` の PHP、`.ai/rules/*.md`（Boost が生成する `index.md` を除く）、`CLAUDE.md` の `<laravel-boost-guidelines>` より前の部分、`.claude/agents/*.md` である。差分のある行を中心に読むが、食い違いを確かめるために周りの記述と実装も読む。
+呼び出す側は、ファイルのパスの一覧か、比べる基準（切った元のブランチとの merge-base で求めたコミット。既定は `git merge-base origin/develop HEAD`）を渡す。基準を渡されたときは、`git diff --name-only <基準>` と `git status --porcelain` で変更したファイルと新しく作ったファイルを出し、次のものだけを見る。`docs/` の Markdown、`tests/` の PHP、`.ai/rules/*.md`（Boost が生成する `index.md` を除く）、`CLAUDE.md` の `<laravel-boost-guidelines>` より前の部分、`.claude/agents/*.md` である。差分のある行を中心に読むが、食い違いを確かめるために周りの記述と実装も読む。
 
 ## 見るもの
 

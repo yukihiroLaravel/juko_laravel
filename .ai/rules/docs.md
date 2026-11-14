@@ -120,6 +120,7 @@ flowchart LR
 | 規約を変えた | `.ai/rules/` の該当ファイルと `docs/architecture/convention-checks.md`（上書き） |
 | 業務ルールが判明・変更された | `docs/domain/shared/business-rules.md`（上書き） |
 | 未確定のまま進める点がある | `docs/domain/open-questions.md` に `Q-NNN` を追加し、コードに `TODO(Q-NNN)` を残す |
+| 未確定事項の一部が直った | 状態は未確定のまま、直った部分を `docs/domain/open-questions.md` の本文から外す。確定させるのは業務の判断を得たときだけ |
 | 技術選定の判断をした | `docs/adr/` に新しい記録を追加（既存は上書きしない） |
 | 方針を覆した | 旧記録のステータスだけを更新し、新しい記録を追加 |
 

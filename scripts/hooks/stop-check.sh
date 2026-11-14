@@ -30,6 +30,25 @@ fi
 changed="$(git status --porcelain --untracked-files=all -- '*.php' 'docs/' 'tests/' 2>/dev/null)"
 [ -n "$changed" ] || exit 0
 
+# 前回通ったときから作業ツリーが変わっていなければ流さない。評価のエージェントを待つあいだなど、
+# 何も直さずにターンを終えるたびに30秒待たせないためである。
+# 指紋は、HEAD と、コミットしていない変更と、追跡していないファイルの中身から作る。
+fingerprint() {
+    {
+        git rev-parse HEAD
+        git diff HEAD
+        git ls-files --others --exclude-standard | while IFS= read -r file; do
+            printf '%s %s\n' "$file" "$(git hash-object -- "$file")"
+        done
+    } 2>/dev/null | git hash-object --stdin
+}
+
+state="$(git rev-parse --git-path stop-check-passed)"
+current="$(fingerprint)"
+if [ -f "$state" ] && [ "$(cat "$state")" = "$current" ]; then
+    exit 0
+fi
+
 output="$(scripts/dc composer check-all 2>&1)"
 status=$?
 
@@ -40,7 +59,9 @@ if [ $status -ne 0 ]; then
         printf '%s\n' "----"
         printf '%s\n' "$output" | tail -n "$TAIL_LINES"
     } >&2
+    rm -f "$state"
     exit 2
 fi
 
+printf '%s\n' "$current" > "$state"
 exit 0

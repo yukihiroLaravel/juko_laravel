@@ -39,7 +39,7 @@ scripts/dc composer check-conventions
 | 場所 | 呼び方 | 効き方 |
 |---|---|---|
 | 編集直後（`.claude/settings.json` の PostToolUse フック） | `scripts/dc php scripts/check-conventions.php --quiet` | `.php` と `.md` を書いた直後に Pint で整形してから検査し、違反があればその場で書き手に返す |
-| 作業の終わり（`.claude/settings.json` の Stop フック） | `scripts/dc composer check-all` | PHP・docs・テストに変更があるときだけ、すべての項目を見る。落ちたら出力を返し、1回だけ作業を続けさせる。続けたあとの終了では流さないので、直したら `scripts/dc composer check-all` で通ることを確かめる |
+| 作業の終わり（`.claude/settings.json` の Stop フック） | `scripts/dc composer check-all` | PHP・docs・テストに変更があり、前回通ったときから作業ツリーが変わっているときだけ、すべての項目を見る。落ちたら出力を返し、1回だけ作業を続けさせる。続けたあとの終了では流さないので、直したら `scripts/dc composer check-all` で通ることを確かめる |
 | 継続的インテグレーション | `composer check-all`（PHP が入った環境のため直接呼ぶ） | すべての項目を見て、取り込む前に落とす |
 
 検査には見る時機が 2 つある。編集のたびに見てよいものと、作業の終わりにだけ見るものである。テストが参照する受け入れ基準の実在（CHK-TEST-06）は後者にあたる。テストを先に書いて AC-ID を決め、仕様への追加は実装と一緒に行うので、その間はテストの AC-ID が仕様にない。編集のたびに咎めると手順そのものが進まない。編集の直後は何度も走るので、呼ぶ回数が多いほうを既定にしている。
